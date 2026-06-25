@@ -4,7 +4,7 @@ function cardEff(k,s,r){
  const t=tierOf(k),base=CARDDEFS[k].eff(s,r);
  const noTierPower=[
   "genc","otobus","yildiz","derbi",
-  "temiz_sayfa","kisa_kamp","yedek_guvence","taksit_transfer","prim_dondurma","kara_borsa","sahte_evrak","son_kredi",
+  "temiz_sayfa","kisa_kamp","yedek_guvence","taksit_transfer","kara_borsa","sahte_evrak","son_kredi",
   "altyapi_plani","tecrubeli_omurga","yerli_blok","kanat_akini","deplasman_kafilesi","sosyal_medya",
   "sessiz_kamp","final_provasi","kupaci_kadro","sogukkanli_penaltici","son_dans",
   "kumarbaz","gecici_prim","doping","kriz"
@@ -23,7 +23,6 @@ function applyRiskCardGain(k){
  if(k==="kriz"){const d=Math.min(6,finalPenalty);finalPenalty-=d;pushFeed("\u{1f9ef} <b>"+L().cards[k].n+"</b> finaldeki güç eksiği -"+d,"pres");}
  if(k==="kisa_kamp"){shortCamp=1;riskPowerMod+=2;pushFeed("\u{26fa} <b>"+L().cards[k].n+"</b> bu maç +2, sonraki maç -1","pres");}
  if(k==="taksit_transfer"){earn(INSTALLMENT_GAIN,"earned");installmentTurns+=INSTALLMENT_TURNS;pushFeed("\u{1f4b3} <b>"+L().cards[k].n+"</b> +\u20ac"+INSTALLMENT_GAIN+"M, 2 tur -\u20ac"+INSTALLMENT_PAY+"M","buy");}
- if(k==="prim_dondurma"){primFreeze=1;pushFeed("\u{1f9ca} <b>"+L().cards[k].n+"</b> bu tur pazar kapanma riski yok","pres");}
  if(k==="kara_borsa"){const pool=CARDKEYS.filter(x=>x!==k&&invOf(x)<MAX_CARD_COPIES);if(pool.length){const free=rnd(pool);addCardCopy(free,{silent:false});pushFeed("\u{1f5a4} <b>"+L().cards[k].n+"</b> bedava kart: <b>"+L().cards[free].n+"</b>","buy");}if(rand()<BLACK_MARKET_FINE_CHANCE){spend(BLACK_MARKET_FINE,"spent");pushFeed("\u{1f6a8} "+(LANG==="tr"?"Kara Borsa cezası: -\u20ac":"Black Market fine: -\u20ac")+BLACK_MARKET_FINE+"M","lose");}}
  if(k==="sahte_evrak"){finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+FAKE_DOC_DEBT);pushFeed("\u{1f4c4} <b>"+L().cards[k].n+"</b> +6 güç, finalde -"+FAKE_DOC_DEBT+" güç","lose");}
  if(k==="son_kredi"){if(budget<-10&&!lastCreditActive){earn(LAST_CREDIT_GAIN,"earned");lastCreditActive=1;pushFeed("\u{1f198} <b>"+L().cards[k].n+"</b> +\u20ac"+LAST_CREDIT_GAIN+"M, başkan eşiği +"+LAST_CREDIT_TIGHTEN,"buy");}else{lastCreditActive=-1;pushFeed("\u{1f198} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"kasa -10M altına inerse çalışır":"works if funds drop below -10M"),"pres");}}
@@ -42,7 +41,6 @@ function expireTemporaryCards(){
  if(tempPrime>0){tempPrime=0;tempPrimePenalty=-TEMP_PRIME_NEXT_PENALTY;cards=cards.filter(k=>k!=="gecici_prim");cardInv.gecici_prim=0;cardTier.gecici_prim=0;if(rand()<TEMP_PRIME_INJURY_CHANCE){const inj=applyRandomInjury(1);if(inj)pushFeed("\u{1fa79} <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"Geçici Prim sonrası sakatlandı":"was injured after Temporary Bonus"),"lose");}pushFeed("\u{1f4b8} "+(LANG==="tr"?"Geçici Prim bitti: sıradaki maç -2 güç":"Temporary Bonus expired: next match -2 power"),"lose");}
  if(shortCamp>0){shortCamp=0;shortCampPenalty=-1;cards=cards.filter(k=>k!=="kisa_kamp");cardInv.kisa_kamp=0;cardTier.kisa_kamp=0;pushFeed("\u{26fa} "+(LANG==="tr"?"Kısa Kamp bitti: sıradaki maç -1 güç":"Short Camp ended: next match -1 power"),"lose");}
  if(quietCamp>0){quietCamp=0;cards=cards.filter(k=>k!=="sessiz_kamp");cardInv.sessiz_kamp=0;cardTier.sessiz_kamp=0;pushFeed("\u{1f910} "+(LANG==="tr"?"Sessiz Kamp sona erdi":"Quiet Camp ended"),"pres");}
- if(primFreeze>0){primFreeze=0;cards=cards.filter(k=>k!=="prim_dondurma");cardInv.prim_dondurma=0;cardTier.prim_dondurma=0;pushFeed("\u{1f9ca} "+(LANG==="tr"?"Prim Dondurma sona erdi":"Frozen Bonuses ended"),"pres");}
 }
 function tryUpgradeCard(k){const nt=tierFromCopies(invOf(k));if(nt>tierOf(k)){cardTier[k]=nt;pushFeed("UP <b>"+L().cards[k].n+"</b> "+tierText(k),"ch");return true;}return false;}
 function addCardCopy(k,opts){opts=opts||{};const silent=!!opts.silent,first=invOf(k)<=0,instant=isInstantCard(k),progress=isProgressCard(k);if(progress&&invOf(k)>=MAX_CARD_COPIES){const r=duplicateRefund(k);earn(r,"earned");if(!silent)pushFeed("CARD <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"zaten maksimum \u00b7 iade":"already maxed \u00b7 refund")+" \u20ac"+r+"M","buy");return {added:false,refund:r,maxed:true};}cardInv[k]=progress?invOf(k)+1:1;if(!instant&&!hasCard(k)&&cards.length<activeCardSlots())cards.push(k);const upgraded=progress?tryUpgradeCard(k):false;if(first||instant)applyRiskCardGain(k);if(instant){cardInv[k]=0;cardTier[k]=0;cards=cards.filter(c=>c!==k);return {added:true,instant:true};}if(canActivate(k)&&!upgraded&&!silent)pushFeed("CARD <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"aktif slota hazır":"ready for slot"),"ch");return {added:true,upgraded};}

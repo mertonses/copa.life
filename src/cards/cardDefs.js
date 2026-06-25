@@ -11,7 +11,7 @@ var CARDDEFS={
  kisa_kamp:{price:7,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
  yedek_guvence:{price:9,rar:"silver",kind:"injury",mode:"scaling",eff:(s,r)=>0},
  taksit_transfer:{price:8,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
- prim_dondurma:{price:8,rar:"silver",kind:"temporary",mode:"instant",eff:(s,r)=>0},
+
  kara_borsa:{price:7,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
  sahte_evrak:{price:10,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>6},
  son_kredi:{price:7,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},

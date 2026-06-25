@@ -214,7 +214,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
     if(af)b.onclick=()=>choose(i);c.appendChild(b);});
   const debtPick=currentOpts.some(o=>canAffordCost((o.price||0)+reserve)&&budget-(o.price||0)<0);
   const rb=$("rerollBtn");if(rb){rb.disabled=draftRerollUsed;rb.textContent=draftRerollUsed?(LANG==="tr"?"Yenileme kullanıldı ✗":"Reroll used ✗"):(LANG==="tr"?"Ücretsiz yenile (1 hak)":"Free reroll (1 left)");}
-  $("optmsg").textContent=any?(debtPick?(LANG==="tr"?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür. Borç, ileride yönetim baskısını ve pazar kapanma riskini artırır.":"Warning: one of these picks puts funds below zero. Debt can raise board pressure and market closure risk later."):""):x.noAfford;}
+  $("optmsg").textContent=any?(debtPick?(LANG==="tr"?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}
 function rerollOptions(){if(draftRerollUsed||currentSlot<0)return;draftRerollUsed=true;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6,_cap=budget-_reserve-DEBT_LIMIT;currentOpts=draftOptions(_pos);if(!currentOpts.some(o=>o.price<=_cap)){const fp=fabPlayer(_pos,55,61);fp.price=Math.max(0,Math.min(_cap,1));fp.free=true;currentOpts[0]=fp;}sfxRoll();renderOpts();}
 function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.pos))+(p.train||0);picksBySlot[idx]=p;filled[idx]=true;remaining--;spend(p.price||0,"spent");setBudget();renderRoundel("r"+idx,p);}
 function surOf(p){const w=(p.name||"").trim().split(" ");return clip(w[w.length-1],7);}
@@ -437,7 +437,6 @@ Object.assign(T.tr.cards,{
   kisa_kamp:{n:"Kısa Kamp",d:"Bu maç +2 güç; sonraki maç -1, sonra kaybolur.",i:"⛺"},
   yedek_guvence:{n:"Yedek Güvencesi",d:"Sakatlıkta yedekten gelen oyuncuya +10 OVR.",i:"🪑"},
   taksit_transfer:{n:"Taksitli Transfer",d:"Hemen +€10M; sonraki 2 tur -€4M.",i:"💳"},
-  prim_dondurma:{n:"Prim Dondurma",d:"Bu tur pazar kapanmaz; kart kaybolur.",i:"🧊"},
   kara_borsa:{n:"Kara Borsa",d:"Bedava 1 kart; %30 ihtimal -€12M ceza.",i:"🖤"},
   sahte_evrak:{n:"Sahte Evrak",d:"+6 güç; finalde -6 güç.",i:"📄"},
   son_kredi:{n:"Son Kredi",d:"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.",i:"🆘"},
@@ -463,7 +462,6 @@ Object.assign(T.en.cards,{
   kisa_kamp:{n:"Short Camp",d:"This match +2 power; next match -1, then expires.",i:"⛺"},
   yedek_guvence:{n:"Bench Cover",d:"Injury replacement gets +10 OVR.",i:"🪑"},
   taksit_transfer:{n:"Installment Deal",d:"Instant +€10M; next 2 rounds -€4M.",i:"💳"},
-  prim_dondurma:{n:"Frozen Bonuses",d:"This round market stays open; card expires.",i:"🧊"},
   kara_borsa:{n:"Black Market",d:"Free 1 card; 30% chance -€12M fine.",i:"🖤"},
   sahte_evrak:{n:"Fake Papers",d:"+6 power; final -6 power.",i:"📄"},
   son_kredi:{n:"Last Credit",d:"If below -€10M, +€15M; chairman limit tightens by 5M.",i:"🆘"},

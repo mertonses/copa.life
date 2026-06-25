@@ -47,7 +47,7 @@ function shopPreviewText(k,pv){
   taksit_transfer:()=>money(b,b+10)+" · "+(tr?"2 tur -€4M":"2 rounds -€4M"),
   son_kredi:()=>b<-10?money(b,b+15)+" · "+(tr?"başkan eşiği sertleşir":"chairman limit tightens"):(tr?"Kasa -€10M altına düşerse +€15M":"Triggers below -€10M for +€15M"),
   kara_borsa:()=>tr?"Bedava kart · %30 ihtimal -€12M":"Free card · 30% chance -€12M",
-  prim_dondurma:()=>tr?"Bu tur pazar kapanma riski kapanır":"Market closure risk disabled this round",
+
   kriz:()=>finalLoss(fp,Math.max(0,fp-6)),
   kisa_kamp:()=>tr?"Bu maç +2 güç · sonra -1":"This match +2 power · then -1",
   gecici_prim:()=>tr?"Bu maç +8 güç · %35 sakatlık riski":"This match +8 power · 35% injury risk",
@@ -80,7 +80,7 @@ function cardContractText(k){
     kisa_kamp:tr?"Bu maç +2; sonraki maç -1; kart kaybolur.":"This match +2; next match -1; card expires.",
     yedek_guvence:tr?"Sakatlıkta yedekten gelen oyuncu +10 OVR.":"Injury replacement gets +10 OVR.",
     taksit_transfer:tr?"Hemen +€10M; sonraki 2 tur -€4M.":"Instant +€10M; next 2 rounds -€4M.",
-    prim_dondurma:tr?"Bu tur pazar kapanmaz; kart kaybolur.":"This round market stays open; card expires.",
+
     kara_borsa:tr?"Bedava 1 kart; %30 ihtimal -€12M.":"Free 1 card; 30% chance -€12M.",
     sahte_evrak:tr?"Güç +6; finalde -6 güç.":"Power +6; final -6 power.",
     son_kredi:tr?"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.":"If below -€10M: +€15M; chairman limit tightens 5M.",
