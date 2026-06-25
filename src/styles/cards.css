@@ -20,7 +20,7 @@
 .chrow .ctx{flex:1;line-height:1.25}
 .chrow .crw{font-family:var(--disp);font-weight:600;font-size:10px;color:#5a3fb0;flex-shrink:0}
 .chrow.done .crw{color:#3f9a57}
-.shopcards{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
+.shopcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-bottom:8px}
 .shopcard{display:flex;gap:9px;align-items:center;border:2px solid var(--ink);border-radius:4px;padding:8px;background:var(--paper2);cursor:pointer;transition:.12s}
 .shopcard.bronze{border-color:var(--bronze)}.shopcard.silver{border-color:var(--silver)}.shopcard.gold{border-color:var(--gold)}
 .shopcard:hover:not(.owned):not(.cant){background:var(--blue);color:#fff}.shopcard:hover:not(.owned):not(.cant) .sd,.shopcard:hover:not(.owned):not(.cant) .sp,.shopcard:hover:not(.owned):not(.cant) .powerpreview{color:#fff}
@@ -161,3 +161,100 @@ body.dark .ccard.tier-1,body.dark .card.tier-1,body.dark .shopcard.tier-1{backgr
 body.dark .ccard.tier-2,body.dark .card.tier-2,body.dark .shopcard.tier-2{background-color:#fff0bd;color:#1f2d35;border-color:#d7a11e}
 body.dark .ccard.tier-3,body.dark .card.tier-3,body.dark .shopcard.tier-3{background-color:#efe8ff;color:#1f2d35;border-color:#6d55a5}
 body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.tier-3 .sd,body.dark .shopcard.tier-3 .cat{color:#1f2d35}
+
+/* ===== CARD TILE (yeni dikdörtgen kart tasarımı) ===== */
+.cardtile{
+  display:flex;flex-direction:column;
+  border:2px solid var(--ink);border-radius:8px;overflow:hidden;
+  cursor:pointer;position:relative;
+  background-color:#fbf2d8;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,247,221,.92)),url("../../assets/textures/panel-lines.png");
+  background-size:auto,70px 70px;
+  color:#23332a;
+  transition:transform .14s,box-shadow .14s;
+  min-height:220px;
+}
+.cardtile:hover:not(.cant){transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.cardtile.cant{opacity:.5;cursor:not-allowed}
+.cardtile.upgrade{box-shadow:0 0 0 2px var(--mustard),0 0 0 4px rgba(208,161,30,.25)}
+/* rarity border stripe at bottom of header */
+.rar-bronze .cardtile,.cardtile.rar-bronze{border-color:#9a6a3b}
+.rar-silver .cardtile,.cardtile.rar-silver{border-color:#6a8a9b}
+.rar-gold .cardtile,.cardtile.rar-gold{border-color:#c8940a}
+.rar-risk .cardtile,.cardtile.rar-risk{border-color:#5a3a7a}
+
+/* rarity header bar */
+.ct-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 8px;
+  font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:#fff;
+}
+.cardtile.rar-bronze .ct-head{background:#9a6a3b}
+.cardtile.rar-silver .ct-head{background:#5e7a8a}
+.cardtile.rar-gold .ct-head{background:#c8940a}
+.cardtile.rar-risk .ct-head{background:#5a3a7a}
+.ct-rar{opacity:.9}
+.ct-cat{opacity:.75;font-size:6.5px}
+
+/* illustration area */
+.ct-art{
+  display:flex;align-items:center;justify-content:center;
+  padding:12px 18px 8px;
+  height:82px;flex-shrink:0;
+  color:#23332a;
+}
+.ct-art svg{width:100%;height:100%;max-width:58px;max-height:58px}
+
+/* body */
+.ct-body{flex:1;padding:4px 10px 4px;display:flex;flex-direction:column;gap:2px}
+.ct-name{font-family:var(--disp);font-weight:700;font-size:13px;line-height:1.2;color:#23332a}
+.ct-desc{font-family:var(--mono);font-size:8.5px;color:#52685f;line-height:1.35}
+.ct-contract{font-family:var(--mono);font-size:7.5px;color:#78887f;line-height:1.3;margin-top:1px}
+.ct-body .progline{margin-top:4px}
+.ct-body .progbar{margin-top:2px}
+
+/* footer */
+.ct-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 10px 8px;
+  border-top:1px solid rgba(0,0,0,.10);
+  margin-top:auto;
+  gap:6px;
+}
+.ct-pw{font-family:var(--mono);font-size:8px;color:#1f7a4e;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-price{
+  font-family:var(--mono);font-weight:700;font-size:13px;
+  background:var(--mustard);color:#23332a;
+  padding:2px 7px;border-radius:3px;
+  box-shadow:0 2px 0 rgba(0,0,0,.22);
+  flex-shrink:0;text-align:center;white-space:nowrap;
+}
+.ct-price small{display:block;font-size:6px;letter-spacing:1px;text-transform:uppercase;line-height:1}
+
+/* dark mode */
+body.dark .cardtile{
+  background-color:#f2edd8;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.80),rgba(244,238,216,.94)),url("../../assets/textures/panel-lines.png");
+  color:#1f2d35;
+  border-color:#b8a87a;
+}
+body.dark .cardtile.rar-bronze{border-color:#a56f3e}
+body.dark .cardtile.rar-silver{border-color:#6a8a9b}
+body.dark .cardtile.rar-gold{border-color:#c8940a}
+body.dark .cardtile.rar-risk{border-color:#6a4a8a}
+body.dark .ct-art{color:#1f2d35}
+body.dark .ct-name{color:#1f2d35}
+body.dark .ct-desc{color:#3a4a42}
+body.dark .ct-contract{color:#5a6a62}
+body.dark .ct-pw{color:#1f6c46}
+body.dark .ct-foot{border-color:rgba(0,0,0,.12)}
+
+/* mobile */
+@media(max-width:520px){
+  .shopcards{grid-template-columns:repeat(2,1fr);gap:8px}
+  .ct-art{height:70px;padding:10px 14px 6px}
+  .ct-name{font-size:12px}
+  .ct-desc{font-size:8px}
+  .ct-price{font-size:12px;padding:2px 5px}
+}

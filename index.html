@@ -61,6 +61,13 @@
 <link rel="stylesheet" href="src/styles/cards.css">
 <link rel="stylesheet" href="src/styles/match.css">
 <link rel="stylesheet" href="src/styles/debug.css">
+<style>
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1a2e22);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+#loader.done{opacity:0;pointer-events:none}
+#loader svg{animation:ldspin 1s linear infinite}
+@keyframes ldspin{to{transform:rotate(360deg)}}
+:focus-visible{outline:2px solid var(--acc,#4caf50);outline-offset:2px;border-radius:3px}
+</style>
 <noscript><div style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;line-height:1.6">
 <h1>copa.life — Roguelite Futbol Müdürü</h1>
 <p>Ücretsiz tarayıcı futbol yönetim oyunu. Kadro kur, transfer yönet, kupayı kaldır. 5 farklı lig: Türkiye Süper Ligi, İngiltere Premier Lig (FA Cup), İspanya La Liga (Copa del Rey), İtalya Serie A, Almanya Bundesliga. 9000'den fazla gerçek oyuncu ismiyle roguelite futbol deneyimi.</p>
@@ -70,6 +77,7 @@
 <ul><li>Türkiye, İngiltere, İspanya, İtalya, Almanya ligleri</li><li>9000+ oyuncu, gerçek kulüp logoları</li><li>Roguelite ilerleme: her run farklı</li><li>Kart koleksiyonu sistemi</li><li>Koyu/açık tema, PWA desteği</li><li>Tamamen ücretsiz, kayıt gerektirmez</li></ul>
 <p>JavaScript etkin bir tarayıcıyla oyunu oynamak için sayfayı yenileyin.</p>
 </div></noscript></head><body>
+<div id="loader"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,.15)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/></svg></div>
 <div class="wrap">
   <div class="top"><div class="tools"><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar" aria-label="Ayarlar"><img src="assets/icons/settings.png" alt="Ayarlar" width="22" height="22" style="display:block"></button><div class="settingsdrop hidden" id="settingsDrop"><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.png" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.png" alt="">EN</button><button class="sdbtn" id="musicBtn" onclick="toggleMusic()" title="Müzik" aria-label="Müzik">🎵</button><button class="sdbtn" id="muteBtn" onclick="toggleMute()" title="Ses efektleri" aria-label="Ses efektleri">🔊</button><button class="sdbtn" id="lightBtn" onclick="setTheme(false)" title="Aydınlık mod" aria-label="Aydınlık mod">💡</button><button class="sdbtn" id="darkBtn" onclick="setTheme(true)" title="Karanlık mod" aria-label="Karanlık mod">🌙</button></div></div></div></div>
     <div class="logo" aria-label="copa.life"><span class="brandmark"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></span></div>
@@ -603,4 +611,6 @@ function _applyCheat(){unlockedForms=[...FORMORDER];unlockedChairs=[...CHAIR_ORD
 function _chairLockedFlash(btn){let el=btn.querySelector(".chair-lock-msg");if(!el){el=document.createElement("div");el.className="chair-lock-msg";el.style.cssText="position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap;padding:3px 6px;border-radius:3px;pointer-events:none;z-index:10;text-align:center";el.textContent=LANG==="tr"?"Şampiyonlukla açılır":"Win a championship";btn.style.position="relative";btn.appendChild(el);}el.style.opacity="1";clearTimeout(btn._lockT);btn._lockT=setTimeout(()=>{el.style.transition="opacity .5s";el.style.opacity="0";setTimeout(()=>el.remove(),500);},1800);}
 
 var POOL_TR=POOL;loadMeta();applyTheme();applyStatic();buildFormButtons();applyMeta();setBudget();startTCentre();$("budgetBox").classList.add("introhide");geoDefaultCountry();
+(function(){const l=$("loader");if(l){l.classList.add("done");setTimeout(()=>l.remove(),350);}
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){const m=$("modal");if(m&&!m.classList.contains("hidden"))closeModal();}});})();
 </script></body></html>
