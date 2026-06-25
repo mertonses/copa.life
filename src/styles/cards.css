@@ -258,3 +258,46 @@ body.dark .ct-foot{border-color:rgba(0,0,0,.12)}
   .ct-desc{font-size:8px}
   .ct-price{font-size:12px;padding:2px 5px}
 }
+
+/* ===== COLLECTION CARD TILE ===== */
+.collectiongrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;padding:7px;max-height:300px;overflow:auto}
+.collcard{
+  display:flex;flex-direction:column;
+  border:2px solid var(--ink);border-radius:6px;overflow:hidden;
+  cursor:pointer;position:relative;
+  background-color:#fbf2d8;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.76),rgba(255,247,221,.92)),url("../../assets/textures/panel-lines.png");
+  background-size:auto,70px 70px;
+  color:#23332a;
+  transition:transform .14s,box-shadow .14s;
+}
+.collcard:hover:not(.locked){transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.collcard.locked{opacity:.38;cursor:help;filter:saturate(.25)}
+.collcard.active{box-shadow:0 0 0 2px #3f9a57;border-color:#3f9a57}
+.collcard.rar-bronze{border-color:#9a6a3b}.collcard.rar-silver{border-color:#6a8a9b}
+.collcard.rar-gold{border-color:#c8940a}.collcard.rar-risk{border-color:#5a3a7a}
+.cc-head{display:flex;justify-content:space-between;align-items:center;padding:3px 7px;font-family:var(--mono);font-size:6.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.collcard.rar-bronze .cc-head{background:#9a6a3b}.collcard.rar-silver .cc-head{background:#5e7a8a}
+.collcard.rar-gold .cc-head{background:#c8940a}.collcard.rar-risk .cc-head{background:#5a3a7a}
+.collcard.locked .cc-head{background:#888;color:#eee}
+.cc-rar{opacity:.9}.cc-kind{opacity:.7;font-size:6px}
+.cc-art{display:flex;align-items:center;justify-content:center;padding:8px 14px 5px;height:60px;flex-shrink:0;color:#23332a}
+.cc-art svg{width:100%;height:100%;max-width:42px;max-height:42px}
+.cc-body{flex:1;padding:3px 8px 2px;display:flex;flex-direction:column;gap:1px}
+.cc-name{font-family:var(--disp);font-weight:700;font-size:11px;line-height:1.2;color:#23332a}
+.cc-desc{font-family:var(--mono);font-size:7.5px;color:#52685f;line-height:1.3}
+.cc-preview{font-size:7.5px;margin-top:2px}
+.cc-body .progline{margin-top:3px}.cc-body .progbar{margin-top:2px}
+.cc-foot{display:flex;justify-content:space-between;align-items:center;padding:4px 8px 6px;border-top:1px solid rgba(0,0,0,.08);margin-top:auto;gap:4px}
+.cc-state{font-family:var(--mono);font-size:6.5px;color:#78887f;line-height:1.2;flex:1}
+.collcard.active .cc-state{color:#3f9a57;font-weight:700}
+.cc-dot{width:6px;height:6px;border-radius:50%;background:#3f9a57;flex-shrink:0}
+body.dark .collcard{background-color:#f2edd8;background-image:linear-gradient(180deg,rgba(255,255,255,.80),rgba(244,238,216,.94)),url("../../assets/textures/panel-lines.png");color:#1f2d35}
+body.dark .cc-name{color:#1f2d35}body.dark .cc-desc{color:#3a4a42}body.dark .cc-state{color:#5a6a62}
+body.dark .cc-art{color:#1f2d35}body.dark .collcard.active .cc-state{color:#1f6c46}body.dark .cc-dot{background:#1f6c46}
+body.dark .collcard.rar-bronze{border-color:#a56f3e}body.dark .collcard.rar-gold{border-color:#c8940a}
+body.dark .collcard.rar-risk{border-color:#6a4a8a}
+
+/* ===== ACTIVE CARD CHIP ICON ===== */
+.card-ico{display:inline-flex;align-items:center;vertical-align:middle;width:16px;height:16px;margin-right:4px;flex-shrink:0;opacity:.85}
+.card-ico svg{width:100%;height:100%}
