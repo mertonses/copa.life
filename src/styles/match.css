@@ -34,7 +34,7 @@
 .vs-crest-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
 .vsbar .you .vs-crest-col{border-right:2px dashed rgba(95,115,97,.35);padding-right:12px;margin-right:12px}
 .vsbar .opp .vs-crest-col{border-right:2px dashed rgba(95,115,97,.35);padding-right:12px;margin-right:12px}
-.vs-crest{width:46px;height:54px}
+.vs-crest{width:46px;height:54px}.vs-crest .club-logo{width:100%;height:100%;object-fit:contain;display:block}
 .vs-ti{flex:1;display:flex;flex-direction:column;gap:3px}.vsbar .opp .vs-ti{align-items:flex-end;text-align:right}
 .vs-lbl{font-size:8px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;font-weight:700;line-height:1}
 .vs-nm{font-family:var(--disp);font-weight:800;font-size:clamp(11px,3.2vw,17px);text-transform:uppercase;line-height:1.05;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:clip}
