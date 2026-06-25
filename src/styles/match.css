@@ -40,7 +40,13 @@
 .vs-nm{font-family:var(--disp);font-weight:800;font-size:clamp(10px,2.8vw,17px);text-transform:uppercase;line-height:1.05;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vs-pw{font-size:15px;font-weight:700;line-height:1}
 .vsbar .mid{flex:0 0 150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 14px;background:#26402f;color:#fff}
-.vs-vs{font-family:var(--disp);font-weight:900;font-size:32px;font-style:italic;line-height:1;color:#fff;letter-spacing:-1px}
+.vs-vs{font-family:var(--disp);font-weight:900;font-size:32px;font-style:italic;line-height:1;color:#fff;letter-spacing:-1px;position:relative;animation:vsglitch 4s infinite}
+.vs-vs::before,.vs-vs::after{content:"VS";position:absolute;inset:0;font:inherit;font-style:inherit;letter-spacing:inherit}
+.vs-vs::before{color:#ff2d55;animation:vsglitch-r 4s infinite;clip-path:polygon(0 20%,100% 20%,100% 45%,0 45%)}
+.vs-vs::after{color:#00c8ff;animation:vsglitch-b 4s infinite;clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%)}
+@keyframes vsglitch{0%,89%,91%,93%,100%{transform:none}90%{transform:translate(-1px,0)}92%{transform:translate(2px,0)}}
+@keyframes vsglitch-r{0%,89%,91%,93%,100%{transform:none;opacity:0}90%{transform:translate(3px,-1px);opacity:1}92%{transform:translate(-2px,1px);opacity:1}93%{opacity:0}}
+@keyframes vsglitch-b{0%,89%,91%,93%,100%{transform:none;opacity:0}90%{transform:translate(-3px,1px);opacity:1}92%{transform:translate(2px,-1px);opacity:1}93%{opacity:0}}
 .vsweather{font-size:10px;opacity:.8;display:flex;align-items:center;gap:5px;font-family:var(--mono)}
 .vsaud{font-size:9px;opacity:.6;letter-spacing:.2px;font-family:var(--mono);display:flex;align-items:center;gap:5px}
 .vsround{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.8;color:var(--mustard)}
