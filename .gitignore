@@ -1,0 +1,10 @@
+node_modules/
+.npm-cache/
+.pw-browsers/
+.agents/
+.codex/
+.claude/
+*.log
+test/
+src/legacy/
+kupa_yolu_analiz_raporu.md

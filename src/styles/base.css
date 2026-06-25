@@ -1,0 +1,26 @@
+/* Kupa Yolu - temel tema, reset ve global kurallar */
+*{box-sizing:border-box;margin:0;padding:0}
+*{border-radius:0!important}
+@keyframes ddshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-3px)}}
+@keyframes blink{50%{opacity:.4}}
+html,body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:400;font-size:15px;letter-spacing:-0.01em}
+body{position:relative;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;background-image:radial-gradient(rgba(38,64,47,.04) 1px,transparent 1px);background-size:6px 6px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:url("../../assets/textures/paper.png") 0 0/96px 96px repeat;opacity:.028;mix-blend-mode:multiply}
+.wrap{position:relative;z-index:1}
+@keyframes ddp{50%{background:#3a1418}}
+.pdie{position:absolute;top:-18px;z-index:1;animation:mfall linear forwards}@keyframes mfall{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(130px) rotate(420deg)}}
+body.dark{--paper:#1b1f26;--paper2:#262b33;--ink:#edeae1;--ink2:#99a2ae;--line:#363d47;--navy:#37607c;--blue:#5fa6d8;--green:#5fc36e;--good:#5fc36e;--mustard:#f0bb3e}
+body.dark .sheet{background:#22272f;border-color:var(--ink)}
+body.dark .ovb small{opacity:.65}
+body.dark .cover{background:repeating-linear-gradient(135deg,rgba(214,84,58,.1) 0 7px,transparent 7px 14px),#262b33}
+body.dark{background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px)}
+body.dark::before{opacity:.035;mix-blend-mode:screen}
+body.dark .cover{background:repeating-linear-gradient(135deg,rgba(214,84,58,.1) 0 7px,transparent 7px 14px),#2f353c}
+body.dark .storytile,body.dark .storytext,body.dark .storygrid,body.dark .stb{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
+body.dark .storytext mark{background:#f5df99;color:#1f2d35}
+body.dark .artnote,body.dark .patreonbox{background:#edf2f7;color:#30414a;border-color:#d3dde7}
+body.dark .brandmark .copa,body.dark .brandmark .dot{color:#edf2f7}
+@keyframes slidein{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
+.hidden{display:none!important}.pop{animation:pop .3s}@keyframes pop{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}60%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#introSetup.hidden,#introLand.hidden{display:none}

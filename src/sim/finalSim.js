@@ -1,0 +1,147 @@
+/* Final mac simulasyonu: canvas akisi, skor dengesi, final karnesi. */
+let sim=null,speedMul=1;
+function setSpeed(s){speedMul=s;document.querySelectorAll(".spd").forEach(b=>b.classList.toggle("on",parseFloat(b.dataset.s)===s));}
+function startFinalSim(sp){
+ clearTimeout(autoTimer);$("hub").classList.add("hidden");$("result").classList.add("hidden");$("sim").classList.remove("hidden");
+ const x=L();$("simA").textContent=clip(teamName||"US",10);$("simB").textContent=clip(opponent.name,10);$("simGoals").innerHTML="";$("simState").textContent=LANG==="tr"?"Dengeli final":"Balanced final";$("momBar").style.background="linear-gradient(90deg,var(--green) 50%,var(--red) 50%)";$("momA").textContent="50%";$("momB").textContent="50%";["statShot","statSave","statDanger"].forEach(id=>{const e=$(id);if(e)e.textContent="0-0";});{const gb=$("goalBurst");if(gb){gb.classList.add("hidden");gb.classList.remove("show");gb.innerHTML="";}}
+ window.finalReportHTML="";speedMul=1;setSpeed(1);buildSim(sp.power,opponent.power);sfxWhistle();crowdStart();$("simComm").innerHTML=(LANG==="tr"?"<b>FINAL</b> başladı!":"<b>FINAL</b> kicks off!");
+ document.querySelectorAll(".shoutbtn").forEach(b=>b.classList.remove("lit"));_simPaused=false;{const pb=$("pauseBtn");if(pb){pb.textContent="⏸";pb.classList.remove("pause");}}
+ if(LANG==="en"){const L2={shMore:"Push Up",shPush:"Press High",shCalm:"Slow Tempo",shHold:"Protect Lead"};Object.keys(L2).forEach(id=>{const e=$(id);if(e){const sp=e.querySelector("span");if(sp)sp.textContent=L2[id];}});}
+ const rb=$("simRadio");if(rb)rb.textContent="📻 —";sim.run();
+}
+function buildSim(myPow,oppPow){
+ const cv=$("cv"),wrap=Math.max(340,Math.min(860,($("sim")&&$("sim").clientWidth)||860)),W=wrap,H=Math.round(W*0.62),GW=Math.round(W*0.27),GL=(W-GW)/2,GR=(W+GW)/2,PR=Math.max(8,Math.round(W*0.012)),BR=Math.max(5,Math.round(W*0.007)),CTRL=PR+BR+4,ctx=cv.getContext("2d"),x=L();
+ const _dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*_dpr;cv.height=H*_dpr;cv.style.width="100%";cv.style.height="auto";ctx.setTransform(_dpr,0,0,_dpr,0,0);
+ function teamFrom(coords,poses,names,side,col,fg,pow,inj=[]){const ps=coords.map((c,i)=>{let hx,hy;if(side==="A"){hx=c[0]/100*W;hy=c[1]/100*H;}else{hx=(1-c[0]/100)*W;hy=(1-c[1]/100)*H;}const pos=poses[i]||"CM",role=groupOf(pos),wide=["LB","RB","WB","LW","RW","LM","RM"].includes(pos);return {hx,hy,x:hx,y:hy,gk:i===0,n:i+1,nm:((names[i]||"").split(" ").pop()||"?"),role,wide,inj:!!inj[i],sideX:hx};});return {side,col,fg,ps,pow,basePow:pow,fwd:side==="A"?-1:1,og:side==="A"?0:H};}
+ const myCoords=slots.map(s=>[s[1],s[2]]),myPoses=slots.map(s=>s[0]),myNames=picksBySlot.map(p=>p?p.name:"");
+ const f433=FORMATIONS["4-3-3"],oppCoords=f433.map(s=>[s[1],s[2]]),oppPoses=f433.map(s=>s[0]),oNames=oppLineup.length?oppLineup.map(o=>o.name):oppCoords.map(()=>"?");
+ const A=teamFrom(myCoords,myPoses,myNames,"A",kit.bg,kit.fg,myPow,picksBySlot.map(p=>p&&p.injured)),B=teamFrom(oppCoords,oppPoses,oNames,"B","#eae2cb","#23332a",oppPow);
+ let ball={x:W/2,y:H/2,vx:0,vy:-2.1},frame=0,clock=0,sA=0,sB=0,running=false,raf,lastKick=-12,lastShot=-60,acc=0,poss="A",lastShooter=null,lastShooterSide=null,lastTouch=null,assistNm="",cooldown=0;
+ let aShoutTtl=0,aPowBase=null,keeperA=0,keeperB=0,shotsA=0,shotsB=0,dangerA=0,dangerB=0,goalFlash=0,keyMoment="",penaltyNote="";const goals=[],scorersA=[],scorersB=[];
+ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ function scoreDiffFor(t){return t.side==="A"?sA-sB:sB-sA;}
+ function attackBrake(t){const lead=scoreDiffFor(t);return lead>=3?0.10:lead>=2?0.26:lead>=1?0.66:1;}
+ function scoreSoftCap(){const total=sA+sB;return total>=6?0.18:total>=5?0.30:total>=4?0.48:total>=3?0.72:1;}
+ function gameBrake(){return cooldown>0?0.56:1;}
+ function closest(t){let bp=null,bd=1e9;t.ps.forEach(p=>{if(p.gk)return;const d=dist(p,ball);if(d<bd){bd=d;bp=p;}});return bp;}
+ function mv(p,tx,ty,sp){const a=Math.atan2(ty-p.y,tx-p.x),d=Math.hypot(tx-p.x,ty-p.y);p.vx=p.vx||0;p.vy=p.vy||0;if(d>2){p.vx=p.vx*.62+Math.cos(a)*sp*.38;p.vy=p.vy*.62+Math.sin(a)*sp*.38;}else{p.vx*=.72;p.vy*=.72;}p.x+=p.vx;p.y+=p.vy;p.x=clamp(p.x,PR,W-PR);p.y=clamp(p.y,PR,H-PR);}
+ function feedSim(side,txt){const who=side==="A"?clip(teamName||"US",9):clip(opponent.name,8);$("simComm").innerHTML="<b>"+who+"</b> "+txt;}
+ function updateStats(){const sh=$("statShot"),sv=$("statSave"),dg=$("statDanger");if(sh)sh.textContent=shotsA+"-"+shotsB;if(sv)sv.textContent=keeperA+"-"+keeperB;if(dg)dg.textContent=dangerA+"-"+dangerB;}
+ function addEvent(kind,side,txt){const el=$("simGoals");if(!el)return;const d=document.createElement("div");d.className=(side==="A"?"home":"away")+" "+kind;d.innerHTML=`<b>${Math.max(1,Math.floor(clock))}'</b><span>${txt}</span>`;el.prepend(d);while(el.children.length>8)el.removeChild(el.lastChild);}
+ function showGoalBurst(min,name,score){const gb=$("goalBurst");if(!gb)return;gb.innerHTML=`<b>${min}' ${name}</b><span>${score}</span>`;gb.classList.remove("hidden","show");void gb.offsetWidth;gb.classList.add("show");setTimeout(()=>gb.classList.add("hidden"),1050);}
+ function move(t){const cb=closest(t),attacking=poss===t.side,gy=t.side==="A"?0:H,oy=t.side==="A"?H:0,spF=(0.86+(t.pow-60)/180)*gameBrake();
+  t.ps.forEach(p=>{let tx,ty;
+   if(p.gk){const danger=t.side==="A"?ball.y>H*0.64:ball.y<H*0.36;tx=clamp(ball.x,GL+8,GR-8);ty=t.side==="A"?(danger?H-42:H-13):(danger?42:13);mv(p,tx,ty,1.82*spF);return;}
+   if(attacking){
+    if(p===cb){tx=ball.x;ty=ball.y;}
+    else if(p.role==="FWD"){if(p.wide){tx=p.sideX<W/2?28:W-28;ty=gy-t.fwd*74;}else{tx=W/2+(p.sideX-W/2)*0.28;ty=gy-t.fwd*58;}}
+    else if(p.role==="MID"){tx=p.sideX*0.58+ball.x*0.42;ty=p.hy+(gy-p.hy)*0.42;}
+    else{tx=p.sideX;ty=p.hy+(gy-p.hy)*0.12;}
+   }else{
+    if(p===cb){tx=ball.x;ty=ball.y;}
+    else{tx=p.sideX*0.72+ball.x*0.28;ty=p.hy+(oy-p.hy)*0.16+(ball.y-p.hy)*0.10;}
+   }
+   mv(p,tx,ty,(p.role==="DEF"?1.05:1.18)*spF);
+  });
+ }
+ function sep(){const all=[...A.ps,...B.ps];for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){const a=all[i],b=all[j],d=dist(a,b);if(d>0&&d<PR*2-1){const o=(PR*2-d)/2,an=Math.atan2(b.y-a.y,b.x-a.x);a.x-=Math.cos(an)*o;a.y-=Math.sin(an)*o;b.x+=Math.cos(an)*o;b.y+=Math.sin(an)*o;}}}
+ function shotProfile(t,shooter,defTeam){
+  const gy=t.side==="A"?0:H,distGoal=Math.abs(ball.y-gy),central=1-Math.min(1,Math.abs(ball.x-W/2)/(GW*.72));
+  const close=distGoal<H*.115,box=distGoal<H*.22&&ball.x>GL-8&&ball.x<GR+8,outside=distGoal<H*.38;
+  let gate=close?0.36:box?0.18:outside?0.035:0;
+  const pressure=defTeam.ps.filter(p=>!p.gk&&dist(p,shooter)<PR*4.2).length;
+  const gk=defTeam.ps[0],gkCover=1-Math.min(1,Math.abs(gk.x-ball.x)/(GW*.55));
+  let q=0.28+(close?.34:0)+(box?.20:0)+central*.20+(t.pow-defTeam.pow)/110-pressure*.08-gkCover*.14;
+  if(scoreDiffFor(t)<0){gate*=1.15;q+=0.04;}
+  if(clock>78&&scoreDiffFor(t)<0){gate*=1.12;}
+  gate*=attackBrake(t)*scoreSoftCap();
+  return {gate:clamp(gate,0,0.48),q:clamp(q,0.18,0.88),pressure,gkCover};
+ }
+ function kick(){let ow=null,od=1e9,t=null;[A,B].forEach(T=>T.ps.forEach(p=>{const d=dist(p,ball);if(d<od){od=d;ow=p;t=T;}}));if(od>CTRL||frame-lastKick<16)return;lastKick=frame;poss=t.side;
+  const gy=t.side==="A"?0:H,defTeam=t.side==="A"?B:A,baseNoise=(96-t.pow)/96*0.42,finalThird=t.side==="A"?ball.y<H*0.40:ball.y>H*0.60;
+  const wideDeep=finalThird&&(ball.x<GL+16||ball.x>GR-16),sp=shotProfile(t,ow,defTeam),canShoot=frame-lastShot>34;
+  let ang,pow;
+  if(canShoot&&!ow.gk&&rand()<sp.gate){const cx=GL+GW*(rand()<0.5?0.20:0.80),noise=baseNoise+(1-sp.q)*0.70;ang=Math.atan2(gy-ball.y,cx-ball.x)+(rand()-.5)*noise;pow=2.85+sp.q*1.35;assistNm=(lastTouch&&lastTouch.side===t.side&&lastTouch.p!==ow)?lastTouch.p.nm:"";lastShooter=ow;lastShooterSide=t.side;lastShot=frame;if(t.side==="A")shotsA++;else shotsB++;if(t.side==="A")dangerA++;else dangerB++;updateStats();addEvent("danger",t.side,(LANG==="tr"?(sp.q>.58?"Net şut: ":"Zor şut: "):(sp.q>.58?"Clear shot: ":"Low-quality shot: "))+ow.nm);sfxKick(pow);feedSim(t.side,LANG==="tr"?"şutu çekti!":"shoots!");}
+  else if(wideDeep&&!ow.gk&&rand()<0.28*attackBrake(t)*scoreSoftCap()){ang=Math.atan2((gy-t.fwd*46)-ball.y,W/2-ball.x)+(rand()-.5)*(baseNoise+.22);pow=3.30;if(t.side==="A")dangerA++;else dangerB++;updateStats();addEvent("danger",t.side,LANG==="tr"?"Kanattan tehlike":"Wide danger");sfxKick(pow);feedSim(t.side,LANG==="tr"?"kanattan ortaladı!":"crosses in!");}
+  else{const mates=t.ps.filter(m=>m!==ow&&!m.gk&&(t.side==="A"?m.y<ball.y-10:m.y>ball.y+10));mates.sort((a,b)=>t.side==="A"?a.y-b.y:b.y-a.y);const wm=mates.filter(m=>m.wide),tg=(wm.length&&rand()<0.42)?wm[0]:(mates.length?mates[0]:null);
+   if(tg&&rand()>0.10){ang=Math.atan2(tg.y-ball.y,tg.x-ball.x)+(rand()-.5)*baseNoise;pow=3.35;}
+   else{ang=(t.side==="A"?-Math.PI/2:Math.PI/2)+(rand()-.5)*0.42;pow=3.05;}sfxPass();}
+  ball.vx=Math.cos(ang)*pow;ball.vy=Math.sin(ang)*pow;lastTouch={p:ow,side:t.side};
+ }
+ function saveChance(defTeam,attTeam){const gap=(defTeam.pow-attTeam.pow)/125;const shotSpeed=Math.min(1,Math.hypot(ball.vx,ball.vy)/5);return clamp(0.78+gap-shotSpeed*0.09,0.62,0.89);}
+ function saveMsg(def){const who=def==="A"?clip(teamName||"US",8):clip(opponent.name,8);$("simComm").innerHTML="🧤 "+(LANG==="tr"?"<b>"+who+"</b> kalecisi kurtardı!":"<b>"+who+"</b> keeper saves!");if(def==="A")keeperA++;else keeperB++;updateStats();addEvent("save",def,LANG==="tr"?"Kaleci kurtardı":"Keeper save");if(!keyMoment)keyMoment=LANG==="tr"?"kaleci oyunda tuttu":"keeper kept it alive";}
+ function phys(){ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=0.976;ball.vy*=0.976;if(ball.x<BR){ball.x=BR;ball.vx*=-.58;}if(ball.x>W-BR){ball.x=W-BR;ball.vx*=-.58;}
+  if(ball.y<BR){if(ball.x>GL&&ball.x<GR){const gk=B.ps[0];if(Math.abs(gk.x-ball.x)<38&&rand()<saveChance(B,A)){ball.y=BR+5;ball.vy=2.35+rand()*0.75;ball.vx=(ball.x<W/2?-1:1)*(1.55+rand()*1.2);lastKick=frame+18;lastShot=frame;saveMsg("B");}else{goal("A");return;}}else{if(ball.x>GL-13&&ball.x<GR+13)sfxPost();ball.y=BR;ball.vy*=-.58;}}
+  if(ball.y>H-BR){if(ball.x>GL&&ball.x<GR){const gk=A.ps[0];if(Math.abs(gk.x-ball.x)<38&&rand()<saveChance(A,B)){ball.y=H-BR-5;ball.vy=-(2.35+rand()*0.75);ball.vx=(ball.x<W/2?-1:1)*(1.55+rand()*1.2);lastKick=frame+18;lastShot=frame;saveMsg("A");}else{goal("B");return;}}else{if(ball.x>GL-13&&ball.x<GR+13)sfxPost();ball.y=H-BR;ball.vy*=-.58;}}
+  [...A.ps,...B.ps].forEach(p=>{const d=dist(p,ball);if(d<PR+BR&&frame-lastKick>4){const an=Math.atan2(ball.y-p.y,ball.x-p.x);ball.x=p.x+Math.cos(an)*(PR+BR);ball.y=p.y+Math.sin(an)*(PR+BR);const s2=Math.hypot(ball.vx,ball.vy)*0.43;ball.vx=Math.cos(an)*s2+(rand()-.45);ball.vy=Math.sin(an)*s2+(rand()-.45);}});
+ }
+ function updateGoals(){const el=$("simGoals");if(!el)return;el.innerHTML=goals.map(g=>`<div class="${g.side==="A"?"home":"away"}"><b>${g.m}'</b><span>${g.side==="A"?"⚽":"🥅"} ${clip(g.name,18)}</span></div>`).join("");}
+ function goal(sc){if(sc==="A")sA++;else sB++;cooldown=760;goalFlash=60;$("simScore").textContent=sA+"–"+sB;sfxWhistle();crowdSwell();
+  if(lastShooter&&lastShooterSide===sc){if(sc==="A")scorersA.push(lastShooter.nm);else scorersB.push(lastShooter.nm);}
+  const x2=L(),mn=Math.max(1,Math.floor(clock)),who=sc==="A"?(clip(teamName||"US",9)):(clip(opponent.name,8)),sn=(lastShooter&&lastShooterSide===sc)?lastShooter.nm:"";const asst=(sn&&assistNm)?(" <small>"+x2.assistLbl+" "+assistNm+"</small>"):"";
+  $("simComm").innerHTML="⚽ <b>"+mn+"'</b> "+(sn?"<b>"+sn+"</b>":"<b>"+who+"</b>")+asst+" — "+sA+"–"+sB;pushFeed("⚽ "+mn+"' <b>"+(sn||who)+"</b>"+(sn&&assistNm?" ("+assistNm+")":"")+" "+sA+"–"+sB,"goal");goals.push({m:mn,side:sc,name:sn||who});addEvent("goal",sc,"⚽ "+(sn||who)+" "+sA+"–"+sB);showGoalBurst(mn,sn||who,sA+"–"+sB);if(!keyMoment)keyMoment=(sn||who)+" "+mn+"'";
+  assistNm="";A.ps.forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;});B.ps.forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;});ball={x:W/2,y:H/2,vx:0,vy:(sc==="A"?1.8:-1.8)};lastKick=frame;lastShooter=null;poss=sc==="A"?"B":"A";
+ }
+ function statusText(){const tr=LANG==="tr",diff=Math.abs(sA-sB);if(clock>78)return tr?"Son dakikalar":"Final minutes";if(diff>=3)return tr?"Fark açıldı, tempo düştü":"Gap opened, tempo cooled";if(diff>=2)return tr?"Kontrol oyunu":"Game management";if(keeperA+keeperB>=3)return tr?"Kaleciler öne çıktı":"Keepers on top";if(Math.abs(myPow-oppPow)<=3)return tr?"Dengeli final":"Balanced final";return (myPow>oppPow)?(tr?"Favori baskı kuruyor":"Favourite applying pressure"):(tr?"Rakip baskıyı artırdı":"Opponent raising pressure");}
+ function updateMomentum(){const raw=50+(A.pow-B.pow)*0.55+(sA-sB)*7+(poss==="A"?4:-4),a=Math.round(clamp(raw,20,80)),b=100-a;$("momA").textContent=a+"%";$("momB").textContent=b+"%";$("momBar").style.background=`linear-gradient(90deg,var(--green) ${a}%,var(--red) ${a}%)`;$("simState").textContent=statusText();}
+ function draw(){ctx.clearRect(0,0,W,H);for(let i=0;i<9;i++){ctx.fillStyle=i%2?"#79ad5c":"#6fa052";ctx.fillRect(0,i*H/9,W,H/9);}
+  ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=2;ctx.strokeRect(7,7,W-14,H-14);ctx.beginPath();ctx.moveTo(7,H/2);ctx.lineTo(W-7,H/2);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,38,0,7);ctx.stroke();
+  ctx.strokeStyle="#fff";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(GL,7);ctx.lineTo(GR,7);ctx.stroke();ctx.beginPath();ctx.moveTo(GL,H-7);ctx.lineTo(GR,H-7);ctx.stroke();
+  [A,B].forEach(t=>t.ps.forEach(p=>{const r=p.gk?8:9.5,bx=Math.sin((frame+p.n*9)*0.16)*1.1,by=Math.cos((frame+p.n*5)*0.14)*1.1,cx=p.x+bx,cy=p.y+by;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fillStyle=p.gk?"#e6ad2e":t.col;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=(t.side==="A"&&!p.gk)?kit.sec:"#fff";ctx.stroke();ctx.fillStyle=p.gk?"#23332a":t.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 9px 'Inter',sans-serif";ctx.fillText(p.n,cx,cy);ctx.fillStyle="#f3ead2";ctx.font="6px 'Inter',sans-serif";ctx.fillText((p.nm||"").slice(0,7).toUpperCase(),cx,cy+r+5);if(p.inj){ctx.fillStyle="#d6543a";ctx.fillRect(cx+r-4,cy-r-4,8,8);ctx.fillStyle="#fff";ctx.font="bold 7px 'Inter',sans-serif";ctx.fillText("!",cx+r,cy-r+1);}}));
+  ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,7);ctx.fillStyle="#fff";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#23332a";ctx.stroke();
+ }
+ function tick(){frame++;clock+=90/(68*60);if(cooldown>0)cooldown--;if(aShoutTtl>0){aShoutTtl--;if(aShoutTtl<=0&&aPowBase!=null){A.pow=aPowBase;aPowBase=null;}}move(A);move(B);sep();kick();phys();}
+ function frameStep(){if(!running)return;acc+=goalFlash>0?speedMul*0.35:speedMul;if(goalFlash>0)goalFlash--;let n=0;while(acc>=1&&n<8){tick();acc--;n++;if(clock>=90)break;}$("simClk").textContent=String(Math.min(90,Math.floor(clock))).padStart(2,"0")+"'";{const tv=$("tvover");if(tv)tv.innerHTML=(round>=6?"🏆 "+L().cupTitle:"🔴 TRT SPOR")+" · "+Math.min(90,Math.floor(clock))+"' · "+sA+"–"+sB;}if(frame%110<2){const rb=$("simRadio");if(rb)rb.innerHTML=radioLine(poss,sA,sB,Math.floor(clock));updateMomentum();}draw();if(clock>=90){finishSim();return;}raf=requestAnimationFrame(frameStep);}
+ function pickMOTM(){if(scorersA.length){const f={};scorersA.forEach(n=>f[n]=(f[n]||0)+1);let best=scorersA[0],bc=0;Object.keys(f).forEach(n=>{if(f[n]>bc){bc=f[n];best=n;}});return best;}const out=picksBySlot.filter(p=>p&&p.pos!=="GK");const p=out.length?rnd(out):picksBySlot[0];return p?p.name.split(" ").pop():"?";}
+ function makeReport(won){const tr=LANG==="tr",cardsTxt=finalCardSummary().replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const rows=[[tr?"Maçın kırılma anı":"Key moment",keyMoment||goals[0]?.name||"-"],[tr?"Kaleci kurtarışı":"Keeper saves",`${clip(teamName||"US",8)} ${keeperA} · ${clip(opponent.name,8)} ${keeperB}`],[tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]];if(penaltyNote)rows.push([tr?"Penaltılar":"Penalties",penaltyNote]);rows.push([tr?"Final yorumu":"Final note",won?(tr?"Kupa geldi.":"Cup lifted."):(tr?"Final kaybedildi.":"Final lost.")]);window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");}
+ function finishSim(){running=false;cancelAnimationFrame(raf);crowdStop();$("simClk").textContent="90'";if(sA===sB){const penBoost=hasCard("sogukkanli_penaltici")?0.15:0,home=rand()<0.5+penBoost+(myPow-oppPow)/60;penaltyNote=home?(LANG==="tr"?"penaltılarda kazandın":"won on penalties"):(LANG==="tr"?"penaltılarda kaybettin":"lost on penalties");if(home)sA++;else sB++;$("simScore").textContent=sA+"–"+sB;$("simState").textContent=LANG==="tr"?"Penaltı gerilimi":"Penalty drama";$("simComm").innerHTML="🎯 "+penaltyNote;}
+  motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
+ }
+ sim={
+  run:()=>{
+   running=true;draw();raf=requestAnimationFrame(frameStep);
+  },
+  pause:()=>{
+   running=false;cancelAnimationFrame(raf);
+  },
+  resume:()=>{
+   if(!running&&clock<90){running=true;raf=requestAnimationFrame(frameStep);}
+  },
+  shout:(t)=>{
+   if(aPowBase==null)aPowBase=A.pow;
+   const mp={more:{d:6,t:"yüklen!",e:"push up!"},push:{d:4,t:"önde bas!",e:"press high!"},calm:{d:2,t:"tempoyu düşür",e:"slow tempo"},hold:{d:-4,t:"skoru koru",e:"protect lead"}};
+   const c=mp[t]||mp.more;
+   A.pow=aPowBase+c.d;aShoutTtl=780;
+   const rb=$("simRadio");if(rb)rb.innerHTML="📻 <b>"+clip(teamName||"US",9)+"</b> "+(LANG==="tr"?c.t:c.e);
+  },
+  skip:()=>{
+   running=false;cancelAnimationFrame(raf);crowdStop();
+   while(clock<90){
+    clock+=4;
+    const e=(myPow-oppPow)/150,lead=sA-sB;
+    const total=sA+sB,cap=total>=6?0.20:total>=5?0.32:total>=4?0.50:total>=3?0.72:1;
+    if(rand()<(0.010+Math.max(0,e)*0.70-(lead>=2?0.008:0))*cap){
+     sA++;
+     const fw=picksBySlot.filter(p=>p&&FWDP.includes(p.pos));
+     if(fw.length){
+      const n=rnd(fw).name.split(" ").pop();
+      scorersA.push(n);goals.push({m:Math.min(90,Math.floor(clock)),side:"A",name:n});
+     }
+    }
+    if(rand()<(0.010+Math.max(0,-e)*0.70-((-lead)>=2?0.008:0))*cap){
+     sB++;
+     goals.push({m:Math.min(90,Math.floor(clock)),side:"B",name:opponent.name});
+    }
+   }
+   if(sA===sB){
+    const penBoost=hasCard("sogukkanli_penaltici")?0.15:0;
+    if(rand()<0.5+penBoost+(myPow-oppPow)/60){sA++;penaltyNote=LANG==="tr"?"penaltılarda kazandın":"won on penalties";}
+    else{sB++;penaltyNote=LANG==="tr"?"penaltılarda kaybettin":"lost on penalties";}
+   }
+   $("simScore").textContent=sA+"–"+sB;
+   updateGoals();motm=pickMOTM();makeReport(sA>sB);endRun(sA>sB,sA+"–"+sB);
+  }
+ };
+
+}
+function simSkip(){if(sim)sim.skip();}
