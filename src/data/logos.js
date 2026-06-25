@@ -34,3 +34,49 @@ var CLUB_LOGOS={
 };
 var CLUB_LOGOS_SM={};
 Object.keys(CLUB_LOGOS).forEach(k=>{CLUB_LOGOS_SM[k]=CLUB_LOGOS[k].replace("assets/clubs/","assets/clubs/small/");});
+
+/* England Premier League + Championship logos */
+var CLUB_LOGOS_EN={
+ "Arsenal":"assets/clubs/Arsenal.png",
+ "Chelsea":"assets/clubs/Chelsea.png",
+ "Liverpool":"assets/clubs/Liverpool.png",
+ "Manchester City":"assets/clubs/Manchester City.png",
+ "Manchester United":"assets/clubs/Manchester United.png",
+ "Tottenham Hotspur":"assets/clubs/Tottenham Hotspur.png",
+ "Newcastle United":"assets/clubs/Newcastle United.png",
+ "Aston Villa":"assets/clubs/Aston Villa.png",
+ "West Ham United":"assets/clubs/West Ham United.png",
+ "Brighton & Hove Albion":"assets/clubs/Brighton.png",
+ "Fulham":"assets/clubs/Fulham.png",
+ "Brentford":"assets/clubs/Brentford.png",
+ "Crystal Palace":"assets/clubs/Crystal Palace.png",
+ "Wolverhampton Wanderers":"assets/clubs/Wolverhampton Wanderers.png",
+ "Everton":"assets/clubs/Everton.png",
+ "Nottingham Forest":"assets/clubs/Nottingham Forest.png",
+ "Burnley":"assets/clubs/Burnley.png",
+ "Leeds United":"assets/clubs/Leeds United.png",
+ "Sunderland":"assets/clubs/Sunderland.png",
+ "AFC Bournemouth":"assets/clubs/Bournemouth.png",
+ "Leicester City":"assets/clubs/Leicester City.png",
+ "Sheffield United":"assets/clubs/Sheffield United.png",
+ "Ipswich Town":"assets/clubs/Ipswich Town.png",
+ "Southampton":"assets/clubs/Southampton.png",
+ "Coventry City":"assets/clubs/Coventry City.png",
+ "Middlesbrough":"assets/clubs/Middlesbrough.png",
+ "Watford":"assets/clubs/Watford.png",
+ "Norwich City":"assets/clubs/Norwich City.png",
+ "West Bromwich Albion":"assets/clubs/West Bromwich Albion.png",
+ "Stoke City":"assets/clubs/Stoke City.png",
+ "Birmingham City":"assets/clubs/Birmingham City.png",
+ "Blackburn Rovers":"assets/clubs/Blackburn Rovers.png",
+ "Bristol City":"assets/clubs/Bristol City.png",
+ "Hull City":"assets/clubs/Hull City.png",
+ "Millwall":"assets/clubs/Millwall.png",
+ "Queens Park Rangers":"assets/clubs/Queens Park Rangers.png",
+ "Sheffield Wednesday":"assets/clubs/Sheffield Wednesday.png",
+ "Swansea City":"assets/clubs/Swansea City.png",
+ "Preston North End":"assets/clubs/Preston North End.png",
+ "Cardiff City":"assets/clubs/Cardiff City.png"
+};
+var CLUB_LOGOS_EN_SM={};
+Object.keys(CLUB_LOGOS_EN).forEach(k=>{CLUB_LOGOS_EN_SM[k]=CLUB_LOGOS_EN[k].replace("assets/clubs/","assets/clubs/small/");});
