@@ -212,9 +212,9 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 
 /* v5 actionbar layout */
 .dashtop{display:block}
-.dashtop .actionbar{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:7px;justify-content:stretch;margin:0 0 8px}
+.dashtop .actionbar{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-start;margin:0 0 8px}
 .actionbar .presbtngp{flex:0 0 auto;order:1;margin:0}
-.actionbar #talkBtn{flex:1 0 auto;order:2;width:auto;margin:0;padding:8px 8px;font-size:13px}
+.actionbar #talkBtn{flex:1 1 0;min-width:0;order:2;width:auto;margin:0;padding:8px 8px;font-size:13px}
 .actionbar #playBtn{flex:1 1 100%;order:3;margin:0}
 .actionbar #autoTog{flex:1 1 100%;order:4}
 @media(min-width:760px){.dashtop .actionbar{flex-wrap:nowrap}.actionbar #playBtn{flex:2 1 auto}.actionbar .presbtngp{flex:0 0 auto}.actionbar #talkBtn{flex:0 0 auto}.actionbar #autoTog{flex:1 1 auto}}

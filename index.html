@@ -1,8 +1,39 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>copa.life</title>
-<link rel="icon" type="image/png" href="assets/icons/cl.png">
-<meta name="theme-color" content="#1f2d35"><link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>copa.life — Taraftar Yönetim Oyunu</title>
+<meta name="description" content="copa.life, tarayıcı tabanlı bir futbol taraftar yönetim oyunu. Kadro kur, transfer yönet, kupayı kaldır. Türkiye, İngiltere, İspanya, İtalya ve Almanya ligleri.">
+<meta name="keywords" content="copa life, taraftar yönetim oyunu, futbol oyunu, tarayıcı oyunu, türkiye kupası, fa cup, copa del rey">
+<meta name="author" content="copa.life">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://copa.life">
+
+<!-- Open Graph (link paylaşımı) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://copa.life">
+<meta property="og:site_name" content="copa.life">
+<meta property="og:title" content="copa.life — Taraftar Yönetim Oyunu">
+<meta property="og:description" content="Kadro kur, transfer yönet, kupayı kaldır. 9000+ oyuncu, 5 lig, tarayıcıda ücretsiz.">
+<meta property="og:image" content="https://copa.life/assets/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="tr_TR">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="copa.life — Taraftar Yönetim Oyunu">
+<meta name="twitter:description" content="Kadro kur, transfer yönet, kupayı kaldır. 9000+ oyuncu, 5 lig, tarayıcıda ücretsiz.">
+<meta name="twitter:image" content="https://copa.life/assets/social-preview.png">
+
+<!-- Favicon & PWA -->
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/cl.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/cl.png">
+<link rel="apple-touch-icon" href="assets/icons/cl.png">
+<meta name="theme-color" content="#26402f">
+<link rel="manifest" href="manifest.json">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css">
 <link rel="stylesheet" href="src/styles/layout.css">
@@ -10,7 +41,7 @@
 <link rel="stylesheet" href="src/styles/match.css">
 <link rel="stylesheet" href="src/styles/debug.css"></head><body>
 <div class="wrap">
-  <div class="top"><div class="tools"><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar">⚙️</button><div class="settingsdrop hidden" id="settingsDrop"><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.png" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.png" alt="">EN</button><button class="sdbtn" id="musicBtn" onclick="toggleMusic()" title="Müzik">🎵</button><button class="sdbtn" id="muteBtn" onclick="toggleMute()" title="Ses">🔊</button><button class="sdbtn" id="lightBtn" onclick="setTheme(false)" title="Aydınlık">💡</button><button class="sdbtn" id="darkBtn" onclick="setTheme(true)" title="Karanlık">🌙</button></div></div></div></div>
+  <div class="top"><div class="tools"><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar" aria-label="Ayarlar"><img src="assets/icons/settings.png" alt="Ayarlar"></button><div class="settingsdrop hidden" id="settingsDrop"><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.png" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.png" alt="">EN</button><button class="sdbtn" id="musicBtn" onclick="toggleMusic()" title="Müzik">🎵</button><button class="sdbtn" id="muteBtn" onclick="toggleMute()" title="Ses">🔊</button><button class="sdbtn" id="lightBtn" onclick="setTheme(false)" title="Aydınlık">💡</button><button class="sdbtn" id="darkBtn" onclick="setTheme(true)" title="Karanlık">🌙</button></div></div></div></div>
     <div class="logo" aria-label="copa.life"><span class="brandmark"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></span></div>
     <div class="budget" id="budgetBox"><div class="l" id="lblBudget">Kasa</div><div class="v" id="budgetV">—</div></div></div>
 

@@ -136,6 +136,19 @@ body.dark .opt,body.dark .shopcard,body.dark .stylebtn,body.dark .mtile,body.dar
 body.dark .simgoals,body.dark .finalreport{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 body.dark .simstats span,body.dark .eventpanel,body.dark .fieldframe{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 @media(max-width:760px){.simstage{grid-template-columns:1fr}.eventpanel{min-height:92px}.simgoals{max-height:110px}}
+@media(max-width:520px){
+  .vsbar .mid{flex:0 0 76px;padding:8px 4px}
+  .vs-vs{font-size:20px}
+  .vsweather{font-size:8px;gap:3px}
+  .vsaud{font-size:8px}
+  .vsround{font-size:7px}
+  .vs-crest{width:32px;height:36px}
+  .vsbar .side{padding:6px 8px;gap:0}
+  .vsbar .you .vs-crest-col{padding-right:7px;margin-right:7px}
+  .vsbar .opp .vs-crest-col{padding-left:7px;margin-left:7px}
+  .vs-nm{font-size:clamp(9px,2.4vw,15px)}
+  .vs-pw{font-size:13px}
+}
 body.dark .perfwhy{color:#30414a}
 body.dark .comm{color:var(--paper)}
 .chem-high .roundel.full{border-color:rgba(0,0,0,.55)!important;box-shadow:0 3px 0 rgba(0,0,0,.25)}

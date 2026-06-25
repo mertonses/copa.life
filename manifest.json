@@ -1,14 +1,13 @@
 {
   "name": "copa.life",
   "short_name": "copa.life",
-  "description": "Türkiye Kupası taraftar yönetim oyunu — zarla kadro kur, kupayı kaldır.",
+  "description": "Tarayıcı tabanlı futbol taraftar yönetim oyunu. 5 lig, 9000+ oyuncu. Zarla kadro kur, kupayı kaldır.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f5f0e8",
-  "theme_color": "#1f2d35",
+  "theme_color": "#26402f",
   "icons": [
-    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "assets/icons/cl.png", "sizes": "any", "type": "image/png", "purpose": "any" }
   ]
 }
