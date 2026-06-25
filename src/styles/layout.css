@@ -290,7 +290,7 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 
 /* ===== pixel art icons ===== */
 .si{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;display:inline-block;flex-shrink:0}
-.ssi .si{width:32px;height:32px}
+.ssi .si{width:32px;height:32px}.stylebtn .si{width:36px;height:36px}
 .lockicon{width:14px;height:14px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;opacity:.7}
 .kithdr .si{width:26px;height:26px}
 #feedHdr .si{width:20px;height:20px;margin-right:4px}
