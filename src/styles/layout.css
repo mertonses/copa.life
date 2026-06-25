@@ -120,6 +120,9 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .opt .price{flex-shrink:0;text-align:right;font-family:var(--mono)}.opt .price .p{font-weight:700;font-size:17px;color:#23332a;background:var(--mustard);border-radius:4px;padding:1px 6px}.opt .price .oldp{font-size:9px;color:var(--ink2);text-decoration:line-through;text-decoration-thickness:2px;margin-bottom:1px}.opt.tooexp .price .p{background:var(--red);color:#fff}.opt.tooexp .price .p{color:var(--red)}
 .opt.bargain{border-color:#d88928;box-shadow:0 0 0 2px rgba(230,173,46,.28) inset}
 .opt.bargain::after{content:var(--disc) " İNDİRİM";position:absolute;right:-38px;top:8px;transform:rotate(34deg);width:132px;text-align:center;background:var(--red);color:#fff;font-family:var(--mono);font-weight:900;font-size:8px;letter-spacing:.8px;padding:3px 0;box-shadow:0 2px 0 rgba(0,0,0,.18);pointer-events:none}
+.opt-lbar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px}
+.opt-ico-wrap{flex-shrink:0;display:flex;align-items:center;opacity:.5;pointer-events:none;margin-left:-4px}
+.opt:hover:not(:disabled) .opt-ico-wrap{opacity:.85}
 .optmsg{font-family:var(--mono);font-size:10px;color:var(--red);text-align:center;margin-top:6px;min-height:12px}
 #rerollBtn{margin:7px 0 0}
 .styletag{display:none}
