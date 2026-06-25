@@ -365,13 +365,19 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
   .actionbar #playBtn{flex:1 1 auto;font-size:14px;padding:8px 10px;letter-spacing:1px}
   .actionbar #talkBtn{flex:0 0 auto;align-self:stretch}
   .actionbar #autoTog{flex:0 0 100%}
-  .vsbar .mid{flex:0 0 90px;padding:6px 8px}
-  .vs-vs{font-size:24px}
-  .vs-nm{font-size:13px}
+  .vsbar{min-height:0}
+  .vsbar .mid{flex:0 0 72px;padding:5px 6px}
+  .vs-vs{font-size:20px}
+  .vsweather{font-size:8px}
+  .vsaud{font-size:7px}
+  .vsround{font-size:7px}
+  .vs-nm{font-size:11px}
   .vs-pw{font-size:12px}
-  .vs-crest-col .vs-crest{width:36px;height:42px}
-  .vsbar .side{padding:8px 8px}
-  .vsbar .you .vs-crest-col,.vsbar .opp .vs-crest-col{padding-right:8px}
+  .vs-crest-col .vs-crest{width:28px;height:34px}
+  .vsbar .side{padding:6px 6px}
+  .vsbar .you .vs-crest-col,.vsbar .opp .vs-crest-col{padding-right:6px;margin-right:6px}
+  .vs-lbl{font-size:7px;letter-spacing:1px}
+  .vsscout{font-size:8px;padding:2px 5px}
 }
 @media(min-width:720px){
   .wrap{max-width:880px;padding:14px 16px 48px}
