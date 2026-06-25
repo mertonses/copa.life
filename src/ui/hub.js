@@ -27,15 +27,17 @@ function conditionHint(k){
  const s=picksBySlot.filter(Boolean),tr=LANG==="tr";
  const countPos=arr=>s.filter(p=>arr.includes(p.pos)).length;
  const map={
-  yerli_blok:()=>`${tr?"Yerli":"Locals"}: ${s.filter(p=>p.tr).length}/6`,
+  yerli_blok:()=>`${tr?"Yerli":"Locals"}: ${s.filter(p=>p.tr).length}/4`,
   altyapi_plani:()=>`${tr?"U21":"U21"}: ${s.filter(p=>p.age<=21).length}/4`,
   tecrubeli_omurga:()=>`${tr?"32+":"32+"}: ${s.filter(p=>p.age>=32).length}/3`,
-  cift_forvet:()=>`${tr?"Santrfor":"Strikers"}: ${s.filter(p=>p.pos==="ST").length}/2`,
+  cift_forvet:()=>`${tr?"Santrfor":"Strikers"}: ${s.filter(p=>p.pos==="ST").length}`,
   kanat_akini:()=>`${tr?"Kanat/bek":"Wing/WB"}: ${countPos(["LW","RW","LM","RM","WB"])}/4`,
   otobus:()=>`${tr?"Stoper":"CB"}: ${s.filter(p=>p.pos==="CB").length}`,
   kontra:()=>`${tr?"Forvet":"Forwards"}: ${cnt(s,FWDP)}`,
   anadolu:()=>`${tr?"70 altı":"Sub-70"}: ${s.filter(p=>p.ov<70).length}`,
-  son_dans:()=>`${tr?"32+ final şartı":"32+ final condition"}: ${s.some(p=>p.age>=32)?(tr?"hazır":"ready"):(tr?"yok":"missing")}`
+  kaleci_kalesi:()=>{const gk=s.find(p=>p.pos==="GK");return `GK: ${gk?gk.ov+" OVR":(tr?"yok":"none")}`;},
+  buyuk_mac:()=>`${tr?"Aktif tur":"Active round"}: ${round}/4`,
+  ch_final:()=>`${tr?"Yarı/Final'de aktif":"Active in Semi/Final"}: ${round>=5?(tr?"hazır":"ready"):(tr?"tur 5'te":"from round 5")}`
  };
  return map[k]?map[k]():"";
 }
@@ -55,10 +57,12 @@ function shopPreviewText(k,pv){
   sahte_evrak:()=>`+6 ${tr?"güç":"power"} · `+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+6)),
   final_provasi:()=>money(b,b-8)+" · "+(tr?"finalde +5 güç":"final +5 power"),
   kupaci_kadro:()=>`${tr?"Yarı final/final +3":"Semi/final +3"} · `+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+4)),
-  deplasman_kafilesi:()=>money(b,b-5)+" · "+(cardEff(k,picksBySlot.filter(Boolean),round)>0?"+4":"0"),
+  deplasman_kafilesi:()=>money(b,b-3)+" · "+(cardEff(k,picksBySlot.filter(Boolean),round)>0?"+4":"0"),
   sogukkanli_penaltici:()=>tr?"Beraberlikte tur şansı +%15":"Draw advance chance +15%",
   temiz_sayfa:()=>tr?"Sakatlık riski -%30":"Injury risk -30%",
-  yedek_guvence:()=>tr?"Yedek gelirse +10 OVR":"Bench replacement +10 OVR"
+  cilgin_basin:()=>tr?"€12M kazanmak ya da €8M kaybetmek (%65/%35)":"Win €12M or lose €8M (65%/35%)",
+  ch_final:()=>`${tr?"YF: +3":"SF: +3"} · ${tr?"Final: +6":"Final: +6"}`,
+  kaleci_kalesi:()=>{const gk=picksBySlot.filter(Boolean).find(p=>p.pos==="GK");return gk?`GK ${gk.ov} OVR → +${gk.ov>=80?4:gk.ov>=70?2:0}`:(tr?"Kaleci gerekli":"Need a GK");}
  };
  if(map[k])return map[k]();
  const hint=conditionHint(k);
@@ -76,35 +80,33 @@ function cardContractText(k){
     yildiz:tr?"En iyi oyuncudan +5; şu an "+plus+".":"Best player gives +5; now "+plus+".",
     veteran:tr?"Erken güç "+plus+"; ilerleyen turlarda azalır.":"Early power "+plus+"; fades later.",
     derbi:tr?"Bu tur +0; finalde +8 güç.":"Now +0; final +8 power.",
+    taraftar:tr?"Garanti +2 güç; götürü yok.":"Guaranteed +2 power; no downside.",
+    ch_momentum:tr?"Sabit +3 güç; götürü yok.":"Flat +3 power; no downside.",
+    buyuk_mac:tr?"4. turdan itibaren +2 güç; şu an "+plus+".":"From round 4: +2 power; now "+plus+".",
+    kaleci_kalesi:tr?"Kaleci OVR 80+: +4, 70-79: +2; şu an "+plus+".":"GK OVR 80+: +4, 70-79: +2; now "+plus+".",
+    ch_final:tr?"Yarı finalde +3, finalde +6; şu an "+plus+".":"Semi-final +3, final +6; now "+plus+".",
+    cilgin_basin:tr?"%65 ihtimal +€12M; %35 ihtimal -€8M; kart kaybolur.":"65% +€12M; 35% -€8M; card expires.",
     temiz_sayfa:tr?"Sakatlık riski -%30; güç +0.":"Injury risk -30%; power +0.",
     kisa_kamp:tr?"Bu maç +2; sonraki maç -1; kart kaybolur.":"This match +2; next match -1; card expires.",
-    yedek_guvence:tr?"Sakatlıkta yedekten gelen oyuncu +10 OVR.":"Injury replacement gets +10 OVR.",
     taksit_transfer:tr?"Hemen +€10M; sonraki 2 tur -€4M.":"Instant +€10M; next 2 rounds -€4M.",
-
-    kara_borsa:tr?"Bedava 1 kart; %30 ihtimal -€12M.":"Free 1 card; 30% chance -€12M.",
+    kara_borsa:tr?"Bedava 1 kart; %40 ihtimal -€12M.":"Free 1 card; 40% chance -€12M.",
     sahte_evrak:tr?"Güç +6; finalde -6 güç.":"Power +6; final -6 power.",
     son_kredi:tr?"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.":"If below -€10M: +€15M; chairman limit tightens 5M.",
     altyapi_plani:tr?"21 yaş altı başına +1; max +4, şu an "+plus+".":"U21 +1 each; max +4, now "+plus+".",
     tecrubeli_omurga:tr?"32+ yaş başına +1; max +3, şu an "+plus+".":"32+ +1 each; max +3, now "+plus+".",
-    yerli_blok:tr?"6+ yerli varsa +3; şu an "+plus+".":"6+ locals gives +3; now "+plus+".",
+    yerli_blok:tr?"4+ yerli varsa +3; şu an "+plus+".":"4+ locals gives +3; now "+plus+".",
     kanat_akini:tr?"Kanat/bek başına +1; max +4, şu an "+plus+".":"Wing/wingback +1; max +4, now "+plus+".",
-    cift_forvet:tr?"2+ santrfor varsa +3; şu an "+plus+".":"2+ strikers gives +3; now "+plus+".",
-    deplasman_kafilesi:tr?"Güçlü rakibe +4; hemen -€5M, şu an "+plus+".":"Vs stronger opponent +4; instant -€5M, now "+plus+".",
+    cift_forvet:tr?"1 ST: +1, 2+ ST: +3; şu an "+plus+".":"1 ST: +1, 2+ ST: +3; now "+plus+".",
+    deplasman_kafilesi:tr?"Güçlü rakibe +4; hemen -€3M, şu an "+plus+".":"Vs stronger opponent +4; instant -€3M, now "+plus+".",
     sosyal_medya:tr?"Underdog +3; favori -2, şu an "+plus+".":"Underdog +3; favourite -2, now "+plus+".",
-    sessiz_kamp:tr?"1 maç başkan baskısı 0; kart kaybolur.":"1 match chairman pressure 0; expires.",
     final_provasi:tr?"Şimdi -€8M; finalde +5.":"Now -€8M; final +5.",
     kupaci_kadro:tr?"Yarı final/final +3; finalde -4 güç.":"Semi/final +3; final -4 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
-    son_dans:tr?"Finalde 32+ oyuncu varsa +6; şu an "+plus+".":"Final +6 if you have 32+ player; now "+plus+".",
+    son_dans:tr?"Finalde +4 güç.":"Final +4 power.",
     kumarbaz:tr?"Hemen +€16M; finalde -8 güç; her tur %20 ihtimal -€24M.":"Instant +€16M; final -8 power; 20% each round -€24M.",
     gecici_prim:tr?"Bu maç +8; sonra %35 sakatlık, sıradaki maç -2, kart kaybolur.":"This match +8; then 35% injury, next match -2, card expires.",
-    doping:tr?"+10 güç; her tur %25 ihtimal -€15M ceza.":"+10 power; 25% each round -€15M fine.",
-    kriz:tr?"Finaldeki eksi gücü en fazla 6 azaltır.":"Reduces final power loss by up to 6.",
-    ch_blitz:tr?"Forvet başına güç; max +4, şu an "+plus+".":"Forward power; max +4, now "+plus+".",
-    ch_wall:tr?"Defans başına güç; max +4, şu an "+plus+".":"Defender power; max +4, now "+plus+".",
-    ch_giant:tr?"Sabit güç "+plus+"; götürü yok.":"Flat power "+plus+"; no downside.",
-    ch_momentum:tr?"Sabit güç "+plus+"; götürü yok.":"Flat power "+plus+"; no downside.",
-    ch_final:tr?"Bu tur "+plus+"; finalde +4.":"This round "+plus+"; final +4."
+    doping:tr?"+8 güç; her tur %35 ihtimal -€15M ceza.":"+8 power; 35% each round -€15M fine.",
+    kriz:tr?"Finaldeki eksi gücü en fazla 6 azaltır.":"Reduces final power loss by up to 6."
   };
   return map[k]||((tr?"Net güç ":"Net power ")+plus+".");
 }
@@ -115,7 +117,7 @@ function renderDebtWarning(){const el=$("debtWarn");if(!el)return;const tr=LANG=
 function renderHub(){const x=L(),sp=squadPower(round),s=picksBySlot.filter(Boolean);
   $("roundtag").textContent=x.rounds[round-1]+" · "+x.vsword+" "+opponent.name;
   {const wm=$("vsMid");if(wm){const we=currentWeather?currentWeather.e:"";const wn=currentWeather?(LANG==="tr"?currentWeather.tr:currentWeather.en):"";const bases=[8000,14000,22000,34000,52000,75000];const b=bases[Math.min(5,round-1)];const aud=Math.round(b*(0.65+Math.min(0.33,Math.max(0,(sp.power-(opponent?opponent.power:0))/100)))/1000)*1000;wm.innerHTML=`<div class="vs-vs">VS</div>${we?`<div class="vsweather">${we} ${wn}</div>`:"<div class='vsweather'></div>"}<div class="vsaud">👥 ${(aud/1000).toFixed(0)}K ${LANG==="tr"?"seyirci":"fans"}</div><div class="vsround">${x.rounds[round-1]}</div>`;}}
-  {const mkShield=(bg,border,fg,lbl)=>`<svg viewBox="0 0 44 52" width="46" height="54" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L41 9L41 29Q41 44 22 50Q3 44 3 29L3 9Z" fill="${bg}" stroke="${border}" stroke-width="2"/><text x="22" y="31" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="${fg}">${lbl}</text></svg>`;const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#8e2d20","#bf4329","#f5f0e8",lbl);}}}
+  {const mkShield=(bg,border,fg,lbl)=>`<svg viewBox="0 0 44 52" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path d="M22 2L41 9L41 29Q41 44 22 50Q3 44 3 29L3 9Z" fill="${bg}" stroke="${border}" stroke-width="2"/><text x="22" y="31" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="${fg}">${lbl}</text></svg>`;const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#8e2d20","#bf4329","#f5f0e8",lbl);}}}
   const _pwCol=v=>v>=90?"#16c96b":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
   {const el=$("youPw");if(el){el.textContent=sp.power;el.style.color=_pwCol(sp.power);}}
   $("youNm").textContent=teamName||"XI";$("oppNm").textContent=opponent.name;
