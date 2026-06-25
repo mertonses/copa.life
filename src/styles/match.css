@@ -149,7 +149,12 @@ body.dark .simstats span,body.dark .eventpanel,body.dark .fieldframe{background:
   .vs-nm{font-size:clamp(9px,2.4vw,15px)}
   .vs-pw{font-size:13px}
 }
-body.dark .perfwhy{color:#30414a}
+body.dark .perfwhy{color:var(--ink2)}
+body.dark .verdict{color:var(--ink2)}
+body.dark .sheet .pbr{color:var(--ink);border-color:var(--line)}
+body.dark .sheet .pbr b{color:var(--mustard)}
+body.dark .sheet .pbr.tot{border-color:var(--ink2)}
+.riskitem-inj{background:#f6dcd6;border:1.5px solid var(--red);color:#a23b28}
 body.dark .comm{color:var(--paper)}
 .chem-high .roundel.full{border-color:rgba(0,0,0,.55)!important;box-shadow:0 3px 0 rgba(0,0,0,.25)}
 .chem-low .roundel.full{opacity:.78;border-color:var(--line)!important}

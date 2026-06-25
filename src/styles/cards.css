@@ -148,7 +148,7 @@ body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.c
 .powerpreview{color:#1f7a4e}
 .singleuse{background:#fffdf3}
 body.dark .storytile,body.dark .collection,body.dark .feedwrap,body.dark .econsum,body.dark .mtile,body.dark .stylebtn{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
-body.dark .storytile .stb,body.dark .storytext,body.dark .pbr,body.dark .ccard .cact,body.dark .shopcard .sd,body.dark .cardshort,body.dark .cardcontract{color:#1f2d35}
+body.dark .storytile .stb,body.dark .storytext,body.dark .storytile .pbr,body.dark .ccard .cact,body.dark .shopcard .sd,body.dark .cardshort,body.dark .cardcontract{color:#1f2d35}
 body.dark .collectionfilters button{background:#f7f0dc;color:#1f2d35;border-color:#d3dde7}
 body.dark .collectionfilters button.on{background:#34546b;color:#fff;border-color:#34546b}
 body.dark .powerpreview{color:#1f6c46}
