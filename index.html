@@ -29,7 +29,28 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/cl.png">
 <link rel="apple-touch-icon" href="assets/icons/cl.png">
 <meta name="theme-color" content="#26402f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="rating" content="general">
 <link rel="manifest" href="manifest.json">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "copa.life",
+  "description": "Tarayıcı tabanlı futbol taraftar yönetim oyunu. 5 lig, 9000+ oyuncu. Kadro kur, transfer yönet, kupayı kaldır.",
+  "url": "https://copa.life",
+  "genre": ["Sports", "Strategy", "Simulation"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "inLanguage": ["tr", "en"],
+  "image": "https://copa.life/assets/icons/cl.png"
+}
+</script>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,7 +218,7 @@ function renderFeed(){const fc=$("feed");if(!fc)return;if(!feed.length){fc.inner
 /* ===== lang / static ===== */
 function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();buildFormButtons();applyMeta();
   if(!$("hub").classList.contains("hidden"))renderHub();if(!$("draft").classList.contains("hidden"))refreshDraft();if(!$("result").classList.contains("hidden")&&lastResult)renderResult();if(!$("fixbar").classList.contains("hidden"))renderFixtures();}
-function applyStatic(){const x=L();document.title="copa.life";$("lblBudget").textContent=x.budget;$("coverTitle").textContent=x.coverTitle;const _csTR={ENG:"İngiltere Kupası",ES:"İspanya Kupası",IT:"İtalya Kupası",DE:"Almanya Kupası"};const _csEN={ENG:"FA Cup",ES:"Copa del Rey",IT:"Coppa Italia",DE:"DFB-Pokal"};$("coverSub").textContent=(LANG==="tr"?_csTR[selectedCountry]:_csEN[selectedCountry])||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;if($("patreonIntroText"))$("patreonIntroText").textContent=x.patreonText;if($("patreonResultText"))$("patreonResultText").textContent=x.patreonText;$("pickhdr").textContent=x.pickhdr;$("protoFoot").textContent=x.proto;$("rollHint").textContent=x.rollHint;$("rollBtn").textContent=x.roll;$("allBtn").textContent=x.allBtn;$("ddLbl").innerHTML=x.ddTitle;
+function applyStatic(){const x=L();document.title=LANG==="en"?"copa.life — Football Cup Manager":"copa.life — Taraftar Yönetim Oyunu";$("lblBudget").textContent=x.budget;$("coverTitle").textContent=x.coverTitle;const _csTR={ENG:"İngiltere Kupası",ES:"İspanya Kupası",IT:"İtalya Kupası",DE:"Almanya Kupası"};const _csEN={ENG:"FA Cup",ES:"Copa del Rey",IT:"Coppa Italia",DE:"DFB-Pokal"};$("coverSub").textContent=(LANG==="tr"?_csTR[selectedCountry]:_csEN[selectedCountry])||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;if($("patreonIntroText"))$("patreonIntroText").textContent=x.patreonText;if($("patreonResultText"))$("patreonResultText").textContent=x.patreonText;$("pickhdr").textContent=x.pickhdr;$("protoFoot").textContent=x.proto;$("rollHint").textContent=x.rollHint;$("rollBtn").textContent=x.roll;$("allBtn").textContent=x.allBtn;$("ddLbl").innerHTML=x.ddTitle;
   if($("startBtn"))$("startBtn").textContent=x.startBtn;if($("quickStartBtn"))$("quickStartBtn").textContent=x.quickStartBtn;if($("cName"))$("cName").placeholder=x.cNamePh;
   $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").textContent=x.shopLbl;if($("collectionHdr"))$("collectionHdr").textContent=LANG==="tr"?"KART KOLEKSİYONU":"CARD COLLECTION";$("scoutBtn").title=x.scout;$("talkBtn").textContent=x.talk;$("autoLbl").textContent=autoPlay?x.autoOn:x.autoOff;$("spdLbl").textContent=x.spd;$("lblTur").textContent=x.lblTur;$("lblGuc").textContent=x.lblGuc;$("lblKart").textContent=x.lblKart;$("copyBtn").textContent=x.copy;$("againBtn").textContent=x.again;
   const mechTexts=LANG==="en"?['Pick your formation. Choose <mark>your chairman</mark>.','<mark>Roll the dice:</mark> different players come for each position.','Build your squad, power up with <mark>cards</mark>, manage injuries.','Luck alone won\'t cut it. Don\'t let go of <mark>the strategy</mark>.']:['Dizilişini seç. <mark>Başkanını</mark> belirle.','<mark>Zarı at:</mark> her pozisyon için farklı oyuncular gelir.','Kadronu kur, <mark>kartlarla</mark> güçlendir, sakatları yönet.','Şansına güvenmek yetmez. <mark>Stratejiyi</mark> elden bırakma.'];
