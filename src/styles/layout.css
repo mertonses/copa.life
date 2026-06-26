@@ -393,7 +393,8 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
   .vs-pw{font-size:12px}
   .vs-crest-col .vs-crest{width:28px;height:34px}
   .vsbar .side{padding:6px 6px}
-  .vsbar .you .vs-crest-col,.vsbar .opp .vs-crest-col{padding-right:6px;margin-right:6px}
+  .vsbar .you .vs-crest-col{padding-right:6px;margin-right:6px}
+  .vsbar .opp .vs-crest-col{padding-right:0;margin-right:0;padding-left:6px;margin-left:6px}
   .vs-lbl{font-size:7px;letter-spacing:1px}
   .vsscout{font-size:8px;padding:2px 5px}
 }
@@ -414,10 +415,26 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
 #rollBtn:hover .dsvg{animation:diceRoll .45s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes diceRoll{0%{transform:rotate(0) scale(1)}45%{transform:rotate(200deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
 
-/* 2. Play button: SVG ball rolls right on hover */
-.play-ball{display:inline-flex;align-items:center;vertical-align:middle;margin-left:5px}
-.btn-go:hover .play-ball svg{animation:ballRoll .45s ease forwards}
-@keyframes ballRoll{0%{transform:translateX(0) rotate(0deg)}70%{transform:translateX(6px) rotate(210deg)}100%{transform:translateX(4px) rotate(180deg)}}
+/* 2. Play button: ball + player kick animation */
+.play-ball{display:inline-flex;align-items:center;vertical-align:middle;margin-left:5px;overflow:hidden}
+.play-ball svg{overflow:visible}
+/* ball spins idle, rotates around its own center */
+.ball-grp{transform-box:fill-box;transform-origin:center;animation:ballSpin 3s linear infinite}
+/* player hidden left by default */
+.player-grp{transform:translateX(-52px)}
+/* on hover: player slides in, ball flies off */
+.btn-go:hover .player-grp,.btn-go:focus .player-grp{animation:playerRun .3s ease-out forwards}
+.btn-go:hover .ball-grp,.btn-go:focus .ball-grp{animation:ballKick .35s .2s ease-in forwards}
+@keyframes ballSpin{to{transform:rotate(360deg)}}
+@keyframes playerRun{
+  0%{transform:translateX(-52px)}
+  100%{transform:translateX(0)}
+}
+@keyframes ballKick{
+  0%{transform:translate(0,0) rotate(0deg);opacity:1}
+  55%{transform:translate(10px,-16px) rotate(210deg);opacity:1}
+  100%{transform:translate(18px,-10px) rotate(340deg);opacity:0}
+}
 
 /* 3. btn-go / btn-roll: inner glow pulse on hover */
 .btn-go,.btn-roll{position:relative}
@@ -431,3 +448,16 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
 
 /* 5. metaline SVG icons */
 .metaline-ico{display:inline-flex;align-items:center;vertical-align:-.15em;margin-right:1px}
+
+/* YEDEK ÇEK grid */
+.backup-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px 0}
+.backup-card{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border:1.5px solid var(--ink);border-radius:6px;cursor:pointer;min-width:70px;flex:1;max-width:100px;transition:background .15s}
+.backup-card:hover{background:var(--navy);color:#fff}
+.backup-card.misfit{opacity:.65;border-style:dashed}
+.bk-fig{opacity:.85}
+.bk-name{font-family:var(--mono);font-size:9px;font-weight:700;text-align:center;line-height:1.2;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-role{font-family:var(--mono);font-size:8px;color:var(--ink2);text-align:center}
+.bk-eff{font-family:var(--disp);font-size:13px;font-weight:700;text-align:center}
+.bk-delta{font-size:10px;font-weight:400}.bk-delta.pos{color:#16c96b}.bk-delta.neg{color:#ef4444}
+.backup-empty{padding:12px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink2)}
+.backupcompare{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;padding:6px 0 8px;border-bottom:1px solid var(--line);margin-bottom:6px}

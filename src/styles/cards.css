@@ -4,6 +4,7 @@
 .storytile .stb{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--ink);padding:9px 10px}
 .cardrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;min-height:18px}
 .card{border:1.5px solid var(--ink);border-radius:4px;padding:4px 7px;font-family:var(--mono);font-size:10px;line-height:1.2}
+.card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
 .card .copy{display:block;font-size:8px;color:var(--ink2);margin-top:2px}
