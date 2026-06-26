@@ -16,8 +16,11 @@ body.dark .cover{background:repeating-linear-gradient(135deg,rgba(214,84,58,.1) 
 body.dark{background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px)}
 body.dark::before{opacity:.035;mix-blend-mode:screen}
 body.dark .cover{background:repeating-linear-gradient(135deg,rgba(214,84,58,.1) 0 7px,transparent 7px 14px),#2f353c}
-body.dark .storytile,body.dark .storytext,body.dark .storygrid,body.dark .stb{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
-body.dark .storytext mark{background:#f5df99;color:#1f2d35}
+body.dark .storytile,body.dark .storytext,body.dark .storygrid,body.dark .stb{background:#edf2f7;color:#1f2d35;border-color:#8e2d20}
+body.dark .storytile .sth{background:#8e2d20;color:#fff}
+body.dark .storytext mark{background:#26402f;color:#fff}
+body.dark .scoreboard{background:#26402f}
+body.dark .budget{background:#8e2d20;border-color:#6b1f17}
 body.dark .artnote,body.dark .patreonbox{background:#edf2f7;color:#30414a;border-color:#d3dde7}
 body.dark .brandmark .copa,body.dark .brandmark .dot{color:#edf2f7}
 @keyframes slidein{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}

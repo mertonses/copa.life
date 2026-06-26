@@ -7,7 +7,7 @@
 .pbreak{padding:8px 14px}
 .pbr{display:flex;justify-content:space-between;font-family:var(--mono);font-size:15px;padding:4px 0;border-bottom:1px solid var(--line)}
 .pbr.tot{border-top:2px solid var(--ink);border-bottom:none;margin-top:4px;font-family:var(--disp);font-weight:700;font-size:14px}
-.pbr b{color:var(--mustard)}
+.pbr b{color:var(--good)}
 .opt .ctx{font-family:var(--mono);font-size:11px;color:var(--mustard);line-height:1.1;margin-top:1px}
 
 .ddbanner.alarm{animation:ddshake .35s steps(2) infinite}
@@ -55,7 +55,7 @@
 .langtog button{display:flex;align-items:center;gap:4px;background:transparent;border:none;padding:4px 7px;cursor:pointer;color:var(--ink2)}.langtog button.on{background:var(--ink);color:var(--paper)}
 .langtog img{width:14px;height:10px;display:block;object-fit:cover;image-rendering:auto;border:1px solid rgba(0,0,0,.18)}
 .iconbtn{background:var(--paper2);border:1.5px solid var(--ink);border-radius:4px;padding:3px 6px;cursor:pointer;font-size:13px}
-.budget{text-align:center;font-family:var(--mono);min-width:86px;background:var(--mustard);border:2px solid var(--ink);border-radius:6px;padding:5px 11px}.budget .l{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#5a4a18}.budget .v{font-weight:700;font-size:26px;line-height:1;color:#23332a}.budget .lim{font-size:8px;letter-spacing:.4px;margin-top:3px;color:#5a4a18;white-space:nowrap}.budget.low{background:var(--red)}.budget.low .v{color:#fff}.budget.low .l,.budget.low .lim{color:#ffe0d8}.budget.debt{box-shadow:0 0 0 2px #8e2d20 inset}
+.budget{text-align:center;font-family:var(--mono);min-width:86px;background:#8e2d20;border:2px solid #6b1f17;border-radius:6px;padding:5px 11px}.budget .l{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.72)}.budget .v{font-weight:700;font-size:26px;line-height:1;color:#fff}.budget .lim{font-size:8px;letter-spacing:.4px;margin-top:3px;color:rgba(255,255,255,.65);white-space:nowrap}.budget.low{background:#c0312a}.budget.low .v{color:#fff}.budget.low .l,.budget.low .lim{color:rgba(255,255,255,.8)}.budget.debt{box-shadow:0 0 0 2px #ff7a5a inset}
 .debtladder{display:flex;justify-content:center;gap:2px;margin-top:3px}.debtladder span{font-size:7px;line-height:1;border:1px solid rgba(0,0,0,.25);padding:1px 3px;background:rgba(255,255,255,.35);color:#5a4a18}.debtladder span.on{background:#8e2d20;color:#fff}
 h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.5px;line-height:.9}
 .hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:13px;text-align:center}
@@ -170,7 +170,7 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .introrow{display:flex;gap:8px;align-items:stretch;margin-bottom:8px}
 .countrypick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 10px}
 .countrypick button{position:relative;min-width:0;border:1.5px solid var(--ink);background:var(--paper2);color:var(--ink);font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;overflow:hidden}
-.countrypick button.on{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 0 0 2px var(--mustard) inset}
+.countrypick button.on{background:#26402f;color:#fff;border-color:#26402f}
 .countrypick img{width:24px;height:16px;object-fit:cover;border:1px solid rgba(0,0,0,.22);background:#fff}
 .countrypick button.locked{cursor:not-allowed;color:rgba(35,51,42,.62);background:#efe6cf}
 .countrypick button.locked img{filter:saturate(.55) contrast(.9);opacity:.82}
@@ -189,8 +189,8 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .seedlow{max-width:150px;margin:10px auto 6px;border:1.5px dashed var(--line);background:var(--paper2);padding:4px 8px;text-align:left}
 .seedlow label{display:block;font-family:var(--mono);font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2)}
 .seedlow input{width:100%;border:none;background:transparent;font-family:var(--mono);font-size:12px;color:var(--ink2);padding:1px 0}
-.btn-quick{background:var(--mustard);color:#23332a;font-family:var(--mono);font-weight:700;letter-spacing:2px;margin-bottom:9px;box-shadow:0 3px 0 #b8860b}
-.btn-quick:active{box-shadow:0 1px 0 #b8860b}
+.btn-quick{background:#8e2d20;color:#fff;font-family:var(--mono);font-weight:700;letter-spacing:2px;margin-bottom:9px;box-shadow:0 3px 0 #6b1f17}
+.btn-quick:active{box-shadow:0 1px 0 #6b1f17}
 #budgetBox.introhide{display:none}
 #hubPitch{width:100%;max-width:none;margin:0 auto 8px}
 .runid{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--disp);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#fff;background:var(--navy);border:2px solid var(--ink);padding:7px 10px;margin-bottom:8px}
@@ -235,15 +235,17 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .setuphdr{font-family:var(--disp);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:1px;color:var(--red);margin-bottom:10px;text-align:center}
 .cover .mascot{max-width:none}
 .pc-band{background:var(--navy);color:#fff;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:6px}
-.pc-team{font-family:var(--disp);font-weight:800;font-size:25px;text-transform:uppercase;letter-spacing:1px;color:var(--red);margin:8px 0 2px}
+.pc-team{font-family:var(--disp);font-weight:800;font-size:25px;text-transform:uppercase;letter-spacing:1px;color:#8e2d20;margin:8px 0 2px}
 .pc-sub{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ink2);text-transform:uppercase;margin-bottom:6px}
 .pc-debt{font-family:var(--mono);font-size:10px;line-height:1.35;color:#8e2d20;background:#ffe1aa;border:1.5px solid #d88928;margin:7px 10px;padding:6px 8px}
 .pc-xi{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:8px 0;text-align:left}
 .pc-pl{display:flex;justify-content:space-between;border:1.5px solid var(--line);background:var(--paper2);padding:4px 7px;font-family:var(--mono);font-size:11px}
-.pc-pl .pp{color:var(--mustard);font-weight:700;margin-right:5px}
+.pc-pl .pp{color:#26402f;font-weight:700;margin-right:5px}
 .pc-pl .po{font-weight:700}
 
 #intro .cover .est,#intro .cover h1,#intro .cover .sub2,#intro .cover .rule,#intro .cover .blurb{display:none}
+#startBtn{background:#26402f}#startBtn:hover{background:#1d3022}
+.postcard .btn-go{background:#26402f}.postcard .btn-go:hover{background:#1d3022}
 
 /* ===== dice ===== */
 .dsvg{vertical-align:middle;margin-right:6px;filter:drop-shadow(0 2px 0 #7b241c);flex-shrink:0}
@@ -303,6 +305,11 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .settingsbtn{font-size:20px !important;width:44px !important;height:44px !important;padding:6px !important;display:flex !important;align-items:center !important;justify-content:center !important}
 .settingsbtn img{width:26px;height:26px;object-fit:contain;display:block}
 .settingsdrop{min-width:160px}
+@keyframes gearSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.settingsbtn svg{transition:transform .3s ease}
+.settingsbtn:hover svg,.settingsbtn:focus-visible svg{animation:gearSpin 1.4s linear infinite}
+.settingsbtn:active svg{animation:gearSpin .4s linear 1}
+body.dark .countrypick button.on{background:#3a6b4a;border-color:#3a6b4a}
 
 /* ===== collection count spacing ===== */
 #collCount{margin-left:5px}
@@ -435,6 +442,7 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
 /* on hover: player slides in, ball flies off */
 .btn-go:hover .player-grp,.btn-go:focus .player-grp{animation:playerRun .3s ease-out forwards}
 .btn-go:hover .ball-grp,.btn-go:focus .ball-grp{animation:ballKick .35s .2s ease-in forwards}
+@media(hover:none){.btn-go .player-grp{animation:playerRun .3s ease-out forwards}.btn-go .ball-grp{animation:ballKick .35s .2s ease-in forwards}}
 @keyframes ballSpin{to{transform:rotate(360deg)}}
 @keyframes playerRun{
   0%{transform:translateX(-52px)}
