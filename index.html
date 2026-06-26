@@ -298,15 +298,17 @@ function setBudget(){
 function unfilled(){const a=[];filled.forEach((f,i)=>{if(!f)a.push(i);});return a;}
 function clip(s,n){return s.length>n?s.slice(0,n-1)+"…":s;}
 function shortName(p){const n=p.fab?p.name:p.name;const pa=n.split(" ");if(pa.length<2)return clip(n,9);let s=pa[0][0]+"."+pa[pa.length-1];if(s.length>10)s=clip(pa[pa.length-1],9);return s;}
-function loadRollStage(){const x=L();currentSlot=-1;slots.forEach((_,i)=>$("r"+i).classList.remove("cur"));$("slotn").textContent=(slots.length-remaining)+"/"+slots.length;$("slotname").textContent=x.rollPrompt;$("rollstage").classList.remove("hidden");$("optstage").classList.add("hidden");updateUndoBtn();}
-function refreshDraft(){const x=L();slots.forEach((s,i)=>{const el=$("r"+i);if(el&&el.classList.contains("empty"))el.querySelector(".rp").textContent=x.abbr[s[0]];});if(currentSlot>=0&&!$("optstage").classList.contains("hidden")){$("slotname").textContent=x.pos[slots[currentSlot][0]]+" · "+x.abbr[slots[currentSlot][0]];renderOpts();}else $("slotname").textContent=x.rollPrompt;}
+function _setSlotLabel(v){const e=$("slotname");if(e)e.textContent=v;}
+function _setSlotN(v){const e=$("slotn");if(e)e.textContent=v;}
+function loadRollStage(){const x=L();currentSlot=-1;slots.forEach((_,i)=>$("r"+i).classList.remove("cur"));_setSlotN((slots.length-remaining)+"/"+slots.length);_setSlotLabel(x.rollPrompt);$("rollstage").classList.remove("hidden");$("optstage").classList.add("hidden");updateUndoBtn();}
+function refreshDraft(){const x=L();slots.forEach((s,i)=>{const el=$("r"+i);if(el&&el.classList.contains("empty"))el.querySelector(".rp").textContent=x.abbr[s[0]];});if(currentSlot>=0&&!$("optstage").classList.contains("hidden")){_setSlotLabel(x.pos[slots[currentSlot][0]]+" · "+x.abbr[slots[currentSlot][0]]);renderOpts();}else _setSlotLabel(x.rollPrompt);}
 
 /* ===== draft ===== */
 function roll(){const uf=unfilled();if(!uf.length)return;if(deadlineH<=2&&!panicDone&&remaining>1){panicDone=true;panicBuy();return;}currentSlot=uf[rand()*uf.length|0];if(deadlineH>2){deadlineH-=2;updateDeadline();}sfxRoll();sfxTick();
   showFx(()=>{const x=L(),pos=slots[currentSlot][0];currentOpts=draftOptions(pos);const reserve=(remaining-1)*0.6,cap=budget-reserve-DEBT_LIMIT;
     if(!currentOpts.some(o=>o.price<=cap)){const fp=fabPlayer(pos,55,61);fp.price=Math.max(0,Math.min(cap,1));fp.free=true;currentOpts[0]=fp;}
     slots.forEach((_,i)=>$("r"+i).classList.remove("cur"));if($("r"+currentSlot).classList.contains("empty"))$("r"+currentSlot).classList.add("cur");
-    $("slotname").textContent=x.pos[pos]+" · "+x.abbr[pos];renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");});}
+    _setSlotLabel(x.pos[pos]+" · "+x.abbr[pos]);renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");});}
 function ovCol(ov){return ov>=90?"#16c96b":ov>=80?"#4ade80":ov>=70?"#eab308":ov>=60?"#f97316":"#ef4444";}
 const POS_SVGS={
   GK:`<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="5" y1="6" x2="5" y2="22"/><line x1="23" y1="6" x2="23" y2="22"/><line x1="5" y1="6" x2="23" y2="6"/><line x1="9" y1="22" x2="9" y2="14"/><line x1="19" y1="22" x2="19" y2="14"/><line x1="9" y1="14" x2="19" y2="14"/></svg>`,
