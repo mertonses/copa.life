@@ -20,15 +20,12 @@
 .pitch::before{content:"";position:absolute;inset:8px;border:2px solid var(--pitchln);border-radius:50px 50px 4px 4px}
 .pitch::after{content:"";position:absolute;inset:0;pointer-events:none;background:url("../../assets/textures/match-lines.png") center/90px 90px repeat;opacity:.07;mix-blend-mode:screen}
 .pl{position:absolute;border:2px solid var(--pitchln)}.pl.half{left:8px;right:8px;top:50%;height:0}.pl.circ{width:30%;aspect-ratio:1;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.pl.boxb{left:28%;right:28%;bottom:8px;height:13%;border-bottom:none;border-radius:0 0 4px 4px}.pl.boxt{left:28%;right:28%;top:8px;height:13%;border-top:none;border-radius:4px 4px 0 0}
-.pitch-zone{position:absolute;left:8px;right:8px;height:2px;border-radius:1px;pointer-events:none}
-.pz-fwd{top:38%;background:#d6543a;opacity:.5}
-.pz-mid{top:57%;background:#4f9d5f;opacity:.5}
-.pz-def{top:74%;background:#e6ad2e;opacity:.5}
+.pitch-zone{display:none}
 .roundel{position:absolute;transform:translate(-50%,-50%);width:14.5%;max-width:56px;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.25s;overflow:hidden;padding:2px}
 .roundel.empty{border:2px dashed rgba(255,255,255,.7);color:#fff}.roundel.empty .rp{font-family:var(--mono);font-size:8px;font-weight:700}.roundel.empty .slot-sil{position:absolute;width:85%;height:85%;opacity:.22;pointer-events:none}
 .wk-burst{display:inline-block;animation:wkPop .5s cubic-bezier(.36,1.6,.46,1) both}
 @keyframes wkPop{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-.roundel.cur{border-color:var(--mustard);border-style:solid;box-shadow:0 0 0 3px var(--mustard);background:rgba(230,173,46,.25)}.roundel.cur .rp{color:#fff}
+.roundel.cur{border-color:#8e2d20;border-style:solid;box-shadow:0 0 0 3px #8e2d20;background:rgba(142,45,32,.2)}.roundel.cur .rp{color:#fff}
 .roundel.full{border:2px solid rgba(0,0,0,.55);box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 1px 2px rgba(255,255,255,.4)}
 .roundel.inj{box-shadow:0 0 0 3px var(--red),0 3px 0 rgba(0,0,0,.25)}
 .roundel .injmark{position:absolute;right:1px;top:1px;width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;border:1px solid #fff;display:flex;align-items:center;justify-content:center;z-index:3}
