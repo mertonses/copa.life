@@ -4,3 +4,4 @@ var SCOMBOS=[{k:"gegenkids",style:"gegen",need:["genc"],b:5},{k:"mourinho",style
 function sActive(){return SCOMBOS.filter(c=>(!c.style||style===c.style)&&c.need.every(hasCard));}
 function comboBonus(){let t=0;COMBOS.forEach(c=>{if(c.need.every(hasCard))t+=c.b;});sActive().forEach(c=>t+=c.b);return t;}
 function activeCombos(){return COMBOS.filter(c=>c.need.every(hasCard)).concat(sActive());}
+function wouldCombo(k){if(hasCard(k))return null;const test=kk=>kk===k||hasCard(kk);const nc=COMBOS.filter(c=>!c.need.every(hasCard)&&c.need.every(test));const ns=SCOMBOS.filter(c=>(!c.style||style===c.style)&&!c.need.every(hasCard)&&c.need.every(test));return[...nc,...ns][0]||null;}

@@ -1,10 +1,10 @@
 /* Final mac simulasyonu: canvas akisi, skor dengesi, final karnesi. */
-let sim=null,speedMul=1;
-function setSpeed(s){speedMul=s;document.querySelectorAll(".spd").forEach(b=>b.classList.toggle("on",parseFloat(b.dataset.s)===s));}
+let sim=null,speedMul=parseFloat(localStorage.getItem("copa_spd")||"1")||1;
+function setSpeed(s){speedMul=s;try{localStorage.setItem("copa_spd",s);}catch(e){}document.querySelectorAll(".spd").forEach(b=>b.classList.toggle("on",parseFloat(b.dataset.s)===s));}
 function startFinalSim(sp){
  clearTimeout(autoTimer);$("hub").classList.add("hidden");$("result").classList.add("hidden");$("sim").classList.remove("hidden");
  const x=L();$("simA").textContent=clip(teamName||"US",10);$("simB").textContent=clip(opponent.name,10);$("simGoals").innerHTML="";$("simState").textContent=LANG==="tr"?"Dengeli final":"Balanced final";$("momBar").style.background="linear-gradient(90deg,var(--green) 50%,var(--red) 50%)";$("momA").textContent="50%";$("momB").textContent="50%";["statShot","statSave","statDanger"].forEach(id=>{const e=$(id);if(e)e.textContent="0-0";});{const gb=$("goalBurst");if(gb){gb.classList.add("hidden");gb.classList.remove("show");gb.innerHTML="";}}
- window.finalReportHTML="";speedMul=1;setSpeed(1);buildSim(sp.power,opponent.power);sfxWhistle();crowdStart();$("simComm").innerHTML=(LANG==="tr"?"<b>FINAL</b> başladı!":"<b>FINAL</b> kicks off!");
+ window.finalReportHTML="";setSpeed(parseFloat(localStorage.getItem("copa_spd")||"1")||1);buildSim(sp.power,opponent.power);sfxWhistle();crowdStart();$("simComm").innerHTML=(LANG==="tr"?"<b>FINAL</b> başladı!":"<b>FINAL</b> kicks off!");
  document.querySelectorAll(".shoutbtn").forEach(b=>b.classList.remove("lit"));_simPaused=false;{const pb=$("pauseBtn");if(pb){pb.textContent="⏸";pb.classList.remove("pause");}}
  if(LANG==="en"){const L2={shMore:"Push Up",shPush:"Press High",shCalm:"Slow Tempo",shHold:"Protect Lead"};Object.keys(L2).forEach(id=>{const e=$(id);if(e){const sp=e.querySelector("span");if(sp)sp.textContent=L2[id];}});}
  const rb=$("simRadio");if(rb)rb.textContent="📻 —";sim.run();
