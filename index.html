@@ -106,8 +106,8 @@
     <div class="introrow"><input class="cinput" id="cName" maxlength="16" placeholder="Kulüp adı"></div>
     <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
     <button class="btn btn-quick" id="quickStartBtn" onclick="quickStart()">⚡ HIZLI BAŞLA</button>
-    <div class="cover"><img class="mascot" alt="" src="assets/mascot.jpg"><div class="est">EST · 1974</div><div class="crest">🏆</div><h1 id="coverTitle">copa.life</h1><div class="sub2" id="coverSub">Türkiye Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
-    <div class="artnote" id="lowryNote"></div>
+    <div class="cover" style="display:none"><img class="mascot" alt="" src="assets/mascot.jpg"><div class="est">EST · 1974</div><div class="crest">🏆</div><h1 id="coverTitle">copa.life</h1><div class="sub2" id="coverSub">Türkiye Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
+    <div class="artnote" id="lowryNote" style="display:none"></div>
     <div class="seedwrap seedlow" title="Aynı seed aynı run akışını üretir."><label>seed</label><input id="seedInput" maxlength="14" placeholder="auto" title="Aynı seed aynı run akışını üretir."></div>
     <div class="metaline" id="metaline"></div>
     <div class="foot" id="protoFoot">—</div>
@@ -117,12 +117,11 @@
 
   <section id="draft" class="hidden">
     <div class="ddbanner hidden" id="ddbanner"><div class="ddl" id="ddLbl">TRANSFER<br>SON GÜNÜ</div><div class="ddc" id="ddClock">24:00</div><div class="dds" id="ddSub">—</div></div>
-    <div class="slothdr"><span class="n" id="slotn">—</span><span class="nm" id="slotname">—</span></div>
-    <div class="pitch" id="pitch"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div></div>
     <div id="rollstage" class="rollstage"><p id="rollHint">—</p>
       <div id="rollbtns"><button class="btn btn-roll" id="rollBtn" onclick="roll()"><svg class="dsvg" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="4.5" fill="#c0392b" stroke="#7b241c" stroke-width="1.5"/><rect x="1.5" y="1.5" width="25" height="10" rx="4.5" fill="rgba(255,255,255,.12)"/><circle cx="8.5" cy="8.5" r="2.8" fill="#fff"/><circle cx="14" cy="14" r="2.8" fill="#fff"/><circle cx="19.5" cy="19.5" r="2.8" fill="#fff"/></svg> ZAR AT</button><button class="btn btn-ghost btn-mini" id="allBtn" style="margin-top:8px" onclick="quickAll()">⚡ Akıllı doldur</button><button class="btn btn-ghost btn-mini hidden" id="undoBtn" style="margin-top:6px" onclick="undoPick()">↩ Son hamleyi geri al</button></div>
       <div id="dicebox" class="dicebox hidden"><div class="dface" id="fxDie">⚀</div><div class="dcap" id="fxCap"></div></div></div>
     <div id="optstage" class="hidden"><div class="opts" id="opts"></div><button class="btn btn-ghost btn-mini" id="rerollBtn" onclick="rerollOptions()">Seçenekleri yenile</button><div class="optmsg" id="optmsg"></div></div>
+    <div class="pitch" id="pitch"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div></div>
   </section>
 
   <section id="hub" class="hidden">
