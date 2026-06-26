@@ -405,3 +405,29 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
   .fbtn.chairbtn{max-width:none}
   .chairthumb{height:80px}
 }
+
+/* ── SVG interaction animations ── */
+
+/* 1. Roll button: dice SVG spins on hover */
+#rollBtn{gap:8px;display:inline-flex;align-items:center;justify-content:center}
+#rollBtn .dsvg{transition:transform .25s;flex-shrink:0}
+#rollBtn:hover .dsvg{animation:diceRoll .45s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes diceRoll{0%{transform:rotate(0) scale(1)}45%{transform:rotate(200deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+
+/* 2. Play button: SVG ball rolls right on hover */
+.play-ball{display:inline-flex;align-items:center;vertical-align:middle;margin-left:5px}
+.btn-go:hover .play-ball svg{animation:ballRoll .45s ease forwards}
+@keyframes ballRoll{0%{transform:translateX(0) rotate(0deg)}70%{transform:translateX(6px) rotate(210deg)}100%{transform:translateX(4px) rotate(180deg)}}
+
+/* 3. btn-go / btn-roll: inner glow pulse on hover */
+.btn-go,.btn-roll{position:relative}
+.btn-go::after,.btn-roll::after{content:"";position:absolute;inset:0;border-radius:4px;box-shadow:inset 0 0 0 0 rgba(255,255,255,0);transition:box-shadow .25s}
+.btn-go:hover::after{box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-roll:hover::after{box-shadow:inset 0 0 0 2px rgba(255,255,255,.25),inset 0 1px 0 rgba(255,255,255,.15)}
+
+/* 4. opt-lbar: widens + brightens on card hover */
+.opt-lbar{transition:width .15s ease,filter .15s ease}
+.opt:hover:not(:disabled) .opt-lbar{width:5px;filter:brightness(1.7) saturate(1.4)}
+
+/* 5. metaline SVG icons */
+.metaline-ico{display:inline-flex;align-items:center;vertical-align:-.15em;margin-right:1px}
