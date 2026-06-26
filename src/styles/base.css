@@ -1,5 +1,5 @@
 /* Kupa Yolu - temel tema, reset ve global kurallar */
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 *{border-radius:0!important}
 @keyframes ddshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-3px)}}
 @keyframes blink{50%{opacity:.4}}
