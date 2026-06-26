@@ -310,6 +310,16 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 /* ===== talk option icons bigger ===== */
 .stylebtn .ssi{font-size:32px !important}
 
+/* ===== style & talk icon colors ===== */
+[data-style="gegen"] .ssi{color:#d6543a}
+[data-style="kontra"] .ssi{color:#2f6f9e}
+[data-style="tiki"] .ssi{color:#3f9a57}
+[data-style="uzun"] .ssi{color:#7c5cbf}
+[data-style="blok"] .ssi{color:#e6ad2e}
+[data-talk="gaz"] .ssi{color:#d6543a}
+[data-talk="mantik"] .ssi{color:#2f6f9e}
+[data-talk="sert"] .ssi{color:#3f9a57}
+
 /* ===== result page buttons ===== */
 .result-actions{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .result-row{display:flex;gap:8px}
