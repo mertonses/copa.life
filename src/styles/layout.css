@@ -440,7 +440,7 @@ body.dark #copyBtn,body.dark #quickBtn{background:var(--paper);color:var(--ink);
   .budget{min-width:76px}
   .dashtop .actionbar{align-items:flex-start}
   .actionbar #playBtn{flex:1 1 auto;font-size:14px;padding:8px 10px;letter-spacing:1px}
-  .actionbar #talkBtn{flex:0 0 auto;align-self:stretch}
+  .actionbar #talkBtn{flex:1 1 0;align-self:stretch}
   .actionbar #autoTog{flex:0 0 100%}
   .vsbar{min-height:0}
   .vsbar .mid{flex:0 0 72px;padding:5px 6px}
