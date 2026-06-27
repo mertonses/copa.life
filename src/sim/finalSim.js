@@ -24,6 +24,7 @@ function buildSim(myPow,oppPow){
  let ball={x:W/2,y:H/2,vx:0,vy:-2.1},frame=0,clock=0,sA=0,sB=0,running=false,raf,lastKick=-12,lastShot=-60,acc=0,poss="A",lastShooter=null,lastShooterSide=null,lastTouch=null,assistNm="",cooldown=0;
  let aShoutTtl=0,aPowBase=null,keeperA=0,keeperB=0,shotsA=0,shotsB=0,dangerA=0,dangerB=0,goalFlash=0,keyMoment="",penaltyNote="";
  const goals=[],scorersA=[],scorersB=[];
+ const HGW=20,HGH=15,heatGrid=new Uint16Array(HGW*HGH);
  /* 3 — Momentum state variable */
  let momVal=50;
  /* 2 — Stoppage + ET state */
@@ -105,6 +106,18 @@ function buildSim(myPow,oppPow){
   const x2=L(),mn=clockDisp(),who=sc==="A"?(clip(teamName||"US",9)):(clip(opponent.name,8)),sn=(lastShooter&&lastShooterSide===sc)?lastShooter.nm:"";const asst=(sn&&assistNm)?(" <small>"+x2.assistLbl+" "+assistNm+"</small>"):"";
   $("simComm").innerHTML="⚽ <b>"+mn+"'</b> "+(sn?"<b>"+sn+"</b>":"<b>"+who+"</b>")+asst+" — "+sA+"–"+sB;pushFeed("⚽ "+mn+"' <b>"+(sn||who)+"</b>"+(sn&&assistNm?" ("+assistNm+")":"")+" "+sA+"–"+sB,"goal");goals.push({m:mn,side:sc,name:sn||who});addEvent("goal",sc,"⚽ "+(sn||who)+" "+sA+"–"+sB);showGoalBurst(mn,sn||who,sA+"–"+sB);if(!keyMoment)keyMoment=(sn||who)+" "+mn+"'";
   assistNm="";A.ps.forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;});B.ps.forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;});ball={x:W/2,y:H/2,vx:0,vy:(sc==="A"?1.8:-1.8)};lastKick=frame;lastShooter=null;poss=sc==="A"?"B":"A";
+  /* kritik an dramatizasyonu */
+  const _isEq=sA===sB,_isLate=clock>78,_isVeryLate=clock>86,_wrap=document.querySelector(".simwrap");
+  if(_wrap&&(_isEq||_isLate)){_wrap.classList.remove("shake","equalize");void _wrap.offsetWidth;_wrap.classList.add(_isEq?"equalize":"shake");setTimeout(()=>_wrap.classList.remove("equalize","shake"),_isEq?900:450);}
+  if(_isVeryLate||(_isEq&&_isLate)){
+   const _tr=LANG==="tr",_sn=sn||who;
+   let _dm="";
+   if(_isEq&&_isVeryLate)_dm=_tr?`⚡ <b style="font-size:1.15em">SON DAKİKA EŞİTLEMESİ!</b> ${_sn}`:`⚡ <b style="font-size:1.15em">LATE EQUALIZER!</b> ${_sn}`;
+   else if(_isEq)_dm=_tr?`⚡ <b>EŞİTLEDİ!</b> ${_sn} — ${sA}–${sB}`:`⚡ <b>EQUALIZER!</b> ${_sn} — ${sA}–${sB}`;
+   else if(sc==="A"&&_isVeryLate)_dm=_tr?`🔥 <b>GEÇ GOL!</b> ${_sn} — ${sA}–${sB}`:`🔥 <b>LATE GOAL!</b> ${_sn} — ${sA}–${sB}`;
+   else if(sc==="B"&&_isVeryLate)_dm=_tr?`💥 <b>RAKİP GEÇ GOL!</b> — ${sA}–${sB}`:`💥 <b>LATE GOAL — OPPONENT!</b> — ${sA}–${sB}`;
+   if(_dm)setTimeout(()=>{if(!gameOver)$("simComm").innerHTML=_dm;},320);
+  }
  }
  function statusText(){const tr=LANG==="tr",diff=Math.abs(sA-sB);
   if(extraTime)return tr?"Uzatmalar":"Extra Time";
@@ -123,16 +136,52 @@ function buildSim(myPow,oppPow){
   momVal=clamp(momVal,18,82);
   const a=Math.round(momVal),b=100-a;
   $("momA").textContent=a+"%";$("momB").textContent=b+"%";$("momBar").style.background=`linear-gradient(90deg,var(--green) ${a}%,var(--red) ${a}%)`;$("simState").textContent=statusText();}
+ function drawHeatmap(){
+  const mx=Math.max(1,...Array.from(heatGrid));
+  const cw=W/HGW,ch=H/HGH;
+  for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){
+   const v=heatGrid[r*HGW+c]/mx;if(v<0.06)continue;
+   const hue=Math.round((1-Math.min(1,v*1.2))*220);
+   ctx.fillStyle=`hsla(${hue},90%,55%,${Math.min(0.68,v*0.82)})`;
+   ctx.fillRect(c*cw,r*ch,cw,ch);
+  }
+  ctx.fillStyle="rgba(0,0,0,0.52)";ctx.fillRect(6,H-20,148,15);
+  ctx.fillStyle="#fff";ctx.font="bold 8.5px 'Inter',sans-serif";ctx.textAlign="left";ctx.textBaseline="middle";
+  ctx.fillText(LANG==="tr"?"🔥 TOP YOĞUNLUK HARİTASI":"🔥 BALL HEAT MAP",10,H-13);
+ }
  function radioLine(pos,sa,sb,min){
-  const tr=LANG==="tr",diff=sa-sb,lead=diff>0,behind=diff<0,atHome=pos==="A";
+  const tr=LANG==="tr",diff=sa-sb,atHome=pos==="A";
   const myN=clip(teamName||"US",8),oppN=clip(opponent.name,8);
-  const tense=min>80,et=extraTime;
-  if(et){const etLines=tr?["Uzatmalarda nefesler tutuluyor!","Bir gol her şeyi değiştirebilir!","Penaltılar kapıda, her şut kritik!"]:["Extra time — every touch matters!","One goal changes everything now!","Penalties loom — nerves of steel needed!"];return "📻 "+etLines[min%etLines.length];}
-  if(tense&&diff===0){const tl=tr?["Son dakikalar, berabere! Uzatmalar geliyor!","Hiç kimse kazanamıyor, tüm stad ayakta!","Deplasman golü yeter mi? Hayır, bu kupa finali!"]:["Final minutes level — it's going to extra time!","Nobody blinks — who blinks first?","Drama building at the death!"];return "📻 <b>"+tl[min%tl.length]+"</b>";}
-  if(tense&&lead){return "📻 "+(tr?"<b>"+myN+"</b> skoru koruyor, sayım başlıyor!":"<b>"+myN+"</b> holding on — count it down!");}
-  if(tense&&behind){return "📻 "+(tr?"<b>"+myN+"</b> son umut, forvet önde!":"<b>"+myN+"</b> chasing — attackers forward!");}
-  if(atHome){const pool=tr?["Kontrol "+myN+"'de",""+myN+" baskı kuruyor",""+myN+" ataklarda"]:["Control with "+myN,""+myN+" on the front foot",""+myN+" pushing forward"];return "📻 "+pool[frame%pool.length];}
-  const dl=tr?[oppN+" topa hükmediyor",oppN+" maça hakim","Rakip iyi organize"]:[oppN+" controlling",oppN+" on top now","Opposition well-organized"];return "📻 "+dl[frame%dl.length];
+  const lastScorer=scorersA.length?scorersA[scorersA.length-1]:"";
+  const p=(a)=>a[frame%a.length];
+  /* Uzatma */
+  if(extraTime&&min>FULL+20){return "📻 "+(tr?p(["⏱ Penaltılar kapıda!","Her şut kupa!","Nefesler tutuluyor..."])
+   :p(["⏱ Penalties are coming!","Every shot could be the cup!","Nobody's breathing out there..."]));}
+  if(extraTime){return "📻 "+(tr?p(["Uzatmalarda bir gol yeter!","Uzatma, stad ayakta!","30 dakika, bir bilet!"])
+   :p(["One goal wins it in extra time!","Extra time — stadium on its feet!","30 minutes, one ticket home!"]));}
+  /* Son dakikalar */
+  if(min>86&&diff===0){return "📻 <b>"+(tr?p(["Berabere, penaltılar geliyor!","Kimse kazanamıyor, uzatma kapıda!","Kupa finalinde dram tavan!"])
+   :p(["Level — it's going to extra time!","Nobody can separate them!","Cup final drama at the death!"]))+"</b>";}
+  if(min>86&&diff>0){return "📻 "+(tr?"<b>"+myN+"</b> "+p(["skoru koruyor, sayım başladı!","mutlu son yakın, def duruyor!","kupa ellerinde, son anlar!"])
+   :"<b>"+myN+"</b> "+p(["holding on for glory!","the cup is theirs to lose!","counting down the seconds!"]));}
+  if(min>86&&diff<0){return "📻 "+(tr?"<b>"+myN+"</b> "+p(["son umut, forvet önde!","bir mucize gerek!","son atakta gol lazım!"])
+   :"<b>"+myN+"</b> "+p(["chasing a miracle!","everything forward now!","one last chance for glory!"]));}
+  if(min>78&&diff===0){return "📻 "+(tr?p(["Son dakikalar, skor berabere!","Kim kazanacak, stad biliyor mu?","Final gerginliği tavan yaptı!"])
+   :p(["Final minutes — still level!","Who wants this cup more?","The tension is unbearable!"]));}
+  if(min>78&&diff>0&&lastScorer){return "📻 "+(tr?"<b>"+lastScorer+"</b>'nin golü "+myN+"'i öne geçirdi, dakikalar akıyor..."
+   :"<b>"+lastScorer+"</b>'s goal has "+myN+" in front — clock ticking...");}
+  if(min>78&&diff<0){return "📻 "+(tr?p(["Rakip önde, "+myN+" cevap arıyor","Zor durum, golü bul!"])
+   :p([oppN+" ahead — "+myN+" need a response","Trailing late, this is now or never!"]));}
+  /* İlk devre / orta bölüm */
+  if(min<20){return "📻 "+(tr?p(["Final başladı, her iki takım da dikkatli","Açılış dakikaları, zemin kuruluyor","Kupa finalinin ilk nabzı atıyor"])
+   :p(["Cup final underway — both teams cautious","Early stages, feeling each other out","First minutes of the cup final"]));}
+  if(min<45&&atHome&&lastScorer){return "📻 "+(tr?"<b>"+lastScorer+"</b> golünün ardından "+myN+" iyi görünüyor"
+   :"<b>"+lastScorer+"</b>'s goal has "+myN+" looking confident");}
+  if(atHome){return "📻 "+(tr?p(["Kontrol "+myN+"'de",""+myN+" baskı kuruyor",""+myN+" saha hakimiyetini aldı","Top "+myN+"'de, atak çıkışı bekleniyor"])
+   :p(["Control with "+myN,""+myN+" on the front foot",""+myN+" dominating possession",""+myN+" building another attack"]));}
+  if(diff>=2){return "📻 "+(tr?oppN+" fark açtı, "+myN+" geri dönebilir mi?":oppN+" two clear — can "+myN+" come back?");}
+  return "📻 "+(tr?p([oppN+" topa hükmediyor",oppN+" maça hakim","İki takım eşit, sıkı final"])
+   :p([oppN+" controlling the ball",oppN+" on top now","Tight final — both teams level"]));
  }
  function draw(){ctx.clearRect(0,0,W,H);for(let i=0;i<9;i++){ctx.fillStyle=i%2?"#79ad5c":"#6fa052";ctx.fillRect(0,i*H/9,W,H/9);}
   ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=2;ctx.strokeRect(7,7,W-14,H-14);ctx.beginPath();ctx.moveTo(7,H/2);ctx.lineTo(W-7,H/2);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,38,0,7);ctx.stroke();
@@ -140,7 +189,9 @@ function buildSim(myPow,oppPow){
   [A,B].forEach(t=>t.ps.forEach(p=>{const r=p.gk?8:9.5,bx=Math.sin((frame+p.n*9)*0.16)*1.1,by=Math.cos((frame+p.n*5)*0.14)*1.1,cx=p.x+bx,cy=p.y+by;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fillStyle=p.gk?"#e6ad2e":t.col;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=(t.side==="A"&&!p.gk)?kit.sec:"#fff";ctx.stroke();ctx.fillStyle=p.gk?"#23332a":t.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 9px 'Inter',sans-serif";ctx.fillText(p.n,cx,cy);ctx.fillStyle="#f3ead2";ctx.font="6px 'Inter',sans-serif";ctx.fillText((p.nm||"").slice(0,7).toUpperCase(),cx,cy+r+5);if(p.inj){ctx.fillStyle="#d6543a";ctx.fillRect(cx+r-4,cy-r-4,8,8);ctx.fillStyle="#fff";ctx.font="bold 7px 'Inter',sans-serif";ctx.fillText("!",cx+r,cy-r+1);}}));
   ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,7);ctx.fillStyle="#fff";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#23332a";ctx.stroke();
  }
- function tick(){frame++;clock+=90/(68*60);if(cooldown>0)cooldown--;if(aShoutTtl>0){aShoutTtl--;if(aShoutTtl<=0&&aPowBase!=null){A.pow=aPowBase;aPowBase=null;}}move(A);move(B);sep();kick();phys();}
+ function tick(){frame++;clock+=90/(68*60);if(cooldown>0)cooldown--;if(aShoutTtl>0){aShoutTtl--;if(aShoutTtl<=0&&aPowBase!=null){A.pow=aPowBase;aPowBase=null;}}move(A);move(B);sep();kick();phys();
+  const _hx=Math.min(HGW-1,Math.floor(ball.x/W*HGW)),_hy=Math.min(HGH-1,Math.floor(ball.y/H*HGH));heatGrid[_hy*HGW+_hx]++;
+ }
 
  /* 1 — Penaltı serisi */
  function doShootout(){
@@ -172,7 +223,7 @@ function buildSim(myPow,oppPow){
    $("simComm").innerHTML="🏆 "+penaltyNote;
    $("simClk").textContent="90'";
    sfxWhistle();
-   motm=pickMOTM();makeReport(sA>sB);
+   draw();drawHeatmap();motm=pickMOTM();makeReport(sA>sB);
    setTimeout(()=>endRun(sA>sB,sA+"–"+sB),900);
   },delay);
  }
@@ -212,7 +263,7 @@ function buildSim(myPow,oppPow){
  function pickMOTM(){if(scorersA.length){const f={};scorersA.forEach(n=>f[n]=(f[n]||0)+1);let best=scorersA[0],bc=0;Object.keys(f).forEach(n=>{if(f[n]>bc){bc=f[n];best=n;}});return best;}const out=picksBySlot.filter(p=>p&&p.pos!=="GK");const p=out.length?rnd(out):picksBySlot[0];return p?p.name.split(" ").pop():"?";}
  function makeReport(won){const tr=LANG==="tr",cardsTxt=finalCardSummary().replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const rows=[[tr?"Maçın kırılma anı":"Key moment",keyMoment||goals[0]?.name||"-"],[tr?"Kaleci kurtarışı":"Keeper saves",`${clip(teamName||"US",8)} ${keeperA} · ${clip(opponent.name,8)} ${keeperB}`],[tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]];if(penaltyNote)rows.push([tr?"Penaltılar":"Penalties",penaltyNote]);rows.push([tr?"Final yorumu":"Final note",won?(tr?"Kupa geldi.":"Cup lifted."):(tr?"Final kaybedildi.":"Final lost.")]);window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");}
  function finishSim(){gameOver=true;running=false;cancelAnimationFrame(raf);crowdStop();const cd=clockDisp();$("simClk").textContent=cd+"'";
-  motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
+  draw();drawHeatmap();motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
  }
  sim={
   run:()=>{running=true;draw();raf=requestAnimationFrame(frameStep);},
