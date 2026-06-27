@@ -1,5 +1,5 @@
 /* copa.life Service Worker — offline cache */
-const CACHE = "copa-v1";
+const CACHE = "copa-v2";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -21,6 +21,17 @@ const PRECACHE = [
   "/src/core/squad.js",
   "/src/game/generate.js",
   "/src/balance/config.js",
+  "/src/balance/power.js",
+  "/src/balance/economy.js",
+  "/src/balance/difficulty.js",
+  "/src/balance/rewards.js",
+  "/src/cards/cardDefs.js",
+  "/src/cards/cardEffects.js",
+  "/src/cards/cardBalance.js",
+  "/src/cards/cardCombos.js",
+  "/src/cards/cardInventory.js",
+  "/src/audio/sfx.js",
+  "/src/state/saveLoad.js",
   "/src/state/metaState.js",
   "/src/state/gameState.js",
   "/src/ui/hub.js",
