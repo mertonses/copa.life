@@ -96,12 +96,12 @@
     <div class="howto-wrap" id="howtoWrap">
       <button class="howto-toggle" id="howtoToggle" onclick="this.nextElementSibling.classList.toggle('hidden');this.classList.toggle('open')"></button>
       <div class="howto-body hidden" id="howtoBody">
-        <div class="howto-step"><span class="howto-n">01</span><div id="hw01"><b>Diziliş ve başkan seç.</b> Formasyonun kadrondaki pozisyonları belirler. Başkan bütçeni, bonuslarını ve borç limitini etkiler. Şampiyon oldukça yeni dizilişlerin ve başkanların kilidi açılır.</div></div>
-        <div class="howto-step"><span class="howto-n">02</span><div id="hw02"><b>Zarı at, oyuncu seç.</b> Her pozisyon için 3 farklı oyuncu gelir. Bunlardan biri gizli olabilir. Bütçen kısıtlı, dikkatli harca. Yerlilik ve birlikte oynamış olma gibi kriterlere dayanan <b>kimya</b> elementini göz önünde bulundur.</div></div>
-        <div class="howto-step"><span class="howto-n">03</span><div id="hw03"><b>6 turda finali oyna.</b> Her tur rakipten güçlüysen maçı kazanma şansın artar — ancak gücünün fazla olması galibiyeti garanti etmez. Tıpkı gerçek futbol gibi! Kazandıkça para veya kart ödülü seç. Yaptığın her seçimin bir bedeli olabilir.</div></div>
-        <div class="howto-step"><span class="howto-n">04</span><div id="hw04"><b>Başkan araya girer.</b> Para suyunu çekerse Başkan seni kovabilir. Danış butonuyla Başkan'a danışabilirsin — danışmak bedava değil, ama getirileri büyük olabilir (ya da seni iyice dibe çekebilir!). Her Başkan'ın kendine özgü karakteristik özellikleri vardır.</div></div>
-        <div class="howto-step"><span class="howto-n">05</span><div id="hw05"><b>Sakatlık ve yedekler.</b> Sakat oyuncu sana güç kaybettirir. Yedekleri akıllıca kullan veya oyuncuyu belirli bir ücret karşılığında tedavi ettir — tabii paran kaldıysa.</div></div>
-        <div class="howto-step"><span class="howto-n">06</span><div id="hw06"><b>Kartlar güç katlar.</b> Piyasadan kart satın alabilirsin: kalıcı güç bonusu verenler, risk-ödül dengesi sunanlar, final maçında devreye girenler. Her kartın farklı bir bedeli ve koşulu vardır — doğru kart yanlış an işe yaramaz.</div></div>
+        <div class="howto-step"><span class="howto-n">01</span><span class="hwi" id="hwi01l"></span><div id="hw01"></div><span class="hwi" id="hwi01r"></span></div>
+        <div class="howto-step"><span class="howto-n">02</span><span class="hwi" id="hwi02l"></span><div id="hw02"></div><span class="hwi" id="hwi02r"></span></div>
+        <div class="howto-step"><span class="howto-n">03</span><span class="hwi" id="hwi03l"></span><div id="hw03"></div><span class="hwi" id="hwi03r"></span></div>
+        <div class="howto-step"><span class="howto-n">04</span><span class="hwi" id="hwi04l"></span><div id="hw04"></div><span class="hwi" id="hwi04r"></span></div>
+        <div class="howto-step"><span class="howto-n">05</span><span class="hwi" id="hwi05l"></span><div id="hw05"></div><span class="hwi" id="hwi05r"></span></div>
+        <div class="howto-step"><span class="howto-n">06</span><span class="hwi" id="hwi06l"></span><div id="hw06"></div><span class="hwi" id="hwi06r"></span></div>
       </div>
     </div>
    </div>
@@ -831,10 +831,38 @@ const _HOWTO={
     ["CARDS MULTIPLY YOUR POWER","Buy CARDS from the market: some give permanent POWER BOOSTS, others offer RISK-REWARD gambles, some activate in the FINAL... Every card has its own COST and CONDITIONS. The right card at the wrong time IS USELESS."]
   ]}
 };
+const _HOWTO_SVGS=[
+  // 01 saha
+  [`<svg viewBox="0 0 46 30" width="40" height="26" fill="none" stroke="#4ade80" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="42" height="26" rx="1.5"/><line x1="23" y1="2" x2="23" y2="28"/><circle cx="23" cy="15" r="5"/><circle cx="23" cy="15" r="1.2" fill="#4ade80"/><rect x="2" y="10" width="8" height="10"/><rect x="36" y="10" width="8" height="10"/><rect x="2" y="6" width="14" height="18"/><rect x="30" y="6" width="14" height="18"/></svg>`,
+   `<svg viewBox="0 0 26 34" width="20" height="27" fill="none" stroke="#4ade80" stroke-linecap="round"><circle cx="13" cy="3.5" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="4" cy="11" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="13" cy="11" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="22" cy="11" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="6.5" cy="19.5" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="19.5" cy="19.5" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="4" cy="28" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="13" cy="29" r="2.2" fill="#4ade80" opacity=".55"/><circle cx="22" cy="28" r="2.2" fill="#4ade80" opacity=".55"/></svg>`],
+  // 02 zar
+  [`<svg viewBox="0 0 34 34" width="28" height="28" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="24" height="24" rx="4"/><circle cx="9.5" cy="9.5" r="2" fill="#ef4444"/><circle cx="15" cy="15" r="2" fill="#ef4444"/><circle cx="20.5" cy="20.5" r="2" fill="#ef4444"/><path d="M27 3L31 7L31 31L27 27" stroke-width="1" opacity=".45"/><path d="M3 27L7 31L31 31" stroke-width="1" opacity=".45"/></svg>`,
+   `<svg viewBox="0 0 32 30" width="26" height="24" fill="none" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="8" width="18" height="18" rx="3" opacity=".5"/><rect x="13" y="4" width="18" height="18" rx="3"/><circle cx="18" cy="9.5" r="1.6" fill="#ef4444"/><circle cx="25.5" cy="9.5" r="1.6" fill="#ef4444"/><circle cx="18" cy="15.5" r="1.6" fill="#ef4444"/><circle cx="25.5" cy="15.5" r="1.6" fill="#ef4444"/></svg>`],
+  // 03 kupa
+  [`<svg viewBox="0 0 32 36" width="26" height="30" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h12v12a6 6 0 0 1-12 0Z"/><path d="M10 8H5Q5 18 10 16"/><path d="M22 8h5Q27 18 22 16"/><line x1="16" y1="22" x2="16" y2="29"/><path d="M10 29h12"/><path d="M8 33h16"/></svg>`,
+   `<svg viewBox="0 0 30 30" width="24" height="24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3L17.2 9.8H24.5L18.6 14L20.8 20.8L15 17L9.2 20.8L11.4 14L5.5 9.8H12.8Z"/><line x1="15" y1="1" x2="15" y2="3"/><line x1="27" y1="5.5" x2="25.5" y2="7"/><line x1="3" y1="5.5" x2="4.5" y2="7"/><line x1="29" y1="14" x2="27" y2="14"/><line x1="1" y1="14" x2="3" y2="14"/></svg>`],
+  // 04 başkan
+  [`<svg viewBox="0 0 32 42" width="24" height="32" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="9" r="6.5"/><path d="M5 26Q7 18 16 18Q25 18 27 26L29 42H3Z"/><path d="M11 26L11 36"/><path d="M21 26L21 36"/><path d="M11 26Q12 22 16 22Q20 22 21 26"/><path d="M5 28L3 33M27 28L29 33"/><path d="M10.5 7Q10 11 8 12" stroke-width="1.1" opacity=".6"/><path d="M21.5 7Q22 11 24 12" stroke-width="1.1" opacity=".6"/></svg>`,
+   `<svg viewBox="0 0 32 30" width="26" height="24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="24" height="18" rx="2.5"/><path d="M10 10V7Q10 4 16 4Q22 4 22 7V10"/><circle cx="16" cy="18" r="3"/><line x1="16" y1="21" x2="16" y2="24"/><line x1="4" y1="16" x2="7" y2="16"/><line x1="25" y1="16" x2="28" y2="16"/></svg>`],
+  // 05 sakatlık
+  [`<svg viewBox="0 0 32 32" width="26" height="26" fill="none" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round"><line x1="16" y1="4" x2="16" y2="28"/><line x1="4" y1="16" x2="28" y2="16"/></svg>`,
+   `<svg viewBox="0 0 30 38" width="22" height="30" fill="none" stroke="#fb923c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="15" cy="5" r="3.5"/><path d="M12 9Q9 14 9 21"/><path d="M18 9Q21 14 21 21"/><line x1="9" y1="21" x2="21" y2="21"/><path d="M9 21L7 34"/><path d="M21 21L19 30Q19 35 15 36Q11 35 11 30L10 26"/><path d="M18 30Q21 30 21 33" stroke-width="1.1" opacity=".65"/></svg>`],
+  // 06 iskambil kartı
+  [`<svg viewBox="0 0 26 34" width="20" height="27" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="22" height="30" rx="3"/><path d="M13 8Q13 6 11 7Q9 8 9 10Q9 14 13 18Q17 14 17 10Q17 8 15 7Q13 6 13 8Z" fill="currentColor" opacity=".2" stroke-width="1.1"/><line x1="5" y1="24" x2="9" y2="24" stroke-width="1.1" opacity=".6"/><line x1="5" y1="27" x2="10" y2="27" stroke-width="1.1" opacity=".6"/></svg>`,
+   `<svg viewBox="0 0 34 34" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="26" rx="3" opacity=".4"/><rect x="7" y="4" width="20" height="26" rx="3" opacity=".65"/><rect x="12" y="2" width="20" height="26" rx="3"/><path d="M22 9Q22 7 20 8Q18 9 18 11Q18 15 22 19Q26 15 26 11Q26 9 24 8Q22 7 22 9Z" fill="currentColor" opacity=".2" stroke-width="1.1"/></svg>`]
+];
 function _applyHowtoLang(){
   const d=_HOWTO[LANG]||_HOWTO.tr;
   if($("howtoToggle"))$("howtoToggle").textContent=d.toggle;
-  d.steps.forEach((s,i)=>{const el=$(["hw01","hw02","hw03","hw04","hw05","hw06"][i]);if(el)el.innerHTML=`<b>${s[0]}</b> ${s[1]}`;});
+  const ids=["hw01","hw02","hw03","hw04","hw05","hw06"];
+  d.steps.forEach((s,i)=>{
+    const el=$(ids[i]);if(el)el.innerHTML=`<b>${s[0]}</b> ${s[1]}`;
+    const n=(i+1).toString().padStart(2,"0");
+    const sv=_HOWTO_SVGS[i]||[];
+    const l=$("hwi"+n+"l"),r=$("hwi"+n+"r");
+    if(l)l.innerHTML=sv[0]||"";
+    if(r)r.innerHTML=sv[1]||"";
+  });
 }
 
 /* ===== sessionStorage persistence ===== */
