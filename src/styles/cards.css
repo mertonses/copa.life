@@ -1,6 +1,6 @@
 /* Kupa Yolu - kartlar, koleksiyon, hedefler ve ekonomi panelleri */
 .storytile{border:2px solid var(--ink);background:var(--paper2);margin:10px 0;text-align:left}
-.storytile .sth{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;background:var(--navy);color:#fff;padding:5px 8px}
+.storytile .sth{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#26402f;color:#fff;padding:5px 8px}
 .storytile .stb{font-family:var(--mono);font-size:11px;line-height:1.55;color:var(--ink);padding:9px 10px}
 .cardrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;min-height:18px}
 .card{border:1.5px solid var(--ink);border-radius:4px;padding:4px 7px;font-family:var(--mono);font-size:10px;line-height:1.2}
@@ -30,10 +30,10 @@
 .shopcard .sp small{display:block;font-size:7px;letter-spacing:1px;text-align:center}
 .shopcard.upgrade{box-shadow:0 0 0 2px var(--mustard) inset}
 .collection{border:2px solid var(--ink);background:var(--paper2);margin-bottom:8px}
-.collection h4{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;background:var(--navy);color:#fff;padding:6px 8px;display:flex;justify-content:space-between}
+.collection h4{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;background:#26402f;color:#fff;padding:6px 8px;display:flex;justify-content:space-between}
 .collectionfilters{display:flex;gap:5px;padding:6px 7px 0;flex-wrap:wrap}
 .collectionfilters button{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:4px 6px;cursor:pointer}
-.collectionfilters button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.collectionfilters button.on{background:#26402f;color:#fff;border-color:#26402f}
 .collectiongrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px;max-height:270px;overflow:auto}
 .ccard{position:relative;border:2px solid var(--ink);padding:8px 8px 8px 12px;min-height:68px;cursor:pointer}
 .ccard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--catc,var(--mustard))}
