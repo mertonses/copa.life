@@ -1,5 +1,5 @@
-/* Kart kopya, aktif slot ve envanter yardimcilari. */
-function tierOf(k){return cardTier[k]||0;}
+/* Kart aktif slot ve envanter yardimcilari. */
+function variantOf(k){return cardVariant[k]||0;}
 function invOf(k){return cardInv[k]||0;}
 function hasCard(k){return cards.includes(k);}
 function activeCardSlots(){return round>=5?4:(round>=3?3:2);}

@@ -7,12 +7,26 @@
 .card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
+/* Variant badges */
+.var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:3px}
+.var-0{background:#e0e0e0;color:#444}
+.var-1{background:#cd7f32;color:#fff}
+.var-2{background:#e6ad2e;color:#23332a}
+.var-3{background:#7c3aed;color:#fff}
 .card .copy{display:block;font-size:8px;color:var(--ink2);margin-top:2px}
 .card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--mustard) inset}
-.card.tier-0,.shopcard.tier-0{background:#8a5a2b;color:#fff}.card.tier-0 .copy,.shopcard.tier-0 .sd,.shopcard.tier-0 .cat{color:#fff}
-.card.tier-1,.shopcard.tier-1{background:#d9dee3;color:#1f2d35}.card.tier-1 .copy,.shopcard.tier-1 .sd{color:#30414a}
-.card.tier-2,.shopcard.tier-2{background:#f0bf34;color:#23332a}.card.tier-2 .copy,.shopcard.tier-2 .sd,.shopcard.tier-2 .cat{color:#23332a}
-.card.tier-3,.shopcard.tier-3{background:#2b2b2b;color:#fff;border-color:#f0bf34}.card.tier-3 .copy,.shopcard.tier-3 .sd,.shopcard.tier-3 .cat{color:#fff}
+/* Shop tile variant tinting */
+.shopcard.sv-1{border-color:#cd7f32;box-shadow:inset 0 0 0 1px #cd7f32}
+.shopcard.sv-2{border-color:#e6ad2e;box-shadow:inset 0 0 0 1px #e6ad2e}
+.shopcard.sv-3{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed}
+/* Active card row variant tinting */
+.card.v1{border-left-color:#cd7f32}
+.card.v2{border-left-color:#e6ad2e}
+.card.v3{border-left-color:#7c3aed}
+/* Collection card variant tinting */
+.ccard.v1::before{background:#cd7f32}
+.ccard.v2::before{background:#e6ad2e}
+.ccard.v3::before{background:#7c3aed}
 .card.ch{background:#7b5cd6;color:#fff;border-color:#5a3fb0}
 .challist{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
 .chrow{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:4px;padding:6px 8px;font-family:var(--mono);font-size:10px;background:var(--paper2)}
@@ -47,12 +61,16 @@
 .cardcontract{color:var(--ink2)}
 .powerpreview{color:var(--green);font-weight:800}
 .debttax{display:inline-block;color:#8e2d20;background:#ffe1aa;border:1px solid #d88928;padding:1px 4px;font-weight:800}
-.ccard.tier-0{background:#8a5a2b;color:#fff}.ccard.tier-0 .cact{color:#fff}
-.ccard.tier-1{background:#d9dee3;color:#1f2d35}.ccard.tier-1 .cact{color:#30414a}
-.ccard.tier-2{background:#f0bf34;color:#23332a}.ccard.tier-2 .cact{color:#23332a}
-.ccard.tier-3{background:#2b2b2b;color:#fff;border-color:#f0bf34}.ccard.tier-3 .cact{color:#fff}
+/* Card swap modal */
+.swap-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+.swap-card-btn{display:flex;align-items:center;gap:10px;background:var(--paper2);border:2px solid var(--ink);border-radius:4px;padding:8px 11px;cursor:pointer;font-family:var(--mono);font-size:11px;text-align:left;transition:.12s}
+.swap-card-btn:hover{background:var(--blue);color:#fff}
+.swap-card-btn .sc-icon{font-size:20px;flex-shrink:0}
+.swap-card-btn .sc-name{font-family:var(--disp);font-weight:700;font-size:13px}
+.swap-card-btn .sc-desc{font-size:9px;color:var(--ink2);margin-top:2px}
+.swap-card-btn:hover .sc-desc{color:rgba(255,255,255,.75)}
 .shoprow{display:flex;gap:7px;margin-bottom:8px}
-body.dark .card.bronze{background:#3a3322;color:#f0d9ad}body.dark .card.silver{background:#2f343a;color:#dde3e8}body.dark .card.gold{background:#3a3320;color:#f3e2a8}
+body.dark .shopcard.sv-1{border-color:#e09840}body.dark .shopcard.sv-2{border-color:#f0c840}body.dark .shopcard.sv-3{border-color:#a060ff}
 body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.cant){color:#fff}
 .objboard{border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:8px}
 .objboard h4{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;background:#5a3fb0;color:#fff;padding:5px 8px;display:flex;justify-content:space-between}

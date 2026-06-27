@@ -300,7 +300,7 @@ function applyMeta(){const m=$("metaline");
 function pickForm(f){formName=f;slots=FORMATIONS[f];buildFormButtons();}
 function normalStart(){if(!formName||!unlockedForms.includes(formName))pickForm(unlockedForms[0]||"4-4-2");const x=L();let sb="";Object.keys(STYLES).forEach(k=>{const sd=x.styles[k];sb+=`<div class="stylebtn" data-style="${k}" onclick="pickStyle('${k}')"><div class="ssi">${sd.i}</div><div class="ssm"><div class="sst">${sd.n}</div><div class="ssd">${sd.d}</div></div></div>`;});showModal(`<div><div class="kithdr">${x.styleHdr}</div><div class="kitsub">${x.styleSub}</div><div class="stylelist">${sb}</div></div>`);}
 function pickStyle(k){style=k;sfxSeat();closeModal();beginDraft();}
-function beginDraft(){makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=(($("cName")&&$("cName").value.trim())||teamName||rnd(NAMEP)+" FK").toUpperCase().slice(0,16);kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;round=1;cards=[];cardInv={};cardTier={};riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;
+function beginDraft(){makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=(($("cName")&&$("cName").value.trim())||teamName||rnd(NAMEP)+" FK").toUpperCase().slice(0,16);kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;
   {const _pm={ENG:[POOL_EN,OPP_POOL_EN,OPP_BASES_EN],ES:[POOL_ES,OPP_POOL_ES,OPP_BASES_ES],IT:[POOL_IT,OPP_POOL_IT,OPP_BASES_IT],DE:[POOL_DE,OPP_POOL_DE,OPP_BASES_DE]};const _pc=_pm[selectedCountry];if(_pc&&typeof _pc[0]!=="undefined"){POOL=_pc[0];}else if(typeof POOL_TR!=="undefined"){POOL=POOL_TR;}const _srcPool=_pc?_pc[1]:OPP_POOL;const _srcBases=_pc?_pc[2]:OPP_BASES;const _pool=[..._srcPool];bracket=_srcBases.map(base=>{if(!_pool.length)return{name:"Opponent",power:base+ri(-2,3)};const _i=rand()*_pool.length|0;return{name:_pool.splice(_i,1)[0],power:base+ri(-2,3)};});}fixtures=bracket.map(b=>({opp:b.name,res:null,gf:null,ga:null}));
   $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("budgetBox").classList.remove("introhide");
   $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();renderDraftExtra();}
@@ -640,16 +640,84 @@ function playMatch(skipRisk){if(runEnded)return;clearTimeout(autoTimer);const sp
   showModal(`<div class="tele"><div class="thead">${x.teleHead} · ${x.rounds[round-1]}</div><div class="tscore"><div class="tt">${clip(teamName||"US",9)}</div><div class="tn">${gf}</div><div style="font-family:var(--mono)">–</div><div class="tn">${ga}</div><div class="tt">${clip(opponent.name,9)}</div></div><div class="perfnote">${lastMatchPerf.note}</div><div class="perfwhy">${lastMatchPerf.why}</div>${matchEventsHTML(lastMatchEvents)}<div class="tv ${vcls}">${vtxt}</div><div class="bact"><button class="btn btn-primary" onclick="afterMatch(${advance})">${advance?(round===5?x.toFinal:x.cont):x.again}</button></div></div>`);
   if(autoPlay)setTimeout(()=>{if(!$("modal").classList.contains("hidden"))afterMatch(advance);},1300);}
 function afterMatch(advance){if(runEnded)return;closeModal();if(!advance){endRun(false);return;}showRewardChoice();}
-function rewardCardPool(){return allCardKeys().filter(k=>isProgressCard(k)&&invOf(k)>0&&invOf(k)<MAX_CARD_COPIES);}
 function rewardPreview(kind,prize){
   const tr=LANG==="tr";
   if(kind==="cash")return "€"+budget+"M → €"+(budget+prize)+"M";
-  if(kind==="card"){const pool=rewardCardPool();if(!pool.length)return tr?"Açık kart yok":"No unlocked card";const k=pool.slice().sort((a,b)=>invOf(b)-invOf(a))[0];return L().cards[k].n+" "+invOf(k)+"/"+MAX_CARD_COPIES+" → "+Math.min(MAX_CARD_COPIES,invOf(k)+1)+"/"+MAX_CARD_COPIES;}
+  if(kind==="loan")return tr?"Yedek slota güçlü oyuncu — 1 tur, -€5M":"Powerful bench player — 1 round, -€5M";
+  if(kind==="swap")return cards.length?(tr?"Elinden kart iade et, rastgele kart al":"Return a card, get a random one back"):tr?"Aktif kart yok":"No active cards";
   if(!(injuredIdx>=0&&picksBySlot[injuredIdx]))return tr?"Sakat oyuncu yok":"No injured player";
   const p=picksBySlot[injuredIdx];return shortName(p)+" "+effOf(p)+" → "+(effOf(p)+INJ);
 }
-function showRewardChoice(){const p=[0,4,6,8,10,12][round]||10,tr=LANG==="tr",cardOk=rewardCardPool().length>0,careOk=injuredIdx>=0&&picksBySlot[injuredIdx];if(autoPlay){const auto=careOk?"care":cardOk?"card":"cash";setTimeout(()=>finishRoundReward(auto),600);return;}const cardCls=cardOk?"stylebtn":"stylebtn disabled",careCls=careOk?"stylebtn":"stylebtn disabled";const cardClick=cardOk?" onclick=\"finishRoundReward('card')\"":"",careClick=careOk?" onclick=\"finishRoundReward('care')\"":"";const _rCash=`<svg viewBox='0 0 36 24' width='32' height='22' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='3' width='32' height='18' rx='2.5'/><circle cx='18' cy='12' r='5'/><path d='M18 7V9M18 15V17'/><line x1='7' y1='3' x2='7' y2='21'/><line x1='29' y1='3' x2='29' y2='21'/></svg>`;const _rCard=`<svg viewBox='0 0 28 36' width='22' height='28' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='2' width='22' height='32' rx='3'/><path d='M14 10V20M10 14H18'/><circle cx='14' cy='26' r='3' fill='currentColor' opacity='.3'/></svg>`;const _rBand=`<svg viewBox='0 0 36 28' width='28' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='28' height='12' rx='5' transform='rotate(-15 18 14)'/><line x1='18' y1='10' x2='18' y2='18'/><line x1='14' y1='14' x2='22' y2='14'/></svg>`;showModal("<div><div class=\"kithdr\">"+(tr?"Galibiyet Ödülü":"Win Reward")+"</div><div class=\"kitsub\">"+(tr?"Para tek çözüm değil. Bir yol seç.":"Money is not the only answer. Pick a path.")+"</div><div class=\"stylelist\"><div class=\"stylebtn\" onclick=\"finishRoundReward('cash')\"><div class=\"ssi\" style=\"color:var(--good)\">"+_rCash+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kasa Primi":"Cash Bonus")+"</div><div class=\"ssd\">+€"+p+"M</div><div class=\"rewardpreview\">"+rewardPreview("cash",p)+"</div></div></div><div class=\""+cardCls+"\""+cardClick+"><div class=\"ssi\" style=\"color:var(--gold)\">"+_rCard+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kart Geliştir":"Develop Card")+"</div><div class=\"ssd\">"+(cardOk?(tr?"Açık bir karta gelişim ekle":"Add progress to an unlocked card"):(tr?"Açık kart yok":"No unlocked card"))+"</div><div class=\"rewardpreview\">"+rewardPreview("card",p)+"</div></div></div><div class=\""+careCls+"\""+careClick+"><div class=\"ssi\" style=\"color:var(--blue)\">"+_rBand+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Sakatlık Tedavisi":"Injury Care")+"</div><div class=\"ssd\">"+(careOk?(tr?"Sakat oyuncuyu iyileştir":"Heal the injured player"):(tr?"Sakat oyuncu yok":"No injured player"))+"</div><div class=\"rewardpreview\">"+rewardPreview("care",p)+"</div></div></div></div></div>");}
-function finishRoundReward(kind){closeModal();const prizes=[0,4,6,8,10,12],prize=prizes[round]||10;let rewardText="";if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);}else if(kind==="card"){const pool=rewardCardPool();if(!pool.length){showRewardChoice();return;}const k=pool.slice().sort((a,b)=>invOf(b)-invOf(a))[0];addCardCopy(k,{silent:false});rewardText=(LANG==="tr"?"Kart gelişti: ":"Card developed: ")+L().cards[k].n;}else{if(!(injuredIdx>=0&&picksBySlot[injuredIdx])){showRewardChoice();return;}picksBySlot[injuredIdx].injured=false;rewardText=(LANG==="tr"?"Tedavi edildi: ":"Healed: ")+shortName(picksBySlot[injuredIdx]);injuredIdx=-1;}pushFeed("\u{1f3c1} "+rewardText,"buy");if(round>=3&&checkChairmanSack("debt"))return;expireTemporaryCards();if(injuredIdx>=0&&picksBySlot[injuredIdx]&&rand()<0.35){picksBySlot[injuredIdx].dev=(picksBySlot[injuredIdx].dev||0)-1;pushFeed("\u{1fa79} <b>"+shortName(picksBySlot[injuredIdx])+"</b> "+(LANG==="tr"?"sakat oynadı, sakatlık uzadı (-1)":"played injured, recovery worsened (-1)"),"lose");}const perf=lastMatchPerf||{power:squadPower(round).power};const inj=applyRandomInjury(injuryRiskFor(perf.power));if(inj)pushFeed("\u{1fa79} <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"maçtan sonra sakatlandı":"was injured after the match"),"lose");devWonderkids();round++;enterHub();pushFeed("\u{1f4f0} "+rnd(L().heads),"pres");$("roundtag").textContent=rewardText;setTimeout(()=>{if(!$("hub").classList.contains("hidden"))renderHub();},1600);}
+function generateLoanPlayer(){
+  if(typeof POOL==="undefined"||!POOL.length)return null;
+  const high=POOL.filter(p=>p[1]>=76&&!usedNames.has(p[0]));
+  const base=rnd(high.length?high:POOL.filter(p=>!usedNames.has(p[0]))||POOL);
+  if(!base)return null;
+  const pos=slots.length?rnd(slots.map(s=>s[0]).filter(Boolean))||"MID":"MID";
+  const ov=base[1];
+  return{name:base[0],ov,natG:base[2],pos,club:base[3]||"",age:base[4]||26,tr:base[5]||0,
+         price:0,fab:false,train:0,dev:0,trait:null,injured:false,
+         eff:ov,loan:true,loanCost:5,used:false,bench:true};
+}
+function showRewardChoice(){
+  const prize=[0,4,6,8,10,12][round]||10,tr=LANG==="tr";
+  const careOk=injuredIdx>=0&&picksBySlot[injuredIdx];
+  const swapOk=cards.length>0;
+  if(autoPlay){setTimeout(()=>finishRoundReward(careOk?"care":"cash"),600);return;}
+  const careCls=careOk?"stylebtn":"stylebtn disabled";
+  const careClick=careOk?" onclick=\"finishRoundReward('care')\"":"";
+  const swapCls=swapOk?"stylebtn":"stylebtn disabled";
+  const swapClick=swapOk?" onclick=\"finishRoundReward('swap')\"":"";
+  const _rCash=`<svg viewBox='0 0 36 24' width='32' height='22' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='3' width='32' height='18' rx='2.5'/><circle cx='18' cy='12' r='5'/><path d='M18 7V9M18 15V17'/><line x1='7' y1='3' x2='7' y2='21'/><line x1='29' y1='3' x2='29' y2='21'/></svg>`;
+  const _rLoan=`<svg viewBox='0 0 36 28' width='32' height='24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='14' cy='8' r='4.5'/><path d='M4 26Q4 18 14 18Q24 18 24 26'/><circle cx='28' cy='12' r='3' stroke-dasharray='2 2'/><path d='M23 24Q23 19 28 19Q33 19 33 24'/><line x1='28' y1='4' x2='28' y2='8'/><line x1='26' y1='6' x2='30' y2='6'/></svg>`;
+  const _rSwap=`<svg viewBox='0 0 36 28' width='32' height='24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='4' width='14' height='20' rx='2.5'/><rect x='20' y='4' width='14' height='20' rx='2.5'/><path d='M16 10L20 14L16 18' fill='none'/><path d='M20 10L16 14L20 18' fill='none'/></svg>`;
+  const _rBand=`<svg viewBox='0 0 36 28' width='28' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='28' height='12' rx='5' transform='rotate(-15 18 14)'/><line x1='18' y1='10' x2='18' y2='18'/><line x1='14' y1='14' x2='22' y2='14'/></svg>`;
+  showModal("<div><div class=\"kithdr\">"+(tr?"Galibiyet Ödülü":"Win Reward")+"</div><div class=\"kitsub\">"+(tr?"Para tek çözüm değil. Bir yol seç.":"Money is not the only answer. Pick a path.")+"</div><div class=\"stylelist\">"+
+    "<div class=\"stylebtn\" onclick=\"finishRoundReward('cash')\"><div class=\"ssi\" style=\"color:var(--good)\">"+_rCash+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kasa Primi":"Cash Bonus")+"</div><div class=\"ssd\">+€"+prize+"M</div><div class=\"rewardpreview\">"+rewardPreview("cash",prize)+"</div></div></div>"+
+    "<div class=\"stylebtn\" onclick=\"finishRoundReward('loan')\"><div class=\"ssi\" style=\"color:var(--blue)\">"+_rLoan+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kiralık Oyuncu":"Loan Player")+"</div><div class=\"ssd\">"+(tr?"1 tur yedek — tur sonunda -€5M":"1 round bench — -€5M at end")+"</div><div class=\"rewardpreview\">"+rewardPreview("loan",prize)+"</div></div></div>"+
+    "<div class=\""+swapCls+"\""+swapClick+"><div class=\"ssi\" style=\"color:var(--gold)\">"+_rSwap+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kart Takas":"Card Swap")+"</div><div class=\"ssd\">"+(swapOk?(tr?"Kartını iade et, yenisi gelir":"Return a card, get a new one"):(tr?"Aktif kart yok":"No active cards"))+"</div><div class=\"rewardpreview\">"+rewardPreview("swap",prize)+"</div></div></div>"+
+    "<div class=\""+careCls+"\""+careClick+"><div class=\"ssi\" style=\"color:var(--red,#d6543a)\">"+_rBand+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Sakatlık Tedavisi":"Injury Care")+"</div><div class=\"ssd\">"+(careOk?(tr?"Sakat oyuncuyu iyileştir":"Heal the injured player"):(tr?"Sakat oyuncu yok":"No injured player"))+"</div><div class=\"rewardpreview\">"+rewardPreview("care",prize)+"</div></div></div>"+
+    "</div></div>");
+}
+function showCardSwapModal(){
+  const x=L(),s=picksBySlot.filter(Boolean);
+  if(!cards.length){finishRoundReward("cash");return;}
+  const list=cards.map(k=>{const cd=x.cards[k],v=variantOf(k),cv=cardEff(k,s,round);const vl=(L().variantLbl||["NORMAL","BRONZ","ALTIN","KARA"])[v];
+    return `<button class="swap-card-btn" onclick="doCardSwap('${k}')"><span class="var-badge var-${v}">${vl}</span> <b>${cd.n}</b> <span style="color:var(--good)">${cv>=0?"+":""}${cv}</span></button>`;
+  }).join("");
+  showModal(`<div style="padding:14px 16px"><div class="kithdr">${LANG==="tr"?"Kart Takas":"Card Swap"}</div><div class="kitsub" style="margin-bottom:12px">${LANG==="tr"?"Hangi kartı iade edeceksin? Yerine rastgele bir kart gelir.":"Which card to return? A random replacement arrives."}</div><div class="swap-list">${list}</div><div class="bact"><button class="btn btn-ghost" onclick="closeModal();finishRoundReward('cash')">${LANG==="tr"?"Vazgeç — nakit al":"Cancel — take cash"}</button></div></div>`);
+}
+function doCardSwap(k){
+  closeModal();
+  const oldName=L().cards[k]?.n||k;
+  cards=cards.filter(c=>c!==k);cardInv[k]=0;cardVariant[k]=0;
+  const pool=allCardKeys().filter(kk=>kk!==k&&invOf(kk)<=0&&!isInstantCard(kk));
+  let rewardText;
+  if(pool.length){const nk=rnd(pool),nv=weightedVariant();addCard(nk,nv,{silent:true});const nl=(L().variantLbl||["NORMAL","BRONZ","ALTIN","KARA"])[nv];rewardText=(LANG==="tr"?"Takas: "+oldName+" → "+L().cards[nk].n+" ("+nl+")":"Swap: "+oldName+" → "+L().cards[nk].n+" ("+nl+")");}
+  else{rewardText=LANG==="tr"?"Takas: "+oldName+" iade (başka kart yok)":"Swap: "+oldName+" returned (no more cards)";}
+  finishRoundReward("_done",rewardText);
+}
+function finishRoundReward(kind,extraText){
+  if(kind!=="swap"&&kind!=="_done")closeModal();
+  const prizes=[0,4,6,8,10,12],prize=prizes[round]||10;
+  let rewardText=extraText||"";
+  if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);}
+  else if(kind==="loan"){const lp=generateLoanPlayer();if(lp){loanPlayer=lp;bench.push(lp);pushFeed("\u{1f504} <b>"+shortName(lp)+"</b> "+(LANG==="tr"?"kiralık kadronuza katıldı — tur sonunda -€"+lp.loanCost+"M":"joined on loan — -€"+lp.loanCost+"M at round end"),"buy");rewardText=LANG==="tr"?"Kiralık: "+shortName(lp):"Loan: "+shortName(lp);}else{earn(prize,"earned");rewardText=L().prize(prize);}}
+  else if(kind==="swap"){showCardSwapModal();return;}
+  else if(kind==="care"){if(!(injuredIdx>=0&&picksBySlot[injuredIdx])){showRewardChoice();return;}picksBySlot[injuredIdx].injured=false;rewardText=(LANG==="tr"?"Tedavi edildi: ":"Healed: ")+shortName(picksBySlot[injuredIdx]);injuredIdx=-1;}
+  /* kind==="cash" veya "_done" — ortak ilerleyiş */
+  pushFeed("\u{1f3c1} "+rewardText,"buy");
+  /* Kiralık oyuncu vadesi */
+  if(loanPlayer&&kind!=="loan"){const lp=loanPlayer;bench=bench.filter(b=>b!==lp);picksBySlot=picksBySlot.map(p=>p===lp?null:p);if(canAffordCost(lp.loanCost))spend(lp.loanCost,"spent");pushFeed("\u{1f504} <b>"+shortName(lp)+"</b> "+(LANG==="tr"?"kiralık bitti (-€"+lp.loanCost+"M)":"loan ended (-€"+lp.loanCost+"M)"),"lose");loanPlayer=null;}
+  if(round>=3&&checkChairmanSack("debt"))return;
+  expireTemporaryCards();
+  if(injuredIdx>=0&&picksBySlot[injuredIdx]&&rand()<0.35){picksBySlot[injuredIdx].dev=(picksBySlot[injuredIdx].dev||0)-1;pushFeed("\u{1fa79} <b>"+shortName(picksBySlot[injuredIdx])+"</b> "+(LANG==="tr"?"sakat oynadı, sakatlık uzadı (-1)":"played injured, recovery worsened (-1)"),"lose");}
+  const perf=lastMatchPerf||{power:squadPower(round).power};
+  const inj=applyRandomInjury(injuryRiskFor(perf.power));if(inj)pushFeed("\u{1fa79} <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"maçtan sonra sakatlandı":"was injured after the match"),"lose");
+  devWonderkids();round++;enterHub();
+  pushFeed("\u{1f4f0} "+rnd(L().heads),"pres");$("roundtag").textContent=rewardText;
+  setTimeout(()=>{if(!$("hub").classList.contains("hidden"))renderHub();},1600);
+}
 
 
 /* ===== result / meta ===== */
@@ -865,7 +933,7 @@ function _saveState(){
   if(runEnded)return;
   try{sessionStorage.setItem("copa_run",JSON.stringify({v:2,
     picks:picksBySlot.map(p=>p?Object.assign({},p):null),
-    budget,round,cards:[...cards],cardInv:Object.assign({},cardInv),cardTier:Object.assign({},cardTier),
+    budget,round,cards:[...cards],cardInv:Object.assign({},cardInv),cardVariant:Object.assign({},cardVariant),
     chairId:chairman&&chairman.id,formName,teamName,
     bench:bench.map(p=>Object.assign({},p)),benchUsed,captainIdx,presCharges,
     kit:Object.assign({},kit),kp:_kp,ks:_ks,
@@ -882,7 +950,7 @@ function _tryRestoreState(){
     const raw=sessionStorage.getItem("copa_run");if(!raw)return false;
     const st=JSON.parse(raw);if(!st||st.v!==2)return false;
     picksBySlot=st.picks;budget=st.budget;round=st.round;
-    cards=st.cards;cardInv=st.cardInv;cardTier=st.cardTier;
+    cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
     formName=st.formName||"4-4-2";teamName=st.teamName||"";
     slots=FORMATIONS[formName];filled=slots.map((_,i)=>!!(picksBySlot&&picksBySlot[i]));remaining=0;

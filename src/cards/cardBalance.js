@@ -1,22 +1,30 @@
-/* Kart tier etiketleri, fiyatlari, iade ve progress dengesi. */
+/* Kart fiyatlari ve variant dengesi. */
+/* Variant fiyat carpani: normal/bronz/altin/kara */
+var VARIANT_PRICE_MOD=[1.0,1.15,1.4,0.9];
+
+function weightedVariant(){
+ const r=rand();
+ if(r<0.55)return 0; // Normal  55%
+ if(r<0.85)return 1; // Bronz   30%
+ if(r<0.97)return 2; // Altin   12%
+ return 3;           // Kara     3%
+}
+
 function cardPrice(k){
  const d=CARDDEFS[k],rar=d.rar||"bronze";
  const floor={bronze:9,silver:15,gold:21,risk:12}[rar]||9;
- const scaled=Math.round((d.price||floor)*1.35);
- const tierTax=isProgressCard(k)?tierOf(k)*4:0;
- return Math.max(3,Math.max(floor,scaled)+tierTax+chairmanMarketMod());
+ const base=Math.round((d.price||floor)*1.35);
+ const vm=VARIANT_PRICE_MOD[variantOf(k)||0];
+ return Math.max(3,Math.round(Math.max(floor,base)*vm)+chairmanMarketMod());
 }
-function tierText(k){const labels=L().tierLbl||[];return labels[tierOf(k)]||labels[0]||"";}
-function tierFromCopies(c){return Math.max(0,Math.min(3,(c||0)-1));}
-function duplicateRefund(k){return Math.max(3,Math.floor(cardPrice(k)*0.35));}
-function progressText(k){
- if(!isProgressCard(k))return isInstantCard(k)?(LANG==="tr"?"Tek kullanım":"Single use"):(LANG==="tr"?"Sözleşme kartı":"Contract card");
- const c=Math.min(MAX_CARD_COPIES,invOf(k)),next=tierFromCopies(c+1),up=next>tierOf(k)&&c<MAX_CARD_COPIES;
- return (LANG==="tr"?"Gelişim":"Progress")+" "+c+"/"+MAX_CARD_COPIES+(up?" · "+(LANG==="tr"?"sonraki kopya tier atlatır":"next copy upgrades"):(c>=MAX_CARD_COPIES?" · MAX":""));
+
+function variantText(k){
+ const labels=L().variantLbl||["NORMAL","BRONZ","ALTIN","KARA"];
+ return labels[variantOf(k)]||labels[0]||"";
 }
-function progressStars(k){const c=Math.min(MAX_CARD_COPIES,invOf(k));let s="";for(let i=1;i<=MAX_CARD_COPIES;i++)s+=i<=c?"★":"☆";return s;}
-function progressBarHTML(k){
- if(!isProgressCard(k))return `<div class="singleuse">${progressText(k)}</div>`;
- const c=Math.min(MAX_CARD_COPIES,invOf(k)),pct=Math.round(c/MAX_CARD_COPIES*100),next=tierFromCopies(c+1),up=next>tierOf(k)&&c<MAX_CARD_COPIES;
- return `<div class="progline"><span>${progressStars(k)}</span><b>${c}/${MAX_CARD_COPIES}</b></div><div class="progbar"><i style="width:${pct}%"></i></div>${up?`<div class="upnext">${LANG==="tr"?"Sıradaki kopya: ":"Next copy: "}${(L().tierLbl||[])[next]||""}</div>`:""}`;
+
+function cardContractType(k){
+ if(isInstantCard(k))return LANG==="tr"?"Tek kullanım":"Single use";
+ if(cardMode(k)==="contract")return LANG==="tr"?"Sözleşme":"Contract";
+ return LANG==="tr"?"Sürekli":"Persistent";
 }
