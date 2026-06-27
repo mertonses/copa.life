@@ -30,6 +30,7 @@ function buildSim(myPow,oppPow){
  /* 2 — Stoppage + ET state */
  const stoppage=Math.floor(rand()*4)+2; // 2-5 dk
  let halfDone=false,etDone=false,extraTime=false,etHalf=false,gameOver=false;
+ let _paused=false;
  const FULL=90+stoppage,ET1=FULL+15,ET2=FULL+30;
 
  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -237,7 +238,7 @@ function buildSim(myPow,oppPow){
   sfxWhistle();
   /* hafif momentum reset */
   momVal=momVal*0.7+50*0.3;
-  setTimeout(()=>{if(!gameOver){running=true;raf=requestAnimationFrame(frameStep);}},2400);
+  setTimeout(()=>{if(!gameOver&&!_paused){running=true;raf=requestAnimationFrame(frameStep);}},2400);
  }
 
  function frameStep(){if(!running)return;acc+=goalFlash>0?speedMul*0.35:speedMul;if(goalFlash>0)goalFlash--;let n=0;
@@ -246,7 +247,7 @@ function buildSim(myPow,oppPow){
    if(!halfDone&&!extraTime&&clock>=45){halfDone=true;doHalfTime(false);return;}
    /* 2 — Normal süre bitiş */
    if(!extraTime&&clock>=FULL){
-    if(sA===sB){extraTime=true;clock=FULL;$("simState").textContent=LANG==="tr"?"Uzatmalar başlıyor":"Extra Time begins";$("simComm").innerHTML="⏱ "+(LANG==="tr"?"30 dakika uzatma!":"30 minutes of extra time!");sfxWhistle();setTimeout(()=>{if(!gameOver){running=true;raf=requestAnimationFrame(frameStep);}},1800);running=false;cancelAnimationFrame(raf);return;}
+    if(sA===sB){extraTime=true;clock=FULL;$("simState").textContent=LANG==="tr"?"Uzatmalar başlıyor":"Extra Time begins";$("simComm").innerHTML="⏱ "+(LANG==="tr"?"30 dakika uzatma!":"30 minutes of extra time!");sfxWhistle();setTimeout(()=>{if(!gameOver&&!_paused){running=true;raf=requestAnimationFrame(frameStep);}},1800);running=false;cancelAnimationFrame(raf);return;}
     else{finishSim();return;}
    }
    /* 4 — ET devre arası */
@@ -266,9 +267,9 @@ function buildSim(myPow,oppPow){
   draw();drawHeatmap();motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
  }
  sim={
-  run:()=>{running=true;draw();raf=requestAnimationFrame(frameStep);},
-  pause:()=>{running=false;cancelAnimationFrame(raf);},
-  resume:()=>{if(!running&&!gameOver){running=true;raf=requestAnimationFrame(frameStep);}},
+  run:()=>{_paused=false;running=true;draw();raf=requestAnimationFrame(frameStep);},
+  pause:()=>{_paused=true;running=false;cancelAnimationFrame(raf);},
+  resume:()=>{_paused=false;if(!running&&!gameOver){running=true;raf=requestAnimationFrame(frameStep);}},
   shout:(t)=>{
    if(aPowBase==null)aPowBase=A.pow;
    const mp={more:{d:6,t:"yüklen!",e:"push up!"},push:{d:4,t:"önde bas!",e:"press high!"},calm:{d:2,t:"tempoyu düşür",e:"slow tempo"},hold:{d:-4,t:"skoru koru",e:"protect lead"}};

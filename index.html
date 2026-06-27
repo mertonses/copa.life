@@ -96,12 +96,12 @@
     <div class="howto-wrap" id="howtoWrap">
       <button class="howto-toggle" id="howtoToggle" onclick="this.nextElementSibling.classList.toggle('hidden');this.classList.toggle('open')"></button>
       <div class="howto-body hidden" id="howtoBody">
-        <div class="howto-step"><span class="howto-n">01</span><span class="hwi" id="hwi01l"></span><div id="hw01"></div><span class="hwi" id="hwi01r"></span></div>
-        <div class="howto-step"><span class="howto-n">02</span><span class="hwi" id="hwi02l"></span><div id="hw02"></div><span class="hwi" id="hwi02r"></span></div>
-        <div class="howto-step"><span class="howto-n">03</span><span class="hwi" id="hwi03l"></span><div id="hw03"></div><span class="hwi" id="hwi03r"></span></div>
-        <div class="howto-step"><span class="howto-n">04</span><span class="hwi" id="hwi04l"></span><div id="hw04"></div><span class="hwi" id="hwi04r"></span></div>
-        <div class="howto-step"><span class="howto-n">05</span><span class="hwi" id="hwi05l"></span><div id="hw05"></div><span class="hwi" id="hwi05r"></span></div>
-        <div class="howto-step"><span class="howto-n">06</span><span class="hwi" id="hwi06l"></span><div id="hw06"></div><span class="hwi" id="hwi06r"></span></div>
+        <div class="howto-step"><span class="hwi" id="hwi01l"></span><span class="howto-n">01</span><div id="hw01"></div></div>
+        <div class="howto-step"><span class="howto-n">02</span><div id="hw02"></div><span class="hwi" id="hwi02r"></span></div>
+        <div class="howto-step"><span class="hwi" id="hwi03l"></span><span class="howto-n">03</span><div id="hw03"></div></div>
+        <div class="howto-step"><span class="howto-n">04</span><div id="hw04"></div><span class="hwi" id="hwi04r"></span></div>
+        <div class="howto-step"><span class="hwi" id="hwi05l"></span><span class="howto-n">05</span><div id="hw05"></div></div>
+        <div class="howto-step"><span class="howto-n">06</span><div id="hw06"></div><span class="hwi" id="hwi06r"></span></div>
       </div>
     </div>
    </div>
@@ -175,7 +175,7 @@
     <div class="simstats" id="simStats"><span>Şut <b id="statShot">0-0</b></span><span>Kurtarış <b id="statSave">0-0</b></span><span>Tehlike <b id="statDanger">0-0</b></span></div>
     <div class="simstage"><div class="fieldframe"><canvas id="cv" width="340" height="430"></canvas><div class="goalburst hidden" id="goalBurst"></div></div><div class="eventpanel"><h4>Maç Olayları</h4><div class="simgoals" id="simGoals"></div></div></div><div class="comm" id="simComm">—</div>
     <div class="radioband" id="simRadio">📻 —</div>
-    <div class="shoutrow" id="shoutrow"><button class="shoutbtn" id="shMore" onclick="simShout('more')">🔥 <span>Yüklen</span></button><button class="shoutbtn" id="shPush" onclick="simShout('push')">⬆ <span>Önde Bas</span></button><button class="shoutbtn" id="shCalm" onclick="simShout('calm')">🧊 <span>Tempoyu Düşür</span></button><button class="shoutbtn" id="shHold" onclick="simShout('hold')">🛡 <span>Skoru Koru</span></button></div>
+    <div class="shoutrow" id="shoutrow"><button class="shoutbtn shout-more" id="shMore" onclick="simShout('more')"><svg viewBox="0 0 20 24" width="17" height="20" fill="none" aria-hidden="true"><path d="M10 1Q8 6 5.5 8Q7 13 10 14Q9 12 10 10Q11.5 13 11.5 17Q13.5 14 13.5 10.5Q13.5 7 10.5 5.5Q11 7.5 10 9.5Q9 6 10 1Z" fill="#ef4444"/><path d="M10 8Q8.5 10.5 9 13Q10 11 10 10Q11 11 11 13Q12 10 10 8Z" fill="#fbbf24"/></svg><span>Yüklen</span></button><button class="shoutbtn shout-push" id="shPush" onclick="simShout('push')"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3,12 10,5 17,12"/><polyline points="3,18 10,11 17,18"/></svg><span>Önde Bas</span></button><button class="shoutbtn shout-calm" id="shCalm" onclick="simShout('calm')"><svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="10" y1="1" x2="10" y2="19"/><line x1="1" y1="10" x2="19" y2="10"/><line x1="3.9" y1="3.9" x2="16.1" y2="16.1"/><line x1="16.1" y1="3.9" x2="3.9" y2="16.1"/><circle cx="10" cy="10" r="1.8" fill="#60a5fa"/></svg><span>Tempoyu Düşür</span></button><button class="shoutbtn shout-hold" id="shHold" onclick="simShout('hold')"><svg viewBox="0 0 20 22" width="16" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 1.5L2.5 4.5V9.5C2.5 14.5 6.5 18.5 10 20.5C13.5 18.5 17.5 14.5 17.5 9.5V4.5Z" fill="#4ade80" opacity=".18"/><path d="M10 1.5L2.5 4.5V9.5C2.5 14.5 6.5 18.5 10 20.5C13.5 18.5 17.5 14.5 17.5 9.5V4.5Z"/><polyline points="6.5,10.5 9,13 13.5,8" stroke-width="2"/></svg><span>Skoru Koru</span></button></div>
     <div class="speedrow"><span class="sl" id="spdLbl">HIZ</span><button class="spd" id="pauseBtn" onclick="simPause()">⏸</button><button class="spd" data-s="0.5" onclick="setSpeed(0.5)">0.5×</button><button class="spd on" data-s="1" onclick="setSpeed(1)">1×</button><button class="spd" data-s="2" onclick="setSpeed(2)">2×</button><button class="spd" data-s="5" onclick="setSpeed(5)">5×</button><button class="btn btn-ghost btn-mini" onclick="simSkip()" style="width:auto">⏭ Geç</button></div>
   </section>
 
@@ -856,12 +856,12 @@ function _applyHowtoLang(){
   if($("howtoToggle"))$("howtoToggle").textContent=d.toggle;
   const ids=["hw01","hw02","hw03","hw04","hw05","hw06"];
   d.steps.forEach((s,i)=>{
-    const el=$(ids[i]);if(el)el.innerHTML=`<b>${s[0]}</b> ${s[1]}`;
+    const el=$(ids[i]);if(el)el.innerHTML=`<b class="hwt">${s[0]}</b><p class="hwd">${s[1]}</p>`;
     const n=(i+1).toString().padStart(2,"0");
     const sv=_HOWTO_SVGS[i]||[];
-    const l=$("hwi"+n+"l"),r=$("hwi"+n+"r");
-    if(l)l.innerHTML=sv[0]||"";
-    if(r)r.innerHTML=sv[1]||"";
+    // Odd steps (01,03,05 → i=0,2,4): icon LEFT; Even (02,04,06 → i=1,3,5): icon RIGHT
+    if(i%2===0){const l=$("hwi"+n+"l");if(l)l.innerHTML=sv[0]||"";}
+    else{const r=$("hwi"+n+"r");if(r)r.innerHTML=sv[1]||"";}
   });
 }
 
