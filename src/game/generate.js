@@ -31,5 +31,5 @@ function draftOptions(pos){const SG=groupOf(pos);let inp=availG(SG).slice(),oth=
   {const strong=out.filter(o=>!o.hidden&&!o.free&&!o.bargain&&o.ov>=80);if(strong.length&&rand()<0.32)applyBargain(rnd(strong));}
   if(typeof eliteBonus!=="undefined"&&eliteBonus){const elites=POOL.filter(p=>p[1]>=90&&!usedNames.has(p[0]));if(elites.length){const ep=rnd(elites);const eo=mkOpt(ep[0],ep[1],ep[2],pos,false,ep[3],ep[4],ep[5]);eo.price=Math.max(12,Math.round(valueOf(ep[1])*0.18));eo.eliteDiscount=true;out[0]=eo;eliteBonus=false;if(typeof saveMeta==="function")saveMeta();}}
   return out.slice(0,3);}
-function takeUnique(pos,lo,hi){const SG=groupOf(pos);let a=availG(SG,lo,hi);if(!a.length)a=availAll(lo,hi);if(!a.length)return fabPlayer(pos,lo,hi);const p=rnd(a);usedNames.add(p[0]);return mkOpt(p[0],p[1],p[2],pos,false,p[3],p[4],p[5]);}
+function takeUnique(pos,lo,hi){const SG=groupOf(pos);let a=availG(SG,lo,hi);if(!a.length&&SG!=="GK")a=availAll(lo,hi).filter(p=>p[2]!=="GK");if(!a.length)return fabPlayer(pos,lo,hi);const p=rnd(a);usedNames.add(p[0]);return mkOpt(p[0],p[1],p[2],pos,false,p[3],p[4],p[5]);}
 function oppPick(g){const a=POOL.filter(p=>p[2]===g);return rnd(a.length?a:POOL);}

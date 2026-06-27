@@ -9,7 +9,6 @@
 .fix .fpw{font-family:var(--mono);font-size:9px;color:var(--ink2)}
 .fix.trophy{flex:0 0 30px;display:flex;align-items:center;justify-content:center;border-color:#8e2d20}
 .fix.trophy.lit{background:#8e2d20;color:#fff}
-.fix.cur{box-shadow:0 0 0 2px #8e2d20 inset}
 .tvover{font-family:var(--disp);font-size:9px;letter-spacing:1px;color:#ff5a4a;text-align:center;padding:3px;margin-bottom:4px;animation:blink 1.4s steps(1) infinite}
 .vsscout{background:transparent;color:var(--ink);border:1.5px solid var(--ink);font-size:9px;padding:3px 7px;cursor:pointer;border-radius:3px;font-family:var(--mono);font-weight:700;letter-spacing:.5px;display:inline-flex;align-items:center;gap:3px;transition:.1s;white-space:nowrap}.vsscout:hover{background:var(--ink);color:#fff}
 .fixbar{display:flex;gap:4px;margin-bottom:10px}
@@ -67,6 +66,12 @@ body.dark .opt,body.dark .shopcard,body.dark .stylebtn,body.dark .mtile,body.dar
 body.dark .scoutbtn,body.dark .autotog{background:var(--paper2);color:var(--ink)}
 body.dark .fix.win,body.dark .chrow.done{background:#23402c}body.dark .fix.lose{background:#402320}body.dark .fix.draw{background:#3a341f}
 .scoutmodal{padding:0}.scoutmodal h4{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;background:var(--navy);color:#fff;padding:6px;text-align:center}
+@keyframes simShake{0%,100%{transform:translate(0)}15%,45%,75%{transform:translate(-4px,0)}30%,60%,90%{transform:translate(4px,0)}}
+@keyframes simEq{0%,100%{background:var(--paper)}50%{background:rgba(74,222,128,.07)}}
+.simwrap.shake{animation:simShake .45s ease}.simwrap.equalize{animation:simEq .9s ease}
+.heatmap{margin-top:8px;border:1.5px solid var(--line);border-radius:4px;overflow:hidden;background:var(--paper2)}
+.heatmap-lbl{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:4px 6px;color:var(--ink2);border-bottom:1px solid var(--line);text-transform:uppercase}
+.heatmap-foot{font-family:var(--mono);font-size:8px;padding:3px 6px;display:flex;gap:8px;color:var(--ink2)}
 .scoutmodal .sl{display:flex;justify-content:space-between;padding:5px 12px;font-size:12px;border-bottom:1px solid var(--line);font-family:var(--mono)}
 .scoutmodal .sl.weak{background:#f6dcd6}.scoutmodal .sl .so{font-weight:700}
 .scoutmodal .wf{font-family:var(--mono);font-size:11px;text-align:center;padding:8px;color:var(--red)}

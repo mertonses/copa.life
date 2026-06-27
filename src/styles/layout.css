@@ -38,6 +38,17 @@
 .hubcols{display:block}
 .hcol-l>*,.hcol-r>*{margin-bottom:8px}
 .trbadge{font-size:11px}
+.final-pills{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;min-height:0}
+.fpill{display:inline-flex;align-items:center;gap:2px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.3px;padding:2px 6px;border-radius:10px;cursor:pointer;border:1.5px solid;-webkit-tap-highlight-color:transparent;user-select:none;transition:.1s}
+.fpill.fp-bonus{background:rgba(38,64,47,.10);color:#26402f;border-color:rgba(38,64,47,.4)}.fpill.fp-bonus:active{background:rgba(38,64,47,.2)}
+.fpill.fp-risk{background:rgba(142,45,32,.08);color:#8e2d20;border-color:rgba(142,45,32,.35)}.fpill.fp-risk:active{background:rgba(142,45,32,.15)}
+.fpill.fp-none{background:var(--paper2);color:var(--ink2);border-color:var(--line)}
+#squadSils{display:none}
+.budget.plenty{background:#26402f;border-color:#1d3020}.budget.plenty .v{color:#a8f0b8}
+.budget.safe{background:#3a5c40;border-color:#2a4430}
+.budget.warn{background:#7a5200;border-color:#5a3c00}
+.budget.tight{background:#8e4520;border-color:#6b3015}
+.budget.debt{background:#8e2d20;border-color:#6b1f17;animation:debtPulse 1.2s ease-in-out infinite}
 .opt .trbadge{margin-left:3px}
 @media(min-width:760px){
  .wrap{max-width:900px;padding:14px 20px 40px}
