@@ -674,7 +674,7 @@ function showRewardChoice(){
   const _rBand=`<svg viewBox='0 0 36 28' width='28' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='28' height='12' rx='5' transform='rotate(-15 18 14)'/><line x1='18' y1='10' x2='18' y2='18'/><line x1='14' y1='14' x2='22' y2='14'/></svg>`;
   showModal("<div><div class=\"kithdr\">"+(tr?"Galibiyet Ödülü":"Win Reward")+"</div><div class=\"kitsub\">"+(tr?"Para tek çözüm değil. Bir yol seç.":"Money is not the only answer. Pick a path.")+"</div><div class=\"stylelist\">"+
     "<div class=\"stylebtn\" onclick=\"finishRoundReward('cash')\"><div class=\"ssi\" style=\"color:var(--good)\">"+_rCash+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kasa Primi":"Cash Bonus")+"</div><div class=\"ssd\">+€"+prize+"M</div><div class=\"rewardpreview\">"+rewardPreview("cash",prize)+"</div></div></div>"+
-    "<div class=\"stylebtn\" onclick=\"finishRoundReward('loan')\"><div class=\"ssi\" style=\"color:var(--blue)\">"+_rLoan+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kiralık Oyuncu":"Loan Player")+"</div><div class=\"ssd\">"+(tr?"1 tur yedek — tur sonunda -€5M":"1 round bench — -€5M at end")+"</div><div class=\"rewardpreview\">"+rewardPreview("loan",prize)+"</div></div></div>"+
+    "<div class=\"stylebtn\" onclick=\"finishRoundReward('loan')\"><div class=\"ssi\" style=\"color:var(--blue)\">"+_rLoan+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kiralık Oyuncu":"Loan Player")+"</div><div class=\"ssd\">"+(tr?"En zayıfın yerini alır, 1 tur — tur sonunda -€5M":"Replaces weakest, 1 round — -€5M at end")+"</div><div class=\"rewardpreview\">"+rewardPreview("loan",prize)+"</div></div></div>"+
     "<div class=\""+swapCls+"\""+swapClick+"><div class=\"ssi\" style=\"color:var(--gold)\">"+_rSwap+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Kart Takas":"Card Swap")+"</div><div class=\"ssd\">"+(swapOk?(tr?"Kartını iade et, yenisi gelir":"Return a card, get a new one"):(tr?"Aktif kart yok":"No active cards"))+"</div><div class=\"rewardpreview\">"+rewardPreview("swap",prize)+"</div></div></div>"+
     "<div class=\""+careCls+"\""+careClick+"><div class=\"ssi\" style=\"color:var(--red,#d6543a)\">"+_rBand+"</div><div class=\"ssm\"><div class=\"sst\">"+(tr?"Sakatlık Tedavisi":"Injury Care")+"</div><div class=\"ssd\">"+(careOk?(tr?"Sakat oyuncuyu iyileştir":"Heal the injured player"):(tr?"Sakat oyuncu yok":"No injured player"))+"</div><div class=\"rewardpreview\">"+rewardPreview("care",prize)+"</div></div></div>"+
     "</div></div>");
@@ -702,7 +702,18 @@ function finishRoundReward(kind,extraText){
   const prizes=[0,4,6,8,10,12],prize=prizes[round]||10;
   let rewardText=extraText||"";
   if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);}
-  else if(kind==="loan"){const lp=generateLoanPlayer();if(lp){loanPlayer=lp;bench.push(lp);pushFeed("\u{1f504} <b>"+shortName(lp)+"</b> "+(LANG==="tr"?"kiralık kadronuza katıldı — tur sonunda -€"+lp.loanCost+"M":"joined on loan — -€"+lp.loanCost+"M at round end"),"buy");rewardText=LANG==="tr"?"Kiralık: "+shortName(lp):"Loan: "+shortName(lp);}else{earn(prize,"earned");rewardText=L().prize(prize);}}
+  else if(kind==="loan"){const lp=generateLoanPlayer();if(lp){
+    /* En zayıf 11 oyuncusunu bul */
+    let weakIdx=-1,weakOv=Infinity;
+    picksBySlot.forEach((p,i)=>{if(p&&!p.injured&&(p.ov||p.eff||0)<weakOv){weakOv=(p.ov||p.eff||0);weakIdx=i;}});
+    if(weakIdx>=0){
+      const displaced=picksBySlot[weakIdx];
+      loanPlayer=lp;lp.bench=false;
+      picksBySlot[weakIdx]=lp;
+      pushFeed("\u{1f504} <b>"+shortName(lp)+"</b> (OV"+lp.ov+") "+(LANG==="tr"?"kiralık geldi — <b>"+shortName(displaced)+"</b> çıktı — tur sonunda -€"+lp.loanCost+"M":"joined on loan (OV"+lp.ov+") — <b>"+shortName(displaced)+"</b> dropped — -€"+lp.loanCost+"M at round end"),"buy");
+      rewardText=(LANG==="tr"?"Kiralık: "+shortName(lp)+" → "+shortName(displaced)+" çıktı":"Loan: "+shortName(lp)+" in, "+shortName(displaced)+" out");
+    }else{earn(prize,"earned");rewardText=L().prize(prize);}
+  }else{earn(prize,"earned");rewardText=L().prize(prize);}}
   else if(kind==="swap"){showCardSwapModal();return;}
   else if(kind==="care"){if(!(injuredIdx>=0&&picksBySlot[injuredIdx])){showRewardChoice();return;}picksBySlot[injuredIdx].injured=false;rewardText=(LANG==="tr"?"Tedavi edildi: ":"Healed: ")+shortName(picksBySlot[injuredIdx]);injuredIdx=-1;}
   /* kind==="cash" veya "_done" — ortak ilerleyiş */
