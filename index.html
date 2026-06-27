@@ -375,11 +375,8 @@ function renderDraftExtra(){
   // Power bar
   const avgOv=picks.length?Math.round(picks.reduce((a,p)=>a+p.ov,0)/picks.length):0;
   const myPow=picks.length>=slots.length?(squadPower(round).power||avgOv):avgOv;
-  const oppPow=(typeof opponent!=="undefined"&&opponent&&opponent.power)||65;
-  const ref=Math.max(myPow,oppPow,60);
-  const myCol=myPow>=oppPow?"#4ade80":"#fb923c";
-  const oppNm=(typeof opponent!=="undefined"&&opponent&&opponent.n)?clip(opponent.n,12):(tr?"Rakip":"Opp");
-  const pwHtml=`<div class="de-sec"><div class="de-hdr">${tr?"GÜÇ":"POWER"}</div><div class="de-bar-row"><span class="de-bar-lbl">${tr?"Kadro":"Squad"}</span><div class="de-bar-track"><div class="de-bar-fill" style="width:${Math.round(myPow/ref*100)}%;background:${myCol}"></div></div><span class="de-bar-val">${myPow||"—"}</span></div><div class="de-bar-row"><span class="de-bar-lbl">${oppNm}</span><div class="de-bar-track"><div class="de-bar-fill" style="width:${Math.round(oppPow/ref*100)}%;background:rgba(255,255,255,.3)"></div></div><span class="de-bar-val">${oppPow}</span></div></div>`;
+  const myCol=myPow>=70?"#4ade80":myPow>=60?"#fbbf24":"#fb923c";
+  const pwHtml=`<div class="de-sec"><div class="de-hdr">${tr?"GÜÇ":"POWER"}</div><div class="de-bar-row"><span class="de-bar-lbl">${tr?"Kadro":"Squad"}</span><div class="de-bar-track"><div class="de-bar-fill" style="width:${Math.min(100,Math.round((myPow||0)/90*100))}%;background:${myCol}"></div></div><span class="de-bar-val">${myPow||"—"}</span></div></div>`;
   el.innerHTML=sqHtml+chHtml+pwHtml;
 }
 function buildPitch(p){p.querySelectorAll(".roundel,.pitch-zone,.pclines").forEach(e=>e.remove());const pre=p.id==="pitch"?"r":"h";slots.forEach((s,i)=>{const d=document.createElement("div");d.className="roundel empty";d.id=pre+i;d.style.left=s[1]+"%";d.style.top=s[2]+"%";const sil=_SLOT_SIL[groupOf(s[0])]||"";d.innerHTML=`${sil}<span class="rp">${L().abbr[s[0]]}</span>`;p.appendChild(d);});_drawConnectors(p);}

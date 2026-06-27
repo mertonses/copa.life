@@ -126,7 +126,7 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .draft-right .pitch{width:min(100%, calc((100vh - 155px) * 68 / 92));height:auto;margin-bottom:0}
 @media(max-width:640px){.draft-cols{flex-direction:column;height:auto;overflow:visible;padding:8px}.draft-left{width:100%}.draft-right{align-self:auto}.draft-right .pitch{width:100%;height:auto}}
 .draft-extra{display:flex;flex-direction:column;gap:6px;margin-top:2px}
-.de-sec{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:7px 10px}
+.de-sec{background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
 .de-hdr{font-size:9px;letter-spacing:1.2px;font-weight:700;color:var(--ink2);text-transform:uppercase;margin-bottom:5px}
 .de-cnt{opacity:.5;font-weight:400;letter-spacing:0}
 .de-row{display:flex;align-items:center;gap:5px;padding:1.5px 0;font-size:11px}
