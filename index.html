@@ -124,6 +124,7 @@
           <div id="rollbtns"><button class="btn btn-roll" id="rollBtn" onclick="roll()"><svg class="dsvg" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="4.5" fill="#c0392b" stroke="#7b241c" stroke-width="1.5"/><rect x="1.5" y="1.5" width="25" height="10" rx="4.5" fill="rgba(255,255,255,.12)"/><circle cx="8.5" cy="8.5" r="2.8" fill="#fff"/><circle cx="14" cy="14" r="2.8" fill="#fff"/><circle cx="19.5" cy="19.5" r="2.8" fill="#fff"/></svg> ZAR AT</button><button class="btn btn-ghost btn-mini" id="allBtn" style="margin-top:8px" onclick="quickAll()">⚡ Akıllı doldur</button><button class="btn btn-ghost btn-mini hidden" id="undoBtn" style="margin-top:6px" onclick="undoPick()">↩ Son hamleyi geri al</button></div>
           <div id="dicebox" class="dicebox hidden"><div class="dface" id="fxDie">⚀</div><div class="dcap" id="fxCap"></div></div></div>
         <div id="optstage" class="hidden"><div class="opts" id="opts"></div><button class="btn btn-ghost btn-mini" id="rerollBtn" onclick="rerollOptions()">Seçenekleri yenile</button><div class="optmsg" id="optmsg"></div></div>
+        <div class="draft-extra" id="draftExtra"></div>
       </div>
       <div class="draft-right">
         <div class="pitch" id="pitch"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div></div>
@@ -291,7 +292,7 @@ function pickStyle(k){style=k;sfxSeat();closeModal();beginDraft();}
 function beginDraft(){makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=(($("cName")&&$("cName").value.trim())||teamName||rnd(NAMEP)+" FK").toUpperCase().slice(0,16);kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;round=1;cards=[];cardInv={};cardTier={};riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;
   {const _pm={ENG:[POOL_EN,OPP_POOL_EN,OPP_BASES_EN],ES:[POOL_ES,OPP_POOL_ES,OPP_BASES_ES],IT:[POOL_IT,OPP_POOL_IT,OPP_BASES_IT],DE:[POOL_DE,OPP_POOL_DE,OPP_BASES_DE]};const _pc=_pm[selectedCountry];if(_pc&&typeof _pc[0]!=="undefined"){POOL=_pc[0];}else if(typeof POOL_TR!=="undefined"){POOL=POOL_TR;}const _srcPool=_pc?_pc[1]:OPP_POOL;const _srcBases=_pc?_pc[2]:OPP_BASES;const _pool=[..._srcPool];bracket=_srcBases.map(base=>{if(!_pool.length)return{name:"Opponent",power:base+ri(-2,3)};const _i=rand()*_pool.length|0;return{name:_pool.splice(_i,1)[0],power:base+ri(-2,3)};});}fixtures=bracket.map(b=>({opp:b.name,res:null,gf:null,ga:null}));
   $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("budgetBox").classList.remove("introhide");
-  $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();}
+  $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();renderDraftExtra();}
 function updateDeadline(){const cl=$("ddClock");if(cl)cl.textContent=String(deadlineH).padStart(2,"0")+":00";const sub=$("ddSub");if(sub)sub.textContent=L().squad+" "+(slots.length-remaining)+"/"+slots.length;const bb=$("ddbanner");if(bb){bb.classList.toggle("urgent",deadlineH<=8);bb.classList.toggle("alarm",deadlineH<=5);}if(cl)cl.style.color=deadlineH<=5?"#ff5a4a":"";_updateSquadSils();}
 function _drawConnectors(p){
   const old=p.querySelector(".pclines");if(old)old.remove();
@@ -351,6 +352,36 @@ function _drawConnectors(p){
   w.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0">${el}</svg>`;
   p.appendChild(w);
 }
+function renderDraftExtra(){
+  const el=$("draftExtra");if(!el)return;
+  const tr=LANG==="tr";
+  // Squad list
+  const picks=picksBySlot.filter(Boolean);
+  let sqHtml=`<div class="de-sec"><div class="de-hdr">${tr?"KADRO":"SQUAD"} <span class="de-cnt">${picks.length}/${slots.length}</span></div>`;
+  const gOrder=["GK","DEF","MID","FWD"];
+  const byG={};slots.forEach((s,i)=>{const g=groupOf(s[0]);if(!byG[g])byG[g]=[];byG[g].push({s,i});});
+  gOrder.forEach(g=>{if(!byG[g])return;byG[g].forEach(({s,i})=>{const p=picksBySlot[i];const ab=(L().abbr[s[0]]||s[0]);
+    if(p){const ov=p.ov;const col=ov>=80?"#fbbf24":ov>=75?"#4ade80":ov>=70?"#86efac":ov>=65?"#fde68a":"#fb923c";
+      sqHtml+=`<div class="de-row de-filled"><span class="de-pos-badge">${ab}</span><span class="de-pname">${shortName(p)}</span>${p.tr?'<span class="de-trflag">TR</span>':''}<span class="de-ov" style="color:${col}">${ov}</span></div>`;}
+    else sqHtml+=`<div class="de-row de-empty"><span class="de-pos-badge">${ab}</span><span class="de-pname">—</span><span class="de-ov">·</span></div>`;});});
+  sqHtml+=`</div>`;
+  // Chairman card
+  const x=L(),cd=x.chair&&chairman&&x.chair[chairman.id];
+  const passive=typeof chairmanPassive==="function"?chairmanPassive():"";
+  const debtLimMap={pinti:-12,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-31};
+  const lim=(chairman&&debtLimMap[chairman.id])||DEBT_LIMIT;
+  const cPhoto=chairman?`<img src="${chairSrc(chairman.id)}" class="de-chair-photo" onerror="this.style.display='none'" alt="">`:"";
+  const chHtml=`<div class="de-sec de-chair-sec"><div class="de-hdr">${tr?"BAŞKAN":"CHAIRMAN"}</div><div class="de-chair-body">${cPhoto}<div class="de-chair-txt"><div class="de-chair-nm">${cd?cd.n:(chairman?chairman.id:"")}</div><div class="de-chair-pass">${passive}</div><div class="de-chair-lim">${tr?"Limit":"Limit"} <b style="color:var(--red)">€${lim}M</b></div></div></div></div>`;
+  // Power bar
+  const avgOv=picks.length?Math.round(picks.reduce((a,p)=>a+p.ov,0)/picks.length):0;
+  const myPow=picks.length>=slots.length?(squadPower(round).power||avgOv):avgOv;
+  const oppPow=(typeof opponent!=="undefined"&&opponent&&opponent.power)||65;
+  const ref=Math.max(myPow,oppPow,60);
+  const myCol=myPow>=oppPow?"#4ade80":"#fb923c";
+  const oppNm=(typeof opponent!=="undefined"&&opponent&&opponent.n)?clip(opponent.n,12):(tr?"Rakip":"Opp");
+  const pwHtml=`<div class="de-sec"><div class="de-hdr">${tr?"GÜÇ":"POWER"}</div><div class="de-bar-row"><span class="de-bar-lbl">${tr?"Kadro":"Squad"}</span><div class="de-bar-track"><div class="de-bar-fill" style="width:${Math.round(myPow/ref*100)}%;background:${myCol}"></div></div><span class="de-bar-val">${myPow||"—"}</span></div><div class="de-bar-row"><span class="de-bar-lbl">${oppNm}</span><div class="de-bar-track"><div class="de-bar-fill" style="width:${Math.round(oppPow/ref*100)}%;background:rgba(255,255,255,.3)"></div></div><span class="de-bar-val">${oppPow}</span></div></div>`;
+  el.innerHTML=sqHtml+chHtml+pwHtml;
+}
 function buildPitch(p){p.querySelectorAll(".roundel,.pitch-zone,.pclines").forEach(e=>e.remove());const pre=p.id==="pitch"?"r":"h";slots.forEach((s,i)=>{const d=document.createElement("div");d.className="roundel empty";d.id=pre+i;d.style.left=s[1]+"%";d.style.top=s[2]+"%";const sil=_SLOT_SIL[groupOf(s[0])]||"";d.innerHTML=`${sil}<span class="rp">${L().abbr[s[0]]}</span>`;p.appendChild(d);});_drawConnectors(p);}
 function setBudget(){
   $("budgetV").textContent="€"+budget+"M";{const bb=$("budgetBox");["plenty","safe","warn","tight","low","debt"].forEach(c=>bb.classList.remove(c));if(budget>=25)bb.classList.add("plenty");else if(budget>=12)bb.classList.add("safe");else if(budget>=5)bb.classList.add("warn");else if(budget>=0)bb.classList.add("tight");else bb.classList.add("debt");}
@@ -408,14 +439,14 @@ function _ovCol(ov){return ov>=80?"#4ade80":ov>=70?"#fcd34d":ov>=62?"#fb923c":"#
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?kit.bg:"rgba(120,120,120,0.2)";const s=done?(kit.sec||"rgba(255,255,255,.5)"):"rgba(120,120,120,0.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
 function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;r.title=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;r.innerHTML=`${isCap?'<span class="capbadge"><svg viewBox="0 0 12 9" width="10" height="7.5" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>':""}${p.injured?'<span class="injmark"><svg viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>':""}
 <span class="rov" style="color:${_ovCol(eff)}">${eff}</span><span class="rname">${surOf(p)}</span>`;}
-function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};currentSlot=-1;updateDeadline();const _dp=$("pitch");if(_dp)_drawConnectors(_dp);if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
+function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};currentSlot=-1;updateDeadline();const _dp=$("pitch");if(_dp)_drawConnectors(_dp);renderDraftExtra();if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
 function quickAll(){const uf=unfilled();uf.forEach((idx,k)=>{const pos=slots[idx][0],SG=groupOf(pos),reserve=(uf.length-1-k)*1;
     let pick=null;let inp=availG(SG).filter(p=>canAffordCost(valueOf(p[1])+reserve));if(inp.length)pick=rnd(inp);
     if(!pick){let any=availAll().filter(p=>canAffordCost(valueOf(p[1])+reserve));if(any.length)pick=rnd(any);}
     if(!pick){let all=availG(SG);if(!all.length)all=availAll();if(all.length)pick=all.reduce((a,b)=>a[1]<b[1]?a:b);}
     let obj;if(pick){usedNames.add(pick[0]);obj=mkOpt(pick[0],pick[1],pick[2],pos,false,pick[3],pick[4],pick[5]);}else obj=fabPlayer(pos,55,61);
     fillSlot(idx,obj);});
-  const _qp=$("pitch");if(_qp)_drawConnectors(_qp);
+  const _qp=$("pitch");if(_qp)_drawConnectors(_qp);renderDraftExtra();
   deadlineH=Math.max(2,deadlineH-2*uf.length);buildBench();updateDeadline();sfxRoll();$("ddbanner").classList.add("hidden");setTimeout(()=>{if(reuseClub)reuseClub=false;showPostcard(enterHub);},350);}
 
 /* ===== kit ===== */
