@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>copa.life — Roguelite Futbol Müdürü</title>
+<title>copa.life — Roguelite futbol. Şans + strateji.</title>
 <meta name="description" content="Ücretsiz tarayıcı futbol oyunu. Kadro kur, transfer yönet, kupayı kaldır. Roguelite futbol müdürü — 5 lig (Türkiye, İngiltere, İspanya, İtalya, Almanya), 9000+ oyuncu.">
 <meta name="keywords" content="copa life, futbol oyunu, tarayıcı futbol oyunu, ücretsiz futbol manager, online futbol yönetim oyunu, roguelite futbol, football manager browser game, free football game, futbol müdürü, türkiye kupası, fa cup, copa del rey, serie a, bundesliga, süper lig, futbol kart oyunu, football card game">
 <meta name="author" content="copa.life">
@@ -348,9 +348,9 @@ function _drawConnectors(p){
       el+=`<path d="M${ax-2.5},${y2+7} Q${ax},${y2+2} ${ax+2.5},${y2+7}" fill="none" stroke="${s}" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>`;
     }
   });
-  const w=document.createElement("div");w.className="pclines";w.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:0";
-  w.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0">${el}</svg>`;
-  p.appendChild(w);
+  let _svg=p.querySelector(".pclines svg");
+  if(!_svg){const w=document.createElement("div");w.className="pclines";w.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:0";w.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0"></svg>`;p.appendChild(w);_svg=w.querySelector("svg");}
+  _svg.innerHTML=el;
 }
 function renderDraftExtra(){
   const el=$("draftExtra");if(!el)return;
@@ -434,7 +434,7 @@ function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.
 function surOf(p){const w=(p.name||"").trim().split(" ");return clip(w[w.length-1],7);}
 function _ovCol(ov){return ov>=80?"#4ade80":ov>=70?"#fcd34d":ov>=62?"#fb923c":"#f87171";}
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?kit.bg:"rgba(120,120,120,0.2)";const s=done?(kit.sec||"rgba(255,255,255,.5)"):"rgba(120,120,120,0.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
-function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;r.title=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;r.innerHTML=`${isCap?'<span class="capbadge"><svg viewBox="0 0 12 9" width="10" height="7.5" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>':""}${p.injured?'<span class="injmark"><svg viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>':""}
+function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;r.title=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");r.setAttribute("aria-label",r.title);const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;r.innerHTML=`${isCap?'<span class="capbadge"><svg viewBox="0 0 12 9" width="10" height="7.5" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>':""}${p.injured?'<span class="injmark"><svg viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>':""}
 <span class="rov">${eff}</span><span class="rname">${surOf(p)}</span>`;}
 function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};currentSlot=-1;updateDeadline();const _dp=$("pitch");if(_dp)_drawConnectors(_dp);renderDraftExtra();if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
 function quickAll(){const uf=unfilled();uf.forEach((idx,k)=>{const pos=slots[idx][0],SG=groupOf(pos),reserve=(uf.length-1-k)*1;
@@ -577,8 +577,33 @@ function pickTalk(k){if(talkUsed)return;talkUsed=true;const x=L(),c=talkContext(
 /* ===== fx / modal ===== */
 const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
 function showFx(cb){const dur=760;if(reduce){cb&&cb();return;}const box=$("dicebox"),die=$("fxDie"),cap=$("fxCap"),btns=$("rollbtns");btns.classList.add("hidden");box.classList.remove("hidden");cap.textContent=L().capRoll;die.textContent=rnd(FACES);box.querySelectorAll(".pdie").forEach(e=>e.remove());for(let i=0;i<12;i++){const s=document.createElement("span");s.className="pdie";s.textContent=rnd(FACES);s.style.left=(rand()*100)+"%";s.style.fontSize=(14+rand()*14)+"px";s.style.color=i%2?"var(--red)":"var(--blue)";s.style.animationDuration=(0.5+rand()*0.5)+"s";s.style.animationDelay=(rand()*0.3)+"s";box.appendChild(s);}const iv=setInterval(()=>die.textContent=rnd(FACES),60);setTimeout(()=>{clearInterval(iv);box.classList.add("hidden");btns.classList.remove("hidden");cb&&cb();},dur);}
-function showModal(html){const m=$("modal");m.innerHTML=`<div class="sheet">${html}</div>`;m.classList.remove("hidden");}
-function closeModal(){$("modal").classList.add("hidden");$("modal").innerHTML="";}
+let _modalPrevFocus=null,_modalTrapFn=null;
+function showModal(html){
+  const m=$("modal");
+  m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  m.classList.remove("hidden");
+  _modalPrevFocus=document.activeElement;
+  const focusable='button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  const first=m.querySelector(focusable);
+  if(first)first.focus();
+  if(_modalTrapFn)m.removeEventListener("keydown",_modalTrapFn);
+  _modalTrapFn=e=>{
+    if(e.key!=="Tab")return;
+    const els=[...m.querySelectorAll(focusable)].filter(el=>!el.disabled&&el.offsetParent!==null);
+    if(!els.length)return;
+    const fi=els[0],la=els[els.length-1];
+    if(e.shiftKey){if(document.activeElement===fi){e.preventDefault();la.focus();}}
+    else{if(document.activeElement===la){e.preventDefault();fi.focus();}}
+  };
+  m.addEventListener("keydown",_modalTrapFn);
+}
+function closeModal(){
+  const m=$("modal");
+  if(_modalTrapFn){m.removeEventListener("keydown",_modalTrapFn);_modalTrapFn=null;}
+  m.classList.add("hidden");m.innerHTML="";
+  if(_modalPrevFocus&&_modalPrevFocus.focus){try{_modalPrevFocus.focus();}catch(e){}}
+  _modalPrevFocus=null;
+}
 
 /* ===== match ===== */
 function scorerPool(home){if(home){const s=picksBySlot.filter(p=>p&&p.pos!=="GK");return s.length?s:picksBySlot.filter(Boolean);}return (oppLineup&&oppLineup.length?oppLineup.map(o=>({name:o.name,pos:o.pos})):["Rakip"].map(name=>({name,pos:""})));}
@@ -653,7 +678,7 @@ ${cardNames.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;justify-cont
 showModal(`<div class="scoutmodal"><h4>${LANG==="tr"?"Paylaşım Kartı":"Share Card"}</h4>${html}<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;margin-top:10px">${LANG==="tr"?"Ekran görüntüsü al ve paylaş":"Screenshot & share"}</div><div class="bact" style="margin-top:8px"><button class="btn btn-ghost" onclick="closeModal()">${x.presClose||"Kapat"}</button></div></div>`);}
 function copyResult(){const x=L(),r=lastResult,cs=cards.map(k=>x.cards[k].n).join(", ")||"—";const txt=`🏆 ${x.coverTitle.toUpperCase()} (${formName} · ${x.styles[style].n})\n${r.won?x.champTitle:x.outTitle} · ${x.rounds[r.round-1]}\n${x.lblGuc} ${r.power} · ${cs}\n${r.score?"FİNAL "+r.score+(motm?" · ⭐ "+motm:""):""}\n\n${LANG==="tr"?"sen finali görebilir misin?":"can you reach the final?"}`;const done=()=>$("copied").textContent=x.copied;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done).catch(()=>fb(txt,done));else fb(txt,done);}
 function fb(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){$("copied").textContent=L().copyfail;}document.body.removeChild(ta);}
-function restart(){clearTimeout(autoTimer);crowdStop();closeModal();$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;setBudget();buildFormButtons();applyMeta();applyStatic();$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
+function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;setBudget();buildFormButtons();applyMeta();applyStatic();$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
 
 
 /* ===== v5: categories, identity, helpers ===== */
@@ -776,7 +801,60 @@ function _applyCheat(){unlockedForms=[...FORMORDER];unlockedChairs=[...CHAIR_ORD
 /* ===== locked chair flash ===== */
 function _chairLockedFlash(btn){let el=btn.querySelector(".chair-lock-msg");if(!el){el=document.createElement("div");el.className="chair-lock-msg";el.style.cssText="position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap;padding:3px 6px;border-radius:3px;pointer-events:none;z-index:10;text-align:center";el.textContent=LANG==="tr"?"Şampiyonlukla açılır":"Win a championship";btn.style.position="relative";btn.appendChild(el);}el.style.opacity="1";clearTimeout(btn._lockT);btn._lockT=setTimeout(()=>{el.style.transition="opacity .5s";el.style.opacity="0";setTimeout(()=>el.remove(),500);},1800);}
 
-var POOL_TR=POOL;loadMeta();applyTheme();applyStatic();buildFormButtons();applyMeta();setBudget();startTCentre();$("budgetBox").classList.add("introhide");geoDefaultCountry();
+/* ===== sessionStorage persistence ===== */
+function _saveState(){
+  if(runEnded)return;
+  try{sessionStorage.setItem("copa_run",JSON.stringify({v:2,
+    picks:picksBySlot.map(p=>p?Object.assign({},p):null),
+    budget,round,cards:[...cards],cardInv:Object.assign({},cardInv),cardTier:Object.assign({},cardTier),
+    chairId:chairman&&chairman.id,formName,teamName,
+    bench:bench.map(p=>Object.assign({},p)),benchUsed,captainIdx,presCharges,
+    kit:Object.assign({},kit),kp:_kp,ks:_ks,
+    feed:[...feed].slice(-30),
+    finalPenalty,riskPowerMod,econStats:Object.assign({},econStats),
+    fixtures:fixtures.map(f=>f?Object.assign({},f):null),
+    talkUsed,talkMod:Object.assign({},talkMod),injuredIdx,
+    tempPrimePenalty,shortCampPenalty,installmentTurns,primFreeze,lastCreditActive
+  }));}catch(e){}
+}
+function _clearState(){try{sessionStorage.removeItem("copa_run");}catch(e){}}
+function _tryRestoreState(){
+  try{
+    const raw=sessionStorage.getItem("copa_run");if(!raw)return false;
+    const st=JSON.parse(raw);if(!st||st.v!==2)return false;
+    picksBySlot=st.picks;budget=st.budget;round=st.round;
+    cards=st.cards;cardInv=st.cardInv;cardTier=st.cardTier;
+    chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
+    formName=st.formName||"4-4-2";teamName=st.teamName||"";
+    slots=FORMATIONS[formName];filled=slots.map((_,i)=>!!(picksBySlot&&picksBySlot[i]));remaining=0;
+    bench=st.bench||[];benchUsed=st.benchUsed||0;captainIdx=st.captainIdx||-1;presCharges=st.presCharges??1;
+    kit=st.kit||{bg:"#1e3a5f",fg:"#ffffff",sec:"#f0c040"};_kp=st.kp||0;_ks=st.ks||6;
+    feed=st.feed||[];finalPenalty=st.finalPenalty||0;riskPowerMod=st.riskPowerMod||0;
+    econStats=st.econStats||{earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
+    fixtures=st.fixtures||[];
+    talkUsed=st.talkUsed||false;talkMod=st.talkMod||{all:0,def:0,atk:0};injuredIdx=st.injuredIdx||-1;
+    tempPrimePenalty=st.tempPrimePenalty||0;shortCampPenalty=st.shortCampPenalty||0;
+    installmentTurns=st.installmentTurns||0;primFreeze=st.primFreeze||0;lastCreditActive=st.lastCreditActive||0;
+    runEnded=false;eventSeen={};undoData=null;undoUsed=false;autoPlay=false;
+    setBudget();enterHub();return true;
+  }catch(e){_clearState();return false;}
+}
+
+/* ===== IntersectionObserver for card SMIL animations ===== */
+(function(){
+  if(typeof IntersectionObserver==="undefined")return;
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      en.target.querySelectorAll("svg").forEach(svg=>{
+        try{en.isIntersecting?svg.unpauseAnimations():svg.pauseAnimations();}catch(e){}
+      });
+    });
+  },{threshold:0.01});
+  const coll=$("collection");if(coll)obs.observe(coll);
+  window._smilObs=obs;
+})();
+
+var POOL_TR=POOL;loadMeta();applyTheme();applyStatic();buildFormButtons();applyMeta();setBudget();startTCentre();$("budgetBox").classList.add("introhide");geoDefaultCountry();_tryRestoreState();
 (function(){const ms=$("mechStats");if(!ms)return;const pc=typeof POOL_TR!=="undefined"?POOL_TR.length:(typeof POOL!=="undefined"?POOL.length:0);const tc=typeof OPP_POOL!=="undefined"?OPP_POOL.length:0;const cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:(typeof allCardKeys==="function"?allCardKeys().length:33);ms.innerHTML=`<span><b>${pc}</b> oyuncu</span><span>·</span><span><b>${tc}</b> takım</span><span>·</span><span><b>${cc}</b> kart</span><span>·</span><span><b>6</b> tur</span><span>·</span><span><b>6</b> başkan</span>`;})();
 (function(){const l=$("loader");if(l){l.classList.add("done");setTimeout(()=>l.remove(),350);}
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){const m=$("modal");if(m&&!m.classList.contains("hidden"))closeModal();}});})();
