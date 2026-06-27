@@ -1,0 +1,40 @@
+{
+  "howto_icons": [
+    "howto/01_howto_pitch.svg",
+    "howto/02_howto_formation.svg",
+    "howto/03_howto_single_die.svg",
+    "howto/04_howto_double_dice.svg",
+    "howto/05_howto_trophy.svg",
+    "howto/06_howto_star.svg",
+    "howto/07_howto_chairman_bust.svg",
+    "howto/08_howto_briefcase_lock.svg",
+    "howto/09_howto_medical_cross.svg",
+    "howto/10_howto_injured_player.svg",
+    "howto/11_howto_playing_card.svg",
+    "howto/12_howto_stacked_cards.svg"
+  ],
+  "shout_icons": [
+    "shout/13_shout_flame.svg",
+    "shout/14_shout_double_up_arrow.svg",
+    "shout/15_shout_snowflake.svg",
+    "shout/16_shout_shield.svg"
+  ],
+  "trait_icons": [
+    "traits/trait_target.svg",
+    "traits/trait_trophy.svg",
+    "traits/trait_crown.svg",
+    "traits/trait_dice.svg",
+    "traits/trait_badge.svg"
+  ],
+  "oppchar_icons": [
+    "oppchars/opp_bolt.svg",
+    "oppchars/opp_shield.svg",
+    "oppchars/opp_flame.svg",
+    "oppchars/opp_target.svg",
+    "oppchars/opp_ice.svg"
+  ],
+  "motm_icon": [
+    "motm/motm_star.svg"
+  ],
+  "loader_fix": "snippets/loader_color_fix.txt"
+}
