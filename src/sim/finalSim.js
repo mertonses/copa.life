@@ -123,6 +123,17 @@ function buildSim(myPow,oppPow){
   momVal=clamp(momVal,18,82);
   const a=Math.round(momVal),b=100-a;
   $("momA").textContent=a+"%";$("momB").textContent=b+"%";$("momBar").style.background=`linear-gradient(90deg,var(--green) ${a}%,var(--red) ${a}%)`;$("simState").textContent=statusText();}
+ function radioLine(pos,sa,sb,min){
+  const tr=LANG==="tr",diff=sa-sb,lead=diff>0,behind=diff<0,atHome=pos==="A";
+  const myN=clip(teamName||"US",8),oppN=clip(opponent.name,8);
+  const tense=min>80,et=extraTime;
+  if(et){const etLines=tr?["Uzatmalarda nefesler tutuluyor!","Bir gol her şeyi değiştirebilir!","Penaltılar kapıda, her şut kritik!"]:["Extra time — every touch matters!","One goal changes everything now!","Penalties loom — nerves of steel needed!"];return "📻 "+etLines[min%etLines.length];}
+  if(tense&&diff===0){const tl=tr?["Son dakikalar, berabere! Uzatmalar geliyor!","Hiç kimse kazanamıyor, tüm stad ayakta!","Deplasman golü yeter mi? Hayır, bu kupa finali!"]:["Final minutes level — it's going to extra time!","Nobody blinks — who blinks first?","Drama building at the death!"];return "📻 <b>"+tl[min%tl.length]+"</b>";}
+  if(tense&&lead){return "📻 "+(tr?"<b>"+myN+"</b> skoru koruyor, sayım başlıyor!":"<b>"+myN+"</b> holding on — count it down!");}
+  if(tense&&behind){return "📻 "+(tr?"<b>"+myN+"</b> son umut, forvet önde!":"<b>"+myN+"</b> chasing — attackers forward!");}
+  if(atHome){const pool=tr?["Kontrol "+myN+"'de",""+myN+" baskı kuruyor",""+myN+" ataklarda"]:["Control with "+myN,""+myN+" on the front foot",""+myN+" pushing forward"];return "📻 "+pool[frame%pool.length];}
+  const dl=tr?[oppN+" topa hükmediyor",oppN+" maça hakim","Rakip iyi organize"]:[oppN+" controlling",oppN+" on top now","Opposition well-organized"];return "📻 "+dl[frame%dl.length];
+ }
  function draw(){ctx.clearRect(0,0,W,H);for(let i=0;i<9;i++){ctx.fillStyle=i%2?"#79ad5c":"#6fa052";ctx.fillRect(0,i*H/9,W,H/9);}
   ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=2;ctx.strokeRect(7,7,W-14,H-14);ctx.beginPath();ctx.moveTo(7,H/2);ctx.lineTo(W-7,H/2);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,38,0,7);ctx.stroke();
   ctx.strokeStyle="#fff";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(GL,7);ctx.lineTo(GR,7);ctx.stroke();ctx.beginPath();ctx.moveTo(GL,H-7);ctx.lineTo(GR,H-7);ctx.stroke();
