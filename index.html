@@ -117,9 +117,10 @@
 
   <section id="draft" class="hidden">
     <div style="display:none" id="ddbanner"><div class="ddl" id="ddLbl">TRANSFER<br>SON GÜNÜ</div><div class="ddc" id="ddClock">24:00</div><div class="dds" id="ddSub">—</div><div id="squadSils" class="squad-sils"></div></div>
+    <p id="rollHint" class="draft-hint">—</p>
     <div class="draft-cols">
       <div class="draft-left">
-        <div id="rollstage" class="rollstage"><p id="rollHint">—</p>
+        <div id="rollstage" class="rollstage">
           <div id="rollbtns"><button class="btn btn-roll" id="rollBtn" onclick="roll()"><svg class="dsvg" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="4.5" fill="#c0392b" stroke="#7b241c" stroke-width="1.5"/><rect x="1.5" y="1.5" width="25" height="10" rx="4.5" fill="rgba(255,255,255,.12)"/><circle cx="8.5" cy="8.5" r="2.8" fill="#fff"/><circle cx="14" cy="14" r="2.8" fill="#fff"/><circle cx="19.5" cy="19.5" r="2.8" fill="#fff"/></svg> ZAR AT</button><button class="btn btn-ghost btn-mini" id="allBtn" style="margin-top:8px" onclick="quickAll()">⚡ Akıllı doldur</button><button class="btn btn-ghost btn-mini hidden" id="undoBtn" style="margin-top:6px" onclick="undoPick()">↩ Son hamleyi geri al</button></div>
           <div id="dicebox" class="dicebox hidden"><div class="dface" id="fxDie">⚀</div><div class="dcap" id="fxCap"></div></div></div>
         <div id="optstage" class="hidden"><div class="opts" id="opts"></div><button class="btn btn-ghost btn-mini" id="rerollBtn" onclick="rerollOptions()">Seçenekleri yenile</button><div class="optmsg" id="optmsg"></div></div>
@@ -292,10 +293,64 @@ function beginDraft(){makeSeed($("seedInput")&&$("seedInput").value.trim());pani
   $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("budgetBox").classList.remove("introhide");
   $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();}
 function updateDeadline(){const cl=$("ddClock");if(cl)cl.textContent=String(deadlineH).padStart(2,"0")+":00";const sub=$("ddSub");if(sub)sub.textContent=L().squad+" "+(slots.length-remaining)+"/"+slots.length;const bb=$("ddbanner");if(bb){bb.classList.toggle("urgent",deadlineH<=8);bb.classList.toggle("alarm",deadlineH<=5);}if(cl)cl.style.color=deadlineH<=5?"#ff5a4a":"";_updateSquadSils();}
-function _drawConnectors(p){const old=p.querySelector(".pclines");if(old)old.remove();const go=["GK","DEF","MID","FWD"],byG={};slots.forEach(s=>{const g=groupOf(s[0]);if(!byG[g])byG[g]=[];byG[g].push({x:s[1],y:s[2]});});const _cx=g=>g.reduce((a,q)=>a+q.x,0)/g.length;const _miny=g=>Math.min(...g.map(q=>q.y));const _maxy=g=>Math.max(...g.map(q=>q.y));let el="";const R=8,col="rgba(255,255,255,.28)",arr="rgba(255,255,255,.55)";
-go.forEach(g=>{const gr=byG[g];if(!gr||gr.length<2)return;const sorted=[...gr].sort((a,b)=>a.x-b.x);for(let i=0;i<sorted.length-1;i++){const x1=sorted[i].x+R,y1=sorted[i].y,x2=sorted[i+1].x-R,y2=sorted[i+1].y;if(x2>x1+2){const mx=(x1+x2)/2,sag=y1<50?3:-3;el+=`<path d="M${x1},${y1} Q${mx},${(y1+y2)/2+sag} ${x2},${y2}" fill="none" stroke="${col}" stroke-width=".9" stroke-dasharray="2 1.8" stroke-linecap="round"/>`;}}});
-const pairs=[["GK","DEF"],["DEF","MID"],["MID","FWD"]];pairs.forEach(([g1,g2])=>{const fr=byG[g1],to=byG[g2];if(!fr||!to)return;const ax1=_cx(fr),ax2=_cx(to),ax=(ax1+ax2)/2;const y1=_miny(fr)-R,y2=_maxy(to)+R;if(y1>y2+4){const cy=(y1+y2)/2,bend=ax<50?-4:4;el+=`<path d="M${ax},${y1} Q${ax+bend},${cy} ${ax},${y2+4}" fill="none" stroke="${col}" stroke-width=".9" stroke-dasharray="2.5 1.8" stroke-linecap="round"/>`;el+=`<path d="M${ax-2.5},${y2+7} Q${ax},${y2+2} ${ax+2.5},${y2+7}" fill="none" stroke="${arr}" stroke-width="1.2" stroke-linecap="round"/>`;}});
-const w=document.createElement("div");w.className="pclines";w.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:0";w.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0">${el}</svg>`;p.appendChild(w);}
+function _drawConnectors(p){
+  const old=p.querySelector(".pclines");if(old)old.remove();
+  const go=["GK","DEF","MID","FWD"],byG={};
+  slots.forEach((s,i)=>{const g=groupOf(s[0]);if(!byG[g])byG[g]=[];byG[g].push({x:s[1],y:s[2],idx:i});});
+  const _cx=g=>g.reduce((a,q)=>a+q.x,0)/g.length;
+  const _miny=g=>Math.min(...g.map(q=>q.y));
+  const _maxy=g=>Math.max(...g.map(q=>q.y));
+  const _avgScore=g=>g.reduce((a,q)=>{const pl=picksBySlot&&picksBySlot[q.idx];return a+(pl?_lnk(pl,pl):1);}  ,0)/g.length;
+  function _lnk(a,b){
+    if(!a||!b)return 0;
+    if(a===b)return (a.tr?2:1);
+    const bothTR=a.tr&&b.tr,oneTR=a.tr||b.tr;
+    if(bothTR)return 4;
+    if(oneTR)return 3;
+    const ad=Math.abs((a.age||25)-(b.age||25));
+    return ad<=3?2:1;
+  }
+  function _lnkColor(score){
+    if(score===0)return {s:"rgba(255,255,255,.15)",w:".7"};
+    if(score>=4)return {s:"#4ade80",w:"1.3"};
+    if(score>=3)return {s:"#fbbf24",w:"1.15"};
+    if(score>=2)return {s:"rgba(255,255,255,.55)",w:"1.0"};
+    return {s:"rgba(255,255,255,.32)",w:".9"};
+  }
+  let el="";const R=8;
+  go.forEach(g=>{
+    const gr=byG[g];if(!gr||gr.length<2)return;
+    const sorted=[...gr].sort((a,b)=>a.x-b.x);
+    for(let i=0;i<sorted.length-1;i++){
+      const x1=sorted[i].x+R,y1=sorted[i].y,x2=sorted[i+1].x-R,y2=sorted[i+1].y;
+      if(x2>x1+2){
+        const mx=(x1+x2)/2,sag=y1<50?3:-3;
+        const p1=picksBySlot&&picksBySlot[sorted[i].idx],p2=picksBySlot&&picksBySlot[sorted[i+1].idx];
+        const {s,w}=_lnkColor(_lnk(p1,p2));
+        el+=`<path d="M${x1},${y1} Q${mx},${(y1+y2)/2+sag} ${x2},${y2}" fill="none" stroke="${s}" stroke-width="${w}" stroke-dasharray="2.5 2" stroke-linecap="round"/>`;
+      }
+    }
+  });
+  const pairs=[["GK","DEF"],["DEF","MID"],["MID","FWD"]];
+  pairs.forEach(([g1,g2])=>{
+    const fr=byG[g1],to=byG[g2];if(!fr||!to)return;
+    const ax1=_cx(fr),ax2=_cx(to),ax=(ax1+ax2)/2;
+    const y1=_miny(fr)-R,y2=_maxy(to)+R;
+    if(y1>y2+4){
+      const cy=(y1+y2)/2,bend=ax<50?-4:4;
+      const avgScore=(fr.reduce((a,q)=>{const pl=picksBySlot&&picksBySlot[q.idx];return a+(pl?1:0);}  ,0)+to.reduce((a,q)=>{const pl=picksBySlot&&picksBySlot[q.idx];return a+(pl?1:0);}  ,0))/(fr.length+to.length);
+      const trScore=([...fr,...to].filter(q=>picksBySlot&&picksBySlot[q.idx]&&picksBySlot[q.idx].tr).length);
+      const filled=([...fr,...to].filter(q=>picksBySlot&&picksBySlot[q.idx]).length);
+      const sc=filled===0?0:trScore>=2?4:trScore>=1?3:filled>0?1:0;
+      const {s,w}=_lnkColor(sc);
+      el+=`<path d="M${ax},${y1} Q${ax+bend},${cy} ${ax},${y2+4}" fill="none" stroke="${s}" stroke-width="${w}" stroke-dasharray="2.5 2" stroke-linecap="round"/>`;
+      el+=`<path d="M${ax-2.5},${y2+7} Q${ax},${y2+2} ${ax+2.5},${y2+7}" fill="none" stroke="${s}" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>`;
+    }
+  });
+  const w=document.createElement("div");w.className="pclines";w.style.cssText="position:absolute;inset:0;pointer-events:none;z-index:0";
+  w.innerHTML=`<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0">${el}</svg>`;
+  p.appendChild(w);
+}
 function buildPitch(p){p.querySelectorAll(".roundel,.pitch-zone,.pclines").forEach(e=>e.remove());const pre=p.id==="pitch"?"r":"h";slots.forEach((s,i)=>{const d=document.createElement("div");d.className="roundel empty";d.id=pre+i;d.style.left=s[1]+"%";d.style.top=s[2]+"%";const sil=_SLOT_SIL[groupOf(s[0])]||"";d.innerHTML=`${sil}<span class="rp">${L().abbr[s[0]]}</span>`;p.appendChild(d);});_drawConnectors(p);}
 function setBudget(){
   $("budgetV").textContent="€"+budget+"M";{const bb=$("budgetBox");["plenty","safe","warn","tight","low","debt"].forEach(c=>bb.classList.remove(c));if(budget>=25)bb.classList.add("plenty");else if(budget>=12)bb.classList.add("safe");else if(budget>=5)bb.classList.add("warn");else if(budget>=0)bb.classList.add("tight");else bb.classList.add("debt");}
@@ -353,13 +408,14 @@ function _ovCol(ov){return ov>=80?"#4ade80":ov>=70?"#fcd34d":ov>=62?"#fb923c":"#
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?kit.bg:"rgba(120,120,120,0.2)";const s=done?(kit.sec||"rgba(255,255,255,.5)"):"rgba(120,120,120,0.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
 function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;r.title=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;r.innerHTML=`${isCap?'<span class="capbadge"><svg viewBox="0 0 12 9" width="10" height="7.5" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>':""}${p.injured?'<span class="injmark"><svg viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>':""}
 <span class="rov" style="color:${_ovCol(eff)}">${eff}</span><span class="rname">${surOf(p)}</span>`;}
-function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};currentSlot=-1;updateDeadline();if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
+function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};currentSlot=-1;updateDeadline();const _dp=$("pitch");if(_dp)_drawConnectors(_dp);if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
 function quickAll(){const uf=unfilled();uf.forEach((idx,k)=>{const pos=slots[idx][0],SG=groupOf(pos),reserve=(uf.length-1-k)*1;
     let pick=null;let inp=availG(SG).filter(p=>canAffordCost(valueOf(p[1])+reserve));if(inp.length)pick=rnd(inp);
     if(!pick){let any=availAll().filter(p=>canAffordCost(valueOf(p[1])+reserve));if(any.length)pick=rnd(any);}
     if(!pick){let all=availG(SG);if(!all.length)all=availAll();if(all.length)pick=all.reduce((a,b)=>a[1]<b[1]?a:b);}
     let obj;if(pick){usedNames.add(pick[0]);obj=mkOpt(pick[0],pick[1],pick[2],pos,false,pick[3],pick[4],pick[5]);}else obj=fabPlayer(pos,55,61);
     fillSlot(idx,obj);});
+  const _qp=$("pitch");if(_qp)_drawConnectors(_qp);
   deadlineH=Math.max(2,deadlineH-2*uf.length);buildBench();updateDeadline();sfxRoll();$("ddbanner").classList.add("hidden");setTimeout(()=>{if(reuseClub)reuseClub=false;showPostcard(enterHub);},350);}
 
 /* ===== kit ===== */
