@@ -94,12 +94,10 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .fbtn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}.fbtn:active{transform:translateY(2px)}.fbtn .sm{display:block;font-family:var(--disp);font-weight:300;font-size:8px;letter-spacing:1px;margin-top:2px;opacity:.7}
 .fbtn.sel{background:#8e2d20;color:#fff;border-color:#8e2d20;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
 .foot{text-align:center;color:var(--ink2);font-size:10px;margin-top:6px;line-height:1.5}
-.ddbanner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--navy);color:var(--mustard);border:2px solid var(--mustard);border-radius:6px;padding:8px 14px;margin-bottom:10px;font-family:var(--mono)}
-.ddbanner .ddl{font-size:9px;letter-spacing:2px;text-transform:uppercase;line-height:1.2;text-align:left}
-.ddbanner .ddc{font-family:var(--disp);font-weight:700;font-size:30px;letter-spacing:1px;line-height:1}
-.ddbanner .dds{font-size:9px;letter-spacing:1px;color:#cfe0ee;text-align:right}
-.ddbanner.urgent{border-color:var(--red);color:#ff8a6a;animation:ddp .7s steps(1) infinite}
-.ddbanner.urgent .ddc{color:#ff6a48}
+.ddbanner{display:flex;align-items:center;justify-content:center;background:rgba(44,74,99,.55);border:1.5px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;margin-bottom:8px}
+.ddbanner .ddl,.ddbanner .ddc,.ddbanner .dds{display:none}
+.squad-sils{display:flex;gap:4px;align-items:center;justify-content:center}
+.ddbanner.urgent{border-color:rgba(255,90,74,.4)}.ddbanner.alarm{border-color:rgba(255,90,74,.7)}
 .slothdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-height:24px}
 .slothdr .n{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--red)}.slothdr .nm{font-family:var(--disp);font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.5px;flex:1}
 .btn{font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:1.5px;font-size:15px;border:none;border-radius:4px;padding:13px 16px;cursor:pointer;width:100%;transition:transform .1s,background .15s}
@@ -237,7 +235,8 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .pc-band{background:var(--navy);color:#fff;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:6px}
 .pc-team{font-family:var(--disp);font-weight:800;font-size:25px;text-transform:uppercase;letter-spacing:1px;color:#8e2d20;margin:8px 0 2px}
 .pc-sub{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ink2);text-transform:uppercase;margin-bottom:6px}
-.pc-debt{font-family:var(--mono);font-size:10px;line-height:1.35;color:#8e2d20;background:#ffe1aa;border:1.5px solid #d88928;margin:7px 10px;padding:6px 8px}
+.pc-debt{font-family:var(--mono);font-size:10px;line-height:1.35;color:#fff;background:#8e2d20;border:1.5px solid #c0392b;margin:7px 10px;padding:6px 8px;animation:debtPulse 1.2s ease-in-out infinite}
+@keyframes debtPulse{0%,100%{box-shadow:0 0 0 0 rgba(142,45,32,.6)}60%{box-shadow:0 0 0 5px rgba(142,45,32,0)}}
 .pc-xi{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:8px 0;text-align:left}
 .pc-pl{display:flex;justify-content:space-between;border:1.5px solid var(--line);background:var(--paper2);padding:4px 7px;font-family:var(--mono);font-size:11px}
 .pc-pl .pp{color:#26402f;font-weight:700;margin-right:5px}
