@@ -643,7 +643,7 @@ function afterMatch(advance){if(runEnded)return;closeModal();if(!advance){endRun
 function rewardPreview(kind,prize){
   const tr=LANG==="tr";
   if(kind==="cash")return "€"+budget+"M → €"+(budget+prize)+"M";
-  if(kind==="loan")return tr?"Yedek slota güçlü oyuncu — 1 tur, -€5M":"Powerful bench player — 1 round, -€5M";
+  if(kind==="loan")return tr?"En zayıf oyuncunun yerini alır — 1 tur, -€5M":"Replaces weakest player — 1 round, -€5M";
   if(kind==="swap")return cards.length?(tr?"Elinden kart iade et, rastgele kart al":"Return a card, get a random one back"):tr?"Aktif kart yok":"No active cards";
   if(!(injuredIdx>=0&&picksBySlot[injuredIdx]))return tr?"Sakat oyuncu yok":"No injured player";
   const p=picksBySlot[injuredIdx];return shortName(p)+" "+effOf(p)+" → "+(effOf(p)+INJ);
