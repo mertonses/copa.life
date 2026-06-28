@@ -40,9 +40,13 @@
 .trbadge{font-size:11px}
 .final-pills{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;min-height:0}
 .fpill{display:inline-flex;align-items:center;gap:2px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.3px;padding:2px 6px;border-radius:10px;cursor:pointer;border:1.5px solid;-webkit-tap-highlight-color:transparent;user-select:none;transition:.1s}
-.fpill.fp-bonus{background:rgba(38,64,47,.10);color:#26402f;border-color:rgba(38,64,47,.4)}.fpill.fp-bonus:active{background:rgba(38,64,47,.2)}
-.fpill.fp-risk{background:rgba(142,45,32,.08);color:#8e2d20;border-color:rgba(142,45,32,.35)}.fpill.fp-risk:active{background:rgba(142,45,32,.15)}
+.fpill.fp-bonus{background:rgba(63,154,87,.12);color:var(--good);border-color:rgba(63,154,87,.4)}.fpill.fp-bonus:active{background:rgba(63,154,87,.22)}
+.fpill.fp-risk{background:rgba(214,84,58,.08);color:var(--red);border-color:rgba(214,84,58,.35)}.fpill.fp-risk:active{background:rgba(214,84,58,.18)}
 .fpill.fp-none{background:var(--paper2);color:var(--ink2);border-color:var(--line)}
+.fpill svg{width:10px;height:10px;flex-shrink:0;vertical-align:-.1em}
+.fpill .fpico{display:inline-flex;align-items:center;width:10px;height:10px;flex-shrink:0}
+.card-popup-ico{width:44px;height:44px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+.card-popup-ico svg{width:44px;height:44px}
 #squadSils{display:none}
 .budget.plenty{background:#26402f;border-color:#1d3020}
 .budget.safe{background:#3a5c40;border-color:#2a4430}
