@@ -59,6 +59,7 @@
  #intro .formpick{max-width:none;margin:0}
 }
 @media(min-width:760px){#hub .roundtag{text-align:center}}
+@media(min-width:1280px){body{zoom:1.25}}
 .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;border-bottom:3px solid var(--red);padding-bottom:7px;margin-bottom:10px}
 .logo{font-family:var(--disp);font-weight:800;line-height:1;text-transform:none;color:var(--red);text-align:center;justify-self:center}
 .brandmark{display:inline-flex;align-items:baseline;background:transparent;border:0;padding:0;font-size:30px;letter-spacing:-.5px}
