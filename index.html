@@ -785,7 +785,7 @@ function finishRoundReward(kind,extraText){
   /* Eski Kurt OV penalty */
   if(eskiKurtSlotIdx>=0&&picksBySlot[eskiKurtSlotIdx]){const _p=picksBySlot[eskiKurtSlotIdx];_p.ov=Math.max(55,_p.ov-eskiKurtPenalty);_p.eff=effOf(_p);renderRoundel("h"+eskiKurtSlotIdx,_p);pushFeed("🧓 <b>"+shortName(_p)+"</b> "+(LANG==="tr"?"eski kurt bedeli: OV -":"veteran cost: OV -")+eskiKurtPenalty,"lose");eskiKurtSlotIdx=-1;eskiKurtPenalty=0;}
   /* Kurban Belli deferred injury */
-  if(kurbanScheduled&&kurbanScheduled.count>0){for(let _ki=0;_ki<kurbanScheduled.count;_ki++){applyRandomInjury(kurbanScheduled.turns);}pushFeed("🔪 "+(LANG==="tr"?"Kurban bedeli: "+kurbanScheduled.count+" oyuncu sakatlandı":"Sacrifice price: "+kurbanScheduled.count+" player(s) injured"),"lose");kurbanScheduled={count:0,turns:0};}
+  if(kurbanScheduled&&kurbanScheduled.count>0){const _kinj=applyMultiInjury(kurbanScheduled.count);pushFeed("🔪 "+(LANG==="tr"?"Kurban bedeli: "+_kinj.length+" oyuncu sakatlandı":"Sacrifice price: "+_kinj.length+" player(s) injured"),"lose");kurbanScheduled={count:0,turns:0};}
   /* Kaynaşma DARK penalty */
   if(kaynasmaDark){riskPowerMod-=3;pushFeed("🤝 "+(LANG==="tr"?"Kaynaşma çöküşü: -3 güç":"Team bonding collapse: -3 power"),"lose");kaynasmaDark=false;}
   /* Loan expiry (turnsLeft-based) */
