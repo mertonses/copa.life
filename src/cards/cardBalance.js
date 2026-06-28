@@ -1,12 +1,9 @@
 /* Kart fiyatlari ve variant dengesi. */
-/* Variant fiyat carpani: notr/altin/kara */
-var VARIANT_PRICE_MOD=[1.0,1.3,0.85];
+/* Variant fiyat carpani: altin/kara */
+var VARIANT_PRICE_MOD=[1.15,0.85];
 
 function weightedVariant(){
- const r=rand();
- if(r<0.65)return 0; // NÖTR  65%
- if(r<0.90)return 1; // ALTIN 25%
- return 2;           // KARA  10%
+ return rand()<0.5?0:1; // 50/50 ALTIN / KARA
 }
 
 function cardPrice(k){
@@ -14,12 +11,13 @@ function cardPrice(k){
  const floor={bronze:7,silver:12,gold:17,risk:6}[rar]||7;
  const base=Math.round(d.price||floor);
  const vm=VARIANT_PRICE_MOD[variantOf(k)||0];
- return Math.max(3,Math.round(Math.max(floor,base)*vm)+chairmanMarketMod());
+ const pm=typeof cardPriceMod!=="undefined"?cardPriceMod:1.0;
+ return Math.max(3,Math.round(Math.max(floor,base)*vm*pm)+chairmanMarketMod());
 }
 
 function variantText(k){
- const labels=L().variantLbl||["NÖTR","ALTIN","KARA"];
- return labels[variantOf(k)]||labels[0]||"";
+ const labels=L().variantLbl||["ALTIN","KARA"];
+ return labels[Math.min(variantOf(k)||0,1)]||labels[0]||"";
 }
 
 function cardContractType(k){

@@ -6,6 +6,12 @@ var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUs
 var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
 var loanPlayer=null;
 var legacyFund=0;
+var shopBlocked=0,presidentBlocked=0,cardPriceMod=1.0,cardPriceModTurns=0;
+var deferredBudgetPenalty=0,deferredPowerPenalty=0,oppPowerMod=0;
+var shopVariantLock={};
+var eskiKurtSlotIdx=-1,eskiKurtPenalty=0;
+var kurbanScheduled={count:0,turns:0};
+var kaynasmaDark=false;
 var pintiSavings=0,sansSpotlightIdx=-1,sansMediaPressure=0,torpilDebtPenalty=0,chairTrust=1,kaosHalfReward=false;
 var NAMEP=["Anadolu","Demir","Yıldız","Kartal","Şimşek","Bordo","Gençlik","Deniz","Ankara","Toros","Çelik","Boğaz"],NAMES2=["spor","gücü FK","SK","Birliği","FK","United"];
 

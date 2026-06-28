@@ -38,7 +38,18 @@ var CARDDEFS={
  kisa_kamp:{price:7,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
  doping:{price:10,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>8},
  kriz:{price:8,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
- cilgin_basin:{price:7,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0}};
+ cilgin_basin:{price:7,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
+ /* YENİ KARTLAR */
+ kurban_belli:{price:8,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
+ primler_yatinca:{price:9,rar:"risk",kind:"power",mode:"instant",eff:(s,r)=>0},
+ kaynasma:{price:7,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>{const avg=s.length?s.reduce((a,p)=>a+p.age,0)/s.length:30;return avg<=29?5:3;}},
+ vur_igneyi:{price:6,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
+ bu_adam:{price:12,rar:"gold",kind:"power",mode:"instant",eff:(s,r)=>0},
+ gec_gec:{price:5,rar:"risk",kind:"defense",mode:"scaling",eff:(s,r)=>opponent&&opponent.power>squadBasePower()?5:2},
+ eski_kurt:{price:9,rar:"risk",kind:"power",mode:"instant",eff:(s,r)=>0},
+ nasip_kismet:{price:8,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
+ yildiz_krizi:{price:6,rar:"risk",kind:"power",mode:"instant",eff:(s,r)=>0},
+ kasiga_para:{price:9,rar:"silver",kind:"power",mode:"instant",eff:(s,r)=>0}};
 var CARDKEYS=Object.keys(CARDDEFS);
 function cardKind(k){return (CARDDEFS[k]&&CARDDEFS[k].kind)||"power";}
 function cardMode(k){return (CARDDEFS[k]&&CARDDEFS[k].mode)||"scaling";}

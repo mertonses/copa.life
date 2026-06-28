@@ -1,8 +1,8 @@
 /* Kartlarin guce ve run durumuna etkileri. */
 function squadBasePower(){const s=picksBySlot.filter(Boolean);return s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;}
 
-/* Variant guc bonuslari — notr/altin/kara */
-var VARIANT_BONUS=[0,2,4];
+/* Variant guc bonuslari — altin/kara */
+var VARIANT_BONUS=[1,3];
 
 /* Kara variant'ta finalde dususecek guc (satin almada eklenir) */
 var KARA_PEN={
@@ -11,17 +11,18 @@ var KARA_PEN={
  veteran:2,yerli_blok:1,kanat_akini:1,cift_forvet:1,
  derbi:3,ch_final:2,final_provasi:2,kupaci_kadro:2,son_dans:3,
  deplasman_kafilesi:1,sosyal_medya:1,
- sahte_evrak:3,kumarbaz:2,doping:3
+ sahte_evrak:3,kumarbaz:2,doping:3,
+ kaynasma:1,gec_gec:1
 };
 
 function cardEff(k,s,r){
  const v=variantOf(k),base=CARDDEFS[k].eff(s,r);
  const bonus=isProgressCard(k)?VARIANT_BONUS[v]||0:0;
  /* Ozel variant kosullu kartlar (eskiden tier skalasi) */
- if(k==="kontra")return base+bonus+(v>=1&&cnt(s,FWDP)>=3?2:0)+(v>=2&&opponent&&opponent.power>squadBasePower()?3:0);
- if(k==="anadolu")return base+bonus+(v>=1&&s.filter(p=>p.tr).length>=6?3:0)+(v>=2?Math.floor(Math.max(0,budget)/18)+3:0);
- if(k==="veteran")return base+bonus+(v>=1?Math.min(3,s.filter(p=>p.age>=32).length):0)+(v>=2&&(talkUsed||r>=5)?3:0);
- if(k==="cift_forvet")return base+bonus+(v>=1&&s.filter(p=>p.pos==="ST").length>=2?1:0);
+ if(k==="kontra")return base+bonus+(cnt(s,FWDP)>=3?2:0)+(v>=1&&opponent&&opponent.power>squadBasePower()?3:0);
+ if(k==="anadolu")return base+bonus+(s.filter(p=>p.tr).length>=6?3:0)+(v>=1?Math.floor(Math.max(0,budget)/18)+3:0);
+ if(k==="veteran")return base+bonus+Math.min(3,s.filter(p=>p.age>=32).length)+(v>=1&&(talkUsed||r>=5)?3:0);
+ if(k==="cift_forvet")return base+bonus+(s.filter(p=>p.pos==="ST").length>=2?1:0);
  return base+bonus;
 }
 
@@ -47,6 +48,99 @@ function applyRiskCardGain(k){
  if(k==="final_provasi"){spend(FINAL_PROVA_COST,"spent");pushFeed("\u{1f3df} <b>"+L().cards[k].n+"</b> şimdi -€"+FINAL_PROVA_COST+"M, finalde +5","pres");}
  if(k==="kupaci_kadro"){finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+KUPA_DEBT);pushFeed("\u{1f3c6} <b>"+L().cards[k].n+"</b> YF/final +4, finalde -"+KUPA_DEBT+" güç","lose");}
  if(k==="cilgin_basin"){if(rand()<0.65){earn(20,"earned");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı işe yaradı: +€20M":"press worked in our favour: +€20M"),"buy");}else{spend(8,"spent");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı ters tepti: -€8M":"press backfired: -€8M"),"lose");}}
+ if(k==="kurban_belli"){
+  const v=variantOf(k);
+  const pow=v===1?10:6;
+  riskPowerMod+=pow;
+  kurbanScheduled={count:v===1?2:1,turns:v===1?2:1};
+  pushFeed("\u{1f52a} <b>"+L().cards[k].n+"</b> +"+(pow)+(LANG==="tr"?" güç, tur sonu bedel — "+kurbanScheduled.count+" sakatlık bekliyor":" power — "+kurbanScheduled.count+" injury(ies) pending"),"pres");
+ }
+ if(k==="primler_yatinca"){
+  const v=variantOf(k);
+  const pow=v===1?9:4;
+  const pen=v===1?15:8;
+  riskPowerMod+=pow;
+  deferredBudgetPenalty+=pen;
+  pushFeed("\u{1f4b8} <b>"+L().cards[k].n+"</b> +"+(pow)+(LANG==="tr"?" güç, gelecek tur -€":" power, next turn -€")+pen+"M","pres");
+ }
+ if(k==="vur_igneyi"){
+  if(injuredIdx<0){pushFeed("\u{1f489} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"sakat oyuncu yok":"no injured player"),"lose");return;}
+  const v=variantOf(k);
+  const pow=v===1?5:2;
+  const extraTurns=v===1?2:1;
+  riskPowerMod+=pow;
+  const _inj=picksBySlot[injuredIdx];
+  if(_inj){_inj.injured=Math.max(0,(_inj.injured||0)+extraTurns);}
+  pushFeed("\u{1f489} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"sakat oyuncu sahada":"injured player on pitch")+" +"+pow+(LANG==="tr"?" güç, sakatlık +":" power, injury +")+extraTurns+(LANG==="tr"?" tur":" turn(s)"),"pres");
+ }
+ if(k==="bu_adam"){
+  const v=variantOf(k);
+  const minOV=v===1?80:70,maxOV=v===1?89:79;
+  const commission=v===1?10:0;
+  const emptySlot=picksBySlot.findIndex(p=>!p);
+  const slotIdx=emptySlot>=0?emptySlot:picksBySlot.length-1;
+  const displaced=picksBySlot[slotIdx]||null;
+  const positions=["ST","CM","CB","GK","LW","RW","LM","RM","WB","CDM","CAM"];
+  const pos=positions[ri(0,positions.length-1)];
+  const ov=ri(minOV,maxOV);
+  const tempP={name:"Misafir",sur:"Misafir "+ov,age:ri(25,32),pos,ov,tr:false,eff:Math.round(ov*0.95),isTemp:true};
+  picksBySlot[slotIdx]=tempP;
+  renderRoundel("h"+slotIdx,tempP);
+  if(commission>0){spend(commission,"spent");}
+  loanPlayer={...tempP,loanCost:commission,turnsLeft:1,slotIdx,displaced};
+  pushFeed("⚡ <b>"+L().cards[k].n+"</b> OV"+ov+" "+pos+(LANG==="tr"?" 1 tur sahada":" on pitch for 1 turn")+(commission>0?" -€"+commission+"M":""),"pres");
+ }
+ if(k==="eski_kurt"){
+  const v=variantOf(k);
+  const minAge=v===1?32:30;
+  const pow=v===1?12:8;
+  const pen=v===1?6:2;
+  const elder=picksBySlot.map((p,i)=>({p,i})).filter(x=>x.p&&x.p.age>=minAge);
+  if(!elder.length){pushFeed("\u{1f9d3} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?minAge+"+ oyuncu yok":minAge+"+ player needed"),"lose");return;}
+  const target=elder[ri(0,elder.length-1)];
+  riskPowerMod+=pow;
+  eskiKurtSlotIdx=target.i;
+  eskiKurtPenalty=pen;
+  pushFeed("\u{1f9d3} <b>"+L().cards[k].n+"</b> <b>"+shortName(target.p)+"</b> +"+pow+(LANG==="tr"?" güç, tur sonu OV -":" power, turn end OV -")+pen,"pres");
+ }
+ if(k==="nasip_kismet"){
+  const v=variantOf(k);
+  const drawCount=v===1?2:1;
+  const freePool=CARDKEYS.filter(x=>invOf(x)<=0&&!isInstantCard(x));
+  let drawn=0;
+  while(drawn<drawCount&&freePool.length){const fi=ri(0,freePool.length-1);const fk=freePool.splice(fi,1)[0];addCard(fk,weightedVariant(),{silent:false});drawn++;}
+  if(v===1){cardPriceMod=1.6;cardPriceModTurns=1;presidentBlocked=1;pushFeed("\u{1f340} <b>"+L().cards[k].n+"</b> "+drawn+(LANG==="tr"?" bedava kart · fiyatlar +%60 · başkan kapalı":" free card(s) · prices +60% · president unavailable"),"pres");}
+  else{cardPriceMod=0.8;cardPriceModTurns=2;pushFeed("\u{1f340} <b>"+L().cards[k].n+"</b> "+drawn+(LANG==="tr"?" bedava kart · 2 tur fiyatlar -%20":" free card · prices -20% for 2 turns"),"buy");}
+ }
+ if(k==="yildiz_krizi"){
+  const v=variantOf(k);
+  const s=picksBySlot.filter(Boolean);
+  if(!s.length)return;
+  let bestIdx=-1,bestEff=0;
+  picksBySlot.forEach((p,i)=>{if(p&&p.eff>bestEff){bestEff=p.eff;bestIdx=i;}});
+  if(bestIdx<0)return;
+  const best=picksBySlot[bestIdx];
+  if(v===1){
+   const domestic=s.filter(p=>p.tr&&p!==best).length;
+   const netPow=domestic*3-Math.round(best.eff);
+   riskPowerMod+=netPow;
+   if(rand()<0.20){spend(10,"spent");pushFeed("⚡ "+(LANG==="tr"?"Yıldız Krizi: medya cezası -€10M":"Star Crisis: media fine -€10M"),"lose");}
+   pushFeed("⭐ <b>"+L().cards[k].n+"</b> <b>"+shortName(best)+"</b> "+(LANG==="tr"?"dışarıda · "+domestic+" yerli +"+(domestic*3)+" güç":"out · "+domestic+" domestic +"+(domestic*3)+" power"),"pres");
+  } else {
+   const restCount=s.length-1;
+   const netPow=restCount*2-Math.round(best.eff);
+   riskPowerMod+=netPow;
+   pushFeed("⭐ <b>"+L().cards[k].n+"</b> <b>"+shortName(best)+"</b> "+(LANG==="tr"?"dışarıda · kalan "+restCount+" oyuncu +"+(restCount*2)+" güç":"out · rest +"+restCount*2+" power"),"pres");
+  }
+ }
+ if(k==="kasiga_para"){
+  const v=variantOf(k);
+  const debuff=v===1?8:4;
+  if(opponent)opponent.power=Math.max(1,opponent.power-debuff);
+  shopBlocked=1;
+  if(v===1){presidentBlocked=1;deferredPowerPenalty=3;}
+  pushFeed("\u{1f911} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"rakip -"+debuff+" güç · gelecek tur pazar kapalı":"opponent -"+debuff+" power · next turn market closed")+(v===1?" · "+(LANG==="tr"?"başkan kapalı":"president unavailable"):""),"pres");
+ }
 }
 
 function processRiskCards(){
@@ -54,6 +148,10 @@ function processRiskCards(){
  if(lastCreditActive<0&&budget<-10){earn(LAST_CREDIT_GAIN,"earned");lastCreditActive=1;pushFeed("\u{1f198} <b>"+L().cards.son_kredi.n+"</b> +€"+LAST_CREDIT_GAIN+"M, "+(LANG==="tr"?"başkan eşiği 5M sertleşti":"chairman limit tightened 5M"),"buy");}
  if(hasCard("kumarbaz")&&round>1&&rand()<BET_SPONSOR_LOSS_CHANCE){spend(BET_SPONSOR_LOSS,"spent");pushFeed("\u{1f4c9} "+(LANG==="tr"?"Bahis Sponsoru patladı: -€":"Bet Sponsor collapsed: -€")+BET_SPONSOR_LOSS+"M","lose");}
  if(hasCard("doping")&&round>1&&rand()<DOPING_FINE_CHANCE){spend(DOPING_FINE,"spent");pushFeed("\u{1f9ea} "+(LANG==="tr"?"Doping incelemesi: -€":"Doping review: -€")+DOPING_FINE+"M","lose");}
+ if(hasCard("gec_gec")&&variantOf("gec_gec")===1&&rand()<0.25){
+  const inj=applyRandomInjury(1);
+  if(inj)pushFeed("\u{1f9ba} "+(LANG==="tr"?"Geç Geçebilirsen riski: ":"Defensive wall risk: ")+"<b>"+shortName(inj)+"</b>"+(LANG==="tr"?" sakatlandı":" injured"),"lose");
+ }
 }
 
 function expireTemporaryCards(){
@@ -74,11 +172,12 @@ function addCard(k,v,opts){
  cardInv[k]=1;cardVariant[k]=variant;
  if(!instant&&!hasCard(k)&&cards.length<activeCardSlots())cards.push(k);
  /* Kara variant: final guc cezasi uygula */
- if(variant===2&&!isInstantCard(k)&&(KARA_PEN[k]||0)>0){
+ if(variant===1&&!isInstantCard(k)&&(KARA_PEN[k]||0)>0){
    const pen=KARA_PEN[k];
    finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+pen);
    if(!silent)pushFeed("\u{1f5a4} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"KARA — finalde -"+pen+" güç (lanetli)":"DARK — -"+pen+" in the final (cursed)"),"lose");
  }
+ if(variant===1&&k==="kaynasma")kaynasmaDark=true;
  if(instant)applyRiskCardGain(k);
  /* Contract kartlar satin alindiginda ani etkilerini uygula */
  if(!instant&&cardMode(k)==="contract")applyRiskCardGain(k);
