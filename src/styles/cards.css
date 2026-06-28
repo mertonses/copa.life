@@ -9,20 +9,20 @@
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
 /* Variant badges — NÖTR / ALTIN / KARA */
 .var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:3px}
-.var-0{background:#d4d4d4;color:#444}
-.var-1{background:#e6ad2e;color:#23332a}
-.var-2{background:#7c3aed;color:#fff}
+.var-0{background:#7a8a76;color:#fff}
+.var-1{background:#c8940a;color:#fff}
+.var-2{background:#1c1c1c;color:#d8cfc0}
 .card .copy{display:block;font-size:8px;color:var(--ink2);margin-top:2px}
 .card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--mustard) inset}
 /* Shop tile variant tinting — NÖTR(0) no tint, ALTIN(1), KARA(2) */
-.shopcard.sv-1{border-color:#e6ad2e;box-shadow:inset 0 0 0 1px #e6ad2e}
-.shopcard.sv-2{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed}
+.shopcard.sv-1{border-color:#c8940a;box-shadow:inset 0 0 0 1px #c8940a}
+.shopcard.sv-2{border-color:#3c3c3c;box-shadow:inset 0 0 0 1px #3c3c3c}
 /* Active card row variant tinting */
-.card.v1{border-left-color:#e6ad2e}
-.card.v2{border-left-color:#7c3aed}
+.card.v1{border-left-color:#c8940a}
+.card.v2{border-left-color:#1c1c1c}
 /* Collection card variant tinting */
-.ccard.v1::before{background:#e6ad2e}
-.ccard.v2::before{background:#7c3aed}
+.ccard.v1::before{background:#c8940a}
+.ccard.v2::before{background:#1c1c1c}
 /* Captain & loan chips in card row */
 .cap-chip{background:var(--navy,#2c4a63);color:#fff;border-left-color:#e6ad2e}
 .cap-chip .tier{color:rgba(255,255,255,.7)}
@@ -72,7 +72,7 @@
 .swap-card-btn .sc-desc{font-size:9px;color:var(--ink2);margin-top:2px}
 .swap-card-btn:hover .sc-desc{color:rgba(255,255,255,.75)}
 .shoprow{display:flex;gap:7px;margin-bottom:8px}
-body.dark .shopcard.sv-1{border-color:#f0c840}body.dark .shopcard.sv-2{border-color:#a060ff}
+body.dark .shopcard.sv-1{border-color:#f0c840}body.dark .shopcard.sv-2{border-color:#555}
 body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.cant){color:#fff}
 .objboard{border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:8px}
 .objboard h4{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;background:#5a3fb0;color:#fff;padding:5px 8px;display:flex;justify-content:space-between}
@@ -144,7 +144,7 @@ body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.c
 .card.tier-0,.shopcard.tier-0,.ccard.tier-0{background-color:#f6e5cf;color:#23332a;border-color:#9a6a3b}
 .card.tier-1,.shopcard.tier-1,.ccard.tier-1{background-color:#eef1f2;color:#1f2d35;border-color:#8b9ba7}
 .card.tier-2,.shopcard.tier-2,.ccard.tier-2{background-color:#fff0bd;color:#23332a;border-color:#d7a11e}
-.card.tier-3,.shopcard.tier-3,.ccard.tier-3{background-color:#efe8ff;color:#211c35;border-color:#6d55a5}
+.card.tier-3,.shopcard.tier-3,.ccard.tier-3{background-color:#e8e4de;color:#1c1c1c;border-color:#3c3c3c}
 .card.tier-0 .copy,.card.tier-1 .copy,.card.tier-2 .copy,.card.tier-3 .copy,
 .ccard.tier-0 .cact,.ccard.tier-1 .cact,.ccard.tier-2 .cact,.ccard.tier-3 .cact,
 .shopcard.tier-0 .sd,.shopcard.tier-1 .sd,.shopcard.tier-2 .sd,.shopcard.tier-3 .sd,
@@ -155,7 +155,7 @@ body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.c
 }
 .shopcard.tier-1::after,.ccard.tier-1::after{background:#8b9ba7}
 .shopcard.tier-2::after,.ccard.tier-2::after{background:#d7a11e}
-.shopcard.tier-3::after,.ccard.tier-3::after{background:#6d55a5}
+.shopcard.tier-3::after,.ccard.tier-3::after{background:#1c1c1c}
 .shopcard:hover:not(.owned):not(.cant){
   background-color:#eaf4f9;
   background-image:linear-gradient(180deg,rgba(255,255,255,.82),rgba(232,244,250,.92)),url("../../assets/textures/panel-lines.png");
@@ -185,8 +185,8 @@ body.dark .card,body.dark .shopcard,body.dark .ccard{background-color:#f2edd8;ba
 body.dark .ccard.tier-0,body.dark .card.tier-0,body.dark .shopcard.tier-0{background-color:#f1dfc7;color:#1f2d35;border-color:#a56f3e}
 body.dark .ccard.tier-1,body.dark .card.tier-1,body.dark .shopcard.tier-1{background-color:#edf2f6;color:#1f2d35;border-color:#8b9ba7}
 body.dark .ccard.tier-2,body.dark .card.tier-2,body.dark .shopcard.tier-2{background-color:#fff0bd;color:#1f2d35;border-color:#d7a11e}
-body.dark .ccard.tier-3,body.dark .card.tier-3,body.dark .shopcard.tier-3{background-color:#efe8ff;color:#1f2d35;border-color:#6d55a5}
-body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.tier-3 .sd,body.dark .shopcard.tier-3 .cat{color:#1f2d35}
+body.dark .ccard.tier-3,body.dark .card.tier-3,body.dark .shopcard.tier-3{background-color:#dedad4;color:#1c1c1c;border-color:#3c3c3c}
+body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.tier-3 .sd,body.dark .shopcard.tier-3 .cat{color:#1c1c1c}
 
 /* ===== CARD TILE (yeni dikdörtgen kart tasarımı) ===== */
 .cardtile{
@@ -220,6 +220,10 @@ body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.t
 .cardtile.rar-silver .ct-head{background:#5e7a8a}
 .cardtile.rar-gold .ct-head{background:#c8940a}
 .cardtile.rar-risk .ct-head{background:#5a3a7a}
+/* Variant-based header — sv-0 NÖTR / sv-1 ALTIN / sv-2 KARA */
+.cardtile.sv-0 .ct-head{background:#7a8a76}
+.cardtile.sv-1 .ct-head{background:#c8940a}
+.cardtile.sv-2 .ct-head{background:#1c1c1c}
 .ct-rar{opacity:.9}
 .ct-cat{opacity:.75;font-size:6.5px}
 
@@ -305,6 +309,10 @@ body.dark .ct-foot{border-color:rgba(0,0,0,.12)}
 .cc-head{display:flex;justify-content:space-between;align-items:center;padding:3px 7px;font-family:var(--mono);font-size:6.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff}
 .collcard.rar-bronze .cc-head{background:#9a6a3b}.collcard.rar-silver .cc-head{background:#5e7a8a}
 .collcard.rar-gold .cc-head{background:#c8940a}.collcard.rar-risk .cc-head{background:#5a3a7a}
+/* Variant-based header for collection cards */
+.collcard.v0 .cc-head{background:#7a8a76}
+.collcard.v1 .cc-head{background:#c8940a}
+.collcard.v2 .cc-head{background:#1c1c1c}
 .collcard.locked .cc-head{background:#888;color:#eee}
 .cc-rar{opacity:.9}.cc-kind{opacity:.7;font-size:6px}
 .cc-art{display:flex;align-items:center;justify-content:center;padding:8px 14px 5px;height:60px;flex-shrink:0;color:#23332a}

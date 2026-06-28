@@ -9,7 +9,7 @@ var CARDDEFS={
  yildiz:{price:12,rar:"gold",kind:"power",mode:"scaling",eff:(s,r)=>s.length&&s.reduce((a,p)=>Math.max(a,p.ov),0)>=80?5:2},
  /* SAVUNMA */
  otobus:{price:8,rar:"silver",kind:"defense",mode:"scaling",eff:(s,r)=>s.filter(p=>p.pos==="CB").length},
- kaleci_kalesi:{price:10,rar:"gold",kind:"defense",mode:"scaling",eff:(s,r)=>{const gk=s.find(p=>p.pos==="GK");return gk&&gk.ov>=75?4:gk&&gk.ov>=68?2:gk?1:0;}},
+ kaleci_kalesi:{price:9,rar:"silver",kind:"defense",mode:"scaling",eff:(s,r)=>{const gk=s.find(p=>p.pos==="GK");return gk&&gk.ov>=75?4:gk&&gk.ov>=68?2:gk?1:0;}},
  /* KADRO */
  anadolu:{price:7,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(2,Math.floor(s.filter(p=>p.ov<70).length/2))},
  altyapi_plani:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(4,s.filter(p=>p.age<=21).length)},
