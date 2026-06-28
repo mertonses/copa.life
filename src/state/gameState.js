@@ -5,6 +5,7 @@ var injuredIdx=-1,oppLineup=[],weakFlank="C",matchupBonus=0,autoTimer=null,undoD
 var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUsed=false;
 var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
 var loanPlayer=null;
+var legacyFund=0;
 var NAMEP=["Anadolu","Demir","Yıldız","Kartal","Şimşek","Bordo","Gençlik","Deniz","Ankara","Toros","Çelik","Boğaz"],NAMES2=["spor","gücü FK","SK","Birliği","FK","United"];
 
 var nativeRandom=Math.random,runRng=nativeRandom;function rand(){return runRng();}

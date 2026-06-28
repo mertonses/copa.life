@@ -1,8 +1,8 @@
 /* Kartlarin guce ve run durumuna etkileri. */
 function squadBasePower(){const s=picksBySlot.filter(Boolean);return s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;}
 
-/* Variant guc bonuslari — normal/bronz/altin/kara */
-var VARIANT_BONUS=[0,1,2,4];
+/* Variant guc bonuslari — notr/altin/kara */
+var VARIANT_BONUS=[0,2,4];
 
 /* Kara variant'ta finalde dususecek guc (satin almada eklenir) */
 var KARA_PEN={
@@ -10,16 +10,16 @@ var KARA_PEN={
  otobus:1,kaleci_kalesi:2,anadolu:1,altyapi_plani:1,tecrubeli_omurga:1,
  veteran:2,yerli_blok:1,kanat_akini:1,cift_forvet:1,
  derbi:3,ch_final:2,final_provasi:2,kupaci_kadro:2,son_dans:3,
- temiz_sayfa:0,deplasman_kafilesi:1,sosyal_medya:1
+ deplasman_kafilesi:1,sosyal_medya:1
 };
 
 function cardEff(k,s,r){
  const v=variantOf(k),base=CARDDEFS[k].eff(s,r);
  const bonus=isProgressCard(k)?VARIANT_BONUS[v]||0:0;
  /* Ozel variant kosullu kartlar (eskiden tier skalasi) */
- if(k==="kontra")return base+bonus+(v>=1&&cnt(s,FWDP)>=3?2:0)+(v>=2&&opponent&&opponent.power>squadBasePower()?3:0)+(v>=3?Math.min(3,cnt(s,MIDP)):0);
- if(k==="anadolu")return base+bonus+(v>=1&&s.filter(p=>p.tr).length>=6?3:0)+(v>=2?Math.floor(Math.max(0,budget)/18):0)+(v>=3?3:0);
- if(k==="veteran")return base+bonus+(v>=1?Math.min(3,s.filter(p=>p.age>=32).length):0)+(v>=2&&talkUsed?2:0)+(v>=3&&r>=5?4:0);
+ if(k==="kontra")return base+bonus+(v>=1&&cnt(s,FWDP)>=3?2:0)+(v>=2&&opponent&&opponent.power>squadBasePower()?3:0);
+ if(k==="anadolu")return base+bonus+(v>=1&&s.filter(p=>p.tr).length>=6?3:0)+(v>=2?Math.floor(Math.max(0,budget)/18)+3:0);
+ if(k==="veteran")return base+bonus+(v>=1?Math.min(3,s.filter(p=>p.age>=32).length):0)+(v>=2&&(talkUsed||r>=5)?3:0);
  if(k==="cift_forvet")return base+bonus+(v>=1&&s.filter(p=>p.pos==="ST").length>=2?1:0);
  return base+bonus;
 }
@@ -73,10 +73,10 @@ function addCard(k,v,opts){
  cardInv[k]=1;cardVariant[k]=variant;
  if(!instant&&!hasCard(k)&&cards.length<activeCardSlots())cards.push(k);
  /* Kara variant: final guc cezasi uygula */
- if(variant===3&&isProgressCard(k)&&(KARA_PEN[k]||0)>0){
+ if(variant===2&&isProgressCard(k)&&(KARA_PEN[k]||0)>0){
    const pen=KARA_PEN[k];
    finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+pen);
-   if(!silent)pushFeed("\u{1f5a4} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"KARA — finalde -"+pen+" güç":"DARK — -"+pen+" in the final"),"lose");
+   if(!silent)pushFeed("\u{1f5a4} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"KARA — finalde -"+pen+" güç (lanetli)":"DARK — -"+pen+" in the final (cursed)"),"lose");
  }
  if(instant)applyRiskCardGain(k);
  if(instant){cardInv[k]=0;cardVariant[k]=0;cards=cards.filter(c=>c!==k);return{added:true,instant:true};}

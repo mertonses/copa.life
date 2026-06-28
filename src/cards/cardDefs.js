@@ -5,11 +5,11 @@ var CARDDEFS={
  genc:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>Math.min(4,r)},
  ch_momentum:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>3},
  kontra:{price:8,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>cnt(s,FWDP)},
- buyuk_mac:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>r>=4?2:0},
+ buyuk_mac:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>r>=4?3:1},
  yildiz:{price:12,rar:"gold",kind:"power",mode:"scaling",eff:(s,r)=>s.length&&s.reduce((a,p)=>Math.max(a,p.ov),0)>=80?5:2},
  /* SAVUNMA */
  otobus:{price:8,rar:"silver",kind:"defense",mode:"scaling",eff:(s,r)=>s.filter(p=>p.pos==="CB").length},
- kaleci_kalesi:{price:10,rar:"gold",kind:"defense",mode:"scaling",eff:(s,r)=>{const gk=s.find(p=>p.pos==="GK");return gk&&gk.ov>=80?4:gk&&gk.ov>=70?2:0;}},
+ kaleci_kalesi:{price:10,rar:"gold",kind:"defense",mode:"scaling",eff:(s,r)=>{const gk=s.find(p=>p.pos==="GK");return gk&&gk.ov>=75?4:gk&&gk.ov>=68?2:gk?1:0;}},
  /* KADRO */
  anadolu:{price:7,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(2,Math.floor(s.filter(p=>p.ov<70).length/2))},
  altyapi_plani:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(4,s.filter(p=>p.age<=21).length)},
@@ -24,18 +24,15 @@ var CARDDEFS={
  ch_final:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?6:r>=5?3:0},
  final_provasi:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?5:0},
  kupaci_kadro:{price:11,rar:"risk",kind:"final",mode:"scaling",eff:(s,r)=>r>=5?3:0},
- sogukkanli_penaltici:{price:9,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>0},
  son_dans:{price:10,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?4:0},
- /* SAKATLIK */
- temiz_sayfa:{price:7,rar:"bronze",kind:"injury",mode:"scaling",eff:(s,r)=>0},
  /* EKONOMİ */
  taksit_transfer:{price:8,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
  son_kredi:{price:7,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
  /* RİSK */
  kara_borsa:{price:7,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
  sahte_evrak:{price:10,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>6},
- deplasman_kafilesi:{price:8,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>opponent&&opponent.power>squadBasePower()?4:0},
- sosyal_medya:{price:7,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>opponent&&opponent.power>squadBasePower()?3:-2},
+ deplasman_kafilesi:{price:8,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>opponent&&opponent.power>squadBasePower()?4:1},
+ sosyal_medya:{price:7,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>{const under=opponent&&opponent.power>squadBasePower();return under?3:-2;}},
  kumarbaz:{price:9,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>0},
  gecici_prim:{price:6,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
  kisa_kamp:{price:7,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},

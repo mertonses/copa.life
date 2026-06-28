@@ -7,26 +7,28 @@
 .card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
-/* Variant badges */
+/* Variant badges — NÖTR / ALTIN / KARA */
 .var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:3px}
-.var-0{background:#e0e0e0;color:#444}
-.var-1{background:#cd7f32;color:#fff}
-.var-2{background:#e6ad2e;color:#23332a}
-.var-3{background:#7c3aed;color:#fff}
+.var-0{background:#d4d4d4;color:#444}
+.var-1{background:#e6ad2e;color:#23332a}
+.var-2{background:#7c3aed;color:#fff}
 .card .copy{display:block;font-size:8px;color:var(--ink2);margin-top:2px}
 .card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--mustard) inset}
-/* Shop tile variant tinting */
-.shopcard.sv-1{border-color:#cd7f32;box-shadow:inset 0 0 0 1px #cd7f32}
-.shopcard.sv-2{border-color:#e6ad2e;box-shadow:inset 0 0 0 1px #e6ad2e}
-.shopcard.sv-3{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed}
+/* Shop tile variant tinting — NÖTR(0) no tint, ALTIN(1), KARA(2) */
+.shopcard.sv-1{border-color:#e6ad2e;box-shadow:inset 0 0 0 1px #e6ad2e}
+.shopcard.sv-2{border-color:#7c3aed;box-shadow:inset 0 0 0 1px #7c3aed}
 /* Active card row variant tinting */
-.card.v1{border-left-color:#cd7f32}
-.card.v2{border-left-color:#e6ad2e}
-.card.v3{border-left-color:#7c3aed}
+.card.v1{border-left-color:#e6ad2e}
+.card.v2{border-left-color:#7c3aed}
 /* Collection card variant tinting */
-.ccard.v1::before{background:#cd7f32}
-.ccard.v2::before{background:#e6ad2e}
-.ccard.v3::before{background:#7c3aed}
+.ccard.v1::before{background:#e6ad2e}
+.ccard.v2::before{background:#7c3aed}
+/* Captain & loan chips in card row */
+.cap-chip{background:var(--navy,#2c4a63);color:#fff;border-left-color:#e6ad2e}
+.cap-chip .tier{color:rgba(255,255,255,.7)}
+.cap-chip.cap-inj{background:#8e2d20}
+.loan-chip{background:#1e3a26;color:#fff;border-left-color:#4ade80}
+.loan-chip .tier{color:rgba(255,255,255,.7)}
 .card.ch{background:#7b5cd6;color:#fff;border-color:#5a3fb0}
 .challist{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
 .chrow{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:4px;padding:6px 8px;font-family:var(--mono);font-size:10px;background:var(--paper2)}
@@ -70,7 +72,7 @@
 .swap-card-btn .sc-desc{font-size:9px;color:var(--ink2);margin-top:2px}
 .swap-card-btn:hover .sc-desc{color:rgba(255,255,255,.75)}
 .shoprow{display:flex;gap:7px;margin-bottom:8px}
-body.dark .shopcard.sv-1{border-color:#e09840}body.dark .shopcard.sv-2{border-color:#f0c840}body.dark .shopcard.sv-3{border-color:#a060ff}
+body.dark .shopcard.sv-1{border-color:#f0c840}body.dark .shopcard.sv-2{border-color:#a060ff}
 body.dark .opt:hover:not(:disabled),body.dark .shopcard:hover:not(.owned):not(.cant){color:#fff}
 .objboard{border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:8px}
 .objboard h4{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;background:#5a3fb0;color:#fff;padding:5px 8px;display:flex;justify-content:space-between}

@@ -17,10 +17,10 @@ function undoPick(){if(!undoData||undoUsed)return;const u=undoData;picksBySlot[u
 function toggleCardActive(k){if(invOf(k)<=0)return;if(hasCard(k)){cards=cards.filter(c=>c!==k);sfxStamp();renderHub();return;}if(cards.length>=activeCardSlots()){pushFeed((LANG==="tr"?"🃏 aktif kart slotu dolu":"🃏 active card slots full"),"ch");renderFeed();return;}cards.push(k);sfxStamp();renderHub();}
 function cardArt(k){return "assets/cards/"+k+".png";}
 function debtTaxAmount(){return 0;}
-function kindLabel(k){const tr=LANG==="tr",m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["RİSK","RISK"],temporary:["GEÇİCİ","TEMP"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[cardKind(k)]||["GÜÇ","POWER"];return tr?m[0]:m[1];}
+function kindLabel(k){const tr=LANG==="tr",m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["ÖZEL","SPECIAL"],temporary:["ÖZEL","SPECIAL"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[cardKind(k)]||["GÜÇ","POWER"];return tr?m[0]:m[1];}
 function modeLabel(k){if(isInstantCard(k))return LANG==="tr"?"ANINDA ÇALIŞIR":"INSTANT";if(!isProgressCard(k))return LANG==="tr"?"SÖZLEŞME":"CONTRACT";return LANG==="tr"?"GELİŞEN":"SCALING";}
 function cardBadgeHTML(k){return `<span class="kindtag kind-${cardKind(k)}">${kindLabel(k)}</span><span class="modetag">${modeLabel(k)}</span>`;}
-function variantBadge(v){const labels=L().variantLbl||["NORMAL","BRONZ","ALTIN","KARA"];return labels[v||0]||labels[0];}
+function variantBadge(v){const labels=L().variantLbl||["NÖTR","ALTIN","KARA"];return labels[Math.min(v||0,2)]||labels[0];}
 function rarLabel(k){return variantBadge(variantOf(k));}
 
 const LOCK_SVG=`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="22" width="28" height="20" rx="3"/><path d="M16 22V16Q16 8 24 8Q32 8 32 16V22"/><circle cx="24" cy="32" r="3" fill="currentColor" stroke-width="0"/></svg>`;
@@ -174,6 +174,10 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   $("playBtn").innerHTML=round>=6?x.playFinal:x.play;$("autoLbl").textContent=autoPlay?x.autoOn:x.autoOff;$("autoTog").classList.toggle("on",autoPlay);
   $("talkBtn").classList.toggle("hidden",talkUsed);$("talkBtn").innerHTML=x.talk;renderDebtWarning();renderInjbar();
   const cr=$("cardrow");cr.innerHTML="";const e0=document.createElement("div");e0.className="card style";e0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;cr.appendChild(e0);
+  /* Kaptan chip */
+  if(captainIdx>=0&&picksBySlot[captainIdx]){const cp=picksBySlot[captainIdx];const injured=cp.injured;const dc=document.createElement("div");dc.className="card style cap-chip"+(injured?" cap-inj":"");dc.innerHTML=`<svg viewBox="0 0 12 9" width="11" height="8" fill="currentColor" style="margin-right:3px"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg><b>${surOf(cp)}</b><span class="tier">${injured?(LANG==="tr"?"SAKAT KAPTAN":"INJ. CAPTAIN"):"KAPTAN"}</span><span class="v">${injured?"-3":"+1"}</span>`;cr.appendChild(dc);}
+  /* Kiralık chip */
+  if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";lc.innerHTML=`🔄 <b>${surOf(loanPlayer)}</b> <span class="tier">${LANG==="tr"?"KİRALIK":"LOAN"}</span> <span class="v">OV${loanPlayer.ov}</span> <span class="copy" style="color:var(--red)">-€${loanPlayer.loanCost}M</span>`;cr.appendChild(lc);}
   cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round);d.onclick=()=>toggleCardActive(k);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy var-badge var-${v}">${variantBadge(v)} · ${x.ui.activeRemove}</span>`;cr.appendChild(d);});
   activeCombos().forEach(c=>{const d=document.createElement("div");d.className="card combo";d.innerHTML=`✨ <b>${x.combos[c.k]||L().combos[c.k]||c.k}</b> <span class="v">+${c.b}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')">${cd.i} ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
