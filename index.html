@@ -26,10 +26,15 @@
 
 <!-- Favicon & PWA -->
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" id="fav32">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" id="fav16">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>
+(function(){function _wfav(sz,id){var img=new Image();img.crossOrigin="anonymous";img.onload=function(){var c=document.createElement("canvas");c.width=sz;c.height=sz;var ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,sz,sz);ctx.drawImage(img,0,0,sz,sz);var el=document.getElementById(id);if(el)el.href=c.toDataURL("image/png");};img.src="/favicon-"+sz+"x"+sz+".png";}
+_wfav(32,"fav32");_wfav(16,"fav16");})();
+</script>
 <meta name="theme-color" content="#26402f">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="rating" content="general">
@@ -244,12 +249,8 @@ function fgFor(bg){const c=bg.replace("#","");const r=parseInt(c.substr(0,2),16)
 const $=id=>document.getElementById(id);
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 /* ===== SVG constants ===== */
-const _SLOT_SIL={
-GK:`<svg class="slot-sil" viewBox="0 0 24 28" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="translate" values="-2 0;2 0;-2 0" dur="2.4s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><circle cx="12" cy="4" r="3.5"/><path d="M3 10L21 10L19 8L5 8Z"/><rect x="9" y="10" width="6" height="9" rx="1.5"/><path d="M9 19L5 28L9 28L12 21L15 28L19 28L15 19Z"/></g></svg>`,
-DEF:`<svg class="slot-sil" viewBox="0 0 24 28" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="translate" values="-2 0;2 0;-2 0" dur="2.8s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><circle cx="12" cy="4" r="3.5"/><path d="M7 9L17 9L16 7L8 7Z"/><rect x="9" y="9" width="6" height="10" rx="1.5"/><path d="M9 19L7 28L11 28L12 22L13 28L17 28L15 19Z"/><path d="M4 13L4 20Q5 22 6 22Q7 22 8 20L8 13Q6 12 4 13Z" opacity=".6"/></g></svg>`,
-MID:`<svg class="slot-sil" viewBox="0 0 24 28" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="1.1s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><circle cx="12" cy="4" r="3.5"/><path d="M7 9L17 9L16 7L8 7Z"/><rect x="9" y="9" width="6" height="10" rx="1.5"/><path d="M9 19L7 28L11 28L12 22L13 28L17 28L15 19Z"/></g></svg>`,
-FWD:`<svg class="slot-sil" viewBox="0 0 24 28" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><g><animateTransform attributeName="transform" type="translate" values="0 0;2 -1;0 0;-1 -2;0 0" dur="1.3s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><circle cx="12" cy="4" r="3.5"/><path d="M8 9L18 9L16 7L10 7Z"/><rect x="9" y="9" width="6" height="10" rx="1.5"/><path d="M9 19L6 28L10 28L12 22L14 28L18 28L15 19Z"/></g></svg>`
-};
+const _SIL=`<svg class="slot-sil" viewBox="0 0 20 26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="6" r="3.5"/><path d="M3 25C3 18 6 15 10 15C14 15 17 18 17 25"/></svg>`;
+const _SLOT_SIL={GK:_SIL,DEF:_SIL,MID:_SIL,FWD:_SIL};
 const _PP_SVG={
 generous:`<svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 22Q12 22 12 34Q12 52 32 54Q52 52 52 34Q52 22 44 22Z" fill="currentColor" opacity=".12"/><path d="M20 22Q12 22 12 34Q12 52 32 54Q52 52 52 34Q52 22 44 22Z"/><path d="M24 10Q24 6 32 6Q40 6 40 10Q40 16 32 18Q24 16 24 10Z"/><path d="M22 10L20 22M42 10L44 22"/><path d="M26 34Q26 30 32 30Q38 30 38 34Q38 38 32 38Q38 38 38 42Q38 46 32 46Q26 46 26 42"/><line x1="32" y1="24" x2="32" y2="30"/><line x1="32" y1="46" x2="32" y2="50"/></svg>`,
 sponsor:`<svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 36L16 24Q20 20 24 22L30 28Q32 30 34 28L40 22Q44 20 48 24L60 36"/><path d="M4 36Q6 44 12 42L18 40L24 34"/><path d="M60 36Q58 44 52 42L46 40L40 34"/><circle cx="32" cy="29" r="3" fill="currentColor" opacity=".5"/></svg>`,
@@ -882,10 +883,17 @@ ${won?_trophy:_elim}
 ${_motmRow}
 ${cardNames.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px">${cardNames.map((n,i)=>`<span style="background:rgba(255,255,255,.1);border-radius:3px;padding:2px 6px;font-size:8px;letter-spacing:.3px;animation:_scChip .35s ease ${.5+i*.09}s both">${n}</span>`).join("")}</div>`:""}</div>
 <div style="background:rgba(0,0,0,.25);padding:8px 18px;text-align:center;border-top:1px solid rgba(255,255,255,.07)"><div style="font-size:8px;opacity:.35;letter-spacing:1.5px;display:flex;align-items:center;justify-content:center;gap:6px">${LANG==="tr"?"SEN FİNALİ GÖREBİLİR MİSİN?":"CAN YOU REACH THE FINAL?"} · ${_footLogo}</div></div></div>`;
-showModal(`<div class="scoutmodal"><h4 style="background:${hdrBg}">${LANG==="tr"?"Paylaşım Kartı":"Share Card"}</h4>${html}<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;margin-top:10px">${LANG==="tr"?"Ekran görüntüsü al ve paylaş":"Screenshot & share"}</div><div class="bact" style="margin-top:8px"><button class="btn btn-ghost" onclick="closeModal()">${x.presClose||"Kapat"}</button></div></div>`);
+showModal(`<div class="scoutmodal"><h4 style="background:${hdrBg}">${LANG==="tr"?"Paylaşım Kartı":"Share Card"}</h4>${html}<div class="bact" style="margin-top:10px;gap:6px"><button class="btn btn-ghost" onclick="shareCard_export('download')" title="${LANG==="tr"?"PNG indir":"Download PNG"}">↓ PNG</button><button class="btn btn-ghost" onclick="shareCard_export('copy')" title="${LANG==="tr"?"Görseli kopyala":"Copy image"}"><span id="sc_copyLbl">${LANG==="tr"?"⧉ Kopyala":"⧉ Copy"}</span></button><button class="btn btn-ghost" onclick="closeModal()">${x.presClose||"Kapat"}</button></div></div>`);
 setTimeout(()=>{const tgts=[{id:"sc_pow",val:r?r.power:0},{id:"sc_rnd",val:r?r.round:0},{id:"sc_crd",val:cards.length}];const dur=700;tgts.forEach(({id,val})=>{const el=document.getElementById(id);if(!el)return;let st=null;const step=ts=>{if(!st)st=ts;const p=Math.min((ts-st)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=Math.round(e*val);if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);});},120);
 }
 function copyResult(){const x=L(),r=lastResult,cs=cards.map(k=>x.cards[k].n).join(", ")||"—";const txt=`🏆 ${x.coverTitle.toUpperCase()} (${formName} · ${x.styles[style].n})\n${r.won?x.champTitle:x.outTitle} · ${x.rounds[r.round-1]}\n${x.lblGuc} ${r.power} · ${cs}\n${r.score?"FİNAL "+r.score+(motm?" · ⭐ "+motm:""):""}\n\n${LANG==="tr"?"sen finali görebilir misin?":"can you reach the final?"}`;const done=()=>{$("copyBtn").innerHTML=x.copied;setTimeout(()=>$("copyBtn").innerHTML=x.copy,2000);};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done).catch(()=>fb(txt,done));else fb(txt,done);}
+async function shareCard_export(mode){
+  const el=document.getElementById("shareCardWrap");
+  if(!el||typeof html2canvas==="undefined")return;
+  const canvas=await html2canvas(el,{scale:2,backgroundColor:null,logging:false,useCORS:true});
+  if(mode==="download"){const a=document.createElement("a");a.download="copa-life.png";a.href=canvas.toDataURL("image/png");a.click();}
+  else{canvas.toBlob(async blob=>{try{await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);const lb=$("sc_copyLbl");if(lb){lb.textContent=LANG==="tr"?"✓ Kopyalandı":"✓ Copied";setTimeout(()=>{lb.textContent=LANG==="tr"?"⧉ Kopyala":"⧉ Copy";},2000);}}catch(e){const a=document.createElement("a");a.download="copa-life.png";a.href=canvas.toDataURL("image/png");a.click();}});}
+}
 function fb(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){$("copied").textContent=L().copyfail;}document.body.removeChild(ta);}
 function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;setBudget();buildFormButtons();applyMeta();applyStatic();$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
 
