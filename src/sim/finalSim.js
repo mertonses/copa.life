@@ -45,7 +45,7 @@ function buildSim(myPow,oppPow){
  function updateStats(){const sh=$("statShot"),sv=$("statSave"),dg=$("statDanger");if(sh)sh.textContent=shotsA+"-"+shotsB;if(sv)sv.textContent=keeperA+"-"+keeperB;if(dg)dg.textContent=dangerA+"-"+dangerB;}
  function addEvent(kind,side,txt){const el=$("simGoals");if(!el)return;const d=document.createElement("div");d.className=(side==="A"?"home":"away")+" "+kind;d.innerHTML=`<b>${clockDisp()}'</b><span>${txt}</span>`;el.prepend(d);while(el.children.length>8)el.removeChild(el.lastChild);}
  function showGoalBurst(min,name,score){const gb=$("goalBurst");if(!gb)return;gb.innerHTML=`<b>${min}' ${name}</b><span>${score}</span>`;gb.classList.remove("hidden","show");void gb.offsetWidth;gb.classList.add("show");setTimeout(()=>gb.classList.add("hidden"),1050);}
- function clockDisp(){const c=Math.floor(clock);if(extraTime)return c<=ET1?"105+"+(c-ET1+15):c<=ET2?"120+"+(c-ET2+15):c+"";if(c>90)return "90+"+(c-90);return Math.max(1,c);}
+ function clockDisp(){const c=Math.floor(clock);if(extraTime){if(c<=ET1)return Math.min(105,91+(c-Math.floor(FULL)));return Math.min(120,106+(c-Math.floor(ET1)));}if(c>90)return "90+"+(c-90);return Math.max(1,c);}
 
  /* 6 — Formation-aware movement */
  function move(t){const cb=closest(t),attacking=poss===t.side,gy=t.side==="A"?0:H,oy=t.side==="A"?H:0,spF=(0.86+(t.pow-60)/180)*gameBrake();
@@ -247,7 +247,7 @@ function buildSim(myPow,oppPow){
    if(!halfDone&&!extraTime&&clock>=45){halfDone=true;doHalfTime(false);return;}
    /* 2 — Normal süre bitiş */
    if(!extraTime&&clock>=FULL){
-    if(sA===sB){extraTime=true;clock=FULL;$("simState").textContent=LANG==="tr"?"Uzatmalar başlıyor":"Extra Time begins";$("simComm").innerHTML="⏱ "+(LANG==="tr"?"30 dakika uzatma!":"30 minutes of extra time!");sfxWhistle();setTimeout(()=>{if(!gameOver&&!_paused){running=true;raf=requestAnimationFrame(frameStep);}},1800);running=false;cancelAnimationFrame(raf);return;}
+    if(sA===sB){extraTime=true;$("simState").textContent=LANG==="tr"?"Uzatmalar başlıyor":"Extra Time begins";$("simComm").innerHTML="⏱ "+(LANG==="tr"?"30 dakika uzatma!":"30 minutes of extra time!");sfxWhistle();setTimeout(()=>{if(!gameOver&&!_paused){running=true;raf=requestAnimationFrame(frameStep);}},1800);running=false;cancelAnimationFrame(raf);return;}
     else{finishSim();return;}
    }
    /* 4 — ET devre arası */
@@ -264,7 +264,7 @@ function buildSim(myPow,oppPow){
  function pickMOTM(){if(scorersA.length){const f={};scorersA.forEach(n=>f[n]=(f[n]||0)+1);let best=scorersA[0],bc=0;Object.keys(f).forEach(n=>{if(f[n]>bc){bc=f[n];best=n;}});return best;}const out=picksBySlot.filter(p=>p&&p.pos!=="GK");const p=out.length?rnd(out):picksBySlot[0];return p?p.name.split(" ").pop():"?";}
  function makeReport(won){const tr=LANG==="tr",cardsTxt=finalCardSummary().replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const rows=[[tr?"Maçın kırılma anı":"Key moment",keyMoment||goals[0]?.name||"-"],[tr?"Kaleci kurtarışı":"Keeper saves",`${clip(teamName||"US",8)} ${keeperA} · ${clip(opponent.name,8)} ${keeperB}`],[tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]];if(penaltyNote)rows.push([tr?"Penaltılar":"Penalties",penaltyNote]);rows.push([tr?"Final yorumu":"Final note",won?(tr?"Kupa geldi.":"Cup lifted."):(tr?"Final kaybedildi.":"Final lost.")]);window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");}
  function finishSim(){gameOver=true;running=false;cancelAnimationFrame(raf);crowdStop();const cd=clockDisp();$("simClk").textContent=cd+"'";
-  draw();drawHeatmap();motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
+  draw();drawHeatmap();try{window._heatmapImg=cv.toDataURL('image/png');}catch(e){}motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
  }
  sim={
   run:()=>{_paused=false;running=true;draw();raf=requestAnimationFrame(frameStep);},
