@@ -8,7 +8,7 @@
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
 /* Variant badges — GOLDEN(0) / DARK(1) */
-.var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:3px}
+.var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:0}
 .var-0{background:#c8940a;color:#fff}
 .var-1{background:#2a2a2a;color:#e8e0d0}
 .var-2{background:#1c1c1c;color:#d8cfc0}
@@ -225,7 +225,7 @@ body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.t
 .cardtile.sv-0 .ct-head{background:#c8940a}
 .cardtile.sv-1 .ct-head{background:#2a2a2a}
 .cardtile.sv-2 .ct-head{background:#1c1c1c}
-.ct-head{padding:4px 8px 4px 5px}
+.ct-head{padding:4px 8px 4px 3px}
 .ct-rar{opacity:.9}
 .ct-cat{opacity:.75;font-size:6.5px}
 
