@@ -24,7 +24,7 @@ function buildSim(myPow,oppPow){
  let ball={x:W/2,y:H/2,vx:0,vy:-2.1},frame=0,clock=0,sA=0,sB=0,running=false,raf,lastKick=-12,lastShot=-60,acc=0,poss="A",lastShooter=null,lastShooterSide=null,lastTouch=null,assistNm="",cooldown=0;
  let aShoutTtl=0,aPowBase=null,keeperA=0,keeperB=0,shotsA=0,shotsB=0,dangerA=0,dangerB=0,goalFlash=0,keyMoment="",penaltyNote="";
  const goals=[],scorersA=[],scorersB=[];
- const HGW=20,HGH=15,heatGrid=new Uint16Array(HGW*HGH);
+ const HGW=20,HGH=15,heatGrid=new Float32Array(HGW*HGH);
  /* 3 — Momentum state variable */
  let momVal=50;
  /* 2 — Stoppage + ET state */
@@ -138,17 +138,13 @@ function buildSim(myPow,oppPow){
   const a=Math.round(momVal),b=100-a;
   $("momA").textContent=a+"%";$("momB").textContent=b+"%";$("momBar").style.background=`linear-gradient(90deg,var(--green) ${a}%,var(--red) ${a}%)`;$("simState").textContent=statusText();}
  function drawHeatmap(){
-  const mx=Math.max(1,...Array.from(heatGrid));
+  const sm=new Float32Array(HGW*HGH);
+  const kn=[0.0625,0.125,0.0625,0.125,0.25,0.125,0.0625,0.125,0.0625];
+  for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){let v=0,w=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const rr=r+dr,cc=c+dc;if(rr>=0&&rr<HGH&&cc>=0&&cc<HGW){const ki=(dr+1)*3+(dc+1);v+=heatGrid[rr*HGW+cc]*kn[ki];w+=kn[ki];}}sm[r*HGW+c]=v/w;}
+  const mx=Math.max(1,...Array.from(sm));
   const cw=W/HGW,ch=H/HGH;
-  for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){
-   const v=heatGrid[r*HGW+c]/mx;if(v<0.06)continue;
-   const hue=Math.round((1-Math.min(1,v*1.2))*220);
-   ctx.fillStyle=`hsla(${hue},90%,55%,${Math.min(0.68,v*0.82)})`;
-   ctx.fillRect(c*cw,r*ch,cw,ch);
-  }
-  ctx.fillStyle="rgba(0,0,0,0.52)";ctx.fillRect(6,H-20,148,15);
-  ctx.fillStyle="#fff";ctx.font="bold 8.5px 'Inter',sans-serif";ctx.textAlign="left";ctx.textBaseline="middle";
-  ctx.fillText(LANG==="tr"?"🔥 TOP YOĞUNLUK HARİTASI":"🔥 BALL HEAT MAP",10,H-13);
+  for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){const v=sm[r*HGW+c]/mx;if(v<0.04)continue;const hue=v<0.3?220-v/0.3*80:v<0.6?140-(v-0.3)/0.3*100:v<0.85?40-(v-0.6)/0.25*40:0;const sat=v<0.15?70:85;const lit=v<0.2?55:48-v*4;const alpha=Math.min(0.88,v<0.15?v/0.15*0.35:0.35+v*0.55);ctx.fillStyle=`hsla(${hue},${sat}%,${lit}%,${alpha})`;ctx.fillRect(c*cw,r*ch,cw,ch);}
+  const lblW=158;ctx.fillStyle="rgba(0,0,0,0.58)";ctx.fillRect((W-lblW)/2,H-22,lblW,17);ctx.fillStyle="#fff";ctx.font="bold 8px 'Inter',sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🔥 "+(LANG==="tr"?"TOP YOĞUNLUK HARİTASI":"BALL HEAT MAP"),W/2,H-13);
  }
  function radioLine(pos,sa,sb,min){
   const tr=LANG==="tr",diff=sa-sb,atHome=pos==="A";
@@ -191,7 +187,7 @@ function buildSim(myPow,oppPow){
   ctx.beginPath();ctx.arc(ball.x,ball.y,BR,0,7);ctx.fillStyle="#fff";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#23332a";ctx.stroke();
  }
  function tick(){frame++;clock+=90/(68*60);if(cooldown>0)cooldown--;if(aShoutTtl>0){aShoutTtl--;if(aShoutTtl<=0&&aPowBase!=null){A.pow=aPowBase;aPowBase=null;}}move(A);move(B);sep();kick();phys();
-  const _hx=Math.min(HGW-1,Math.floor(ball.x/W*HGW)),_hy=Math.min(HGH-1,Math.floor(ball.y/H*HGH));heatGrid[_hy*HGW+_hx]++;
+  const _hx=Math.min(HGW-1,Math.floor(ball.x/W*HGW)),_hy=Math.min(HGH-1,Math.floor(ball.y/H*HGH));heatGrid[_hy*HGW+_hx]++;if(frame%4===0){[...A.ps,...B.ps].forEach(p=>{if(!p.gk){const wx=Math.min(HGW-1,Math.floor(p.x/W*HGW)),wy=Math.min(HGH-1,Math.floor(p.y/H*HGH));heatGrid[wy*HGW+wx]+=0.22;}});}
  }
 
  /* 1 — Penaltı serisi */
@@ -262,7 +258,7 @@ function buildSim(myPow,oppPow){
   if(frame%110<2){const rb=$("simRadio");if(rb)rb.innerHTML=radioLine(poss,sA,sB,Math.floor(clock));updateMomentum();}draw();raf=requestAnimationFrame(frameStep);}
 
  function pickMOTM(){if(scorersA.length){const f={};scorersA.forEach(n=>f[n]=(f[n]||0)+1);let best=scorersA[0],bc=0;Object.keys(f).forEach(n=>{if(f[n]>bc){bc=f[n];best=n;}});return best;}const out=picksBySlot.filter(p=>p&&p.pos!=="GK");const p=out.length?rnd(out):picksBySlot[0];return p?p.name.split(" ").pop():"?";}
- function makeReport(won){const tr=LANG==="tr",cardsTxt=finalCardSummary().replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const rows=[[tr?"Maçın kırılma anı":"Key moment",keyMoment||goals[0]?.name||"-"],[tr?"Kaleci kurtarışı":"Keeper saves",`${clip(teamName||"US",8)} ${keeperA} · ${clip(opponent.name,8)} ${keeperB}`],[tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]];if(penaltyNote)rows.push([tr?"Penaltılar":"Penalties",penaltyNote]);rows.push([tr?"Final yorumu":"Final note",won?(tr?"Kupa geldi.":"Cup lifted."):(tr?"Final kaybedildi.":"Final lost.")]);window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");}
+ function makeReport(won){const tr=LANG==="tr",cardsTxt=finalCardSummary().replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();const rows=[[tr?"Maçın kırılma anı":"Key moment",keyMoment||goals[0]?.name||"-"],[tr?"Şutlar":"Shots",shotsA+"-"+shotsB],[tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]];if(penaltyNote)rows.push([tr?"Penaltılar":"Penalties",penaltyNote]);const _fNotes_won_tr=["Kupa sandığa girdi. Bu kadroya saygı duruşu.","Rüya sezon. Final sahnesi, şampiyonluk sarhoşluğu.","Son düdüğe kadar didindi. Hak edilmiş bir zafer.","Bu takım birlikte büyüdü. Kupa onları bekliyordu.","Rakip daha güçlüydü; ama bugün sahada yürüyen kupayı kazandı.","İnançla kurulmuş bir kadro, inançla kaldırdı kupayı."];const _fNotes_won_en=["The cup comes home. This squad earned every inch.","A dream run. Final glory sealed.","Fought until the last whistle. Perfectly deserved.","Built to win, and they did exactly that.","The underdog story that wrote its own final chapter.","One trophy, one squad, one unforgettable run."];const _fNotes_lost_tr=["Finale geldi, yetmedi. Bir sonraki run daha güçlü.","Son adımda tökezledi. Ama bu ruh devam edecek.","Kupa yakındı — bir gol, bir karar, bir an. Sıradaki.","Bu kadro çok şey gördü. Ama şampiyonluk başka birini seçti.","Rakip daha hazırdı. Sıfırdan başla, bu sefer fark yat.","Finaller böyle. Bir hata, bir ömür. Bir sonraki run."];const _fNotes_lost_en=["So close. Build something stronger next time.","Fell at the final hurdle. The run had real quality.","One moment decided it. Come back harder.","Almost isn't enough in a final. Try again.","The squad gave everything. The cup found another home.","Fine margins. One more piece next run."];const _ni=Math.floor(Math.random()*6);rows.push([tr?"Final yorumu":"Final note",won?(tr?_fNotes_won_tr[_ni]:_fNotes_won_en[_ni]):(tr?_fNotes_lost_tr[_ni]:_fNotes_lost_en[_ni])]);window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");}
  function finishSim(){gameOver=true;running=false;cancelAnimationFrame(raf);crowdStop();const cd=clockDisp();$("simClk").textContent=cd+"'";
   draw();drawHeatmap();try{window._heatmapImg=cv.toDataURL('image/png');}catch(e){}motm=pickMOTM();makeReport(sA>sB);setTimeout(()=>endRun(sA>sB,sA+"–"+sB),1000);
  }
