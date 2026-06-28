@@ -1,18 +1,18 @@
 ﻿<!DOCTYPE html>
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>copa.life — Roguelite futbol. Şans + strateji.</title>
-<meta name="description" content="Ücretsiz tarayıcı futbol oyunu. Kadro kur, transfer yönet, kupayı kaldır. Roguelite futbol müdürü — 5 lig (Türkiye, İngiltere, İspanya, İtalya, Almanya), 9000+ oyuncu.">
+<title>copa.life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
+<meta name="description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 5 lig, kart sistemi ve sakatlıklarla ücretsiz tarayıcı futbol menajerlik oyunu.">
 <meta name="keywords" content="copa life, futbol oyunu, tarayıcı futbol oyunu, ücretsiz futbol manager, online futbol yönetim oyunu, roguelite futbol, football manager browser game, free football game, futbol müdürü, türkiye kupası, fa cup, copa del rey, serie a, bundesliga, süper lig, futbol kart oyunu, football card game">
 <meta name="author" content="copa.life">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://copa.life">
+<link rel="canonical" href="https://copa.life/">
 
 <!-- Open Graph (link paylaşımı) -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://copa.life">
+<meta property="og:url" content="https://copa.life/">
 <meta property="og:site_name" content="copa.life">
-<meta property="og:title" content="copa.life — Roguelite futbol. Şans + strateji.">
-<meta property="og:description" content="Zar at. Kadro kur. Kupayı kaldır. 5 lig, 9000+ oyuncu, tarayıcıda ücretsiz.">
+<meta property="og:title" content="copa.life – Roguelite Futbol Menajerlik Oyunu">
+<meta property="og:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 5 lig, ücretsiz tarayıcı futbol oyunu.">
 <meta property="og:image" content="https://copa.life/assets/social.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -20,14 +20,15 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="copa.life — Roguelite futbol. Şans + strateji.">
-<meta name="twitter:description" content="Zar at. Kadro kur. Kupayı kaldır. 5 lig, 9000+ oyuncu, tarayıcıda ücretsiz.">
+<meta name="twitter:title" content="copa.life – Roguelite Futbol Menajerlik Oyunu">
+<meta name="twitter:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 5 lig, ücretsiz tarayıcı futbol oyunu.">
 <meta name="twitter:image" content="https://copa.life/assets/social.png">
 
 <!-- Favicon & PWA -->
-<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/cl.png">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/cl.png">
-<link rel="apple-touch-icon" href="assets/icons/cl.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#26402f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,6 +37,15 @@
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
 
 <!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "copa.life",
+  "alternateName": "Copa Life",
+  "url": "https://copa.life/"
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,12 +91,12 @@
 <div id="loader"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,.15)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/></svg></div>
 <div class="wrap">
   <div class="top"><div class="tools"><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar" aria-label="Ayarlar"><svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="3.8"/><line x1="11" y1="2" x2="11" y2="5.2"/><line x1="11" y1="16.8" x2="11" y2="20"/><line x1="2" y1="11" x2="5.2" y2="11"/><line x1="16.8" y1="11" x2="20" y2="11"/><line x1="4.1" y1="4.1" x2="6.4" y2="6.4"/><line x1="15.6" y1="15.6" x2="17.9" y2="17.9"/><line x1="4.1" y1="17.9" x2="6.4" y2="15.6"/><line x1="15.6" y1="6.4" x2="17.9" y2="4.1"/><circle cx="11" cy="11" r="7.5"/></svg></button><div class="settingsdrop hidden" id="settingsDrop"><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.png" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.png" alt="">EN</button><button class="sdbtn" id="musicBtn" onclick="toggleMusic()" title="Müzik" aria-label="Müzik"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/></svg></button><button class="sdbtn" id="muteBtn" onclick="toggleMute()" title="Ses efektleri" aria-label="Ses efektleri"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg></button><button class="sdbtn" id="lightBtn" onclick="setTheme(false)" title="Aydınlık mod" aria-label="Aydınlık mod"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="10" cy="9" r="3.5"/><path d="M8.5 13.5L8.5 16L11.5 16L11.5 13.5"/><line x1="10" y1="1" x2="10" y2="3.5"/><line x1="4.2" y1="4.2" x2="5.8" y2="5.8"/><line x1="1" y1="9" x2="3.5" y2="9"/><line x1="15.8" y1="4.2" x2="14.2" y2="5.8"/><line x1="19" y1="9" x2="16.5" y2="9"/></svg></button><button class="sdbtn" id="darkBtn" onclick="setTheme(true)" title="Karanlık mod" aria-label="Karanlık mod"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 1.992a10 10 0 1 0 9.236 13.838c.341 -.82 -.476 -1.644 -1.298 -1.31a6.5 6.5 0 0 1 -6.864 -10.787l.077 -.08c.551 -.63 .113 -1.653 -.758 -1.653h-.266l-.068 -.006l-.06 -.002z"/></svg></button></div></div></div></div>
-    <div class="logo" aria-label="copa.life"><span class="brandmark"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></span></div>
+    <div class="logo" aria-label="copa.life"><span class="brandmark"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></span><p style="font-size:9px;font-family:var(--mono);color:var(--ink2);opacity:.7;margin:2px 0 0;letter-spacing:.4px;text-align:center">Ücretsiz Roguelite Futbol Menajerlik Oyunu</p></div>
     <div class="budget" id="budgetBox"><div class="l" id="lblBudget">Kasa</div><div class="v" id="budgetV">—</div></div></div>
 
   <section id="intro" class="hero">
    <div id="introLand">
-    <div class="mechanics" id="mechSection">
+    <div class="mechanics" id="mechSection" data-nosnippet>
       <div class="mstep"><span class="mn">01</span><p class="mt">Dizilişini seç. <mark>Başkanını</mark> belirle.</p></div>
       <div class="mstep"><span class="mn">02</span><p class="mt"><mark>Zarı at:</mark> her pozisyon için farklı oyuncular gelir.</p></div>
       <div class="mstep"><span class="mn">03</span><p class="mt">Kadronu kur, <mark>kartlarla</mark> güçlendir, sakatları yönet.</p></div>
