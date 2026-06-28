@@ -80,6 +80,8 @@ function addCard(k,v,opts){
    if(!silent)pushFeed("\u{1f5a4} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"KARA — finalde -"+pen+" güç (lanetli)":"DARK — -"+pen+" in the final (cursed)"),"lose");
  }
  if(instant)applyRiskCardGain(k);
+ /* Contract kartlar satin alindiginda ani etkilerini uygula */
+ if(!instant&&cardMode(k)==="contract")applyRiskCardGain(k);
  if(instant){cardInv[k]=0;cardVariant[k]=0;cards=cards.filter(c=>c!==k);return{added:true,instant:true};}
  if(!silent)pushFeed("\u{1f0cf} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"aktif slota hazır":"ready for slot")+(variant>0?" · "+variantText(k):""),"ch");
  return{added:true};
