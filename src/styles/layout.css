@@ -180,6 +180,7 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .roundtag{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);text-align:center;margin-bottom:6px;min-height:13px}
 .fbtn.locked{opacity:.5;cursor:not-allowed;background:repeating-linear-gradient(45deg,var(--paper2) 0 5px,#e8ddbd 5px 10px)}
 .fbtn.locked:hover{background:repeating-linear-gradient(45deg,var(--paper2) 0 5px,#e8ddbd 5px 10px);color:var(--ink);border-color:var(--ink)}
+.fbtn.locked.sel{color:var(--ink);border-color:var(--ink)}
 .clubrow{padding:0 16px}
 .cinput{width:100%;font-family:var(--disp);font-weight:600;font-size:18px;text-align:center;text-transform:uppercase;border:2px solid var(--ink);border-radius:5px;padding:9px;background:var(--paper2);color:var(--ink);margin-bottom:10px}
 .colrow{margin-bottom:8px}

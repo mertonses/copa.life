@@ -224,7 +224,7 @@ function buildSim(myPow,oppPow){
    $("simComm").innerHTML="🏆 "+penaltyNote;
    $("simClk").textContent="90'";
    sfxWhistle();
-   draw();drawHeatmap();motm=pickMOTM();makeReport(sA>sB);
+   draw();drawHeatmap();try{window._heatmapImg=cv.toDataURL('image/png');}catch(e){}motm=pickMOTM();makeReport(sA>sB);
    setTimeout(()=>endRun(sA>sB,sA+"–"+sB),900);
   },delay);
  }
