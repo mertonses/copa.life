@@ -77,7 +77,12 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .metaline{font-family:var(--mono);font-size:10px;color:var(--ink2);letter-spacing:1px}
 .metaline b{color:var(--blue)}
 .artnote{border:1.5px solid var(--line);background:rgba(253,246,226,.86);color:var(--ink2);font-family:var(--mono);font-size:8px;line-height:1.45;text-align:center;padding:7px 10px;margin-top:-4px}
-.patreonbox{display:flex;align-items:center;justify-content:center;gap:7px;max-width:420px;margin:28px auto 0;padding:7px 9px;border:1.5px dashed var(--line);background:rgba(253,246,226,.72);color:var(--ink2);font-family:var(--mono);font-size:9px;line-height:1.35;text-align:left;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s}
+.contactbox{display:flex;align-items:center;justify-content:center;gap:8px;max-width:420px;width:100%;margin:28px auto 0;padding:9px 12px;border:1.5px solid var(--line);background:rgba(253,246,226,.55);color:var(--ink2);font-family:var(--mono);font-size:10.5px;line-height:1.35;text-align:left;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;box-sizing:border-box}
+.contactbox b{font-family:var(--disp);font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.contactbox:hover{background:rgba(47,111,158,.1);border-color:var(--blue);box-shadow:0 0 0 2px rgba(47,111,158,.1) inset}
+.contactbox:active{transform:translateY(1px)}
+.contacticon{display:flex;align-items:center;justify-content:center;flex:0 0 22px;color:var(--ink2)}
+.patreonbox{display:flex;align-items:center;justify-content:center;gap:7px;max-width:420px;margin:8px auto 0;padding:7px 9px;border:1.5px dashed var(--line);background:rgba(253,246,226,.72);color:var(--ink2);font-family:var(--mono);font-size:9px;line-height:1.35;text-align:left;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s}
 .patreonbox b{font-family:var(--disp);font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 .patreonbox:hover{background:rgba(230,173,46,.18);border-color:var(--mustard);box-shadow:0 0 0 2px rgba(230,173,46,.18) inset}
 .patreonbox:active{transform:translateY(1px)}

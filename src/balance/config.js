@@ -1,5 +1,7 @@
 /* Oyun genel sabitleri ve ortak sayac yardimcisi. */
 var BUDGET=30,DEBT_LIMIT=-28,MAX_CARD_COPIES=4,BONUS_SOFT_CAP=8,BONUS_OVERFLOW_RATE=0.2,BONUS_HARD_CAP=12,FINAL_DEBT_CAP=18;
+/* İletişim formu — web3forms.com'dan ücretsiz key al, buraya yapıştır */
+var CONTACT_FORM_KEY="2eb11e4e-335a-401e-b2e7-104c07ecd4a6";
 function cnt(s,arr){return s.filter(p=>arr.includes(p.pos)).length;}
 function squadWage(){return 0;}
 function activeDebtLimit(){return round>=3?Math.max(DEBT_LIMIT,chairmanSackLimit()):DEBT_LIMIT;}
