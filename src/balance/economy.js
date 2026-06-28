@@ -3,8 +3,10 @@ function newShopOffers(){
  shopOffers=[];
  shopVariants={};
  const pool=[];
+ const pintiShop=typeof chairman!=="undefined"&&chairman&&chairman.id==="pinti";
  CARDKEYS.forEach(k=>{
    if(invOf(k)>0)return; // zaten sahip
+   if(pintiShop&&CARDDEFS[k]&&CARDDEFS[k].rar==="gold")return;
    pool.push(k);
  });
  const limit=debtStage()>=3?1:2;
