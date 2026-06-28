@@ -1,30 +1,30 @@
 /* Kart tanimlari. */
 var CARDDEFS={
  /* GÜÇ */
- taraftar:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>2},
- genc:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>Math.min(4,r)},
- ch_momentum:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>3},
- kontra:{price:8,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>cnt(s,FWDP)},
- buyuk_mac:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>r>=4?3:1},
- yildiz:{price:12,rar:"gold",kind:"power",mode:"scaling",eff:(s,r)=>s.length&&s.reduce((a,p)=>Math.max(a,p.ov),0)>=80?5:2},
+ taraftar:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>Math.min(r+1,4)},
+ genc:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>Math.min(6,r)},
+ ch_momentum:{price:6,rar:"bronze",kind:"power",mode:"scaling",eff:(s,r)=>r<=2?2:r<=4?3:4},
+ kontra:{price:8,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>Math.max(1,cnt(s,FWDP))},
+ buyuk_mac:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>r>=3?3:1},
+ yildiz:{price:12,rar:"gold",kind:"power",mode:"scaling",eff:(s,r)=>{const ov=s.length?s.reduce((a,p)=>Math.max(a,p.ov),0):0;return ov>=90?7:ov>=85?6:ov>=80?5:2;}},
  /* SAVUNMA */
  otobus:{price:8,rar:"silver",kind:"defense",mode:"scaling",eff:(s,r)=>s.filter(p=>p.pos==="CB").length},
  kaleci_kalesi:{price:9,rar:"silver",kind:"defense",mode:"scaling",eff:(s,r)=>{const gk=s.find(p=>p.pos==="GK");return gk&&gk.ov>=75?4:gk&&gk.ov>=68?2:gk?1:0;}},
  /* KADRO */
- anadolu:{price:7,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(2,Math.floor(s.filter(p=>p.ov<70).length/2))},
- altyapi_plani:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(4,s.filter(p=>p.age<=21).length)},
+ anadolu:{price:7,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(3,s.filter(p=>p.ov<70).length)},
+ altyapi_plani:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(4,s.filter(p=>p.age<=23).length)},
  tecrubeli_omurga:{price:8,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>Math.min(3,s.filter(p=>p.age>=32).length)},
- veteran:{price:11,rar:"gold",kind:"squad",mode:"scaling",eff:(s,r)=>Math.max(0,4-1*Math.max(0,r-3))},
- yerli_blok:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>s.filter(p=>p.tr).length>=4?3:0},
+ veteran:{price:11,rar:"gold",kind:"squad",mode:"scaling",eff:(s,r)=>Math.max(2,4-Math.max(0,r-4))},
+ yerli_blok:{price:9,rar:"silver",kind:"squad",mode:"scaling",eff:(s,r)=>{const t=s.filter(p=>p.tr).length;return t>=6?5:t>=4?3:t>=2?1:0;}},
  /* HÜCUM */
  kanat_akini:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>Math.min(4,s.filter(p=>["LW","RW","LM","RM","WB"].includes(p.pos)).length)},
  cift_forvet:{price:9,rar:"silver",kind:"power",mode:"scaling",eff:(s,r)=>{const st=s.filter(p=>p.pos==="ST").length;return st>=2?3:st>=1?1:0;}},
  /* FİNAL */
- derbi:{price:13,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?8:0},
+ derbi:{price:13,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?8:r>=5?4:r>=4?2:0},
  ch_final:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?6:r>=5?3:0},
  final_provasi:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?5:0},
- kupaci_kadro:{price:11,rar:"risk",kind:"final",mode:"scaling",eff:(s,r)=>r>=5?3:0},
- son_dans:{price:10,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?4:0},
+ kupaci_kadro:{price:11,rar:"risk",kind:"final",mode:"scaling",eff:(s,r)=>r>=5?4:0},
+ son_dans:{price:10,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?(typeof injuredIdx!=="undefined"&&injuredIdx===-1?6:4):0},
  /* EKONOMİ */
  taksit_transfer:{price:8,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
  son_kredi:{price:7,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
