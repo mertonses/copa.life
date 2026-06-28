@@ -363,7 +363,6 @@ function _drawConnectors(p){
       const sc=filled===0?0:trScore>=2?4:trScore>=1?3:filled>0?1:0;
       const {s,w}=_lnkColor(sc);
       el+=`<path d="M${ax},${y1} Q${ax+bend},${cy} ${ax},${y2+5}" fill="none" stroke="${s}" stroke-width="${w}" stroke-dasharray="2.5 2" stroke-linecap="round"/>`;
-      el+=`<path d="M${ax-3.5},${y2+11} L${ax},${y2+4} L${ax+3.5},${y2+11}" fill="none" stroke="${s}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`;
     }
   });
   let _svg=p.querySelector(".pclines svg");
