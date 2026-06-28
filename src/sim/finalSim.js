@@ -89,7 +89,7 @@ function buildSim(myPow,oppPow){
   ball.vx=Math.cos(ang)*pow;ball.vy=Math.sin(ang)*pow;lastTouch={p:ow,side:t.side};
  }
  function saveChance(defTeam,attTeam){const gap=(defTeam.pow-attTeam.pow)/125;const shotSpeed=Math.min(1,Math.hypot(ball.vx,ball.vy)/5);return clamp(0.78+gap-shotSpeed*0.09,0.62,0.89);}
- function saveMsg(def){const who=def==="A"?clip(teamName||"US",8):clip(opponent.name,8);$("simComm").innerHTML="🧤 "+(LANG==="tr"?"<b>"+who+"</b> kalecisi kurtardı!":"<b>"+who+"</b> keeper saves!");if(def==="A")keeperA++;else keeperB++;updateStats();addEvent("save",def,LANG==="tr"?"Kaleci kurtardı":"Keeper save");if(!keyMoment)keyMoment=LANG==="tr"?"kaleci oyunda tuttu":"keeper kept it alive";}
+ function saveMsg(def){const who=def==="A"?clip(teamName||"US",8):clip(opponent.name,8);$("simComm").innerHTML="🧤 "+(LANG==="tr"?"<b>"+who+"</b> kalecisi kurtardı!":"<b>"+who+"</b> keeper saves!");if(def==="A")keeperA++;else keeperB++;updateStats();addEvent("save",def,LANG==="tr"?"Kaleci kurtardı":"Keeper save");sfxSave();if(!keyMoment)keyMoment=LANG==="tr"?"kaleci oyunda tuttu":"keeper kept it alive";}
 
  /* 7 — Köşe vuruşu */
  function cornerKick(attackSide){const cornerX=ball.x<W/2?8:W-8;ball.x=cornerX;ball.y=attackSide==="A"?BR+2:H-BR-2;const cx=GL+GW*(0.2+rand()*0.6),cy=attackSide==="A"?H*0.22:H*0.78;ball.vx=(cx-ball.x)*0.07+(rand()-.5)*0.4;ball.vy=(cy-ball.y)*0.07+(rand()-.5)*0.3;lastKick=frame+22;poss=attackSide;addEvent("corner",attackSide,LANG==="tr"?"Köşe vuruşu":"Corner kick");sfxPass();}
@@ -273,7 +273,7 @@ function buildSim(myPow,oppPow){
   shout:(t)=>{
    if(aPowBase==null)aPowBase=A.pow;
    const mp={more:{d:6,t:"yüklen!",e:"push up!"},push:{d:4,t:"önde bas!",e:"press high!"},calm:{d:2,t:"tempoyu düşür",e:"slow tempo"},hold:{d:-4,t:"skoru koru",e:"protect lead"}};
-   const c=mp[t]||mp.more;A.pow=aPowBase+c.d;aShoutTtl=780;
+   const c=mp[t]||mp.more;A.pow=aPowBase+c.d;aShoutTtl=780;playUiSample("click",.18);
    const rb=$("simRadio");if(rb)rb.innerHTML="📻 <b>"+clip(teamName||"US",9)+"</b> "+(LANG==="tr"?c.t:c.e);
   },
   /* 9 — Skip: hedefler sıralı gösterilir */

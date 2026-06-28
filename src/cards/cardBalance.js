@@ -11,7 +11,7 @@ function weightedVariant(){
 
 function cardPrice(k){
  const d=CARDDEFS[k],rar=d.rar||"bronze";
- const floor={bronze:7,silver:12,gold:17,risk:10}[rar]||7;
+ const floor={bronze:7,silver:12,gold:17,risk:6}[rar]||7;
  const base=Math.round(d.price||floor);
  const vm=VARIANT_PRICE_MOD[variantOf(k)||0];
  return Math.max(3,Math.round(Math.max(floor,base)*vm)+chairmanMarketMod());

@@ -45,7 +45,7 @@ function applyRiskCardGain(k){
  if(k==="deplasman_kafilesi"){spend(AWAY_TRIP_COST,"spent");pushFeed("\u{1f68c} <b>"+L().cards[k].n+"</b> -€"+AWAY_TRIP_COST+"M, güçlü rakibe +4","pres");}
  if(k==="final_provasi"){spend(FINAL_PROVA_COST,"spent");pushFeed("\u{1f3df} <b>"+L().cards[k].n+"</b> şimdi -€"+FINAL_PROVA_COST+"M, final +5","pres");}
  if(k==="kupaci_kadro"){finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+KUPA_DEBT);pushFeed("\u{1f3c6} <b>"+L().cards[k].n+"</b> YF/final +3, finalde -"+KUPA_DEBT+" güç","lose");}
- if(k==="cilgin_basin"){if(rand()<0.65){earn(12,"earned");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı işe yaradı: +€12M":"press worked in our favour: +€12M"),"buy");}else{spend(8,"spent");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı ters tepti: -€8M":"press backfired: -€8M"),"lose");}}
+ if(k==="cilgin_basin"){if(rand()<0.65){earn(20,"earned");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı işe yaradı: +€20M":"press worked in our favour: +€20M"),"buy");}else{spend(8,"spent");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı ters tepti: -€8M":"press backfired: -€8M"),"lose");}}
 }
 
 function processRiskCards(){
