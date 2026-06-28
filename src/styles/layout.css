@@ -343,11 +343,9 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .howto-toggle::before{content:"▾";font-size:11px;transition:transform .2s}
 .howto-toggle.open::before{transform:rotate(-180deg)}
 .howto-body{padding:6px 0 4px;display:flex;flex-direction:column;gap:0}
-.howto-step{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.howto-step{display:grid;grid-template-columns:48px 1fr;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
 .howto-step:last-child{border-bottom:none}
-.hs-l .hwi{grid-column:1}.hs-l>div{grid-column:2}
-.hs-r>div{grid-column:2}.hs-r .hwi{grid-column:3}
-.hwi{display:flex;justify-content:center;align-items:center;line-height:0;opacity:.9}
+.hwi{display:flex;justify-content:center;align-items:center;line-height:0;flex-shrink:0;width:40px;height:40px;border:1px solid var(--line);background:transparent}
 .howto-n{font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:2px;margin-right:5px}
 .hwt{display:block;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink);margin-bottom:3px;text-align:center}
 .hwd{font-size:11px;color:var(--ink2);line-height:1.5;margin:0;text-align:center}
