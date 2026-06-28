@@ -16,7 +16,7 @@ function cardPrice(k){
 }
 
 function variantText(k){
- const labels=L().variantLbl||["ALTIN","KARA"];
+ const labels=L().variantLbl||["GOLDEN","DARK"];
  return labels[Math.min(variantOf(k)||0,1)]||labels[0]||"";
 }
 

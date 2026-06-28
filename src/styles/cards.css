@@ -7,15 +7,16 @@
 .card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
-/* Variant badges — NÖTR / ALTIN / KARA */
+/* Variant badges — GOLDEN(0) / DARK(1) */
 .var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:3px}
-.var-0{background:#7a8a76;color:#fff}
-.var-1{background:#c8940a;color:#fff}
+.var-0{background:#c8940a;color:#fff}
+.var-1{background:#2a2a2a;color:#e8e0d0}
 .var-2{background:#1c1c1c;color:#d8cfc0}
 .card .copy{display:block;font-size:8px;color:var(--ink2);margin-top:2px}
 .card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--mustard) inset}
-/* Shop tile variant tinting — NÖTR(0) no tint, ALTIN(1), KARA(2) */
-.shopcard.sv-1{border-color:#c8940a;box-shadow:inset 0 0 0 1px #c8940a}
+/* Shop tile variant tinting — GOLDEN(0), DARK(1) */
+.shopcard.sv-0{border-color:#c8940a;box-shadow:inset 0 0 0 1px rgba(200,148,10,.5)}
+.shopcard.sv-1{border-color:#3c3c3c;box-shadow:inset 0 0 0 1px #3c3c3c}
 .shopcard.sv-2{border-color:#3c3c3c;box-shadow:inset 0 0 0 1px #3c3c3c}
 /* Active card row variant tinting */
 .card.v1{border-left-color:#c8940a}
@@ -220,10 +221,11 @@ body.dark .ccard.tier-3 .cact,body.dark .card.tier-3 .copy,body.dark .shopcard.t
 .cardtile.rar-silver .ct-head{background:#5e7a8a}
 .cardtile.rar-gold .ct-head{background:#c8940a}
 .cardtile.rar-risk .ct-head{background:#5a3a7a}
-/* Variant-based header — sv-0 NÖTR / sv-1 ALTIN / sv-2 KARA */
-.cardtile.sv-0 .ct-head{background:#7a8a76}
-.cardtile.sv-1 .ct-head{background:#c8940a}
+/* Variant-based header — sv-0 GOLDEN / sv-1 DARK */
+.cardtile.sv-0 .ct-head{background:#c8940a}
+.cardtile.sv-1 .ct-head{background:#2a2a2a}
 .cardtile.sv-2 .ct-head{background:#1c1c1c}
+.ct-head{padding:4px 8px 4px 5px}
 .ct-rar{opacity:.9}
 .ct-cat{opacity:.75;font-size:6.5px}
 

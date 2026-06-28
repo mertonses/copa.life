@@ -43,7 +43,7 @@ function debtTaxAmount(){return 0;}
 function kindLabel(k){const tr=LANG==="tr",kind=cardKind(k),m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["ÖZEL","SPECIAL"],temporary:["ÖZEL","SPECIAL"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[kind]||["GÜÇ","POWER"];const lbl=tr?m[0]:m[1];if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
 function modeLabel(k){if(isInstantCard(k))return LANG==="tr"?"ANINDA ÇALIŞIR":"INSTANT";if(!isProgressCard(k))return LANG==="tr"?"SÖZLEŞME":"CONTRACT";return LANG==="tr"?"GELİŞEN":"SCALING";}
 function cardBadgeHTML(k){return `<span class="kindtag kind-${cardKind(k)}">${kindLabel(k)}</span><span class="modetag">${modeLabel(k)}</span>`;}
-function variantBadge(v){const labels=L().variantLbl||["ALTIN","KARA"];return labels[Math.min(v||0,1)]||labels[0];}
+function variantBadge(v){const labels=L().variantLbl||["GOLDEN","DARK"];return labels[Math.min(v||0,1)]||labels[0];}
 function rarLabel(k){return variantBadge(variantOf(k));}
 
 const LOCK_SVG=`<svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3 -3v-6a3 3 0 0 1 3 -3v-3a5 5 0 0 1 5 -5m0 12a2 2 0 0 0 -1.995 1.85l-.005 .15a2 2 0 1 0 2 -2m0 -10a3 3 0 0 0 -3 3v3h6v-3a3 3 0 0 0 -3 -3"/></svg>`;
@@ -232,7 +232,7 @@ function buyCard(k){
   shopOffers=shopOffers.filter(o=>o!==k);
   delete shopVariants[k];
   sfxStamp();sfxCoin();
-  const vl=(L().variantLbl||["ALTIN","KARA"])[sv];
+  const vl=(L().variantLbl||["GOLDEN","DARK"])[sv];
   pushFeed("💰 <b>"+L().cards[k].n+"</b> "+L().feedBuy+" (-€"+pr+"M) · "+vl,"buy");
   renderHub();
 }
