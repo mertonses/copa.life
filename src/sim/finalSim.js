@@ -407,7 +407,10 @@ function buildSim(myPow, oppPow) {
   const allPlayers = [...psA, ...psB];
 
   /* ── Simulation (headless) ── */
-  const rng = seededRand(typeof seedNum !== "undefined" ? seedNum : Date.now());
+  /* Mix round into seed so each match produces unique events even with same seedNum */
+  const _base = typeof seedNum !== "undefined" ? seedNum : Date.now();
+  const _r = typeof round !== "undefined" ? round : 1;
+  const rng = seededRand(((_base * 1000003) ^ (_r * 2654435761)) >>> 0 || 1);
   const result = simulateMatch(myPow, oppPow, rng);
   const events = result.events;
 
