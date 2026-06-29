@@ -509,7 +509,7 @@ function buildSim(myPow, oppPow) {
   allPlayers.forEach((p, i) => { _smX[i] = p.hx; _smY[i] = p.hy; p.x = p.hx; p.y = p.hy; });
 
   /* playback state */
-  let _tickF = 0, eventIdx = 0, raf = null, gameEnded = false;
+  let _tickF = 0, gameClock = 0, eventIdx = 0, raf = null, gameEnded = false;
   let momDisplay = 50;
   let liveScore = { A: 0, B: 0 };
   let liveShots = { A: 0, B: 0 }, liveSaves = { A: 0, B: 0 };
@@ -751,14 +751,14 @@ function buildSim(myPow, oppPow) {
     /* advance tick counter */
     _tickF = Math.min(_totalTicks - 1, _tickF + dt * speedMul * TPG * 0.55);
     const _t = Math.floor(_tickF);
-    const _gameClock = _tickF / TPG;
+    gameClock = _tickF / TPG;
     _frame++;
 
     /* read ball position from buffer */
     const _bx = _fbX[_t], _by = _fbY[_t];
 
     /* fire events whose game-minute has been reached */
-    while (eventIdx < events.length && _gameClock >= events[eventIdx].minute) {
+    while (eventIdx < events.length && gameClock >= events[eventIdx].minute) {
       triggerEvent(events[eventIdx]);
       eventIdx++;
     }
@@ -777,7 +777,7 @@ function buildSim(myPow, oppPow) {
     ctx.beginPath(); ctx.arc(_bx, _by, BR, 0, 7);
     ctx.fillStyle = "#fff"; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
-    drawScoreOverlay(_gameClock);
+    drawScoreOverlay(gameClock);
 
     raf = requestAnimationFrame(frameStep);
   }
