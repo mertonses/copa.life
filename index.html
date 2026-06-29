@@ -1033,7 +1033,7 @@ showModal(`<div style="text-align:center;padding:18px 8px"><div style="margin-bo
 function goLand(){const s=$("introSetup"),l=$("introLand");if(s)s.classList.add("hidden");if(l)l.classList.remove("hidden");}
 function showPostcard(cb){_pcCb=cb;const x=L();let xi="";slots.forEach((sl,i)=>{const p=picksBySlot[i];if(!p)return;xi+=`<div class="pc-pl"><span><span class="pp">${x.abbr[sl[0]]}</span>${surOf(p)}</span><span class="po">${effOf(p)}</span></div>`;});const debt=budget<0?`<div class="pc-debt">${LANG==="tr"?`Bu kadro €${Math.abs(budget)}M borçla kuruldu. Borç; transferler ve varsa ücretli yedek kulübesi masrafından gelir. Yönetim baskısı artabilir.`:`This squad starts €${Math.abs(budget)}M in debt. Debt comes from transfers and any paid bench cost. Board pressure may rise.`}</div>`:"";showModal(`<div class="postcard"><div class="pc-band">${x.ui.postBand}</div><div class="pc-team">${teamName||"XI"}</div><div class="pc-sub">${formName} · ${x.styles[style].n}</div>${debt}<div class="pc-xi">${xi}</div><div class="bact"><button class="btn btn-go" onclick="pcGo()">${x.ui.startRun}</button></div></div>`);}
 function pcGo(){closeModal();const f=_pcCb;_pcCb=null;if(f)f();}
-function finalCardSummary(){const s=picksBySlot.filter(Boolean),items=[];cards.forEach(k=>{const v=cardEff(k,s,6),prev=cardEff(k,s,5);if(cardKind(k)==="final"||v!==prev)items.push(`<div class="ferow"><span>${L().cards[k].n}</span><b>${v>=0?"+":""}${v}</b></div>`);});const morale=talkMod&&talkMod.all?talkMod.all:0;if(morale)items.push(`<div class="ferow"><span>${LANG==="tr"?"Motivasyon":"Motivation"}</span><b>${morale>=0?"+":""}${morale}</b></div>`);if(!items.length)items.push(`<div class="ferow muted"><span>${LANG==="tr"?"Final kartı yok":"No final cards"}</span><b>0</b></div>`);if(finalPenalty>0)items.push(`<div class="ferow bad"><span>${LANG==="tr"?"Finalde eksi güç":"Final power loss"}</span><b>-${finalPenalty}</b></div>`);return items.join("");}
+function finalCardSummary(){const s=picksBySlot.filter(Boolean),items=[];cards.forEach(k=>{const v=cardEff(k,s,6),prev=cardEff(k,s,5);if(cardKind(k)==="final"||v!==prev)items.push(`<div class="ferow"><span>${L().cards[k].n}</span><b>${v>=0?"+":""}${v}</b></div>`);});const morale=talkMod&&talkMod.all?talkMod.all:0;if(morale)items.push(`<div class="ferow"><span>${LANG==="tr"?"Motivasyon":"Motivation"}</span><b>${morale>=0?"+":""}${morale}</b></div>`);if(!items.length)items.push(`<div class="ferow muted"><span>${LANG==="tr"?"Final kartı yok":"No final cards"}</span><b>—</b></div>`);if(finalPenalty>0)items.push(`<div class="ferow bad"><span>${LANG==="tr"?"Finalde eksi güç":"Final power loss"}</span><b>-${finalPenalty}</b></div>`);return items.join("");}
 function showFinalCard(sp){
   const x=L(),tr=LANG==="tr",myPow=sp.power,oppPow=opponent.power;
   const myClr=myPow>=oppPow?"#4ade80":"#f97316";
@@ -1093,7 +1093,7 @@ function showFinalCard(sp){
       <line x1="10" y1="15" x2="16" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
     </g>
     <g>
-      <animateTransform attributeName="transform" type="translate" values="30 32;10 22;32 32" dur="0.7s" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="translate" values="22 32;22 32;46 14" dur="0.7s" calcMode="spline" keySplines=".4 0 .6 1;.2 0 .4 1" repeatCount="indefinite"/>
       <circle cx="0" cy="0" r="5.5" fill="#fff" opacity=".88"/>
       <path d="M0,-3.5 L2.1,-1.1 L1.3,1.8 L-1.3,1.8 L-2.1,-1.1Z" fill="#555" opacity=".5" stroke="none"/>
     </g>
@@ -1110,7 +1110,10 @@ function showFinalCard(sp){
           <div style="font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.5px;color:#e8e8e8;text-transform:uppercase;line-height:1.2;max-width:100px">${clip(teamName||"XI",14)}</div>
           <div style="font-family:var(--mono);font-size:13px;font-weight:900;color:${myClr}">${myPow}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">${_vs}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
+          ${_vs}
+          ${currentWeather?`<div style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.5);text-transform:uppercase">${currentWeather.e}<span>${tr?currentWeather.tr:currentWeather.en}</span></div>`:''}
+        </div>
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
           <div style="width:66px;height:74px;display:flex;align-items:center;justify-content:center">${oppCrest}</div>
           <div style="font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.5px;color:#e8e8e8;text-transform:uppercase;line-height:1.2;max-width:100px">${clip(opponent.name,14)}</div>
