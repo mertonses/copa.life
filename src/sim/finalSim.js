@@ -6,6 +6,7 @@ function setSpeed(s) {
   speedMul = s;
   try { localStorage.setItem("copa_spd", s); } catch (e) {}
   document.querySelectorAll(".spd").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.s) === s));
+  if (window._simTl) window._simTl.timeScale(s);
 }
 function simPause() { if (sim && sim.pause) sim.pause(); }
 function simSkip() { if (sim && sim.skip) sim.skip(); }
@@ -353,51 +354,103 @@ function drawHeatmap(ctx, W, H, heatGrid, HGW, HGH) {
   ctx.fillText(lbl, W / 2, H - 13);
 }
 
-/* ── F. buildSim ── */
+/* ── F. buildSim (GSAP) ── */
 function buildSim(myPow, oppPow) {
-  const cv = $("cv");
-  const wrap = Math.max(340, Math.min(860, ($("sim") && $("sim").clientWidth) || 860));
+  const cvEl = $("cv");
+  const wrap = Math.max(340, Math.min(860, ($("sim") && $("sim").clientWidth) || 600));
   const W = wrap, H = Math.round(W * 0.62);
   const GW = Math.round(W * 0.27), GL = (W - GW) / 2, GR = (W + GW) / 2;
-  const PR = Math.max(8, Math.round(W * 0.012)), BR = Math.max(5, Math.round(W * 0.007));
-  const ctx = cv.getContext("2d");
-  const _dpr = Math.min(2, window.devicePixelRatio || 1);
-  cv.width = W * _dpr; cv.height = H * _dpr;
-  cv.style.width = "100%"; cv.style.height = "auto";
-  ctx.setTransform(_dpr, 0, 0, _dpr, 0, 0);
 
-  /* player setup */
-  function teamFrom(coords, poses, names, side, col, fg, pow, inj) {
-    const ps = coords.map((c, i) => {
-      let hx, hy;
-      if (side === "A") { hx = c[0] / 100 * W; hy = c[1] / 100 * H; }
-      else { hx = (1 - c[0] / 100) * W; hy = (1 - c[1] / 100) * H; }
+  /* Reset clock display immediately */
+  { const clk=$("simClk"); if (clk) clk.textContent="0'"; }
+  { const sc=$("simScore"); if (sc) sc.textContent="0–0"; }
+
+  /* ── Build pitch HTML ── */
+  cvEl.innerHTML = "";
+  cvEl.style.cssText = `position:relative;width:${W}px;max-width:100%;height:${H}px;overflow:hidden;border-radius:6px`;
+
+  for (let i = 0; i < 9; i++) {
+    const s = document.createElement("div");
+    s.style.cssText = `position:absolute;left:0;right:0;top:${i/9*100}%;height:${100/9+0.2}%;background:${i%2?"#79ad5c":"#6fa052"}`;
+    cvEl.appendChild(s);
+  }
+
+  const PA_W = Math.round(W * 0.44), PA_H = Math.round(H * 0.28), PA_L = (W - PA_W) / 2;
+  const linesEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  linesEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  linesEl.setAttribute("width", W); linesEl.setAttribute("height", H);
+  linesEl.style.cssText = "position:absolute;inset:0;z-index:1;pointer-events:none";
+  linesEl.innerHTML = `
+    <rect x="7" y="7" width="${W-14}" height="${H-14}" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+    <line x1="7" y1="${H/2}" x2="${W-7}" y2="${H/2}" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+    <circle cx="${W/2}" cy="${H/2}" r="38" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+    <line x1="${GL}" y1="7" x2="${GR}" y2="7" stroke="#fff" stroke-width="4"/>
+    <line x1="${GL}" y1="${H-7}" x2="${GR}" y2="${H-7}" stroke="#fff" stroke-width="4"/>
+    <rect x="${PA_L}" y="7" width="${PA_W}" height="${PA_H}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
+    <rect x="${PA_L}" y="${H-7-PA_H}" width="${PA_W}" height="${PA_H}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
+  `;
+  cvEl.appendChild(linesEl);
+
+  /* ── Player setup ── */
+  function teamFrom(coords, poses, names, side, inj) {
+    return coords.map((c, i) => {
+      const hx = side === "A" ? c[0]/100*W : (1-c[0]/100)*W;
+      const hy = side === "A" ? c[1]/100*H : (1-c[1]/100)*H;
       const pos = poses[i] || "CM";
       const role = (typeof groupOf === "function") ? groupOf(pos) : (["ST","CF","LW","RW"].includes(pos)?"FWD":["CM","CAM","CDM","LM","RM"].includes(pos)?"MID":"DEF");
       const wide = ["LB","RB","WB","LW","RW","LM","RM"].includes(pos);
-      return { hx, hy, x: hx, y: hy, gk: i === 0, n: i + 1, nm: ((names[i] || "").split(" ").pop() || "?"), role, wide, inj: !!(inj && inj[i]), isA: side === "A" };
+      return { hx, hy, x:hx, y:hy, gk:i===0, n:i+1, nm:((names[i]||"").split(" ").pop()||"?"), role, wide, inj:!!(inj&&inj[i]), isA:side==="A" };
     });
-    return { side, col, fg, ps, pow };
   }
 
-  const myCoords = slots.map(s => [s[1], s[2]]);
-  const myPoses  = slots.map(s => s[0]);
-  const myNames  = picksBySlot.map(p => p ? p.name : "");
-  const f433 = FORMATIONS["4-3-3"];
+  const myCoords  = slots.map(s => [s[1], s[2]]);
+  const myPoses   = slots.map(s => s[0]);
+  const myNames   = picksBySlot.map(p => p ? p.name : "");
+  const f433      = FORMATIONS["4-3-3"];
   const oppCoords = f433.map(s => [s[1], s[2]]);
   const oppPoses  = f433.map(s => s[0]);
   const oNames    = oppLineup.length ? oppLineup.map(o => o.name) : oppCoords.map(() => "?");
 
-  const psA = teamFrom(myCoords, myPoses, myNames, "A", kit.bg, kit.fg, myPow, picksBySlot.map(p => p && p.injured));
-  const psB = teamFrom(oppCoords, oppPoses, oNames, "B", "#eae2cb", "#23332a", oppPow);
-  const allPlayers = [...psA.ps, ...psB.ps];
+  const psA = teamFrom(myCoords, myPoses, myNames, "A", picksBySlot.map(p => p && p.injured));
+  const psB = teamFrom(oppCoords, oppPoses, oNames, "B");
+  const allPlayers = [...psA, ...psB];
 
-  /* run simulation */
+  /* Player DOM elements */
+  allPlayers.forEach(p => {
+    const isA = p.isA;
+    const sz  = p.gk ? 16 : 19;
+    const bg  = p.gk ? "#e6ad2e" : (isA ? kit.bg : "#eae2cb");
+    const fg  = p.gk ? "#23332a" : (isA ? kit.fg : "#23332a");
+    const br  = p.gk ? "4px" : "50%";
+    const bdr = isA && !p.gk ? kit.sec : "#fff";
+    const el  = document.createElement("div");
+    el.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;background:${bg};border:2px solid ${bdr};border-radius:${br};display:flex;align-items:center;justify-content:center;font:bold 8px Inter,sans-serif;color:${fg};z-index:3;box-sizing:border-box;transform:translate(-50%,-50%);left:${p.hx/W*100}%;top:${p.hy/H*100}%`;
+    el.textContent = p.n;
+    const nm = document.createElement("div");
+    nm.style.cssText = `position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:${isA?"#d4f7e0":"#f3ead2"};font:bold 6px Inter,sans-serif;padding:1px 3px;border-radius:2px;white-space:nowrap;pointer-events:none`;
+    nm.textContent = (p.nm||"").slice(0, 9).toUpperCase();
+    el.appendChild(nm);
+    if (p.inj) {
+      const inj = document.createElement("div");
+      inj.style.cssText = "position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:#d6543a;border-radius:50%;font:bold 5px sans-serif;color:#fff;display:flex;align-items:center;justify-content:center";
+      inj.textContent = "!";
+      el.appendChild(inj);
+    }
+    cvEl.appendChild(el);
+    p.el = el;
+  });
+
+  /* Ball */
+  const ballSz = Math.max(10, Math.round(W * 0.016));
+  const ballEl = document.createElement("div");
+  ballEl.style.cssText = `position:absolute;width:${ballSz}px;height:${ballSz}px;background:#fff;border:1.5px solid #23332a;border-radius:50%;transform:translate(-50%,-50%);left:50%;top:50%;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.38)`;
+  cvEl.appendChild(ballEl);
+
+  /* ── Simulation ── */
   const rng = seededRand(typeof seedNum !== "undefined" ? seedNum : Date.now());
   const result = simulateMatch(myPow, oppPow, rng);
   const events = result.events;
 
-  /* set globals */
   window.motm = result.motm;
   try { motm = result.motm; } catch (e) {}
   window.keyMoment = result.keyMoment;
@@ -408,462 +461,299 @@ function buildSim(myPow, oppPow) {
   window.keeperB = result.stats.saves.A;
   window.goals = events.filter(e => e.type === "goal");
 
-  /* build heatmap from events */
+  /* Heatmap data */
   const HGW = 20, HGH = 15;
   const heatGrid = new Float32Array(HGW * HGH);
   events.forEach(ev => {
     if (!ev.pos) return;
-    const gx = Math.min(HGW - 1, Math.floor(ev.pos.x * HGW));
-    const gy = Math.min(HGH - 1, Math.floor(ev.pos.y * HGH));
-    const w = ev.type === "goal" ? 4 : (ev.type === "save" || ev.type === "shot_wide") ? 2 : ev.type === "chance" ? 1.5 : 0.8;
-    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
-      const rr = gy + dr, cc = gx + dc;
-      if (rr >= 0 && rr < HGH && cc >= 0 && cc < HGW)
-        heatGrid[rr * HGW + cc] += w * (dr === 0 && dc === 0 ? 1 : 0.4);
+    const gx = Math.min(HGW-1, Math.floor(ev.pos.x * HGW));
+    const gy = Math.min(HGH-1, Math.floor(ev.pos.y * HGH));
+    const w  = ev.type==="goal" ? 4 : (ev.type==="save"||ev.type==="shot_wide") ? 2 : ev.type==="chance" ? 1.5 : 0.8;
+    for (let dr=-1; dr<=1; dr++) for (let dc=-1; dc<=1; dc++) {
+      const rr=gy+dr, cc=gx+dc;
+      if (rr>=0&&rr<HGH&&cc>=0&&cc<HGW) heatGrid[rr*HGW+cc] += w*(dr===0&&dc===0?1:0.4);
     }
   });
-  /* add formation density */
-  [...psA.ps, ...psB.ps].forEach(p => {
+  allPlayers.forEach(p => {
     if (p.gk) return;
-    const gx = Math.min(HGW - 1, Math.floor(p.hx / W * HGW));
-    const gy = Math.min(HGH - 1, Math.floor(p.hy / H * HGH));
-    heatGrid[gy * HGW + gx] += 0.5;
+    heatGrid[Math.min(HGH-1,Math.floor(p.hy/H*HGH))*HGW + Math.min(HGW-1,Math.floor(p.hx/W*HGW))] += 0.5;
   });
 
-  /* ── PRE-COMPUTE ball path (frame buffer) ── */
-  const TPG = 20; /* ticks per game-minute */
-  const _lastMin = events.length ? events[events.length - 1].minute + 4 : 95;
-  const _totalTicks = Math.ceil(_lastMin * TPG);
-
-  const _fbX = new Float32Array(_totalTicks); /* ball X per tick */
-  const _fbY = new Float32Array(_totalTicks); /* ball Y per tick */
-
-  (function _buildBallPath() {
-    function cubic(t, p0, p1, p2, p3) {
-      const u = 1 - t;
-      return u*u*u*p0 + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*p3;
-    }
-    function fillBez(ts, te, ax, ay, bx, by, cx2, cy2, dx, dy) {
-      const n = Math.max(1, te - ts);
-      for (let i = 0; i < n; i++) {
-        const t = i / n;
-        _fbX[ts + i] = cubic(t, ax, bx, cx2, dx);
-        _fbY[ts + i] = cubic(t, ay, by, cy2, dy);
-      }
-    }
-
-    let curX = W / 2, curY = H / 2, prevMin = 0;
-
-    events.forEach(ev => {
-      const st = Math.floor(prevMin * TPG);
-      const et = Math.max(st + 2, Math.floor(ev.minute * TPG));
-      const len = et - st;
-      const ex = ev.pos ? ev.pos.x * W : W / 2;
-      const ey = ev.pos ? ev.pos.y * H : H / 2;
-
-      /* neutral events: glide to centre */
-      if (!ev.side || ev.type === "halftime" || ev.type === "et_start" || ev.type === "et_half") {
-        fillBez(st, et, curX, curY, W/2, H/2, W/2, H/2, ex, ey);
-        curX = ex; curY = ey; prevMin = ev.minute; return;
-      }
-
-      /* build a pass chain through possession-team players */
-      const sideA = ev.side === "A";
-      const pool = (sideA ? psA.ps : psB.ps).filter(p => !p.gk);
-      const shuffled = pool.slice().sort(() => Math.random() - 0.5);
-      const nPasses = len > TPG * 5 ? Math.min(3, shuffled.length) :
-                      len > TPG * 2 ? Math.min(2, shuffled.length) : 0;
-
-      const wps = [{ x: curX, y: curY }];
-      for (let i = 0; i < nPasses; i++) {
-        const pl = shuffled[i];
-        wps.push({ x: pl.hx + (Math.random() - 0.5) * 24, y: pl.hy + (Math.random() - 0.5) * 18 });
-      }
-      wps.push({ x: ex, y: ey });
-
-      const nSeg = wps.length - 1;
-      for (let wi = 0; wi < nSeg; wi++) {
-        const segSt = st + Math.floor(wi * len / nSeg);
-        const segEt = st + Math.floor((wi + 1) * len / nSeg);
-        const p0 = wps[wi], p3 = wps[wi + 1];
-        const ddx = p3.x - p0.x, ddy = p3.y - p0.y;
-        const jit = Math.sqrt(ddx*ddx + ddy*ddy) * 0.18;
-        fillBez(segSt, segEt,
-          p0.x, p0.y,
-          p0.x + ddx * 0.3 + (Math.random()-0.5)*jit, p0.y + ddy * 0.3 + (Math.random()-0.5)*jit,
-          p0.x + ddx * 0.7 + (Math.random()-0.5)*jit, p0.y + ddy * 0.7 + (Math.random()-0.5)*jit,
-          p3.x, p3.y);
-      }
-
-      curX = ex; curY = ey; prevMin = ev.minute;
-    });
-
-    /* hold last position for remaining ticks */
-    const lastT = Math.min(_totalTicks - 1, Math.floor((events.length ? events[events.length-1].minute : 0) * TPG));
-    for (let t = lastT; t < _totalTicks; t++) { _fbX[t] = curX; _fbY[t] = curY; }
-  })();
-
-  /* player EMA smoothing state */
-  const _smX = new Float32Array(allPlayers.length);
-  const _smY = new Float32Array(allPlayers.length);
-  allPlayers.forEach((p, i) => { _smX[i] = p.hx; _smY[i] = p.hy; p.x = p.hx; p.y = p.hy; });
-
-  /* playback state */
-  let _tickF = 0, gameClock = 0, eventIdx = 0, raf = null, gameEnded = false;
-  let momDisplay = 50;
-  let liveScore = { A: 0, B: 0 };
-  let liveShots = { A: 0, B: 0 }, liveSaves = { A: 0, B: 0 };
-  let _paused = false;
-
-  /* stoppage data */
-  const hasPen = events.some(e => e.type === "penalty");
-  const hasET  = events.some(e => e.type === "et_start");
-  const stoppage = Math.floor(rng() * 4) + 2;
-  const FULL = 90 + stoppage;
-  const etLimitLocal = FULL + 30;
+  /* Stoppage */
+  const hasPen = events.some(e => e.type==="penalty");
+  const hasET  = events.some(e => e.type==="et_start");
+  const stoppage = Math.floor(rng()*4)+2;
+  const FULL = 90+stoppage;
 
   function _clockDisp(c) { return clockDisp(c, hasET && c > FULL, FULL); }
 
+  /* ── Playback state ── */
+  let gameClock = 0, eventIdx = 0, gameEnded = false;
+  let momDisplay = 50;
+  let liveScore = { A:0, B:0 };
+  let liveShots = { A:0, B:0 }, liveSaves = { A:0, B:0 };
+
   function updateMomBar(m) {
-    const a = Math.round(m), b = 100 - a;
+    const a = Math.round(m), b = 100-a;
     const ma = $("momA"), mb = $("momB"), bar = $("momBar");
-    if (ma) ma.textContent = a + "%";
-    if (mb) mb.textContent = b + "%";
+    if (ma) ma.textContent = a+"%"; if (mb) mb.textContent = b+"%";
     if (bar) bar.style.background = `linear-gradient(90deg,var(--green) ${a}%,var(--red) ${a}%)`;
   }
 
   function updateStats() {
-    const sh = $("statShot"), sv = $("statSave"), dg = $("statDanger");
-    if (sh) sh.textContent = liveShots.A + "-" + liveShots.B;
-    if (sv) sv.textContent = liveSaves.A + "-" + liveSaves.B;
-    if (dg) dg.textContent = result.stats.shots.A + "-" + result.stats.shots.B;
+    const sh=$("statShot"),sv=$("statSave"),dg=$("statDanger");
+    if (sh) sh.textContent = liveShots.A+"-"+liveShots.B;
+    if (sv) sv.textContent = liveSaves.A+"-"+liveSaves.B;
+    if (dg) dg.textContent = result.stats.shots.A+"-"+result.stats.shots.B;
   }
 
   function addGoalRow(side, html) {
-    const el = $("simGoals"); if (!el) return;
+    const el=$("simGoals"); if (!el) return;
     const d = document.createElement("div");
-    d.className = (side === "A" ? "home" : "away") + " goal";
-    d.innerHTML = html;
+    d.className = (side==="A"?"home":"away")+" goal"; d.innerHTML = html;
     el.prepend(d);
     while (el.children.length > 8) el.removeChild(el.lastChild);
   }
 
   function showGoalBurst(min, name, scoreStr) {
-    const gb = $("goalBurst"); if (!gb) return;
+    const gb=$("goalBurst"); if (!gb) return;
     gb.innerHTML = `<b>${min}' ${name}</b><span>${scoreStr}</span>`;
-    gb.classList.remove("hidden", "show");
-    void gb.offsetWidth;
-    gb.classList.add("show");
-    setTimeout(() => gb.classList.add("hidden"), 1050);
+    gb.classList.remove("hidden","show"); void gb.offsetWidth; gb.classList.add("show");
+    setTimeout(()=>gb.classList.add("hidden"), 1050);
+  }
+
+  function _updateClock() {
+    const cd = _clockDisp(gameClock);
+    const clk=$("simClk"); if (clk) clk.textContent = cd+"'";
+    const sc=$("simScore"); if (sc) sc.textContent = liveScore.A+"–"+liveScore.B;
+    const tv=$("tvover");
+    if (tv) tv.innerHTML = (typeof round!=="undefined"&&round>=6?"🏆 "+(typeof L==="function"?L().cupTitle:"CUP"):"🔴 TRT SPOR")+" · "+cd+"' · "+liveScore.A+"–"+liveScore.B;
   }
 
   function triggerEvent(ev) {
-    /* update commentary */
-    const comm = $("simComm"), radio = $("simRadio");
-    if (comm && ev.comm) comm.innerHTML = ev.comm;
-    if (radio && ev.comm) radio.innerHTML = "📻 " + ev.comm;
-
-    const isTR = (typeof LANG !== "undefined" ? LANG : "tr") === "tr";
-    const myN = (typeof clip === "function" && typeof teamName !== "undefined") ? clip(teamName || "US", 9) : (teamName || "US");
-    const oppN = (typeof clip === "function" && typeof opponent !== "undefined") ? clip(opponent.name, 8) : (typeof opponent !== "undefined" ? opponent.name : "OPP");
+    eventIdx = Math.max(eventIdx, events.indexOf(ev)+1);
+    const comm=$("simComm"),radio=$("simRadio");
+    if (comm&&ev.comm) comm.innerHTML=ev.comm;
+    if (radio&&ev.comm) radio.innerHTML="📻 "+ev.comm;
+    const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
+    const myN=(typeof clip==="function"&&typeof teamName!=="undefined")?clip(teamName||"US",9):(teamName||"US");
+    const oppN=(typeof clip==="function"&&typeof opponent!=="undefined")?clip(opponent.name,8):(typeof opponent!=="undefined"?opponent.name:"OPP");
 
     switch (ev.type) {
       case "goal":
-        liveScore[ev.side]++;
-        liveShots[ev.side]++;
-        const sc = $("simScore");
-        if (sc) sc.textContent = liveScore.A + "–" + liveScore.B;
-        showGoalBurst(ev.minute, ev.scorer || (ev.side === "A" ? myN : oppN), liveScore.A + "–" + liveScore.B);
-        addGoalRow(ev.side, `<b>${ev.minute}'</b><span>⚽ ${ev.scorer || (ev.side === "A" ? myN : oppN)} ${liveScore.A}–${liveScore.B}</span>`);
-        if (typeof sfxGoal === "function") sfxGoal();
-        /* dramatic moment effects */
-        const isEq = liveScore.A === liveScore.B, isLate = gameClock > 78;
-        const _wrap = document.querySelector(".simwrap");
-        if (_wrap && (isEq || isLate)) {
-          _wrap.classList.remove("shake", "equalize"); void _wrap.offsetWidth;
-          _wrap.classList.add(isEq ? "equalize" : "shake");
-          setTimeout(() => _wrap.classList.remove("equalize", "shake"), isEq ? 900 : 450);
+        liveScore[ev.side]++; liveShots[ev.side]++;
+        const sc=$("simScore"); if (sc) sc.textContent=liveScore.A+"–"+liveScore.B;
+        showGoalBurst(ev.minute,ev.scorer||(ev.side==="A"?myN:oppN),liveScore.A+"–"+liveScore.B);
+        addGoalRow(ev.side,`<b>${ev.minute}'</b><span>⚽ ${ev.scorer||(ev.side==="A"?myN:oppN)} ${liveScore.A}–${liveScore.B}</span>`);
+        if (typeof sfxGoal==="function") sfxGoal();
+        const isEq=liveScore.A===liveScore.B, isLate=gameClock>78;
+        const _wrap=document.querySelector(".simwrap");
+        if (_wrap&&(isEq||isLate)) {
+          _wrap.classList.remove("shake","equalize"); void _wrap.offsetWidth;
+          _wrap.classList.add(isEq?"equalize":"shake");
+          setTimeout(()=>_wrap.classList.remove("equalize","shake"),isEq?900:450);
         }
-        momDisplay = Math.max(18, Math.min(82, momDisplay + (ev.side === "A" ? 22 : -22)));
+        momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?22:-22)));
         break;
-
       case "save":
-        liveShots[ev.side === "A" ? "B" : "A"]++;
-        liveSaves[ev.side]++;
-        addGoalRow(ev.side, `<b>${ev.minute}'</b><span>🧤 ${ev.label || (isTR ? "Kaleci kurtardı" : "Keeper save")}</span>`);
-        momDisplay = Math.max(18, Math.min(82, momDisplay + (ev.side === "A" ? -6 : 6)));
+        liveShots[ev.side==="A"?"B":"A"]++; liveSaves[ev.side]++;
+        addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🧤 ${ev.label||(isTR?"Kaleci kurtardı":"Keeper save")}</span>`);
+        momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-6:6)));
         break;
-
       case "shot_wide":
         liveShots[ev.side]++;
-        momDisplay = Math.max(18, Math.min(82, momDisplay + (ev.side === "A" ? -3 : 3)));
+        momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-3:3)));
         break;
-
       case "corner":
-        momDisplay = Math.max(18, Math.min(82, momDisplay + (ev.side === "A" ? 4 : -4)));
+        momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?4:-4)));
         break;
-
       case "et_start":
-        const ss = $("simState"); if (ss) ss.textContent = isTR ? "Uzatmalar" : "Extra Time";
-        if (typeof sfxWhistle === "function") sfxWhistle();
+        const ss=$("simState"); if (ss) ss.textContent=isTR?"Uzatmalar":"Extra Time";
+        if (typeof sfxWhistle==="function") sfxWhistle();
         break;
-
       case "halftime":
-        if (typeof sfxWhistle === "function") sfxWhistle();
-        momDisplay = momDisplay * 0.7 + 50 * 0.3;
+        if (typeof sfxWhistle==="function") sfxWhistle();
+        momDisplay=momDisplay*0.7+50*0.3;
         break;
-
       case "penalty": {
-        const sc2 = $("simScore"); if (sc2) sc2.textContent = liveScore.A + "–" + liveScore.B;
+        const sc2=$("simScore"); if (sc2) sc2.textContent=liveScore.A+"–"+liveScore.B;
         if (ev.penResults) {
-          const st = $("simState"); if (st) st.textContent = isTR ? "Penaltılar" : "Penalties";
-          let delay = 300;
-          ev.penResults.forEach((r, i) => {
-            delay += 750;
-            setTimeout(() => {
-              const mA = r.a ? "✅" : "❌", mB = r.b ? "✅" : "❌";
-              const comm2 = $("simComm");
-              if (comm2) comm2.innerHTML = `🎯 ${r.sd ? "SD" : i + 1}. ${mA} <b>${(typeof clip === "function" ? clip(typeof teamName !== "undefined" ? teamName || "US" : "US", 7) : "US")}</b> <span style="opacity:.5">${r.kA}–${r.kB}</span> <b>${(typeof clip === "function" && typeof opponent !== "undefined" ? clip(opponent.name, 7) : "OPP")}</b> ${mB}`;
-              if (typeof sfxKick === "function") sfxKick(3);
-            }, delay);
+          const pst=$("simState"); if (pst) pst.textContent=isTR?"Penaltılar":"Penalties";
+          let delay=300;
+          ev.penResults.forEach((r,i)=>{
+            delay+=750;
+            setTimeout(()=>{
+              const mA=r.a?"✅":"❌",mB=r.b?"✅":"❌";
+              const comm2=$("simComm");
+              if (comm2) comm2.innerHTML=`🎯 ${r.sd?"SD":i+1}. ${mA} <b>${(typeof clip==="function"?clip(typeof teamName!=="undefined"?teamName||"US":"US",7):"US")}</b> <span style="opacity:.5">${r.kA}–${r.kB}</span> <b>${(typeof clip==="function"&&typeof opponent!=="undefined"?clip(opponent.name,7):"OPP")}</b> ${mB}`;
+              if (typeof sfxKick==="function") sfxKick(3);
+            },delay);
           });
         }
         break;
       }
-
-      case "chance":
-      default:
-        break;
+      default: break;
     }
 
-    /* move ball via waypoints: midfield transit → event position */
-    /* ball position is driven by frame buffer — no target needed here */
-
-    /* update state text */
-    const stEl = $("simState");
-    if (stEl && ev.type !== "et_start" && ev.type !== "halftime") {
-      const diff = liveScore.A - liveScore.B;
-      const isTR2 = (typeof LANG !== "undefined" ? LANG : "tr") === "tr";
-      if (gameClock > 78 && diff === 0) stEl.textContent = isTR2 ? "Berabere, kritik dakikalar" : "Level — final minutes";
-      else if (diff > 0) stEl.textContent = (typeof teamName !== "undefined" ? teamName || "US" : "US") + " " + (isTR2 ? "önde" : "leads");
-      else if (diff < 0) stEl.textContent = (typeof opponent !== "undefined" ? opponent.name : "OPP") + " " + (isTR2 ? "önde" : "leads");
+    const stEl=$("simState");
+    if (stEl&&ev.type!=="et_start"&&ev.type!=="halftime") {
+      const diff=liveScore.A-liveScore.B;
+      const t2=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
+      if (gameClock>78&&diff===0) stEl.textContent=t2?"Berabere, kritik dakikalar":"Level — final minutes";
+      else if (diff>0) stEl.textContent=(typeof teamName!=="undefined"?teamName||"US":"US")+" "+(t2?"önde":"leads");
+      else if (diff<0) stEl.textContent=(typeof opponent!=="undefined"?opponent.name:"OPP")+" "+(t2?"önde":"leads");
     }
-
-    updateStats();
-    updateMomBar(momDisplay);
-  }
-
-  /* ── Field drawing ── */
-  function drawField() {
-    for (let i = 0; i < 9; i++) {
-      ctx.fillStyle = i % 2 ? "#79ad5c" : "#6fa052";
-      ctx.fillRect(0, i * H / 9, W, H / 9);
-    }
-    ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 2;
-    ctx.strokeRect(7, 7, W - 14, H - 14);
-    ctx.beginPath(); ctx.moveTo(7, H / 2); ctx.lineTo(W - 7, H / 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(W / 2, H / 2, 38, 0, 7); ctx.stroke();
-    /* goals */
-    ctx.strokeStyle = "#fff"; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(GL, 7); ctx.lineTo(GR, 7); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(GL, H - 7); ctx.lineTo(GR, H - 7); ctx.stroke();
-    /* penalty areas */
-    const PA_W = Math.round(W * 0.44), PA_H = Math.round(H * 0.28);
-    const PA_L = (W - PA_W) / 2;
-    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 1.5;
-    ctx.strokeRect(PA_L, 7, PA_W, PA_H);
-    ctx.strokeRect(PA_L, H - 7 - PA_H, PA_W, PA_H);
-  }
-
-  function _updatePlayers(bx, by, now) {
-    const emaF = Math.min(0.12, 0.038 * speedMul);
-    allPlayers.forEach((p, i) => {
-      let tx, ty;
-      if (p.gk) {
-        tx = Math.max(W * 0.22, Math.min(W * 0.78, W * 0.5 + (bx - W * 0.5) * 0.38));
-        ty = p.isA ? H * 0.07 : H * 0.93;
-      } else {
-        const dx = bx - p.hx, dy = by - p.hy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const chase = Math.max(0, 1 - dist / (W * 0.38)) * 0.44;
-        const lineShift = (by / H - 0.5) * (p.isA ? 0.14 : -0.14) * H;
-        tx = p.hx + dx * chase + Math.sin(now * 0.00032 + p.n * 1.5) * 2.8;
-        ty = p.hy + dy * chase + lineShift * 0.28 + Math.cos(now * 0.00041 + p.n * 1.2) * 2.2;
-      }
-      _smX[i] += (tx - _smX[i]) * emaF;
-      _smY[i] += (ty - _smY[i]) * emaF;
-      p.x = _smX[i]; p.y = _smY[i];
-    });
-  }
-
-  function drawPlayers(frame) {
-    allPlayers.forEach(p => {
-      const isA = p.isA;
-      const r = p.gk ? 8 : 9.5;
-      const bx = Math.sin((frame + p.n * 9) * 0.16) * 1.1;
-      const by = Math.cos((frame + p.n * 5) * 0.14) * 1.1;
-      const cx = p.x + bx, cy = p.y + by;
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7);
-      ctx.fillStyle = p.gk ? "#e6ad2e" : (isA ? kit.bg : "#eae2cb"); ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = (isA && !p.gk) ? kit.sec : "#fff"; ctx.stroke();
-      ctx.fillStyle = p.gk ? "#23332a" : (isA ? kit.fg : "#23332a");
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.font = "bold 9px 'Inter',sans-serif"; ctx.fillText(p.n, cx, cy);
-      /* name label with subtle background for legibility */
-      const nm = (p.nm || "").slice(0, 9).toUpperCase();
-      ctx.font = "bold 7px 'Inter',sans-serif";
-      const nw = ctx.measureText(nm).width;
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.fillRect(cx - nw / 2 - 2, cy + r + 1, nw + 4, 9);
-      ctx.fillStyle = isA ? "#d4f7e0" : "#f3ead2";
-      ctx.fillText(nm, cx, cy + r + 6);
-      if (p.inj) {
-        ctx.fillStyle = "#d6543a"; ctx.fillRect(cx + r - 4, cy - r - 4, 8, 8);
-        ctx.fillStyle = "#fff"; ctx.font = "bold 7px 'Inter',sans-serif";
-        ctx.fillText("!", cx + r, cy - r + 1);
-      }
-    });
-  }
-
-  function drawScoreOverlay(gameClock) {
-    const cd = _clockDisp(gameClock || 0);
-    const txt = liveScore.A + "–" + liveScore.B + "  " + cd + "'";
-    ctx.font = "bold 12px 'Inter',sans-serif";
-    const tw = ctx.measureText(txt).width + 16;
-    ctx.fillStyle = "rgba(0,0,0,0.52)";
-    ctx.fillRect((W - tw) / 2, 10, tw, 18);
-    ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(txt, W / 2, 19);
-    const clk = $("simClk"); if (clk) clk.textContent = cd + "'";
-    const tv = $("tvover");
-    if (tv) tv.innerHTML = (typeof round !== "undefined" && round >= 6 ? "🏆 " + (typeof L === "function" ? L().cupTitle : "CUP") : "🔴 TRT SPOR") + " · " + cd + "' · " + liveScore.A + "–" + liveScore.B;
-  }
-
-  /* ── Playback loop (frame-buffer read) ── */
-  let _frame = 0, lastTs = null;
-  function frameStep(ts) {
-    if (_paused || gameEnded) return;
-    if (lastTs === null) lastTs = ts;
-    const dt = Math.min(100, ts - lastTs) / 1000;
-    lastTs = ts;
-
-    /* advance tick counter */
-    _tickF = Math.min(_totalTicks - 1, _tickF + dt * speedMul * TPG * 0.55);
-    const _t = Math.floor(_tickF);
-    gameClock = _tickF / TPG;
-    _frame++;
-
-    /* read ball position from buffer */
-    const _bx = _fbX[_t], _by = _fbY[_t];
-
-    /* fire events whose game-minute has been reached */
-    while (eventIdx < events.length && gameClock >= events[eventIdx].minute) {
-      triggerEvent(events[eventIdx]);
-      eventIdx++;
-    }
-
-    /* end check */
-    if (_t >= _totalTicks - 1 && !gameEnded) { endMatch(); return; }
-
-    /* update player positions (EMA toward ball-driven targets) */
-    _updatePlayers(_bx, _by, ts);
-
-    /* draw */
-    ctx.clearRect(0, 0, W, H);
-    drawField();
-    drawPlayers(_frame);
-    /* ball */
-    ctx.beginPath(); ctx.arc(_bx, _by, BR, 0, 7);
-    ctx.fillStyle = "#fff"; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
-    drawScoreOverlay(gameClock);
-
-    raf = requestAnimationFrame(frameStep);
-  }
-
-  function _drawFinalFrame() {
-    const _bx = _fbX[_totalTicks - 1], _by = _fbY[_totalTicks - 1];
-    ctx.clearRect(0, 0, W, H);
-    drawField();
-    drawPlayers(_frame);
-    ctx.beginPath(); ctx.arc(_bx, _by, BR, 0, 7);
-    ctx.fillStyle = "#fff"; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
-    drawHeatmap(ctx, W, H, heatGrid, HGW, HGH);
+    updateStats(); updateMomBar(momDisplay);
   }
 
   function endMatch() {
     if (gameEnded) return;
     gameEnded = true;
-    if (raf) cancelAnimationFrame(raf);
-    if (typeof crowdStop === "function") crowdStop();
-    if (typeof sfxWhistle === "function") sfxWhistle();
-    _drawFinalFrame();
-    try { window._heatmapImg = cv.toDataURL("image/png"); } catch (e) {}
-    const sc = $("simScore"); if (sc) sc.textContent = result.score.A + "–" + result.score.B;
+    if (window._simTl) { window._simTl.kill(); window._simTl = null; }
+    if (typeof crowdStop==="function") crowdStop();
+    if (typeof sfxWhistle==="function") sfxWhistle();
+    /* Render heatmap to a canvas overlay */
+    const hmCv = document.createElement("canvas");
+    hmCv.width=W; hmCv.height=H;
+    hmCv.style.cssText="position:absolute;inset:0;z-index:8;opacity:.72;pointer-events:none;border-radius:6px";
+    cvEl.appendChild(hmCv);
+    drawHeatmap(hmCv.getContext("2d"), W, H, heatGrid, HGW, HGH);
+    try { window._heatmapImg = hmCv.toDataURL("image/png"); } catch(e) {}
+    const sc=$("simScore"); if (sc) sc.textContent=result.score.A+"–"+result.score.B;
     makeReport(result.won);
-    setTimeout(() => endRun(result.won, result.score.A + "–" + result.score.B), 1000);
+    setTimeout(()=>endRun(result.won, result.score.A+"–"+result.score.B), 1000);
   }
 
-  /* ── makeReport ── */
   function makeReport(won) {
-    const tr = LANG === "tr";
-    const cardsTxt = (typeof finalCardSummary === "function" ? finalCardSummary() : "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-    const kM = result.keyMoment || (window.goals && window.goals[0] && window.goals[0].scorer) || "-";
-    const rows = [
-      [tr ? "Maçın kırılma anı" : "Key moment", kM],
-      [tr ? "Şutlar" : "Shots", result.stats.shots.A + "-" + result.stats.shots.B],
-      [tr ? "Kurtarışlar" : "Saves", result.stats.saves.A + "-" + result.stats.saves.B],
-      [tr ? "Final kart etkisi" : "Final card effect", cardsTxt || "0"]
+    const tr = LANG==="tr";
+    const cardsTxt=(typeof finalCardSummary==="function"?finalCardSummary():"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
+    const kM=result.keyMoment||(window.goals&&window.goals[0]&&window.goals[0].scorer)||"-";
+    const rows=[
+      [tr?"Maçın kırılma anı":"Key moment",kM],
+      [tr?"Şutlar":"Shots",result.stats.shots.A+"-"+result.stats.shots.B],
+      [tr?"Kurtarışlar":"Saves",result.stats.saves.A+"-"+result.stats.saves.B],
+      [tr?"Final kart etkisi":"Final card effect",cardsTxt||"0"]
     ];
-    if (result.penaltyNote) rows.push([tr ? "Penaltılar" : "Penalties", result.penaltyNote]);
-    const _fn_wt = ["Kupa sandığa girdi. Bu kadroya saygı duruşu.", "Rüya sezon. Final sahnesi, şampiyonluk sarhoşluğu.", "Son düdüğe kadar didindi. Hak edilmiş bir zafer.", "Bu takım birlikte büyüdü. Kupa onları bekliyordu.", "Rakip daha güçlüydü; ama bugün sahada yürüyen kupayı kazandı.", "İnançla kurulmuş bir kadro, inançla kaldırdı kupayı."];
-    const _fn_we = ["The cup comes home. This squad earned every inch.", "A dream run. Final glory sealed.", "Fought until the last whistle. Perfectly deserved.", "Built to win, and they did exactly that.", "The underdog story that wrote its own final chapter.", "One trophy, one squad, one unforgettable run."];
-    const _fn_lt = ["Finale geldi, yetmedi. Bir sonraki run daha güçlü.", "Son adımda tökezledi. Ama bu ruh devam edecek.", "Kupa yakındı — bir gol, bir karar, bir an. Sıradaki.", "Bu kadro çok şey gördü. Ama şampiyonluk başka birini seçti.", "Rakip daha hazırdı. Sıfırdan başla, bu sefer fark yat.", "Finaller böyle. Bir hata, bir ömür. Bir sonraki run."];
-    const _fn_le = ["So close. Build something stronger next time.", "Fell at the final hurdle. The run had real quality.", "One moment decided it. Come back harder.", "Almost isn't enough in a final. Try again.", "The squad gave everything. The cup found another home.", "Fine margins. One more piece next run."];
-    const _ni = Math.floor(Math.random() * 6);
-    rows.push([tr ? "Final yorumu" : "Final note", won ? (tr ? _fn_wt[_ni] : _fn_we[_ni]) : (tr ? _fn_lt[_ni] : _fn_le[_ni])]);
-    window.finalReportHTML = `<h4>${tr ? "Final Karnesi" : "Final Report"}</h4>` + rows.map(r => `<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");
+    if (result.penaltyNote) rows.push([tr?"Penaltılar":"Penalties",result.penaltyNote]);
+    const _fw=["Kupa sandığa girdi. Bu kadroya saygı duruşu.","Rüya sezon. Final sahnesi, şampiyonluk sarhoşluğu.","Son düdüğe kadar didindi. Hak edilmiş bir zafer.","Bu takım birlikte büyüdü. Kupa onları bekliyordu.","Rakip daha güçlüydü; ama bugün sahada yürüyen kupayı kazandı.","İnançla kurulmuş bir kadro, inançla kaldırdı kupayı."];
+    const _fe=["The cup comes home. This squad earned every inch.","A dream run. Final glory sealed.","Fought until the last whistle. Perfectly deserved.","Built to win, and they did exactly that.","The underdog story that wrote its own final chapter.","One trophy, one squad, one unforgettable run."];
+    const _lw=["Finale geldi, yetmedi. Bir sonraki run daha güçlü.","Son adımda tökezledi. Ama bu ruh devam edecek.","Kupa yakındı — bir gol, bir karar, bir an. Sıradaki.","Bu kadro çok şey gördü. Ama şampiyonluk başka birini seçti.","Rakip daha hazırdı. Sıfırdan başla, bu sefer fark yat.","Finaller böyle. Bir hata, bir ömür. Bir sonraki run."];
+    const _le=["So close. Build something stronger next time.","Fell at the final hurdle. The run had real quality.","One moment decided it. Come back harder.","Almost isn't enough in a final. Try again.","The squad gave everything. The cup found another home.","Fine margins. One more piece next run."];
+    const ni=Math.floor(Math.random()*6);
+    rows.push([tr?"Final yorumu":"Final note",won?(tr?_fw[ni]:_fe[ni]):(tr?_lw[ni]:_le[ni])]);
+    window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4>`+rows.map(r=>`<div class="frrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");
   }
 
-  /* expose sim object */
+  /* ── GSAP Timeline ── */
+  /* 1 game-minute ≈ 1.4s at 1× → 90 game-min ≈ 2.1 min total */
+  const MIN_DUR = 1.4;
+  const tl = gsap.timeline({ paused:true, onComplete:endMatch });
+  let prevMin = 0;
+
+  events.forEach(ev => {
+    const gapMin = Math.max(0.5, ev.minute - prevMin);
+    const segDur = gapMin * MIN_DUR;
+    const destX  = ev.pos ? ev.pos.x*100 : 50;
+    const destY  = ev.pos ? ev.pos.y*100 : 50;
+    const neutral = !ev.side||ev.type==="halftime"||ev.type==="et_start"||ev.type==="et_half";
+
+    if (neutral) {
+      tl.to(ballEl,{ left:"50%", top:"50%", duration:Math.min(segDur,1.2), ease:"power1.inOut",
+        onStart:()=>{ gameClock=ev.minute-0.3; _updateClock(); }
+      });
+      tl.call(()=>{ gameClock=ev.minute; _updateClock(); triggerEvent(ev); });
+      tl.call(()=>{ allPlayers.forEach(p=>gsap.to(p.el,{left:p.hx/W*100+"%",top:p.hy/H*100+"%",duration:0.9,ease:"power1.out"})); });
+      prevMin=ev.minute; return;
+    }
+
+    const sideA = ev.side==="A";
+    const attPool = (sideA?psA:psB).filter(p=>!p.gk);
+    const defPool = (sideA?psB:psA).filter(p=>!p.gk);
+    const shuffled = attPool.slice().sort(()=>Math.random()-0.5);
+    const nPasses = gapMin>8?Math.min(3,shuffled.length):gapMin>3?Math.min(2,shuffled.length):Math.min(1,shuffled.length);
+
+    const wps=[];
+    for (let i=0;i<nPasses;i++){
+      const pl=shuffled[i];
+      wps.push({ x:pl.hx/W*100+(Math.random()-0.5)*4, y:pl.hy/H*100+(Math.random()-0.5)*3, pl });
+    }
+    wps.push({ x:destX, y:destY });
+
+    const durPerSeg = segDur/wps.length;
+
+    wps.forEach((wp,wi)=>{
+      const isLast = wi===wps.length-1;
+      const ease   = isLast?(ev.type==="goal"?"power3.in":ev.type==="save"?"power2.in":"power1.inOut"):"power1.inOut";
+      const clkAtStart = prevMin+gapMin*(wi/wps.length);
+
+      tl.to(ballEl,{
+        left:wp.x+"%", top:wp.y+"%",
+        duration:durPerSeg, ease,
+        onStart:()=>{
+          gameClock=clkAtStart; _updateClock();
+          if (wp.pl) {
+            gsap.to(wp.pl.el,{ left:(wp.x+(Math.random()-0.5)*1.5)+"%", top:(wp.y+(Math.random()-0.5)*1.5)+"%", duration:durPerSeg*0.8, ease:"power1.out" });
+            defPool.sort((a,b)=>Math.hypot(a.hx/W*100-wp.x,a.hy/H*100-wp.y)-Math.hypot(b.hx/W*100-wp.x,b.hy/H*100-wp.y));
+            if (defPool[0]) {
+              const def=defPool[0];
+              gsap.to(def.el,{ left:(wp.x*0.55+def.hx/W*100*0.45)+"%", top:(wp.y*0.55+def.hy/H*100*0.45)+"%", duration:durPerSeg*0.9, ease:"power1.out" });
+            }
+          }
+        },
+        onComplete: isLast?()=>{
+          gameClock=ev.minute; _updateClock(); triggerEvent(ev);
+          if (ev.type==="goal") {
+            (sideA?psA:psB).forEach(p=>gsap.to(p.el,{scale:1.45,duration:0.12,yoyo:true,repeat:3,ease:"power1.inOut"}));
+            gsap.to(ballEl,{scale:1.5,duration:0.1,yoyo:true,repeat:1});
+          } else if (ev.type==="save") {
+            const gk=(sideA?psB:psA).find(p=>p.gk);
+            if (gk) gsap.to(gk.el,{scale:1.7,duration:0.18,yoyo:true,repeat:2,ease:"power1.inOut"});
+          }
+        }:undefined
+      });
+    });
+
+    /* return players toward home formation */
+    tl.call(()=>{
+      (sideA?psA:psB).forEach(p=>gsap.to(p.el,{left:p.hx/W*100+"%",top:p.hy/H*100+"%",duration:1.1+Math.random()*0.4,ease:"power1.out",delay:Math.random()*0.2}));
+      const gk=(sideA?psB:psA).find(p=>p.gk);
+      if (gk) gsap.to(gk.el,{left:gk.hx/W*100+"%",top:gk.hy/H*100+"%",duration:0.5,ease:"power1.out"});
+    });
+
+    prevMin=ev.minute;
+  });
+
+  tl.to({},{duration:2.5}); /* hold at end before endMatch fires */
+
+  window._simTl = tl;
+
+  /* ── Expose sim ── */
   sim = {
-    run: function () {
-      _paused = false; _simPaused = false;
-      raf = requestAnimationFrame(frameStep);
+    run:    ()=>{ _simPaused=false; tl.timeScale(speedMul); tl.play(); },
+    pause:  ()=>{
+      _simPaused=true; tl.pause();
+      const pb=$("pauseBtn"); if (pb){pb.textContent="▶";pb.classList.add("pause");}
     },
-    pause: function () {
-      _paused = true; _simPaused = true;
-      if (raf) cancelAnimationFrame(raf);
-      const pb = $("pauseBtn"); if (pb) { pb.textContent = "▶"; pb.classList.add("pause"); }
+    resume: ()=>{
+      _simPaused=false;
+      if (!gameEnded) tl.resume();
+      const pb=$("pauseBtn"); if (pb){pb.textContent="⏸";pb.classList.remove("pause");}
     },
-    resume: function () {
-      _paused = false; _simPaused = false;
-      if (!gameEnded) { lastTs = null; raf = requestAnimationFrame(frameStep); }
-      const pb = $("pauseBtn"); if (pb) { pb.textContent = "⏸"; pb.classList.remove("pause"); }
+    shout:  (t)=>{
+      const mp={more:{t:"yüklen!",e:"push up!"},push:{t:"önde bas!",e:"press high!"},calm:{t:"tempoyu düşür",e:"slow tempo"},hold:{t:"skoru koru",e:"protect lead"}};
+      const c=mp[t]||mp.more;
+      if (typeof playUiSample==="function") playUiSample("click",0.18);
+      const rb=$("simRadio");
+      if (rb) rb.innerHTML="📻 <b>"+(typeof clip==="function"?clip(typeof teamName!=="undefined"?teamName||"US":"US",9):"US")+"</b> "+(LANG==="tr"?c.t:c.e);
     },
-    shout: function (t) {
-      const mp = { more: { t: "yüklen!", e: "push up!" }, push: { t: "önde bas!", e: "press high!" }, calm: { t: "tempoyu düşür", e: "slow tempo" }, hold: { t: "skoru koru", e: "protect lead" } };
-      const c = mp[t] || mp.more;
-      if (typeof playUiSample === "function") playUiSample("click", 0.18);
-      const rb = $("simRadio");
-      if (rb) rb.innerHTML = "📻 <b>" + (typeof clip === "function" ? clip(typeof teamName !== "undefined" ? teamName || "US" : "US", 9) : "US") + "</b> " + (LANG === "tr" ? c.t : c.e);
-    },
-    skip: function () {
+    skip: ()=>{
       if (gameEnded) return;
-      _paused = false;
-      if (raf) cancelAnimationFrame(raf);
-      while (eventIdx < events.length) { triggerEvent(events[eventIdx]); eventIdx++; }
-      _tickF = _totalTicks - 1;
-      _drawFinalFrame();
-      try { window._heatmapImg = cv.toDataURL("image/png"); } catch (e) {}
-      const sc = $("simScore"); if (sc) sc.textContent = result.score.A + "–" + result.score.B;
-      const clk = $("simClk"); if (clk) clk.textContent = "90'";
-      window.motm = result.motm; try { motm = result.motm; } catch (e2) {}
-      makeReport(result.won);
-      gameEnded = true;
-      endRun(result.won, result.score.A + "–" + result.score.B);
+      if (window._simTl) { window._simTl.kill(); window._simTl=null; }
+      while (eventIdx<events.length){ triggerEvent(events[eventIdx]); eventIdx++; }
+      const lastMin = events.length ? events[events.length-1].minute : FULL;
+      gameClock = Math.max(lastMin, FULL);
+      const clk=$("simClk"); if (clk) clk.textContent=_clockDisp(gameClock)+"'";
+      endMatch();
     }
   };
 }
