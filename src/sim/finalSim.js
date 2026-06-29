@@ -316,6 +316,26 @@ function clockDisp(clock, extraTime, FULL) {
 
 /* ── H. drawHeatmap ── */
 function drawHeatmap(ctx, W, H, heatGrid, HGW, HGH) {
+  /* Draw pitch background first so field is always visible */
+  ctx.fillStyle = "#6fa052";
+  ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 9; i++) {
+    if (i % 2 === 0) { ctx.fillStyle = "rgba(0,0,0,0.04)"; ctx.fillRect(0, i * H / 9, W, H / 9); }
+  }
+  const _GL = (W - W * 0.27) / 2, _GR = _GL + W * 0.27;
+  ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 1.5;
+  ctx.strokeRect(W * 0.03, H * 0.03, W * 0.94, H * 0.94);
+  ctx.beginPath(); ctx.moveTo(W * 0.03, H / 2); ctx.lineTo(W * 0.97, H / 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W / 2, H / 2, W * 0.1, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(_GL, H * 0.03); ctx.lineTo(_GR, H * 0.03); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(_GL, H * 0.97); ctx.lineTo(_GR, H * 0.97); ctx.stroke();
+  const _PA_W = W * 0.44, _PA_H = H * 0.28, _PA_L = (W - _PA_W) / 2;
+  ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 1;
+  ctx.strokeRect(_PA_L, H * 0.03, _PA_W, _PA_H);
+  ctx.strokeRect(_PA_L, H * 0.97 - _PA_H, _PA_W, _PA_H);
+
+  /* Gaussian smooth */
   const sm = new Float32Array(HGW * HGH);
   const kn = [0.0625, 0.125, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625];
   for (let r = 0; r < HGH; r++) for (let c = 0; c < HGW; c++) {
@@ -337,13 +357,13 @@ function drawHeatmap(ctx, W, H, heatGrid, HGW, HGH) {
     const hue = v < 0.3 ? 220 - v / 0.3 * 80 : v < 0.6 ? 140 - (v - 0.3) / 0.3 * 100 : v < 0.85 ? 40 - (v - 0.6) / 0.25 * 40 : 0;
     const sat = v < 0.15 ? 70 : 85;
     const lit = v < 0.2 ? 55 : 48 - v * 4;
-    const alpha = Math.min(0.88, v < 0.15 ? v / 0.15 * 0.35 : 0.35 + v * 0.55);
+    const alpha = Math.min(0.85, v < 0.15 ? v / 0.15 * 0.3 : 0.3 + v * 0.55);
     ctx.fillStyle = `hsla(${hue},${sat}%,${lit}%,${alpha})`;
     ctx.fillRect(c * cw, r * ch, cw, ch);
   }
-  /* centered label */
+  /* label */
   const isTR = (typeof LANG !== "undefined" ? LANG : "tr") === "tr";
-  const lbl = "🔥 " + (isTR ? "TOP YOĞUNLUK HARİTASI" : "BALL HEAT MAP");
+  const lbl = "🔥 " + (isTR ? "ISI HARİTASI" : "HEAT MAP");
   ctx.font = "bold 8px 'Inter',sans-serif";
   const lblW = ctx.measureText(lbl).width + 16;
   ctx.fillStyle = "rgba(0,0,0,0.58)";

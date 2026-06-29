@@ -25,7 +25,7 @@
 .ccard.v1::before{background:#c8940a}
 .ccard.v2::before{background:#1c1c1c}
 /* Captain & loan chips in card row */
-.cap-chip{background:var(--navy,#2c4a63);color:#fff;border-left-color:#e6ad2e}
+.cap-chip{background:var(--ink,#26402f);color:#fff;border-left-color:#e6ad2e}
 .cap-chip .tier{color:rgba(255,255,255,.7)}
 .cap-chip.cap-inj{background:#8e2d20}
 .loan-chip{background:#1e3a26;color:#fff;border-left-color:#4ade80}

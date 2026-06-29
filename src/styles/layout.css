@@ -539,7 +539,7 @@ body.dark .iconbtn{color:var(--ink)}
 /* YEDEK ÇEK grid */
 .backup-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px 0}
 .backup-card{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border:1.5px solid var(--ink);border-radius:6px;cursor:pointer;min-width:70px;flex:1;max-width:100px;transition:background .15s}
-.backup-card:hover{background:var(--navy);color:#fff}
+.backup-card:hover{background:var(--ink);color:#fff}
 .backup-card.misfit{opacity:.65;border-style:dashed}
 .bk-fig{opacity:.85}
 .bk-name{font-family:var(--mono);font-size:9px;font-weight:700;text-align:center;line-height:1.2;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
