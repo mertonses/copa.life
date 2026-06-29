@@ -1,6 +1,6 @@
 /* Final mac simulasyonu: event-driven engine, S-curve power, match phases, momentum, headless runner. */
-let sim = null, speedMul = parseFloat(localStorage.getItem("copa_spd") || "1") || 1;
-let _simPaused = false;
+/* sim and _simPaused are declared in index.html — do not redeclare */
+var speedMul = parseFloat(localStorage.getItem("copa_spd") || "1") || 1;
 
 function setSpeed(s) {
   speedMul = s;
