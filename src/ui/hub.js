@@ -172,7 +172,6 @@ function cardContractText(k){
     yildiz:tr?"En iyi oyuncudan +5; şu an "+plus+".":"Best player gives +5; now "+plus+".",
     veteran:tr?"Erken güç "+plus+"; ilerleyen turlarda azalır.":"Early power "+plus+"; fades later.",
     derbi:tr?"Bu tur +0; finalde +8 güç.":"Now +0; final +8 power.",
-    taraftar:tr?"Garanti +2 güç; götürü yok.":"Guaranteed +2 power; no downside.",
     ch_momentum:tr?"Sabit +3 güç; götürü yok.":"Flat +3 power; no downside.",
     buyuk_mac:tr?"4. turdan itibaren +2 güç; şu an "+plus+".":"From round 4: +2 power; now "+plus+".",
     kaleci_kalesi:tr?"Kaleci OVR 80+: +4, 70-79: +2; şu an "+plus+".":"GK OVR 80+: +4, 70-79: +2; now "+plus+".",

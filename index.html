@@ -924,7 +924,7 @@ function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p)pushFeed("
 function presBtnLockedClick(){const lbl=$("presLabel");if(!lbl)return;const msg=LANG==="tr"?"ÇEYREK FİNALDE":"Q-FINAL";lbl.textContent=msg;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{const pl=$("presLabel");if(pl)pl.textContent=L().ui.seeChair;},3500);}
 const CATMAP={taraftar:"taraftar",genc:"ekonomi",ch_momentum:"hucum",kontra:"hucum",buyuk_mac:"hucum",yildiz:"hucum",otobus:"savunma",kaleci_kalesi:"savunma",anadolu:"ekonomi",altyapi_plani:"ekonomi",tecrubeli_omurga:"savunma",veteran:"savunma",yerli_blok:"ekonomi",kanat_akini:"hucum",cift_forvet:"hucum",derbi:"risk",ch_final:"risk",final_provasi:"risk",kupaci_kadro:"risk",sogukkanli_penaltici:"hucum",son_dans:"risk",temiz_sayfa:"savunma",taksit_transfer:"ekonomi",son_kredi:"ekonomi",kara_borsa:"risk",sahte_evrak:"risk",deplasman_kafilesi:"risk",sosyal_medya:"risk",kumarbaz:"risk",gecici_prim:"risk",kisa_kamp:"risk",doping:"risk",kriz:"risk",cilgin_basin:"baskan"};
 Object.assign(T.tr.cards,{
-  taraftar:{n:"12. Adam",d:"1. turda +2; 2. turda +3; 3. turdan itibaren +4 güç. Erken ısınır.",i:"📣"},
+  taraftar:{n:"12. Adam",d:"1. turda +2; 2. turda +3; 3. turdan itibaren +4 güç. KARA: +3 ekstra.",i:"📣"},
   ch_momentum:{n:"İvme",d:"1-2. turda +2; 3-4. turda +3; 5. turdan itibaren +4 güç. Geç açılır.",i:"📈"},
   buyuk_mac:{n:"Büyük Maç Adamı",d:"+1 güç şimdi; 3. turdan itibaren +3.",i:"🎯"},
   kaleci_kalesi:{n:"Kaleci Kalesi",d:"Kaleci 80+ puanlıysa +4 güç; 70-79 arası +2 güç.",i:"🧤"},
@@ -953,7 +953,7 @@ Object.assign(T.tr.cards,{
   kriz:{n:"Kriz Yönetimi",d:"Finaldeki eksi gücü en fazla 6 azaltır.",i:"🧯"}
 });
 Object.assign(T.en.cards,{
-  taraftar:{n:"12th Man",d:"Round 1: +2; Round 2: +3; Round 3+: +4 power. Peaks early.",i:"📣"},
+  taraftar:{n:"12th Man",d:"Round 1: +2; Round 2: +3; Round 3+: +4 power. DARK: +3 extra.",i:"📣"},
   ch_momentum:{n:"Momentum",d:"Rounds 1-2: +2; Rounds 3-4: +3; Round 5+: +4 power. Peaks late.",i:"📈"},
   buyuk_mac:{n:"Big Game Player",d:"+1 now; from round 3: +3 power.",i:"🎯"},
   kaleci_kalesi:{n:"Keeper's Fortress",d:"GK 80+ rating: +4 power; 70-79: +2 power.",i:"🧤"},
