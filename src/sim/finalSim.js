@@ -454,6 +454,7 @@ function buildSim(myPow, oppPow) {
   let phase="play", phaseTimer=0, forced=null;
   let shoutEffect={type:null,timer:0}; /* active shout: more/push/calm/hold */
   let cornerPhase=null; /* {cx,cy,tx,ty} — ball in corner, waiting to cross */
+  let microEvtTimer=4.0+Math.random()*3; /* seconds until next micro-commentary */
 
   /* Speeds in px/s at 1× */
   const SPD_CARRY=W*0.50, SPD_RUN=W*0.60, SPD_DEF=W*0.58, SPD_GK=W*0.45;
@@ -550,6 +551,51 @@ function buildSim(myPow, oppPow) {
     updateStats(); updateMomBar(momDisplay);
   }
 
+  /* ── Micro-commentary: flowing event stream between scheduled events ── */
+  const _MICRO_TR=[
+    ["🏃","Kanat akını","LW","RW","LM","RM"],
+    ["🤜","Kafa dueli"],
+    ["💨","Uzun pas"],
+    ["🛡️","Top uzaklaştırıldı"],
+    ["⚡","Hızlı kontra"],
+    ["🔄","Top el değiştirdi"],
+    ["🦵","Frikik fırsatı"],
+    ["🎯","Orta sahada top"],
+    ["🚀","İsabetsiz vuruş"],
+    ["💪","Fiziksel mücadele"],
+    ["👀","Tehlikeli pozisyon"],
+    ["📐","Ofsayt tuzağı"],
+  ];
+  const _MICRO_EN=[
+    ["🏃","Wing run"],
+    ["🤜","Header battle"],
+    ["💨","Long ball"],
+    ["🛡️","Clearance"],
+    ["⚡","Quick counter"],
+    ["🔄","Possession switch"],
+    ["🦵","Free kick won"],
+    ["🎯","Ball in midfield"],
+    ["🚀","Shot off target"],
+    ["💪","Physical battle"],
+    ["👀","Dangerous position"],
+    ["📐","Offside trap"],
+  ];
+  function _fireMicroEvent(){
+    const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
+    const pool=isTR?_MICRO_TR:_MICRO_EN;
+    const entry=pool[Math.floor(Math.random()*pool.length)];
+    const icon=entry[0], label=entry[1];
+    const team=attackSide==="A"?psA:psB;
+    const outfield=team.filter(p=>!p.gk);
+    const nm=outfield.length?outfield[Math.floor(Math.random()*outfield.length)].nm:"";
+    const txt=label+(nm?" — "+nm:"");
+    addGoalRow(attackSide,`<b>${Math.floor(gameClock)}'</b><span style="opacity:.7">${icon} ${txt}</span>`);
+    const rb=document.getElementById("simRadio");
+    if(rb)rb.innerHTML="📻 "+txt;
+    const comm=document.getElementById("simComm");
+    if(comm)comm.innerHTML=txt;
+  }
+
   function makeReport(won){
     const tr=LANG==="tr";
     const ct=(typeof finalCardSummary==="function"?finalCardSummary():"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
@@ -625,17 +671,29 @@ function buildSim(myPow, oppPow) {
       }
       return;
     }
-    /* Corner: skip forced sequence, kick ball to corner then deliver cross */
+    /* Corner: kicker waits at flag, runners pour into box, then cross */
     if(ev.type==="corner"){
       triggerEvent(ev);
       const isA=ev.side==="A";
       const cx=(ev.pos&&ev.pos.x<0.5)?W*0.04:W*0.96;
       const cy=isA?H*0.04:H*0.96;
       bx=cx; by=cy; bvx=0; bvy=0; carrier=-1;
-      const ctgX=W/2+(Math.random()-0.5)*GW*0.7;
-      const ctgY=isA?H*0.20:H*0.80;
+      const cTeam=ev.side==="A"?psA:psB;
+      const outfield=cTeam.filter(p=>!p.gk);
+      /* closest outfield player becomes kicker and stands at flag */
+      const kicker=outfield.reduce((a,b)=>Math.hypot(a.x-cx,a.y-cy)<Math.hypot(b.x-cx,b.y-cy)?a:b);
+      kicker.x=cx+(cx<W/2?12:-12); kicker.y=cy+(cy<H/2?12:-12);
+      /* others make runs into the penalty box */
+      const runners=outfield.filter(p=>p!==kicker).slice(0,4);
+      const boxY=isA?H*0.22:H*0.78;
+      runners.forEach((p,ii)=>{
+        p.x=W/2+(ii%2===0?1:-1)*(GW*0.28+ii*W*0.035);
+        p.y=boxY+(Math.random()-0.5)*H*0.07;
+      });
+      const ctgX=W/2+(Math.random()-0.5)*GW*0.65;
+      const ctgY=isA?H*0.22:H*0.78;
       cornerPhase={tx:ctgX,ty:ctgY,timer:0};
-      setTimeout(()=>{ if(!gameEnded&&cornerPhase){_kickBall(ctgX,ctgY,V_PASS*1.2);cornerPhase=null;attackSide=ev.side;} },Math.max(200,500/speedMul));
+      setTimeout(()=>{ if(!gameEnded&&cornerPhase){_kickBall(ctgX,ctgY,V_PASS*1.15);cornerPhase=null;attackSide=ev.side;} },Math.max(500,900/speedMul));
       return;
     }
     const tx=ev.pos?ev.pos.x*W:W/2, ty=ev.pos?ev.pos.y*H:H/2;
@@ -725,8 +783,7 @@ function buildSim(myPow, oppPow) {
           phase="celebrate"; phaseTimer=1.0;
           setTimeout(()=>{ if(!gameEnded)_kickoff(isA?"B":"A"); },Math.max(300,1000/speedMul));
         } else if(ev.type==="save"){
-          const gk=(isA?psB:psA).find(p=>p.gk);
-          if(gk){gk.x=forced.tx;gk.y=forced.ty;}
+          /* no teleport — GK stays on goal line; ball bounces away */
           bvx=(Math.random()-0.5)*V_PASS*0.4; bvy=(isA?1:-1)*V_PASS*0.35; carrier=-1;
         } else {
           _kickBall(W/2+(Math.random()-0.5)*W*0.3,H/2+(Math.random()-0.5)*H*0.2,V_PASS*0.4);
@@ -757,10 +814,10 @@ function buildSim(myPow, oppPow) {
         const goalY=isA?H*0.88:H*0.12;
         const _spd = isA ? _sA : 1.0; /* shout speed multiplier (A team only) */
         if(p.gk){
-          /* hold mode: GK presses further from goal line to clear */
-          const gkPush=_holdMode&&isA?H*0.12:0;
-          const clX=Math.max(GL+8,Math.min(GR-8,bx));
-          const gkY=isA?H*0.06+gkPush:H*0.94-gkPush;
+          /* track ball X only when ball is in own half; else hold center */
+          const ballInOwnHalf=isA?(by<H*0.52):(by>H*0.48);
+          const clX=ballInOwnHalf?Math.max(GL+10,Math.min(GR-10,bx)):W/2;
+          const gkY=isA?H*0.065:H*0.935;
           _steer(p,clX,gkY,SPD_GK*_spd,dt);
         } else if(isCarrier){
           const laneX=p.hx+(Math.sin(time*0.0009+i)*W*0.05);
@@ -775,9 +832,13 @@ function buildSim(myPow, oppPow) {
         } else if(isRecv){
           _steer(p,bx+bvx*0.12,by+bvy*0.12,SPD_RUN*_spd,dt);
         } else if(ownAttacking){
-          const driftX=p.hx+(bx-W/2)*0.22+(Math.sin(time*0.0007+i*2.3)*W*0.04);
+          const isWide=/^(LW|RW|LB|RB|LM|RM)$/.test(p.pos||"");
+          /* wide players hug their flank; central players drift with ball */
+          const driftX=isWide
+            ? p.hx*0.80+(Math.sin(time*0.0007+i*2.3)*W*0.022)
+            : p.hx+(bx-W/2)*0.22+(Math.sin(time*0.0007+i*2.3)*W*0.04);
           const driftY=p.hy*0.5+goalY*0.5+(Math.cos(time*0.0006+i*1.9)*H*0.03);
-          _steer(p,driftX,driftY,SPD_RUN*_spd*0.65,dt);
+          _steer(p,driftX,driftY,SPD_RUN*_spd*(isWide?0.72:0.65),dt);
         } else {
           if(carrier>=0&&allPlayers[carrier].isA!==isA){
             const cp=allPlayers[carrier];
@@ -805,6 +866,11 @@ function buildSim(myPow, oppPow) {
           _kickBall(nearest.x+(Math.random()-0.5)*20,nearest.y+(Math.random()-0.5)*20,V_PASS*0.35);
         }
       }
+    }
+    /* Micro-event stream — fire commentary every ~4-8 game seconds */
+    if(!forced&&!gameEnded&&phase==="play"){
+      microEvtTimer-=dt;
+      if(microEvtTimer<=0){ _fireMicroEvent(); microEvtTimer=4.0+Math.random()*4.0; }
     }
     _renderAll(); _updateClock();
   }
