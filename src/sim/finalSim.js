@@ -104,9 +104,11 @@ function simulateMatch(myPow, oppPow, rng) {
   function evPos(side, type) {
     const x = 0.28 + rng() * 0.44;
     if (type === "corner") {
-      return { x: rng() < 0.5 ? 0.01 : 0.99, y: side === "A" ? 0.05 + rng() * 0.08 : 0.87 + rng() * 0.08 };
+      /* A attacks toward bottom (y≈1), B attacks toward top (y≈0) */
+      return { x: rng() < 0.5 ? 0.01 : 0.99, y: side === "A" ? 0.87 + rng() * 0.08 : 0.05 + rng() * 0.08 };
     }
-    const y = side === "A" ? 0.06 + rng() * 0.24 : 0.70 + rng() * 0.24;
+    /* A attacks toward bottom half; B attacks toward top half */
+    const y = side === "A" ? 0.70 + rng() * 0.24 : 0.06 + rng() * 0.24;
     return { x, y };
   }
 
@@ -436,6 +438,10 @@ function buildSim(myPow, oppPow) {
   let liveShots = { A: 0, B: 0 }, liveSaves = { A: 0, B: 0 };
   let lastEventTime = events.length ? events[events.length - 1].minute : 90;
   let _paused = false;
+  /* waypoint queue for smooth ball travel */
+  let wpQueue = [];
+  let driftTimer = 0;
+  let lastFiredAt = 0;
 
   /* stoppage data */
   const hasPen = events.some(e => e.type === "penalty");
@@ -558,8 +564,17 @@ function buildSim(myPow, oppPow) {
         break;
     }
 
-    /* move ball target */
-    if (ev.pos) { targetX = ev.pos.x * W; targetY = ev.pos.y * H; }
+    /* move ball via waypoints: midfield transit → event position */
+    if (ev.pos) {
+      wpQueue = [];
+      const ex = ev.pos.x * W, ey = ev.pos.y * H;
+      /* add a midfield waypoint only for long-distance events */
+      const curDist = Math.sqrt(Math.pow(ex - ballX, 2) + Math.pow(ey - ballY, 2));
+      if (curDist > W * 0.25) {
+        wpQueue.push({ x: W * 0.3 + Math.random() * W * 0.4, y: H * 0.38 + Math.random() * H * 0.24 });
+      }
+      wpQueue.push({ x: ex, y: ey });
+    }
 
     /* update state text */
     const stEl = $("simState");
@@ -662,12 +677,16 @@ function buildSim(myPow, oppPow) {
     const dt = Math.min(100, ts - lastTs) / 1000;
     lastTs = ts;
 
-    gameClock += dt * speedMul * 1.5;
+    gameClock += dt * speedMul * 0.55;
     frame++;
 
-    /* fire pending events */
+    /* fire pending events — enforce minimum real-time gap to prevent simultaneous bursts */
+    const _nowMs = performance.now();
+    const _minGapMs = 800 / Math.max(1, speedMul);
     while (eventIdx < events.length && gameClock >= events[eventIdx].minute) {
+      if (lastFiredAt > 0 && _nowMs - lastFiredAt < _minGapMs) break;
       triggerEvent(events[eventIdx]);
+      lastFiredAt = _nowMs;
       eventIdx++;
     }
 
@@ -680,9 +699,25 @@ function buildSim(myPow, oppPow) {
     const now = Date.now();
     animatePlayers(now);
 
-    /* ball lerp */
-    ballX += (targetX - ballX) * 0.06;
-    ballY += (targetY - ballY) * 0.06;
+    /* ball movement: process waypoint queue, then drift when idle */
+    const _bDx = targetX - ballX, _bDy = targetY - ballY;
+    const _bDist = Math.sqrt(_bDx * _bDx + _bDy * _bDy);
+    if (_bDist < 14 && wpQueue.length > 0) {
+      const _wp = wpQueue.shift();
+      targetX = _wp.x; targetY = _wp.y;
+    } else if (_bDist < 8 && wpQueue.length === 0) {
+      /* idle drift: ball wanders in the likely possession half */
+      driftTimer -= dt;
+      if (driftTimer <= 0) {
+        driftTimer = 0.9 + Math.random() * 1.4;
+        const _nextEv = eventIdx < events.length ? events[eventIdx] : null;
+        const _inAHalf = _nextEv && _nextEv.side === "A";
+        targetX = W * (0.22 + Math.random() * 0.56);
+        targetY = _inAHalf ? H * (0.42 + Math.random() * 0.38) : H * (0.20 + Math.random() * 0.38);
+      }
+    }
+    ballX += (targetX - ballX) * 0.045;
+    ballY += (targetY - ballY) * 0.045;
 
     /* draw */
     ctx.clearRect(0, 0, W, H);
