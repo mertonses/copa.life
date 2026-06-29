@@ -188,7 +188,7 @@ function simulateMatch(myPow, oppPow, rng) {
           ? (isTR ? "penaltılarda kazandın" : "won on penalties")
           : (isTR ? "penaltılarda kaybettin" : "lost on penalties");
         pushEvent({ minute: Math.floor(clock), type: "penalty", side: wonA ? "A" : "B",
-          pos: { x: 0.5, y: wonA ? 0.15 : 0.85 },
+          pos: { x: 0.5, y: wonA ? 0.88 : 0.12 },
           label: penaltyNote, comm: "🎯 " + penaltyNote,
           penResults, kA, kB, wonA
         });
@@ -375,7 +375,7 @@ function buildSim(myPow, oppPow) {
       const pos = poses[i] || "CM";
       const role = (typeof groupOf === "function") ? groupOf(pos) : (["ST","CF","LW","RW"].includes(pos)?"FWD":["CM","CAM","CDM","LM","RM"].includes(pos)?"MID":"DEF");
       const wide = ["LB","RB","WB","LW","RW","LM","RM"].includes(pos);
-      return { hx, hy, x: hx, y: hy, gk: i === 0, n: i + 1, nm: ((names[i] || "").split(" ").pop() || "?"), role, wide, inj: !!(inj && inj[i]) };
+      return { hx, hy, x: hx, y: hy, gk: i === 0, n: i + 1, nm: ((names[i] || "").split(" ").pop() || "?"), role, wide, inj: !!(inj && inj[i]), isA: side === "A" };
     });
     return { side, col, fg, ps, pow };
   }
@@ -623,10 +623,7 @@ function buildSim(myPow, oppPow) {
 
   function drawPlayers(frame) {
     allPlayers.forEach(p => {
-      const t = p.n <= 11 ? psA : psB;
-      const col = t === psA ? psA.col : psB.col;
-      const fg = t === psA ? psA.fg : psB.fg;
-      const isA = t === psA;
+      const isA = p.isA;
       const r = p.gk ? 8 : 9.5;
       const bx = Math.sin((frame + p.n * 9) * 0.16) * 1.1;
       const by = Math.cos((frame + p.n * 5) * 0.14) * 1.1;
@@ -638,8 +635,14 @@ function buildSim(myPow, oppPow) {
       ctx.fillStyle = p.gk ? "#23332a" : (isA ? kit.fg : "#23332a");
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.font = "bold 9px 'Inter',sans-serif"; ctx.fillText(p.n, cx, cy);
-      ctx.fillStyle = "#f3ead2"; ctx.font = "6px 'Inter',sans-serif";
-      ctx.fillText((p.nm || "").slice(0, 7).toUpperCase(), cx, cy + r + 5);
+      /* name label with subtle background for legibility */
+      const nm = (p.nm || "").slice(0, 9).toUpperCase();
+      ctx.font = "bold 7px 'Inter',sans-serif";
+      const nw = ctx.measureText(nm).width;
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.fillRect(cx - nw / 2 - 2, cy + r + 1, nw + 4, 9);
+      ctx.fillStyle = isA ? "#d4f7e0" : "#f3ead2";
+      ctx.fillText(nm, cx, cy + r + 6);
       if (p.inj) {
         ctx.fillStyle = "#d6543a"; ctx.fillRect(cx + r - 4, cy - r - 4, 8, 8);
         ctx.fillStyle = "#fff"; ctx.font = "bold 7px 'Inter',sans-serif";
@@ -702,7 +705,8 @@ function buildSim(myPow, oppPow) {
     /* ball movement: process waypoint queue, then drift when idle */
     const _bDx = targetX - ballX, _bDy = targetY - ballY;
     const _bDist = Math.sqrt(_bDx * _bDx + _bDy * _bDy);
-    if (_bDist < 14 && wpQueue.length > 0) {
+    const _wpThresh = 14 + speedMul * 8;
+    if (_bDist < _wpThresh && wpQueue.length > 0) {
       const _wp = wpQueue.shift();
       targetX = _wp.x; targetY = _wp.y;
     } else if (_bDist < 8 && wpQueue.length === 0) {
@@ -716,8 +720,9 @@ function buildSim(myPow, oppPow) {
         targetY = _inAHalf ? H * (0.42 + Math.random() * 0.38) : H * (0.20 + Math.random() * 0.38);
       }
     }
-    ballX += (targetX - ballX) * 0.045;
-    ballY += (targetY - ballY) * 0.045;
+    const _lerpF = Math.min(0.18, 0.045 * speedMul);
+    ballX += (targetX - ballX) * _lerpF;
+    ballY += (targetY - ballY) * _lerpF;
 
     /* draw */
     ctx.clearRect(0, 0, W, H);
