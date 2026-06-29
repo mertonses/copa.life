@@ -554,49 +554,93 @@ function buildSim(myPow, oppPow) {
     updateStats(); updateMomBar(momDisplay);
   }
 
-  /* ── Micro-commentary: flowing event stream between scheduled events ── */
-  const _MICRO_TR=[
-    ["🏃","Kanat akını","LW","RW","LM","RM"],
-    ["🤜","Kafa dueli"],
-    ["💨","Uzun pas"],
-    ["🛡️","Top uzaklaştırıldı"],
-    ["⚡","Hızlı kontra"],
-    ["🔄","Top el değiştirdi"],
-    ["🦵","Frikik fırsatı"],
-    ["🎯","Orta sahada top"],
-    ["🚀","İsabetsiz vuruş"],
-    ["💪","Fiziksel mücadele"],
-    ["👀","Tehlikeli pozisyon"],
-    ["📐","Ofsayt tuzağı"],
+  /* ── Match event template system ── */
+  const _EVTPL=[
+    {id:"corner_basic",icon:"🚩",w:14,minM:0,impact:{danger:1,mom:1},
+     tr:["{team} köşe vuruşu kazandı.","{player} baskıyı artırdı, top kornere çıktı.","{team} sağ kanattan geldi, savunma topu kornere gönderdi.","{player} ortayı zorladı, {opp} savunması topu uzaklaştırdı.","{team} duran toptan tehlike arıyor."],
+     en:["{team} won a corner.","{player} pushed forward, ball went out for a corner.","{team} came from the right, defence cleared to the corner.","{player} forced a cross, {opp} defence cleared.","{team} looking for danger from set pieces."]},
+    {id:"wing_attack",icon:"🏃",w:13,minM:0,impact:{danger:1,mom:1},
+     tr:["Kanat akını — {player}.","{player} çizgiye indi, ceza sahasına çevirmek istedi.","{team} kanattan yükleniyor, {player} hareketlendi.","{player} bire birde rakibini geçti ama son pas gelmedi.","{team} kanadı iyi kullandı, {opp} savunması zorlandı."],
+     en:["Wing run — {player}.","{player} reached the byline, tried to cut inside.","{team} pressing from the flank, {player} made a run.","{player} beat his man but couldn't find the final pass.","{team} used the wing well, {opp} defence under pressure."]},
+    {id:"shot_blocked",icon:"⚽",w:12,minM:0,impact:{shot:1,danger:1},
+     tr:["{player} şutunu çekti, savunmadan döndü.","{player} ceza sahası dışından denedi, top kalabalığa takıldı.","{team} şut şansı buldu ama {opp} savunması kapandı.","{player} bekletmeden vurdu, top savunmadan sekti.","{team} gole yaklaştı, şut bloklandı."],
+     en:["{player} shot — blocked by the defence.","{player} tried from outside the box, lost in the crowd.","{team} found a shooting chance but {opp} defence closed down.","{player} shot quickly, ball deflected.","{team} came close — shot blocked."]},
+    {id:"shot_wide",icon:"🎯",w:10,minM:0,impact:{shot:1,danger:1},
+     tr:["{player} uzaklardan denedi, top dışarı çıktı.","{player} iyi vuramadı, top auta gitti.","{team} pozisyon buldu ama şut isabetsiz.","{player} kaleyi yokladı, top direğin yanından auta çıktı.","{team} net bir fırsatı değerlendiremedi."],
+     en:["{player} tried from range, ball flew wide.","{player} couldn't connect, ball went out.","{team} found space but the shot was off target.","{player} tested the corner — just wide.","{team} couldn't convert a clear chance."]},
+    {id:"keeper_save",icon:"🧤",w:9,minM:0,impact:{shot:1,save:1,danger:2},
+     tr:["{keeper} kritik bir kurtarış yaptı.","{player} vurdu, {keeper} gole izin vermedi.","{keeper} topu son anda çeldi.","{team} gole çok yaklaştı ama {keeper} ayakta kaldı.","{keeper} refleksiyle takımını oyunda tuttu."],
+     en:["{keeper} made a crucial save.","{player} shot, {keeper} denied the goal.","{keeper} tipped it over at the last moment.","{team} came so close but {keeper} stood firm.","{keeper} kept his team in it with a reflex save."]},
+    {id:"clearance",icon:"🛡️",w:11,minM:0,impact:{mom:-1},
+     tr:["Top uzaklaştırıldı — {defender}.","{defender} tehlikeyi büyümeden kesti.","{opp} atağı olgunlaşmadan {defender} araya girdi.","{defender} ceza sahasında doğru yerdeydi.","{team} savunması panik yapmadan topu uzaklaştırdı."],
+     en:["Clearance — {defender}.","{defender} cut out the danger early.","{defender} intercepted before the {opp} attack developed.","{defender} was in the right place in the box.","{team} defence cleared calmly."]},
+    {id:"midfield",icon:"🧠",w:12,minM:0,impact:{mom:1},
+     tr:["Orta sahada top — {player}.","{player} oyunun temposunu düşürdü.","{team} orta sahada kontrolü ele almaya çalışıyor.","{player} pas trafiğini yönlendirdi.","{team} sabırla boşluk arıyor."],
+     en:["Ball in midfield — {player}.","{player} slowed the tempo down.","{team} trying to take control in midfield.","{player} dictated the passing lanes.","{team} patiently looking for space."]},
+    {id:"counter",icon:"⚡",w:8,minM:0,impact:{danger:2,mom:2},
+     tr:["{team} hızlı çıktı, {player} boş alana koştu.","Kontra atak fırsatı — {player}.","{opp} savunması dengesiz yakalandı.","{player} topu taşıdı, destek gecikti.","{team} hızlı hücumda kaleyi düşündü."],
+     en:["{team} broke fast, {player} ran into space.","Counter-attack — {player}.","{opp} defence caught off-balance.","{player} carried the ball, support was late.","{team} looking to goal on the break."]},
+    {id:"foul",icon:"🦵",w:8,minM:0,impact:{mom:-1},
+     tr:["{player} yerde kaldı, faul.","{opp} müdahalesi sertti, oyun durdu.","{player} faulle durduruldu.","Hakem düdüğü çaldı, serbest vuruş {team}.","{team} tehlikeli bir noktadan serbest vuruş kazandı."],
+     en:["{player} went down — foul.","{opp} tackle was hard, play stopped.","{player} was brought down trying to escape.","Referee blows — free kick to {team}.","{team} won a free kick in a dangerous position."]},
+    {id:"near_miss",icon:"😮",w:6,minM:0,impact:{shot:1,danger:3,mom:2},
+     tr:["{player} çok yaklaştı, top az farkla dışarıda.","{team} tribünleri ayağa kaldırdı ama gol gelmedi.","{player} müsait durumda vurdu, top direğin dibinden çıktı.","{opp} savunması nefesini tuttu.","{team} adına maçın en net fırsatlarından biri kaçtı."],
+     en:["{player} so close — ball just wide.","{team} brought the crowd to its feet but no goal.","{player} had a free run and hit the post.","{opp} defence held its breath.","One of the clearest chances of the match goes begging for {team}."]},
+    {id:"header",icon:"🤜",w:9,minM:0,impact:{danger:1},
+     tr:["Kafa topunda {player} kazandı.","Havalarda {player} galip geldi.","{player} ikinci topu iyi değerlendirdi.","Uzun top — {player} rakibini geride bıraktı.","Standart duran top — {player} kafayla uzaklaştırdı."],
+     en:["{player} won the header.","{player} dominant in the air.","{player} read the second ball well.","Long ball — {player} left his opponent behind.","Set piece — {player} headed clear."]},
+    {id:"offside",icon:"📐",w:6,minM:0,impact:{mom:-1},
+     tr:["Ofsayt tuzağı — {player} ataktan geri döndü.","{opp} ofsaytta kaldı.","Savunma çizgisi iyi çıktı, atak başlamadan bitti.","{player} ofsayt pozisyonundaydı.","{team} ofsayt tuzağıyla atağı boşa çıkardı."],
+     en:["Offside trap — {player} recalled from attack.","{opp} caught offside.","Defence line stepped up well, attack ended before it started.","{player} was in an offside position.","{team} sprung the offside trap."]},
+    {id:"late_pressure",icon:"🔥",w:7,minM:70,impact:{danger:2,mom:2},
+     tr:["{team} son bölümde baskıyı artırdı.","{opp} savunması iyice geriye yaslandı.","{team} beraberlik için yükleniyor.","{player} oyunu rakip yarı alana yıktı.","Maçın temposu yükseldi, {team} risk alıyor."],
+     en:["{team} ramping up the pressure late on.","{opp} defence retreating deep.","{team} pushing for the equaliser.","{player} pinned the game in the opponent's half.","The pace has risen — {team} taking risks."]},
+    {id:"tactical",icon:"📋",w:5,minM:55,impact:{mom:1},
+     tr:["{team} taktiksel olarak daha öne çıkıyor.","{team} orta sahayı kalabalıklaştırdı.","{player} daha serbest oynamaya başladı.","{opp} baskıyı kırmakta zorlanıyor.","{team} oyunun yönünü değiştirmeye çalışıyor."],
+     en:["{team} pushing further forward tactically.","{team} packed out the midfield.","{player} started playing more freely.","{opp} struggling to break the press.","{team} trying to change the direction of play."]},
+    {id:"crowd",icon:"📣",w:5,minM:0,impact:{mom:1},
+     tr:["Tribünler {team} oyuncularını ateşliyor.","{team} taraftarı oyuna ağırlığını koydu.","Stadyumda tansiyon yükseldi.","{player} tribünleri hareketlendiren bir hamle yaptı.","{team} taraftarı bu bölümden memnun."],
+     en:["The crowd firing {team} players on.","{team} fans making their weight felt.","Tension rising in the stadium.","{player} made a move that got the crowd going.","{team} fans happy with this spell."]},
+    {id:"yellow_card_micro",icon:"🟨",w:4,minM:15,impact:{mom:-1},
+     tr:["{player} sarı kart gördü.","Sert müdahale sonrası kart çıktı — {player}.","{player} hakemin sabrını taşırdı.","{team} adına gereksiz bir sarı kart.","{player} bir sonraki müdahalede dikkatli olmak zorunda."],
+     en:["{player} shown a yellow card.","Hard tackle leads to a booking — {player}.","{player} tried the referee's patience.","A needless yellow card for {team}.","{player} will need to be careful for the rest of the match."]},
   ];
-  const _MICRO_EN=[
-    ["🏃","Wing run"],
-    ["🤜","Header battle"],
-    ["💨","Long ball"],
-    ["🛡️","Clearance"],
-    ["⚡","Quick counter"],
-    ["🔄","Possession switch"],
-    ["🦵","Free kick won"],
-    ["🎯","Ball in midfield"],
-    ["🚀","Shot off target"],
-    ["💪","Physical battle"],
-    ["👀","Dangerous position"],
-    ["📐","Offside trap"],
-  ];
+  let _lastEvtId="";
   function _fireMicroEvent(){
     const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
-    const pool=isTR?_MICRO_TR:_MICRO_EN;
-    const entry=pool[Math.floor(Math.random()*pool.length)];
-    const icon=entry[0], label=entry[1];
-    const team=attackSide==="A"?psA:psB;
-    const outfield=team.filter(p=>!p.gk);
-    const nm=outfield.length?outfield[Math.floor(Math.random()*outfield.length)].nm:"";
-    const txt=label+(nm?" — "+nm:"");
-    addGoalRow(attackSide,`<b>${Math.floor(gameClock)}'</b><span style="opacity:.7">${icon} ${txt}</span>`);
-    const rb=document.getElementById("simRadio");
-    if(rb)rb.innerHTML="📻 "+txt;
-    const comm=document.getElementById("simComm");
-    if(comm)comm.innerHTML=txt;
+    const isA=attackSide==="A";
+    const myT=(typeof teamName!=="undefined"?teamName:"Biz");
+    const oppT=(typeof opponent!=="undefined"?opponent.name:"Rakip");
+    const teamStr=isA?myT:oppT, oppStr=isA?oppT:myT;
+    const atTeam=isA?psA:psB, defTeam=isA?psB:psA;
+    const outfield=atTeam.filter(p=>!p.gk);
+    const defOut=defTeam.filter(p=>!p.gk);
+    const keeper=defTeam.find(p=>p.gk);
+    const _rp=arr=>arr.length?arr[Math.floor(Math.random()*arr.length)]:null;
+    const player=_rp(outfield), defender=_rp(defOut);
+    /* weighted random, skip repeat id */
+    const pool=_EVTPL.filter(t=>t.id!==_lastEvtId&&gameClock>=(t.minM||0));
+    const tot=pool.reduce((s,t)=>s+t.w,0);
+    let r=Math.random()*tot, tpl=pool[pool.length-1];
+    for(const t of pool){r-=t.w;if(r<=0){tpl=t;break;}}
+    _lastEvtId=tpl.id;
+    const texts=isTR?tpl.tr:tpl.en;
+    const raw=texts[Math.floor(Math.random()*texts.length)];
+    const txt=raw
+      .replace(/{team}/g,teamStr).replace(/{opp}/g,oppStr)
+      .replace(/{player}/g,player?player.nm:teamStr)
+      .replace(/{keeper}/g,keeper?keeper.nm:"Kaleci")
+      .replace(/{defender}/g,defender?defender.nm:(isTR?"Savunma":"Defence"));
+    /* stat impacts */
+    if(tpl.impact){
+      if(tpl.impact.shot)liveShots[isA?"A":"B"]=Math.min(99,(liveShots[isA?"A":"B"]||0)+tpl.impact.shot);
+      if(tpl.impact.save)liveSaves[isA?"A":"B"]=Math.min(99,(liveSaves[isA?"A":"B"]||0)+tpl.impact.save);
+      if(tpl.impact.mom)momDisplay=Math.max(18,Math.min(82,momDisplay+(isA?1:-1)*tpl.impact.mom));
+      updateStats(); updateMomBar(momDisplay);
+    }
+    addGoalRow(attackSide,`<b>${Math.floor(gameClock)}'</b><span style="opacity:.75">${tpl.icon} ${txt}</span>`);
+    const rb=document.getElementById("simRadio");if(rb)rb.innerHTML="📻 "+txt;
+    const comm=document.getElementById("simComm");if(comm)comm.innerHTML=txt;
   }
 
   function makeReport(won){
