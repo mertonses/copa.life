@@ -307,7 +307,7 @@ function applyStatic(){const x=L();document.title="copa.life — Roguelite futbo
   document.querySelectorAll(".mstep .mt").forEach((el,i)=>{if(mechTexts[i])el.innerHTML=mechTexts[i];});
   if($("logoSlogan"))$("logoSlogan").textContent=LANG==="tr"?"kadere meydan okuduğun kadro yönetim oyunu":"the squad management game where you defy fate";}
 function buildFormButtons(){const fp=$("formpick");fp.innerHTML="";if(formName&&!unlockedForms.includes(formName)){formName=unlockedForms[0]||"4-4-2";slots=FORMATIONS[formName];}FORMORDER.forEach(f=>{const lk=!unlockedForms.includes(f);const b=document.createElement("button");b.className="fbtn"+(lk?" locked":"")+(formName===f?" sel":"");b.innerHTML=(lk?`<svg viewBox='0 0 14 18' width='11' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='lockicon'><rect x='2' y='8' width='10' height='9' rx='1.5'/><path d='M4 8V6a3 3 0 0 1 6 0v2'/><circle cx='7' cy='12.5' r='1.2' fill='currentColor'/></svg> `:"")+f;if(!lk)b.onclick=()=>pickForm(f);fp.appendChild(b);});buildChairButtons();}
-const CHAIR_ASSET={cilgin:"çılgın"};
+const CHAIR_ASSET={};
 const CHAIR_BORDER={babacan:"#2d7bae",leydi:"#8e2d20",pinti:"#5a6e60",sansasyoncu:"#e6ad2e",torpilci:"#bf4329",cilgin:"#7b4fa0"};
 const CHAIR_ROLE_COLOR={babacan:"#2d8c5a",leydi:"#2d8c7a",pinti:"#bf4329",sansasyoncu:"#c8860b",torpilci:"#bf4329",cilgin:"#7b4fa0"};
 function chairSrc(id,suf=""){return `assets/chairs/${CHAIR_ASSET[id]||id}${suf}.png`;}
