@@ -294,7 +294,7 @@ function simulateMatch(myPow, oppPow, rng) {
 
   const won = score.A > score.B;
 
-  return { events, score, won, motm, keyMoment, penaltyNote, stats };
+  return { events, score, won, motm, keyMoment, penaltyNote, stats, fullTime: FULL };
 }
 
 /* ── E. runMatchHeadless ── */
@@ -439,12 +439,12 @@ function buildSim(myPow, oppPow) {
 
   const hasPen = events.some(e=>e.type==="penalty");
   const hasET  = events.some(e=>e.type==="et_start");
-  const stoppage = Math.floor(rng()*4)+2;
-  const FULL = 90+stoppage;
+  const FULL = result.fullTime;
   function _clockDisp(c){ return clockDisp(c, hasET&&c>FULL, FULL); }
 
   /* ── Match state ── */
   let gameClock=0, eventIdx=0, gameEnded=false, _paused=true;
+  let _penaltyRunning=false;
   let momDisplay=50, liveScore={A:0,B:0}, liveShots={A:0,B:0}, liveSaves={A:0,B:0};
 
   /* Ball physics */
@@ -532,6 +532,7 @@ function buildSim(myPow, oppPow) {
       case "et_start":  { const ss=$("simState");if(ss)ss.textContent=isTR?"Uzatmalar":"Extra Time"; if(typeof sfxWhistle==="function")sfxWhistle(); } break;
       case "halftime":  if(typeof sfxWhistle==="function")sfxWhistle(); momDisplay=momDisplay*0.7+50*0.3; break;
       case "penalty":   {
+        _penaltyRunning=true;
         { const sc2=$("simScore");if(sc2)sc2.textContent=liveScore.A+"–"+liveScore.B; }
         if(ev.penResults){
           const pst=$("simState");if(pst)pst.textContent=isTR?"Penaltılar":"Penalties";
@@ -540,7 +541,11 @@ function buildSim(myPow, oppPow) {
             const comm2=$("simComm"),mA=r.a?"✅":"❌",mB=r.b?"✅":"❌";
             if(comm2)comm2.innerHTML=`🎯 ${r.sd?"SD":pi+1}. ${mA} <b>${(typeof clip==="function"?clip(typeof teamName!=="undefined"?teamName||"US":"US",7):"US")}</b> <span style="opacity:.5">${r.kA}–${r.kB}</span> <b>${(typeof clip==="function"&&typeof opponent!=="undefined"?clip(opponent.name,7):"OPP")}</b> ${mB}`;
             if(typeof sfxKick==="function")sfxKick(3);
-          },delay); }); }
+          },delay); });
+          setTimeout(()=>{ _penaltyRunning=false; endMatch(); }, delay+800/Math.max(0.2,speedMul));
+        } else {
+          setTimeout(()=>{ _penaltyRunning=false; endMatch(); }, 800/Math.max(0.2,speedMul));
+        }
         } break;
       default: break;
     }
@@ -699,10 +704,22 @@ function buildSim(myPow, oppPow) {
     const opts=team.filter(t=>!t.gk&&t!==p);
     if(!opts.length)return;
     const goalY=p.isA?H:0;
-    opts.sort((a,b)=>Math.abs(a.y-goalY)-Math.abs(b.y-goalY));
-    const recv=opts[Math.floor(Math.random()*Math.min(3,opts.length))];
-    recvIdx=allPlayers.indexOf(recv);
-    _kickBall(recv.x+(Math.random()-0.5)*24,recv.y+(Math.random()-0.5)*18,V_PASS);
+    const isWideCarrier=/^(LW|RW|LM|RM|LB|RB)$/.test(p.pos||"");
+    if(isWideCarrier){
+      /* wide carrier: give wide/non-central receivers 40% bonus weight */
+      const _wideRe=/^(LW|RW|LM|RM|LB|RB)$/;
+      const weighted=[];
+      opts.forEach(t=>{ weighted.push(t); if(_wideRe.test(t.pos||""))weighted.push(t); }); /* duplicate = +50% chance */
+      weighted.sort((a,b)=>Math.abs(a.y-goalY)-Math.abs(b.y-goalY));
+      const recv=weighted[Math.floor(Math.random()*Math.min(4,weighted.length))];
+      recvIdx=allPlayers.indexOf(recv);
+      _kickBall(recv.x+(Math.random()-0.5)*24,recv.y+(Math.random()-0.5)*18,V_PASS);
+    } else {
+      opts.sort((a,b)=>Math.abs(a.y-goalY)-Math.abs(b.y-goalY));
+      const recv=opts[Math.floor(Math.random()*Math.min(3,opts.length))];
+      recvIdx=allPlayers.indexOf(recv);
+      _kickBall(recv.x+(Math.random()-0.5)*24,recv.y+(Math.random()-0.5)*18,V_PASS);
+    }
   }
   function _shoot(p){
     const goalX=W/2+(Math.random()-0.5)*GW*0.55;
@@ -801,15 +818,17 @@ function buildSim(myPow, oppPow) {
     const _calmMode=shoutEffect.type==="calm";
 
     while(eventIdx<events.length&&gameClock>=events[eventIdx].minute&&!forced){
-      _scheduleForced(events[eventIdx]);
+      const _ev=events[eventIdx]; eventIdx++;
+      _scheduleForced(_ev);
     }
 
+    if(_penaltyRunning){ _renderAll(); _updateClock(); return; }
     if(phase==="halftime_pause"||phase==="celebrate"){
       phaseTimer-=dt; if(phaseTimer<=0)phase="play";
       _renderAll(); _updateClock(); return;
     }
     if(gameClock>=FULL&&!hasPen&&!forced){ endMatch(); return; }
-    if(gameClock>=FULL+32){ endMatch(); return; }
+    if(gameClock>=FULL+32&&!_penaltyRunning){ endMatch(); return; }
 
     if(forced){
       forced.timer+=dt;
@@ -868,7 +887,11 @@ function buildSim(myPow, oppPow) {
           _steer(p,clX,gkY,SPD_GK*_spd,dt);
         } else if(isCarrier){
           const laneX=p.hx+(Math.sin(time*0.0009+i)*W*0.05);
-          _steer(p,laneX*0.35+W/2*0.2+bx*0.45,goalY,SPD_CARRY*_spd,dt);
+          const isWideCarrier=/^(LW|RW|LM|RM|LB|RB)$/.test(p.pos||"");
+          const targetX=isWideCarrier
+            ? p.hx*0.75+bx*0.25
+            : laneX*0.35+W/2*0.2+bx*0.45;
+          _steer(p,targetX,goalY,SPD_CARRY*_spd,dt);
           bx=p.x; by=p.y+(isA?7:-7);
           passCD-=dt;
           if(_calmMode)passCD+=dt*0.6; /* calm: delay shooting/passing */
@@ -882,10 +905,10 @@ function buildSim(myPow, oppPow) {
           const isWide=/^(LW|RW|LB|RB|LM|RM)$/.test(p.pos||"");
           /* wide players hug their flank; central players drift with ball */
           const driftX=isWide
-            ? p.hx*0.80+(Math.sin(time*0.0007+i*2.3)*W*0.022)
+            ? p.hx*0.88+(Math.sin(time*0.0007+i*2.3)*W*0.025)
             : p.hx+(bx-W/2)*0.22+(Math.sin(time*0.0007+i*2.3)*W*0.04);
           const driftY=p.hy*0.5+goalY*0.5+(Math.cos(time*0.0006+i*1.9)*H*0.03);
-          _steer(p,driftX,driftY,SPD_RUN*_spd*(isWide?0.72:0.65),dt);
+          _steer(p,driftX,driftY,SPD_RUN*_spd*(isWide?0.78:0.65),dt);
         } else {
           if(carrier>=0&&allPlayers[carrier].isA!==isA){
             const cp=allPlayers[carrier];
