@@ -566,14 +566,18 @@ function buildSim(myPow, oppPow) {
 
     /* move ball via waypoints: midfield transit → event position */
     if (ev.pos) {
-      wpQueue = [];
       const ex = ev.pos.x * W, ey = ev.pos.y * H;
-      /* add a midfield waypoint only for long-distance events */
       const curDist = Math.sqrt(Math.pow(ex - ballX, 2) + Math.pow(ey - ballY, 2));
-      if (curDist > W * 0.25) {
-        wpQueue.push({ x: W * 0.3 + Math.random() * W * 0.4, y: H * 0.38 + Math.random() * H * 0.24 });
+      wpQueue = [];
+      if (curDist > W * 0.28) {
+        /* route through midfield: set target to midfield NOW, push final dest to queue */
+        targetX = W * 0.28 + Math.random() * W * 0.44;
+        targetY = H * 0.36 + Math.random() * H * 0.28;
+        wpQueue.push({ x: ex, y: ey });
+      } else {
+        /* close enough: go direct */
+        targetX = ex; targetY = ey;
       }
-      wpQueue.push({ x: ex, y: ey });
     }
 
     /* update state text */
@@ -614,10 +618,24 @@ function buildSim(myPow, oppPow) {
 
   function animatePlayers(now) {
     allPlayers.forEach(p => {
-      const nx = p.hx + Math.sin(now * 0.0003 + p.hx) * 0.8;
-      const ny = p.hy + Math.cos(now * 0.0004 + p.hy) * 0.8;
-      p.x += (nx - p.x) * 0.04;
-      p.y += (ny - p.y) * 0.04;
+      /* GK: stays on goal line, tracks ball laterally */
+      if (p.gk) {
+        const goalY = p.isA ? H * 0.07 : H * 0.93;
+        const lateral = W * 0.5 + (ballX - W * 0.5) * 0.4;
+        p.x += (Math.max(W * 0.25, Math.min(W * 0.75, lateral)) - p.x) * 0.04;
+        p.y += (goalY - p.y) * 0.07;
+        return;
+      }
+      /* Outfield: players within ~35% of W chase the ball */
+      const dx = ballX - p.hx, dy = ballY - p.hy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const chase = Math.max(0, 1 - dist / (W * 0.35)) * 0.5;
+      /* Whole line shifts slightly toward ball's Y half */
+      const lineShift = (ballY / H - 0.5) * (p.isA ? 0.15 : -0.15) * H;
+      const tx = p.hx + dx * chase + Math.sin(now * 0.00035 + p.n * 1.4) * 3;
+      const ty = p.hy + dy * chase + lineShift * 0.3 + Math.cos(now * 0.00045 + p.n * 1.2) * 2.5;
+      p.x += (tx - p.x) * 0.03;
+      p.y += (ty - p.y) * 0.03;
     });
   }
 
@@ -705,22 +723,30 @@ function buildSim(myPow, oppPow) {
     /* ball movement: process waypoint queue, then drift when idle */
     const _bDx = targetX - ballX, _bDy = targetY - ballY;
     const _bDist = Math.sqrt(_bDx * _bDx + _bDy * _bDy);
-    const _wpThresh = 14 + speedMul * 8;
+    const _wpThresh = 20 + speedMul * 10;
     if (_bDist < _wpThresh && wpQueue.length > 0) {
       const _wp = wpQueue.shift();
       targetX = _wp.x; targetY = _wp.y;
-    } else if (_bDist < 8 && wpQueue.length === 0) {
-      /* idle drift: ball wanders in the likely possession half */
+    } else if (_bDist < 10 && wpQueue.length === 0) {
+      /* idle drift toward a nearby player in possession half */
       driftTimer -= dt;
       if (driftTimer <= 0) {
-        driftTimer = 0.9 + Math.random() * 1.4;
+        driftTimer = 0.7 + Math.random() * 1.1;
         const _nextEv = eventIdx < events.length ? events[eventIdx] : null;
-        const _inAHalf = _nextEv && _nextEv.side === "A";
-        targetX = W * (0.22 + Math.random() * 0.56);
-        targetY = _inAHalf ? H * (0.42 + Math.random() * 0.38) : H * (0.20 + Math.random() * 0.38);
+        const _sideA = _nextEv ? _nextEv.side === "A" : liveScore.A >= liveScore.B;
+        /* pick a random outfield player from the possession team as drift target */
+        const _pool = allPlayers.filter(p => p.isA === _sideA && !p.gk);
+        if (_pool.length) {
+          const _tp = _pool[Math.floor(Math.random() * _pool.length)];
+          targetX = _tp.x + (Math.random() - 0.5) * 20;
+          targetY = _tp.y + (Math.random() - 0.5) * 20;
+        } else {
+          targetX = W * (0.22 + Math.random() * 0.56);
+          targetY = _sideA ? H * (0.45 + Math.random() * 0.35) : H * (0.20 + Math.random() * 0.35);
+        }
       }
     }
-    const _lerpF = Math.min(0.18, 0.045 * speedMul);
+    const _lerpF = Math.min(0.20, 0.07 * speedMul);
     ballX += (targetX - ballX) * _lerpF;
     ballY += (targetY - ballY) * _lerpF;
 
