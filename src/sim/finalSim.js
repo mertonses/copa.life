@@ -726,7 +726,6 @@ function buildSim(myPow, oppPow) {
     });
   }
 
-  function drawBall() {
   function drawScoreOverlay(gameClock) {
     const cd = _clockDisp(gameClock || 0);
     const txt = liveScore.A + "–" + liveScore.B + "  " + cd + "'";
