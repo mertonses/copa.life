@@ -452,6 +452,8 @@ function buildSim(myPow, oppPow) {
   /* Possession */
   let carrier=-1, recvIdx=-1, passCD=2.0, attackSide="A";
   let phase="play", phaseTimer=0, forced=null;
+  let shoutEffect={type:null,timer:0}; /* active shout: more/push/calm/hold */
+  let cornerPhase=null; /* {cx,cy,tx,ty} — ball in corner, waiting to cross */
 
   /* Speeds in px/s at 1× */
   const SPD_CARRY=W*0.50, SPD_RUN=W*0.60, SPD_DEF=W*0.58, SPD_GK=W*0.45;
@@ -514,7 +516,15 @@ function buildSim(myPow, oppPow) {
         addGoalRow(ev.side,`<b>${Math.floor(gameClock)}'</b><span>🧤 ${ev.label||(isTR?"Kaleci kurtardı":"Keeper save")}</span>`);
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-6:6))); break;
       case "shot_wide": liveShots[ev.side]++; momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-3:3))); break;
-      case "corner":    momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?4:-4))); break;
+      case "corner":
+        addGoalRow(ev.side,`<b>${Math.floor(gameClock)}'</b><span>🚩 ${isTR?"Köşe vuruşu":"Corner kick"}</span>`);
+        momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?4:-4))); break;
+      case "card": case "yellow_card": case "red_card": {
+        const _cTeam=ev.side==="B"?psB:psA;
+        const _cp=_cTeam.find(p=>ev.player&&p.nm&&ev.player.toLowerCase().includes(p.nm.toLowerCase()));
+        if(_cp)_cp._yellowEnd=Date.now()+700;
+        addGoalRow(ev.side,`<b>${Math.floor(gameClock)}'</b><span>${ev.type==="red_card"?"🟥":"🟨"} ${ev.player||""}</span>`);
+      } break;
       case "et_start":  { const ss=$("simState");if(ss)ss.textContent=isTR?"Uzatmalar":"Extra Time"; if(typeof sfxWhistle==="function")sfxWhistle(); } break;
       case "halftime":  if(typeof sfxWhistle==="function")sfxWhistle(); momDisplay=momDisplay*0.7+50*0.3; break;
       case "penalty":   {
@@ -615,6 +625,19 @@ function buildSim(myPow, oppPow) {
       }
       return;
     }
+    /* Corner: skip forced sequence, kick ball to corner then deliver cross */
+    if(ev.type==="corner"){
+      triggerEvent(ev);
+      const isA=ev.side==="A";
+      const cx=(ev.pos&&ev.pos.x<0.5)?W*0.04:W*0.96;
+      const cy=isA?H*0.04:H*0.96;
+      bx=cx; by=cy; bvx=0; bvy=0; carrier=-1;
+      const ctgX=W/2+(Math.random()-0.5)*GW*0.7;
+      const ctgY=isA?H*0.20:H*0.80;
+      cornerPhase={tx:ctgX,ty:ctgY,timer:0};
+      setTimeout(()=>{ if(!gameEnded&&cornerPhase){_kickBall(ctgX,ctgY,V_PASS*1.2);cornerPhase=null;attackSide=ev.side;} },Math.max(200,500/speedMul));
+      return;
+    }
     const tx=ev.pos?ev.pos.x*W:W/2, ty=ev.pos?ev.pos.y*H:H/2;
     forced={ ev,tx,ty,timer:0 }; attackSide=ev.side;
     const team=ev.side==="A"?psA:psB;
@@ -643,6 +666,7 @@ function buildSim(myPow, oppPow) {
     allPlayers.forEach(p=>{
       const isA=p.isA,sz=p.gk?10:12;
       const bgC=p.gk?_hex("#e6ad2e"):(isA?_hex(kit.bg):_hex("#eae2cb"));
+      p._bgC=bgC; p._yellowEnd=0; p._tackleEnd=0;
       const bdrC=(isA&&!p.gk)?_hex(kit.sec):0xffffff;
       const fgC=p.gk?"#23332a":(isA?kit.fg:"#23332a");
       p._shadow=this.add.ellipse(p.hx+2,p.hy+3,sz*2+2,sz+2,0x000000,0.18);
@@ -663,7 +687,13 @@ function buildSim(myPow, oppPow) {
   function _pUpdate(time,delta){
     if(_paused||gameEnded)return;
     const dt=Math.min(delta,100)/1000*speedMul;
-    gameClock=Math.min(hasPen?150:FULL+3, gameClock+dt*0.75);
+    gameClock=Math.min(hasPen?150:FULL+3, gameClock+dt*1.5);
+    /* Shout effect countdown */
+    if(shoutEffect.timer>0){shoutEffect.timer-=dt;if(shoutEffect.timer<=0)shoutEffect.type=null;}
+    const _sA=shoutEffect.type==="more"?1.30:shoutEffect.type==="calm"?0.78:1.0;
+    const _pressDeep=shoutEffect.type==="push";
+    const _holdMode=shoutEffect.type==="hold";
+    const _calmMode=shoutEffect.type==="calm";
 
     while(eventIdx<events.length&&gameClock>=events[eventIdx].minute&&!forced){
       _scheduleForced(events[eventIdx]);
@@ -725,32 +755,40 @@ function buildSim(myPow, oppPow) {
         const isCarrier=i===carrier,isRecv=i===recvIdx,isA=p.isA;
         const ownAttacking=attackSide===(isA?"A":"B");
         const goalY=isA?H*0.88:H*0.12;
+        const _spd = isA ? _sA : 1.0; /* shout speed multiplier (A team only) */
         if(p.gk){
+          /* hold mode: GK presses further from goal line to clear */
+          const gkPush=_holdMode&&isA?H*0.12:0;
           const clX=Math.max(GL+8,Math.min(GR-8,bx));
-          const gkY=isA?H*0.06:H*0.94;
-          _steer(p,clX,gkY,SPD_GK,dt);
+          const gkY=isA?H*0.06+gkPush:H*0.94-gkPush;
+          _steer(p,clX,gkY,SPD_GK*_spd,dt);
         } else if(isCarrier){
           const laneX=p.hx+(Math.sin(time*0.0009+i)*W*0.05);
-          _steer(p,laneX*0.35+W/2*0.2+bx*0.45,goalY,SPD_CARRY,dt);
+          _steer(p,laneX*0.35+W/2*0.2+bx*0.45,goalY,SPD_CARRY*_spd,dt);
           bx=p.x; by=p.y+(isA?7:-7);
           passCD-=dt;
+          if(_calmMode)passCD+=dt*0.6; /* calm: delay shooting/passing */
           const dGoal=Math.hypot(p.x-W/2,p.y-goalY);
-          if(dGoal<W*0.20&&Math.random()<dt*1.8){_shoot(p);}
+          const shootBias=_holdMode?0.6:(_calmMode?0.5:1.8); /* hold/calm: less risk */
+          if(dGoal<W*0.20&&Math.random()<dt*shootBias){_shoot(p);}
           else if(passCD<=0){_attemptPass();passCD=0.6+Math.random()*2.0;}
         } else if(isRecv){
-          _steer(p,bx+bvx*0.12,by+bvy*0.12,SPD_RUN,dt);
+          _steer(p,bx+bvx*0.12,by+bvy*0.12,SPD_RUN*_spd,dt);
         } else if(ownAttacking){
           const driftX=p.hx+(bx-W/2)*0.22+(Math.sin(time*0.0007+i*2.3)*W*0.04);
           const driftY=p.hy*0.5+goalY*0.5+(Math.cos(time*0.0006+i*1.9)*H*0.03);
-          _steer(p,driftX,driftY,SPD_RUN*0.65,dt);
+          _steer(p,driftX,driftY,SPD_RUN*_spd*0.65,dt);
         } else {
           if(carrier>=0&&allPlayers[carrier].isA!==isA){
             const cp=allPlayers[carrier];
+            /* push mode: defenders press high into opponent half */
+            const pressY=_pressDeep&&!isA?(cp.y*0.6+goalY*0.4):(cp.y*0.38+p.hy*0.42+H/2*0.20);
             const intX=cp.x*0.38+p.hx*0.42+W/2*0.20;
-            const intY=cp.y*0.38+p.hy*0.42+H/2*0.20;
-            _steer(p,intX,intY,SPD_DEF,dt);
+            _steer(p,intX,pressY,SPD_DEF*_spd,dt);
           } else {
-            _steer(p,p.hx+(Math.sin(time*0.0005+i)*W*0.018),p.hy+(Math.cos(time*0.0004+i)*H*0.012),SPD_RUN*0.25,dt);
+            /* hold mode: defenders stay deeper */
+            const holdOfsY=_holdMode&&!isA?H*0.08:0;
+            _steer(p,p.hx+(Math.sin(time*0.0005+i)*W*0.018),(p.hy+holdOfsY)+(Math.cos(time*0.0004+i)*H*0.012),SPD_RUN*0.25,dt);
           }
         }
         p.x=Math.max(8,Math.min(W-8,p.x));
@@ -762,6 +800,7 @@ function buildSim(myPow, oppPow) {
         const defs=(cp.isA?psB:psA).filter(p=>!p.gk);
         const nearest=defs.sort((a,b)=>Math.hypot(a.x-bx,a.y-by)-Math.hypot(b.x-bx,b.y-by))[0];
         if(nearest&&Math.hypot(nearest.x-bx,nearest.y-by)<W*0.055){
+          cp._tackleEnd=Date.now()+280; /* brief red flash on tackled player */
           attackSide=cp.isA?"B":"A";
           _kickBall(nearest.x+(Math.random()-0.5)*20,nearest.y+(Math.random()-0.5)*20,V_PASS*0.35);
         }
@@ -772,10 +811,14 @@ function buildSim(myPow, oppPow) {
 
   function _renderAll(){
     if(!_pScene)return;
+    const _now=Date.now();
     allPlayers.forEach(p=>{
       const sz=p.gk?10:12;
       p._shadow.setPosition(p.x+2,p.y+3);
       p._circ.setPosition(p.x,p.y);
+      if(p._yellowEnd&&_now<p._yellowEnd) p._circ.setFillStyle(0xf0e040,1);
+      else if(p._tackleEnd&&_now<p._tackleEnd) p._circ.setFillStyle(0xff5533,1);
+      else if(p._bgC!==undefined) p._circ.setFillStyle(p._bgC,1);
       p._num.setPosition(p.x,p.y);
       p._name.setPosition(p.x,p.y+sz+3);
     });
@@ -797,6 +840,7 @@ function buildSim(myPow, oppPow) {
     shout:  (t)=>{
       const mp={more:{t:"yüklen!",e:"push up!"},push:{t:"önde bas!",e:"press high!"},calm:{t:"tempoyu düşür",e:"slow tempo"},hold:{t:"skoru koru",e:"protect lead"}};
       const c=mp[t]||mp.more;
+      shoutEffect={type:t,timer:3.5}; /* 3.5 seconds of effect */
       if(typeof playUiSample==="function")playUiSample("click",0.18);
       const rb=$("simRadio");
       if(rb)rb.innerHTML="📻 <b>"+(typeof clip==="function"?clip(typeof teamName!=="undefined"?teamName||"US":"US",9):"US")+"</b> "+(LANG==="tr"?c.t:c.e);
