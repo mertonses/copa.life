@@ -430,18 +430,90 @@ function buildSim(myPow, oppPow) {
     heatGrid[gy * HGW + gx] += 0.5;
   });
 
+  /* ── PRE-COMPUTE ball path (frame buffer) ── */
+  const TPG = 20; /* ticks per game-minute */
+  const _lastMin = events.length ? events[events.length - 1].minute + 4 : 95;
+  const _totalTicks = Math.ceil(_lastMin * TPG);
+
+  const _fbX = new Float32Array(_totalTicks); /* ball X per tick */
+  const _fbY = new Float32Array(_totalTicks); /* ball Y per tick */
+
+  (function _buildBallPath() {
+    function cubic(t, p0, p1, p2, p3) {
+      const u = 1 - t;
+      return u*u*u*p0 + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*p3;
+    }
+    function fillBez(ts, te, ax, ay, bx, by, cx2, cy2, dx, dy) {
+      const n = Math.max(1, te - ts);
+      for (let i = 0; i < n; i++) {
+        const t = i / n;
+        _fbX[ts + i] = cubic(t, ax, bx, cx2, dx);
+        _fbY[ts + i] = cubic(t, ay, by, cy2, dy);
+      }
+    }
+
+    let curX = W / 2, curY = H / 2, prevMin = 0;
+
+    events.forEach(ev => {
+      const st = Math.floor(prevMin * TPG);
+      const et = Math.max(st + 2, Math.floor(ev.minute * TPG));
+      const len = et - st;
+      const ex = ev.pos ? ev.pos.x * W : W / 2;
+      const ey = ev.pos ? ev.pos.y * H : H / 2;
+
+      /* neutral events: glide to centre */
+      if (!ev.side || ev.type === "halftime" || ev.type === "et_start" || ev.type === "et_half") {
+        fillBez(st, et, curX, curY, W/2, H/2, W/2, H/2, ex, ey);
+        curX = ex; curY = ey; prevMin = ev.minute; return;
+      }
+
+      /* build a pass chain through possession-team players */
+      const sideA = ev.side === "A";
+      const pool = (sideA ? psA.ps : psB.ps).filter(p => !p.gk);
+      const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+      const nPasses = len > TPG * 5 ? Math.min(3, shuffled.length) :
+                      len > TPG * 2 ? Math.min(2, shuffled.length) : 0;
+
+      const wps = [{ x: curX, y: curY }];
+      for (let i = 0; i < nPasses; i++) {
+        const pl = shuffled[i];
+        wps.push({ x: pl.hx + (Math.random() - 0.5) * 24, y: pl.hy + (Math.random() - 0.5) * 18 });
+      }
+      wps.push({ x: ex, y: ey });
+
+      const nSeg = wps.length - 1;
+      for (let wi = 0; wi < nSeg; wi++) {
+        const segSt = st + Math.floor(wi * len / nSeg);
+        const segEt = st + Math.floor((wi + 1) * len / nSeg);
+        const p0 = wps[wi], p3 = wps[wi + 1];
+        const ddx = p3.x - p0.x, ddy = p3.y - p0.y;
+        const jit = Math.sqrt(ddx*ddx + ddy*ddy) * 0.18;
+        fillBez(segSt, segEt,
+          p0.x, p0.y,
+          p0.x + ddx * 0.3 + (Math.random()-0.5)*jit, p0.y + ddy * 0.3 + (Math.random()-0.5)*jit,
+          p0.x + ddx * 0.7 + (Math.random()-0.5)*jit, p0.y + ddy * 0.7 + (Math.random()-0.5)*jit,
+          p3.x, p3.y);
+      }
+
+      curX = ex; curY = ey; prevMin = ev.minute;
+    });
+
+    /* hold last position for remaining ticks */
+    const lastT = Math.min(_totalTicks - 1, Math.floor((events.length ? events[events.length-1].minute : 0) * TPG));
+    for (let t = lastT; t < _totalTicks; t++) { _fbX[t] = curX; _fbY[t] = curY; }
+  })();
+
+  /* player EMA smoothing state */
+  const _smX = new Float32Array(allPlayers.length);
+  const _smY = new Float32Array(allPlayers.length);
+  allPlayers.forEach((p, i) => { _smX[i] = p.hx; _smY[i] = p.hy; p.x = p.hx; p.y = p.hy; });
+
   /* playback state */
-  let gameClock = 0, eventIdx = 0, raf = null, gameEnded = false;
-  let ballX = W / 2, ballY = H / 2, targetX = W / 2, targetY = H / 2;
+  let _tickF = 0, eventIdx = 0, raf = null, gameEnded = false;
   let momDisplay = 50;
   let liveScore = { A: 0, B: 0 };
   let liveShots = { A: 0, B: 0 }, liveSaves = { A: 0, B: 0 };
-  let lastEventTime = events.length ? events[events.length - 1].minute : 90;
   let _paused = false;
-  /* waypoint queue for smooth ball travel */
-  let wpQueue = [];
-  let driftTimer = 0;
-  let lastFiredAt = 0;
 
   /* stoppage data */
   const hasPen = events.some(e => e.type === "penalty");
@@ -450,7 +522,7 @@ function buildSim(myPow, oppPow) {
   const FULL = 90 + stoppage;
   const etLimitLocal = FULL + 30;
 
-  function _clockDisp(c) { return clockDisp(c, hasET && gameClock > FULL, FULL); }
+  function _clockDisp(c) { return clockDisp(c, hasET && c > FULL, FULL); }
 
   function updateMomBar(m) {
     const a = Math.round(m), b = 100 - a;
@@ -565,20 +637,7 @@ function buildSim(myPow, oppPow) {
     }
 
     /* move ball via waypoints: midfield transit → event position */
-    if (ev.pos) {
-      const ex = ev.pos.x * W, ey = ev.pos.y * H;
-      const curDist = Math.sqrt(Math.pow(ex - ballX, 2) + Math.pow(ey - ballY, 2));
-      wpQueue = [];
-      if (curDist > W * 0.28) {
-        /* route through midfield: set target to midfield NOW, push final dest to queue */
-        targetX = W * 0.28 + Math.random() * W * 0.44;
-        targetY = H * 0.36 + Math.random() * H * 0.28;
-        wpQueue.push({ x: ex, y: ey });
-      } else {
-        /* close enough: go direct */
-        targetX = ex; targetY = ey;
-      }
-    }
+    /* ball position is driven by frame buffer — no target needed here */
 
     /* update state text */
     const stEl = $("simState");
@@ -616,26 +675,24 @@ function buildSim(myPow, oppPow) {
     ctx.strokeRect(PA_L, H - 7 - PA_H, PA_W, PA_H);
   }
 
-  function animatePlayers(now) {
-    allPlayers.forEach(p => {
-      /* GK: stays on goal line, tracks ball laterally */
+  function _updatePlayers(bx, by, now) {
+    const emaF = Math.min(0.12, 0.038 * speedMul);
+    allPlayers.forEach((p, i) => {
+      let tx, ty;
       if (p.gk) {
-        const goalY = p.isA ? H * 0.07 : H * 0.93;
-        const lateral = W * 0.5 + (ballX - W * 0.5) * 0.4;
-        p.x += (Math.max(W * 0.25, Math.min(W * 0.75, lateral)) - p.x) * 0.04;
-        p.y += (goalY - p.y) * 0.07;
-        return;
+        tx = Math.max(W * 0.22, Math.min(W * 0.78, W * 0.5 + (bx - W * 0.5) * 0.38));
+        ty = p.isA ? H * 0.07 : H * 0.93;
+      } else {
+        const dx = bx - p.hx, dy = by - p.hy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const chase = Math.max(0, 1 - dist / (W * 0.38)) * 0.44;
+        const lineShift = (by / H - 0.5) * (p.isA ? 0.14 : -0.14) * H;
+        tx = p.hx + dx * chase + Math.sin(now * 0.00032 + p.n * 1.5) * 2.8;
+        ty = p.hy + dy * chase + lineShift * 0.28 + Math.cos(now * 0.00041 + p.n * 1.2) * 2.2;
       }
-      /* Outfield: players within ~35% of W chase the ball */
-      const dx = ballX - p.hx, dy = ballY - p.hy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const chase = Math.max(0, 1 - dist / (W * 0.35)) * 0.5;
-      /* Whole line shifts slightly toward ball's Y half */
-      const lineShift = (ballY / H - 0.5) * (p.isA ? 0.15 : -0.15) * H;
-      const tx = p.hx + dx * chase + Math.sin(now * 0.00035 + p.n * 1.4) * 3;
-      const ty = p.hy + dy * chase + lineShift * 0.3 + Math.cos(now * 0.00045 + p.n * 1.2) * 2.5;
-      p.x += (tx - p.x) * 0.03;
-      p.y += (ty - p.y) * 0.03;
+      _smX[i] += (tx - _smX[i]) * emaF;
+      _smY[i] += (ty - _smY[i]) * emaF;
+      p.x = _smX[i]; p.y = _smY[i];
     });
   }
 
@@ -670,13 +727,8 @@ function buildSim(myPow, oppPow) {
   }
 
   function drawBall() {
-    ctx.beginPath(); ctx.arc(ballX, ballY, BR, 0, 7);
-    ctx.fillStyle = "#fff"; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
-  }
-
-  function drawScoreOverlay() {
-    const cd = _clockDisp(gameClock);
+  function drawScoreOverlay(gameClock) {
+    const cd = _clockDisp(gameClock || 0);
     const txt = liveScore.A + "–" + liveScore.B + "  " + cd + "'";
     ctx.font = "bold 12px 'Inter',sans-serif";
     const tw = ctx.measureText(txt).width + 16;
@@ -684,80 +736,62 @@ function buildSim(myPow, oppPow) {
     ctx.fillRect((W - tw) / 2, 10, tw, 18);
     ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(txt, W / 2, 19);
-    /* update DOM clock */
     const clk = $("simClk"); if (clk) clk.textContent = cd + "'";
     const tv = $("tvover");
     if (tv) tv.innerHTML = (typeof round !== "undefined" && round >= 6 ? "🏆 " + (typeof L === "function" ? L().cupTitle : "CUP") : "🔴 TRT SPOR") + " · " + cd + "' · " + liveScore.A + "–" + liveScore.B;
   }
 
-  /* ── Playback loop ── */
-  let frame = 0, lastTs = null;
+  /* ── Playback loop (frame-buffer read) ── */
+  let _frame = 0, lastTs = null;
   function frameStep(ts) {
     if (_paused || gameEnded) return;
     if (lastTs === null) lastTs = ts;
     const dt = Math.min(100, ts - lastTs) / 1000;
     lastTs = ts;
 
-    gameClock += dt * speedMul * 0.55;
-    frame++;
+    /* advance tick counter */
+    _tickF = Math.min(_totalTicks - 1, _tickF + dt * speedMul * TPG * 0.55);
+    const _t = Math.floor(_tickF);
+    const _gameClock = _tickF / TPG;
+    _frame++;
 
-    /* fire pending events — enforce minimum real-time gap to prevent simultaneous bursts */
-    const _nowMs = performance.now();
-    const _minGapMs = 800 / Math.max(1, speedMul);
-    while (eventIdx < events.length && gameClock >= events[eventIdx].minute) {
-      if (lastFiredAt > 0 && _nowMs - lastFiredAt < _minGapMs) break;
+    /* read ball position from buffer */
+    const _bx = _fbX[_t], _by = _fbY[_t];
+
+    /* fire events whose game-minute has been reached */
+    while (eventIdx < events.length && _gameClock >= events[eventIdx].minute) {
       triggerEvent(events[eventIdx]);
-      lastFiredAt = _nowMs;
       eventIdx++;
     }
 
-    /* check end */
-    if (gameClock > lastEventTime + 2 && eventIdx >= events.length && !gameEnded) {
-      endMatch(); return;
-    }
+    /* end check */
+    if (_t >= _totalTicks - 1 && !gameEnded) { endMatch(); return; }
 
-    /* animate */
-    const now = Date.now();
-    animatePlayers(now);
-
-    /* ball movement: process waypoint queue, then drift when idle */
-    const _bDx = targetX - ballX, _bDy = targetY - ballY;
-    const _bDist = Math.sqrt(_bDx * _bDx + _bDy * _bDy);
-    const _wpThresh = 20 + speedMul * 10;
-    if (_bDist < _wpThresh && wpQueue.length > 0) {
-      const _wp = wpQueue.shift();
-      targetX = _wp.x; targetY = _wp.y;
-    } else if (_bDist < 10 && wpQueue.length === 0) {
-      /* idle drift toward a nearby player in possession half */
-      driftTimer -= dt;
-      if (driftTimer <= 0) {
-        driftTimer = 0.7 + Math.random() * 1.1;
-        const _nextEv = eventIdx < events.length ? events[eventIdx] : null;
-        const _sideA = _nextEv ? _nextEv.side === "A" : liveScore.A >= liveScore.B;
-        /* pick a random outfield player from the possession team as drift target */
-        const _pool = allPlayers.filter(p => p.isA === _sideA && !p.gk);
-        if (_pool.length) {
-          const _tp = _pool[Math.floor(Math.random() * _pool.length)];
-          targetX = _tp.x + (Math.random() - 0.5) * 20;
-          targetY = _tp.y + (Math.random() - 0.5) * 20;
-        } else {
-          targetX = W * (0.22 + Math.random() * 0.56);
-          targetY = _sideA ? H * (0.45 + Math.random() * 0.35) : H * (0.20 + Math.random() * 0.35);
-        }
-      }
-    }
-    const _lerpF = Math.min(0.20, 0.07 * speedMul);
-    ballX += (targetX - ballX) * _lerpF;
-    ballY += (targetY - ballY) * _lerpF;
+    /* update player positions (EMA toward ball-driven targets) */
+    _updatePlayers(_bx, _by, ts);
 
     /* draw */
     ctx.clearRect(0, 0, W, H);
     drawField();
-    drawPlayers(frame);
-    drawBall();
-    drawScoreOverlay();
+    drawPlayers(_frame);
+    /* ball */
+    ctx.beginPath(); ctx.arc(_bx, _by, BR, 0, 7);
+    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
+    drawScoreOverlay(_gameClock);
 
     raf = requestAnimationFrame(frameStep);
+  }
+
+  function _drawFinalFrame() {
+    const _bx = _fbX[_totalTicks - 1], _by = _fbY[_totalTicks - 1];
+    ctx.clearRect(0, 0, W, H);
+    drawField();
+    drawPlayers(_frame);
+    ctx.beginPath(); ctx.arc(_bx, _by, BR, 0, 7);
+    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = "#23332a"; ctx.stroke();
+    drawHeatmap(ctx, W, H, heatGrid, HGW, HGH);
   }
 
   function endMatch() {
@@ -766,14 +800,8 @@ function buildSim(myPow, oppPow) {
     if (raf) cancelAnimationFrame(raf);
     if (typeof crowdStop === "function") crowdStop();
     if (typeof sfxWhistle === "function") sfxWhistle();
-    /* draw final frame with heatmap */
-    ctx.clearRect(0, 0, W, H);
-    drawField();
-    drawPlayers(frame);
-    drawBall();
-    drawHeatmap(ctx, W, H, heatGrid, HGW, HGH);
+    _drawFinalFrame();
     try { window._heatmapImg = cv.toDataURL("image/png"); } catch (e) {}
-    /* sync final score to globals */
     const sc = $("simScore"); if (sc) sc.textContent = result.score.A + "–" + result.score.B;
     makeReport(result.won);
     setTimeout(() => endRun(result.won, result.score.A + "–" + result.score.B), 1000);
@@ -827,15 +855,9 @@ function buildSim(myPow, oppPow) {
       if (gameEnded) return;
       _paused = false;
       if (raf) cancelAnimationFrame(raf);
-      /* fire all remaining events immediately */
       while (eventIdx < events.length) { triggerEvent(events[eventIdx]); eventIdx++; }
-      gameClock = 9999;
-      /* draw final */
-      ctx.clearRect(0, 0, W, H);
-      drawField();
-      drawPlayers(frame);
-      drawBall();
-      drawHeatmap(ctx, W, H, heatGrid, HGW, HGH);
+      _tickF = _totalTicks - 1;
+      _drawFinalFrame();
       try { window._heatmapImg = cv.toDataURL("image/png"); } catch (e) {}
       const sc = $("simScore"); if (sc) sc.textContent = result.score.A + "–" + result.score.B;
       const clk = $("simClk"); if (clk) clk.textContent = "90'";
