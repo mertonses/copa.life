@@ -9,7 +9,7 @@ var OPP_POOL=[
  "Pendikspor","Giresunspor","Kocaelispor","Şanlıurfaspor","Denizlispor",
  "Altınordu","İnegölspor","İstanbulspor","Elazığspor","Sakaryaspor"
 ];
-var OPP_BASES=[60,66,72,78,83,88];
+var OPP_BASES=[60,66,72,78,86,94];
 
 /* England – Premier League + Championship */
 var OPP_POOL_EN=[
@@ -25,7 +25,7 @@ var OPP_POOL_EN=[
  "Swansea City","Preston North End","Charlton Athletic","Oxford United",
  "Portsmouth","Derby County","Wrexham"
 ];
-var OPP_BASES_EN=[62,67,73,79,84,89];
+var OPP_BASES_EN=[62,67,73,79,87,95];
 
 /* Spain — La Liga + Segunda */
 var OPP_POOL_ES=[
@@ -38,7 +38,7 @@ var OPP_POOL_ES=[
  "U.D. Almería","Granada C.F.","Cádiz C.F.","Real Sporting de Gijón",
  "Málaga C.F.","Burgos C.F.","S.D. Eibar","Real Racing Club de Santander"
 ];
-var OPP_BASES_ES=[62,67,73,79,85,90];
+var OPP_BASES_ES=[62,67,73,79,88,96];
 
 /* Italy — Serie A + Serie B */
 var OPP_POOL_IT=[
@@ -51,7 +51,7 @@ var OPP_POOL_IT=[
  "Spezia Calcio","Palermo F.C.","S.S.C. Bari","A.C. Monza",
  "Cesena F.C.","Modena F.C. 2018","Delfino Pescara 1936","A.C. Reggiana 1919"
 ];
-var OPP_BASES_IT=[61,66,72,78,84,89];
+var OPP_BASES_IT=[61,66,72,78,87,95];
 
 /* Germany — Bundesliga + Bundesliga 2 */
 var OPP_POOL_DE=[
@@ -64,4 +64,4 @@ var OPP_POOL_DE=[
  "SV Darmstadt 98","VfL Bochum 1848","SC Paderborn 07","DSC Arminia Bielefeld",
  "1. FC Kaiserslautern","Karlsruher SC","SpVgg Greuther Fürth","SG Dynamo Dresden"
 ];
-var OPP_BASES_DE=[62,67,73,79,84,89];
+var OPP_BASES_DE=[62,67,73,79,87,95];

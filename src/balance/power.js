@@ -14,10 +14,7 @@ function chemBonus(s){
 }
 function calcFan(){return 0;}
 function fanBonus(){return 0;}
-function softenBonus(v){
- const soft=v<=BONUS_SOFT_CAP?v:BONUS_SOFT_CAP+(v-BONUS_SOFT_CAP)*BONUS_OVERFLOW_RATE;
- return Math.min(BONUS_HARD_CAP,soft);
-}
+function softenBonus(v){return v;}
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
@@ -29,8 +26,7 @@ function powerBreakdown(r){
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
  const capBonus=typeof captainIdx!=="undefined"&&captainIdx>=0&&picksBySlot[captainIdx]?(picksBySlot[captainIdx].injured?-3:1):0;
  const cappedRaw=styleBonus+cardBonus+combo+matchup+risk+trait;
- const cappedBonus=softenBonus(cappedRaw);
- const rawBonus=cappedRaw+moral+wxBonus+capBonus,bonus=cappedBonus+moral+wxBonus+capBonus,chem=Math.min(3,chemBonus(s).total);
- return {avg,styleBonus,cardBonus,combo,matchup,risk,trait,moral,rawBonus,bonus,capLoss:cappedRaw-cappedBonus,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ const rawBonus=cappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.min(3,chemBonus(s).total);
+ return {avg,styleBonus,cardBonus,combo,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}
