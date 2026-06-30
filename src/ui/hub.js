@@ -15,7 +15,7 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
   newShopOffers();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&captainIdx<0&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
-  if(chairman.id==="cilgin"&&round<6&&round%2===1)setTimeout(showKaosOffer,900);
+  if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
   if(autoPlay&&round<6){autoTimer=setTimeout(()=>{if(autoPlay&&!$("hub").classList.contains("hidden"))playMatch();},2200);}}
 const _SPOT_COLORS=["#e6ad2e","#4ade80","#60a5fa","#f472b6","#fb923c","#a78bfa"];
 function showSansSpotlightPicker(){
@@ -195,15 +195,15 @@ function shopPreviewText(k,pv){
 
   kriz:()=>finalLoss(fp,Math.max(0,fp-6)),
   kisa_kamp:()=>tr?"Bu maç +4 güç · sonra -1":"This match +4 power · then -1",
-  gecici_prim:()=>tr?"Bu maç +8 güç · %35 sakatlık riski":"This match +8 power · 35% injury risk",
+  gecici_prim:()=>tr?"Bu maç +8 güç · %30 sakatlık riski":"This match +8 power · 30% injury risk",
   kumarbaz:()=>money(b,b+16)+" · "+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+8)),
-  sahte_evrak:()=>`+6 ${tr?"güç":"power"} · `+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+6)),
-  final_provasi:()=>money(b,b-FINAL_PROVA_COST)+" · "+(tr?"finalde +5 güç":"final +5 power"),
+  sahte_evrak:()=>`+6 ${tr?"güç":"power"} · `+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+8)),
+  final_provasi:()=>money(b,b-FINAL_PROVA_COST)+" · "+(tr?"yarı +3, finalde +5":"semi +3, final +5"),
   kupaci_kadro:()=>`${tr?"Yarı final/final +4":"Semi/final +4"} · `+finalLoss(fp,Math.min(FINAL_DEBT_CAP,fp+KUPA_DEBT)),
   deplasman_kafilesi:()=>money(b,b-3)+" · "+(cardEff(k,picksBySlot.filter(Boolean),round)>0?"+4":"0"),
   sogukkanli_penaltici:()=>tr?"Beraberlikte tur şansı +%15":"Draw advance chance +15%",
   temiz_sayfa:()=>tr?"Sakatlık riski -%30":"Injury risk -30%",
-  cilgin_basin:()=>tr?"€12M kazanmak ya da €8M kaybetmek (%65/%35)":"Win €12M or lose €8M (65%/35%)",
+  cilgin_basin:()=>tr?"€15M kazanmak ya da €10M kaybetmek (%60/%40)":"Win €15M or lose €10M (60%/40%)",
   ch_final:()=>`${tr?"YF: +3":"SF: +3"} · ${tr?"Final: +6":"Final: +6"}`,
   kaleci_kalesi:()=>{const gk=picksBySlot.filter(Boolean).find(p=>p.pos==="GK");return gk?`GK ${gk.ov} OVR → +${gk.ov>=80?4:gk.ov>=70?2:0}`:(tr?"Kaleci gerekli":"Need a GK");}
  };
@@ -227,12 +227,12 @@ function cardContractText(k){
     buyuk_mac:tr?"4. turdan itibaren +2 güç; şu an "+plus+".":"From round 4: +2 power; now "+plus+".",
     kaleci_kalesi:tr?"Kaleci OVR 80+: +4, 70-79: +2; şu an "+plus+".":"GK OVR 80+: +4, 70-79: +2; now "+plus+".",
     ch_final:tr?"Yarı finalde +3, finalde +6; şu an "+plus+".":"Semi-final +3, final +6; now "+plus+".",
-    cilgin_basin:tr?"%65 ihtimal +€12M; %35 ihtimal -€8M; kart kaybolur.":"65% +€12M; 35% -€8M; card expires.",
+    cilgin_basin:tr?"%60 ihtimal +€15M; %40 ihtimal -€10M; kart kaybolur.":"60% +€15M; 40% -€10M; card expires.",
     temiz_sayfa:tr?"Sakatlık riski -%30; güç +0.":"Injury risk -30%; power +0.",
     kisa_kamp:tr?"Bu maç +2; sonraki maç -1; kart kaybolur.":"This match +2; next match -1; card expires.",
     taksit_transfer:tr?"Hemen +€10M; sonraki 2 tur -€4M.":"Instant +€10M; next 2 rounds -€4M.",
-    kara_borsa:tr?"Bedava 1 kart; %40 ihtimal -€12M.":"Free 1 card; 40% chance -€12M.",
-    sahte_evrak:tr?"Güç +6; finalde -6 güç.":"Power +6; final -6 power.",
+    kara_borsa:tr?"Bedava 1 kart; %25 ihtimal -€12M.":"Free 1 card; 25% chance -€12M.",
+    sahte_evrak:tr?"Güç +6; finalde -8 güç.":"Power +6; final -8 power.",
     son_kredi:tr?"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.":"If below -€10M: +€15M; chairman limit tightens 5M.",
     altyapi_plani:tr?"23 yaş altı başına +1; max +4, şu an "+plus+".":"U23 +1 each; max +4, now "+plus+".",
     tecrubeli_omurga:tr?"32+ yaş başına +1; max +3, şu an "+plus+".":"32+ +1 each; max +3, now "+plus+".",
@@ -241,7 +241,7 @@ function cardContractText(k){
     cift_forvet:tr?"1 ST: +1, 2+ ST: +3; şu an "+plus+".":"1 ST: +1, 2+ ST: +3; now "+plus+".",
     deplasman_kafilesi:tr?"Güçlü rakibe +4; hemen -€3M, şu an "+plus+".":"Vs stronger opponent +4; instant -€3M, now "+plus+".",
     sosyal_medya:tr?"Underdog +3; favori -2, şu an "+plus+".":"Underdog +3; favourite -2, now "+plus+".",
-    final_provasi:tr?"Şimdi -€4M; finalde +5.":"Now -€4M; final +5.",
+    final_provasi:tr?"Şimdi -€4M; yarıda +3, finalde +5.":"Now -€4M; semi +3, final +5.",
     kupaci_kadro:tr?"Yarı final/final +4; finalde -2 güç.":"Semi/final +4; final -2 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
     son_dans:tr?"Finalde +4 güç.":"Final +4 power.",

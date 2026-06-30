@@ -11,7 +11,7 @@ function debtStage(){return budget<=-20?3:budget<=-10?2:budget<0?1:0;}
 function spend(cost,tag){cost=Math.round(cost||0);budget=Math.round(budget-cost);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+cost;recordDebt();return budget;}
 function earn(amount,tag){amount=Math.round(amount||0);budget=Math.round(budget+amount);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+amount;recordDebt();return budget;}
 function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
-function chairmanSackLimit(){const m={pinti:-12,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-31};let lim=m[chairman&&chairman.id]||DEBT_LIMIT;if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
+function chairmanSackLimit(){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};let lim=m[chairman&&chairman.id]||DEBT_LIMIT;if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -2;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanPressureMod(power){return 0;}

@@ -22,19 +22,19 @@ var CARDDEFS={
  /* FİNAL */
  derbi:{price:13,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?8:r>=5?4:r>=4?2:0},
  ch_final:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?6:r>=5?3:0},
- final_provasi:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?5:0},
+ final_provasi:{price:11,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?5:r>=5?3:0},
  kupaci_kadro:{price:11,rar:"risk",kind:"final",mode:"scaling",eff:(s,r)=>r>=5?4:0},
  son_dans:{price:10,rar:"gold",kind:"final",mode:"scaling",eff:(s,r)=>r>=6?(typeof injuredIdx!=="undefined"&&injuredIdx===-1?6:4):0},
  /* EKONOMİ */
  taksit_transfer:{price:8,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
- son_kredi:{price:7,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
+ son_kredi:{price:9,rar:"risk",kind:"economy",mode:"instant",eff:(s,r)=>0},
  /* RİSK */
  kara_borsa:{price:7,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},
  sahte_evrak:{price:10,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>6},
  deplasman_kafilesi:{price:8,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>opponent&&opponent.power>squadBasePower()?4:1},
  sosyal_medya:{price:7,rar:"risk",kind:"risk",mode:"scaling",eff:(s,r)=>{const under=opponent&&opponent.power>squadBasePower();return under?3:-2;}},
  kumarbaz:{price:9,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>0},
- gecici_prim:{price:6,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
+ gecici_prim:{price:8,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
  kisa_kamp:{price:7,rar:"risk",kind:"temporary",mode:"instant",eff:(s,r)=>0},
  doping:{price:10,rar:"risk",kind:"risk",mode:"contract",eff:(s,r)=>8},
  kriz:{price:8,rar:"risk",kind:"risk",mode:"instant",eff:(s,r)=>0},

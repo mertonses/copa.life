@@ -26,18 +26,18 @@ function cardEff(k,s,r){
  return base+bonus;
 }
 
-const BET_SPONSOR_GAIN=16,BET_SPONSOR_DEBT=8,BET_SPONSOR_LOSS=24,BET_SPONSOR_LOSS_CHANCE=0.20,
-      DOPING_POWER=8,DOPING_FINE=15,DOPING_FINE_CHANCE=0.35,
-      TEMP_PRIME_POWER=8,TEMP_PRIME_INJURY_CHANCE=0.35,TEMP_PRIME_NEXT_PENALTY=2,
+const BET_SPONSOR_GAIN=16,BET_SPONSOR_DEBT=8,BET_SPONSOR_LOSS=16,BET_SPONSOR_LOSS_CHANCE=0.20,
+      DOPING_POWER=8,DOPING_FINE=15,DOPING_FINE_CHANCE=0.35,DOPING_FINAL_PEN=3,
+      TEMP_PRIME_POWER=8,TEMP_PRIME_INJURY_CHANCE=0.30,TEMP_PRIME_NEXT_PENALTY=2,
       INSTALLMENT_GAIN=10,INSTALLMENT_PAY=4,INSTALLMENT_TURNS=2,
-      BLACK_MARKET_FINE=12,BLACK_MARKET_FINE_CHANCE=0.40,
+      BLACK_MARKET_FINE=12,BLACK_MARKET_FINE_CHANCE=0.25,
       LAST_CREDIT_GAIN=15,LAST_CREDIT_TIGHTEN=5,
-      FAKE_DOC_DEBT=6,FINAL_PROVA_COST=4,KUPA_DEBT=2,AWAY_TRIP_COST=3;
+      FAKE_DOC_DEBT=8,FINAL_PROVA_COST=4,KUPA_DEBT=4,AWAY_TRIP_COST=3;
 
 function applyRiskCardGain(k){
  if(k==="kumarbaz"){earn(BET_SPONSOR_GAIN,"earned");finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+BET_SPONSOR_DEBT);pushFeed("\u{1f3b2} <b>"+L().cards[k].n+"</b> +€"+BET_SPONSOR_GAIN+"M, finalde -"+BET_SPONSOR_DEBT+" güç","pres");}
  if(k==="gecici_prim"){tempPrime=1;riskPowerMod+=TEMP_PRIME_POWER;pushFeed("\u{1f4b8} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"bu maç +8 güç; sonra %35 sakatlık, sıradaki maç -2":"this match +8; then 35% injury, next match -2"),"pres");}
- if(k==="doping"){pushFeed("\u{1f9ea} <b>"+L().cards[k].n+"</b> +"+DOPING_POWER+" güç, her tur %35 ihtimal -€"+DOPING_FINE+"M","lose");}
+ if(k==="doping"){finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+DOPING_FINAL_PEN);pushFeed("\u{1f9ea} <b>"+L().cards[k].n+"</b> +"+DOPING_POWER+" güç, her tur %35 ihtimal -€"+DOPING_FINE+"M, finalde -"+DOPING_FINAL_PEN+" güç","lose");}
  if(k==="kriz"){const d=Math.min(6,finalPenalty);finalPenalty-=d;pushFeed("\u{1f9ef} <b>"+L().cards[k].n+"</b> finaldeki güç eksiği -"+d,"pres");}
  if(k==="kisa_kamp"){shortCamp=1;riskPowerMod+=4;pushFeed("\u{26fa} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"bu maç +4, sonraki maç -1":"this match +4; next match -1"),"pres");}
  if(k==="taksit_transfer"){earn(INSTALLMENT_GAIN,"earned");installmentTurns+=INSTALLMENT_TURNS;pushFeed("\u{1f4b3} <b>"+L().cards[k].n+"</b> +€"+INSTALLMENT_GAIN+"M, 2 tur -€"+INSTALLMENT_PAY+"M","buy");}
@@ -47,7 +47,7 @@ function applyRiskCardGain(k){
  if(k==="deplasman_kafilesi"){spend(AWAY_TRIP_COST,"spent");pushFeed("\u{1f68c} <b>"+L().cards[k].n+"</b> -€"+AWAY_TRIP_COST+"M, güçlü rakibe +4","pres");}
  if(k==="final_provasi"){spend(FINAL_PROVA_COST,"spent");pushFeed("\u{1f3df} <b>"+L().cards[k].n+"</b> şimdi -€"+FINAL_PROVA_COST+"M, finalde +5","pres");}
  if(k==="kupaci_kadro"){finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+KUPA_DEBT);pushFeed("\u{1f3c6} <b>"+L().cards[k].n+"</b> YF/final +4, finalde -"+KUPA_DEBT+" güç","lose");}
- if(k==="cilgin_basin"){if(rand()<0.65){earn(20,"earned");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı işe yaradı: +€20M":"press worked in our favour: +€20M"),"buy");}else{spend(8,"spent");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı ters tepti: -€8M":"press backfired: -€8M"),"lose");}}
+ if(k==="cilgin_basin"){if(rand()<0.60){earn(15,"earned");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı işe yaradı: +€15M":"press worked in our favour: +€15M"),"buy");}else{spend(10,"spent");pushFeed("\u{1f4f0} <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"medya baskısı ters tepti: -€10M":"press backfired: -€10M"),"lose");}}
  if(k==="kurban_belli"){
   const v=variantOf(k);
   const pow=v===1?10:6;
@@ -124,7 +124,7 @@ function applyRiskCardGain(k){
    const domestic=s.filter(p=>p.tr&&p!==best).length;
    const netPow=domestic*3-Math.round(best.eff);
    riskPowerMod+=netPow;
-   if(rand()<0.20){spend(10,"spent");pushFeed("⚡ "+(LANG==="tr"?"Yıldız Krizi: medya cezası -€10M":"Star Crisis: media fine -€10M"),"lose");}
+   if(rand()<0.25){spend(10,"spent");pushFeed("⚡ "+(LANG==="tr"?"Yıldız Krizi: medya cezası -€10M":"Star Crisis: media fine -€10M"),"lose");}
    pushFeed("⭐ <b>"+L().cards[k].n+"</b> <b>"+shortName(best)+"</b> "+(LANG==="tr"?"dışarıda · "+domestic+" yerli +"+(domestic*3)+" güç":"out · "+domestic+" domestic +"+(domestic*3)+" power"),"pres");
   } else {
    const restCount=s.length-1;
