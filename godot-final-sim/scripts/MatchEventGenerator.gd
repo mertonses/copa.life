@@ -57,8 +57,10 @@ func _generate_sequence_first(input: Dictionary) -> Dictionary:
 				success = false
 			var goal: bool = false
 			var danger: float = _danger_value(action, event_phase, success, team_power, opp_power)
-			if action == "SHOOT":
+			if action in ["SHOOT", "HEADED"]:
 				var goal_prob: float = clampf(0.04 + danger * 0.020 + (team_power - opp_power) * 0.004, 0.02, 0.38)
+				if action == "HEADED":
+					goal_prob *= 0.75
 				goal = _randf() < goal_prob
 				success = goal
 				if goal:
@@ -66,7 +68,7 @@ func _generate_sequence_first(input: Dictionary) -> Dictionary:
 						score_home += 1
 					else:
 						score_away += 1
-			var turnover: bool = not success and action != "SHOOT"
+			var turnover: bool = not success and action not in ["SHOOT", "HEADED"]
 			var loss_reason: String = "OFFSIDE" if offside else _loss_reason(action, pressure, turnover)
 			var attacking_sequence: String = _sequence_for_event_intent(sequence_intent, action, event_phase, start)
 			var chain_stage: String = _chain_stage(chain_step, action, turnover, goal)
@@ -152,6 +154,51 @@ func _generate_sequence_first(input: Dictionary) -> Dictionary:
 					var corner_end: Vector2 = _corner_target(possession_team)
 					events.append(_restart_event(events.size(), chain_id + 1, minute + 0.04, possession_team, restart_action, current_ball_pos, corner_end, score_home, score_away))
 					current_ball_pos = corner_end
+				elif restart_action == "FREE_KICK_DIRECT":
+					# Foul: same possession team keeps the ball for a direct free kick
+					var fk_start: Vector2 = _clamp_field(end)
+					var fk_goal_dir: float = 0.12 if possession_team == 0 else 0.88
+					var fk_end: Vector2 = Vector2(clampf(fk_start.x + (_randf() - 0.5) * 0.20, 0.25, 0.75), fk_goal_dir)
+					var fk_goal_prob: float = clampf(0.10 + (team_power - opp_power) * 0.003, 0.06, 0.20)
+					var fk_goal: bool = _randf() < fk_goal_prob
+					if fk_goal:
+						if possession_team == 0: score_home += 1
+						else: score_away += 1
+					var fk_label: String = _label(possession_team, "FREE_KICK_DIRECT", "set_piece", fk_goal, fk_goal)
+					events.append({
+						"id": events.size(), "chain_id": chain_id + 1, "chain_step": 0,
+						"minute": minute + 0.06, "team": possession_team, "phase": "set_piece",
+						"pattern": "SHOT_SEQUENCE", "attacking_sequence": "SHOT_SEQUENCE",
+						"chain_intent": "FREE_KICK_DANGEROUS", "chain_stage": "CLIMAX",
+						"chain_origin_zone": _zone_name(fk_start),
+						"next_preferred_zone": "center_top" if possession_team == 0 else "center_bottom",
+						"defensive_reaction": "SET_PIECE_DEFENSE",
+						"play_bubble_center": _pt(fk_start), "play_bubble_radius": 0.18,
+						"action": "FREE_KICK_DIRECT", "release_type": "DIRECT_RELEASE",
+						"actor_role": "CM", "receiver_role": "",
+						"projected_receiver_target": _pt(fk_end),
+						"start": _pt(fk_start), "end": _pt(fk_end),
+						"path": _event_path(fk_start, fk_end, possession_team, "SHOOT"),
+						"success": fk_goal, "turnover": not fk_goal, "loss_reason": "",
+						"restart_type": "KICK_OFF" if fk_goal else ("CORNER" if _randf() < 0.35 else "GOAL_KICK"),
+						"goal": fk_goal, "danger": 0.68, "pressure": 0.15,
+						"pressure_source": "none",
+						"xg": 0.13, "xThreat": 0.16,
+						"chance_type": "free_kick",
+						"visual_intensity": 0.78, "engine_note": "free_kick_direct",
+						"score_home": score_home, "score_away": score_away,
+						"label": fk_label
+					})
+					if fk_goal:
+						possession_team = 1 - possession_team
+						current_ball_pos = Vector2(0.5, 0.5)
+						momentum = clampf(momentum + (-8.0 if possession_team == 1 else 8.0), 28.0, 72.0)
+						events.append(_restart_event(events.size(), chain_id + 2, minute + 0.18, possession_team, "KICK_OFF", current_ball_pos, _kickoff_target(possession_team), score_home, score_away))
+						current_ball_pos = _kickoff_target(possession_team)
+					else:
+						possession_team = 1 - possession_team
+						current_ball_pos = _clamp_field(fk_end)
+					minute += 0.28
 				elif restart_action in ["GOAL_KICK_SHORT", "GOAL_KICK_LONG", "KEEPER_BUILD_UP", "KEEPER_LONG", "THROW_IN", "FREE_KICK_SHORT"]:
 					possession_team = 1 - possession_team
 					current_ball_pos = _restart_start_for(possession_team, restart_action, end)
@@ -392,7 +439,7 @@ func _sequence_intent_for_context(phase: String, tactic: Dictionary, ball_pos: V
 		if roll < 0.52:
 			return AttackingSequence.CROSS_SEQUENCE
 		return AttackingSequence.FINAL_THIRD_COMBINATION
-	if team_momentum > 58.0 and roll < 0.18:
+	if team_momentum > 48.0 and roll < 0.30:
 		return AttackingSequence.COUNTER_ATTACK
 	if roll < 0.10 or (float(tactic["directness"]) > 0.62 and roll < 0.24):
 		return AttackingSequence.DIRECT_LONG_BALL
@@ -434,11 +481,16 @@ func _actions_for_sequence(sequence_intent: String, phase: String, tactic: Dicti
 		AttackingSequence.RECYCLE_POSSESSION:
 			actions = ["PRESSURED_BACK_PASS", "SAFE_RECYCLE", "SIDEWAYS_PASS", "SHORT_PASS"]
 		AttackingSequence.COUNTER_ATTACK:
-			actions = ["DRIBBLE", "THROUGH_BALL", "SHOOT"]
+			if _randf() < 0.50:
+				actions = ["DRIBBLE", "THROUGH_BALL", "SHOOT"]
+			else:
+				actions = ["THROUGH_BALL", "DRIBBLE", "SHOOT"]
 		AttackingSequence.CROSS_SEQUENCE:
 			actions = ["PASS_TO_WING", "DRIBBLE", "CROSS"]
-			if _randf() < 0.26:
+			if _randf() < 0.42:
 				actions.append("SHOOT")
+			elif _randf() < 0.30:
+				actions.append("HEADED")
 		AttackingSequence.CUTBACK_SEQUENCE:
 			actions = ["PASS_TO_WING", "DRIBBLE", "CUTBACK", "SHOOT"]
 		AttackingSequence.FINAL_THIRD_COMBINATION:
@@ -452,7 +504,7 @@ func _actions_for_sequence(sequence_intent: String, phase: String, tactic: Dicti
 func _phase_for_sequence_action(sequence_intent: String, action: String, fallback_phase: String) -> String:
 	if action in ["GOAL_KICK_SHORT", "KEEPER_BUILD_UP"]:
 		return "build_up"
-	if action in ["CROSS", "CUTBACK", "SHOOT"]:
+	if action in ["CROSS", "CUTBACK", "SHOOT", "HEADED", "FREE_KICK_DIRECT"]:
 		return "final_third"
 	if sequence_intent in [AttackingSequence.ATTACK_LEFT, AttackingSequence.ATTACK_RIGHT, AttackingSequence.CROSS_SEQUENCE, AttackingSequence.CUTBACK_SEQUENCE]:
 		return "wide_attack" if action in ["PASS_TO_WING", "DRIBBLE", "SIDEWAYS_PASS", "SWITCH_PLAY"] else "final_third"
@@ -485,8 +537,10 @@ func _sequence_success_probability(action: String, phase: String, sequence_inten
 		base += 0.05
 	if sequence_intent == AttackingSequence.DIRECT_LONG_BALL and action == "LONG_PASS":
 		base += 0.04
-	if action == "SHOOT":
+	if action in ["SHOOT", "HEADED"]:
 		base = 0.50
+	if action == "FREE_KICK_DIRECT":
+		base = 0.52
 	if chain_step >= 3:
 		base -= 0.04
 	return clampf(base, 0.10, 0.95)
@@ -496,7 +550,7 @@ func _time_step_for_sequence_action(sequence_intent: String, action: String) -> 
 		return 0.72
 	if action in ["DRIBBLE", "SWITCH_PLAY"]:
 		return 0.64
-	if action in ["SHOOT", "CUTBACK"]:
+	if action in ["SHOOT", "CUTBACK", "HEADED", "FREE_KICK_DIRECT"]:
 		return 0.54
 	if sequence_intent == AttackingSequence.RECYCLE_POSSESSION:
 		return 0.48
@@ -771,19 +825,22 @@ func _pattern_for_phase(phase: String, start: Vector2) -> String:
 func _label(team: int, action: String, phase: String, success: bool, goal: bool) -> String:
 	var side: String = "Home" if team == 0 else "Away"
 	if goal:
-		return "%s goal from %s" % [side, action]
+		match action:
+			"FREE_KICK_DIRECT": return "%s free kick GOAL!" % side
+			"HEADED": return "%s headed GOAL!" % side
+			_: return "%s goal from %s" % [side, action]
 	if not success:
-		return "%s loses it after %s" % [side, action]
-	if action == "ONE_TWO":
-		return "%s one-two combination" % side
-	if action == "WALL_PASS":
-		return "%s wall pass through pressure" % side
-	if action == "SWITCH_PLAY":
-		return "%s switches play" % side
-	if action == "CUTBACK":
-		return "%s cutback into the box" % side
-	if action == "PRESSURED_BACK_PASS":
-		return "%s goes backwards under pressure" % side
+		match action:
+			"FREE_KICK_DIRECT": return "%s free kick saved / off target" % side
+			"HEADED": return "%s header off target" % side
+			_: return "%s loses it after %s" % [side, action]
+	if action == "ONE_TWO": return "%s one-two combination" % side
+	if action == "WALL_PASS": return "%s wall pass through pressure" % side
+	if action == "SWITCH_PLAY": return "%s switches play" % side
+	if action == "CUTBACK": return "%s cutback into the box" % side
+	if action == "PRESSURED_BACK_PASS": return "%s goes backwards under pressure" % side
+	if action == "FREE_KICK_DIRECT": return "%s dangerous free kick" % side
+	if action == "HEADED": return "%s header on target" % side
 	return "%s %s in %s" % [side, action, phase]
 
 func _loss_reason(action: String, pressure: float, turnover: bool) -> String:
@@ -990,6 +1047,10 @@ func _restart_type(action: String, loss_reason: String, end: Vector2, goal: bool
 		return "INDIRECT_FREE_KICK"
 	if loss_reason == "KEEPER_CLAIM":
 		return "KEEPER_POSSESSION"
+	if loss_reason in ["TACKLED", "PRESSURE_MISTAKE", "FAILED_DRIBBLE"]:
+		var in_danger_zone: bool = (end.y < 0.38 or end.y > 0.62) and end.x > 0.15 and end.x < 0.85
+		if in_danger_zone and _randf() < 0.22:
+			return "FREE_KICK_DANGEROUS"
 	if loss_reason == "OVERHIT_PASS":
 		if action == "CROSS" and _randf() < 0.28:
 			return "CORNER"
@@ -1028,6 +1089,8 @@ func _restart_action(restart_type: String, attacking_team: int, end: Vector2) ->
 			return "KEEPER_BUILD_UP" if _randf() < 0.62 else "KEEPER_LONG"
 		"INDIRECT_FREE_KICK":
 			return "FREE_KICK_SHORT"
+		"FREE_KICK_DANGEROUS":
+			return "FREE_KICK_DIRECT"
 	return "OPEN_PLAY"
 
 func _restart_event(id: int, chain_id: int, minute: float, team: int, action: String, start: Vector2, end: Vector2, score_home: int, score_away: int) -> Dictionary:

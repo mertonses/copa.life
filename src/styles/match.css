@@ -93,6 +93,14 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .goalburst.show{animation:goalpop 1s ease-out}
 .goalburst b{display:block;font-family:var(--disp);font-size:25px;line-height:1;color:var(--red);letter-spacing:0;margin-bottom:4px}
 @keyframes goalpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.82)}12%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+.godot-ctrl-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;border:1.5px solid var(--line);border-top:none;background:var(--paper2);font-family:var(--mono);font-size:10px;letter-spacing:.04em;margin-bottom:8px}
+.gctrl-btn{background:transparent;border:1.5px solid var(--line);color:var(--ink);padding:3px 9px;font-family:var(--mono);font-size:10px;cursor:pointer;letter-spacing:.04em;line-height:1.5}
+.gctrl-btn:hover,.gctrl-btn.active{background:var(--ink);color:var(--paper)}
+.gctrl-lbl{color:var(--ink2);font-size:9px;letter-spacing:.1em;margin-right:1px}
+.gctrl-sep{width:1px;height:14px;background:var(--line);margin:0 4px;flex-shrink:0}
+.gctrl-flex{flex:1}
+.gctrl-instant{border-color:var(--mustard);color:var(--mustard)}
+.gctrl-instant:hover{background:var(--mustard);color:var(--paper);border-color:var(--mustard)}
 .comm{font-family:var(--mono);font-size:11px;min-height:28px;padding:7px 2px;color:var(--ink2);border-bottom:2px solid var(--line);margin-bottom:8px;line-height:1.4}.comm b{color:var(--red)}
 .eventpanel{border:1.5px solid var(--ink);background:var(--paper2);text-align:left;min-height:100%;overflow:hidden}
 .eventpanel h4{background:var(--ink);color:#fff;font-family:var(--mono);font-size:8px;letter-spacing:1.4px;text-align:center;text-transform:uppercase;padding:6px}

@@ -1048,30 +1048,13 @@ function startFinalSim(sp) {
 /* ── Godot iframe launcher ───────────────────────────────────────────────── */
 function _tryGodotSim(sp) {
   var GODOT_BASE = "godot-final-sim/index.html";
-  /* file:// protokolünde fetch bloklandığı için Godot çalışmaz → JS sim'e düş */
-  if (window.location.protocol === "file:") {
-    buildSim(sp.power, opponent.power); sfxWhistle(); crowdStart(); return true;
-  }
-  /* Web export var mı kontrol et — yoksa eski motora düş */
-  var testImg = new Image();
-  var timedOut = false;
-  var fallbackTimer = null;
   var resolved = false;
 
-  function _fallback() {
-    if (resolved) return;
-    resolved = true;
-    _removeGodotOverlay();
-    buildSim(sp.power, opponent.power);
-    sfxWhistle();
-    crowdStart();
-  }
-
-  function _removeGodotOverlay() {
+  function _removeGodotUI() {
     var iframe = document.getElementById("godotOverlay");
     if (iframe) iframe.remove();
-    var skipBtn = document.querySelector(".fieldframe > button");
-    if (skipBtn) skipBtn.remove();
+    var bar = document.getElementById("godotControls");
+    if (bar) bar.remove();
     var cvEl = document.getElementById("cv");
     if (cvEl) Array.from(cvEl.children).forEach(function(c) { c.style.display = ""; });
     window.removeEventListener("message", _onMsg);
@@ -1081,18 +1064,15 @@ function _tryGodotSim(sp) {
     if (!e.data || e.data.type !== "godot_match_result") return;
     if (resolved) return;
     resolved = true;
-    clearTimeout(fallbackTimer);
-    _removeGodotOverlay();
+    _removeGodotUI();
     var won = !!e.data.won;
     var sh = parseInt(e.data.score_home) || 0;
     var sa = parseInt(e.data.score_away) || 0;
-    var scoreStr = sh + "–" + sa;
-    setTimeout(function() { endRun(won, scoreStr); }, 400);
+    setTimeout(function() { endRun(won, sh + "–" + sa); }, 400);
   }
 
   window.addEventListener("message", _onMsg);
 
-  /* Payload oluştur */
   var pb = (typeof powerBreakdown === "function") ? powerBreakdown(6) : null;
   var hp = pb ? pb.power : (sp.power || 84);
   var fp = (typeof finalPenalty !== "undefined") ? finalPenalty : 0;
@@ -1101,24 +1081,19 @@ function _tryGodotSim(sp) {
   var oppName = (opponent && opponent.name) ? opponent.name : "Final Rakibi";
   var oppPow = sp.oppPower || (opponent && opponent.power) || 80;
   var injuredSlots = [];
-  if (typeof picksBySlot !== "undefined") {
+  if (typeof picksBySlot !== "undefined")
     picksBySlot.forEach(function(p, i) { if (p && p.injured) injuredSlots.push(i); });
-  }
   var cardsDetail = [];
-  if (typeof cards !== "undefined") {
+  if (typeof cards !== "undefined")
     cards.forEach(function(k) {
       var v = (typeof cardVariant !== "undefined" && cardVariant[k]) ? cardVariant[k] : "normal";
       cardsDetail.push({ id: k, variant: v });
     });
-  }
   var payload = {
     seed: String(round) + "-" + tn + "-" + sty,
-    home_name: tn,
-    away_name: oppName,
-    home_power: hp,
-    away_power: oppPow,
-    style: sty,
-    final_penalty: fp,
+    home_name: tn, away_name: oppName,
+    home_power: hp, away_power: oppPow,
+    style: sty, final_penalty: fp,
     injuries: injuredSlots,
     cards: (typeof cards !== "undefined") ? cards : [],
     cards_detail: cardsDetail
@@ -1126,32 +1101,50 @@ function _tryGodotSim(sp) {
   var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   var godotUrl = GODOT_BASE + "?d=" + encodeURIComponent(b64);
 
-  /* #cv içine iframe göm — fieldframe sabit kalır, dış UI dokunulmaz */
   var cvEl = document.getElementById("cv");
-  if (!cvEl) { _fallback(); return true; }
-  /* Mevcut Phaser canvas'ı gizle */
+  if (!cvEl) { window.removeEventListener("message", _onMsg); return true; }
   Array.from(cvEl.children).forEach(function(c) { c.style.display = "none"; });
+
   var iframe = document.createElement("iframe");
   iframe.id = "godotOverlay";
   iframe.src = godotUrl;
   iframe.allow = "autoplay";
-  iframe.style.cssText = "width:100%;height:100%;min-height:320px;border:none;display:block;background:#1a2a14;border-radius:6px;";
+  iframe.style.cssText = "width:100%;height:500px;border:none;display:block;background:#111c0e;";
   cvEl.appendChild(iframe);
-  var skipBtn = document.createElement("button");
-  skipBtn.textContent = "⏭ JS sim";
-  skipBtn.style.cssText = "position:absolute;top:4px;right:6px;padding:3px 8px;background:rgba(0,0,0,0.55);color:#fff;border:1px solid #fff3;border-radius:4px;cursor:pointer;font-size:11px;z-index:10;";
-  skipBtn.onclick = function() { clearTimeout(fallbackTimer); _fallback(); };
+
+  /* Kontrol barı — copa.life stiliyle fieldframe altına */
+  var tr = (typeof LANG !== "undefined" && LANG === "tr");
+  var bar = document.createElement("div");
+  bar.id = "godotControls";
+  bar.className = "godot-ctrl-bar";
+  bar.innerHTML =
+    '<button class="gctrl-btn" id="gctrl-pp" onclick="godotControl(\'pause\')" title="' + (tr ? "Duraklat" : "Pause") + '">⏸</button>' +
+    '<button class="gctrl-btn" onclick="godotControl(\'play\')" title="' + (tr ? "Devam" : "Play") + '">▶</button>' +
+    '<span class="gctrl-sep"></span>' +
+    '<span class="gctrl-lbl">' + (tr ? "HIZ" : "SPEED") + '</span>' +
+    '<button class="gctrl-btn gctrl-spd active" id="gctrl-1x" onclick="godotControlSpeed(1)">1×</button>' +
+    '<button class="gctrl-btn gctrl-spd" id="gctrl-2x" onclick="godotControlSpeed(2)">2×</button>' +
+    '<button class="gctrl-btn gctrl-spd" id="gctrl-4x" onclick="godotControlSpeed(4)">4×</button>' +
+    '<span class="gctrl-flex"></span>' +
+    '<button class="gctrl-btn gctrl-instant" onclick="godotControl(\'instant\')">' + (tr ? "▶▶ ANLIK" : "▶▶ INSTANT") + '</button>';
   var fieldframe = cvEl.closest(".fieldframe") || cvEl.parentElement;
-  if (fieldframe && getComputedStyle(fieldframe).position === "static") fieldframe.style.position = "relative";
-  if (fieldframe) fieldframe.appendChild(skipBtn);
+  var insertAfter = fieldframe || cvEl;
+  if (insertAfter.parentElement) insertAfter.parentElement.insertBefore(bar, insertAfter.nextSibling);
 
-  /* 12 saniye içinde sonuç gelmezse fallback */
-  fallbackTimer = setTimeout(_fallback, 12000);
+  return true;
+}
 
-  /* iframe yüklenemezse (web export yok) hemen fallback */
-  iframe.onerror = function() { clearTimeout(fallbackTimer); _fallback(); };
-
-  return true; /* startFinalSim'e: Godot devredildi, buildSim çağırma */
+function godotControl(action, value) {
+  var iframe = document.getElementById("godotOverlay");
+  if (iframe && iframe.contentWindow)
+    iframe.contentWindow.postMessage({ type: "copa_control", action: action, value: value || 1 }, "*");
+}
+function godotControlSpeed(v) {
+  godotControl("speed", v);
+  ["1x","2x","4x"].forEach(function(id) {
+    var b = document.getElementById("gctrl-" + id);
+    if (b) b.classList.toggle("active", parseInt(id) === v);
+  });
 }
 
 /* ── Godot Final Sim Bridge ───────────────────────────────────────────────── */

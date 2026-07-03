@@ -65,9 +65,31 @@ func _ready() -> void:
 	audio_director.name = "MatchAudioDirector"
 	add_child(audio_director)
 	_build_ui()
+	_setup_js_listener()
 	_start_match()
 
+func _poll_js_control() -> void:
+	var raw = JavaScriptBridge.eval("window._gcm?JSON.stringify(window._gcm):null", true)
+	if typeof(raw) != TYPE_STRING or raw == "null":
+		return
+	JavaScriptBridge.eval("window._gcm=null;", true)
+	var msg = JSON.parse_string(raw)
+	if typeof(msg) != TYPE_DICTIONARY:
+		return
+	match str(msg.get("action", "")):
+		"pause": paused = true
+		"play": paused = false
+		"speed": speed = clampf(float(msg.get("value", 1.0)), 0.25, 32.0)
+		"instant": _instant_result()
+
+func _setup_js_listener() -> void:
+	if not OS.has_feature("web"):
+		return
+	JavaScriptBridge.eval("window.addEventListener('message',function(e){if(e.data&&e.data.type==='copa_control')window._gcm=e.data;});", true)
+
 func _process(delta: float) -> void:
+	if OS.has_feature("web"):
+		_poll_js_control()
 	if paused:
 		return
 	var dt: float = delta * speed
@@ -127,36 +149,10 @@ func _build_ui() -> void:
 	field.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	field.draw.connect(_draw_field)
 	add_child(field)
-	var btn_panel := HBoxContainer.new()
-	btn_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	btn_panel.position = Vector2(-260, -52)
-	btn_panel.size = Vector2(244, 40)
-	add_child(btn_panel)
-	for label in ["1x", "2x", "4x"]:
-		var btn := Button.new()
-		btn.text = label
-		btn.custom_minimum_size = Vector2(56, 36)
-		btn.pressed.connect(_on_speed_button.bind(label))
-		btn_panel.add_child(btn)
-	var pause_btn := Button.new()
-	pause_btn.text = "⏸"
-	pause_btn.custom_minimum_size = Vector2(38, 36)
-	pause_btn.pressed.connect(_toggle_pause)
-	btn_panel.add_child(pause_btn)
-	var restart_btn := Button.new()
-	restart_btn.text = "↺"
-	restart_btn.custom_minimum_size = Vector2(38, 36)
-	restart_btn.pressed.connect(_start_match)
-	btn_panel.add_child(restart_btn)
-	instant_btn = Button.new()
-	instant_btn.text = "▶▶"
-	instant_btn.custom_minimum_size = Vector2(48, 36)
-	instant_btn.pressed.connect(_instant_result)
-	btn_panel.add_child(instant_btn)
 	scrubber = HSlider.new()
 	scrubber.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	scrubber.position = Vector2(0, -26)
-	scrubber.size = Vector2(0, 22)
+	scrubber.position = Vector2(0, -18)
+	scrubber.size = Vector2(0, 16)
 	scrubber.min_value = 0.0
 	scrubber.max_value = 260.0
 	scrubber.step = 1.0
@@ -332,7 +328,7 @@ func _start_event_action() -> void:
 			event_actor.target = event_end
 			event_actor.current_state = "DRIBBLE"
 			ball.set_owner(event_actor, "dribble")
-		"SHOOT":
+		"SHOOT", "FREE_KICK_DIRECT", "HEADED":
 			event_actor.current_state = "SHOOT"
 			ball.start_path_action(event_actor, null, path, action_duration, MatchBall.SHOOTING, "event_shot_path")
 		"CROSS", "CORNER":
@@ -355,7 +351,7 @@ func _finish_event() -> void:
 	var team_id: int = int(current_event.get("team", 0))
 	var ev_xg: float = float(current_event.get("xg", 0.0))
 	var ev_xt: float = float(current_event.get("xThreat", 0.0))
-	if action == "SHOOT":
+	if action in ["SHOOT", "FREE_KICK_DIRECT", "HEADED"]:
 		if team_id == 0: home_shots += 1
 		else: away_shots += 1
 	if team_id == 0:
@@ -500,6 +496,8 @@ func _loss_reason_label(reason: String) -> String:
 			return "failed dribble"
 		"KEEPER_CLAIM":
 			return "keeper claims"
+		"TACKLED":
+			return "tackled"
 		"OFFSIDE":
 			return "offside"
 		"OUT_OF_PLAY":
@@ -527,7 +525,7 @@ func _sequence_for_event(action: String, pattern: String, phase: String) -> Stri
 		return TacticalDirector.CUTBACK_SEQUENCE
 	if action == "LONG_PASS" or action == "THROUGH_BALL" or action == "VERTICAL_PASS":
 		return TacticalDirector.DIRECT_LONG_BALL
-	if action == "SHOOT":
+	if action in ["SHOOT", "FREE_KICK_DIRECT", "HEADED"]:
 		return TacticalDirector.SHOT_SEQUENCE
 	if phase == "final_third" and action in ["BACK_PASS", "SHORT_PASS"]:
 		return TacticalDirector.CUTBACK_SEQUENCE
@@ -559,6 +557,10 @@ func _duration_for(action: String, phase: String = "") -> float:
 			return 2.05
 		"FREE_KICK_SHORT":
 			return 1.95
+		"FREE_KICK_DIRECT":
+			return 2.20
+		"HEADED":
+			return 1.80
 		"GOAL_KICK_SHORT", "KEEPER_BUILD_UP":
 			return 2.45
 		"GOAL_KICK_LONG", "KEEPER_LONG":
