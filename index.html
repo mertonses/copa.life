@@ -1489,6 +1489,8 @@ document.addEventListener('keydown',e=>{
   if((e.key==='c'||e.key==='C')&&hubVisible){collFilter=collFilter==='all'?'active':'all';renderCollection();}
   if((e.key==='s'||e.key==='S')&&hubVisible){document.querySelector('.shopscroll')?.scrollIntoView({behavior:'smooth'});}
 });
+}})();
+/* === Global helpers (IIFE dışında — onclick ve playMatch'ten erişilebilir) === */
 function _flashGoalScorers(events){
   if(!events||!Array.isArray(events))return;
   events.filter(e=>e.home).forEach(e=>{
@@ -1519,5 +1521,5 @@ function _finalTacticBench(benchIdx){
   if(!bench||benchIdx<0||benchIdx>=bench.length)return;
   riskPowerMod+=2;
   pushFeed("⚡ "+(LANG==="tr"?"En iyi yedek sahaya: +2 güç":"Best sub on: +2 power"),"form");
-}})();
+}
 </script></body></html>
