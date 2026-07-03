@@ -376,6 +376,15 @@ function drawHeatmap(ctx, W, H, heatGrid, HGW, HGH) {
 
 /* ── F. buildSim (Phaser 3) ── */
 function buildSim(myPow, oppPow) {
+  /* Lazy-load Phaser on first use — keeps page load instant */
+  if (typeof Phaser === 'undefined') {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js';
+    s.onload = function() { buildSim(myPow, oppPow); };
+    s.onerror = function() { console.error('copa: Phaser CDN failed'); };
+    document.head.appendChild(s);
+    return;
+  }
   /* Kill previous Phaser instance */
   if (window._phaserGame) { try { window._phaserGame.destroy(true); } catch(e){} window._phaserGame = null; }
 
@@ -1123,6 +1132,12 @@ function _tryGodotSim(sp) {
       var v = (typeof cardVariant !== "undefined" && cardVariant[k]) ? cardVariant[k] : "normal";
       cardsDetail.push({ id: k, variant: v });
     });
+  var formation_players = [];
+  if (typeof picksBySlot !== "undefined" && typeof surOf === "function") {
+    picksBySlot.forEach(function(p, i) {
+      if (p) formation_players.push({ slot: i, name: surOf(p), pos: p.pos, ov: p.ov||0, injured: !!p.injured });
+    });
+  }
   var payload = {
     seed: String(round) + "-" + tn + "-" + sty,
     home_name: tn, away_name: oppName,
@@ -1130,7 +1145,9 @@ function _tryGodotSim(sp) {
     style: sty, final_penalty: fp,
     injuries: injuredSlots,
     cards: (typeof cards !== "undefined") ? cards : [],
-    cards_detail: cardsDetail
+    cards_detail: cardsDetail,
+    formation: (typeof formation !== "undefined") ? formation : "4-3-3",
+    players: formation_players
   };
   var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   var godotUrl = GODOT_BASE + "?_nc=" + Date.now() + "&d=" + encodeURIComponent(b64);

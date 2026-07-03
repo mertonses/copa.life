@@ -250,6 +250,12 @@ func _load_input() -> Dictionary:
 		var meta = get_tree().get_meta("godot_match_input")
 		if typeof(meta) == TYPE_DICTIONARY:
 			return meta
+	if OS.has_feature("web"):
+		var raw = JavaScriptBridge.eval("window._copaMatchData?JSON.stringify(window._copaMatchData):null", true)
+		if typeof(raw) == TYPE_STRING and raw != "null":
+			var parsed = JSON.parse_string(raw)
+			if typeof(parsed) == TYPE_DICTIONARY:
+				return parsed
 	if not FileAccess.file_exists(TEST_INPUT_PATH):
 		return {}
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(TEST_INPUT_PATH))
