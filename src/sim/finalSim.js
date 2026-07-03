@@ -1011,6 +1011,9 @@ function startFinalSim(sp) {
   window.finalReportHTML = "";
   setSpeed(parseFloat(localStorage.getItem("copa_spd") || "1") || 1);
 
+  /* ── Godot sim: round 6 finallerinde iframe üzerinden çalışır ── */
+  if (round === 6 && _tryGodotSim(sp)) return;
+
   buildSim(sp.power, opponent.power);
   sfxWhistle();
   crowdStart();
@@ -1039,4 +1042,173 @@ function startFinalSim(sp) {
 
   const rb = $("simRadio"); if (rb) rb.textContent = "📻 —";
   sim.run();
+}
+
+
+/* ── Godot iframe launcher ───────────────────────────────────────────────── */
+function _tryGodotSim(sp) {
+  var GODOT_BASE = "godot-final-sim/index.html";
+  /* Web export var mı kontrol et — yoksa eski motora düş */
+  var testImg = new Image();
+  var timedOut = false;
+  var fallbackTimer = null;
+  var resolved = false;
+
+  function _fallback() {
+    if (resolved) return;
+    resolved = true;
+    _removeGodotOverlay();
+    buildSim(sp.power, opponent.power);
+    sfxWhistle();
+    crowdStart();
+  }
+
+  function _removeGodotOverlay() {
+    var iframe = document.getElementById("godotOverlay");
+    if (iframe) iframe.remove();
+    var skipBtn = document.querySelector(".fieldframe > button");
+    if (skipBtn) skipBtn.remove();
+    var cvEl = document.getElementById("cv");
+    if (cvEl) Array.from(cvEl.children).forEach(function(c) { c.style.display = ""; });
+    window.removeEventListener("message", _onMsg);
+  }
+
+  function _onMsg(e) {
+    if (!e.data || e.data.type !== "godot_match_result") return;
+    if (resolved) return;
+    resolved = true;
+    clearTimeout(fallbackTimer);
+    _removeGodotOverlay();
+    var won = !!e.data.won;
+    var sh = parseInt(e.data.score_home) || 0;
+    var sa = parseInt(e.data.score_away) || 0;
+    var scoreStr = sh + "–" + sa;
+    setTimeout(function() { endRun(won, scoreStr); }, 400);
+  }
+
+  window.addEventListener("message", _onMsg);
+
+  /* Payload oluştur */
+  var pb = (typeof powerBreakdown === "function") ? powerBreakdown(6) : null;
+  var hp = pb ? pb.power : (sp.power || 84);
+  var fp = (typeof finalPenalty !== "undefined") ? finalPenalty : 0;
+  var sty = (typeof style !== "undefined") ? style : "gegen";
+  var tn = (typeof teamName !== "undefined" && teamName) ? teamName : "copa.life XI";
+  var oppName = (opponent && opponent.name) ? opponent.name : "Final Rakibi";
+  var oppPow = sp.oppPower || (opponent && opponent.power) || 80;
+  var injuredSlots = [];
+  if (typeof picksBySlot !== "undefined") {
+    picksBySlot.forEach(function(p, i) { if (p && p.injured) injuredSlots.push(i); });
+  }
+  var cardsDetail = [];
+  if (typeof cards !== "undefined") {
+    cards.forEach(function(k) {
+      var v = (typeof cardVariant !== "undefined" && cardVariant[k]) ? cardVariant[k] : "normal";
+      cardsDetail.push({ id: k, variant: v });
+    });
+  }
+  var payload = {
+    seed: String(round) + "-" + tn + "-" + sty,
+    home_name: tn,
+    away_name: oppName,
+    home_power: hp,
+    away_power: oppPow,
+    style: sty,
+    final_penalty: fp,
+    injuries: injuredSlots,
+    cards: (typeof cards !== "undefined") ? cards : [],
+    cards_detail: cardsDetail
+  };
+  var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  var godotUrl = GODOT_BASE + "?d=" + encodeURIComponent(b64);
+
+  /* #cv içine iframe göm — fieldframe sabit kalır, dış UI dokunulmaz */
+  var cvEl = document.getElementById("cv");
+  if (!cvEl) { _fallback(); return true; }
+  /* Mevcut Phaser canvas'ı gizle */
+  Array.from(cvEl.children).forEach(function(c) { c.style.display = "none"; });
+  var iframe = document.createElement("iframe");
+  iframe.id = "godotOverlay";
+  iframe.src = godotUrl;
+  iframe.allow = "autoplay";
+  iframe.style.cssText = "width:100%;height:100%;min-height:320px;border:none;display:block;background:#1a2a14;border-radius:6px;";
+  cvEl.appendChild(iframe);
+  var skipBtn = document.createElement("button");
+  skipBtn.textContent = "⏭ JS sim";
+  skipBtn.style.cssText = "position:absolute;top:4px;right:6px;padding:3px 8px;background:rgba(0,0,0,0.55);color:#fff;border:1px solid #fff3;border-radius:4px;cursor:pointer;font-size:11px;z-index:10;";
+  skipBtn.onclick = function() { clearTimeout(fallbackTimer); _fallback(); };
+  var fieldframe = cvEl.closest(".fieldframe") || cvEl.parentElement;
+  if (fieldframe && getComputedStyle(fieldframe).position === "static") fieldframe.style.position = "relative";
+  if (fieldframe) fieldframe.appendChild(skipBtn);
+
+  /* 12 saniye içinde sonuç gelmezse fallback */
+  fallbackTimer = setTimeout(_fallback, 12000);
+
+  /* iframe yüklenemezse (web export yok) hemen fallback */
+  iframe.onerror = function() { clearTimeout(fallbackTimer); _fallback(); };
+
+  return true; /* startFinalSim'e: Godot devredildi, buildSim çağırma */
+}
+
+/* ── Godot Final Sim Bridge ───────────────────────────────────────────────── */
+/* Mevcut maç durumundan Godot simülatörü için test_match.json üretir.        */
+/* Tarayıcı konsoluna kopyalanabilir JSON yazar ve dosya indirme sunar.       */
+function exportGodotBridge() {
+  var pb = (typeof powerBreakdown === "function") ? powerBreakdown(6) : null;
+  var hp = pb ? pb.power : 84;
+  var fp = (typeof finalPenalty !== "undefined") ? finalPenalty : 0;
+  var sty = (typeof style !== "undefined") ? style : "gegen";
+  var tn = (typeof teamName !== "undefined" && teamName) ? teamName : "copa.life XI";
+  var seed = [round, tn, sty].join("-");
+
+  var oppPow = 82;
+  if (typeof opponent !== "undefined" && opponent && opponent.power) {
+    oppPow = opponent.power;
+  } else if (typeof OPP_BASES !== "undefined") {
+    var bases = OPP_BASES;
+    if ((typeof selectedCountry !== "undefined") && selectedCountry === "EN" && typeof OPP_BASES_EN !== "undefined") bases = OPP_BASES_EN;
+    if ((typeof selectedCountry !== "undefined") && selectedCountry === "ES" && typeof OPP_BASES_ES !== "undefined") bases = OPP_BASES_ES;
+    if ((typeof selectedCountry !== "undefined") && selectedCountry === "IT" && typeof OPP_BASES_IT !== "undefined") bases = OPP_BASES_IT;
+    if ((typeof selectedCountry !== "undefined") && selectedCountry === "DE" && typeof OPP_BASES_DE !== "undefined") bases = OPP_BASES_DE;
+    oppPow = bases[Math.min(5, Math.max(0, (typeof round !== "undefined" ? round : 1) - 1))] || 82;
+  }
+
+  var injuredSlots = [];
+  var activeCardsDetail = [];
+  if (typeof picksBySlot !== "undefined") {
+    picksBySlot.forEach(function(p, i) {
+      if (p && p.injured) injuredSlots.push(i);
+    });
+  }
+  if (typeof cards !== "undefined") {
+    var cv = (typeof cardVariant !== "undefined") ? cardVariant : {};
+    cards.forEach(function(k) {
+      activeCardsDetail.push({ id: k, variant: cv[k] || "normal" });
+    });
+  }
+
+  var payload = {
+    seed: seed,
+    home_name: tn,
+    away_name: (typeof opponent !== "undefined" && opponent && opponent.name) ? opponent.name : "Final Rakibi",
+    home_power: hp,
+    away_power: oppPow,
+    style: sty,
+    cards: (typeof cards !== "undefined") ? cards.slice() : [],
+    final_penalty: fp,
+    injuries: injuredSlots,
+    cards_detail: activeCardsDetail
+  };
+
+  var json = JSON.stringify(payload, null, 2);
+  console.log("[Godot Bridge] test_match.json:\n" + json);
+
+  var blob = new Blob([json], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "test_match.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  return payload;
 }

@@ -1,0 +1,17 @@
+{
+  "seed": "2026",
+  "home_name": "copa.life XI",
+  "away_name": "Final Rakibi",
+  "home_power": 87,
+  "away_power": 82,
+  "style": "gegen",
+  "cards": ["taraftar", "kontra"],
+
+  "_copa_bridge": "Aşağıdaki alanlar copa.life'tan aktarılır",
+  "final_penalty": 0,
+  "injuries": [],
+  "cards_detail": [
+    { "id": "taraftar", "variant": "normal" },
+    { "id": "kontra", "variant": "normal" }
+  ]
+}
