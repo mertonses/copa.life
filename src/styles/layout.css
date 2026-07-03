@@ -431,8 +431,8 @@ body.dark .countrypick button.on{background:#3a6b4a;border-color:#3a6b4a}
 [data-talk="sert"] .ssi{color:#3f9a57}
 
 /* ===== result FX canvas ===== */
-.result-fx{position:relative;width:100%;height:80px;overflow:hidden;pointer-events:none;margin-bottom:4px}
-.result-fx svg{display:block;width:100%;height:100%}
+.result-fx{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:0}
+.result-fx svg{display:block;width:100%;height:100%;position:absolute;inset:0}
 
 /* ===== result page buttons ===== */
 .result-actions{display:flex;flex-direction:column;gap:8px;margin-top:12px}

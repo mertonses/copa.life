@@ -725,21 +725,20 @@ function buildSim(myPow, oppPow) {
     const progress=Math.min(1,elapsed/ANIM_DUR);
     const clockMin=progress*totalMins;
 
-    /* trigger events in order */
-    while(nextEvIdx<events.length){
+    /* trigger events one per tick — prevents ball teleporting when events cluster */
+    if(nextEvIdx<events.length){
       const ev=events[nextEvIdx];
-      const evMin=ev.minute||0;
-      if(clockMin>=evMin){
+      if(clockMin>=(ev.minute||0)){
         nextEvIdx++;
         const ep=_evToCanvas(ev);
         prevBx=bx; prevBy=by;
         btx=ep.x; bty=ep.y;
         ballSegStart=elapsed;
         const dist=Math.hypot(btx-bx,bty-by);
-        ballSegDur=Math.max(200,Math.min(1200,dist*1.4));
+        ballSegDur=Math.max(180,Math.min(900,dist*1.2));
         triggerEvent(ev);
-        if(ev.type==="penalty")return; /* penalty handles its own end */
-      } else break;
+        if(ev.type==="penalty")return;
+      }
     }
 
     /* ball interpolation */
@@ -771,7 +770,13 @@ function buildSim(myPow, oppPow) {
   /* ── controls ── */
   sim = {
     pause: function(){ if(animId){cancelAnimationFrame(animId);animId=null;} },
-    skip:  function(){ if(!gameEnded){startTs=performance.now()-ANIM_DUR*0.99;} }
+    skip:  function(){
+      if(gameEnded)return;
+      if(animId){cancelAnimationFrame(animId);animId=null;}
+      /* fire all remaining events instantly for correct final score */
+      while(nextEvIdx<events.length){ triggerEvent(events[nextEvIdx++]); }
+      endMatch();
+    }
   };
 
   /* init DOM */
