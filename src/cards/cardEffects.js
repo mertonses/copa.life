@@ -17,7 +17,7 @@ var KARA_PEN={
 
 function cardEff(k,s,r){
  const v=variantOf(k),base=CARDDEFS[k].eff(s,r);
- const bonus=isProgressCard(k)?VARIANT_BONUS[v]||0:0;
+ const bonus=isProgressCard(k)&&base>0?VARIANT_BONUS[v]||0:0;
  /* Ozel variant kosullu kartlar (eskiden tier skalasi) */
  if(k==="kontra")return base+bonus+(cnt(s,FWDP)>=3?2:0)+(v>=1&&opponent&&opponent.power>squadBasePower()?3:0);
  if(k==="anadolu")return base+bonus+(s.filter(p=>p.tr).length>=6?3:0)+(v>=1?Math.floor(Math.max(0,budget)/18)+3:0);
@@ -29,7 +29,7 @@ function cardEff(k,s,r){
 const BET_SPONSOR_GAIN=16,BET_SPONSOR_DEBT=8,BET_SPONSOR_LOSS=16,BET_SPONSOR_LOSS_CHANCE=0.20,
       DOPING_POWER=8,DOPING_FINE=15,DOPING_FINE_CHANCE=0.35,DOPING_FINAL_PEN=3,
       TEMP_PRIME_POWER=8,TEMP_PRIME_INJURY_CHANCE=0.30,TEMP_PRIME_NEXT_PENALTY=2,
-      INSTALLMENT_GAIN=10,INSTALLMENT_PAY=4,INSTALLMENT_TURNS=2,
+      INSTALLMENT_GAIN=18,INSTALLMENT_PAY=4,INSTALLMENT_TURNS=2,
       BLACK_MARKET_FINE=12,BLACK_MARKET_FINE_CHANCE=0.25,
       LAST_CREDIT_GAIN=15,LAST_CREDIT_TIGHTEN=5,
       FAKE_DOC_DEBT=8,FINAL_PROVA_COST=4,KUPA_DEBT=4,AWAY_TRIP_COST=3;

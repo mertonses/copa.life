@@ -1048,6 +1048,10 @@ function startFinalSim(sp) {
 /* ── Godot iframe launcher ───────────────────────────────────────────────── */
 function _tryGodotSim(sp) {
   var GODOT_BASE = "godot-final-sim/index.html";
+  /* file:// protokolünde fetch bloklandığı için Godot çalışmaz → JS sim'e düş */
+  if (window.location.protocol === "file:") {
+    buildSim(sp.power, opponent.power); sfxWhistle(); crowdStart(); return true;
+  }
   /* Web export var mı kontrol et — yoksa eski motora düş */
   var testImg = new Image();
   var timedOut = false;
