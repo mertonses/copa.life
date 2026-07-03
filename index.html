@@ -618,7 +618,7 @@ function showKaosOffer(){
   const tr=LANG==="tr",forced=chairTrust===0;
   const decBtn=forced?"":` <button class="btn btn-ghost" onclick="_declineKaos()">${tr?"REDDET":"DECLINE"}</button>`;
   const _trustLbl=chairTrust>=3?tr?"(güven bonusu aktif ✦)":"(trust bonus active ✦)":chairTrust===0?tr?"(güven sıfır — ödüller zayıf)":"(trust zero — weak rewards)":"";
-  showModal(`<div class="kaos-modal"><div class="kaos-hdr"><span class="kaos-title">${tr?"KAOS ZARI":"CHAOS DICE"}</span><span class="kaos-round">${L().rounds[round-1]}</span></div><div class="kaos-svg">${_kaosDiceSvg()}</div><div class="kaos-sub">${tr?"BAŞKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE"}</div><div class="kaos-desc">${forced?tr?"<b style='color:var(--red)'>Güven sıfır — zar zorunlu!</b>":"<b style='color:var(--red)'>Trust is zero — roll is mandatory!</b>":tr?`Kör kabul et ya da olasılıkları gör.<br><span style='color:var(--ink2);font-size:9px'>(Açık bakış −€3M bedel alır) ${_trustLbl}</span>`:`Accept blind or reveal the odds.<br><span style='color:var(--ink2);font-size:9px'>(Peeking costs −€3M) ${_trustLbl}</span>`}</div><div class="bact"><button class="btn btn-primary" onclick="_kaosStartRoll(false)">${tr?"KÖR KABUL":"BLIND ACCEPT"}</button><button class="btn btn-go" onclick="showKaosPeek()">${tr?"AÇ BAK (−€3M)":"PEEK (−€3M)"}</button>${decBtn}</div></div>`);
+  showModal(`<div class="kaos-modal"><div class="kaos-hdr"><span class="kaos-title">${tr?"KAOS ZARI":"CHAOS DICE"}</span><span class="kaos-round">${L().rounds[round-1]}</span></div><div class="kaos-svg">${_kaosDiceSvg()}</div><div class="kaos-sub">${tr?"BAŞKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE"}</div><div class="kaos-desc">${forced?tr?"<b style='color:var(--red)'>Güven sıfır — zar zorunlu!</b>":"<b style='color:var(--red)'>Trust is zero — roll is mandatory!</b>":tr?`Kör kabul et ya da olasılıkları gör.<br><span style='color:var(--ink2);font-size:9px'>(Açık bakış −€3M bedel alır) ${_trustLbl}</span>`:`Accept blind or reveal the odds.<br><span style='color:var(--ink2);font-size:9px'>(Peeking costs −€3M) ${_trustLbl}</span>`}</div><div class="bact"><button class="btn btn-primary" onclick="_kaosStartRoll(false)">${tr?"ZARI AT":"ROLL THE DICE"}</button>${decBtn}</div></div>`);
 }
 function showKaosPeek(){
   closeModal();const tr=LANG==="tr";
@@ -631,7 +631,7 @@ function _computeKaos(){
   if(r<t1)return{type:'cash',val:o.cash,good:true,label:`+€${o.cash}M`,desc:tr?"Kasa doldu!":"Cash boost!",feed:tr?`Kaos zarı: +€${o.cash}M`:`Chaos dice: +€${o.cash}M`};
   if(r<t2)return{type:'pow',val:o.pow,good:true,label:tr?`+${o.pow} GUC`:`+${o.pow} POWER`,desc:tr?"Bu maç güç bonusu!":"Power bonus this match!",feed:tr?`Kaos zarı: bu maç +${o.pow} güç`:`Chaos dice: +${o.pow} power this match`};
   if(r<t3)return{type:'loss',val:o.loss,good:false,label:`−€${o.loss}M`,desc:tr?"Başkan kasadan aldı.":"Chairman took from budget.",feed:tr?`Kaos zarı: −€${o.loss}M`:`Chaos dice: −€${o.loss}M`};
-  return{type:'fin',val:o.fin,good:false,label:tr?`FINALDE −${o.fin} GUC`:`FINAL −${o.fin} POWER`,desc:tr?"Final maçına ceza biriyor.":"Penalty stacks for the final.",feed:tr?`Kaos zarı: finalde −${o.fin} güç`:`Chaos dice: −${o.fin} power in final`};
+  return{type:'fin',val:o.fin,good:false,label:tr?`FINALDE −${o.fin} GUC`:`FINAL −${o.fin} POWER`,desc:tr?"Final maçına ceza biniyor.":"Penalty stacks for the final.",feed:tr?`Kaos zarı: finalde −${o.fin} güç`:`Chaos dice: −${o.fin} power in final`};
 }
 function _applyKaos(res){
   if(res.type==='cash')earn(res.val,"earned");
@@ -646,7 +646,7 @@ function _kaosStartRoll(isPeek){
   closeModal();
   const res=_computeKaos();
   sfxRoll();
-  showModal(`<div class="kaos-modal kaos-rolling"><div class="kaos-roll-lbl">${LANG==="tr"?"ZARIYOR...":"ROLLING..."}</div><div class="kaos-roll-wrap">${_kaosDiceSvg(110)}</div><div class="kaos-roll-dots"><span></span><span></span><span></span></div></div>`);
+  showModal(`<div class="kaos-modal kaos-rolling"><div class="kaos-roll-lbl">${LANG==="tr"?"ZARLIYOR...":"ROLLING..."}</div><div class="kaos-roll-wrap">${_kaosDiceSvg(110)}</div><div class="kaos-roll-dots"><span></span><span></span><span></span></div></div>`);
   setTimeout(()=>{closeModal();_applyKaos(res);_showKaosResult(res);},2700);
 }
 function _showKaosResult(res){
@@ -1005,7 +1005,6 @@ function _renderResultFx(r){
         <line x1="18" y1="-18" x2="-18" y2="18" stroke="#ef4444" stroke-width="5" stroke-linecap="round"><animate attributeName="stroke-dasharray" values="0 52;52 0" dur="0.45s" begin="0.15s" fill="freeze"/><animate attributeName="opacity" values="0;1;1;.5;1" dur="2s" begin="0.5s" repeatCount="indefinite"/></line>
         <circle cx="0" cy="0" r="26" fill="none" stroke="#ef4444" stroke-width="1.5" opacity=".4"><animate attributeName="r" values="22;32;22" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".5;0;.5" dur="2s" repeatCount="indefinite"/></circle>
       </g>
-      <text x="50%" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="#ef4444" opacity=".5" letter-spacing="2">SACKED</text>
     </svg>`;
   } else {
     /* ELENDİN: deflating ball + falling lines */
@@ -1016,7 +1015,6 @@ function _renderResultFx(r){
         <circle cx="0" cy="0" r="20" fill="none" stroke="#f97316" stroke-width="2"><animate attributeName="r" values="20;14;20" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="stroke-width" values="2;3.5;2" dur="2.4s" repeatCount="indefinite"/></circle>
         <path d="M-8-8Q0-14 8-8Q14 0 8 8Q0 14-8 8Q-14 0-8-8Z" fill="none" stroke="#f97316" stroke-width="1.2" opacity=".7"><animate attributeName="d" values="M-8-8Q0-14 8-8Q14 0 8 8Q0 14-8 8Q-14 0-8-8Z;M-5-10Q0-10 5-10Q10 0 5 10Q0 10-5 10Q-10 0-5-10Z;M-8-8Q0-14 8-8Q14 0 8 8Q0 14-8 8Q-14 0-8-8Z" dur="2.4s" repeatCount="indefinite"/></path>
       </g>
-      <text x="50%" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="#f97316" opacity=".5" letter-spacing="2">ELIMINATED</text>
     </svg>`;
   }
 }

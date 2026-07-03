@@ -577,6 +577,7 @@ body.dark .iconbtn{color:var(--ink)}
 /* ===== draft slot active pulse ===== */
 @keyframes slotPulse{0%,100%{box-shadow:0 0 0 2px var(--green),4px 4px 0 0 #000}50%{box-shadow:0 0 0 4px var(--green),4px 4px 0 0 #000}}
 .roundel.cur{border:3px solid var(--green)!important;animation:slotPulse 1.2s ease-in-out infinite;z-index:2}
+.roundel.h-drag-over{border:2.5px dashed #4ade80!important;background:rgba(74,222,128,0.18)!important;box-shadow:0 0 0 2px rgba(74,222,128,0.3);z-index:3}
 .roundel.slot-dim{opacity:.4;filter:grayscale(.4)}
 .roundel.slot-hover{box-shadow:0 0 0 3px var(--green),2px 2px 0 0 #000;opacity:1;filter:none}
 

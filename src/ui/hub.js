@@ -313,15 +313,57 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   /* Bench render */
   {const _tr=LANG==="tr";let _benchEl=document.getElementById("hubBenchSection");
   if(typeof bench!=="undefined"&&bench&&bench.length){
-    if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _sc=$("shopcards");if(_sc&&_sc.parentNode)_sc.parentNode.insertBefore(_benchEl,_sc);}
+    if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _sl=$("shopLbl")||$("shopcards");if(_sl&&_sl.parentNode)_sl.parentNode.insertBefore(_benchEl,_sl);}
     const _benched=bench.filter(p=>p&&!p.used);
     if(_benched.length){
       const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEK KULÜBESİ":"BENCH"} <span style="opacity:.5">(${_benched.length})</span></div>`;
-      const _benchCards=_benched.map(p=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=_ov>=80?"#4ade80":_ov>=70?"#fcd34d":_ov>=60?"#fb923c":"#f87171";const _inj=p.injured?`<span style="color:var(--red);font-size:8px;font-family:var(--mono);margin-left:3px">${_tr?"SAKAT":"INJ"}</span>`:"";const _emg=p.benchEmergency?`<span style="color:var(--ink2);font-size:7px;font-family:var(--mono);margin-left:3px">${_tr?"ACİL":"EMRG"}</span>`:"";return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper2);font-family:var(--mono)"><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:26px;letter-spacing:.5px">${_pos}</span><span style="flex:1;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}${_emg}<span style="font-size:11px;font-weight:700;color:${_col}">${_eff}</span></div>`;}).join("");
+      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=_ov>=80?"#4ade80":_ov>=70?"#fcd34d":_ov>=60?"#fb923c":"#f87171";const _inj=p.injured?`<span style="color:var(--red);font-size:8px;font-family:var(--mono);margin-left:3px">${_tr?"SAKAT":"INJ"}</span>`:"";const _emg=p.benchEmergency?`<span style="color:var(--ink2);font-size:7px;font-family:var(--mono);margin-left:3px">${_tr?"ACİL":"EMRG"}</span>`:"";return `<div data-bench-idx="${bi}" style="display:flex;align-items:center;gap:6px;padding:5px 8px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper2);font-family:var(--mono);cursor:grab"><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:26px;letter-spacing:.5px">${_pos}</span><span style="flex:1;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}${_emg}<span style="font-size:11px;font-weight:700;color:${_col}">${_eff}</span></div>`;}).join("");
       _benchEl.innerHTML=_benchHdr+`<div style="display:flex;flex-direction:column;gap:4px">${_benchCards}</div>`;
     }else{if(_benchEl)_benchEl.innerHTML="";}
   }else if(_benchEl){_benchEl.innerHTML="";}}
-  setBudget();renderFixtures();renderFeed();_renderFreeAgents();}
+  setBudget();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();}
+
+function _initHubDragDrop(){
+  let _src=null; /* {type:"slot",idx} or {type:"bench",idx} */
+  function _clearOver(){document.querySelectorAll(".h-drag-over").forEach(e=>e.classList.remove("h-drag-over"));}
+  /* pitch slots */
+  slots.forEach((_,i)=>{
+    const el=document.getElementById("h"+i); if(!el)return;
+    el.draggable=true;
+    el.ondragstart=e=>{_src={type:"slot",idx:i};e.dataTransfer.effectAllowed="move";el.style.opacity=".5";};
+    el.ondragend=e=>{el.style.opacity="";_clearOver();};
+    el.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect="move";el.classList.add("h-drag-over");};
+    el.ondragleave=()=>el.classList.remove("h-drag-over");
+    el.ondrop=e=>{e.preventDefault();_clearOver();if(!_src||_src.idx===i)return;
+      if(_src.type==="slot"){
+        /* swap two pitch players */
+        const a=picksBySlot[_src.idx],b=picksBySlot[i];
+        picksBySlot[_src.idx]=b; picksBySlot[i]=a;
+        if(a){a.pos=slots[i][0];a.eff=typeof effOf==="function"?effOf(a):a.ov;renderRoundel("h"+i,a);}
+        else{const r=document.getElementById("h"+i);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";}}
+        if(b){b.pos=slots[_src.idx][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+_src.idx,b);}
+        else{const r=document.getElementById("h"+_src.idx);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[_src.idx][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[_src.idx][0]])+"</span>";}}
+        _initHubDragDrop();
+      } else if(_src.type==="bench"){
+        /* bench player → pitch slot */
+        const bp=bench&&bench[_src.idx]; if(!bp)return;
+        const old=picksBySlot[i];
+        bp.used=true;bp.bench=false;
+        if(typeof fillSlotReplace==="function")fillSlotReplace(i,bp);
+        bench.splice(_src.idx,1);
+        if(old){old.bench=true;old.used=false;bench.push(old);}
+        if(typeof renderHub==="function")renderHub();
+      }
+      _src=null;};
+  });
+  /* bench players: add drag via event delegation on benchEl */
+  const _be=document.getElementById("hubBenchSection"); if(!_be)return;
+  _be.querySelectorAll("[data-bench-idx]").forEach(card=>{
+    card.draggable=true;
+    card.ondragstart=e=>{const bi=parseInt(card.dataset.benchIdx);_src={type:"bench",idx:bi};e.dataTransfer.effectAllowed="move";card.style.opacity=".5";};
+    card.ondragend=()=>{card.style.opacity="";_clearOver();};
+  });
+}
 function showCardPopup(k){const x=L(),cd=x.cards[k];if(!cd)return;const v=cardEff(k,picksBySlot.filter(Boolean),round);const kin=kindLabel(k);showModal(`<div style="padding:14px 16px"><div class="card-popup-ico">${CARD_SVGS[k]||cd.i}</div><div style="font-family:var(--mono);font-weight:700;font-size:13px;text-align:center">${cd.n}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;letter-spacing:1px;margin:2px 0">${kin}</div><hr style="border:none;border-top:1px solid var(--line);margin:8px 0"><div style="font-size:11px;line-height:1.55;color:var(--ink)">${variantDesc(cd.d,variantOf(k)||0)}</div><div style="margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700;color:${v>=0?"var(--good)":"var(--red)"}">${LANG==="tr"?"Bu tur etkisi":"Effect now"}: ${v>=0?"+":""}${v}</div><div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${x.presClose||"Kapat"}</button></div></div>`);}
 function buyCard(k,overridePrice){
   const sv=shopVariants[k]||0;

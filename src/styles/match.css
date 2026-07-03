@@ -172,6 +172,10 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .scoutmodal .sl.backupopt:hover .so{color:#a8f0c6}
 .backupcompare b,.backupopt .so{color:var(--green)}
 body.dark .opt,body.dark .shopcard,body.dark .stylebtn,body.dark .mtile,body.dark .feedwrap,body.dark .cuproad,body.dark .collection,body.dark .scoutbtn,body.dark .autotog,body.dark .goalsum,body.dark .econsum{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
+body.dark .econsum .sth{background:#1f2d35;color:#fff}
+body.dark .econsum .pbr{color:#1f2d35;border-color:#c5d0db}
+body.dark .econsum .pbr b{color:#1a6b3c}
+body.dark .econsum .econwhy{background:#fff6d8;color:#1f2d35;border-color:#e0c45f}
 body.dark .simgoals,body.dark .finalreport{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 body.dark .simstats span,body.dark .eventpanel,body.dark .fieldframe{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 @media(max-width:760px){.simstage{grid-template-columns:1fr}.eventpanel{min-height:92px}.simgoals{max-height:110px}}
