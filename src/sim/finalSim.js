@@ -1057,11 +1057,45 @@ function _tryGodotSim(sp) {
     if (bar) bar.remove();
     var cvEl = document.getElementById("cv");
     if (cvEl) Array.from(cvEl.children).forEach(function(c) { c.style.display = ""; });
+    var shoutrow = document.getElementById("shoutrow");
+    if (shoutrow) shoutrow.style.display = "";
+    var speedrow = document.querySelector(".speedrow");
+    if (speedrow) speedrow.style.display = "";
     window.removeEventListener("message", _onMsg);
   }
 
   function _onMsg(e) {
-    if (!e.data || e.data.type !== "godot_match_result") return;
+    if (!e.data) return;
+    if (e.data.type === "godot_live_update") {
+      var d = e.data;
+      var sc = document.getElementById("simScore");
+      if (sc) sc.textContent = d.score_home + "–" + d.score_away;
+      var clk = document.getElementById("simClk");
+      if (clk) clk.textContent = (d.minute < 10 ? "0" : "") + d.minute + "'";
+      var st = document.getElementById("simState");
+      if (st) st.textContent = d.minute < 45 ? (LANG === "tr" ? "1. Devre" : "1st Half") : d.minute < 90 ? (LANG === "tr" ? "2. Devre" : "2nd Half") : (LANG === "tr" ? "Uzatma" : "Extra Time");
+      var shots = document.getElementById("statShot");
+      if (shots) shots.textContent = d.shots_home + "-" + d.shots_away;
+      var mom = d.home_momentum || 50;
+      var momA = document.getElementById("momA");
+      if (momA) momA.textContent = mom + "%";
+      var momB = document.getElementById("momB");
+      if (momB) momB.textContent = (100 - mom) + "%";
+      var momBar = document.getElementById("momBar");
+      if (momBar) momBar.style.setProperty("--mh", mom + "%");
+      return;
+    }
+    if (e.data.type === "godot_match_event") {
+      var evDiv = document.getElementById("simGoals");
+      if (evDiv) {
+        var item = document.createElement("div");
+        item.className = e.data.goal ? "home" : "away";
+        item.innerHTML = "<b>" + e.data.minute + "'</b> " + e.data.text;
+        evDiv.insertBefore(item, evDiv.firstChild);
+      }
+      return;
+    }
+    if (e.data.type !== "godot_match_result") return;
     if (resolved) return;
     resolved = true;
     _removeGodotUI();
@@ -1099,7 +1133,7 @@ function _tryGodotSim(sp) {
     cards_detail: cardsDetail
   };
   var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  var godotUrl = GODOT_BASE + "?d=" + encodeURIComponent(b64);
+  var godotUrl = GODOT_BASE + "?_nc=" + Date.now() + "&d=" + encodeURIComponent(b64);
 
   var cvEl = document.getElementById("cv");
   if (!cvEl) { window.removeEventListener("message", _onMsg); return true; }
@@ -1127,9 +1161,12 @@ function _tryGodotSim(sp) {
     '<button class="gctrl-btn gctrl-spd" id="gctrl-4x" onclick="godotControlSpeed(4)">4×</button>' +
     '<span class="gctrl-flex"></span>' +
     '<button class="gctrl-btn gctrl-instant" onclick="godotControl(\'instant\')">' + (tr ? "▶▶ ANLIK" : "▶▶ INSTANT") + '</button>';
-  var fieldframe = cvEl.closest(".fieldframe") || cvEl.parentElement;
-  var insertAfter = fieldframe || cvEl;
-  if (insertAfter.parentElement) insertAfter.parentElement.insertBefore(bar, insertAfter.nextSibling);
+  cvEl.appendChild(bar);
+
+  var shoutrow = document.getElementById("shoutrow");
+  if (shoutrow) shoutrow.style.display = "none";
+  var speedrow = document.querySelector(".speedrow");
+  if (speedrow) speedrow.style.display = "none";
 
   return true;
 }

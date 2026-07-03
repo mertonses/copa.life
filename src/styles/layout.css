@@ -309,6 +309,41 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 @keyframes debtflash{0%,100%{opacity:1}50%{opacity:.22}}
 .debtwarn.danger{animation:debtflash .9s ease-in-out infinite}
 
+/* ===== dark mode variables ===== */
+body.dark-mode {
+  --paper: #1a1a1a;
+  --paper2: #242424;
+  --ink: #e8e4da;
+  --ink2: #a09890;
+  --ink3: #6a6260;
+  --line: #333;
+  --good: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --mustard: #fbbf24;
+}
+
+/* ===== card flip animation ===== */
+.cardtile{
+  animation: cardFlipIn 0.35s ease-out both;
+  transform-origin: center top;
+}
+@keyframes cardFlipIn{
+  0%{opacity:0;transform:rotateY(-90deg) scale(.9);}
+  60%{transform:rotateY(8deg) scale(1.02);}
+  100%{opacity:1;transform:rotateY(0) scale(1);}
+}
+.cardtile:nth-child(1){animation-delay:.05s}
+.cardtile:nth-child(2){animation-delay:.15s}
+
+/* ===== combo card glow ===== */
+.cardtile.has-combo{border:1.5px solid rgba(230,173,46,.6);box-shadow:0 0 8px rgba(230,173,46,.2)}
+.ct-combo{background:rgba(230,173,46,.12);border:1px solid rgba(230,173,46,.4);border-radius:3px;padding:3px 6px;font-size:9px;margin-top:4px;color:#e6ad2e;font-weight:700}
+
+/* ===== goal flash animation ===== */
+@keyframes goalFlash{0%{box-shadow:0 0 0 0 rgba(230,173,46,.9)}50%{box-shadow:0 0 18px 8px rgba(230,173,46,.6);background:#e6ad2e;color:#1a1a1a}100%{box-shadow:none}}
+.roundel.goal-flash{animation:goalFlash 1.2s ease-out forwards}
+
 /* ===== scout button ===== */
 .vsscout{background:var(--paper2);border:1.5px solid var(--ink);border-radius:4px;padding:4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;transition:.12s;margin:4px auto 0}
 .vsscout:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -679,3 +714,26 @@ body.dark .iconbtn{color:var(--ink)}
 .finalreport h4{background:var(--good);color:#fff;padding:6px 10px;margin:0;font-family:var(--mono);font-size:10px;letter-spacing:1px;border-radius:4px 4px 0 0}
 .frrow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px}
 .frrow b{color:var(--good);font-family:var(--mono);font-size:11px}
+
+/* ===== Penalty Shootout ===== */
+.pen-log-row{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;font-family:var(--mono);font-size:10px;border-bottom:1px solid var(--line)}
+.pen-goal{color:var(--good)}
+.pen-save{color:var(--red)}
+
+/* ===== Goal flash roundel ===== */
+@keyframes goalFlash{0%{box-shadow:0 0 0 0 rgba(74,222,128,0)}40%{box-shadow:0 0 0 8px rgba(74,222,128,.55)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.goal-flash{animation:goalFlash 1.1s ease-out}
+
+/* ===== Card flip animation ===== */
+@keyframes cardFlipIn{0%{transform:rotateY(-70deg) scale(.92);opacity:0}60%{transform:rotateY(8deg);opacity:1}100%{transform:none}}
+.cardtile{animation:cardFlipIn .28s ease both}
+.cardtile:nth-child(2){animation-delay:.05s}
+.cardtile:nth-child(3){animation-delay:.1s}
+.cardtile:nth-child(4){animation-delay:.15s}
+
+/* ===== Combo glow ===== */
+.cardtile.has-combo{border-color:#e6ad2e;box-shadow:0 0 8px rgba(230,173,46,.35)}
+.ct-combo{font-family:var(--mono);font-size:8px;color:#e6ad2e;margin-top:3px}
+
+/* ===== Dark mode extra ===== */
+body.dark-mode{--paper:#0d1117;--paper2:#161b22;--ink:#e6edf3;--ink2:#8b949e;--ink3:#3d444d;--line:#21262d;--accent:#f0883e;--good:#3fb950;--red:#f85149;--gold:#e3b341;--blue:#58a6ff;--mustard:#d29922}

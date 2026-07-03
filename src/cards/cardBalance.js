@@ -7,12 +7,12 @@ function weightedVariant(){
 }
 
 function cardPrice(k){
- const d=CARDDEFS[k],rar=d.rar||"bronze";
- const floor={bronze:7,silver:12,gold:17,risk:6}[rar]||7;
- const base=Math.round(d.price||floor);
+ const d=CARDDEFS[k];
+ const base=typeof d.price==="number"?d.price:7;
+ if(base===0)return 0;
  const vm=VARIANT_PRICE_MOD[variantOf(k)||0];
  const pm=typeof cardPriceMod!=="undefined"?cardPriceMod:1.0;
- return Math.max(3,Math.round(Math.max(floor,base)*vm*pm)+chairmanMarketMod());
+ return Math.max(1,Math.round(base*vm*pm)+chairmanMarketMod());
 }
 
 function variantText(k){

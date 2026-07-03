@@ -7,8 +7,9 @@ function newShopOffers(){
  const pintiShop=typeof chairman!=="undefined"&&chairman&&chairman.id==="pinti";
  CARDKEYS.forEach(k=>{
    if(invOf(k)>0)return; // zaten sahip
-   if(pintiShop&&CARDDEFS[k]&&CARDDEFS[k].rar==="gold")return;
+   if(pintiShop&&CARDDEFS[k]&&(CARDDEFS[k].price||0)>=10)return;
    if(k==="kurban_belli"&&round>=6)return; // Finalde kullanılamaz
+   if(k==="kumarbaz"&&round>=6)return; // Finalde kullanılamaz
    pool.push(k);
  });
  const limit=debtStage()>=3?1:2;

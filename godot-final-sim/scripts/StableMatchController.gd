@@ -51,6 +51,7 @@ var home_shots: int = 0
 var away_shots: int = 0
 var home_momentum: float = 50.0
 var active_cards: Array = []
+var _live_timer: float = 0.0
 var scrubber: HSlider = null
 var instant_btn: Button = null
 
@@ -126,6 +127,10 @@ func _process(delta: float) -> void:
 	if halftime_flash_timer > 0.0:
 		halftime_flash_timer -= delta
 	_update_labels()
+	_live_timer -= delta
+	if _live_timer <= 0.0:
+		_live_timer = 3.0
+		_post_live_update()
 	field.queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -384,6 +389,8 @@ func _finish_event() -> void:
 		_log("%02d' GOAL! %d-%d" % [int(minute), score_home, score_away], "#4ade80")
 		goal_flash_timer = 1.2
 		goal_flash_score = "%d - %d" % [score_home, score_away]
+		_post_event_to_parent("GOL! %d-%d" % [score_home, score_away], true)
+		_post_live_update()
 	elif action == "SHOOT" and str(current_event.get("restart_type", "OPEN_PLAY")) in ["GOAL_KICK", "CORNER"]:
 		ball.set_out_of_play(str(current_event.get("restart_type", "OPEN_PLAY")).to_lower())
 	else:
@@ -1530,16 +1537,16 @@ func _drain_ball_transition_log() -> void:
 func _draw_field() -> void:
 	var r: Rect2 = Rect2(Vector2.ZERO, field.size)
 	field.draw_rect(r, Color("#102018"))
-	var margin: float = 42.0
-	var pitch: Rect2 = Rect2(Vector2(margin, margin), r.size - Vector2(margin * 2.0, margin * 2.0))
+	var zoom: float = clampf(0.38 / maxf(view_focus_radius, 0.10), 1.2, 2.6)
+	var pw: float = r.size.x * zoom
+	var ph: float = r.size.y * zoom
+	var half_w: float = r.size.x * 0.5
+	var half_h: float = r.size.y * 0.5
+	var ox: float = clampf(view_focus_pos.x * pw, half_w, pw - half_w)
+	var oy: float = clampf(view_focus_pos.y * ph, half_h, ph - half_h)
+	var pitch: Rect2 = Rect2(Vector2(half_w - ox, half_h - oy), Vector2(pw, ph))
 	_draw_pitch(pitch)
 	_draw_goals(pitch)
-	_draw_defensive_line(pitch, home, Color("#f6c453", 0.20))
-	_draw_defensive_line(pitch, away, Color("#7dd3fc", 0.20))
-	_draw_offside_line(pitch, home, Color("#f6c453", 0.34))
-	_draw_offside_line(pitch, away, Color("#7dd3fc", 0.34))
-	_draw_view_focus(pitch)
-	tactical_visual.draw(field, pitch, pitch_mgr, home, away, ball, current_event, false)
 	_draw_players(pitch, home.players, Color("#f5f0e8"))
 	_draw_players(pitch, away.players, Color("#d95040"))
 	_draw_ball(pitch)
@@ -1547,9 +1554,7 @@ func _draw_field() -> void:
 		_draw_goal_flash(r)
 	if halftime_flash_timer > 0.0:
 		_draw_halftime_flash(r)
-	_draw_overlay(r)
 	_draw_momentum_bar(r)
-	_draw_xg_bar(r, pitch)
 	_draw_active_cards_panel(r)
 	if match_ended:
 		_draw_match_summary(r)
@@ -1749,33 +1754,11 @@ func _draw_players(pitch: Rect2, players: Array[PlayerAgent], color: Color) -> v
 		var sp: Vector2 = pitch_mgr.to_screen(pitch, p.pos)
 		var radius: float = 10.0 if not p.is_goalkeeper() else 12.0
 		field.draw_circle(sp + Vector2(0, 3), radius * 0.78, Color("#000000", 0.22))
-		if p.current_state in ["PRESS", "PRESS_BALL_CARRIER", "PRESS_TRAP", "WIDE_PRESS", "COUNTER_PRESS_REACT"]:
-			field.draw_circle(sp, radius + 6.0, Color("#ff6555", 0.34), false, 3.0)
-		if p.current_state in ["RECEIVE_PASS", "ANTICIPATE_PASS", "SHOW_TO_FEET"]:
-			field.draw_circle(sp, radius + 6.0, Color("#7dd3fc", 0.34), false, 3.0)
-		if p.current_state in ["COVER_PASSING_LANE", "BLOCK_PASSING_LANE", "COVER_CUTBACK", "SHOT_BLOCK", "COUNTER_PRESS_COVER"]:
-			field.draw_circle(sp, radius + 5.0, Color("#60a5fa", 0.24), false, 2.0)
-		if p.current_state in ["CHASE_LOOSE_BALL", "SECOND_BALL_WINNER", "INTERCEPT_PASS"]:
-			field.draw_circle(sp, radius + 6.0, Color("#f472b6", 0.28), false, 2.0)
-		if p.current_state in ["ATTACK_CORNER", "DEFEND_CORNER", "CONTEST_LONG_BALL", "SECOND_BALL", "SECOND_BALL_DEFENSE", "BOX_NEAR_POST", "BOX_FAR_POST", "PENALTY_SPOT_RUN", "REBOUND_RUN"]:
-			field.draw_circle(sp, radius + 6.0, Color("#facc15", 0.20), false, 2.0)
-		if p.current_state in ["BUILD_FROM_BACK", "OFFER_THROW", "MARK_THROW_OPTION", "OVERLAP_RUN", "BYLINE_DRIVE", "SCAN_WIDE_RELEASE", "SUPPORT_WIDE_RELEASE"]:
-			field.draw_circle(sp, radius + 5.0, Color("#c084fc", 0.18), false, 2.0)
-		if p.current_state in ["TRIANGLE_SUPPORT", "PASSING_ANGLE_LEFT", "PASSING_ANGLE_RIGHT", "RETURN_OPTION", "SAFE_SUPPORT", "RESET_OUTLET", "CUTBACK_OPTION", "HALF_SPACE_SUPPORT", "UNDERLAP_SUPPORT", "CUTBACK_ZONE_ATTACK", "SECURE_POSSESSION", "BREAK_OUTLET"]:
-			field.draw_circle(sp, radius + 5.0, Color("#a7f3d0", 0.22), false, 2.0)
-		if p.current_state in ["LINE_HOLDER", "BLOCK_PASSING_LANE", "OFFSIDE_LINE_HOLD", "OFFSIDE_TRAP", "REST_DEFENSE_DROP", "RESET_SHAPE", "RESTART_SHAPE"]:
-			field.draw_circle(sp, radius + 4.0, Color("#60a5fa", 0.18), false, 2.0)
-		if p.current_state == "TIME_LINE_RUN":
-			field.draw_circle(sp, radius + 6.0, Color("#a7f3d0", 0.26), false, 2.5)
-		_draw_sequence_role_hint(sp, radius, p)
 		var base_color: Color = Color("#48c7e8") if p.is_goalkeeper() else color
 		if p.is_injured:
 			base_color = base_color.lerp(Color("#ff4444"), 0.55)
 		field.draw_circle(sp, radius, base_color)
 		field.draw_circle(sp, radius, Color("#102018"), false, 2.0)
-		_draw_player_facing(sp, radius, p)
-		if p.is_goalkeeper():
-			_draw_keeper_action_hint(sp, radius, p)
 		if p.has_ball:
 			field.draw_circle(sp, radius + 7.0, Color("#f6c453", 0.40), false, 3.0)
 		if p.is_injured:
@@ -1873,6 +1856,31 @@ func _draw_overlay(r: Rect2) -> void:
 		var age_alpha: float = lerpf(0.48, 1.0, float(i + 1) / float(log_count))
 		col.a = age_alpha
 		field.draw_string(font, Vector2(18, bottom - log_panel_h + 26.0 + line_h * float(i)), log_lines[idx], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, col)
+
+func _post_live_update() -> void:
+	if not OS.has_feature("web"):
+		return
+	var payload: String = JSON.stringify({
+		"type": "godot_live_update",
+		"minute": int(minute),
+		"score_home": score_home,
+		"score_away": score_away,
+		"shots_home": home_shots,
+		"shots_away": away_shots,
+		"home_momentum": int(home_momentum)
+	})
+	JavaScriptBridge.eval("window.parent.postMessage(%s, '*')" % payload, true)
+
+func _post_event_to_parent(text: String, is_goal: bool = false) -> void:
+	if not OS.has_feature("web"):
+		return
+	var payload: String = JSON.stringify({
+		"type": "godot_match_event",
+		"minute": int(minute),
+		"text": text,
+		"goal": is_goal
+	})
+	JavaScriptBridge.eval("window.parent.postMessage(%s, '*')" % payload, true)
 
 func _post_result_to_parent() -> void:
 	if not OS.has_feature("web"):
