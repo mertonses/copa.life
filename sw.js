@@ -1,5 +1,5 @@
-/* copa.life Service Worker — offline cache */
-const CACHE = "copa-v2";
+/* copa.life Service Worker — v3 */
+const CACHE = "copa-v3";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -46,8 +46,10 @@ const PRECACHE = [
   "/assets/flags/DE.png"
 ];
 
+const NETWORK_FIRST = [".html", ".js", ".css"];
+
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE).catch(()=>{})));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE).catch(() => {})));
   self.skipWaiting();
 });
 
@@ -60,16 +62,31 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
+  const url = e.request.url;
+  const isNetworkFirst = NETWORK_FIRST.some(ext => url.split("?")[0].endsWith(ext)) || url.endsWith("/");
+
+  if (isNetworkFirst) {
+    e.respondWith(
+      fetch(e.request).then(res => {
         if (res && res.status === 200 && res.type !== "opaque") {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      }).catch(() => cached);
-    })
-  );
+      }).catch(() => caches.match(e.request))
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(res => {
+          if (res && res.status === 200 && res.type !== "opaque") {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        });
+      })
+    );
+  }
 });
