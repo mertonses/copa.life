@@ -799,7 +799,7 @@ function _showPintiSavingsModal(sp){
 function _pintiSavingsCash(sav){pintiSavings=0;earn(sav,"earned");pushFeed("🪙 "+(LANG==="tr"?"Birikim kasaya: +€"+sav+"M":"Savings to budget: +€"+sav+"M"),"buy");}
 function _pintiSavingsPow(pow){pintiSavings=0;riskPowerMod+=pow;pushFeed("🪙 "+(LANG==="tr"?"Birikim güce: +"+pow+" güç (final)":"Savings to power: +"+pow+" power (final)"),"buy");}
 function scorerPool(home){if(home){const s=picksBySlot.filter(p=>p&&p.pos!=="GK");return s.length?s:picksBySlot.filter(Boolean);}return (oppLineup&&oppLineup.length?oppLineup.map(o=>({name:o.name,pos:o.pos})):["Rakip"].map(name=>({name,pos:""})));}
-function makeMatchEvents(gf,ga){const ev=[];for(let i=0;i<gf;i++){const p=rnd(scorerPool(true));ev.push({m:ri(8,88),home:true,name:surOf(p),type:"goal"});}for(let i=0;i<ga;i++){const p=rnd(scorerPool(false));ev.push({m:ri(8,88),home:false,name:p.name||"Rakip",type:"goal"});}
+function makeMatchEvents(gf,ga){const ev=[];for(let i=0;i<gf;i++){const p=rnd(scorerPool(true));if(p)ev.push({m:ri(8,88),home:true,name:surOf(p),type:"goal"});}for(let i=0;i<ga;i++){const p=rnd(scorerPool(false));if(p)ev.push({m:ri(8,88),home:false,name:p.name||"Rakip",type:"goal"});}
   /* Yellow cards — 1-3 per side, random players */
   const _yCount=ri(0,2);for(let i=0;i<_yCount;i++){const _yp=rnd(scorerPool(true));if(_yp)ev.push({m:ri(15,89),home:true,name:surOf(_yp),type:"yellow"});}
   const _ycOpp=ri(0,2);for(let i=0;i<_ycOpp;i++){const _ypo=rnd(scorerPool(false));if(_ypo)ev.push({m:ri(15,89),home:false,name:_ypo.name||"Rakip",type:"yellow"});}
@@ -845,7 +845,7 @@ function playMatch(skipRisk){if(runEnded)return;clearTimeout(autoTimer);if(round
   /* Sansasyoncu MOTM bonusu */
   if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0&&win){const _me=chairTrust===3?10:6;earn(_me,"earned");setBudget();pushFeed("🎤 "+(LANG==="tr"?"Spotlight MOTM — +€"+_me+"M":"Spotlight MOTM — +€"+_me+"M"),"buy");}
   const vcls=win?"win":draw?"draw":"lose",vtxt=draw?(LANG==="tr"?"PENALTİLER":"PENALTIES"):(advance?x.matchWin:x.matchLose);
-  _flashGoalScorers(lastMatchEvents);
+  if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
   const _drawBtn=draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTİLERE →":"PENALTIES →"}</button>`:
     `<button class="btn btn-primary" onclick="afterMatch(${advance})">${advance?(round===5?x.toFinal:x.cont):x.again}</button>`;
   showModal(`<div class="tele"><div class="thead">${x.teleHead} · ${x.rounds[round-1]}</div><div class="tscore"><div class="tt">${clip(teamName||"US",9)}</div><div class="tn">${gf}</div><div style="font-family:var(--mono)">–</div><div class="tn">${ga}</div><div class="tt">${clip(opponent.name,9)}</div></div><div class="perfnote">${lastMatchPerf.note}</div><div class="perfwhy">${lastMatchPerf.why}</div>${matchEventsHTML(lastMatchEvents)}<div class="tv ${vcls}">${vtxt}</div><div class="bact">${_drawBtn}</div></div>`);
