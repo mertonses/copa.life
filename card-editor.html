@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Copa.life — Card Editor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0!important;}
+:root{
+  --paper:#f5f0e8;--paper2:#ede8df;--ink:#1a1a14;--ink2:#6b6657;
+  --line:#c8c2b4;--mono:"Courier New",monospace;--mustard:#c8960c;
+  --golden:#b8860b;--golden-bg:#fdf8ee;--dark:#3a2a6a;--dark-bg:#eeeaf6;
+}
+body{background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:11px;padding:12px;}
+h1{font-size:13px;letter-spacing:.12em;border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:4px;}
+.note{font-size:9px;color:var(--ink2);margin-bottom:10px;padding:4px 0;}
+.note b{color:var(--golden);}
+.note span{color:var(--dark);}
+.toolbar{display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.toolbar button{background:var(--ink);color:var(--paper);border:none;padding:4px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;cursor:pointer;}
+.toolbar button:hover{background:var(--mustard);}
+.toolbar .status{color:var(--ink2);font-size:10px;}
+
+.card-pair{display:grid;grid-template-columns:200px 1fr 1fr;gap:0;border:1px solid var(--line);margin-bottom:6px;}
+.card-base{padding:6px 8px;border-right:1px solid var(--line);background:var(--paper2);}
+.card-variant{padding:6px 8px;}
+.card-variant.golden{background:var(--golden-bg);border-right:1px solid var(--line);}
+.card-variant.dark{background:var(--dark-bg);}
+.vtitle{font-size:9px;letter-spacing:.1em;font-weight:bold;margin-bottom:5px;}
+.vtitle.golden{color:var(--golden);}
+.vtitle.dark{color:var(--dark);}
+.row{display:flex;gap:4px;align-items:center;margin-bottom:3px;}
+.lbl{font-size:9px;color:var(--ink2);min-width:38px;flex-shrink:0;}
+input[type=text],input[type=number],select,textarea{
+  background:var(--paper);border:1px solid var(--line);color:var(--ink);
+  font-family:var(--mono);font-size:10px;padding:1px 4px;
+}
+input[type=text],select{width:100%;}
+input[type=number]{width:44px;}
+textarea{width:100%;resize:vertical;min-height:32px;font-size:9px;line-height:1.3;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink);}
+.card-icon{font-size:18px;display:block;margin-bottom:3px;}
+.card-key{font-size:9px;color:var(--ink2);margin-bottom:5px;letter-spacing:.04em;}
+.kara-zero{opacity:0.5;}
+.output-area{margin-top:14px;border:1px solid var(--line);padding:8px;}
+.output-area h2{font-size:10px;letter-spacing:.1em;margin-bottom:6px;}
+.output-area textarea{width:100%;height:200px;background:var(--ink);color:#c8ffb0;font-size:9px;border:none;padding:6px;}
+</style>
+</head>
+<body>
+<h1>COPA.LIFE — CARD EDITOR</h1>
+<div class="note">
+  <b>GOLDEN</b>: scaling kartlarda +1 güç global · <span>DARK</span>: +3 güç global, finalde KARA CEZA düşer (kart başına farklı, 0=yok)
+</div>
+<div class="toolbar">
+  <button onclick="exportJSON()">EXPORT JSON</button>
+  <button onclick="copyJSON()">COPY</button>
+  <button onclick="resetAll()">RESET</button>
+  <span class="status" id="status"></span>
+</div>
+<div id="cards-grid"></div>
+<div class="output-area">
+  <h2>JSON OUTPUT</h2>
+  <textarea id="json-output" readonly></textarea>
+</div>
+
+<script>
+const CARDS=[
+{key:"taraftar",icon:"📣",price:6,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"12. Adam",en_n:"12th Man",
+  golden_desc:"1. turda +2; 2. turda +3; 3. turdan itibaren +4 güç.",
+  dark_desc:"Aynı güç bonusu + KARA: finalde -1 güç."},
+{key:"genc",icon:"🌱",price:6,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"Wonderkid",en_n:"Wonderkid",
+  golden_desc:"Her tur +1 büyür, max +6.",
+  dark_desc:"Aynı büyüme + KARA: finalde -1 güç."},
+{key:"ch_momentum",icon:"📈",price:6,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"İvme",en_n:"Momentum",
+  golden_desc:"1-2. turda +2; 3-4. turda +3; 5. turdan +4.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"kontra",icon:"⚡",price:8,kind:"power",mode:"scaling",kara_pen:2,
+  tr_n:"Kontra",en_n:"Counter",
+  golden_desc:"Her forvet için +1 güç. En az +1 garanti.",
+  dark_desc:"Aynı + rakip güçlüyse +3 ek. KARA: finalde -2."},
+{key:"buyuk_mac",icon:"🎯",price:9,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"Büyük Maç Adamı",en_n:"Big Game Player",
+  golden_desc:"+1 güç şimdi; 3. turdan itibaren +3.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"yildiz",icon:"🍰",price:12,kind:"power",mode:"scaling",kara_pen:2,
+  tr_n:"Pastanın Çileği",en_n:"Cherry on Top",
+  golden_desc:"En yüksek güç 90+: +7; 85+: +6; 80+: +5; altı: +2.",
+  dark_desc:"Aynı + KARA: finalde -2 güç."},
+{key:"otobus",icon:"🚌",price:8,kind:"defense",mode:"scaling",kara_pen:1,
+  tr_n:"Otobüs",en_n:"Park Bus",
+  golden_desc:"Stoper başına +1 güç.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"kaleci_kalesi",icon:"🧤",price:9,kind:"defense",mode:"scaling",kara_pen:2,
+  tr_n:"Kaleci Kalesi",en_n:"Keeper's Fortress",
+  golden_desc:"Kaleci 75+: +4; 68-74: +2; altı: +1.",
+  dark_desc:"Aynı + KARA: finalde -2 güç."},
+{key:"anadolu",icon:"🚂",price:7,kind:"squad",mode:"scaling",kara_pen:1,
+  tr_n:"Anadolu Eksp.",en_n:"Anatolia Exp.",
+  golden_desc:"70 altı her oyuncu +1 (max +3) + kalan bütçe bonusu.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"altyapi_plani",icon:"🏫",price:9,kind:"squad",mode:"scaling",kara_pen:1,
+  tr_n:"Altyapı Planı",en_n:"Academy Plan",
+  golden_desc:"23 yaş altı oyuncu başına +1 güç, max +4.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"tecrubeli_omurga",icon:"🧓",price:8,kind:"squad",mode:"scaling",kara_pen:1,
+  tr_n:"Tecrübeli Omurga",en_n:"Veteran Spine",
+  golden_desc:"32+ yaş oyuncu başına +1 güç, max +3.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"yerli_blok",icon:"🇹🇷",price:9,kind:"squad",mode:"scaling",kara_pen:1,
+  tr_n:"Yerli Blok",en_n:"Local Block",
+  golden_desc:"2 yerli: +1; 4 yerli: +3; 6+ yerli: +5.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"kanat_akini",icon:"🪽",price:9,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"Kanat Akını",en_n:"Wing Surge",
+  golden_desc:"Kanat/bek başına +1 (max +4).",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"cift_forvet",icon:"⚔️",price:9,kind:"power",mode:"scaling",kara_pen:1,
+  tr_n:"Çift Forvet",en_n:"Two Strikers",
+  golden_desc:"1 ST: +1; 2+ ST: +3.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"derbi",icon:"🦁",price:13,kind:"final",mode:"scaling",kara_pen:3,
+  tr_n:"Derbi Aslanı",en_n:"Derby Lion",
+  golden_desc:"Çeyrek +2; yarı +4; finalde +8.",
+  dark_desc:"Aynı + KARA: finalde -3 güç."},
+{key:"final_provasi",icon:"🏟️",price:11,kind:"final",mode:"scaling",kara_pen:2,
+  tr_n:"Final Provası",en_n:"Final Rehearsal",
+  golden_desc:"Şimdi -€4M; finalde +5 güç.",
+  dark_desc:"Aynı + KARA: finalde -2 güç."},
+{key:"son_dans",icon:"🕺",price:10,kind:"final",mode:"scaling",kara_pen:3,
+  tr_n:"Son Dans",en_n:"Last Dance",
+  golden_desc:"Finalde: sakatsız kadro +6; sakatlık varsa +4.",
+  dark_desc:"Aynı + KARA: finalde -3 güç."},
+{key:"taksit_transfer",icon:"💳",price:8,kind:"economy",mode:"instant",kara_pen:0,
+  tr_n:"Taksitli Transfer",en_n:"Installment Deal",
+  golden_desc:"Hemen +€18M; sonraki 2 tur -€4M.",
+  dark_desc:"Aynı etki. (Dark'ın ek etkisi yok.)"},
+{key:"son_kredi",icon:"🆘",price:9,kind:"economy",mode:"instant",kara_pen:0,
+  tr_n:"Son Kredi",en_n:"Last Credit",
+  golden_desc:"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.",
+  dark_desc:"Aynı etki."},
+{key:"kara_borsa",icon:"🖤",price:7,kind:"risk",mode:"instant",kara_pen:0,
+  tr_n:"Kara Borsa",en_n:"Black Market",
+  golden_desc:"Bedava 1 kart; %25 ihtimal -€12M ceza.",
+  dark_desc:"Aynı etki."},
+{key:"sahte_evrak",icon:"📄",price:10,kind:"risk",mode:"contract",kara_pen:3,
+  tr_n:"Sahte Evrak",en_n:"Fake Papers",
+  golden_desc:"+6 güç; finalde -8 güç.",
+  dark_desc:"Aynı + KARA: finalde -3 ek güç (toplam -11)."},
+{key:"deplasman_kafilesi",icon:"🚌",price:8,kind:"risk",mode:"scaling",kara_pen:1,
+  tr_n:"Deplasman Kafilesi",en_n:"Away Trip",
+  golden_desc:"Rakip güçlüyse +4; zayıfsa +1. Satın alırken -€3M.",
+  dark_desc:"Aynı + KARA: finalde -1 güç."},
+{key:"kumarbaz",icon:"🎲",price:9,kind:"risk",mode:"contract",kara_pen:2,
+  tr_n:"Kumarbaz",en_n:"Bet Sponsor",
+  golden_desc:"+€16M şimdi; her tur %20 ihtimal -€16M.",
+  dark_desc:"Aynı + KARA: finalde -2 güç."},
+{key:"gecici_prim",icon:"💸",price:8,kind:"temporary",mode:"instant",kara_pen:0,
+  tr_n:"Geçici Prim",en_n:"Temporary Bonus",
+  golden_desc:"Bu maç +8 güç; %30 sakatlık; sonraki -2.",
+  dark_desc:"Aynı etki."},
+{key:"kisa_kamp",icon:"⛺",price:7,kind:"temporary",mode:"instant",kara_pen:0,
+  tr_n:"Kısa Kamp",en_n:"Short Camp",
+  golden_desc:"Bu maç +4 güç; sonraki maç -1.",
+  dark_desc:"Aynı etki."},
+{key:"doping",icon:"🧪",price:10,kind:"risk",mode:"contract",kara_pen:3,
+  tr_n:"Doping Söylentisi",en_n:"Doping Rumour",
+  golden_desc:"+8 güç; her tur %35 -€15M; finalde -3.",
+  dark_desc:"Aynı + KARA: finalde -3 ek güç (toplam -6)."},
+{key:"kriz",icon:"🧯",price:8,kind:"risk",mode:"instant",kara_pen:0,
+  tr_n:"Kriz Yönetimi",en_n:"Crisis Management",
+  golden_desc:"Finaldeki güç eksiğini max 6 azaltır.",
+  dark_desc:"Aynı etki."},
+{key:"kurban_belli",icon:"🔪",price:8,kind:"risk",mode:"instant",kara_pen:0,
+  tr_n:"Kurban Belli",en_n:"Sacrifice Play",
+  golden_desc:"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.",
+  dark_desc:"+10 güç; 2 oyuncu 2 tur sakatlanır."},
+{key:"primler_yatinca",icon:"💸",price:9,kind:"power",mode:"instant",kara_pen:0,
+  tr_n:"Primler Yatınca",en_n:"Bonus Day",
+  golden_desc:"+4 güç; gelecek tur -€8M.",
+  dark_desc:"+9 güç; gelecek tur -€15M."},
+{key:"vur_igneyi",icon:"💉",price:6,kind:"risk",mode:"instant",kara_pen:0,
+  tr_n:"Vur İğneyi",en_n:"Play Through Pain",
+  golden_desc:"Sakat oyuncu gerekli. +2 güç; sakatlık +1 tur.",
+  dark_desc:"+5 güç; sakatlık +2 tur."},
+{key:"bu_adam",icon:"⚡",price:12,kind:"power",mode:"instant",kara_pen:0,
+  tr_n:"Bu Adam Nasıl Düştü?",en_n:"Where Did He Come From?",
+  golden_desc:"70-79 puanlı misafir oyuncu 1 tur sahada.",
+  dark_desc:"80-89 puanlı oyuncu; -€10M komisyon."},
+{key:"gec_gec",icon:"🦺",price:5,kind:"defense",mode:"scaling",kara_pen:1,
+  tr_n:"Geç Geçebilirsen",en_n:"Park the Bus",
+  golden_desc:"Güçlü rakibe +5; diğer durumlarda +2.",
+  dark_desc:"+3 ek güç ama %25 sakatlık riski. KARA: finalde -1."},
+{key:"nasip_kismet",icon:"🍀",price:8,kind:"risk",mode:"instant",kara_pen:0,
+  tr_n:"Nasip, Kısmet",en_n:"Destiny",
+  golden_desc:"1 bedava kart; 2 tur fiyatlar -%20.",
+  dark_desc:"2 bedava kart; fiyatlar +%60; başkan bu tur kapalı."},
+{key:"yildiz_krizi",icon:"⭐",price:6,kind:"power",mode:"instant",kara_pen:0,
+  tr_n:"Yıldız Krizi",en_n:"Star Crisis",
+  golden_desc:"En güçlü oyuncu dışarıda; kalan +2/oyuncu.",
+  dark_desc:"Yerli oyuncular +3/oyuncu; %20 -€10M."},
+{key:"kasiga_para",icon:"🤑",price:9,kind:"power",mode:"instant",kara_pen:0,
+  tr_n:"Kasığa Para",en_n:"Backhander",
+  golden_desc:"Rakip -4 güç; gelecek tur pazar kapalı.",
+  dark_desc:"Rakip -8 güç; pazar+başkan kapalı; güç -3."}
+];
+
+let data = JSON.parse(JSON.stringify(CARDS));
+
+function sel(id, options, val){
+  return '<select id="'+id+'">'+options.map(function(o){
+    return '<option value="'+o+'"'+(o===val?' selected':'')+'>'+o+'</option>';
+  }).join('')+'</select>';
+}
+
+function renderCards(){
+  var grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+  data.forEach(function(c){
+    var div = document.createElement('div');
+    div.className = 'card-pair';
+    div.innerHTML =
+      '<div class="card-base">'+
+        '<span class="card-icon">'+c.icon+'</span>'+
+        '<div class="card-key">'+c.key+'</div>'+
+        '<div class="row"><span class="lbl">TR</span><input type="text" id="'+c.key+'_tr_n" value="'+esc(c.tr_n)+'"></div>'+
+        '<div class="row"><span class="lbl">EN</span><input type="text" id="'+c.key+'_en_n" value="'+esc(c.en_n)+'"></div>'+
+        '<div class="row"><span class="lbl">fiyat</span><input type="number" id="'+c.key+'_price" value="'+c.price+'"> €M</div>'+
+        '<div class="row"><span class="lbl">tür</span>'+sel(c.key+'_kind',['power','defense','squad','final','economy','risk','temporary'],c.kind)+'</div>'+
+        '<div class="row"><span class="lbl">mod</span>'+sel(c.key+'_mode',['scaling','instant','contract'],c.mode)+'</div>'+
+      '</div>'+
+      '<div class="card-variant golden">'+
+        '<div class="vtitle golden">⬤ GOLDEN</div>'+
+        '<textarea id="'+c.key+'_golden_desc" rows="4">'+esc(c.golden_desc)+'</textarea>'+
+      '</div>'+
+      '<div class="card-variant dark">'+
+        '<div class="vtitle dark">⬤ DARK</div>'+
+        '<textarea id="'+c.key+'_dark_desc" rows="3">'+esc(c.dark_desc)+'</textarea>'+
+        '<div class="row" style="margin-top:4px"><span class="lbl">final -</span><input type="number" id="'+c.key+'_kara_pen" value="'+c.kara_pen+'" class="'+(c.kara_pen===0?'kara-zero':'')+'"></div>'+
+      '</div>';
+    grid.appendChild(div);
+    var fields = ['tr_n','en_n','price','kind','mode','golden_desc','dark_desc','kara_pen'];
+    fields.forEach(function(f){
+      var el = document.getElementById(c.key+'_'+f);
+      if(!el) return;
+      el.addEventListener('input', function(){ sync(c.key, f, el.value); });
+      el.addEventListener('change', function(){ sync(c.key, f, el.value); });
+    });
+  });
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function sync(key, f, value){
+  var idx = data.findIndex(function(c){ return c.key===key; });
+  if(idx<0) return;
+  if(f==='price'||f==='kara_pen') data[idx][f]=parseInt(value)||0;
+  else data[idx][f]=value;
+  if(f==='kara_pen'){
+    var el = document.getElementById(key+'_kara_pen');
+    if(el) el.className = data[idx].kara_pen===0?'kara-zero':'';
+  }
+}
+
+function exportJSON(){
+  var json = JSON.stringify(data, null, 2);
+  document.getElementById('json-output').value = json;
+  document.getElementById('status').textContent = data.length+' kart';
+}
+
+function copyJSON(){
+  exportJSON();
+  var ta = document.getElementById('json-output');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(function(){
+    document.getElementById('status').textContent = 'Kopyalandı!';
+  }).catch(function(){
+    document.execCommand('copy');
+    document.getElementById('status').textContent = 'Kopyalandı!';
+  });
+}
+
+function resetAll(){
+  if(!confirm('Sıfırla?')) return;
+  data = JSON.parse(JSON.stringify(CARDS));
+  renderCards();
+  document.getElementById('status').textContent = 'Sıfırlandı.';
+}
+
+renderCards();
+</script>
+</body>
+</html>
