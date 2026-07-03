@@ -251,8 +251,9 @@ func _load_input() -> Dictionary:
 		if typeof(meta) == TYPE_DICTIONARY:
 			return meta
 	if OS.has_feature("web"):
-		var raw = JavaScriptBridge.eval("window._copaMatchData?JSON.stringify(window._copaMatchData):null", true)
-		if typeof(raw) == TYPE_STRING and raw != "null":
+		var raw = JavaScriptBridge.eval("localStorage.getItem('copa_godot_match')", true)
+		if typeof(raw) == TYPE_STRING and raw != "" and raw != "null":
+			JavaScriptBridge.eval("localStorage.removeItem('copa_godot_match')", true)
 			var parsed = JSON.parse_string(raw)
 			if typeof(parsed) == TYPE_DICTIONARY:
 				return parsed

@@ -1149,8 +1149,9 @@ function _tryGodotSim(sp) {
     formation: (typeof formation !== "undefined") ? formation : "4-3-3",
     players: formation_players
   };
-  var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  var godotUrl = GODOT_BASE + "?_nc=" + Date.now() + "&d=" + encodeURIComponent(b64);
+  /* localStorage köprüsü — Godot re-export HTML'yi silse bile çalışır */
+  try { localStorage.setItem("copa_godot_match", JSON.stringify(payload)); } catch(e) {}
+  var godotUrl = GODOT_BASE + "?_nc=" + Date.now();
 
   var cvEl = document.getElementById("cv");
   if (!cvEl) { window.removeEventListener("message", _onMsg); return true; }
