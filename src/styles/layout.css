@@ -193,7 +193,7 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .sectlbl{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink2);border-bottom:2px solid var(--line);padding-bottom:3px;margin:8px 0}
 .autotog{display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--mono);font-size:11px;border:1.5px solid var(--ink);border-radius:4px;padding:9px;cursor:pointer;background:var(--paper2)}.autotog.on{background:var(--green);color:#fff}.autotog .dot{width:9px;height:9px;border-radius:50%;background:var(--ink2)}.autotog.on .dot{background:#fff}
 .modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(38,64,47,.45)}
-.sheet{background:var(--paper);border:3px solid var(--ink);border-radius:7px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35);max-height:88vh;overflow-y:auto}
+.sheet{background:var(--paper);border:3px solid var(--ink);border-radius:7px;max-width:380px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.35);max-height:88vh;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}.sheet::-webkit-scrollbar{display:none}
 .bulletin .bhead{background:#26402f;color:#fff;padding:7px 12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;text-transform:uppercase}
 .bulletin .bmascot{text-align:center;font-size:58px;padding:12px 0 4px;background:repeating-linear-gradient(135deg,rgba(47,111,158,.07) 0 7px,transparent 7px 14px)}
 .bchairphoto{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--mustard);display:block;margin:0 auto}
@@ -549,7 +549,7 @@ body.dark .iconbtn{color:var(--ink)}
 .kaos-half-warn{font-family:var(--mono);font-size:10px;color:var(--ink2);background:var(--paper2);border:1.5px dashed var(--line);border-radius:4px;padding:7px 10px;margin:0 6px 8px;text-align:center}
 
 /* ===== kaos roll animation ===== */
-.kaos-rolling{text-align:center;padding:28px 20px 24px}
+.kaos-rolling{text-align:center;padding:28px 20px 24px;overflow:hidden}
 .kaos-roll-lbl{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--ink2);margin-bottom:14px}
 .kaos-roll-wrap{display:flex;justify-content:center;animation:kaosSpinWild 2.7s cubic-bezier(.36,.07,.19,.97) forwards}
 @keyframes kaosSpinWild{0%{transform:rotate(0deg) scale(1)}8%{transform:rotate(60deg) scale(1.12) skewX(6deg)}18%{transform:rotate(-40deg) scale(.93) skewY(-5deg)}30%{transform:rotate(145deg) scale(1.08)}42%{transform:rotate(90deg) scale(.97) skewX(-4deg)}55%{transform:rotate(260deg) scale(1.1)}68%{transform:rotate(310deg) scale(.95) skewY(4deg)}80%{transform:rotate(340deg) scale(1.04)}92%{transform:rotate(358deg) scale(1.01)}100%{transform:rotate(360deg) scale(1)}}
