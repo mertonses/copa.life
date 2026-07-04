@@ -270,8 +270,31 @@ function simulateMatch(myPow, oppPow, rng) {
       pushEvent({ minute: Math.floor(clock), type: "chance", side,
         pos: evPos(side, "chance"), label: isTR ? "Büyük fırsat!" : "Big chance!", comm });
       updateMom(side === "A" ? 3 : -3);
+    } else if (roll < 0.74) {
+      /* foul / yellow card */
+      const fouler = side === "A" ? _pickerB(rng) : _pickerA(rng);
+      const isYellow = rng() < 0.6;
+      const comm = isYellow
+        ? "🟨 " + fouler + " — " + (isTR ? "Sarı kart!" : "Yellow card!")
+        : "⚠️ " + fouler + " — " + (isTR ? "Faul!" : "Foul!");
+      pushEvent({ minute: Math.floor(clock), type: isYellow ? "yellow" : "foul", side: side === "A" ? "B" : "A",
+        pos: evPos(side, "chance"), label: isYellow ? (isTR ? "Sarı kart" : "Yellow card") : (isTR ? "Faul" : "Foul"), comm });
+      updateMom(side === "A" ? -2 : 2);
+    } else if (roll < 0.80) {
+      /* free kick / tactical foul */
+      const comm = "🎯 " + (isTR
+        ? ["Serbest vuruş!", "Taktik faul!", "Hakem durduruyor!", "İyi pozisyon!"][Math.floor(rng()*4)]
+        : ["Free kick!", "Tactical foul!", "Referee stops play!", "Good position!"][Math.floor(rng()*4)]);
+      pushEvent({ minute: Math.floor(clock), type: "freekick", side,
+        pos: evPos(side, "chance"), label: isTR ? "Serbest vuruş" : "Free kick", comm });
+      updateMom(side === "A" ? 2 : -2);
     } else {
-      /* silent possession — just decay momentum */
+      /* atmosphere / crowd moment */
+      const comm = isTR
+        ? ["📣 Tribünler ayakta!", "🌊 Baskı devam ediyor!", "💨 Tempo yükseliyor!", "🔔 Kritik anlar!", "⚡ Her iki takım da baskılıyor!"][Math.floor(rng()*5)]
+        : ["📣 Crowd on their feet!", "🌊 Pressure building!", "💨 The pace is high!", "🔔 Critical moments!", "⚡ Both teams pressing!"][Math.floor(rng()*5)];
+      pushEvent({ minute: Math.floor(clock), type: "atmosphere", side,
+        pos: {x:0.5,y:0.5}, label: isTR ? "Atmosfer" : "Atmosphere", comm });
       updateMom(0);
     }
 
@@ -452,8 +475,9 @@ function buildSim(myPow, oppPow) {
   });
 
   /* ── animation state ── */
-  const ANIM_DUR = (28000 / Math.max(0.2, typeof speedMul !== "undefined" ? speedMul : 1));
-  let startTs = null, animId = null, gameEnded = false;
+  const BASE_DUR = 90000; /* ms for 1x speed — 90 seconds real time */
+  let _simProgress = 0, _simLastTs = null, _simMs = 0;
+  let animId = null, gameEnded = false;
   let liveScore = {A:0,B:0}, momDisplay = 50;
   let liveShots = {A:0,B:0}, liveSaves = {A:0,B:0};
   let nextEvIdx = 0;
@@ -468,7 +492,7 @@ function buildSim(myPow, oppPow) {
   /* ── geometry helpers ── */
   const GW = W*0.27, GL = (W-GW)/2, GR = GL+GW;
   const PAW = W*0.44, PAH = H*0.24, PAL = (W-PAW)/2;
-  const PR = Math.max(6, Math.round(W*0.012)); /* player radius */
+  const PR = Math.max(5, Math.round(W*0.010)); /* player radius */
   const BR = Math.max(4, Math.round(W*0.009)); /* ball radius */
 
   function _evToCanvas(ev) {
@@ -504,6 +528,24 @@ function buildSim(myPow, oppPow) {
     ctx.fillStyle="rgba(255,255,255,0.55)";
     ctx.beginPath(); ctx.arc(W/2,H*0.17,2.5,0,Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.arc(W/2,H*0.83,2.5,0,Math.PI*2); ctx.fill();
+    /* corner arcs */
+    ctx.strokeStyle="rgba(255,255,255,0.35)"; ctx.lineWidth=1;
+    const cr=W*0.025;
+    [[W*0.03,H*0.03],[W*0.97,H*0.03],[W*0.03,H*0.97],[W*0.97,H*0.97]].forEach(([cx,cy])=>{
+      ctx.beginPath();
+      const a1=cx<W/2?(cy<H/2?0:Math.PI*1.5):(cy<H/2?Math.PI*0.5:Math.PI);
+      ctx.arc(cx,cy,cr,a1,a1+Math.PI*0.5); ctx.stroke();
+    });
+    /* goal nets (interior grid lines) */
+    ctx.strokeStyle="rgba(255,255,255,0.2)"; ctx.lineWidth=0.7;
+    const nLines=4;
+    for(let i=1;i<nLines;i++){
+      const nx=GL+i*(GW/nLines);
+      ctx.beginPath(); ctx.moveTo(nx,H*0.03-H*0.028); ctx.lineTo(nx,H*0.03); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(nx,H*0.97); ctx.lineTo(nx,H*0.97+H*0.028); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(GL,H*0.03-H*0.014); ctx.lineTo(GR,H*0.03-H*0.014); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(GL,H*0.97+H*0.014); ctx.lineTo(GR,H*0.97+H*0.014); ctx.stroke();
   }
 
   function drawPlayers(progress) {
@@ -528,13 +570,18 @@ function buildSim(myPow, oppPow) {
         ctx.beginPath(); ctx.arc(p.x, p.y, PR+3, 0, Math.PI*2); ctx.stroke();
       }
 
-      /* name label */
-      if (W > 380 && PR > 7) {
-        ctx.font = `bold ${Math.max(7,Math.round(W*0.018))}px sans-serif`;
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillStyle = "#fff";
-        const label = p.nm.slice(0,4);
-        ctx.fillText(label, p.x, p.y);
+      /* name label — below circle */
+      if (W > 300) {
+        const fs = Math.max(6, Math.round(W * 0.014));
+        ctx.font = `${fs}px sans-serif`;
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        const label = p.nm.slice(0, 5);
+        const tw = ctx.measureText(label).width + 4;
+        const lx = p.x - tw / 2, ly = p.y + PR + 2;
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillRect(lx, ly, tw, fs + 2);
+        ctx.fillStyle = p.isA ? "#93c5fd" : "#fca5a5";
+        ctx.fillText(label, p.x, ly + 1);
       }
     });
   }
@@ -720,9 +767,11 @@ function buildSim(myPow, oppPow) {
 
   function tick(ts) {
     if(gameEnded)return;
-    if(!startTs)startTs=ts;
-    const elapsed=ts-startTs;
-    const progress=Math.min(1,elapsed/ANIM_DUR);
+    if(!_simLastTs)_simLastTs=ts;
+    const dt=ts-_simLastTs; _simLastTs=ts; _simMs+=dt;
+    const curSpeed=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1);
+    _simProgress=Math.min(1,_simProgress+(dt*curSpeed)/BASE_DUR);
+    const progress=_simProgress;
     const clockMin=progress*totalMins;
 
     /* trigger events one per tick — prevents ball teleporting when events cluster */
@@ -733,7 +782,7 @@ function buildSim(myPow, oppPow) {
         const ep=_evToCanvas(ev);
         prevBx=bx; prevBy=by;
         btx=ep.x; bty=ep.y;
-        ballSegStart=elapsed;
+        ballSegStart=_simMs;
         const dist=Math.hypot(btx-bx,bty-by);
         ballSegDur=Math.max(180,Math.min(900,dist*1.2));
         triggerEvent(ev);
@@ -742,7 +791,7 @@ function buildSim(myPow, oppPow) {
     }
 
     /* ball interpolation */
-    const segProg=Math.min(1,(elapsed-ballSegStart)/ballSegDur);
+    const segProg=Math.min(1,(_simMs-ballSegStart)/ballSegDur);
     const sp=ease(segProg);
     bx=prevBx+(btx-prevBx)*sp;
     by=prevBy+(bty-prevBy)*sp;

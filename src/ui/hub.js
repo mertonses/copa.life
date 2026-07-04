@@ -23,7 +23,7 @@ function showSansSpotlightPicker(){
   const _m=$("modal");if(_m&&!_m.classList.contains("hidden")){setTimeout(showSansSpotlightPicker,500);return;}
   const tr=LANG==="tr",_xi=picksBySlot.map((p,i)=>({p,i})).filter(({p})=>p&&!p.injured);
   if(!_xi.length)return;
-  const _spow=chairTrust===3?4:chairTrust===0?1:3;
+  const _spow=chairTrust===3?9:chairTrust===0?3:6;
   const _beamSvg=`<svg class="spot-beam-svg" viewBox="0 0 64 72" width="48" height="54" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g><animateTransform attributeName="transform" type="rotate" values="-20 32 10;20 32 10;-20 32 10" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/>
       <path d="M32 10L2 70L62 70Z" fill="rgba(255,220,60,.06)"/>
