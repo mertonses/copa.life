@@ -223,14 +223,13 @@ function applyRiskCardGain(k){
  if(k==="yildiz_krizi"){
   const s=picksBySlot.filter(Boolean);
   if(!s.length)return;
-  const removeCount=v===1?2:1,bonusPow=v===1?6:4;
+  const removeCount=v===1?2:1,netPow=v===1?4:3;
   const sorted=[...s].sort((a,b)=>effOf(b)-effOf(a));
   const removed=sorted.slice(0,removeCount);
-  const rest=s.length-removed.length;
-  const lostPow=removed.reduce((a,p)=>a+effOf(p),0);
-  riskPowerMod+=rest*bonusPow-lostPow;
-  removed.forEach(p=>pushFeed("⭐ <b>"+shortName(p)+"</b> "+(tr?"dışarıda":"out"),"lose"));
-  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?rest+" oyuncu x+"+bonusPow+" güç":rest+" players x+"+bonusPow+" power"),"pres");
+  // Stars underperform but the rest of the squad rallies: flat net bonus
+  riskPowerMod+=netPow;
+  removed.forEach(p=>pushFeed("⭐ <b>"+shortName(p)+"</b> "+(tr?"kriz içinde":"in crisis"),"lose"));
+  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?"takım ruhu: +"+netPow+" güç":"team spirit: +"+netPow+" power"),"pres");
   if(v===1&&rand()<0.20){spend(4,"spent");pushFeed("⭐ "+(tr?"Medya cezası: -€4M":"Media fine: -€4M"),"lose");}
   return;
  }

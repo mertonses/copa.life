@@ -733,7 +733,10 @@ body.dark .iconbtn{color:var(--ink)}
 .backup-empty{padding:12px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink2)}
 .backupcompare{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;padding:6px 0 8px;border-bottom:1px solid var(--line);margin-bottom:6px}
 #finalRow{display:flex;gap:12px;align-items:stretch}
-#finalRow>.finalreport,#finalRow>.storytile,#finalRow>.econtile{flex:1;min-width:0;margin-top:0;box-shadow:4px 4px 0 0 #000}
+#finalRow>.finalreport,#finalRow>.storytile,#finalRow>.econtile{flex:1;min-width:0;margin-top:0}
+#finalRow>.finalreport,#finalRow>.storytile{box-shadow:4px 4px 0 0 #000}
+#finalRow>.econtile{display:flex;flex-direction:column}
+.econtile .econsum{flex:1;box-shadow:4px 4px 0 0 #000}
 @media(max-width:560px){#finalRow{flex-direction:column}}
 .finalreport h4{background:var(--good);color:#fff;padding:6px 10px;margin:0;font-family:var(--mono);font-size:10px;letter-spacing:1px;border-radius:4px 4px 0 0}
 .frrow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 8px;border-bottom:1px solid var(--line);font-size:11px}
