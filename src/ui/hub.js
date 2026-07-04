@@ -311,7 +311,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   /* Bench render */
   {const _tr=LANG==="tr";let _benchEl=document.getElementById("hubBenchSection");
   if(typeof bench!=="undefined"&&bench&&bench.length){
-    if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _sl=$("shopLbl")||$("shopcards");if(_sl&&_sl.parentNode)_sl.parentNode.insertBefore(_benchEl,_sl);}
+    if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _anchor=$("injbar")||$("cardrow");if(_anchor&&_anchor.parentNode)_anchor.parentNode.insertBefore(_benchEl,_anchor);}
     const _benched=bench.filter(p=>p&&!p.used);
     if(_benched.length){
       const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEK KULÜBESİ":"BENCH"} <span style="opacity:.5">(${_benched.length})</span></div>`;
