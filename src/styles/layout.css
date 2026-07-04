@@ -14,7 +14,10 @@
 .seedbox{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--ink2);text-align:center;margin:8px 0;border:1.5px dashed var(--line);padding:5px}
 .seedbox b{color:var(--mustard);letter-spacing:2px}
 #powHint{font-family:var(--mono);letter-spacing:1px}
-.mtile{border:2px solid var(--ink);background:var(--paper2);padding:5px 6px;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden}
+.mtile{border:2px solid var(--ink);background:var(--paper2);padding:5px 6px;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden;position:relative}
+.mtile-info{position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink2);background:transparent;color:var(--ink2);font-family:var(--mono);font-size:8px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:.55;transition:opacity .15s}
+.mtile-info:hover{opacity:1;border-color:var(--ink);color:var(--ink)}
+@keyframes infoRing{0%,100%{box-shadow:0 0 0 0 rgba(100,116,139,.4)}60%{box-shadow:0 0 0 4px rgba(100,116,139,0)}}
 .mtile .mh{font-family:var(--mono);font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2)}
 .mtile .mv{font-family:var(--disp);font-weight:600;font-size:12px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mtile .ms{font-family:var(--mono);font-size:8px;color:var(--ink2);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
