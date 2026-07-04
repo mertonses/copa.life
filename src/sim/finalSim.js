@@ -690,14 +690,17 @@ function buildSim(myPow, oppPow) {
       case "save":
         liveShots[ev.side==="A"?"B":"A"]++; liveSaves[ev.side]++;
         _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🧤 ${isTR?"Kurtarış":"Save"}</span>`);
+        if(typeof sfxSave==="function")sfxSave();
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-6:6)));
         break;
       case "shot_wide":
         liveShots[ev.side]++;
+        if(typeof sfxKick==="function")sfxKick(2);
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-3:3)));
         break;
       case "corner":
         _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🚩 ${isTR?"Köşe":"Corner"}</span>`);
+        if(typeof sfxWhistle==="function")sfxWhistle();
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?4:-4)));
         break;
       case "halftime":
@@ -722,6 +725,20 @@ function buildSim(myPow, oppPow) {
         } else setTimeout(endMatch,600);
         break;
       }
+      case "yellow":
+        _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🟨 ${isTR?"Sarı Kart":"Yellow Card"}</span>`);
+        if(typeof sfxCard==="function")sfxCard();
+        break;
+      case "foul":
+        if(typeof sfxKick==="function")sfxKick(1);
+        break;
+      case "freekick":
+        _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🎯 ${isTR?"Serbest Vuruş":"Free Kick"}</span>`);
+        if(typeof sfxWhistle==="function")sfxWhistle();
+        break;
+      case "atmosphere":
+        if(typeof sfxGrumble==="function")sfxGrumble();
+        break;
       default: break;
     }
 
