@@ -1,5 +1,5 @@
-/* copa.life Service Worker — v3 */
-const CACHE = "copa-v3";
+/* copa.life Service Worker — v4 */
+const CACHE = "copa-v4";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -36,6 +36,7 @@ const PRECACHE = [
   "/src/state/gameState.js",
   "/src/ui/hub.js",
   "/src/sim/finalSim.js",
+  "/assets/mascot.webp",
   "/assets/mascot.jpg",
   "/assets/icons/cl.png",
   "/assets/icons/copa.png",

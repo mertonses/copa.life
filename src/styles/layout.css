@@ -651,6 +651,22 @@ body.dark .iconbtn{color:var(--ink)}
   .vsbar .opp .vs-crest-col{padding-right:0;margin-right:0;padding-left:6px;margin-left:6px}
   .vs-lbl{font-size:7px;letter-spacing:1px}
   .vsscout{font-size:8px;padding:2px 5px}
+  /* sim screen */
+  .shoutrow{flex-wrap:wrap;gap:4px}
+  .shoutbtn{flex:1 1 calc(50% - 4px);font-size:11px;padding:7px 4px}
+  .speedrow{gap:4px}
+  .spd{padding:6px 8px;font-size:12px}
+  /* modal sheets */
+  .sheet{max-width:calc(100vw - 24px)}
+  /* minitiles */
+  .minitiles{grid-template-columns:1fr 1fr}
+  /* opt cards on mobile */
+  .opt .tag{font-size:9px}
+  /* scrollable containers */
+  .simwrap{-webkit-overflow-scrolling:touch}
+  /* fix overflow on narrow screens */
+  body{overflow-x:hidden}
+  .wrap{overflow-x:hidden}
 }
 @media(min-width:720px){
   .wrap{max-width:880px;padding:14px 16px 48px}

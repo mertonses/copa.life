@@ -108,7 +108,6 @@ function updateUndoBtn(){const b=$("undoBtn");if(b)b.classList.toggle("hidden",!
 function undoPick(){if(!undoData||undoUsed)return;const u=undoData;picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();}
 function toggleCardActive(k){if(invOf(k)<=0)return;if(hasCard(k)){cards=cards.filter(c=>c!==k);sfxStamp();renderHub();return;}if(cards.length>=activeCardSlots()){pushFeed((LANG==="tr"?"🃏 aktif kart slotu dolu":"🃏 active card slots full"),"ch");renderFeed();return;}cards.push(k);sfxStamp();renderHub();}
 function cardArt(k){return "assets/cards/"+k+".png";}
-function debtTaxAmount(){return 0;}
 function kindLabel(k){const tr=LANG==="tr",kind=cardKind(k),m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["ÖZEL","SPECIAL"],temporary:["ÖZEL","SPECIAL"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[kind]||["GÜÇ","POWER"];const lbl=tr?m[0]:m[1];if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
 function modeLabel(k){if(isInstantCard(k))return LANG==="tr"?"ANINDA ÇALIŞIR":"INSTANT";if(!isProgressCard(k))return LANG==="tr"?"SÖZLEŞME":"CONTRACT";return LANG==="tr"?"GELİŞEN":"SCALING";}
 function cardBadgeHTML(k){return `<span class="kindtag kind-${cardKind(k)}">${kindLabel(k)}</span><span class="modetag">${modeLabel(k)}</span>`;}
@@ -392,5 +391,4 @@ function buyCard(k,overridePrice){
   pushFeed("💰 <b>"+L().cards[k].n+"</b> "+L().feedBuy+" (-€"+pr+"M) · "+vl,"buy");
   renderHub();
 }
-function renderChallenges(){}
 function toggleAuto(){autoPlay=!autoPlay;const x=L();$("autoTog").classList.toggle("on",autoPlay);$("autoLbl").textContent=autoPlay?x.autoOn:x.autoOff;if(autoPlay&&round<6&&!$("hub").classList.contains("hidden")){clearTimeout(autoTimer);autoTimer=setTimeout(()=>{if(autoPlay&&!$("hub").classList.contains("hidden"))playMatch();},2000);}else clearTimeout(autoTimer);}

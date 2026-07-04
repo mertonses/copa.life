@@ -81,7 +81,8 @@ body.dark .fix.win,body.dark .chrow.done{background:#23402c}body.dark .fix.lose{
 .simstate{display:inline-block;margin:0 auto 7px;padding:5px 10px;border:1.5px solid var(--ink);background:var(--mustard);color:#23332a;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .momentum{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:7px;margin:0 0 8px;font-family:var(--mono);font-size:9px;color:var(--ink2)}
 .momentum i{height:8px;border:1.5px solid var(--ink);background:linear-gradient(90deg,var(--green) 50%,var(--red) 50%);border-radius:99px;display:block;transition:background 0.4s ease}
-.simstats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:0 0 8px;font-family:var(--mono);font-size:9px;color:var(--ink2)}
+.simstats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:0 0 8px;font-family:var(--mono);font-size:9px;color:var(--ink2)}
+@media(min-width:480px){.simstats{grid-template-columns:repeat(6,1fr)}}
 .simstats span{border:1.5px solid var(--line);background:var(--paper2);padding:5px 6px;text-transform:uppercase;letter-spacing:.6px}
 .simstats b{display:block;color:var(--ink);font-size:13px;letter-spacing:0;margin-top:1px}
 .simstage{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:8px;align-items:stretch;margin-bottom:8px}
@@ -179,6 +180,16 @@ body.dark .econsum .econwhy{background:#fff6d8;color:#1f2d35;border-color:#e0c45
 body.dark .simgoals,body.dark .finalreport{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 body.dark .simstats span,body.dark .eventpanel,body.dark .fieldframe{background:#edf2f7;color:#1f2d35;border-color:#d3dde7}
 @media(max-width:760px){.simstage{grid-template-columns:1fr}.eventpanel{min-height:92px}.simgoals{max-height:110px}}
+@media(max-width:480px){
+  .board .bn{font-size:11px}
+  .board .bsc{font-size:20px}
+  .simstats{grid-template-columns:repeat(3,1fr);font-size:8px}
+  .simstats b{font-size:11px}
+  .momentum{grid-template-columns:34px 1fr 34px;font-size:8px}
+  .speedrow{flex-wrap:wrap;justify-content:center}
+  .comm{font-size:10px;padding:5px 2px}
+  .radioband{font-size:9px}
+}
 @media(max-width:520px){
   .vsbar .mid{flex:0 0 76px;padding:8px 4px}
   .vs-vs{font-size:20px}

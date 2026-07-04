@@ -480,6 +480,7 @@ function buildSim(myPow, oppPow) {
   let animId = null, gameEnded = false;
   let liveScore = {A:0,B:0}, momDisplay = 50;
   let liveShots = {A:0,B:0}, liveSaves = {A:0,B:0};
+  let liveCorners = {A:0,B:0}, liveYellows = {A:0,B:0};
   let nextEvIdx = 0;
   /* ball */
   let bx = W/2, by = H/2, btx = W/2, bty = H/2, prevBx = W/2, prevBy = H/2;
@@ -488,6 +489,8 @@ function buildSim(myPow, oppPow) {
   let flashAlpha = 0, flashColor = [255,255,255];
   let burstText = "", burstAlpha = 0, burstTimer = 0;
   let commText = "—";
+  /* possession smoothed */
+  let _possDisplay = 50;
 
   /* ── geometry helpers ── */
   const GW = W*0.27, GL = (W-GW)/2, GR = GL+GW;
@@ -611,39 +614,77 @@ function buildSim(myPow, oppPow) {
   }
 
   function drawHUD(progress) {
+    const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
     const clockMin = Math.min(120, Math.floor(progress * totalMins));
-    /* score pill */
-    const scoreFS = Math.round(W*0.033), scoreW = 78, scoreH = 22, sX=(W-scoreW)/2, sY=6;
-    ctx.fillStyle = "rgba(0,0,0,0.62)"; _rrect(sX,sY,scoreW,scoreH,4); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.font = `bold ${scoreFS}px monospace`;
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(liveScore.A+"–"+liveScore.B, W/2, sY+scoreH/2);
-    /* clock badge */
-    const clkW=36,clkH=16,clkX=sX+scoreW+3,clkY=sY+3;
-    ctx.fillStyle="rgba(0,0,0,0.5)"; _rrect(clkX,clkY,clkW,clkH,3); ctx.fill();
-    ctx.fillStyle="#fff"; ctx.font=`${Math.round(W*0.022)}px monospace`;
-    ctx.fillText(clockMin+"'", clkX+clkW/2, clkY+clkH/2);
-    /* momentum strip */
-    const mF=momDisplay/100, mW=W*0.55, mH=4, mX=(W-mW)/2, mY=H-6;
-    ctx.fillStyle="rgba(0,0,0,0.4)"; ctx.fillRect(mX,mY,mW,mH);
-    ctx.fillStyle="#3fb950"; ctx.fillRect(mX,mY,mW*mF,mH);
-    ctx.fillStyle="#ef4444"; ctx.fillRect(mX+mW*mF,mY,mW*(1-mF),mH);
-    /* team labels */
-    ctx.fillStyle="rgba(59,130,246,0.85)"; ctx.fillRect(mX-2,mY,2,mH);
-    ctx.fillStyle="rgba(239,68,68,0.85)"; ctx.fillRect(mX+mW,mY,2,mH);
-    /* burst text (goal announcement) */
+    const myN=(typeof teamName!=="undefined"&&teamName)?teamName.slice(0,8):"US";
+    const oppN=(typeof opponent!=="undefined"&&opponent.name)?opponent.name.slice(0,8):"RAK";
+    const lateGame = clockMin >= 80;
+
+    /* ── scoreboard panel (top center) ── */
+    const sbW = Math.min(W*0.72, 260), sbH = 32, sbX=(W-sbW)/2, sbY=5;
+    ctx.fillStyle="rgba(0,0,0,0.72)"; _rrect(sbX,sbY,sbW,sbH,5); ctx.fill();
+
+    /* team A name (left) */
+    const nFS = Math.max(8, Math.round(W*0.018));
+    ctx.font=`bold ${nFS}px monospace`; ctx.textAlign="left"; ctx.textBaseline="middle";
+    ctx.fillStyle="#93c5fd";
+    ctx.fillText(myN.toUpperCase(), sbX+7, sbY+sbH*0.38);
+
+    /* score (center) */
+    const scoreFS=Math.round(W*0.038);
+    ctx.font=`bold ${scoreFS}px monospace`; ctx.textAlign="center";
+    ctx.fillStyle="#fff";
+    ctx.fillText(liveScore.A+"–"+liveScore.B, W/2, sbY+sbH*0.5);
+
+    /* team B name (right) */
+    ctx.textAlign="right"; ctx.fillStyle="#fca5a5";
+    ctx.fillText(oppN.toUpperCase(), sbX+sbW-7, sbY+sbH*0.38);
+
+    /* clock badge (below score) */
+    const clkFS=Math.max(7,Math.round(W*0.019));
+    ctx.font=`${clkFS}px monospace`; ctx.textAlign="center";
+    ctx.fillStyle=lateGame?"#facc15":"rgba(255,255,255,0.7)";
+    ctx.fillText(clockMin+"'", W/2, sbY+sbH*0.8);
+
+    /* ── bottom bar: possession + momentum ── */
+    _possDisplay += (momDisplay - _possDisplay) * 0.03;
+    const mW=W*0.62, mH=6, mX=(W-mW)/2, mY=H-10;
+    const pF=_possDisplay/100;
+
+    /* possession bg */
+    ctx.fillStyle="rgba(0,0,0,0.45)"; _rrect(mX,mY,mW,mH,3); ctx.fill();
+    /* team A side */
+    ctx.fillStyle="#3b82f6"; ctx.fillRect(mX,mY,mW*pF,mH);
+    /* team B side */
+    ctx.fillStyle="#ef4444"; ctx.fillRect(mX+mW*pF,mY,mW*(1-pF),mH);
+    /* possession % labels */
+    const plFS=Math.max(7,Math.round(W*0.017));
+    ctx.font=`${plFS}px monospace`;
+    ctx.fillStyle="rgba(255,255,255,0.9)"; ctx.textAlign="left";
+    ctx.fillText(Math.round(pF*100)+"%", mX+3, mY-2);
+    ctx.textAlign="right";
+    ctx.fillText(Math.round((1-pF)*100)+"%", mX+mW-3, mY-2);
+    /* possession label */
+    ctx.textAlign="center"; ctx.fillStyle="rgba(255,255,255,0.45)";
+    ctx.font=`${Math.max(6,Math.round(W*0.014))}px monospace`;
+    ctx.fillText(isTR?"TOP":"POSS", W/2, mY-2);
+
+    /* ── burst text (goal announcement) ── */
     if (burstAlpha>0 && burstText) {
-      const bfs=Math.round(W*0.048), bY=H*0.44;
+      const bfs=Math.round(W*0.052), bY=H*0.44;
       ctx.globalAlpha=Math.min(1,burstAlpha);
-      ctx.fillStyle="rgba(0,0,0,0.55)"; _rrect((W-200)/2,bY-bfs*0.6-4,200,bfs+12,5); ctx.fill();
+      const bw=Math.min(W*0.85, ctx.measureText(burstText).width+32);
+      ctx.fillStyle="rgba(0,0,0,0.62)"; _rrect((W-bw)/2,bY-bfs*0.65-6,bw,bfs+14,6); ctx.fill();
+      ctx.strokeStyle="rgba(255,215,0,0.7)"; ctx.lineWidth=1.5;
+      _rrect((W-bw)/2,bY-bfs*0.65-6,bw,bfs+14,6); ctx.stroke();
       ctx.fillStyle="#fff"; ctx.font=`bold ${bfs}px var(--disp,sans-serif)`;
       ctx.textAlign="center"; ctx.textBaseline="middle";
       ctx.fillText(burstText,W/2,bY);
       ctx.globalAlpha=1;
     }
-    /* goal flash */
+    /* ── goal flash ── */
     if (flashAlpha>0) {
-      ctx.fillStyle=`rgba(${flashColor.join(",")},${flashAlpha*0.35})`;
+      ctx.fillStyle=`rgba(${flashColor.join(",")},${flashAlpha*0.32})`;
       ctx.fillRect(0,0,W,H);
     }
   }
@@ -656,6 +697,10 @@ function buildSim(myPow, oppPow) {
     _dom("statShot",liveShots.A+"-"+liveShots.B);
     _dom("statSave",liveSaves.A+"-"+liveSaves.B);
     _dom("statDanger",result.stats.shots.A+"-"+result.stats.shots.B);
+    _dom("statCorner",liveCorners.A+"-"+liveCorners.B);
+    _dom("statYellow",liveYellows.A+"-"+liveYellows.B);
+    const pct=Math.round(_possDisplay);
+    _dom("statPoss",pct+"–"+(100-pct));
     const ma=$("momA"),mb=$("momB"),bar=$("momBar");
     const a=Math.round(momDisplay);
     if(ma)ma.textContent=a+"%"; if(mb)mb.textContent=(100-a)+"%";
@@ -699,6 +744,7 @@ function buildSim(myPow, oppPow) {
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?-3:3)));
         break;
       case "corner":
+        liveCorners[ev.side]++;
         _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🚩 ${isTR?"Köşe":"Corner"}</span>`);
         if(typeof sfxWhistle==="function")sfxWhistle();
         momDisplay=Math.max(18,Math.min(82,momDisplay+(ev.side==="A"?4:-4)));
@@ -726,8 +772,10 @@ function buildSim(myPow, oppPow) {
         break;
       }
       case "yellow":
+        liveYellows[ev.side]++;
         _addGoalRow(ev.side,`<b>${ev.minute}'</b><span>🟨 ${isTR?"Sarı Kart":"Yellow Card"}</span>`);
         if(typeof sfxCard==="function")sfxCard();
+        flashColor=[250,204,21]; flashAlpha=0.5;
         break;
       case "foul":
         if(typeof sfxKick==="function")sfxKick(1);

@@ -12,9 +12,6 @@ function chemBonus(s){
  if(s.filter(p=>p.age>=32).length>=2){total+=1;parts.push(["VET",L().chem.vet,1]);}
  return {total:Math.min(6,total),parts};
 }
-function calcFan(){return 0;}
-function fanBonus(){return 0;}
-function softenBonus(v){return v;}
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
