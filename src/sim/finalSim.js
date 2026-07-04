@@ -800,6 +800,39 @@ function buildSim(myPow, oppPow) {
     _updateDOMStats();
   }
 
+  function _calcPlayerRatings() {
+    window.lastMatchRatings = null;
+    try {
+      const players = (typeof picksBySlot !== "undefined" ? picksBySlot : []).filter(Boolean);
+      if (!players.length) return;
+      /* build goal/assist maps from events (side A = player team) */
+      const goalMap = {}, assistMap = {};
+      events.forEach(ev => {
+        if (ev.type !== "goal" || ev.side !== "A") return;
+        const sn = (ev.scorer || "").split(" ").pop();
+        if (sn) goalMap[sn] = (goalMap[sn] || 0) + 1;
+        const an = (ev.assist || "").split(" ").pop();
+        if (an) assistMap[an] = (assistMap[an] || 0) + 1;
+      });
+      const gFor = result.score.A, gAgainst = result.score.B, won = result.won;
+      const seed = typeof seedNum !== "undefined" ? seedNum : 0;
+      window.lastMatchRatings = players.map((p, i) => {
+        const sn = p.name.split(" ").pop();
+        const goals = goalMap[sn] || 0, assists = assistMap[sn] || 0;
+        const grp = typeof groupOf === "function" ? groupOf(p.pos) : "MID";
+        let r = 6.0;
+        r += goals * 1.5 + assists * 0.7;
+        r += won ? 0.3 : (gAgainst > gFor ? -0.25 : 0);
+        if (grp === "GK") r += gAgainst === 0 ? 0.8 : -gAgainst * 0.25;
+        else if (grp === "DEF" && gAgainst === 0) r += 0.3;
+        /* seeded per-player variance ±0.3 */
+        r += (Math.sin(seed * 31 + i * 17) * 0.5 + 0.5) * 0.6 - 0.3;
+        r = Math.round(Math.max(4.5, Math.min(9.5, r)) * 10) / 10;
+        return { name: p.name, pos: p.pos, eff: typeof effOf === "function" ? effOf(p) : (p.ov || 0), rating: r, goals, assists };
+      });
+    } catch (e) {}
+  }
+
   function makeReport(won) {
     const tr=typeof LANG!=="undefined"&&LANG==="tr";
     const kM=result.keyMoment||(window.goals&&window.goals[0]&&window.goals[0].scorer)||"-";
@@ -824,6 +857,7 @@ function buildSim(myPow, oppPow) {
     try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e2){}
     _dom("simScore",result.score.A+"–"+result.score.B);
     makeReport(result.won);
+    _calcPlayerRatings();
     setTimeout(()=>endRun(result.won,result.score.A+"–"+result.score.B),900);
   }
 
