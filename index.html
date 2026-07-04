@@ -1001,7 +1001,7 @@ function _renderResultFx(r){
     /* trophy */
     const trophySvg=`<g transform="translate(50%,50%) translate(-18,-24)"><path d="M18 4H8v12c0 5.5 4.5 8 10 8s10-2.5 10-8V4z" fill="none" stroke="#f4d03f" stroke-width="1.8" stroke-linecap="round"/><path d="M8 8H4a2 2 0 0 0 0 4c0 3 2 4.5 4 5" fill="none" stroke="#f4d03f" stroke-width="1.6"/><path d="M28 8h4a2 2 0 0 1 0 4c0 3-2 4.5-4 5" fill="none" stroke="#f4d03f" stroke-width="1.6"/><line x1="18" y1="24" x2="18" y2="30" stroke="#f4d03f" stroke-width="1.6"/><rect x="11" y="30" width="14" height="2.5" rx="1" fill="#f4d03f" opacity=".8"/>
     <circle cx="18" cy="12" r="2" fill="#f4d03f" opacity=".7"><animate attributeName="opacity" values=".7;1;.7" dur="1.2s" repeatCount="indefinite"/></circle><path d="M18 6l.6 1.8H21l-1.5 1.1.6 1.8L18 9.6l-2.1 1.1.6-1.8L15 7.8h2.4z" fill="#f4d03f"><animateTransform attributeName="transform" type="scale" values="1;1.15;1" dur="1.2s" additive="sum" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1" repeatCount="indefinite"/></path></g>`;
-    el.innerHTML=`<svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">${pts.join("")}${trophySvg}</svg>`;
+    el.innerHTML=`<svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">${pts.join("")}</svg>`;
   } else if(sacked){
     /* KOVULDUN: red X burst + door slam lines */
     el.innerHTML=`<svg viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
