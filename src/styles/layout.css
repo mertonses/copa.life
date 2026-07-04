@@ -1,16 +1,7 @@
 /* Kupa Yolu - ekran yerlesimi, giris ve genel paneller */
 .minitiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.dashtop{display:grid;grid-template-columns:155px 1fr;gap:8px;align-items:stretch;margin-bottom:8px}
-.dashtop-right{display:flex;flex-direction:column;gap:8px;min-width:0}
-.dashtop .actionbar{flex:none;margin:0}
-/* ===== Başkan paneli ===== */
-.chair-panel{display:flex;flex-direction:column;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--paper2);position:relative}
-.chair-panel-btn{flex:1;width:100%;border:none;background:transparent;cursor:pointer;padding:0;display:block;transition:opacity .15s}
-.chair-panel-btn:hover{opacity:.88}
-.chair-panel-btn .presbtnphoto{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;aspect-ratio:unset}
-.chair-panel-foot{background:var(--ink);color:var(--paper);padding:4px 8px;text-align:center;flex-shrink:0}
-.chair-nm{font-family:var(--disp);font-weight:700;font-size:10px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.chair-pw{font-family:var(--mono);font-size:9px;opacity:.72;line-height:1}
+.dashtop{display:flex;gap:10px;align-items:stretch;margin-bottom:8px;flex-wrap:wrap}
+.dashtop .actionbar{flex:0 0 auto;margin:0;align-items:stretch}
 .mtile.clickable{cursor:pointer}.mtile.clickable:hover{border-color:var(--ink)}
 #powTile .mv{font-size:20px}
 .pbreak{padding:8px 14px}
@@ -279,10 +270,12 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .tcl.news .tct{color:var(--red);min-width:auto;font-size:12px}
 
 /* v5 actionbar layout */
-.dashtop .actionbar{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-start;margin:0}
-.actionbar #talkBtn{flex:1 1 0;min-width:0;order:1;width:auto;margin:0;padding:8px 8px;font-size:13px}
-.actionbar #playBtn{flex:1 1 100%;order:2;margin:0}
-.actionbar #autoTog{flex:1 1 100%;order:3}
+.dashtop{display:block}
+.dashtop .actionbar{flex:none;width:100%;display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-start;margin:0 0 8px}
+.actionbar .presbtngp{flex:0 0 auto;order:1;margin:0}
+.actionbar #talkBtn{flex:1 1 0;min-width:0;order:2;width:auto;margin:0;padding:8px 8px;font-size:13px}
+.actionbar #playBtn{flex:1 1 100%;order:3;margin:0}
+.actionbar #autoTog{flex:1 1 100%;order:4}
 @media(min-width:760px){.dashtop .actionbar{flex-wrap:nowrap}.actionbar #playBtn{flex:2 1 auto}.actionbar .presbtngp{flex:0 0 auto}.actionbar #talkBtn{flex:0 0 auto}.actionbar #autoTog{flex:1 1 auto}}
 @media(max-width:520px){.countrypick{grid-template-columns:repeat(3,1fr)}.countrypick button{font-size:7px}}
 @media(max-width:480px){
@@ -603,6 +596,13 @@ body.dark .iconbtn{color:var(--ink)}
 .presbtnphoto{width:100%;height:auto;display:block;object-fit:contain}
 .presbtnlabel{font-family:var(--mono);font-weight:700;font-size:7px;letter-spacing:.8px;text-transform:uppercase;text-align:center;background:var(--ink);color:var(--paper);padding:3px 4px;border-radius:0 0 4px 4px;line-height:1;white-space:nowrap}
 
+/* ===== chairman mini button in vsbar ===== */
+.vs-chair-btn{width:28px;height:28px;border-radius:50%;overflow:hidden;border:1.5px solid var(--ink);background:var(--paper2);padding:0;cursor:pointer;flex-shrink:0;transition:opacity .15s,transform .12s;display:flex;align-items:center;justify-content:center}
+.vs-chair-btn:hover{transform:scale(1.1)}
+.vs-chair-btn .presbtnphoto{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;aspect-ratio:unset}
+
+/* ===== vsbar: kendi gücünü powTile zaten gösteriyor, vsbar'da gizle ===== */
+.vsbar .you .vs-pw{display:none}
 
 /* ===== tcentre in hub ===== */
 .tcentre-hub{margin-top:10px;margin-bottom:0}
