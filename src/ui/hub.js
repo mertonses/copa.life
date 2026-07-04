@@ -294,7 +294,8 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     <circle cx="9" cy="10" r="1.2" fill="${fg}" opacity="0.35"/>
     <circle cx="35" cy="10" r="1.2" fill="${fg}" opacity="0.35"/>
     <text x="22" y="37" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="${fg}" letter-spacing="0.5">${lbl}</text>
-  </svg>`;}const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#8e2d20","#bf4329","#f5f0e8",lbl);}}}
+  </svg>`;}
+  const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#8e2d20","#bf4329","#f5f0e8",lbl);}}}
   const _pwCol=v=>v>=90?"#16c96b":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
   {const el=$("youPw");if(el){el.textContent=sp.power;el.style.color=_pwCol(sp.power);}}
   $("youNm").textContent=teamName||"XI";$("oppNm").textContent=opponent.name;
