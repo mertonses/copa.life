@@ -14,7 +14,7 @@
 .seedbox{font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--ink2);text-align:center;margin:8px 0;border:1.5px dashed var(--line);padding:5px}
 .seedbox b{color:var(--mustard);letter-spacing:2px}
 #powHint{font-family:var(--mono);letter-spacing:1px}
-.mtile{border:2px solid var(--ink);background:var(--paper2);padding:5px 6px;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden;position:relative}
+.mtile{border:1px solid var(--line);background:var(--paper2);padding:5px 6px;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden;position:relative}
 .mtile-info{position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink2);background:transparent;color:var(--ink2);font-family:var(--mono);font-size:8px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:.55;transition:opacity .15s}
 .mtile-info:hover{opacity:1;border-color:var(--ink);color:var(--ink)}
 @keyframes infoRing{0%,100%{box-shadow:0 0 0 0 rgba(100,116,139,.4)}60%{box-shadow:0 0 0 4px rgba(100,116,139,0)}}
@@ -24,7 +24,7 @@
 #fanTile .mv{font-size:18px}
 .wrap{max-width:480px;margin:0 auto;padding:12px 14px 38px;min-height:100vh;display:flex;flex-direction:column}
 .actionbar{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.tcentre{border:2px solid var(--ink);background:var(--paper2);margin-bottom:10px;overflow:hidden}
+.tcentre{border:1px solid var(--line);background:var(--paper2);margin-bottom:10px;overflow:hidden}
 .tch{background:#26402f;color:#fff;font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:2px;padding:6px 10px;display:flex;align-items:center;gap:6px}
 .tclive{color:#ff5a4a;animation:blink 1.2s steps(1) infinite}
 .tclines{padding:4px 0}
@@ -365,7 +365,7 @@ body.dark-mode {
 
 /* ===== player names on roundel ===== */
 .roundel.full .rpos{display:none}
-.roundel .rname{display:block;font-size:7px;font-weight:700;letter-spacing:-.3px;line-height:1;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;text-align:center;text-transform:uppercase}
+.roundel .rname{display:block;font-size:6.5px;font-weight:700;letter-spacing:-.3px;line-height:1.1;margin-top:1px;overflow:hidden;text-overflow:clip;white-space:normal;word-break:break-word;max-width:100%;text-align:center;text-transform:uppercase;max-height:14px}
 
 /* ===== run-end unlocks ===== */
 .runUnlocks{background:var(--mustard);border:2px solid var(--ink);border-radius:5px;padding:10px 14px;margin:10px 0;text-align:center}
@@ -590,11 +590,19 @@ body.dark .iconbtn{color:var(--ink)}
 /* ===== mobile budget ===== */
 @media(max-width:480px){.budget{min-width:100px;max-width:170px}.budget .v{font-size:17px}}
 
-/* ===== presBtn dikey portreli ===== */
+/* ===== presBtn dikey portreli (legacy, artık vsbar içinde) ===== */
 .presbtngp{display:flex;flex-direction:column;gap:0;min-width:58px;max-width:74px}
 .btn-pres{padding:0;overflow:hidden;min-width:58px;height:auto;border-radius:4px 4px 0 0;border-bottom:none}
 .presbtnphoto{width:100%;height:auto;display:block;object-fit:contain}
 .presbtnlabel{font-family:var(--mono);font-weight:700;font-size:7px;letter-spacing:.8px;text-transform:uppercase;text-align:center;background:var(--ink);color:var(--paper);padding:3px 4px;border-radius:0 0 4px 4px;line-height:1;white-space:nowrap}
+
+/* ===== chairman mini button in vsbar ===== */
+.vs-chair-btn{width:28px;height:28px;border-radius:50%;overflow:hidden;border:1.5px solid var(--ink);background:var(--paper2);padding:0;cursor:pointer;flex-shrink:0;transition:opacity .15s,transform .12s;display:flex;align-items:center;justify-content:center}
+.vs-chair-btn:hover{transform:scale(1.1)}
+.vs-chair-btn .presbtnphoto{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;aspect-ratio:unset}
+
+/* ===== vsbar: kendi gücünü powTile zaten gösteriyor, vsbar'da gizle ===== */
+.vsbar .you .vs-pw{display:none}
 
 /* ===== tcentre in hub ===== */
 .tcentre-hub{margin-top:10px;margin-bottom:0}
