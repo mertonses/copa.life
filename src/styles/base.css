@@ -1,6 +1,7 @@
 /* Kupa Yolu - temel tema, reset ve global kurallar */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 input,textarea,[contenteditable]{user-select:text;-webkit-user-select:text}
+:focus-visible{outline:2px solid var(--focus-ring,rgba(66,154,115,0.38));outline-offset:2px;border-radius:4px}
 @keyframes ddshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-3px)}}
 @keyframes blink{50%{opacity:.4}}
 html,body{background:var(--page-bg);color:var(--text-primary);font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:400;font-size:15px;letter-spacing:-0.01em}
