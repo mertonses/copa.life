@@ -21,11 +21,14 @@
 .pl{position:absolute;border:2px solid var(--pitchln)}.pl.half{left:8px;right:8px;top:50%;height:0}.pl.circ{width:30%;aspect-ratio:1;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.pl.boxb{left:28%;right:28%;bottom:8px;height:13%;border-bottom:none;border-radius:0 0 4px 4px}.pl.boxt{left:28%;right:28%;top:8px;height:13%;border-top:none;border-radius:4px 4px 0 0}
 .pitch-zone{display:none}
 .roundel{position:absolute;transform:translate(-50%,-50%);width:13%;max-width:50px;aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.25s;overflow:hidden;padding:2px}
-.roundel.empty{border:2px dashed rgba(255,255,255,.55);color:#fff}.roundel.empty .rp{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px}.roundel.empty .slot-sil{position:absolute;width:62%;height:62%;opacity:.45;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-50%)}
+.roundel.empty{border:2px dashed rgba(255,255,255,.5);color:#fff;background:rgba(0,40,15,.3)}.roundel.empty .rp{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px}.roundel.empty .slot-sil{position:absolute;width:62%;height:62%;opacity:.5;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-50%)}
 .wk-burst{display:inline-block;animation:wkPop .5s cubic-bezier(.36,1.6,.46,1) both}
 @keyframes wkPop{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-.roundel.cur{border-color:#8e2d20;border-style:solid;box-shadow:0 0 0 3px #8e2d20;background:rgba(142,45,32,.2)}.roundel.cur .rp{color:#fff}
+.roundel.cur{border-color:#e55;border-style:solid;box-shadow:0 0 0 3px rgba(229,85,85,.8);background:rgba(142,45,32,.25);animation:curPulse 1.8s ease-in-out infinite}.roundel.cur .rp{color:#fff}
+@keyframes curPulse{0%,100%{box-shadow:0 0 0 3px rgba(229,85,85,.8)}50%{box-shadow:0 0 0 5px rgba(229,85,85,.35)}}
 .roundel.full{border:2px solid rgba(0,0,0,.3);box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.25)}
+.roundel.slot-filled{animation:slotGlow .9s ease-out}
+@keyframes slotGlow{0%{box-shadow:0 0 0 6px rgba(255,240,80,.85),0 3px 0 rgba(0,0,0,.25)}100%{box-shadow:0 3px 0 rgba(0,0,0,.25)}}
 .roundel.inj{box-shadow:0 0 0 3px var(--red),0 3px 0 rgba(0,0,0,.25)}
 .roundel .injmark{position:absolute;right:1px;top:1px;width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;border:1px solid #fff;display:flex;align-items:center;justify-content:center;z-index:3}
 .roundel .rn{font-family:var(--disp);font-weight:600;font-size:8px;line-height:1;text-align:center;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}

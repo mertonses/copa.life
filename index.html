@@ -165,9 +165,9 @@ body.dark #copyBtn,body.dark #quickBtn{border:1px solid rgba(255,255,255,0.25)}
     <div class="draft-cols">
       <div class="draft-left">
         <div id="rollstage" class="rollstage">
-          <div id="rollbtns"><button class="btn btn-roll" id="rollBtn" onclick="roll()"><svg class="dsvg" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="4.5" fill="#c0392b" stroke="#7b241c" stroke-width="1.5"/><rect x="1.5" y="1.5" width="25" height="10" rx="4.5" fill="rgba(255,255,255,.12)"/><circle cx="8.5" cy="8.5" r="2.8" fill="#fff"/><circle cx="14" cy="14" r="2.8" fill="#fff"/><circle cx="19.5" cy="19.5" r="2.8" fill="#fff"/></svg> ZAR AT</button><button class="btn btn-ghost btn-mini" id="allBtn" style="margin-top:8px" onclick="quickAll()">⚡ Akıllı doldur</button><button class="btn btn-ghost btn-mini hidden" id="undoBtn" style="margin-top:6px" onclick="undoPick()">↩ Son hamleyi geri al</button></div>
+          <div id="rollbtns"><button class="btn btn-roll" id="rollBtn" onclick="roll()"><svg class="dsvg" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="4.5" fill="#c0392b" stroke="#7b241c" stroke-width="1.5"/><rect x="1.5" y="1.5" width="25" height="10" rx="4.5" fill="rgba(255,255,255,.12)"/><circle cx="8.5" cy="8.5" r="2.8" fill="#fff"/><circle cx="14" cy="14" r="2.8" fill="#fff"/><circle cx="19.5" cy="19.5" r="2.8" fill="#fff"/></svg> ZAR AT</button><button class="btn btn-ghost btn-mini" id="allBtn" style="margin-top:8px" onclick="quickAll()">⚡ Takımı Otomatik Kur</button><div class="autofill-wrap"><span id="autoFillLbl">Hedef: €20M</span><input type="range" id="autoFillSlider" min="1" max="80" value="20" step="1" oninput="autoFillUpdate(this.value)"></div><button class="btn btn-ghost btn-mini hidden" id="undoBtn" style="margin-top:6px;font-size:10px;opacity:.8" onclick="undoPick()">↩ Son hamleyi geri al</button></div>
           <div id="dicebox" class="dicebox hidden"><div class="dface" id="fxDie">⚀</div><div class="dcap" id="fxCap"></div></div></div>
-        <div id="optstage" class="hidden"><div class="opts" id="opts"></div><button class="btn btn-ghost btn-mini" id="rerollBtn" onclick="rerollOptions()">Seçenekleri yenile</button><div class="optmsg" id="optmsg"></div></div>
+        <div id="optstage" class="hidden"><div class="opts" id="opts"></div><button class="btn btn-ghost btn-mini" id="rerollBtn" onclick="rerollOptions()">🔄 Seçenekleri yenile</button><span class="reroll-desc" id="rerollDesc">Aynı mevki için 3 yeni aday getirir.</span><div class="optmsg" id="optmsg"></div></div>
         <div class="draft-extra" id="draftExtra"></div>
       </div>
       <div class="draft-right">
@@ -477,18 +477,19 @@ function setBudget(){
   {let lf=$("legacyChip");if(legacyFund>0){if(!lf){lf=document.createElement("div");lf.id="legacyChip";lf.style.cssText="font-family:var(--mono);font-size:9px;color:var(--mustard);letter-spacing:.5px;margin-top:1px";$("budgetBox").prepend(lf);}lf.innerHTML=`🏛 €${legacyFund}M`;}else if(lf){lf.remove();}}{const bb=$("budgetBox");["plenty","safe","warn","tight","low","debt"].forEach(c=>bb.classList.remove(c));if(budget>=25)bb.classList.add("plenty");else if(budget>=12)bb.classList.add("safe");else if(budget>=5)bb.classList.add("warn");else if(budget>=0)bb.classList.add("tight");else bb.classList.add("debt");}
   let lim=$("budgetLimit");if(!lim){lim=document.createElement("div");lim.id="budgetLimit";lim.className="lim";$("budgetBox").appendChild(lim);}
   let ladder=$("debtLadder");if(!ladder){ladder=document.createElement("div");ladder.id="debtLadder";ladder.className="debtladder";$("budgetBox").appendChild(ladder);}
-  const sack=typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT,active=typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT,left=Math.max(0,budget-active);
-  lim.textContent=budget<0?(LANG==="tr"?"Limit €"+sack+"M · €"+left+"M kredi":"Limit €"+sack+"M · €"+left+"M credit"):(LANG==="tr"?"Limit €"+sack+"M":"Limit €"+sack+"M");
+  const sack=typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT,active=typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT;
+  const borcLimiti=Math.abs(sack),harcanabilir=Math.max(0,budget-sack),tr=LANG==="tr";
+  lim.textContent=budget<0?(tr?`BORÇTA · Borç Limiti: €${borcLimiti}M`:`IN DEBT · Debt Limit: €${borcLimiti}M`):(tr?`Borç Limiti: €${borcLimiti}M`:`Debt Limit: €${borcLimiti}M`);
   ladder.innerHTML=`<span class="${budget<0?"on":""}">0</span><span class="${budget<=-10?"on":""}">-10</span><span class="${budget<=-20?"on":""}">-20</span><span class="${budget<=active+1?"on":""}">${active}</span>`;
   /* mini bar */
   const total=BUDGET+Math.abs(sack);
   const filled_pct=Math.max(0,Math.min(100,((budget-sack)/total)*100));
   const bf=$("budgetBarFill");if(bf)bf.style.width=filled_pct+"%";
   const bl=$("budgetBarLeft");if(bl)bl.textContent="€"+budget+"M";
-  const br=$("budgetBarRight");if(br)br.textContent="Limit: €"+sack+"M";
+  const br=$("budgetBarRight");if(br)br.textContent=(tr?"Borç Lmt":"Debt Lmt")+": €"+borcLimiti+"M";
   const rows=$("budgetRows");
   const spent_so_far=econStats?econStats.spent||0:0;
-  if(rows){const kalan=Math.max(0,budget-sack);rows.innerHTML=`<span><span class="br-l">${LANG==="tr"?"Kalan":"Left"}</span><span class="br-v ${kalan<=0?"br-crit":kalan<5?"br-warn":""}">€${kalan}M</span></span><span><span class="br-l">${LANG==="tr"?"Harcanan":"Spent"}</span><span class="br-v">€${spent_so_far}M</span></span>`;}
+  if(rows){rows.innerHTML=`<span><span class="br-l">${tr?"NAKİT":"CASH"}</span><span class="br-v ${budget<0?"br-crit":budget<5?"br-warn":""}">€${budget}M</span></span><span><span class="br-l">${tr?"BORÇ LMT":"DEBT LMT"}</span><span class="br-v">€${borcLimiti}M</span></span><span><span class="br-l">${tr?"HARCANABİLİR":"SPENDABLE"}</span><span class="br-v ${harcanabilir<=5?"br-warn":""}">€${harcanabilir}M</span></span><span><span class="br-l">${tr?"HARCANAN":"SPENT"}</span><span class="br-v">€${spent_so_far}M</span></span>`;}
 }
 function unfilled(){const a=[];filled.forEach((f,i)=>{if(!f)a.push(i);});return a;}
 function clip(s,n){return s.length>n?s.slice(0,n-1)+"…":s;}
@@ -514,22 +515,34 @@ const POS_SVGS={
 };
 function posGroup(pos){if(pos==="GK")return"GK";if(["CB","LB","RB","WB"].includes(pos))return"DEF";if(["CDM","CM","CAM","LM","RM"].includes(pos))return"MID";if(["LW","RW"].includes(pos))return"WNG";return"FWD";}
 function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(remaining-1)*0.6;let any=false;
+  const tr=LANG==="tr";
   const _curPos=currentSlot>=0&&slots[currentSlot]?slots[currentSlot][0]:"ST";
   const _posIco=POS_SVGS[posGroup(_curPos)]||"";
   currentOpts.forEach((o,i)=>{const af=canAffordCost((o.price||0)+reserve);if(af)any=true;const pen=o.ov-o.eff,mis=pen>0;
-    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");if(o.bargain)b.style.setProperty("--disc",`"${o.discountPct||0}%"`);b.disabled=!af;
+    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");if(o.bargain)b.style.setProperty("--disc",`"${o.discountPct||0}%"`);
     const tre=o.trait?` <span class="trbadge">${TRAITS[o.trait].e}</span>`:"";
     const ovb=o.hidden?`<div class="ovb" style="background:#7b5cd6">??</div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)}">${o.ov}</div>`);
-    const debtAfter=budget-(o.price||0),debtTxt=debtAfter<0?(LANG==="tr"?" · borçla alınır":" · uses credit"):"";
-    const meta=o.hidden?x.hiddenMeta:((o.free?x.free:x.grp[o.natG]||"")+(mis?` · ${x.mismatch(pen)}`:"")+(o.trait?` · ${x.trait[o.trait]}`:"")+" · "+(af?x.afford:x.tooexp)+debtTxt+(o.bargain?(LANG==="tr"?" · 🔥 fırsat":" · 🔥 deal"):""));
+    const debtAfter=budget-(o.price||0),debtTxt=debtAfter<0?(tr?" · borçla alınır":" · uses credit"):"";
+    const meta=o.hidden?x.hiddenMeta:((o.free?x.free:x.grp[o.natG]||"")+(mis?` · ${x.mismatch(pen)}`:"")+(o.trait?` · ${x.trait[o.trait]}`:"")+" · "+(af?x.afford:x.tooexp)+debtTxt+(o.bargain?(tr?" · 🔥 fırsat":" · 🔥 deal"):""));
     const nm=o.hidden?x.hiddenName:o.name;
-    const priceHTML=o.bargain?`<div class="oldp">€${o.oldPrice}M</div><div class="p">€${o.price}M</div>`:`<div class="p">€${o.price}M</div>`;
     const eliteBadge=o.eliteDiscount?`<span class="elitebadge"><svg viewBox="0 0 10 10" width="9" height="9" fill="currentColor" style="vertical-align:middle;margin-right:2px"><polygon points="5,1 6.2,3.8 9.5,4.1 7.2,6.4 7.9,9.7 5,8.1 2.1,9.7 2.8,6.4 0.5,4.1 3.8,3.8"/></svg>ELİT İNDİRİMLİ</span>`:"";
-    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#7b5cd6":ovCol(o.ov)}"></div>${ovb}<div class="opt-ico-wrap">${_posIco}</div><div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}</div><div class="ctx">${ctxLine(o)}${eliteBadge}</div></div><div class="price">${priceHTML}</div>`;
-    if(af)b.onclick=()=>choose(i);b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});c.appendChild(b);});
+    /* price / cant-afford area */
+    let priceArea;
+    if(!af){const cap=budget-reserve-DEBT_LIMIT,excess=Math.max(0,Math.round(((o.price||0)-cap)*10)/10);priceArea=`<div class="price"><div class="p">€${o.price||0}M</div><div class="cant-lbl">${tr?`+€${excess}M aşıyor`:"+€"+excess+"M over"}</div></div>`;}
+    else if(o.bargain){priceArea=`<div class="price"><div class="oldp">€${o.oldPrice}M</div><div class="p">€${o.price}M</div></div>`;}
+    else{priceArea=`<div class="price"><div class="p">€${o.price||0}M</div></div>`;}
+    /* hover tip for affordable */
+    let hoverTip="";
+    if(af&&!o.hidden){const nb=budget-(o.price||0),nl=Math.max(0,nb-DEBT_LIMIT);hoverTip=`<div class="opt-hover-tip">${tr?"Satın alırsan":"If bought"} · ${tr?"Kasa":"Cash"} €${budget}M → €${nb}M · ${tr?"Kalan":"Left"}: €${nl}M</div>`;}
+    /* secondary info */
+    const uyum=!o.hidden?(mis?(pen>=6?(tr?"Düşük":"Low"):(tr?"Orta":"Mid")):(tr?"Yüksek":"High")):"";
+    const secInfo=o.hidden?"":`${tr?"Yaş":"Age"}: ${o.age||"—"} · ${tr?"Uyum":"Fit"}: ${uyum}`;
+    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#7b5cd6":ovCol(o.ov)}"></div>${ovb}<div class="opt-ico-wrap">${_posIco}</div><div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}</div><div class="ctx">${ctxLine(o)}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${hoverTip}`;
+    b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--red)";}return;}choose(i);};
+    b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});c.appendChild(b);});
   const debtPick=currentOpts.some(o=>canAffordCost((o.price||0)+reserve)&&budget-(o.price||0)<0);
-  const rb=$("rerollBtn");if(rb){rb.disabled=draftRerollUsed;rb.textContent=draftRerollUsed?(LANG==="tr"?"Yenileme kullanıldı ✗":"Reroll used ✗"):(LANG==="tr"?"Ücretsiz yenile (1 hak)":"Free reroll (1 left)");}
-  $("optmsg").textContent=any?(debtPick?(LANG==="tr"?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}
+  const rb=$("rerollBtn");if(rb){rb.disabled=draftRerollUsed;rb.innerHTML=draftRerollUsed?(tr?"Yenileme kullanıldı ✗":"Reroll used ✗"):(tr?"🔄 Ücretsiz yenile (1 hak)":"🔄 Free reroll (1 left)");const rd=$("rerollDesc");if(rd)rd.textContent=tr?"Aynı mevki için 3 yeni aday getirir.":"Brings 3 new candidates for the same position.";}
+  const om=$("optmsg");if(om){om.style.color="";om.textContent=any?(debtPick?(tr?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}}
 function rerollOptions(){if(draftRerollUsed||currentSlot<0)return;draftRerollUsed=true;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6,_cap=budget-_reserve-DEBT_LIMIT;currentOpts=draftOptions(_pos);if(!currentOpts.some(o=>o.price<=_cap)){const fp=fabPlayer(_pos,55,61);fp.price=0;fp.free=true;currentOpts[0]=fp;}sfxRoll();renderOpts();}
 function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.pos))+(p.train||0);picksBySlot[idx]=p;filled[idx]=true;remaining--;spend(p.price||0,"spent");setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();}
 function surOf(p){const w=(p.name||"").trim().split(" ");const last=w[w.length-1];if(/^\d+$/.test(last)&&w.length>1)return clip(w[w.length-2],8);return clip(last,7);}
@@ -538,9 +551,14 @@ function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.inn
 function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;r.title=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");r.setAttribute("aria-label",r.title);const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;r.innerHTML=`${isCap?'<span class="capbadge"><svg viewBox="0 0 12 9" width="10" height="7.5" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>':""}${p.injured?'<span class="injmark"><svg viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>':""}
 <span class="rov">${eff}</span><span class="rname">${surOf(p)}</span>`;}
 function choose(i){const p=currentOpts[i];const _sidx=currentSlot,_budB=budget;const _wasHidden=!!p.hidden;if(p.hidden){p.hidden=false;const x=L(),tag=p.ov>=76?x.cevher:(p.ov<=64?x.balon:x.reveal);pushFeed("🔍 <b>"+surOf(p)+"</b> "+tag+" "+p.ov,p.ov>=76?"win":"lose");}sfxSeat();if(!p.fab)usedNames.add(p.name);fillSlot(currentSlot,p);if(_wasHidden){undoData=null;undoUsed=true;}else{undoData={idx:_sidx,name:p.fab?null:p.name,budget:_budB};}currentSlot=-1;updateDeadline();const _dp=$("pitch");if(_dp)_drawConnectors(_dp);renderDraftExtra();if(remaining<=0){buildBench();$("ddbanner").classList.add("hidden");if(reuseClub)reuseClub=false;showPostcard(enterHub);return;}loadRollStage();}
-function quickAll(){const uf=unfilled();uf.forEach((idx,k)=>{const pos=slots[idx][0],SG=groupOf(pos),reserve=(uf.length-1-k)*1;
-    let pick=null;let inp=availG(SG).filter(p=>canAffordCost(valueOf(p[1])+reserve));if(inp.length)pick=rnd(inp);
-    if(!pick){let any=availAll().filter(p=>canAffordCost(valueOf(p[1])+reserve));if(any.length)pick=rnd(any);}
+function autoFillUpdate(v){const lbl=$("autoFillLbl");if(lbl)lbl.textContent=(LANG==="tr"?"Hedef: €":"Target: €")+v+"M";}
+function quickAll(){const slider=$("autoFillSlider"),budgetTarget=slider?+slider.value:999;
+  const uf=unfilled();uf.forEach((idx,k)=>{const pos=slots[idx][0],SG=groupOf(pos),reserve=(uf.length-1-k)*1;
+    let pick=null;
+    let inp=availG(SG).filter(p=>canAffordCost(valueOf(p[1])+reserve)&&valueOf(p[1])<=budgetTarget);
+    if(!inp.length)inp=availG(SG).filter(p=>canAffordCost(valueOf(p[1])+reserve));
+    if(inp.length)pick=rnd(inp);
+    if(!pick){let any=availAll().filter(p=>canAffordCost(valueOf(p[1])+reserve)&&valueOf(p[1])<=budgetTarget);if(!any.length)any=availAll().filter(p=>canAffordCost(valueOf(p[1])+reserve));if(any.length)pick=rnd(any);}
     if(!pick){let all=availG(SG);if(!all.length)all=availAll();if(all.length)pick=all.reduce((a,b)=>a[1]<b[1]?a:b);}
     let obj;if(pick){usedNames.add(pick[0]);obj=mkOpt(pick[0],pick[1],pick[2],pos,false,pick[3],pick[4],pick[5]);}else obj=fabPlayer(pos,55,61);
     fillSlot(idx,obj);});
