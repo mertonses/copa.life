@@ -412,12 +412,16 @@ a.footer-link{color:var(--color-slate)}
 
 /* ===== settings dropdown ===== */
 .settingswrap{position:relative}
-.settingsdrop{position:absolute;left:0;top:calc(100% + 6px);background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:8px;z-index:200;min-width:120px;box-shadow:var(--shadow-md)}
+.settingsdrop{position:absolute;left:0;top:calc(100% + 6px);background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);padding:8px;z-index:200;min-width:150px;box-shadow:var(--shadow-md)}
+.sd-group{margin-bottom:8px}
+.sd-group:last-child{margin-bottom:0}
+.sd-hdr{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--color-slate);opacity:.7;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid var(--border-subtle)}
 .sdgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.sdbtn{padding:7px 5px;background:var(--surface-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text-primary);transition:border-color var(--tr-fast),background var(--tr-fast);line-height:1}
+.sdbtn{padding:7px 5px;background:var(--surface-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text-primary);transition:border-color var(--tr-fast),background var(--tr-fast);line-height:1}
 .sdbtn:hover{border-color:var(--color-primary);background:var(--surface-elevated)}
 .sdbtn.on{background:var(--color-ink);color:var(--color-background);border-color:var(--color-ink)}
 .sdbtn.langbtn img{width:13px;height:9px}
+.sdbtn.sd-full{width:100%;padding:7px 8px;justify-content:flex-start;gap:6px;font-size:9px;letter-spacing:.5px;text-transform:uppercase}
 .sdrow{width:100%;text-align:left;font-size:12px}
 .sdrow.iconbtn{display:flex;align-items:center;gap:6px;font-family:var(--mono);letter-spacing:.5px}
 
@@ -452,6 +456,12 @@ a.footer-link{color:var(--color-slate)}
 .hwt{display:block;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--color-ink);margin-bottom:3px;text-align:left}
 .hwd{font-size:11px;color:var(--color-slate);line-height:1.5;margin:0;text-align:left}
 .hwd em{font-style:italic;opacity:.88;font-size:.95em}
+/* Howto modal grid */
+.howto-mgrid{display:grid;grid-template-columns:1fr;gap:12px}
+.howto-mstep{display:grid;grid-template-columns:36px 1fr;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-subtle)}
+.howto-mstep:last-child{border-bottom:none}
+.howto-mico{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg);flex-shrink:0}
+@media(min-width:560px){.howto-mgrid{grid-template-columns:1fr 1fr}}
 
 /* ===== music button active state ===== */
 #musicBtn.playing{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
