@@ -3,9 +3,16 @@
   /* Base palette */
   --color-ink:#0C1213;--color-background:#E6EEEF;--color-slate:#496E71;--color-primary:#429A73;
   /* Semantic tokens */
-  --page-bg:var(--color-background);--surface-bg:#F0F5F5;--surface-elevated:#FFFFFF;
+  --page-bg:var(--color-background);
+  --surface-default:var(--color-background);
+  --surface-bg:#F0F5F5;--surface-elevated:#FFFFFF;
+  --surface-raised:color-mix(in srgb,var(--color-background) 94%,var(--color-primary) 6%);
+  --surface-muted:color-mix(in srgb,var(--color-background) 88%,var(--color-slate) 12%);
+  --surface-dark:var(--color-ink);
   --text-primary:var(--color-ink);--text-secondary:var(--color-slate);
-  --border-subtle:rgba(12,18,19,0.12);--border-default:rgba(12,18,19,0.20);--border-selected:var(--color-primary);
+  --text-on-dark:var(--color-background);--text-on-primary:var(--color-ink);
+  --border-subtle:rgba(12,18,19,0.12);--border-default:rgba(12,18,19,0.20);
+  --border-strong:var(--color-slate);--border-selected:var(--color-primary);
   --action-primary:var(--color-primary);--action-primary-hover:#3B8B68;
   --overlay-bg:rgba(12,18,19,0.62);--focus-ring:rgba(66,154,115,0.38);
   --disabled-bg:rgba(12,18,19,0.06);--disabled-text:rgba(12,18,19,0.35);
@@ -33,14 +40,17 @@
 .cuproad{display:flex;gap:4px;margin-top:10px;border:2px solid var(--line);padding:5px;background:var(--paper2);overflow-x:auto}
 .cuproad .fix{flex:1;min-width:54px}
 .fix .fpw{font-family:var(--mono);font-size:9px;color:var(--ink2)}
-.fix.trophy{flex:0 0 30px;display:flex;align-items:center;justify-content:center;border-color:var(--red)}
-.fix.trophy.lit{background:var(--red);color:#fff}
+.fix.trophy{flex:0 0 30px;display:flex;align-items:center;justify-content:center;border-color:var(--color-primary)}
+.fix.trophy.lit{background:var(--color-primary);color:var(--color-ink)}
 .tvover{font-family:var(--disp);font-size:9px;letter-spacing:1px;color:#ff5a4a;text-align:center;padding:2px;margin-bottom:2px;animation:blink 1.4s steps(1) infinite}
 .vsscout{background:transparent;color:var(--ink);border:1.5px solid var(--ink);font-size:9px;padding:3px 7px;cursor:pointer;border-radius:3px;font-family:var(--mono);font-weight:700;letter-spacing:.5px;display:inline-flex;align-items:center;gap:3px;transition:.1s;white-space:nowrap}.vsscout:hover{background:var(--ink);color:#fff}
 .fixbar{display:flex;gap:4px;margin-bottom:10px}
 .fix{flex:1;border:1.5px solid var(--line);border-radius:4px;padding:4px 2px;text-align:center;font-family:var(--mono);background:var(--paper2)}
 .fix .fr{font-size:7px;letter-spacing:1px;color:var(--ink2);text-transform:uppercase}.fix .fo{font-size:8px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center}.fix-logo{width:18px;height:18px;object-fit:contain;display:block;image-rendering:auto}.fix .fs{font-family:var(--disp);font-weight:700;font-size:12px;line-height:1.1}
-.fix.cur{border-color:var(--color-ink);border-width:2px;background:var(--color-ink);color:#fff}.fix.cur .fr,.fix.cur .fo{color:rgba(255,255,255,.7)}.fix.cur .fs{color:rgba(255,255,255,.85)}.fix.win{background:#dff0df;border-color:var(--good)}.fix.win .fs{color:var(--good)}.fix.lose{background:#f6dcd6;border-color:var(--red)}.fix.lose .fs{color:var(--red)}.fix.draw{background:#f8eecb;border-color:var(--mustard)}.fix.draw .fs{color:#b8860b}
+.fix.cur{border-color:var(--color-primary);border-width:2px;background:color-mix(in srgb,var(--color-primary) 10%,var(--surface-elevated))}.fix.cur .fr,.fix.cur .fo{color:var(--color-slate)}.fix.cur .fs{color:var(--color-primary);font-weight:800}
+.fix.win{background:var(--surface-elevated);border-color:var(--color-slate)}.fix.win .fs{color:var(--color-ink)}
+.fix.lose{background:var(--surface-muted);border-color:var(--border-default)}.fix.lose .fs{color:var(--color-ink);opacity:.65}
+.fix.draw{background:var(--surface-elevated);border-color:var(--border-default)}.fix.draw .fs{color:var(--color-ink)}
 .pitch{position:relative;width:100%;aspect-ratio:68/92;border:3px solid rgba(255,255,255,.9);border-radius:5px;margin-bottom:12px;overflow:hidden;
   background:
     repeating-linear-gradient(0deg,rgba(0,0,0,.04) 0 1px,transparent 1px 100%),
@@ -69,21 +79,21 @@
 .roundel .injmark{position:absolute;right:1px;top:1px;width:13px;height:13px;border-radius:50%;background:var(--red);color:#fff;border:1px solid rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;z-index:3}
 .roundel .rn{font-family:var(--disp);font-weight:600;font-size:8px;line-height:1;text-align:center;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .roundel .ov{font-family:var(--mono);font-size:8px;line-height:1;margin-top:1px;font-weight:700}
-.vsbar{display:flex;align-items:stretch;border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:6px;font-family:var(--mono);min-height:80px}
-.vsbar .side{flex:1;display:flex;align-items:center;gap:0;padding:10px 14px;background:var(--paper2);position:relative}
+.vsbar{display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:var(--radius-md);overflow:hidden;margin-bottom:6px;font-family:var(--mono);min-height:80px;background:var(--surface-elevated);box-shadow:var(--shadow-sm)}
+.vsbar .side{flex:1;display:flex;align-items:center;gap:0;padding:10px 14px;background:var(--surface-elevated);position:relative}
 .vsbar .you{flex-direction:row}.vsbar .opp{flex-direction:row-reverse}
 .vs-crest-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
-.vsbar .you .vs-crest-col{border-right:2px dashed rgba(95,115,97,.35);padding-right:12px;margin-right:12px}
-.vsbar .opp .vs-crest-col{border-left:2px dashed rgba(95,115,97,.35);padding-left:12px;margin-left:12px}
+.vsbar .you .vs-crest-col{border-right:1px solid var(--border-subtle);padding-right:12px;margin-right:12px}
+.vsbar .opp .vs-crest-col{border-left:1px solid var(--border-subtle);padding-left:12px;margin-left:12px}
 .vs-crest{width:46px;height:54px}.vs-crest .club-logo{width:100%;height:100%;object-fit:contain;display:block}
 .vs-ti{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.vsbar .opp .vs-ti{align-items:flex-end;text-align:right}
-.vs-lbl{font-size:8px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;font-weight:700;line-height:1}
-.vs-nm{font-family:var(--disp);font-weight:800;font-size:clamp(10px,2.8vw,17px);text-transform:uppercase;line-height:1.05;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vs-pw{font-size:15px;font-weight:700;line-height:1}
-.vsbar .mid{flex:0 0 150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 14px;background:var(--color-ink);color:#fff}
-.vs-vs{font-family:var(--disp);font-weight:900;font-size:32px;font-style:italic;line-height:1;color:#fff;letter-spacing:-1px;position:relative;animation:vsglitch 4s infinite}
-.vs-vs::before,.vs-vs::after{content:"VS";position:absolute;inset:0;font:inherit;font-style:inherit;letter-spacing:inherit}
-.vs-vs::before{color:#ff2d55;animation:vsglitch-r 4s infinite;clip-path:polygon(0 20%,100% 20%,100% 45%,0 45%)}
+.vs-lbl{font-size:8px;letter-spacing:1.5px;color:var(--color-slate);text-transform:uppercase;font-weight:600;line-height:1}
+.vs-nm{font-family:var(--disp);font-weight:800;font-size:clamp(10px,2.8vw,17px);text-transform:uppercase;line-height:1.05;color:var(--color-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-pw{font-size:15px;font-weight:700;line-height:1;color:var(--color-primary)}
+.vsbar .mid{flex:0 0 100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 8px;background:var(--surface-muted);border-left:1px solid var(--border-subtle);border-right:1px solid var(--border-subtle);color:var(--color-ink)}
+.vs-vs{font-family:var(--disp);font-weight:900;font-size:22px;line-height:1;color:var(--color-ink);letter-spacing:1px}
+.vsweather,.vsaud{font-size:9px;color:var(--color-slate);text-align:center;line-height:1.3}
+.vs-vs::before,.vs-vs::after{display:none}
 .vs-vs::after{color:#00c8ff;animation:vsglitch-b 4s infinite;clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%)}
 @keyframes vsglitch{0%,89%,91%,93%,100%{transform:none}90%{transform:translate(-1px,0)}92%{transform:translate(2px,0)}}
 @keyframes vsglitch-r{0%,89%,91%,93%,100%{transform:none;opacity:0}90%{transform:translate(3px,-1px);opacity:1}92%{transform:translate(-2px,1px);opacity:1}93%{opacity:0}}

@@ -7,17 +7,18 @@
 .card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--mustard)}
-/* Variant badges — GOLDEN(0) / DARK(1) */
-.var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:0}
-.var-0{background:#d4a017;color:#fff}
-.var-1{background:#2e2e2e;color:#f0ece4;border:1px solid #555}
-.var-2{background:#1e1e1e;color:#e0dcd4;border:1px solid #444}
-.card .copy{display:inline-block;font-size:8px;color:var(--ink2);margin-top:2px;border-radius:2px}
-.card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--mustard) inset}
-/* Shop tile variant tinting — GOLDEN(0), DARK(1) */
-.shopcard.sv-0{border-color:#c8940a;box-shadow:inset 0 0 0 1px rgba(200,148,10,.5)}
-.shopcard.sv-1{border-color:#3c3c3c;box-shadow:inset 0 0 0 1px #3c3c3c}
-.shopcard.sv-2{border-color:#3c3c3c;box-shadow:inset 0 0 0 1px #3c3c3c}
+/* Variant badges — GOLDEN(0) primary / DARK(1) ink / SPECIAL(2) slate */
+.var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:0}
+.var-0{background:var(--color-primary);color:var(--color-ink)}
+.var-1{background:var(--color-ink);color:var(--color-background)}
+.var-2{background:var(--color-slate);color:var(--color-background)}
+.card .copy{display:inline-block;font-size:8px;color:var(--color-slate);margin-top:2px;border-radius:2px}
+.card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--color-primary) inset}
+.card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--color-slate)}
+/* Shop tile variant tinting — GOLDEN(0) primary, DARK(1) ink */
+.shopcard.sv-0{border-color:var(--color-primary);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary) 35%,transparent)}
+.shopcard.sv-1{border-color:var(--color-ink);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-ink) 25%,transparent)}
+.shopcard.sv-2{border-color:var(--color-slate);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-slate) 30%,transparent)}
 /* Active card row variant tinting */
 .card.v1{border-left-color:#c8940a}
 .card.v2{border-left-color:#1c1c1c}
@@ -39,11 +40,11 @@
 .chrow .crw{font-family:var(--disp);font-weight:600;font-size:10px;color:#5a3fb0;flex-shrink:0}
 .chrow.done .crw{color:var(--color-primary)}
 .shopcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:8px;margin-bottom:8px}
-.shopcard{display:flex;gap:9px;align-items:center;border:2px solid var(--ink);border-radius:4px;padding:8px;background:var(--paper2);cursor:pointer;transition:.12s}
+.shopcard{display:flex;gap:9px;align-items:center;border:1px solid var(--border-default);border-radius:var(--radius-md);padding:10px;background:var(--surface-elevated);cursor:pointer;transition:border-color var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);box-shadow:var(--shadow-sm)}
 .shopcard.bronze{border-color:var(--bronze)}.shopcard.silver{border-color:var(--silver)}.shopcard.gold{border-color:var(--gold)}
-.shopcard:hover:not(.owned):not(.cant){background:var(--blue);color:#fff}.shopcard:hover:not(.owned):not(.cant) .sd,.shopcard:hover:not(.owned):not(.cant) .sp,.shopcard:hover:not(.owned):not(.cant) .powerpreview{color:#fff}
+.shopcard:hover:not(.owned):not(.cant){border-color:var(--color-primary);box-shadow:var(--shadow-md);background:var(--surface-muted)}
 .shopcard.cant{opacity:.5;cursor:not-allowed}.shopcard.owned{opacity:.45;cursor:default}
-.shopcard .si{font-size:22px;flex-shrink:0}.shopcard .sm{flex:1;min-width:0}.shopcard .st{font-family:var(--disp);font-weight:600;font-size:14px}.shopcard .sr{font-family:var(--mono);font-size:7px;letter-spacing:1px;text-transform:uppercase;opacity:.7}.shopcard .sd{font-family:var(--mono);font-size:9px;color:var(--ink2);line-height:1.3}.shopcard .sp{font-family:var(--mono);font-weight:700;font-size:17px;color:var(--color-ink);background:var(--mustard);border-radius:4px;padding:2px 7px;flex-shrink:0}
+.shopcard .si{font-size:22px;flex-shrink:0}.shopcard .sm{flex:1;min-width:0}.shopcard .st{font-family:var(--disp);font-weight:600;font-size:14px}.shopcard .sr{font-family:var(--mono);font-size:7px;letter-spacing:1px;text-transform:uppercase;opacity:.7}.shopcard .sd{font-family:var(--mono);font-size:9px;color:var(--ink2);line-height:1.3}.shopcard .sp{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--color-ink);background:var(--surface-muted);border:1px solid var(--border-default);border-radius:var(--radius-sm);padding:3px 8px;flex-shrink:0}
 .shopcard .sp small{display:block;font-size:7px;letter-spacing:1px;text-align:center}
 .shopcard.upgrade{box-shadow:0 0 0 2px var(--mustard) inset}
 .collection{border:2px solid var(--ink);background:var(--paper2);margin-bottom:8px}
@@ -52,10 +53,11 @@
 .collectionfilters button{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:4px 6px;cursor:pointer}
 .collectionfilters button.on{background:var(--color-ink);color:#fff;border-color:var(--color-ink)}
 .collectiongrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px;max-height:270px;overflow:auto}
-.ccard{position:relative;border:2px solid var(--ink);padding:8px 8px 8px 12px;min-height:68px;cursor:pointer}
+.ccard{position:relative;border:1px solid var(--border-default);border-radius:var(--radius-md);padding:8px 8px 8px 12px;min-height:68px;cursor:pointer;background:var(--surface-elevated);box-shadow:var(--shadow-sm);transition:border-color var(--tr-fast),box-shadow var(--tr-fast)}
 .ccard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--catc,var(--mustard))}
 .ccard.locked{opacity:.35;filter:saturate(.35);cursor:help}
-.ccard.active{box-shadow:0 0 0 2px var(--green) inset}
+.ccard:hover:not(.locked){border-color:var(--color-primary);box-shadow:var(--shadow-md)}
+.ccard.active{box-shadow:0 0 0 2px var(--color-primary) inset;border-color:var(--color-primary)}
 .ccard .ctop{display:flex;align-items:center;gap:5px;font-family:var(--disp);font-weight:700;font-size:12px;line-height:1.1}
 .ccard .ctier{font-family:var(--mono);font-size:7px;letter-spacing:1px;margin-top:3px}
 .ccard .cprog{font-family:var(--mono);font-size:9px;margin-top:3px}

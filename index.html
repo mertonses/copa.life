@@ -1239,19 +1239,35 @@ function weatherPowerBonus(){
 function pickCaptain(){
   const sq=picksBySlot.map((p,i)=>({p,i})).filter(e=>e.p);
   if(!sq.length)return;
-  /* suggest most experienced: prefer highest age, then highest ov */
   const suggestIdx=sq.reduce((best,e)=>{
     const ba=sq[best].p,ea=e.p;
     const bScore=(ba.age||0)*100+(ba.ov||0),eScore=(ea.age||0)*100+(ea.ov||0);
     return eScore>bScore?sq.indexOf(e):best;
   },0);
   const suggestI=sq[suggestIdx].i;
+  const isCur=e=>captainIdx===e.i;
+  const _armSVG=`<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2L10 6L14 6.5L11 9.5L11.8 14L8 12L4.2 14L5 9.5L2 6.5L6 6Z"/></svg>`;
   const opts=sq.map(e=>{
-    const isSug=e.i===suggestI;
-    return `<button class="btn btn-ghost" style="font-size:11px;text-align:left;padding:6px 8px;${isSug?"border:1.5px solid var(--mustard);background:rgba(230,173,46,.08)":""}" onclick="setCaptain(${e.i});closeModal()">${e.p.name||'?'}${isSug?` <span style="font-size:7px;font-family:var(--mono);color:var(--mustard);letter-spacing:.5px;vertical-align:middle">${LANG==="tr"?"ÖNERİ":"SUGGEST"}</span>`:""}<br><span style="opacity:.65;font-size:9px">${(L().abbr[e.p.pos]||e.p.pos)} · ${e.p.ov}${e.p.age?" · "+e.p.age+(LANG==="tr"?"y":"y"):""}</span></button>`;
+    const isSug=e.i===suggestI,isSel=isCur(e);
+    return `<button class="cap-card${isSel?" cap-card-sel":""}" onclick="setCaptain(${e.i});closeModal()" style="text-align:left">
+      <div class="cap-card-top">
+        <span class="cap-card-name">${e.p.name||'?'}</span>
+        ${isSug?`<span class="cap-card-badge">${_armSVG} ${LANG==="tr"?"ÖNERİ":"PICK"}</span>`:""}
+        ${isSel?`<span class="cap-card-check"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8 6.5 12 13 4"/></svg></span>`:""}
+      </div>
+      <div class="cap-card-meta">
+        <span>${L().abbr[e.p.pos]||e.p.pos}</span>
+        <span style="color:var(--color-primary);font-weight:700">${e.p.ov}</span>
+        ${e.p.age?`<span>${e.p.age}y</span>`:""}
+      </div>
+    </button>`;
   }).join("");
-  const _capIcon=`<svg viewBox="0 0 30 20" width="30" height="20" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="28" height="18" rx="3" fill="#C84B36"/><rect x="1" y="1" width="28" height="18" rx="3" fill="none" stroke="#f5f0e8" stroke-width="1.5"/><text x="15" y="14.5" text-anchor="middle" font-family="monospace" font-weight="900" font-size="13" fill="#fff">C</text></svg>`;
-  showModal(`<div style="padding:14px 16px"><div class="kithdr" style="font-size:16px;padding-top:0;display:flex;align-items:center;justify-content:center;gap:8px">${_capIcon} ${LANG==="tr"?"Kaptanı Seç":"Pick Captain"}</div><div class="kitsub" style="margin-bottom:10px">${LANG==="tr"?"Kaptan sahada: +1 güç. Sakatlanırsa -2.":"Captain on field: +1 power. If injured: -2 extra."}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">${opts}</div></div>`);
+  const tr=LANG==="tr";
+  showModal(`<div style="padding:16px 16px 12px">
+    <div style="font-family:var(--disp);font-weight:800;font-size:18px;color:var(--color-ink);margin-bottom:4px">${tr?"KAPTANI SEÇ":"PICK CAPTAIN"}</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--color-slate);margin-bottom:14px">${tr?"Kaptan sahada +1 güç sağlar. Sakatlanırsa −2 uygulanır.":"Captain on field: +1 power. If injured: −2 extra."}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
+  </div>`);
 }
 function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p)pushFeed("🎽 <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");renderHub();}
 function presBtnLockedClick(){const lbl=$("presLabel");if(!lbl)return;const msg=LANG==="tr"?"ÇEYREK FİNALDE":"Q-FINAL";lbl.textContent=msg;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{const pl=$("presLabel");if(pl)pl.textContent=L().ui.seeChair;},3500);}
@@ -1385,7 +1401,7 @@ showModal(`<div style="text-align:center;padding:18px 8px"><div style="margin-bo
   }
 }
 function goLand(){const s=$("introSetup"),l=$("introLand");if(s)s.classList.add("hidden");if(l)l.classList.remove("hidden");}
-function showPostcard(cb){_pcCb=cb;const x=L();let xi="";slots.forEach((sl,i)=>{const p=picksBySlot[i];if(!p)return;xi+=`<div class="pc-pl"><span><span class="pp">${x.abbr[sl[0]]}</span>${surOf(p)}</span><span class="po">${effOf(p)}</span></div>`;});const debt=budget<0?`<div class="pc-debt">${LANG==="tr"?`Bu kadro €${Math.abs(budget)}M borçla kuruldu. Borç; transferler ve varsa ücretli yedek kulübesi masrafından gelir. Yönetim baskısı artabilir.`:`This squad starts €${Math.abs(budget)}M in debt. Debt comes from transfers and any paid bench cost. Board pressure may rise.`}</div>`:"";showModal(`<div class="postcard"><div class="pc-band">${x.ui.postBand}</div><div class="pc-team">${teamName||"XI"}</div><div class="pc-sub">${formName} · ${x.styles[style].n}</div>${debt}<div class="pc-xi">${xi}</div><div class="bact"><button class="btn btn-go" onclick="pcGo()">${x.ui.startRun}</button></div></div>`);}
+function showPostcard(cb){_pcCb=cb;const x=L();const sq=[];slots.forEach((sl,i)=>{const p=picksBySlot[i];if(!p)return;sq.push({sl,i,p});});let xi=sq.map(({sl,p})=>`<div class="pc-pl"><span><span class="pp">${x.abbr[sl[0]]}</span>${surOf(p)}</span><span class="po">${effOf(p)}</span></div>`).join("");const totalPow=sq.reduce((s,{p})=>s+effOf(p),0);const avgPow=sq.length?Math.round(totalPow/sq.length):0;const debt=budget<0?`<div class="pc-debt"><b>−€${Math.abs(budget)}M</b> ${LANG==="tr"?"borçla başlıyorsunuz. Yönetim baskısı artabilir.":"debt at kickoff. Board pressure may rise."}</div>`:"";showModal(`<div class="postcard"><div class="pc-band">${LANG==="tr"?"KADRO HAZIR":"SQUAD READY"}</div><div class="pc-team">${teamName||"XI"}</div><div class="pc-sub"><span class="pc-meta-chip">${formName}</span><span class="pc-meta-chip">${x.styles[style].n}</span><span class="pc-meta-chip">${LANG==="tr"?"Güç":"Power"} ${avgPow}</span></div>${debt}<div class="pc-xi">${xi}</div><div class="bact"><button class="btn btn-go" onclick="pcGo()">${x.ui.startRun}</button></div></div>`);}
 function pcGo(){closeModal();const f=_pcCb;_pcCb=null;if(f)f();}
 function finalCardSummary(){const s=picksBySlot.filter(Boolean),items=[];cards.forEach(k=>{const v=cardEff(k,s,6),prev=cardEff(k,s,5);if(cardKind(k)==="final"||v!==prev)items.push(`<div class="ferow"><span>${L().cards[k].n}</span><b>${v>=0?"+":""}${v}</b></div>`);});const morale=talkMod&&talkMod.all?talkMod.all:0;if(morale)items.push(`<div class="ferow"><span>${LANG==="tr"?"Motivasyon":"Motivation"}</span><b>${morale>=0?"+":""}${morale}</b></div>`);if(!items.length)items.push(`<div class="ferow muted"><span>${LANG==="tr"?"Final kartı yok":"No final cards"}</span><b>—</b></div>`);if(finalPenalty>0)items.push(`<div class="ferow bad"><span>${LANG==="tr"?"Finalde eksi güç":"Final power loss"}</span><b>-${finalPenalty}</b></div>`);return items.join("");}
 function showFinalCard(sp){
