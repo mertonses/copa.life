@@ -5,6 +5,21 @@
 /* sim and _simPaused declared in index.html */
 var speedMul = parseFloat(localStorage.getItem("copa_spd") || "30") || 30;
 
+const UI_COLORS = {
+  pitchLight: "#429A73",
+  pitchDark:  "#3B8B68",
+  pitchLine:  "rgba(255,255,255,0.75)",
+  pitchLineSub: "rgba(255,255,255,0.5)",
+  teamHome:   "#2563eb",
+  teamAway:   "#dc2626",
+  teamHomeInj:"#f97316",
+  teamAwayInj:"#fb7185",
+  gkHome:     "#ca8a04",
+  gkAway:     "#c2410c",
+  ballHi:     "#ffffff",
+  ballBase:   "#bbbbbb",
+};
+
 function setSpeed(s) {
   speedMul = s;
   try { localStorage.setItem("copa_spd", s); } catch (e) {}
@@ -176,7 +191,7 @@ function runMatchHeadless(myPow,oppPow,seed){const rng=seededRand(seed||(Math.ra
 
 /* ── drawHeatmap ── */
 function drawHeatmap(ctx,W,H,heatGrid,HGW,HGH){
-  ctx.fillStyle="#6fa052";ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=UI_COLORS.pitchLight;ctx.fillRect(0,0,W,H);
   for(let i=0;i<9;i++){if(i%2===0){ctx.fillStyle="rgba(0,0,0,0.04)";ctx.fillRect(0,i*H/9,W,H/9);}}
   const _GL=(W-W*0.27)/2,_GR=_GL+W*0.27;
   ctx.strokeStyle="rgba(255,255,255,0.55)";ctx.lineWidth=1.5;ctx.strokeRect(W*0.03,H*0.03,W*0.94,H*0.94);
@@ -472,7 +487,7 @@ function _mkRenderer(canvas,W,H){
   function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
   return{
     drawPitch(){
-      for(let i=0;i<9;i++){ctx.fillStyle=i%2?'#3a7a2e':'#437d36';ctx.fillRect(0,i*H/9,W,H/9);}
+      for(let i=0;i<9;i++){ctx.fillStyle=i%2?UI_COLORS.pitchDark:UI_COLORS.pitchLight;ctx.fillRect(0,i*H/9,W,H/9);}
       const m={l:W*0.03,r:W*0.97,t:H*0.03,b:H*0.97};
       ctx.strokeStyle='rgba(255,255,255,0.75)';ctx.lineWidth=1.5;ctx.strokeRect(m.l,m.t,m.r-m.l,m.b-m.t);
       ctx.beginPath();ctx.moveTo(m.l,H/2);ctx.lineTo(m.r,H/2);ctx.stroke();
@@ -510,8 +525,8 @@ function _mkRenderer(canvas,W,H){
         ctx.beginPath();ctx.ellipse(sc.x+1.5,sc.y+2.5,PR*0.9,PR*0.45,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fill();
         // body
         let col;
-        if(p.role==='GK')col=p.teamId===0?'#ca8a04':'#c2410c';
-        else col=p.teamId===0?(p.injured?'#f97316':'#2563eb'):(p.injured?'#fb7185':'#dc2626');
+        if(p.role==='GK')col=p.teamId===0?UI_COLORS.gkHome:UI_COLORS.gkAway;
+        else col=p.teamId===0?(p.injured?UI_COLORS.teamHomeInj:UI_COLORS.teamHome):(p.injured?UI_COLORS.teamAwayInj:UI_COLORS.teamAway);
         ctx.beginPath();ctx.arc(sc.x,sc.y,PR,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
         ctx.strokeStyle='rgba(255,255,255,0.88)';ctx.lineWidth=1.5;ctx.stroke();
         if(p.hasBall){ctx.beginPath();ctx.arc(sc.x,sc.y,PR+4,0,Math.PI*2);ctx.strokeStyle='#4ade80';ctx.lineWidth=2;ctx.stroke();}
