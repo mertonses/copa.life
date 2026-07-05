@@ -28,9 +28,9 @@
   /* Legacy aliases */
   --paper:var(--color-background);--paper2:var(--surface-bg);
   --ink:var(--color-ink);--ink2:var(--color-slate);--line:var(--border-subtle);
-  --red:#C84B36;--blue:var(--color-slate);--navy:#1a3035;
-  --green:var(--color-primary);--mustard:#E6A817;--good:var(--color-primary);
-  --bronze:#c0813f;--silver:#9aa2a8;--gold:#e6ad2e;
+  --red:var(--color-slate);--blue:var(--color-slate);--navy:#1a3035;
+  --green:var(--color-primary);--mustard:var(--color-slate);--good:var(--color-primary);
+  --bronze:var(--color-slate);--silver:var(--color-slate);--gold:var(--color-primary);
   --pitchln:rgba(255,255,255,.6);
   --disp:'Inter',system-ui,-apple-system,sans-serif;--mono:'Inter',ui-monospace,SFMono-Regular,Menlo,monospace
 }
