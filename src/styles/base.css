@@ -23,6 +23,7 @@ body.dark .storytext mark{background:#26402f;color:#fff}
 body.dark .scoreboard{background:#26402f}
 body.dark .budget{background:#8e2d20;border-color:#6b1f17}
 body.dark .artnote,body.dark .patreonbox{background:#edf2f7;color:#30414a;border-color:#d3dde7}
+body.reduced-motion *{animation-duration:.001s!important;transition-duration:.001s!important}
 body.dark .contactbox{background:#edf2f7;color:#30414a;border-color:#d3dde7}
 body.dark .contactbox b{color:#1a2530}
 body.dark .contacticon{color:#30414a}
