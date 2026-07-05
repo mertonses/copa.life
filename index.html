@@ -549,8 +549,8 @@ function setBudget(){
   const rows=$("budgetRows");
   const spent_so_far=econStats?econStats.spent||0:0;
   if(rows){rows.innerHTML=`<span><span class="br-l">${tr?"BORÇ LİMİTİ":"DEBT LIMIT"}</span><span class="br-v ${harcanabilir<=5?"br-warn":""}">-€${borcLimiti}M</span></span><span><span class="br-l">${tr?"HARCANAN":"SPENT"}</span><span class="br-v">€${spent_so_far}M</span></span>`;}
-  let spendBar=$("kasaSpendBar");if(!spendBar){spendBar=document.createElement("div");spendBar.id="kasaSpendBar";spendBar.style.cssText="height:3px;border-radius:0;background:var(--border-subtle);margin-top:4px;overflow:hidden;position:relative";spendBar.innerHTML='<div id="kasaSpendFill" style="height:100%;background:var(--red);transition:width .4s ease"></div>';const bb=$("budgetBox");if(bb)bb.appendChild(spendBar);}
-  const _fill=$("kasaSpendFill");if(_fill){const _pct=Math.min(100,Math.round((spent_so_far/Math.max(1,BUDGET))*100));_fill.style.width=_pct+"%";_fill.style.background=_pct>75?"#ef4444":_pct>50?"#fb923c":"#fcd34d";}
+  let spendBar=$("kasaSpendBar");if(!spendBar){spendBar=document.createElement("div");spendBar.id="kasaSpendBar";spendBar.style.cssText="height:3px;border-radius:0;background:var(--border-subtle);margin-top:4px;overflow:hidden;position:relative";spendBar.innerHTML='<div id="kasaSpendFill" style="height:100%;background:var(--color-primary);transition:width .4s ease"></div>';const bb=$("budgetBox");if(bb)bb.appendChild(spendBar);}
+  const _fill=$("kasaSpendFill");if(_fill){const _pct=Math.min(100,Math.round((spent_so_far/Math.max(1,BUDGET))*100));_fill.style.width=_pct+"%";_fill.style.background=_pct>75?"#0C1213":_pct>50?"#496E71":"#429A73";}
 }
 function unfilled(){const a=[];filled.forEach((f,i)=>{if(!f)a.push(i);});return a;}
 function clip(s,n){return s.length>n?s.slice(0,n-1)+"…":s;}
@@ -566,7 +566,7 @@ function roll(){const uf=unfilled();if(!uf.length)return;if(deadlineH<=2&&!panic
     if(!currentOpts.some(o=>o.price<=cap)){const fp=fabPlayer(pos,55,61);fp.price=Math.max(0,Math.min(cap,1));fp.free=true;currentOpts[0]=fp;}
     slots.forEach((_,i)=>{const el=$("r"+i);if(!el)return;el.classList.remove("cur","slot-dim");if(filled[i])return;el.classList.add("slot-dim");});const _cel=$("r"+currentSlot);if(_cel&&_cel.classList.contains("empty")){_cel.classList.add("cur");_cel.classList.remove("slot-dim");}
     _setSlotLabel(x.pos[pos]+" · "+x.abbr[pos]);renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");});}
-function ovCol(ov){return ov>=90?"#16c96b":ov>=80?"#4ade80":ov>=70?"#eab308":ov>=60?"#f97316":"#ef4444";}
+function ovCol(ov){return ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";}
 const POS_SVGS={
   GK:`<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="5" y1="6" x2="5" y2="22"/><line x1="23" y1="6" x2="23" y2="22"/><line x1="5" y1="6" x2="23" y2="6"/><line x1="9" y1="22" x2="9" y2="14"/><line x1="19" y1="22" x2="19" y2="14"/><line x1="9" y1="14" x2="19" y2="14"/></svg>`,
   DEF:`<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14 3L23 7L23 16Q23 22 14 26Q5 22 5 16L5 7Z"/><line x1="5" y1="13" x2="23" y2="13"/></svg>`,
@@ -582,7 +582,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
   currentOpts.forEach((o,i)=>{const af=canAffordCost((o.price||0)+reserve);if(af)any=true;const pen=o.ov-o.eff,mis=pen>0;
     const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");if(o.bargain)b.style.setProperty("--disc",`"${o.discountPct||0}%"`);
     const tre=o.trait?` <span class="trbadge">${TRAITS[o.trait].e}</span>`:"";
-    const ovb=o.hidden?`<div class="ovb" style="background:#7b5cd6">??</div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)}">${o.ov}</div>`);
+    const ovb=o.hidden?`<div class="ovb" style="background:#496E71">??</div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)}">${o.ov}</div>`);
     const debtAfter=budget-(o.price||0),debtTxt=debtAfter<0?(tr?" · borçla alınır":" · uses credit"):"";
     const meta=o.hidden?x.hiddenMeta:((o.free?x.free:x.grp[o.natG]||"")+(mis?` · ${x.mismatch(pen)}`:"")+(o.trait?` · ${x.trait[o.trait]}`:"")+" · "+(af?x.afford:x.tooexp)+debtTxt+(o.bargain?(tr?" · 🔥 fırsat":" · 🔥 deal"):""));
     const nm=o.hidden?x.hiddenName:o.name;
@@ -598,8 +598,8 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
     /* secondary info */
     const uyum=!o.hidden?(mis?(pen>=6?(tr?"Düşük":"Low"):(tr?"Orta":"Mid")):(tr?"Yüksek":"High")):"";
     const secInfo=o.hidden?"":`${tr?"Yaş":"Age"}: ${o.age||"—"} · ${tr?"Uyum":"Fit"}: ${uyum}`;
-    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#7b5cd6":ovCol(o.ov)}"></div>${ovb}<div class="opt-ico-wrap">${_posIco}</div><div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}</div><div class="ctx">${ctxLine(o)}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${hoverTip}`;
-    b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--red)";}return;}choose(i);};
+    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#496E71":ovCol(o.ov)}"></div>${ovb}<div class="opt-ico-wrap">${_posIco}</div><div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}</div><div class="ctx">${ctxLine(o)}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${hoverTip}`;
+    b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}choose(i);};
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});c.appendChild(b);});
   const debtPick=currentOpts.some(o=>canAffordCost((o.price||0)+reserve)&&budget-(o.price||0)<0);
   const rb=$("rerollBtn");if(rb){rb.disabled=draftRerollUsed;const _rerollSvg=`<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><path d="M3 9Q3 5.5 6.5 3.8Q10 2 13.5 4.5"/><path d="M15 9Q15 12.5 11.5 14.2Q8 16 4.5 13.5"/><polyline points="11.5,2.5 14,5 16,2.5" stroke-width="1.6"/><polyline points="6.5,15.5 4,13 2,15.5" stroke-width="1.6"/></svg>`;rb.innerHTML=draftRerollUsed?(tr?"Yenileme kullanıldı ✗":"Reroll used ✗"):(tr?_rerollSvg+"Ücretsiz yenile (1 hak)":_rerollSvg+"Free reroll (1 left)");const rd=$("rerollDesc");if(rd)rd.textContent=tr?"Aynı mevki için 3 yeni aday getirir.":"Brings 3 new candidates for the same position.";}
@@ -607,9 +607,9 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
 function rerollOptions(){if(draftRerollUsed||currentSlot<0)return;draftRerollUsed=true;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6,_cap=budget-_reserve-DEBT_LIMIT;currentOpts=draftOptions(_pos);if(!currentOpts.some(o=>o.price<=_cap)){const fp=fabPlayer(_pos,55,61);fp.price=0;fp.free=true;currentOpts[0]=fp;}sfxRoll();renderOpts();}
 function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.pos))+(p.train||0);picksBySlot[idx]=p;filled[idx]=true;remaining--;spend(p.price||0,"spent");setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();}
 function surOf(p){const w=(p.name||"").trim().split(" ");const last=w[w.length-1];if(/^\d+$/.test(last)&&w.length>1)return w[w.length-2];return last;}
-function _ovCol(ov){return ov>=80?"#4ade80":ov>=70?"#fcd34d":ov>=62?"#fb923c":"#f87171";}
-function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?kit.bg:"rgba(120,120,120,0.2)";const s=done?(kit.sec||"rgba(255,255,255,.5)"):"rgba(120,120,120,0.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
-function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background=kit.bg;r.style.color=kit.fg;r.style.borderColor=kit.sec;const _fullTitle=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");r.title=_fullTitle;r.setAttribute("aria-label",_fullTitle);
+function _ovCol(ov){return ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";}
+function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?"#429A73":"rgba(12,18,19,.2)";const s=done?"rgba(66,154,115,.7)":"rgba(12,18,19,.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
+function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);r.className="roundel full pop"+(p.injured?" inj":"");r.style.background="var(--color-ink)";r.style.color="var(--color-background)";r.style.borderColor=kit.sec||"rgba(255,255,255,.3)";const _fullTitle=p.name+" · "+ab+" "+eff+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"");r.title=_fullTitle;r.setAttribute("aria-label",_fullTitle);
   const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;
   const sur=surOf(p);
   /* font scale: uzun soyadlar için küçük font */
@@ -650,7 +650,7 @@ function genOppLineup(){const base=opponent.power,f433=FORMATIONS["4-3-3"];weakF
   let has=false;slots.forEach((s,i)=>{const p=picksBySlot[i];if(!p)return;const x=s[1],onSide=weakFlank==="L"?x<42:weakFlank==="R"?x>58:(x>=42&&x<=58);if(onSide&&(FWDP.includes(s[0])||groupOf(s[0])==="FWD"))has=true;});matchupBonus=(has?1:0)-opponentEdge(squadPower(round).power,opponent.power);}
 function openScout(){const x=L();const misled=rand()<0.3,bias=misled?ri(-9,9):0,displayPow=Math.max(30,Math.min(99,opponent.power+bias));
   const misleadNote=misled?`<div style="font-family:var(--mono);font-size:9px;color:var(--color-primary);text-align:center;margin-bottom:8px">${_ICO.alert} ${LANG==="tr"?"Rapor güvenilmez olabilir":"Scout report may be unreliable"}</div>`:"";
-  const _col=ov=>ov>=80?"#4ade80":ov>=70?"#fcd34d":ov>=62?"#fb923c":"#f87171";
+  const _col=ov=>ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";
   const _row=(grp,label)=>{const ps=oppLineup.filter(o=>o.grp===grp);if(!ps.length)return "";const cells=ps.map(o=>{const shownOv=misled?Math.max(50,Math.min(95,o.ov+ri(-5,5))):o.ov;return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:32px"><div style="font-size:9px;color:var(--color-slate);font-family:var(--mono);letter-spacing:.3px">${x.abbr[o.pos]||o.pos}</div><div style="font-size:14px;font-weight:700;color:${_col(shownOv)};font-family:var(--mono)">${shownOv}</div></div>`;}).join("");return `<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:10px"><div style="font-size:8px;color:var(--color-slate);font-family:var(--mono);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">${label}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${cells}</div></div>`;};
   let h=`<div class="scoutmodal"><div style="font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:.5px;margin-bottom:12px;text-align:center">${LANG==="tr"?"RAKİP KADROSU":"OPPONENT SQUAD"} · <span style="color:var(--color-ink);font-weight:700">${clip(opponent.name,16)}</span> · <span style="color:${_col(displayPow)};font-weight:700">${displayPow}</span></div>${misleadNote}`;
   h+=_row("FWD",LANG==="tr"?"FORVET":"FORWARD");
@@ -871,7 +871,7 @@ function pickTalk(k){if(talkUsed)return;talkUsed=true;try{sfxTalk(k);}catch(e){}
 
 /* ===== fx / modal ===== */
 const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
-function showFx(cb){const dur=760;if(reduce){cb&&cb();return;}const box=$("dicebox"),die=$("fxDie"),cap=$("fxCap"),btns=$("rollbtns");btns.classList.add("hidden");box.classList.remove("hidden");cap.textContent=L().capRoll;die.textContent=rnd(FACES);box.querySelectorAll(".pdie").forEach(e=>e.remove());for(let i=0;i<12;i++){const s=document.createElement("span");s.className="pdie";s.textContent=rnd(FACES);s.style.left=(rand()*100)+"%";s.style.fontSize=(14+rand()*14)+"px";s.style.color=i%2?"var(--red)":"var(--color-slate)";s.style.animationDuration=(0.5+rand()*0.5)+"s";s.style.animationDelay=(rand()*0.3)+"s";box.appendChild(s);}const iv=setInterval(()=>die.textContent=rnd(FACES),60);setTimeout(()=>{clearInterval(iv);box.classList.add("hidden");btns.classList.remove("hidden");cb&&cb();},dur);}
+function showFx(cb){const dur=760;if(reduce){cb&&cb();return;}const box=$("dicebox"),die=$("fxDie"),cap=$("fxCap"),btns=$("rollbtns");btns.classList.add("hidden");box.classList.remove("hidden");cap.textContent=L().capRoll;die.textContent=rnd(FACES);const iv=setInterval(()=>die.textContent=rnd(FACES),60);setTimeout(()=>{clearInterval(iv);box.classList.add("hidden");btns.classList.remove("hidden");cb&&cb();},dur);}
 let _modalPrevFocus=null,_modalTrapFn=null;
 function showModal(html,{dismissOnOverlay=false}={}){
   const m=$("modal");
@@ -1786,35 +1786,35 @@ function showSeasonStats(){
   </div>
 
   ${sec(_icoMatch,tr?"MAÇLAR":"MATCHES")}
-  ${row(tr?"G / B / M":"W / D / L",`<span style='color:#4ade80'>${wins}</span> / <span style='color:#e6ad2e'>${draws}</span> / <span style='color:#ef4444'>${losses}</span>`)}
-  ${row(tr?"Atılan Gol":"Goals For",goals,"#4ade80",
-    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_gbar" style="height:100%;width:0%;background:#4ade80;border-radius:3px;transition:width .9s ease"></div></div>`)}
-  ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"#4ade80":conceded>goals?"#ef4444":"rgba(255,255,255,.7)",
-    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_cbar" style="height:100%;width:0%;background:#ef4444;border-radius:3px;transition:width .9s ease"></div></div>`)}
-  ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"#4ade80":gd<0?"#ef4444":"#fff")}
-  ${row(tr?"Maç Başı Gol":"Goals/Game",goalsPer,parseFloat(goalsPer)>=1.5?"#4ade80":"rgba(255,255,255,.7)")}
+  ${row(tr?"G / B / M":"W / D / L",`<span style='color:#429A73'>${wins}</span> / <span style='color:#496E71'>${draws}</span> / <span style='color:rgba(230,238,239,.55)'>${losses}</span>`)}
+  ${row(tr?"Atılan Gol":"Goals For",goals,"#429A73",
+    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_gbar" style="height:100%;width:0%;background:#429A73;border-radius:3px;transition:width .9s ease"></div></div>`)}
+  ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"#429A73":conceded>goals?"rgba(230,238,239,.55)":"rgba(255,255,255,.7)",
+    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_cbar" style="height:100%;width:0%;background:#496E71;border-radius:3px;transition:width .9s ease"></div></div>`)}
+  ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"#429A73":gd<0?"rgba(230,238,239,.55)":"#fff")}
+  ${row(tr?"Maç Başı Gol":"Goals/Game",goalsPer,parseFloat(goalsPer)>=1.5?"#429A73":"rgba(255,255,255,.7)")}
 
   ${sec(_icoEcon,tr?"EKONOMİ":"ECONOMY")}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
-    ${row(tr?"Kazanılan":"Earned","+€"+(e.earned||0)+"M","#4ade80")}
-    ${row(tr?"Harcanan":"Spent","-€"+(e.spent||0)+"M","#ef4444")}
-    ${row(tr?"Net":"Net",(((e.earned||0)-(e.spent||0))>=0?"+":"")+((e.earned||0)-(e.spent||0))+"M",((e.earned||0)-(e.spent||0))>=0?"#4ade80":"#ef4444")}
+    ${row(tr?"Kazanılan":"Earned","+€"+(e.earned||0)+"M","#429A73")}
+    ${row(tr?"Harcanan":"Spent","-€"+(e.spent||0)+"M","rgba(230,238,239,.55)")}
+    ${row(tr?"Net":"Net",(((e.earned||0)-(e.spent||0))>=0?"+":"")+((e.earned||0)-(e.spent||0))+"M",((e.earned||0)-(e.spent||0))>=0?"#429A73":"rgba(230,238,239,.55)")}
     ${row(tr?"Başkan":"Chairman","-€"+(e.president||0)+"M","rgba(255,255,255,.5)")}
   </div>
   ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" €"+(expensive.price||0)+"M":"—","rgba(255,255,255,.7)")}
 
   ${sec(_icoCard,tr?"KARTLAR":"CARDS")}
-  ${row(tr?"Kullanılan Kart":"Cards Played",cards.length,"#e6ad2e")}
-  ${row(tr?"En Güçlü Kart":"Best Card",bestVal>0?bestCard+" +"+bestVal:bestCard||"—","#e6ad2e")}
+  ${row(tr?"Kullanılan Kart":"Cards Played",cards.length,"#496E71")}
+  ${row(tr?"En Güçlü Kart":"Best Card",bestVal>0?bestCard+" +"+bestVal:bestCard||"—","#496E71")}
 
   ${sec(_icoPlayer,tr?"OYUNCULAR":"PLAYERS")}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
-    ${row(tr?"Sakatlık":"Injuries",e.injuries||0,(e.injuries||0)===0?"#4ade80":(e.injuries||0)>=2?"#ef4444":"#e6ad2e")}
+    ${row(tr?"Sakatlık":"Injuries",e.injuries||0,(e.injuries||0)===0?"#429A73":(e.injuries||0)>=2?"rgba(230,238,239,.55)":"#496E71")}
     ${row(tr?"Yedek":"Bench Used",benchUsed||0)}
-    ${row(tr?"Final Güç":"Squad Power",r.power||0,"#e6ad2e")}
+    ${row(tr?"Final Güç":"Squad Power",r.power||0,"#496E71")}
   </div>
-  ${topList.length?sec(_icoStar,tr?"TOP GOLCÜLER":"TOP SCORERS")+topList.map(([n,g],i)=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="width:16px;height:16px;border-radius:50%;background:${["#e6ad2e","rgba(255,255,255,.25)","rgba(255,255,255,.15)"][i]||"rgba(255,255,255,.1)"};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#000;flex-shrink:0">${i+1}</div><span style="flex:1;font-family:var(--mono);font-size:11px">${n}</span><b style="color:#4ade80;font-family:var(--mono);font-size:11px">${g}</b></div>`).join(""):""}
-  ${runMVP&&runMVP!=="—"?sec(_icoMVP,tr?"FİNAL MVP":"FINAL MVP")+`<div style="display:flex;align-items:center;gap:10px;padding:7px 0"><div style="width:34px;height:34px;border-radius:50%;background:rgba(230,173,46,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">${_icoMVP.replace('stroke="currentColor"','stroke="#e6ad2e"')}</div><div><div style="font-family:var(--disp);font-size:15px;font-weight:700;color:#e6ad2e">${runMVP}${(mvpMem[runMVP]||0)>=2?" ⭐":""}</div><div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1px">${(mvpMem[runMVP]||0)>=2?(tr?"LEGENDARY MVP":"LEGENDARY MVP"):(tr?"FİNAL YILDIZI":"FINAL STAR")}</div></div></div>`:""}
+  ${topList.length?sec(_icoStar,tr?"TOP GOLCÜLER":"TOP SCORERS")+topList.map(([n,g],i)=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="width:16px;height:16px;border-radius:50%;background:${["#429A73","rgba(73,110,113,.7)","rgba(73,110,113,.4)"][i]||"rgba(255,255,255,.1)"};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#E6EEEF;flex-shrink:0">${i+1}</div><span style="flex:1;font-family:var(--mono);font-size:11px">${n}</span><b style="color:#429A73;font-family:var(--mono);font-size:11px">${g}</b></div>`).join(""):""}
+  ${runMVP&&runMVP!=="—"?sec(_icoMVP,tr?"FİNAL MVP":"FINAL MVP")+`<div style="display:flex;align-items:center;gap:10px;padding:7px 0"><div style="width:34px;height:34px;border-radius:50%;background:rgba(66,154,115,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">${_icoMVP.replace('stroke="currentColor"','stroke="#429A73"')}</div><div><div style="font-family:var(--disp);font-size:15px;font-weight:700;color:#429A73">${runMVP}${(mvpMem[runMVP]||0)>=2?" ⭐":""}</div><div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1px">${(mvpMem[runMVP]||0)>=2?(tr?"LEGENDARY MVP":"LEGENDARY MVP"):(tr?"FİNAL YILDIZI":"FINAL STAR")}</div></div></div>`:""}
 
   <div style="margin-top:14px"><button class="btn" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);color:#fff" onclick="closeModal()">${tr?"Kapat":"Close"}</button></div>
   </div></div>`;
