@@ -356,7 +356,7 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
 }
 
 /* ── Decision ── */
-function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape,rng){
+function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape,rng,shotCd){
   const tid=carrier.teamId;
   const goalX=_PW/2,goalY=tid===0?_PH:0;
   const dGoal=carrier.dist(goalX,goalY);
@@ -372,8 +372,8 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
 
   const acts=[];
 
-  // SHOOT — box only; must beat pass/carry
-  if(inOppBox){
+  // SHOOT — box only; must beat pass/carry; blocked during shot cooldown
+  if(inOppBox&&!(shotCd>0)){
     const shootQ=carrier.shooting/100;
     const strikerRole=carrier.role==='ST'||carrier.role==='AM'||carrier.role==='LW'||carrier.role==='RW';
     let sc=shootQ*0.65+(strikerRole?0.10:0)+(desperate?0.18:0);
@@ -715,6 +715,7 @@ function buildSim(myPow, oppPow) {
   /* shot resolution */
   function handleShot(shooter){
     stats.shots[shooter.teamId]++;
+    shotCooldown[shooter.teamId]=SHOT_COOLDOWN;
     const gk=shooter.teamId===0?teamB.find(p=>p.role==='GK'):teamA.find(p=>p.role==='GK');
     const res=_resolveShot(shooter,gk,rng);
     const goalX=_PW/2,goalY=shooter.teamId===0?_PH:0;
@@ -786,6 +787,9 @@ function buildSim(myPow, oppPow) {
   let decTimer=0;
   const DEC_INT=1.5;
   let slotTimer=0;
+  // Per-team shot cooldown — prevents shot spam; resets after each shot
+  const SHOT_COOLDOWN=180; // simulated seconds between shots per team
+  const shotCooldown=[0,0];
   const SLOT_INT=0.17;
   let stuckTimer=0;
 
@@ -828,7 +832,7 @@ function buildSim(myPow, oppPow) {
     const tid=carrier.teamId;
     const mates=(tid===0?teamA:teamB).filter(p=>!p.hasBall);
     const opps=(tid===0?teamB:teamA);
-    const action=_decide(carrier,ball,mates,opps,score,matchTime,fullTimeSec,shapeCfg,rng);
+    const action=_decide(carrier,ball,mates,opps,score,matchTime,fullTimeSec,shapeCfg,rng,shotCooldown[tid]);
     ball._lastTeam=tid;
 
     if(action.type==='SHOOT'){
@@ -957,6 +961,10 @@ function buildSim(myPow, oppPow) {
       const carrierRef=[...teamA,...teamB].find(p=>p.hasBall);
       if(carrierRef){const oppTeam=carrierRef.teamId===0?teamB:teamA;let bst=null,bd=99;for(const p of oppTeam){if(p.role==='GK')continue;const d=p.dist(ball.x,ball.y);if(d<bd){bd=d;bst=p;}}if(bst)bst.setTarget(ball.x,ball.y);}
     }
+
+    // Shot cooldown
+    if(shotCooldown[0]>0)shotCooldown[0]-=dt;
+    if(shotCooldown[1]>0)shotCooldown[1]-=dt;
 
     // Decision
     decTimer+=dt;
