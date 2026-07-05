@@ -687,7 +687,7 @@ a.footer-link{color:var(--color-slate)}
 .unlockphoto{width:52px;height:52px;object-fit:cover;border-radius:50%;border:2px solid var(--color-ink);display:block;margin:0 auto 6px}
 .unlockrole{display:block;font-family:var(--mono);font-size:9px;font-weight:400;opacity:.8;margin-top:2px;letter-spacing:.5px}
 
-.elitebadge{display:block;font-family:var(--mono);font-size:8px;font-weight:700;color:#16c96b;letter-spacing:.5px;margin-top:2px}
+.elitebadge{display:block;font-family:var(--mono);font-size:8px;font-weight:700;color:var(--color-primary);letter-spacing:.5px;margin-top:2px}
 
 /* ===== scout notes ===== */
 .snote{display:block;font-family:var(--mono);font-size:9px;color:var(--color-slate);font-weight:400;line-height:1.2;margin-top:1px;font-style:italic}
