@@ -421,8 +421,9 @@ function showChairPopup(id){
   const allIds=CHAIRMEN.filter(c=>unlockedChairs.includes(c.id)).map(c=>c.id);
   const idx=allIds.indexOf(id),total=allIds.length;
   const prevId=allIds[(idx-1+total)%total],nextId=allIds[(idx+1)%total];
-  const _prevBtn=total>1?`<button class="cp-nav-btn" onclick="showChairPopup('${prevId}')">← ${tr?"ÖNCEKİ":"PREV"}</button>`:`<span></span>`;
-  const _nextBtn=total>1?`<button class="cp-nav-btn" onclick="showChairPopup('${nextId}')">${tr?"SONRAKİ":"NEXT"} →</button>`:`<span></span>`;
+  const _prevBtn=total>1?`<button class="cp-nav-btn" onclick="showChairPopup('${prevId}')" aria-label="${tr?"Önceki":"Previous"}">←</button>`:`<span></span>`;
+  const _counter=total>1?`<span class="cp-counter">${idx+1}/${total}</span>`:"";
+  const _nextBtn=total>1?`<button class="cp-nav-btn" onclick="showChairPopup('${nextId}')" aria-label="${tr?"Sonraki":"Next"}">→</button>`:`<span></span>`;
   const fx=_CHAIR_FX[id]||{pros:{tr:[],en:[]},cons:{tr:[],en:[]}};
   const pros=fx.pros[tr?"tr":"en"]||[];
   const cons=fx.cons[tr?"tr":"en"]||[];
@@ -431,7 +432,7 @@ function showChairPopup(id){
   const fxHtml=(pros.length?`<div class="cp-fx-hdr">${tr?"AVANTAJLAR":"ADVANTAGES"}</div>${pros.map(p=>`<div class="cp-fx-item cp-pro"><span class="cp-fx-sym">✓</span><span>${_hlPro(p)}</span></div>`).join("")}`:"")+(cons.length?`<div class="cp-fx-hdr">${tr?"DEZAVANTAJ":"DISADVANTAGE"}</div>${cons.map(c=>`<div class="cp-fx-item cp-con"><span class="cp-fx-sym">−</span><span>${_hlCon(c)}</span></div>`).join("")}`:"");
   const desc=(cd.desc||"").replace(/<b>|<\/b>/g,"");
   const img=`<img src="${chairSrc(id)}" alt="" class="cpphoto" onerror="this.style.display='none'">`;
-  const h=`<div class="chairpopup"><button class="cp-close" onclick="closeModal()" aria-label="Kapat">×</button>${img}<div class="chairpopup-name">${cd.n}</div><div class="cp-role-badge">${tr?"ÖZEL YETENEK":"SPECIAL TRAIT"}<b>${cd.role||""}</b></div><div class="chairpopup-desc">${desc}</div><div class="cp-fx">${fxHtml}</div><div class="cp-bot-row">${_prevBtn}<button class="cp-sel-btn" onclick="selectedChairId='${id}';buildChairButtons();closeModal()">${tr?"BAŞKANI SEÇ":"SELECT CHAIRMAN"}</button>${_nextBtn}</div></div>`;
+  const h=`<div class="chairpopup"><button class="cp-close" onclick="closeModal()" aria-label="Kapat">×</button>${img}<div class="chairpopup-name">${cd.n}</div><div class="cp-role-badge">${cd.role||""}</div><div class="chairpopup-desc">${desc}</div><div class="cp-fx">${fxHtml}</div><div class="cp-bot-row">${_prevBtn}${_counter}<button class="cp-sel-btn" onclick="selectedChairId='${id}';buildChairButtons();closeModal()">${tr?"BAŞKANI SEÇ":"SELECT CHAIRMAN"}</button>${_nextBtn}</div></div>`;
   showModal(h,{dismissOnOverlay:true});
 }
 function applyMeta(){const m=$("metaline");

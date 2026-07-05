@@ -101,7 +101,7 @@ body{padding-bottom:36px}
 a.footer-link{color:var(--color-slate)}
 .footer-sep{display:none}
 .patreonicon-sm{display:inline-block;width:13px;height:13px;background:url("../../assets/icons/patreon.svg") center/contain no-repeat;vertical-align:-.15em;margin-right:1px;filter:invert(0%) sepia(0%) saturate(0%) brightness(.15)}
-.metaline-hdr{font-family:var(--mono);font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--color-slate);opacity:.55;margin-bottom:3px}
+.metaline-hdr{display:inline;font-family:var(--mono);font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--color-slate);opacity:.6;margin-right:5px}
 .metaline{font-family:var(--mono);font-size:10px;color:var(--color-slate);letter-spacing:.5px;margin-top:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:6px 10px;background:var(--surface-elevated)}
 .foot{text-align:center;color:var(--color-slate);font-size:9px;margin-top:5px;line-height:1.5;opacity:.6}
 .resultpatreon{margin-top:24px}
@@ -121,12 +121,11 @@ a.footer-link{color:var(--color-slate)}
 .fbtn.chairbtn.locked{opacity:.38;filter:grayscale(.8);cursor:not-allowed}
 .fbtn.chairbtn.locked:hover{opacity:.38;filter:grayscale(.8)}
 .chairpopup{width:100%;position:relative;text-align:center}
-.cp-close{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:var(--color-slate);font-size:20px;line-height:1;padding:2px 5px;opacity:.7;transition:opacity .1s;z-index:2}
-.cp-close:hover{opacity:1}
+.cp-close{position:absolute;top:6px;right:8px;background:var(--surface-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);cursor:pointer;color:var(--color-slate);font-size:20px;line-height:1;padding:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;opacity:.8;transition:opacity var(--tr-fast),background var(--tr-fast);z-index:2}
+.cp-close:hover{opacity:1;background:var(--surface-elevated);color:var(--color-ink)}
 .cpphoto{width:110px;height:143px;object-fit:cover;object-position:top center;border-radius:6px;display:block;margin:14px auto 10px;border:2px solid var(--border-subtle)}
 .chairpopup-name{font-family:var(--mono);font-weight:700;font-size:15px;line-height:1.2}
-.cp-role-badge{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--color-slate);opacity:.65;margin-top:4px}
-.cp-role-badge b{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--color-ink);opacity:1;margin-top:1px}
+.cp-role-badge{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--color-slate);margin-top:5px;padding:3px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg)}
 .chairpopup-desc{font-size:11px;line-height:1.55;color:var(--color-slate);margin:8px 14px 0}
 .cp-fx{margin:10px 14px 0;text-align:center}
 .cp-fx-hdr{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-bottom:5px;margin-top:9px}
@@ -141,8 +140,9 @@ a.footer-link{color:var(--color-slate)}
 .cp-bot-row .cp-nav-btn{flex:1}
 .cp-bot-row .cp-sel-btn{flex:0 0 auto;background:var(--color-primary);color:#fff;border-color:var(--color-primary);font-family:var(--mono);font-size:11px;font-weight:700;padding:7px 18px;border-radius:var(--radius-sm);cursor:pointer;border-width:1.5px;transition:all .12s}
 .cp-bot-row .cp-sel-btn:hover{background:var(--action-primary-hover);border-color:var(--action-primary-hover)}
-.cp-nav-btn{background:none;border:1.5px solid var(--border-subtle);border-radius:4px;color:var(--color-slate);font-family:var(--mono);font-size:10px;cursor:pointer;padding:5px 10px;transition:all .12s;flex-shrink:0}
-.cp-nav-btn:hover{border-color:var(--color-ink);color:var(--color-ink)}
+.cp-nav-btn{background:var(--surface-bg);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);color:var(--color-slate);font-family:var(--mono);font-size:16px;cursor:pointer;padding:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;transition:border-color var(--tr-fast),color var(--tr-fast),background var(--tr-fast);flex-shrink:0}
+.cp-nav-btn:hover{border-color:var(--color-ink);color:var(--color-ink);background:var(--surface-elevated)}
+.cp-counter{font-family:var(--mono);font-size:10px;color:var(--color-slate);letter-spacing:.5px;flex:1;text-align:center}
 .fbtn{font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:1px;background:var(--surface-elevated);border:1px solid var(--border-default);border-radius:var(--radius-sm);color:var(--color-ink);padding:11px 4px;cursor:pointer;transition:border-color .15s,background .15s,color .15s,box-shadow .15s,transform .12s}
 .fbtn:hover{background:var(--surface-bg);border-color:var(--color-slate);color:var(--color-ink)}.fbtn:active{transform:translateY(1px)}.fbtn .sm{display:block;font-family:var(--disp);font-weight:300;font-size:8px;letter-spacing:1px;margin-top:2px;opacity:.7}
 .fbtn.sel{background:var(--color-primary);color:#fff;border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(66,154,115,0.22)}
@@ -946,8 +946,8 @@ a.footer-link{color:var(--color-slate)}
 /* Footer block — merged stats + links */
 .v7-footer-block{margin-top:18px;border-top:1px solid var(--border-subtle);padding-top:10px}
 .foot{font-family:var(--mono);font-size:9px;color:var(--color-slate);opacity:.85;letter-spacing:.4px;padding:0 0 6px;text-align:center;border:none;margin:0}
-.v7-footer{display:none}
-.v7-footer:hover{opacity:.8;transition:opacity var(--tr-fast)}
+.v7-footer{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px}
+.v7-footer:hover{opacity:1}
 .v7-foot-link{background:transparent;border:none;color:inherit;font:inherit;cursor:pointer;text-decoration:none;padding:2px 0;letter-spacing:.8px;text-transform:uppercase;transition:color var(--tr-fast),opacity var(--tr-fast)}
 .v7-foot-link:hover{color:var(--color-ink);opacity:1}
 .v7-foot-link:focus-visible{outline:2px solid var(--color-slate);outline-offset:2px;border-radius:2px}
