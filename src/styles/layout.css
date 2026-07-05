@@ -532,9 +532,9 @@ a.footer-link{color:var(--color-slate)}
 .chairbtn-lockover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.28);pointer-events:none}
 .chairbtn-lockico{color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 
-/* ===== BAŞLA hard shadow ===== */
-#startBtn{box-shadow:4px 4px 0 0 #000}
-#startBtn:active{box-shadow:2px 2px 0 0 #000;transform:translateY(2px)}
+/* ===== BAŞLA shadow ===== */
+#startBtn{box-shadow:0 2px 0 var(--color-ink)}
+#startBtn:active{box-shadow:none;transform:translateY(2px)}
 
 /* ===== seed + quick start row ===== */
 .seed-quick-row{display:flex;flex-direction:column;align-items:center;gap:6px;margin:18px 0 4px}
@@ -851,7 +851,7 @@ a.footer-link{color:var(--color-slate)}
 .v7-hero-head{padding:22px 0 20px;border-bottom:1px solid var(--border-subtle);margin-bottom:0;text-align:left}
 .v7-tagline{font-family:var(--disp);font-weight:700;font-size:clamp(28px,7vw,42px);line-height:1.1;letter-spacing:-0.5px;color:var(--color-ink);margin:0 0 12px}
 .v7-tagline-accent{color:var(--color-primary)}
-.v7-hero-desc{font-family:var(--mono);font-size:11px;color:var(--color-slate);line-height:1.6;letter-spacing:.3px;margin:0}
+.v7-hero-desc{font-family:var(--mono);font-size:12px;color:var(--color-slate);line-height:1.6;letter-spacing:.3px;margin:0}
 
 /* Mechanics strip — compact 2-column */
 .mechanics{display:flex;flex-wrap:wrap;gap:0;border-top:none;border-bottom:1px solid var(--border-subtle);padding:14px 0 16px;margin-top:0;text-align:left}
@@ -867,9 +867,9 @@ a.footer-link{color:var(--color-slate)}
 .howto-body{margin-top:2px}
 
 /* Setup groups */
-.v7-setup-group{padding:20px 0 0}
-.v7-setup-group:first-child{padding-top:22px}
-.v7-sec-lbl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--color-slate);margin-bottom:9px;display:block;opacity:1}
+.v7-setup-group{padding:24px 0 0}
+.v7-setup-group:first-child{padding-top:24px}
+.v7-sec-lbl{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--color-slate);margin-bottom:9px;display:block;opacity:1}
 .v7-sec-lbl-chair{margin-top:18px}
 
 /* Hero area alignment */
@@ -890,7 +890,7 @@ a.footer-link{color:var(--color-slate)}
 #chairpick .fbtn.chairbtn.sel{border-width:2px;border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(66,154,115,0.16);transform:translateY(-2px)}
 
 /* Chairman name label */
-.chairbtn-name{display:block;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.3px;text-align:center;color:var(--color-slate);padding:0 3px;line-height:1;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.chairbtn-name{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.3px;text-align:center;color:var(--color-slate);padding:2px 3px 3px;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 #chairpick .fbtn.chairbtn.sel .chairbtn-name{color:var(--color-primary)}
 
 /* Chairman ✓ badge */
@@ -907,21 +907,25 @@ a.footer-link{color:var(--color-slate)}
 .cname-row{border-width:1px;border-color:var(--border-default);border-radius:var(--radius-sm);transition:border-color var(--tr-fast),box-shadow var(--tr-fast)}
 .cname-row:focus-within{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--focus-ring)}
 
+/* Club name hint */
+.cname-hint{font-family:var(--mono);font-size:10px;color:var(--color-slate);opacity:.75;letter-spacing:.2px;margin-top:5px;line-height:1.4}
+
 /* CTA stack */
 .v7-cta-stack{padding-top:20px}
 
 /* Selection summary */
-.v7-summary{font-family:var(--mono);font-size:10px;color:var(--color-slate);letter-spacing:.5px;margin-bottom:10px;min-height:14px;opacity:1;text-align:center}
+.v7-summary{font-family:var(--mono);font-size:11px;color:var(--color-slate);letter-spacing:.3px;margin-bottom:10px;min-height:14px;opacity:1;text-align:center}
+.v7-summary strong{color:var(--color-ink);font-weight:700}
 
 /* BAŞLA — primary */
 .v7-cta-stack .btn-go{font-size:15px;letter-spacing:3px;padding:15px 16px;box-shadow:0 3px 0 var(--action-primary-hover);border-radius:var(--radius-sm);transition:background var(--tr-fast),transform var(--tr-fast),box-shadow var(--tr-fast)}
 .v7-cta-stack .btn-go:hover{transform:translateY(-1px);box-shadow:0 4px 0 var(--action-primary-hover)}
 .v7-cta-stack .btn-go:active{transform:translateY(1px);box-shadow:0 1px 0 var(--action-primary-hover)}
 
-/* RASTGELE BAŞLA — ghost secondary, narrower */
+/* RASTGELE BAŞLA — solid secondary */
 .v7-cta-stack .seed-quick-row{margin:10px 0 4px;display:flex;justify-content:center}
-.v7-cta-stack .btn-quick-inline{width:auto;max-width:320px;font-size:11px;padding:9px 28px;letter-spacing:1.5px;box-shadow:none!important;border:1px solid var(--border-default)!important;border-radius:var(--radius-sm);background:transparent;color:var(--color-slate);transition:border-color var(--tr-fast),background var(--tr-fast),color var(--tr-fast)}
-.v7-cta-stack .btn-quick-inline:hover{border-color:var(--color-slate)!important;background:rgba(73,110,113,0.06);color:var(--color-ink)}
+.v7-cta-stack .btn-quick-inline{width:auto;max-width:320px;font-size:11px;padding:9px 28px;letter-spacing:1.5px;box-shadow:none!important;border:1px solid var(--color-slate)!important;border-radius:var(--radius-sm);background:var(--surface-elevated);color:var(--color-slate);transition:border-color var(--tr-fast),background var(--tr-fast),color var(--tr-fast)}
+.v7-cta-stack .btn-quick-inline:hover{border-color:var(--color-primary)!important;background:color-mix(in srgb,var(--color-primary) 6%,var(--surface-elevated));color:var(--color-ink)}
 
 /* Advanced toggle — text link, better contrast */
 .advanced-toggle{font-size:10px;letter-spacing:.3px;opacity:.8;border:none;background:none;padding:6px 0;color:var(--color-slate);cursor:pointer;transition:opacity var(--tr-fast),color var(--tr-fast);display:block;width:100%;text-align:center}
