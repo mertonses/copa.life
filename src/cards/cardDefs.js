@@ -20,7 +20,7 @@ var CARDDEFS={
    eff:(s,r)=>0},
  /* KADRO */
  anadolu:{price:4,kind:"squad",mode:"scaling",
-   eff:(s,r)=>{const v=variantOf("anadolu");const sub70=s.filter(p=>p&&p.ov<70).length;if(v===1){const over85=s.filter(p=>p&&p.ov>=85).length;return sub70*6-over85*10;}return sub70*3;}},
+   eff:(s,r)=>{const v=variantOf("anadolu");const sub70=s.filter(p=>p&&p.ov<70).length;if(v===1){const over85=s.filter(p=>p&&p.ov>=85).length;return Math.min(18,sub70*6-over85*10);}return Math.min(9,sub70*3);}},
  altyapi_plani:{price:4,kind:"squad",mode:"scaling",
    eff:(s,r)=>s.filter(p=>p&&p.age<=23).length*(variantOf("altyapi_plani")===1?4:2)},
  tecrubeli_omurga:{price:6,kind:"squad",mode:"scaling",

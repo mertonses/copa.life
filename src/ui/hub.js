@@ -11,6 +11,8 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   /* Leydi yerli kadro bonusu/cezası */
   if(chairman.id==="leydi"&&round>1){const _lc=picksBySlot.filter(Boolean).filter(p=>p.tr).length;if(_lc>=5){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Leydi: yerli baskın kadro — bu maç +1 güç":"Leydi: local-dominant squad — +1 power"),"pres");}else if(_lc<3){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Leydi: yabancı ağırlıklı kadro — bu maç -1 güç":"Leydi: foreign-heavy squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
+  /* Kırmızı kart cezası: askıya alınan oyuncuyu bildir */
+  if(typeof suspendedSlotIdx!=="undefined"&&suspendedSlotIdx>=0&&picksBySlot[suspendedSlotIdx]){const _sp=picksBySlot[suspendedSlotIdx];const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");const _tr=LANG==="tr";setTimeout(()=>{showModal(`<div class="scoutmodal"><h4 style="color:var(--red)">🟥 ${_tr?"Cezalı Oyuncu":"Player Suspended"}</h4><p style="margin:10px 14px;font-size:13px;line-height:1.5"><b>${_sn}</b> ${_tr?"kırmızı kartı nedeniyle bu maçta oynayamaz. Kadrodan çıkarmanız gerekiyor.":"received a red card and cannot play this match. You must remove them from the lineup."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${_tr?"Anladım":"Got it"}</button></div></div>`);},400);}
   /* Sansasyoncu spotlight — her iki turda bir */
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
@@ -300,11 +302,23 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   {const el=$("youPw");if(el){el.textContent=sp.power;el.style.color=_pwCol(sp.power);}}
   $("youNm").textContent=teamName||"XI";$("oppNm").textContent=opponent.name;
   {const el=$("oppPw");if(el){el.textContent=opponent.power;el.style.color=_pwCol(opponent.power);}}
-  $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").innerHTML=`<svg viewBox="0 0 20 14" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:5px"><rect x="1" y="1" width="18" height="12" rx="2"/><line x1="1" y1="5" x2="19" y2="5"/><line x1="5" y1="9" x2="8" y2="9"/></svg>${x.shopLbl}`;$("feedHdr").innerHTML=`<span class="tclive">●</span> <span>${x.feedHdr}</span>`;$("powHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5"/></svg>${x.powHdr}`;$("powV").textContent=sp.power;powerHist[round-1]=sp.power;
+  $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").innerHTML=`<svg viewBox="0 0 20 28" width="11" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.2em;margin-right:5px"><rect x="1" y="1" width="18" height="26" rx="2.5"/><text x="10" y="17" text-anchor="middle" font-size="13" font-weight="900" fill="currentColor" stroke="none" font-family="serif">♦</text><text x="3" y="6.5" text-anchor="middle" font-size="5" fill="currentColor" stroke="none" font-family="sans-serif">J</text><text x="17" y="23.5" text-anchor="middle" font-size="5" fill="currentColor" stroke="none" font-family="sans-serif" transform="rotate(180,17,23.5)">J</text></svg>${x.shopLbl}`;$("feedHdr").innerHTML=`<span class="tclive">●</span> <span>${x.feedHdr}</span>`;$("powHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5"/></svg>${x.powHdr}`;$("powV").textContent=sp.power;powerHist[round-1]=sp.power;
   {const sk=sparkPow();$("powHint").textContent=sk||x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
   {const cb=chemBonus(s);$("chemV").textContent="+"+Math.min(3,cb.total);$("chemList").innerHTML=x.powHint;const hp=$("hubPitch");if(hp){hp.classList.toggle("chem-high",cb.total>=3);hp.classList.toggle("chem-low",cb.total<0);}
    const ct=$("chemTile");if(ct){const cv=cb.total;const cbg=cv<0?"#ef4444":cv===0?"#f97316":cv<=1?"#eab308":cv<=2?"#4ade80":"#16c96b";const cfg=cv<=1&&cv>=0?"var(--ink)":"#fff";ct.style.background=cbg;[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color=cfg;});}}
-  {const pv=sp.power;const pt=$("powTile");if(pt){const pbg=pv>=90?"#16c96b":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";const pfg=(pv>=70&&pv<90)?"#000":"#fff";pt.style.background=pbg;[pt.querySelector(".mh"),pt.querySelector(".mv"),pt.querySelector(".ms")].forEach(el=>{if(el)el.style.color=pfg;});}}
+  {const pv=sp.power,oppPv=opponent?opponent.power:0;const pt=$("powTile");if(pt){
+    const pbg=pv>=90?"#16c96b":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";
+    const pfg=(pv>=70&&pv<90)?"#000":"#fff";
+    pt.style.background=pbg;
+    const _total=Math.max(pv+oppPv,1);const _yPct=Math.round(pv/_total*100);const _oPct=100-_yPct;
+    const _oppBarCol=oppPv>=pv?"rgba(255,100,100,.45)":"rgba(0,0,0,.18)";
+    const _youBarCol=pfg==="#000"?"rgba(0,0,0,.3)":"rgba(255,255,255,.45)";
+    const _bonuses=[{l:LANG==="tr"?"Kart":"Card",v:Math.round(sp.cardBonus||0)},{l:LANG==="tr"?"Stil":"Style",v:Math.round(sp.styleBonus||0)},{l:"Kimya",v:Math.round(sp.chem||0)},{l:LANG==="tr"?"Risk":"Risk",v:Math.round(sp.risk||0)}];
+    const _top=_bonuses.filter(b=>b.v!==0).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];
+    const _topStr=_top?` · ${_top.l} ${_top.v>=0?"+":""}${_top.v}`:"";
+    const _vsBar=`<div style="display:flex;height:3px;overflow:hidden;margin-top:5px;gap:1px"><div style="flex:${_yPct};background:${_youBarCol}"></div><div style="flex:${_oPct};background:${_oppBarCol}"></div></div>`;
+    pt.innerHTML=`<button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="${LANG==="tr"?"Kadro gücü nasıl hesaplanır?":"How is squad power calculated?"}" style="color:${pfg};border-color:${pfg};opacity:.55">?</button><div class="mh" id="powHdr" style="color:${pfg};opacity:.8">${LANG==="tr"?"KADRO GÜCÜ":"SQUAD POWER"}</div><div class="mv" id="powV" style="color:${pfg};font-size:22px;line-height:1.05">${pv}</div><div class="ms" id="powHint" style="color:${pfg};opacity:.75">${LANG==="tr"?"vs":"vs"} <b>${oppPv}</b>${_topStr}</div>${_vsBar}`;
+  }}
   {const os=$("oppStars"),oc=$("oppChar"),ys=$("youStars"),yc=$("youChar");if(os)os.textContent="★".repeat(starsOf(opponent.power));if(oc&&oppChar)oc.innerHTML=oppChar.e+" "+oppChar.l;if(ys)ys.textContent="★".repeat(starsOf(sp.power));if(yc){yc.innerHTML=x.styles[style].i+" "+x.styles[style].n;}}
   {const chName=x.chair[chairman.id].n;const src=typeof chairSrc==="function"?chairSrc(chairman.id):`assets/chairs/${chairman.id}.png`;const pb=$("presBtn");pb.innerHTML=`<img src="${src}" class="presbtnphoto" alt="" onerror="this.style.display='none'">`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.style.opacity=locked?"0.42":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl)pl.textContent=x.ui.seeChair;}$("scoutBtn").title=x.scout;
   $("playBtn").innerHTML=round>=6?x.playFinal:x.play;
@@ -317,7 +331,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy var-badge var-${v}">${variantBadge(v)}</span>`;cr.appendChild(d);});
   activeCombos().forEach(c=>{const d=document.createElement("div");d.className="card combo";d.innerHTML=`<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:-.15em;margin-right:1px"><circle cx="4" cy="4" r="1.5"/><circle cx="10" cy="4" r="1.5"/><circle cx="7" cy="10" r="1.5"/><line x1="5.2" y1="4" x2="8.8" y2="4"/><line x1="4.6" y1="5.4" x2="6.4" y2="8.7"/><line x1="9.4" y1="5.4" x2="7.6" y2="8.7"/></svg> <b>${x.combos[c.k]||L().combos[c.k]||c.k}</b> <span class="v">+${c.b}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
-  const sc=$("shopcards");sc.innerHTML="";shopOffers.forEach(k=>{const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;cardVariant[k]=sv;const cd=x.cards[k];const _basePr=cardPrice(k);const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateEquipPower(k);cardVariant[k]=oldV;const combo=typeof wouldCombo==="function"?wouldCombo(k):null;const comboHint=combo?`<div class="ct-combo">⚡ ${LANG==="tr"?"Kombo":"Combo"}: <b>${x.combos[combo.k]||combo.k}</b> +${combo.b}</div>`:"";const d=document.createElement("div");d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+(combo?" has-combo":"");d.title=cd.n+"\n"+cardContractType(k);const _pintiDisc=chairman&&chairman.id==="pinti"?`<span style="color:var(--good);font-size:7px;font-family:var(--mono);margin-left:3px;letter-spacing:.3px">${LANG==="tr"?"Başkan İnd.":"Chair Disc."} -2M</span>`:"";const _memBadge=_memDisc?`<span style="color:#60a5fa;font-size:8px;font-family:var(--mono);margin-left:3px">↩-20%</span>`:"";d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-cat">${kindLabel(k)}</span></div><div class="ct-art">${CARD_SVGS[k]||cd.i}</div><div class="ct-body"><div class="ct-name">${cd.n}</div><div class="ct-desc">${variantDesc(cd.d,sv)||shortCardText(k,s)}</div><div class="ct-contract">${cardContractType(k)}</div>${comboHint}</div><div class="ct-foot"><span class="ct-pw">${shopPreviewText(k,pv)}</span><span class="ct-price">€${pr}M${_pintiDisc}${_memBadge}</span></div>`;if(!cant)d.onclick=()=>confirmBuyCard(k,pr);sc.appendChild(d);});
+  const sc=$("shopcards");sc.innerHTML="";shopOffers.forEach(k=>{const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;cardVariant[k]=sv;const cd=x.cards[k];const _basePr=cardPrice(k);const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateEquipPower(k);cardVariant[k]=oldV;const combo=typeof wouldCombo==="function"?wouldCombo(k):null;const comboHint=combo?`<div class="ct-combo">⚡ ${LANG==="tr"?"Kombo":"Combo"}: <b>${x.combos[combo.k]||combo.k}</b> +${combo.b}</div>`:"";const d=document.createElement("div");d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+(combo?" has-combo":"");d.title=cd.n+"\n"+cardContractType(k);const _pintiDisc=chairman&&chairman.id==="pinti"?`<div style="font-size:7px;font-family:var(--mono);color:var(--good);letter-spacing:.3px;text-align:right;margin-bottom:1px">⬇ ${LANG==="tr"?"Başkan İnd.":"Chair Disc."} -2M</div>`:"";const _memBadge=_memDisc?`<div style="font-size:7px;font-family:var(--mono);color:#60a5fa;text-align:right;margin-bottom:1px">↩ -20%</div>`:"";d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-cat">${kindLabel(k)}</span></div><div class="ct-art">${CARD_SVGS[k]||cd.i}</div><div class="ct-body"><div class="ct-name">${cd.n}</div><div class="ct-desc">${variantDesc(cd.d,sv)||shortCardText(k,s)}</div><div class="ct-contract">${cardContractType(k)}</div>${comboHint}</div><div class="ct-foot"><span class="ct-pw">${shopPreviewText(k,pv)}</span><div style="display:flex;flex-direction:column;align-items:flex-end">${_pintiDisc}${_memBadge}<span class="ct-price">€${pr}M</span></div></div>`;if(!cant)d.onclick=()=>confirmBuyCard(k,pr);sc.appendChild(d);});
   if(!shopOffers.length){const e=document.createElement("div");e.className="cardtile-empty";e.style="grid-column:1/-1";e.innerHTML=`<div style="font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:center;padding:16px">— ${x.owned} —</div>`;sc.appendChild(e);}
   /* Bench render */
   {const _tr=LANG==="tr";let _benchEl=document.getElementById("hubBenchSection");
@@ -325,8 +339,9 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _anchor=$("injbar")||$("cardrow");if(_anchor&&_anchor.parentNode)_anchor.parentNode.insertBefore(_benchEl,_anchor);}
     const _benched=bench.filter(p=>p&&!p.used);
     if(_benched.length){
-      const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEK KULÜBESİ":"BENCH"} <span style="opacity:.5">(${_benched.length})</span></div>`;
-      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=_ov>=80?"#4ade80":_ov>=70?"#fcd34d":_ov>=60?"#fb923c":"#f87171";const _inj=p.injured?`<span style="color:var(--red);font-size:8px;font-family:var(--mono);margin-left:3px">${_tr?"SAKAT":"INJ"}</span>`:"";const _emg=p.benchEmergency?`<span style="color:var(--ink2);font-size:7px;font-family:var(--mono);margin-left:3px">${_tr?"ACİL":"EMRG"}</span>`:"";return `<div data-bench-idx="${bi}" style="display:flex;align-items:center;gap:6px;padding:5px 8px;border:1.5px solid var(--line);border-radius:5px;background:var(--paper2);font-family:var(--mono);cursor:grab"><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:26px;letter-spacing:.5px">${_pos}</span><span style="flex:1;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}${_emg}<span style="font-size:11px;font-weight:700;color:${_col}">${_eff}</span></div>`;}).join("");
+      const _maxBench=3;const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEKLER":"BENCH"} <span style="opacity:.5;font-weight:600">${_benched.length}/${_maxBench}</span></div>`;
+      const _dragHandle=`<svg viewBox="0 0 8 14" width="7" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><line x1="1" y1="2" x2="7" y2="2"/><line x1="1" y1="5" x2="7" y2="5"/><line x1="1" y1="8" x2="7" y2="8"/><line x1="1" y1="11" x2="7" y2="11"/></svg>`;
+      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=_ov>=80?"#4ade80":_ov>=70?"#fcd34d":_ov>=60?"#fb923c":"#f87171";const _inj=p.injured?`<span style="display:inline-flex;align-items:center;font-size:7px;font-family:var(--mono);font-weight:700;padding:1px 3px;border-radius:2px;background:var(--red);color:#fff;margin-left:2px">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span style="color:var(--ink2);opacity:.45;flex-shrink:0">${_dragHandle}</span><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:24px;letter-spacing:.5px;flex-shrink:0">${_pos}</span><span style="flex:1;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span style="font-size:12px;font-weight:700;color:${_col};flex-shrink:0">${_eff}</span></div>`;}).join("");
       _benchEl.innerHTML=_benchHdr+`<div style="display:flex;flex-direction:column;gap:4px">${_benchCards}</div>`;
     }else{if(_benchEl)_benchEl.innerHTML="";}
   }else if(_benchEl){_benchEl.innerHTML="";}}
@@ -345,6 +360,9 @@ function _initHubDragDrop(){
     el.ondragleave=()=>el.classList.remove("h-drag-over");
     el.ondrop=e=>{e.preventDefault();_clearOver();if(!_src||_src.idx===i)return;
       if(_src.type==="slot"){
+        /* GK restriction: GK slot ↔ non-GK slot blocked unless player is injured */
+        const _srcIsGK=slots[_src.idx][0]==="GK",_dstIsGK=slots[i][0]==="GK";
+        if(_srcIsGK!==_dstIsGK){const _a=picksBySlot[_src.idx],_b=picksBySlot[i];if(!(_a&&_a.injured)&&!(_b&&_b.injured))return;}
         /* swap two pitch players */
         const a=picksBySlot[_src.idx],b=picksBySlot[i];
         picksBySlot[_src.idx]=b; picksBySlot[i]=a;
@@ -372,6 +390,72 @@ function _initHubDragDrop(){
     card.ondragstart=e=>{const bi=parseInt(card.dataset.benchIdx);_src={type:"bench",idx:bi};e.dataTransfer.effectAllowed="move";card.style.opacity=".5";};
     card.ondragend=()=>{card.style.opacity="";_clearOver();};
   });
+  /* touch drag-drop for mobile */
+  let _tEl=null,_tGhost=null,_tSrc=null,_tTimer=null;
+  function _touchDrop(x,y){
+    _clearOver();
+    const real=_tGhost?_tGhost.style.display="none":null;
+    const target=document.elementFromPoint(x,y);
+    if(_tGhost)_tGhost.style.display="";
+    if(!target||!_tSrc)return;
+    const slot=target.closest("[id^='h']");
+    const bench=target.closest("[data-bench-idx]");
+    if(slot){
+      const i=parseInt(slot.id.slice(1));
+      if(_tSrc.type==="slot"&&_tSrc.idx!==i){
+        const _srcIsGK=slots[_tSrc.idx][0]==="GK",_dstIsGK=slots[i][0]==="GK";
+        if(_srcIsGK!==_dstIsGK){const _a=picksBySlot[_tSrc.idx],_b=picksBySlot[i];if(!(_a&&_a.injured)&&!(_b&&_b.injured))return;}
+        const a=picksBySlot[_tSrc.idx],b=picksBySlot[i];
+        picksBySlot[_tSrc.idx]=b;picksBySlot[i]=a;
+        if(a){a.pos=slots[i][0];a.eff=typeof effOf==="function"?effOf(a):a.ov;renderRoundel("h"+i,a);}else{const r=document.getElementById("h"+i);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";}}
+        if(b){b.pos=slots[_tSrc.idx][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+_tSrc.idx,b);}else{const r=document.getElementById("h"+_tSrc.idx);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[_tSrc.idx][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[_tSrc.idx][0]])+"</span>";}}
+        _initHubDragDrop();
+      } else if(_tSrc.type==="bench"){
+        const bp=window.bench&&window.bench[_tSrc.idx];if(!bp)return;
+        const old=picksBySlot[i];
+        bp.used=true;bp.bench=false;
+        if(typeof fillSlotReplace==="function")fillSlotReplace(i,bp);
+        window.bench.splice(_tSrc.idx,1);
+        if(old){old.bench=true;old.used=false;window.bench.push(old);}
+        if(typeof renderHub==="function")renderHub();
+      }
+    }
+  }
+  function _addTouchDrag(el,src){
+    el.addEventListener("touchstart",e=>{
+      _tTimer=setTimeout(()=>{
+        _tSrc=src();if(!_tSrc)return;
+        const t=e.touches[0];
+        _tGhost=el.cloneNode(true);
+        _tGhost.style.cssText="position:fixed;z-index:9999;pointer-events:none;opacity:.7;left:"+(t.clientX-el.offsetWidth/2)+"px;top:"+(t.clientY-el.offsetHeight/2)+"px;width:"+el.offsetWidth+"px;height:"+el.offsetHeight+"px";
+        document.body.appendChild(_tGhost);
+        el.style.opacity=".4";
+      },320);
+    },{passive:true});
+    el.addEventListener("touchmove",e=>{
+      if(!_tSrc)return;e.preventDefault();
+      const t=e.touches[0];
+      if(_tGhost){_tGhost.style.left=(t.clientX-_tGhost.offsetWidth/2)+"px";_tGhost.style.top=(t.clientY-_tGhost.offsetHeight/2)+"px";}
+      _clearOver();
+      if(_tGhost)_tGhost.style.display="none";
+      const target=document.elementFromPoint(t.clientX,t.clientY);
+      if(_tGhost)_tGhost.style.display="";
+      if(target){const s=target.closest("[id^='h']");if(s)s.classList.add("h-drag-over");}
+    },{passive:false});
+    el.addEventListener("touchend",e=>{
+      clearTimeout(_tTimer);
+      if(!_tSrc){return;}
+      const t=e.changedTouches[0];
+      _touchDrop(t.clientX,t.clientY);
+      if(_tGhost){_tGhost.remove();_tGhost=null;}
+      el.style.opacity="";_tSrc=null;_clearOver();
+    });
+    el.addEventListener("touchcancel",()=>{
+      clearTimeout(_tTimer);_tSrc=null;if(_tGhost){_tGhost.remove();_tGhost=null;}el.style.opacity="";_clearOver();
+    });
+  }
+  slots.forEach((_,i)=>{const el=document.getElementById("h"+i);if(el)_addTouchDrag(el,()=>({type:"slot",idx:i}));});
+  _be.querySelectorAll("[data-bench-idx]").forEach(card=>{const bi=parseInt(card.dataset.benchIdx);_addTouchDrag(card,()=>({type:"bench",idx:bi}));});
 }
 function showCardPopup(k){const x=L(),cd=x.cards[k];if(!cd)return;const v=cardEff(k,picksBySlot.filter(Boolean),round);const kin=kindLabel(k);showModal(`<div style="padding:14px 16px"><div class="card-popup-ico">${CARD_SVGS[k]||cd.i}</div><div style="font-family:var(--mono);font-weight:700;font-size:13px;text-align:center">${cd.n}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;letter-spacing:1px;margin:2px 0">${kin}</div><hr style="border:none;border-top:1px solid var(--line);margin:8px 0"><div style="font-size:11px;line-height:1.55;color:var(--ink)">${variantDesc(cd.d,variantOf(k)||0)}</div><div style="margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700;color:${v>=0?"var(--good)":"var(--red)"}">${LANG==="tr"?"Bu tur etkisi":"Effect now"}: ${v>=0?"+":""}${v}</div><div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${x.presClose||"Kapat"}</button></div></div>`);}
 function buyCard(k,overridePrice){
