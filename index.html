@@ -111,6 +111,10 @@ body.dark #copyBtn,body.dark #quickBtn{border:1px solid rgba(255,255,255,0.25)}
 
   <section id="intro" class="hero">
    <div id="introLand">
+    <div class="v7-hero-head">
+      <h2 class="v7-tagline">Zar at. Kadronu kur.<br><span class="v7-tagline-accent">Kadere meydan oku.</span></h2>
+      <p class="v7-hero-desc">Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.</p>
+    </div>
     <div class="mechanics" id="mechSection" data-nosnippet>
       <div class="mstep"><span class="mn">01</span><p class="mt">Dizilişini seç. <mark>Başkanını</mark> belirle.</p></div>
       <div class="mstep"><span class="mn">02</span><p class="mt"><mark>Zarı at:</mark> her pozisyon için farklı oyuncular gelir.</p></div>
@@ -130,32 +134,44 @@ body.dark #copyBtn,body.dark #quickBtn{border:1px solid rgba(255,255,255,0.25)}
     </div>
    </div>
    <div id="introSetup">
-    <div class="setupblock"><div class="setuphdrs"><span class="pickhdr" id="pickhdr">Dizilişini seç</span><span class="pickhdrsep">·</span><span class="pickhdr" id="chairhdr">Başkanını seç</span></div><div class="formpick" id="formpick"></div><div class="chairpickrow" id="chairpick"></div></div>
-    <div class="countrypick" id="countryPick">
-      <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye"><img src="assets/flags/TR.png" alt="">Türkiye</button>
-      <button data-country="IT" onclick="pickCountry('IT')" title="İtalya"><img src="assets/flags/IT.png" alt="">İtalya</button>
-      <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.png" alt="">İngiltere</button>
-      <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.png" alt="">İspanya</button>
-      <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.png" alt="">Almanya</button>
+    <div class="v7-setup-group">
+      <div class="v7-sec-lbl" id="pickhdr">Dizilişini seç</div>
+      <div class="formpick" id="formpick"></div>
+      <div class="v7-sec-lbl v7-sec-lbl-chair" id="chairhdr">Başkanını seç</div>
+      <div class="chairpickrow" id="chairpick"></div>
     </div>
-    <div class="cname-wrap">
-      <label class="cname-lbl" for="cName">Kulüp Adı</label>
-      <div class="cname-row">
-        <input class="cinput-new" id="cName" maxlength="16" placeholder="Kulübüne bir ad ver...">
-        <button class="cname-rand" id="diceBtn" onclick="randomClubName()" title="Rastgele isim üret" type="button"><svg class="dice-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,1)"><polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="10,0 20,5 10,10 0,5" fill="currentColor" opacity=".35" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="20,5 20,15 10,20 10,10" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="0,5 10,10 10,20 0,15" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="6" cy="7" r="1.1" fill="currentColor" opacity=".9"/><circle cx="14" cy="7" r="1.1" fill="currentColor" opacity=".9"/><circle cx="15" cy="12" r="1.1" fill="currentColor" opacity=".7"/><circle cx="17" cy="15" r="1.1" fill="currentColor" opacity=".7"/><circle cx="5" cy="13" r="1.1" fill="currentColor" opacity=".8"/></g></svg></button>
+    <div class="v7-setup-group">
+      <div class="v7-sec-lbl">Lig</div>
+      <div class="countrypick" id="countryPick">
+        <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye"><img src="assets/flags/TR.png" alt="">Türkiye</button>
+        <button data-country="IT" onclick="pickCountry('IT')" title="İtalya"><img src="assets/flags/IT.png" alt="">İtalya</button>
+        <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.png" alt="">İngiltere</button>
+        <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.png" alt="">İspanya</button>
+        <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.png" alt="">Almanya</button>
       </div>
     </div>
-    <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
-    <div class="seed-quick-row">
-      <button class="btn btn-quick btn-quick-inline" id="quickStartBtn" onclick="quickStart()">⚡ RASTGELE BAŞLA</button>
+    <div class="v7-setup-group">
+      <label class="v7-sec-lbl" for="cName">Kulüp Adı</label>
+      <div class="cname-wrap">
+        <div class="cname-row">
+          <input class="cinput-new" id="cName" maxlength="16" placeholder="Kulübüne bir ad ver...">
+          <button class="cname-rand" id="diceBtn" onclick="randomClubName()" title="Rastgele isim üret" type="button"><svg class="dice-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,1)"><polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="10,0 20,5 10,10 0,5" fill="currentColor" opacity=".35" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="20,5 20,15 10,20 10,10" fill="currentColor" opacity=".12" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><polygon points="0,5 10,10 10,20 0,15" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="6" cy="7" r="1.1" fill="currentColor" opacity=".9"/><circle cx="14" cy="7" r="1.1" fill="currentColor" opacity=".9"/><circle cx="15" cy="12" r="1.1" fill="currentColor" opacity=".7"/><circle cx="17" cy="15" r="1.1" fill="currentColor" opacity=".7"/><circle cx="5" cy="13" r="1.1" fill="currentColor" opacity=".8"/></g></svg></button>
+        </div>
+      </div>
     </div>
-    <div class="advanced-wrap">
-      <button class="advanced-toggle" id="advancedToggle" type="button" onclick="this.nextElementSibling.classList.toggle('hidden');this.classList.toggle('open')">Gelişmiş ayarlar</button>
-      <div class="advanced-body hidden">
-        <div class="seedwrap">
-          <label for="seedInput">Seed</label>
-          <input id="seedInput" maxlength="14" placeholder="auto">
-          <span class="seed-hint">Aynı seed, aynı başlangıç koşullarını üretir.</span>
+    <div class="v7-cta-stack">
+      <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
+      <div class="seed-quick-row">
+        <button class="btn btn-quick btn-quick-inline" id="quickStartBtn" onclick="quickStart()">⚡ RASTGELE BAŞLA</button>
+      </div>
+      <div class="advanced-wrap">
+        <button class="advanced-toggle" id="advancedToggle" type="button" onclick="this.nextElementSibling.classList.toggle('hidden');this.classList.toggle('open')">Gelişmiş ayarlar</button>
+        <div class="advanced-body hidden">
+          <div class="seedwrap">
+            <label for="seedInput">Seed</label>
+            <input id="seedInput" maxlength="14" placeholder="auto">
+            <span class="seed-hint">Aynı seed, aynı başlangıç koşullarını üretir.</span>
+          </div>
         </div>
       </div>
     </div>
@@ -163,10 +179,10 @@ body.dark #copyBtn,body.dark #quickBtn{border:1px solid rgba(255,255,255,0.25)}
     <div class="artnote" id="lowryNote" style="display:none"></div>
     <div class="metaline" id="metaline"></div>
     <div class="foot" id="protoFoot">—</div>
-    <div class="footer-bar">
-      <button class="footer-link" onclick="openContactForm()" type="button"><svg viewBox="0 0 18 15" width="12" height="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px;vertical-align:-.1em"><rect x="1" y="1" width="16" height="11" rx="2"/><polyline points="1,2 9,8 17,2"/></svg>İletişim</button>
-      <span class="footer-sep">·</span>
-      <a class="footer-link" href="https://www.patreon.com/c/immgo" target="_blank" rel="noopener"><span class="patreonicon-sm" aria-hidden="true"></span>Patreon</a>
+    <div class="v7-footer">
+      <button class="v7-foot-link" onclick="openContactForm()" type="button">İletişim</button>
+      <span class="v7-foot-sep">·</span>
+      <a class="v7-foot-link" href="https://www.patreon.com/c/immgo" target="_blank" rel="noopener">Patreon</a>
     </div>
     <div class="contact-patreon-row" aria-hidden="true" style="display:none">
       <button class="contactbox" onclick="openContactForm()"><span id="contactIntroText"></span><b id="contactIntroLabel">İletişim</b></button>
