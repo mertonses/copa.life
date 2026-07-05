@@ -3,7 +3,9 @@
    Fixed timestep 1/30s · Seeded RNG · Ball state machine · Slot system */
 
 /* sim and _simPaused declared in index.html */
-var speedMul = parseFloat(localStorage.getItem("copa_spd") || "30") || 30;
+/* 1× target: ≤160 real seconds for a 90+4 min match.
+   speedMul=35 → 5640s / 35 ≈ 161s; 2× ≈ 81s; 5× ≈ 32s */
+var speedMul = parseFloat(localStorage.getItem("copa_spd") || "35") || 35;
 
 const UI_COLORS = {
   pitchLight: "#429A73",
@@ -65,26 +67,34 @@ function _cardBonusFinal() {
   let b=0; cards.forEach(k=>{ try{const v=cardEff(k,ps,6);if(v>0)b+=v*0.14;}catch(e){} }); return b;
 }
 const _COMM = {
-  goal_tr:["Goooool!","Net buluyor!","İnanılmaz!","Harika gol!","Şampiyonluk golü!","Geçilmez!","Muazzam!","Ağlar havalanıyor!","Kaleci çaresiz!","Sanat eseri!"],
-  goal_en:["Goooal!","In the net!","Incredible!","What a goal!","Cup-winning strike!","Unstoppable!","Magnificent!","Net bulging!","Keeper had no chance!","A work of art!"],
-  save_tr:["Kaleci kurtardı!","Müthiş refleks!","Az kalsın!","Direğe çarptı!","İnanılmaz kurtarış!","Kaleci devin gibi!"],
-  save_en:["Keeper saves!","Great reflex!","So close!","Off the post!","Incredible save!","Keeper stood tall!"],
-  chance_tr:["Büyük fırsat!","Tehlikeli atak!","Neredeyse gol!","İnanılmaz kaçırdı!","Açık kale kaçtı!","Nasıl atmadı!"],
-  chance_en:["Big chance!","Dangerous attack!","Almost a goal!","Incredible miss!","Open goal missed!","How did that miss!"],
-  wide_tr:["Yandan dışarı!","Iskaladı!","Az kaldı!","Kaleyi bulamadı!","Yan direkten döndü!"],
-  wide_en:["Wide of the goal!","Missed it!","So close!","Couldn't find the frame!","Off the side post!"],
-  corner_tr:["Köşe vuruşu!","Set topu fırsatı!","Köşe — büyük fırsat!"],
-  corner_en:["Corner kick!","Set piece opportunity!","Corner — big chance!"],
-  freekick_tr:["Serbest vuruş!","Taktik faul!","Set topu!","Mükemmel açı!"],
-  freekick_en:["Free kick!","Tactical foul!","Set piece!","Perfect angle!"],
-  press_tr:["⬆️ Yüksek baskı etkisi!","🔥 Üst sahada kapan!","⚡ Hızlı top kazanımı!"],
-  press_en:["⬆️ High press working!","🔥 Trap in upper third!","⚡ Quick ball recovery!"],
-  tempo_tr:["⏬ Tempo düşüyor","🧘 Kontrollü oyun","💧 Sakin sakin"],
-  tempo_en:["⏬ Slowing the tempo","🧘 Controlled football","💧 Nice and calm"],
-  protect_tr:["🛡️ Savunma duvarı","⏱️ Zaman yönetimi","🔒 Kilit vuruldu"],
-  protect_en:["🛡️ Defensive wall","⏱️ Time management","🔒 Locked down"],
-  surge_tr:["💥 Yükleniyoruz!","⚡ Tam gaz!","🌊 Baskı arttı!"],
-  surge_en:["💥 Surging now!","⚡ Full throttle!","🌊 Pressure building!"],
+  goal_tr:["Goooool!","Net buluyor!","İnanılmaz!","Harika gol!","Şampiyonluk golü!","Geçilmez!","Muazzam!","Ağlar havalanıyor!","Kaleci çaresiz!","Sanat eseri!","Fırsat değerlendirdi!","Kusursuz bitiriş!","Kupa golü bu!","Ne gol bu be!","Tribünler çılgına döndü!"],
+  goal_en:["Goooal!","In the net!","Incredible!","What a goal!","Cup-winning strike!","Unstoppable!","Magnificent!","Net bulging!","Keeper had no chance!","A work of art!","Clinical finish!","Perfect execution!","That's a cup goal!","What a strike!","The crowd goes wild!"],
+  save_tr:["Kaleci kurtardı!","Müthiş refleks!","Az kalsın!","Direğe çarptı!","İnanılmaz kurtarış!","Kaleci devin gibi!","Uzanıp kurtardı!","Son anda!","Olağanüstü!","Kapıyı kapattı!"],
+  save_en:["Keeper saves!","Great reflex!","So close!","Off the post!","Incredible save!","Keeper stood tall!","Fingertip save!","Last ditch!","Outstanding!","Shut the door!"],
+  chance_tr:["Büyük fırsat!","Tehlikeli atak!","Neredeyse gol!","İnanılmaz kaçırdı!","Açık kale kaçtı!","Nasıl atmadı!","Kaleyi gördü ama!","Bir metre sağdan!","Ayağından gitmedi!","Kombinasyon vardı!"],
+  chance_en:["Big chance!","Dangerous attack!","Almost a goal!","Incredible miss!","Open goal missed!","How did that miss!","Had the goal at his mercy!","Just wide!","Couldn't control it!","Great combination!"],
+  wide_tr:["Yandan dışarı!","Iskaladı!","Az kaldı!","Kaleyi bulamadı!","Yan direkten döndü!","Çok sert vurdu!","Kaleye yakın ama!"],
+  wide_en:["Wide of the goal!","Missed it!","So close!","Couldn't find the frame!","Off the side post!","Too much power!","Close but not close enough!"],
+  corner_tr:["Köşe vuruşu!","Set topu fırsatı!","Köşe — büyük fırsat!","Tehlikeli köşe!","Ortalama geliyor!"],
+  corner_en:["Corner kick!","Set piece opportunity!","Corner — big chance!","Dangerous corner!","Ball coming in!"],
+  freekick_tr:["Serbest vuruş!","Taktik faul!","Set topu!","Mükemmel açı!","Duran top durumu!","Tehlikeli pozisyon!"],
+  freekick_en:["Free kick!","Tactical foul!","Set piece!","Perfect angle!","Dangerous set piece!","Great position!"],
+  press_tr:["⬆️ Yüksek baskı etkisi!","🔥 Üst sahada kapan!","⚡ Hızlı top kazanımı!","💪 Baskı çalışıyor!","🎯 Tuzak kuruldu!"],
+  press_en:["⬆️ High press working!","🔥 Trap in upper third!","⚡ Quick ball recovery!","💪 The press is on!","🎯 Trap sprung!"],
+  tempo_tr:["⏬ Tempo düşüyor","🧘 Kontrollü oyun","💧 Sakin sakin","⏳ Top dolaşıyor","🔄 Çeviriyor çeviriyor"],
+  tempo_en:["⏬ Slowing the tempo","🧘 Controlled football","💧 Nice and calm","⏳ Keeping the ball","🔄 Recycling possession"],
+  protect_tr:["🛡️ Savunma duvarı","⏱️ Zaman yönetimi","🔒 Kilit vuruldu","🏰 Kale kapalı","🤝 Sıkı blok"],
+  protect_en:["🛡️ Defensive wall","⏱️ Time management","🔒 Locked down","🏰 Gate is shut","🤝 Compact shape"],
+  surge_tr:["💥 Yükleniyoruz!","⚡ Tam gaz!","🌊 Baskı arttı!","🔥 Gol arıyoruz!","⚡ Hücum dalgası!"],
+  surge_en:["💥 Surging now!","⚡ Full throttle!","🌊 Pressure building!","🔥 Hunting the goal!","⚡ Attack wave!"],
+  tackle_tr:["💥 Sert müdahale!","🦵 Top çalındı!","⚡ Kesintisiz savunma!","🛡️ Harika müdahale!","💢 Top kaptı!"],
+  tackle_en:["💥 Strong tackle!","🦵 Ball stolen!","⚡ Tenacious defending!","🛡️ Great challenge!","💢 Dispossessed!"],
+  counter_tr:["🏃 Kontra atak!","⚡ Hızlı geçiş!","🔥 Hız farkı var!","💨 Savunmayı geçti!","🏹 Sürat koşusu!"],
+  counter_en:["🏃 Counter attack!","⚡ Quick transition!","🔥 Pace differential!","💨 Beat the defence!","🏹 Sprint on!"],
+  combo_tr:["🎵 Harika kombinasyon!","🎯 Üç-dört pas birden!","✨ Tek dokunuşlarla!","🎪 Şık oyun!","🌀 Geçiş oyunu mükemmel!"],
+  combo_en:["🎵 Great combination!","🎯 Three-four touch play!","✨ One-twos everywhere!","🎪 Slick football!","🌀 Passing brilliance!"],
+  through_tr:["🔑 Arkasına düştü!","🎯 Arkaya pas!","⚡ Savunmayı çaktırmadan!","🏃 Arayı açtı!","💫 Nefis açık!"],
+  through_en:["🔑 In behind!","🎯 Through ball!","⚡ Split the defence!","🏃 Made the run!","💫 Beautiful ball!"],
 };
 function _pickComm(pool, rng) { return pool[Math.floor(rng()*pool.length)]; }
 
@@ -391,25 +401,31 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
   if(inOppBox&&!(shotCd>0)){
     const shootQ=carrier.shooting/100;
     const strikerRole=carrier.role==='ST'||carrier.role==='AM'||carrier.role==='LW'||carrier.role==='RW';
-    let sc=shootQ*0.65+(strikerRole?0.10:0)+(desperate?0.18:0);
+    let sc=shootQ*0.65+(strikerRole?0.12:0)+(desperate?0.20:0);
     acts.push({type:'SHOOT',score:sc});
   }
   // PASS — rewarded for forward progress only
   const rcvrs=teammates.filter(t=>!t.hasBall&&t.role!=='GK');
+  let _bestPasser=null,_bsc=-99,_throughBall=null;
   if(rcvrs.length){
-    let best=null,bsc=-99;
     for(const r of rcvrs){
       const d=carrier.dist(r.x,r.y);
       const fwd=tid===0?(r.y-carrier.y):(carrier.y-r.y);
-      let sc2=0.38+Math.max(0,fwd)/_PH*0.55+(r.role==='ST'?0.10:r.role==='AM'?0.06:0)-(d>30?0.12:0)+(pressured?0.25:0);
-      if(sc2>bsc){bsc=sc2;const pt=d<12?'SHORT_PASS':d<25?'DRIVEN_PASS':'LONG_PASS';best={player:r,type:pt,score:bsc};}
+      let sc2=0.40+Math.max(0,fwd)/_PH*0.55+(r.role==='ST'?0.12:r.role==='AM'?0.07:0)-(d>32?0.10:0)+(pressured?0.28:0);
+      if(sc2>_bsc){_bsc=sc2;const pt=d<12?'SHORT_PASS':d<25?'DRIVEN_PASS':'LONG_PASS';_bestPasser={player:r,type:pt,score:_bsc};}
+      // through ball — ST running in behind
+      if(r.role==='ST'&&fwd>12&&d<28&&!pressured){
+        const tbSc=0.45+(carrier.vision/100)*0.25+(carrier.passing/100)*0.15;
+        if(!_throughBall||tbSc>_throughBall.score)_throughBall={player:r,type:'THROUGH_BALL',score:tbSc};
+      }
     }
-    if(best)acts.push({type:best.type,score:best.score,receiver:best.player});
+    if(_bestPasser)acts.push({type:_bestPasser.type,score:_bestPasser.score,receiver:_bestPasser.player});
+    if(_throughBall)acts.push({type:'THROUGH_BALL',score:_throughBall.score,receiver:_throughBall.player});
   }
   // CARRY — advance toward goal; competitive with pass
-  acts.push({type:'CARRY',score:0.42+(carrier.dribbling/100)*0.18-(pressured?0.25:0)-(inOppBox?0.08:0)+(dGoal>25?0.05:0)});
+  acts.push({type:'CARRY',score:0.42+(carrier.dribbling/100)*0.20-(pressured?0.26:0)-(inOppBox?0.06:0)+(dGoal>25?0.05:0)});
   // CROSS
-  const wx=carrier.x/_PW;if((wx<0.18||wx>0.82)&&dGoal<40)acts.push({type:'CROSS',score:0.38+(carrier.passing/100)*0.25});
+  const wx=carrier.x/_PW;if((wx<0.18||wx>0.82)&&dGoal<42)acts.push({type:'CROSS',score:0.40+(carrier.passing/100)*0.28});
   // BACK PASS
   if(pressured&&!desperate){const bp=rcvrs.filter(r=>(tid===0?r.y<carrier.y+4:r.y>carrier.y-4)&&carrier.dist(r.x,r.y)<18);if(bp.length)acts.push({type:'BACK_PASS',score:0.45,receiver:bp[0]});}
   // CLEAR
@@ -800,10 +816,10 @@ function buildSim(myPow, oppPow) {
 
   /* pickup */
   let decTimer=0;
-  const DEC_INT=1.5;
+  const DEC_INT=0.95; // faster decisions → snappier passing sequences
   let slotTimer=0;
   // Per-team shot cooldown — prevents shot spam; resets after each shot
-  const SHOT_COOLDOWN=180; // simulated seconds between shots per team
+  const SHOT_COOLDOWN=80; // ~1.3 sim minutes between shots per team
   const shotCooldown=[0,0];
   const SLOT_INT=0.17;
   let stuckTimer=0;
@@ -833,7 +849,9 @@ function buildSim(myPow, oppPow) {
         }
         if(p.teamId!==(ball._shooter?ball._shooter.teamId:ball._lastTeam)){
           const intC=(p.anticipation/100)*0.045+(d2<4?0.06:0);
-          if(rng.bool(intC)){ball.setOwner(p);ball._lastTeam=p.teamId;lastAssist=null;lastCarrier=p.name;effects.spawn('TACKLE',p.x,p.y,0,0,'#f59e0b',0.3);return;}
+          if(rng.bool(intC)){ball.setOwner(p);ball._lastTeam=p.teamId;lastAssist=null;lastCarrier=p.name;effects.spawn('TACKLE',p.x,p.y,0,0,'#f59e0b',0.35);
+            if(rng.bool(0.35))_html("simComm","🦵 <b>"+p.name.split(' ').pop()+"</b> — "+rng.pick(isTR?_COMM.tackle_tr:_COMM.tackle_en));
+            return;}
         }
         continue;
       }
@@ -861,14 +879,25 @@ function buildSim(myPow, oppPow) {
       effects.spawn('PASS',carrier.x,carrier.y,gx,gy,'#a78bfa55',0.4);
       ball.cross(gx,gy);
     } else if(['SHORT_PASS','DRIVEN_PASS','THROUGH_BALL','LONG_PASS','BACK_PASS'].includes(action.type)&&action.receiver){
-      const spds={SHORT_PASS:16,DRIVEN_PASS:22,THROUGH_BALL:20,LONG_PASS:26,BACK_PASS:14};
+      const spds={SHORT_PASS:16,DRIVEN_PASS:22,THROUGH_BALL:24,LONG_PASS:26,BACK_PASS:14};
       const qual=(carrier.passing*0.4+carrier.vision*0.25+carrier.decisions*0.2+carrier.anticipation*0.15)/100;
-      const err=(1-qual)*4.5;
-      const tx=action.receiver.x+rng.rng(-err,err),ty=action.receiver.y+rng.rng(-err,err);
+      const err=(1-qual)*(action.type==='THROUGH_BALL'?3.5:4.5);
+      // Through ball target is ahead of receiver (run into space)
+      const runAhead=action.type==='THROUGH_BALL'?8:0;
+      const runDir=tid===0?1:-1;
+      const tx=action.receiver.x+rng.rng(-err,err);
+      const ty=action.receiver.y+runDir*runAhead+rng.rng(-err*0.5,err*0.5);
       ball._shooter=carrier;ball._passTarget=action.receiver;
-      effects.spawn('PASS',carrier.x,carrier.y,action.receiver.x,action.receiver.y,tid===0?'#93c5fd44':'#fca5a544',0.35);
+      const passCol=action.type==='THROUGH_BALL'?(tid===0?'#4ade8055':'#f472b655'):(tid===0?'#93c5fd44':'#fca5a544');
+      effects.spawn('PASS',carrier.x,carrier.y,action.receiver.x,action.receiver.y,passCol,0.40);
       ball.passTo(tx,ty,spds[action.type]||16);
-      if(action.type==='SHORT_PASS')audio.shortPass();else audio.drivenPass();
+      if(action.type==='THROUGH_BALL'){
+        audio.drivenPass();
+        if(rng.bool(0.35))_html("simComm","🔑 "+rng.pick(isTR?_COMM.through_tr:_COMM.through_en));
+      } else if(action.type==='SHORT_PASS'){
+        audio.shortPass();
+        if(rng.bool(0.12))_html("simComm","🎵 "+rng.pick(isTR?_COMM.combo_tr:_COMM.combo_en));
+      } else audio.drivenPass();
       stats.possession[tid]++;
       lastAssist=lastCarrier;lastCarrier=carrier.name;
     } else if(action.type==='CARRY'){
@@ -918,21 +947,61 @@ function buildSim(myPow, oppPow) {
 
   /* atmosphere events */
   let atmTimer=0;
+  let comboCount=0; // track pass sequences for combo commentary
   function maybeAtmosphere(){
     atmTimer+=_FIXED_STEP;
-    if(atmTimer<90)return;atmTimer=0;
+    if(atmTimer<42)return;atmTimer=0;
     const tid=rng.int(2);
-    if(rng.bool(0.07)){
+    const oppTeam=tid===0?teamB:teamA;
+    const atkTeam=tid===0?teamA:teamB;
+    const roll=rng.next();
+    if(roll<0.06){
+      // yellow card
       stats.yellows[1-tid]++;
-      const opp=(1-tid===0?teamA:teamB).find(p=>p.role!=='GK');
-      const nm=opp?opp.name.split(' ').pop():'?';
-      _html("simComm","🟨 "+nm+" — "+(isTR?"Sarı kart!":"Yellow card!"));
+      const pl=oppTeam.find(p=>p.role!=='GK');
+      const nm=pl?pl.name.split(' ').pop():'?';
+      _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
       _addRow(1-tid,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟨 "+nm+"</span>");
-    } else if(rng.bool(0.5)){
-      _html("simComm","🎯 "+rng.pick(isTR?_COMM.freekick_tr:_COMM.freekick_en));
-    } else{
-      const atComms=isTR?["📣 Tribünler ayakta!","🌊 Baskı devam ediyor!","💨 Tempo yükseliyor!"]:["📣 Crowd on their feet!","🌊 Pressure building!","💨 The pace is high!"];
-      _html("simComm",rng.pick(atComms));
+    } else if(roll<0.11){
+      // tackle / interception with player name
+      const defender=oppTeam.find(p=>p.role==='CB'||p.role==='DM')||oppTeam.find(p=>p.role!=='GK');
+      const nm=defender?defender.name.split(' ').pop():'?';
+      _html("simComm","🦵 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.tackle_tr:_COMM.tackle_en));
+      effects.spawn('TACKLE',defender?defender.x:_PW/2,defender?defender.y:_PH/2,0,0,'#f59e0b',0.4);
+    } else if(roll<0.16){
+      // counter attack sequence
+      const fwd=atkTeam.find(p=>p.role==='ST'||p.role==='LW'||p.role==='RW');
+      const nm=fwd?fwd.name.split(' ').pop():'?';
+      _html("simComm","⚡ <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.counter_tr:_COMM.counter_en));
+    } else if(roll<0.23){
+      // free kick
+      const pl=atkTeam.find(p=>p.role==='CM'||p.role==='AM')||atkTeam[4];
+      const nm=pl?pl.name.split(' ').pop():'?';
+      _html("simComm","🎯 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.freekick_tr:_COMM.freekick_en));
+    } else if(roll<0.30){
+      // combo pass sequence
+      _html("simComm",rng.pick(isTR?_COMM.combo_tr:_COMM.combo_en));
+    } else if(roll<0.40){
+      // tactical shout-based
+      const shoutComm=shapeCfg.shout==='push'?rng.pick(isTR?_COMM.press_tr:_COMM.press_en):shapeCfg.shout==='hold'?rng.pick(isTR?_COMM.protect_tr:_COMM.protect_en):shapeCfg.shout==='calm'?rng.pick(isTR?_COMM.tempo_tr:_COMM.tempo_en):shapeCfg.shout==='more'?rng.pick(isTR?_COMM.surge_tr:_COMM.surge_en):null;
+      if(shoutComm)_html("simComm",shoutComm);
+      else{const at=isTR?["📣 Tribünler ayakta!","🌊 Baskı devam ediyor!","💨 Tempo yükseliyor!","🔔 Kritik an!","⚡ Her iki takım sıkı!","🎵 Güzel futbol!","🌟 Heyecanli maç!"]:["📣 Crowd on their feet!","🌊 Pressure building!","💨 The pace is high!","🔔 Critical moment!","⚡ Both teams compact!","🎵 Beautiful football!","🌟 Exciting match!"];_html("simComm",rng.pick(at));}
+    } else if(roll<0.50){
+      // score-context commentary
+      const diff=score[0]-score[1];
+      let ctx;
+      if(diff>1)ctx=isTR?"🛡️ Rahat fark — skoru yönetiyoruz":"🛡️ Comfortable lead — managing the game";
+      else if(diff===1)ctx=isTR?"⏰ Tek gollük fark — gergin dakikalar":"⏰ One goal lead — nervy moments";
+      else if(diff===-1)ctx=isTR?"🔥 Eşitleme peşindeyiz!":"🔥 Chasing the equaliser!";
+      else if(diff<-1)ctx=isTR?"😰 İki gol gerideyiz — gerçekçi olmak lazım":"😰 Two down — need a miracle";
+      else ctx=isTR?"⚖️ Beraberlik — her iki takım da gol arıyor":"⚖️ Level — both hunting the winner";
+      _html("simComm",ctx);
+    } else {
+      // player-specific moment
+      const star=atkTeam.find(p=>p.role==='ST')||atkTeam.find(p=>p.role==='AM')||atkTeam[9];
+      const nm=star?star.name.split(' ').pop():'?';
+      const pComms=isTR?["🌟 <b>"+nm+"</b> yine sahada!","💫 <b>"+nm+"</b> fırsatı kolluyor!","🎯 <b>"+nm+"</b> pozisyon arıyor!"]:["🌟 <b>"+nm+"</b> on the ball!","💫 <b>"+nm+"</b> looking for his chance!","🎯 <b>"+nm+"</b> seeking the opening!"];
+      _html("simComm",rng.pick(pComms));
     }
     _updateStats();
   }
@@ -1073,7 +1142,10 @@ function buildSim(myPow, oppPow) {
     const frameMs=Math.min((now-prevTime)/1000,0.25);prevTime=now;
     const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1);
     accumulator+=frameMs*spd;
-    while(accumulator>=FIXED_STEP){simStep(FIXED_STEP);accumulator-=FIXED_STEP;}
+    // Cap steps per frame to prevent spiral of death at very high speeds
+    const MAX_STEPS=Math.ceil(spd*0.55)+4;
+    let _steps=0;
+    while(accumulator>=FIXED_STEP&&_steps<MAX_STEPS){simStep(FIXED_STEP);accumulator-=FIXED_STEP;_steps++;}
     renderer.decay(frameMs);
     renderer.clear();
     renderer.drawPitch();
