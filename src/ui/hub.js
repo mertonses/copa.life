@@ -16,7 +16,7 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&captainIdx<0&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
   if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
-  if(autoPlay&&round<6){autoTimer=setTimeout(()=>{if(autoPlay&&!$("hub").classList.contains("hidden"))playMatch();},2200);}}
+}
 const _SPOT_COLORS=["#e6ad2e","#4ade80","#60a5fa","#f472b6","#fb923c","#a78bfa"];
 function showSansSpotlightPicker(){
   /* modal açıksa (risk-ödül vs.) bekle */
@@ -307,7 +307,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   {const pv=sp.power;const pt=$("powTile");if(pt){const pbg=pv>=90?"#16c96b":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";const pfg=(pv>=70&&pv<90)?"#000":"#fff";pt.style.background=pbg;[pt.querySelector(".mh"),pt.querySelector(".mv"),pt.querySelector(".ms")].forEach(el=>{if(el)el.style.color=pfg;});}}
   {const os=$("oppStars"),oc=$("oppChar"),ys=$("youStars"),yc=$("youChar");if(os)os.textContent="★".repeat(starsOf(opponent.power));if(oc&&oppChar)oc.innerHTML=oppChar.e+" "+oppChar.l;if(ys)ys.textContent="★".repeat(starsOf(sp.power));if(yc){yc.innerHTML=x.styles[style].i+" "+x.styles[style].n;}}
   {const chName=x.chair[chairman.id].n;const src=typeof chairSrc==="function"?chairSrc(chairman.id):`assets/chairs/${chairman.id}.png`;const pb=$("presBtn");pb.innerHTML=`<img src="${src}" class="presbtnphoto" alt="" onerror="this.style.display='none'">`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.style.opacity=locked?"0.42":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl)pl.textContent=x.ui.seeChair;}$("scoutBtn").title=x.scout;
-  $("playBtn").innerHTML=round>=6?x.playFinal:x.play;$("autoLbl").textContent=autoPlay?x.autoOn:x.autoOff;$("autoTog").classList.toggle("on",autoPlay);
+  $("playBtn").innerHTML=round>=6?x.playFinal:x.play;
   $("talkBtn").classList.toggle("hidden",talkUsed);$("talkBtn").innerHTML=x.talk;renderDebtWarning();renderInjbar();
   const cr=$("cardrow");cr.innerHTML="";const e0=document.createElement("div");e0.className="card style";e0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;cr.appendChild(e0);
   /* Kaptan chip */
@@ -392,4 +392,3 @@ function buyCard(k,overridePrice){
   pushFeed("💰 <b>"+L().cards[k].n+"</b> "+L().feedBuy+" (-€"+pr+"M) · "+vl,"buy");
   renderHub();
 }
-function toggleAuto(){autoPlay=!autoPlay;const x=L();$("autoTog").classList.toggle("on",autoPlay);$("autoLbl").textContent=autoPlay?x.autoOn:x.autoOff;if(autoPlay&&round<6&&!$("hub").classList.contains("hidden")){clearTimeout(autoTimer);autoTimer=setTimeout(()=>{if(autoPlay&&!$("hub").classList.contains("hidden"))playMatch();},2000);}else clearTimeout(autoTimer);}

@@ -1,0 +1,219 @@
+{
+  "sessionId": "d0a4c513",
+  "generatedAt": "2026-07-04T12:58:00.991Z",
+  "summary": {
+    "runsCompleted": 5,
+    "wins": 0,
+    "losses": 1,
+    "sacks": 0,
+    "chairsUnlocked": [
+      "babacan"
+    ],
+    "allChairsUnlocked": false,
+    "issueCounts": {
+      "critical": 0,
+      "major": 1,
+      "minor": 0,
+      "observation": 1
+    }
+  },
+  "coverage": {
+    "screen:intro": true,
+    "screen:draft": true,
+    "screen:hub": true,
+    "screen:sim": false,
+    "screen:result": true,
+    "screen:modal": true,
+    "chair:babacan": true,
+    "chair:leydi": false,
+    "chair:pinti": false,
+    "chair:sansasyoncu": false,
+    "chair:torpilci": false,
+    "chair:cilgin": false,
+    "shout:push": false,
+    "shout:calm": false,
+    "shout:hold": false,
+    "shout:more": false,
+    "reward:0": true,
+    "reward:1": true,
+    "theme:dark": false,
+    "theme:light": true,
+    "outcome:win": false,
+    "outcome:loss": true,
+    "outcome:sacked": false,
+    "allChairsUnlocked": false
+  },
+  "issues": [
+    {
+      "id": "745d684cee3b",
+      "severity": "observation",
+      "category": "ux",
+      "title": "Unclassified modal encountered",
+      "description": "Modal with unrecognised content appeared: \"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontr\"",
+      "reproduction": [
+        "Play through hub and observe modals"
+      ],
+      "evidence": "",
+      "screen": "modal",
+      "sessionId": "d0a4c513",
+      "runIndex": 1,
+      "round": null,
+      "ts": 1783169701709,
+      "confirmed": true,
+      "occurrences": 4
+    },
+    {
+      "id": "d4c0f8f8aabf",
+      "severity": "major",
+      "category": "bug",
+      "title": "Hub loop did not reach result",
+      "description": "40 iterations without reaching result screen.",
+      "reproduction": [
+        "Play through hub"
+      ],
+      "evidence": "",
+      "screen": "hub",
+      "sessionId": "d0a4c513",
+      "runIndex": 1,
+      "round": null,
+      "ts": 1783169742981,
+      "confirmed": true,
+      "occurrences": 4
+    }
+  ],
+  "runs": [
+    {
+      "runIndex": 0,
+      "sessionId": "d0a4c513",
+      "startTs": 1783169644514,
+      "endTs": 1783169696436,
+      "durationMs": 51922,
+      "outcome": "loss",
+      "roundReached": 5,
+      "chairUsed": null,
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [
+        "care",
+        "cash",
+        "cash",
+        "cash",
+        "loan"
+      ],
+      "issuesObserved": [],
+      "snapshotCount": 38,
+      "budget": {
+        "start": 30,
+        "end": -17,
+        "peak": 30,
+        "nadir": -23
+      },
+      "durationSec": 52
+    },
+    {
+      "runIndex": 1,
+      "sessionId": "d0a4c513",
+      "startTs": 1783169698088,
+      "endTs": 1783169743163,
+      "durationMs": 45075,
+      "outcome": "abandoned",
+      "roundReached": 1,
+      "chairUsed": "babacan",
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "745d684cee3b",
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 43,
+      "budget": {
+        "start": 30,
+        "end": 30,
+        "peak": 30,
+        "nadir": 30
+      },
+      "durationSec": 45
+    },
+    {
+      "runIndex": 2,
+      "sessionId": "d0a4c513",
+      "startTs": 1783169744643,
+      "endTs": 1783169789078,
+      "durationMs": 44435,
+      "outcome": "abandoned",
+      "roundReached": 1,
+      "chairUsed": "babacan",
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "745d684cee3b",
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 43,
+      "budget": {
+        "start": 30,
+        "end": 30,
+        "peak": 30,
+        "nadir": 30
+      },
+      "durationSec": 44
+    },
+    {
+      "runIndex": 3,
+      "sessionId": "d0a4c513",
+      "startTs": 1783169790548,
+      "endTs": 1783169834899,
+      "durationMs": 44351,
+      "outcome": "abandoned",
+      "roundReached": 1,
+      "chairUsed": "babacan",
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "745d684cee3b",
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 43,
+      "budget": {
+        "start": 30,
+        "end": 30,
+        "peak": 30,
+        "nadir": 30
+      },
+      "durationSec": 44
+    },
+    {
+      "runIndex": 4,
+      "sessionId": "d0a4c513",
+      "startTs": 1783169836376,
+      "endTs": 1783169880988,
+      "durationMs": 44612,
+      "outcome": "abandoned",
+      "roundReached": 1,
+      "chairUsed": "babacan",
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "745d684cee3b",
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 43,
+      "budget": {
+        "start": 30,
+        "end": 30,
+        "peak": 30,
+        "nadir": 30
+      },
+      "durationSec": 45
+    }
+  ]
+}

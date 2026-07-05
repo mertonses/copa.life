@@ -1,0 +1,136 @@
+{"type":"action_attempt","ts":1783169645050,"sessionId":"d0a4c513","data":{"name":"quick_start","args":[]}}
+{"type":"action_result","ts":1783169645056,"sessionId":"d0a4c513","data":{"name":"quick_start","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169645566,"sessionId":"d0a4c513","data":{"name":"draft_quick_all","args":[]}}
+{"type":"action_result","ts":1783169645585,"sessionId":"d0a4c513","data":{"name":"draft_quick_all","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169646606,"sessionId":"d0a4c513","data":{"modalType":"pcgo","text":"COPA.LIFE · KADRO KURULDUTOROS FK4-4-2 · GegenpressingBu kadro €23M borçla kuruldu. Borç; transferle"}}
+{"type":"action_attempt","ts":1783169647645,"sessionId":"d0a4c513","data":{"name":"confirm_pcgo","args":[]}}
+{"type":"action_result","ts":1783169647654,"sessionId":"d0a4c513","data":{"name":"confirm_pcgo","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169648263,"sessionId":"d0a4c513","data":{"modalType":"captain","text":"C Kaptanı SeçKaptan sahada: +1 güç. Sakatlanırsa -2.İrfan Can EğribayatKL · 77 · 27yBuğra TivsizSLB "}}
+{"type":"action_attempt","ts":1783169649305,"sessionId":"d0a4c513","data":{"name":"pick_captain","args":[0]}}
+{"type":"action_result","ts":1783169649313,"sessionId":"d0a4c513","data":{"name":"pick_captain","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169651516,"sessionId":"d0a4c513","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169651521,"sessionId":"d0a4c513","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169653525,"sessionId":"d0a4c513","data":{"modalType":"risk_summary","text":"Maç Öncesi Risk ÖzetiKasa ekside: yönetim baskısı artıyor.Başkan sabrı kritik, kovulma riski var.Ger"}}
+{"type":"action_attempt","ts":1783169654352,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169654363,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169654977,"sessionId":"d0a4c513","data":{"modalType":"post_match","text":"MAÇ SONUCU · 1. TURTOROS FK2–1Bodrum FKKontrollü GeçişRakip zayıf tarafını kapattı.18'  Murato…32'  "}}
+{"type":"action_attempt","ts":1783169655395,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169655398,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169656005,"sessionId":"d0a4c513","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€4M€-23M → €-19MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169656582,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["care"]}}
+{"type":"action_result","ts":1783169656585,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["care"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169657191,"sessionId":"d0a4c513","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€4M€-23M → €-19MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169658046,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"]}}
+{"type":"action_result","ts":1783169658053,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169658663,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169659175,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169659179,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169660738,"sessionId":"d0a4c513","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169660742,"sessionId":"d0a4c513","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169662755,"sessionId":"d0a4c513","data":{"modalType":"risk_summary","text":"Maç Öncesi Risk ÖzetiKasa ekside: yönetim baskısı artıyor.Başkan sabrı kritik, kovulma riski var.Ger"}}
+{"type":"action_attempt","ts":1783169663767,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169663773,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169664378,"sessionId":"d0a4c513","data":{"modalType":"post_match","text":"MAÇ SONUCU · 2. TURTOROS FK2–0Çorum FKRahat GalibiyetRakip zayıf tarafını kapattı.30'  Storm40'  Gül"}}
+{"type":"action_attempt","ts":1783169665003,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169665006,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169665615,"sessionId":"d0a4c513","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€6M€-22M → €-16MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169666692,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"]}}
+{"type":"action_result","ts":1783169666700,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169667306,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169667728,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169667730,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":false,"reason":"no confirm button in modal"}}}
+{"type":"screenshot","ts":1783169667864,"sessionId":"d0a4c513","data":{"label":"action_fail_confirm_modal","path":"C:\\Users\\pc\\Desktop\\Kopa\\playtest\\playtest-output\\screenshots\\1783169667731_action_fail_confirm_modal.png"}}
+{"type":"modal_seen","ts":1783169668470,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169669217,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169669221,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":false,"reason":"no confirm button in modal"}}}
+{"type":"screenshot","ts":1783169669313,"sessionId":"d0a4c513","data":{"label":"action_fail_confirm_modal","path":"C:\\Users\\pc\\Desktop\\Kopa\\playtest\\playtest-output\\screenshots\\1783169669222_action_fail_confirm_modal.png"}}
+{"type":"modal_seen","ts":1783169669925,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169670488,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169670491,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169672138,"sessionId":"d0a4c513","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169672143,"sessionId":"d0a4c513","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169674146,"sessionId":"d0a4c513","data":{"modalType":"risk_summary","text":"Maç Öncesi Risk ÖzetiKasa ekside: yönetim baskısı artıyor.1 sakat oyuncu var; oynarsa 72 → 60 gibi d"}}
+{"type":"action_attempt","ts":1783169674962,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169674969,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169675576,"sessionId":"d0a4c513","data":{"modalType":"post_match","text":"MAÇ SONUCU · SON 16TOROS FK2–1Ankaragü…Sakatlık Pahalıya PatladıSakat oyuncu toplam gücü düşürdü.15'"}}
+{"type":"action_attempt","ts":1783169676572,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169676577,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169677185,"sessionId":"d0a4c513","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€8M€-19M → €-11MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169678392,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"]}}
+{"type":"action_result","ts":1783169678402,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["cash"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169679008,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169679805,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169679808,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":false,"reason":"no confirm button in modal"}}}
+{"type":"screenshot","ts":1783169679905,"sessionId":"d0a4c513","data":{"label":"action_fail_confirm_modal","path":"C:\\Users\\pc\\Desktop\\Kopa\\playtest\\playtest-output\\screenshots\\1783169679809_action_fail_confirm_modal.png"}}
+{"type":"modal_seen","ts":1783169680509,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169681181,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169681184,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169683238,"sessionId":"d0a4c513","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169683242,"sessionId":"d0a4c513","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169685256,"sessionId":"d0a4c513","data":{"modalType":"risk_summary","text":"Maç Öncesi Risk ÖzetiKasa ekside: yönetim baskısı artıyor.1 sakat oyuncu var; oynarsa 72 → 60 gibi d"}}
+{"type":"action_attempt","ts":1783169685693,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169685700,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169686305,"sessionId":"d0a4c513","data":{"modalType":"post_match","text":"MAÇ SONUCU · ÇEYREKTOROS FK2–0Elazığsp…Sakatlık Pahalıya PatladıSakat oyuncu toplam gücü düşürdü.13'"}}
+{"type":"action_attempt","ts":1783169687041,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169687044,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169687655,"sessionId":"d0a4c513","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€10M€-14M → €-4MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169688860,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["loan"]}}
+{"type":"action_result","ts":1783169688868,"sessionId":"d0a4c513","data":{"name":"pick_reward","args":["loan"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169689487,"sessionId":"d0a4c513","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169690436,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169690439,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169692048,"sessionId":"d0a4c513","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169692052,"sessionId":"d0a4c513","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169694057,"sessionId":"d0a4c513","data":{"modalType":"risk_summary","text":"Maç Öncesi Risk ÖzetiKasa ekside: yönetim baskısı artıyor.1 sakat oyuncu var; oynarsa 72 → 60 gibi d"}}
+{"type":"action_attempt","ts":1783169694665,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[]}}
+{"type":"action_result","ts":1783169694671,"sessionId":"d0a4c513","data":{"name":"confirm_modal","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169695276,"sessionId":"d0a4c513","data":{"modalType":"post_match","text":"MAÇ SONUCU · YARITOROS FK0–2GöztepeSakatlık Pahalıya PatladıSakat oyuncu toplam gücü düşürdü.11'  Me"}}
+{"type":"action_attempt","ts":1783169695713,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169695717,"sessionId":"d0a4c513","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"screenshot","ts":1783169696432,"sessionId":"d0a4c513","data":{"label":"result","path":"C:\\Users\\pc\\Desktop\\Kopa\\playtest\\playtest-output\\screenshots\\1783169696335_run0_result.png"}}
+{"type":"run_outcome","ts":1783169696433,"sessionId":"d0a4c513","data":{"outcome":"loss","runIndex":0,"budget":-17}}
+{"type":"run_recorded","ts":1783169696436,"sessionId":"d0a4c513","data":{"runIndex":0,"outcome":"loss"}}
+{"type":"action_attempt","ts":1783169699000,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169699003,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169700465,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169700472,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169701694,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169701702,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169701708,"sessionId":"d0a4c513","data":{"modalType":"other","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169702867,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169702870,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"run_error","ts":1783169742983,"sessionId":"d0a4c513","data":{"error":"Error: hub loop timeout","runIndex":1}}
+{"type":"run_recorded","ts":1783169743163,"sessionId":"d0a4c513","data":{"runIndex":1,"outcome":"abandoned"}}
+{"type":"action_attempt","ts":1783169745699,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169745702,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169746903,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169746907,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169748108,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169748112,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169748116,"sessionId":"d0a4c513","data":{"modalType":"other","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169748899,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169748902,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"run_error","ts":1783169789002,"sessionId":"d0a4c513","data":{"error":"Error: hub loop timeout","runIndex":2}}
+{"type":"run_recorded","ts":1783169789078,"sessionId":"d0a4c513","data":{"runIndex":2,"outcome":"abandoned"}}
+{"type":"action_attempt","ts":1783169790990,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169790993,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169792454,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169792460,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169793921,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169793925,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169793930,"sessionId":"d0a4c513","data":{"modalType":"other","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169794659,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169794661,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"run_error","ts":1783169834714,"sessionId":"d0a4c513","data":{"error":"Error: hub loop timeout","runIndex":3}}
+{"type":"run_recorded","ts":1783169834900,"sessionId":"d0a4c513","data":{"runIndex":3,"outcome":"abandoned"}}
+{"type":"action_attempt","ts":1783169837101,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169837105,"sessionId":"d0a4c513","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169838564,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169838570,"sessionId":"d0a4c513","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169840016,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169840021,"sessionId":"d0a4c513","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169840026,"sessionId":"d0a4c513","data":{"modalType":"other","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169840886,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169840888,"sessionId":"d0a4c513","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"run_error","ts":1783169880913,"sessionId":"d0a4c513","data":{"error":"Error: hub loop timeout","runIndex":4}}
+{"type":"run_recorded","ts":1783169880989,"sessionId":"d0a4c513","data":{"runIndex":4,"outcome":"abandoned"}}

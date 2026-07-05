@@ -1,0 +1,234 @@
+{
+  "sessionId": "83d5d5c4",
+  "generatedAt": "2026-07-04T12:39:38.871Z",
+  "summary": {
+    "runsCompleted": 5,
+    "wins": 0,
+    "losses": 2,
+    "sacks": 0,
+    "chairsUnlocked": [
+      "babacan"
+    ],
+    "allChairsUnlocked": false,
+    "issueCounts": {
+      "critical": 0,
+      "major": 1,
+      "minor": 0,
+      "observation": 1
+    }
+  },
+  "coverage": {
+    "screen:intro": true,
+    "screen:draft": true,
+    "screen:hub": true,
+    "screen:sim": false,
+    "screen:result": true,
+    "screen:modal": true,
+    "chair:babacan": true,
+    "chair:leydi": false,
+    "chair:pinti": false,
+    "chair:sansasyoncu": false,
+    "chair:torpilci": false,
+    "chair:cilgin": false,
+    "shout:push": true,
+    "shout:calm": true,
+    "shout:hold": true,
+    "shout:more": true,
+    "reward:0": true,
+    "reward:1": false,
+    "theme:dark": false,
+    "theme:light": true,
+    "outcome:win": false,
+    "outcome:loss": true,
+    "outcome:sacked": false,
+    "allChairsUnlocked": false
+  },
+  "issues": [
+    {
+      "id": "745d684cee3b",
+      "severity": "observation",
+      "category": "ux",
+      "title": "Unclassified modal encountered",
+      "description": "Modal with unrecognised content appeared: \"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur\"",
+      "reproduction": [
+        "Play through hub and observe modals"
+      ],
+      "evidence": "",
+      "screen": "modal",
+      "sessionId": "83d5d5c4",
+      "runIndex": 0,
+      "round": null,
+      "ts": 1783168498426,
+      "confirmed": true,
+      "occurrences": 2
+    },
+    {
+      "id": "d4c0f8f8aabf",
+      "severity": "major",
+      "category": "bug",
+      "title": "Hub loop did not reach result",
+      "description": "40 iterations without reaching result screen.",
+      "reproduction": [
+        "Play through hub"
+      ],
+      "evidence": "",
+      "screen": "hub",
+      "sessionId": "83d5d5c4",
+      "runIndex": 1,
+      "round": null,
+      "ts": 1783168607143,
+      "confirmed": true,
+      "occurrences": 3
+    }
+  ],
+  "runs": [
+    {
+      "runIndex": 0,
+      "sessionId": "83d5d5c4",
+      "startTs": 1783168484317,
+      "endTs": 1783168509461,
+      "durationMs": 25144,
+      "outcome": "loss",
+      "roundReached": 3,
+      "chairUsed": null,
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [
+        "calm"
+      ],
+      "rewardChoices": [
+        "cash",
+        "care",
+        "cash"
+      ],
+      "issuesObserved": [
+        "745d684cee3b"
+      ],
+      "snapshotCount": 21,
+      "budget": {
+        "start": 30,
+        "end": -30,
+        "peak": 30,
+        "nadir": -30
+      },
+      "durationSec": 25
+    },
+    {
+      "runIndex": 1,
+      "sessionId": "83d5d5c4",
+      "startTs": 1783168511025,
+      "endTs": 1783168607227,
+      "durationMs": 96202,
+      "outcome": "abandoned",
+      "roundReached": 2,
+      "chairUsed": null,
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [
+        "hold",
+        "hold",
+        "push",
+        "more",
+        "more"
+      ],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 42,
+      "budget": {
+        "start": -36,
+        "end": -36,
+        "peak": -36,
+        "nadir": -36
+      },
+      "durationSec": 96
+    },
+    {
+      "runIndex": 2,
+      "sessionId": "83d5d5c4",
+      "startTs": 1783168608734,
+      "endTs": 1783168631238,
+      "durationMs": 22504,
+      "outcome": "loss",
+      "roundReached": 3,
+      "chairUsed": null,
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [
+        "care",
+        "care",
+        "cash",
+        "cash"
+      ],
+      "issuesObserved": [],
+      "snapshotCount": 21,
+      "budget": {
+        "start": 30,
+        "end": -30,
+        "peak": 30,
+        "nadir": -30
+      },
+      "durationSec": 23
+    },
+    {
+      "runIndex": 3,
+      "sessionId": "83d5d5c4",
+      "startTs": 1783168632713,
+      "endTs": 1783168732743,
+      "durationMs": 100030,
+      "outcome": "abandoned",
+      "roundReached": 2,
+      "chairUsed": null,
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [
+        "push",
+        "hold",
+        "calm",
+        "push",
+        "push",
+        "calm"
+      ],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 42,
+      "budget": {
+        "start": -36,
+        "end": -36,
+        "peak": -36,
+        "nadir": -36
+      },
+      "durationSec": 100
+    },
+    {
+      "runIndex": 4,
+      "sessionId": "83d5d5c4",
+      "startTs": 1783168734228,
+      "endTs": 1783168778868,
+      "durationMs": 44640,
+      "outcome": "abandoned",
+      "roundReached": 1,
+      "chairUsed": "babacan",
+      "formationChosen": null,
+      "cardsBought": [],
+      "shoutActions": [],
+      "rewardChoices": [],
+      "issuesObserved": [
+        "745d684cee3b",
+        "d4c0f8f8aabf"
+      ],
+      "snapshotCount": 43,
+      "budget": {
+        "start": 30,
+        "end": 30,
+        "peak": 30,
+        "nadir": 30
+      },
+      "durationSec": 45
+    }
+  ]
+}

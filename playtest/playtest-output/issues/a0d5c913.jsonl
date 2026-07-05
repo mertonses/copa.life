@@ -1,0 +1,1 @@
+{"id":"d4c0f8f8aabf","severity":"major","category":"bug","title":"Hub loop did not reach result","description":"40 iterations without reaching result screen.","reproduction":["Play through hub"],"evidence":"","screen":"hub","sessionId":"a0d5c913","runIndex":0,"round":null,"ts":1783168353767,"confirmed":false,"occurrences":1}

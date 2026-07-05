@@ -1,0 +1,44 @@
+{"type":"action_attempt","ts":1783169954570,"sessionId":"96d38f53","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169954574,"sessionId":"96d38f53","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169956073,"sessionId":"96d38f53","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169956087,"sessionId":"96d38f53","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169957242,"sessionId":"96d38f53","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169957255,"sessionId":"96d38f53","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169957260,"sessionId":"96d38f53","data":{"modalType":"style_select","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169957897,"sessionId":"96d38f53","data":{"name":"pick_style","args":[1]}}
+{"type":"action_result","ts":1783169957904,"sessionId":"96d38f53","data":{"name":"pick_style","args":[1],"result":{"ok":true,"count":5}}}
+{"type":"modal_seen","ts":1783169963559,"sessionId":"96d38f53","data":{"modalType":"pcgo","text":"COPA.LIFE · KADRO KURULDUTOROS FK4-4-2 · Kontra AtakBu kadro €28M borçla kuruldu. Borç; transferler "}}
+{"type":"action_attempt","ts":1783169964116,"sessionId":"96d38f53","data":{"name":"confirm_pcgo","args":[]}}
+{"type":"action_result","ts":1783169964125,"sessionId":"96d38f53","data":{"name":"confirm_pcgo","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169964742,"sessionId":"96d38f53","data":{"modalType":"captain","text":"C Kaptanı SeçKaptan sahada: +1 güç. Sakatlanırsa -2.Cemilhan AslanKL · 67 · 17yEmirhan BalarısıSLB ·"}}
+{"type":"action_attempt","ts":1783169965538,"sessionId":"96d38f53","data":{"name":"pick_captain","args":[0]}}
+{"type":"action_result","ts":1783169965548,"sessionId":"96d38f53","data":{"name":"pick_captain","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169967730,"sessionId":"96d38f53","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169967735,"sessionId":"96d38f53","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169969753,"sessionId":"96d38f53","data":{"modalType":"post_match","text":"MAÇ SONUCU · 1. TURTOROS FK2–1GöztepeKontrollü GeçişRakip zayıf tarafını kapattı.10'  Özcan23'  Kaca"}}
+{"type":"action_attempt","ts":1783169970187,"sessionId":"96d38f53","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169970191,"sessionId":"96d38f53","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169970798,"sessionId":"96d38f53","data":{"modalType":"reward","text":"Galibiyet ÖdülüPara tek çözüm değil. Bir yol seç.Kasa Primi+€4M€-28M → €-24MKiralık OyuncuEn zayıfın"}}
+{"type":"action_attempt","ts":1783169971905,"sessionId":"96d38f53","data":{"name":"pick_reward","args":["cash"]}}
+{"type":"action_result","ts":1783169971915,"sessionId":"96d38f53","data":{"name":"pick_reward","args":["cash"],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169972532,"sessionId":"96d38f53","data":{"modalType":"risk_draft","text":"Risk/Ödül DraftıGüçlü ödül, gerçek bedel. Gerek yoksa pas geç.Yüksek TempoBu tur +6 güç, -€8M, sonra"}}
+{"type":"action_attempt","ts":1783169973169,"sessionId":"96d38f53","data":{"name":"dismiss_modal","args":[]}}
+{"type":"action_result","ts":1783169973172,"sessionId":"96d38f53","data":{"name":"dismiss_modal","args":[],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169974775,"sessionId":"96d38f53","data":{"name":"play_match","args":[]}}
+{"type":"action_result","ts":1783169974778,"sessionId":"96d38f53","data":{"name":"play_match","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169976793,"sessionId":"96d38f53","data":{"modalType":"post_match","text":"MAÇ SONUCU · 2. TURTOROS FK2–0Trabzons…Rahat GalibiyetRakip zayıf tarafını kapattı.15'  Kacar40'  La"}}
+{"type":"action_attempt","ts":1783169977600,"sessionId":"96d38f53","data":{"name":"continue_after_match","args":[]}}
+{"type":"action_result","ts":1783169977603,"sessionId":"96d38f53","data":{"name":"continue_after_match","args":[],"result":{"ok":true}}}
+{"type":"screenshot","ts":1783169978363,"sessionId":"96d38f53","data":{"label":"result","path":"C:\\Users\\pc\\Desktop\\Kopa\\playtest\\playtest-output\\screenshots\\1783169978217_run0_result.png"}}
+{"type":"run_outcome","ts":1783169978364,"sessionId":"96d38f53","data":{"outcome":"loss","runIndex":0,"budget":-30}}
+{"type":"run_recorded","ts":1783169978369,"sessionId":"96d38f53","data":{"runIndex":0,"outcome":"loss"}}
+{"type":"action_attempt","ts":1783169980539,"sessionId":"96d38f53","data":{"name":"select_formation","args":[0]}}
+{"type":"action_result","ts":1783169980544,"sessionId":"96d38f53","data":{"name":"select_formation","args":[0],"result":{"ok":true,"count":7}}}
+{"type":"action_attempt","ts":1783169981694,"sessionId":"96d38f53","data":{"name":"select_chair","args":[0]}}
+{"type":"action_result","ts":1783169981701,"sessionId":"96d38f53","data":{"name":"select_chair","args":[0],"result":{"ok":true}}}
+{"type":"action_attempt","ts":1783169982978,"sessionId":"96d38f53","data":{"name":"start_new_game","args":[]}}
+{"type":"action_result","ts":1783169982984,"sessionId":"96d38f53","data":{"name":"start_new_game","args":[],"result":{"ok":true}}}
+{"type":"modal_seen","ts":1783169982992,"sessionId":"96d38f53","data":{"modalType":"style_select","text":"Oyun Anlayışını Seçküçük stil bonusunu belirlerGegenpressingkoşulsuz +2 güçKontra Atakforvet başına "}}
+{"type":"action_attempt","ts":1783169983544,"sessionId":"96d38f53","data":{"name":"pick_style","args":[1]}}
+{"type":"action_result","ts":1783169983550,"sessionId":"96d38f53","data":{"name":"pick_style","args":[1],"result":{"ok":true,"count":5}}}
+{"type":"run_error","ts":1783170014510,"sessionId":"96d38f53","data":{"error":"Error: page.evaluate: Target page, context or browser has been closed","runIndex":1}}

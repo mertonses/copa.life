@@ -1,0 +1,13 @@
+{
+  "_comment": "Set CHROME_PATH env var to use system Chrome if Playwright browser download fails",
+  "gameUrl": "http://localhost:5500?autotest=1",
+  "targetChairs": ["babacan", "leydi", "pinti", "sansasyoncu", "torpilci", "cilgin"],
+  "maxRunsPerSession": 100,
+  "maxSessionDurationMs": 28800000,
+  "screenshotOnIssue": true,
+  "screenshotOnResult": true,
+  "headless": false,
+  "slowMoMs": 150,
+  "thinkTimeMs": { "min": 400, "max": 1200 },
+  "stagnationTimeoutMs": 90000
+}
