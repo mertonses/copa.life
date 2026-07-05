@@ -87,12 +87,12 @@ h1{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spaci
 .artnote{border:1.5px solid var(--line);background:rgba(253,246,226,.86);color:var(--ink2);font-family:var(--mono);font-size:8px;line-height:1.45;text-align:center;padding:7px 10px;margin-top:-4px}
 .contact-patreon-row{display:none}
 .patreonicon{display:block;width:18px;height:18px;flex:0 0 18px;background:url("../../assets/icons/patreon.svg") center/contain no-repeat}
-.footer-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0 2px;font-family:var(--mono);font-size:10px;color:var(--ink2);flex-wrap:wrap}
-.footer-link{background:none;border:none;color:var(--ink2);font-family:var(--mono);font-size:10px;cursor:pointer;padding:0;text-decoration:none;opacity:.65;transition:opacity .12s}
-.footer-link:hover{opacity:1;color:var(--ink)}
+.footer-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 2px;font-family:var(--mono);font-size:10px;color:var(--ink2);flex-wrap:wrap}
+.footer-link{background:transparent;border:1.5px solid var(--line);border-radius:4px;color:var(--ink2);font-family:var(--mono);font-size:9px;cursor:pointer;padding:4px 10px;text-decoration:none;opacity:.75;transition:opacity .12s,border-color .12s;display:inline-flex;align-items:center;gap:3px;letter-spacing:.4px}
+.footer-link:hover{opacity:1;border-color:var(--ink2);color:var(--ink)}
 a.footer-link{color:var(--ink2)}
-.footer-sep{opacity:.3}
-.patreonicon-sm{display:inline-block;width:12px;height:12px;background:url("../../assets/icons/patreon.svg") center/contain no-repeat;vertical-align:-.15em;margin-right:2px;opacity:.7}
+.footer-sep{display:none}
+.patreonicon-sm{display:inline-block;width:13px;height:13px;background:url("../../assets/icons/patreon.svg") center/contain no-repeat;vertical-align:-.15em;margin-right:1px;opacity:1}
 .metaline-hdr{font-family:var(--mono);font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);opacity:.55;margin-bottom:3px}
 .metaline{font-family:var(--mono);font-size:10px;color:var(--ink2);letter-spacing:.5px;margin-top:12px;border:1px solid var(--line);border-radius:4px;padding:6px 10px;background:var(--paper2)}
 .foot{text-align:center;color:var(--ink2);font-size:9px;margin-top:5px;line-height:1.5;opacity:.6}
