@@ -321,10 +321,10 @@ function _renderFreeAgents(){
     const curP=curSlotIdx>=0&&typeof picksBySlot!=="undefined"?picksBySlot[curSlotIdx]:null;
     const curEff=curP&&typeof effOf==="function"?effOf(curP):null;
     const delta=curEff!=null?inEff-curEff:null;
-    const deltaStr=delta!=null?` <span style="color:${delta>=0?"#4ade80":"#ef4444"};font-weight:700">${delta>=0?"+":""}${delta}</span>`:"";
+    const deltaStr=delta!=null?` <span style="color:${delta>=0?"var(--color-primary)":"var(--red)"};font-weight:700">${delta>=0?"+":""}${delta}</span>`:"";
     const compPw=curP?`${posLbl} ${curEff}→${inEff}${deltaStr}`:`${posLbl} OV${p.ov}→${inEff}`;
-    const _faIcon=`<svg viewBox="0 0 36 44" width="32" height="38" fill="none" stroke="var(--ink2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto"><circle cx="18" cy="13" r="8" fill="var(--paper2)" stroke="var(--ink2)"/><path d="M4 42c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="var(--paper2)"/></svg>`;
-    return `<div class="cardtile cat-oyuncu${cant?" cant":""}" style="cursor:${cant?"default":"pointer"}" onclick="${cant?"":"_signFreeAgent("+ai+")"}"><div class="ct-head"><span class="ct-rar var-badge var-0">${tr?"SERBEST":"FREE"}</span><span class="ct-cat">${posLbl}</span></div><div class="ct-art" style="text-align:center;padding:6px 0">${_faIcon}</div><div class="ct-body"><div class="ct-name">${p.name||("FA "+ai)}</div><div class="ct-desc">${tr?"Yedeğe katar":"Joins bench"}</div></div><div class="ct-foot"><span class="ct-pw">${compPw}</span><span class="ct-price">€${a.fee}M</span></div></div>`;
+    const _faIcon=`<svg viewBox="0 0 36 44" width="32" height="38" fill="none" stroke="var(--color-slate)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto"><circle cx="18" cy="13" r="8" fill="var(--surface-muted)" stroke="var(--color-slate)"/><path d="M4 42c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="var(--surface-muted)"/></svg>`;
+    return `<div class="cardtile cat-oyuncu${cant?" cant":""}" style="cursor:${cant?"default":"pointer"}" onclick="${cant?"":"_signFreeAgent("+ai+")"}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-cat">${posLbl}</span></div><div class="ct-art" style="text-align:center;padding:6px 0">${_faIcon}</div><div class="ct-body"><div class="ct-name">${p.name||("FA "+ai)}</div><div class="ct-desc">${tr?"Yedeğe katar":"Joins bench"}</div></div><div class="ct-foot"><span class="ct-pw">${compPw}</span><span class="ct-price">€${a.fee}M</span></div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--line);margin-top:10px;opacity:.5"></div>`;
 }
