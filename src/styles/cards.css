@@ -37,7 +37,7 @@
 .chrow .cic{font-size:14px;flex-shrink:0}
 .chrow .ctx{flex:1;line-height:1.25}
 .chrow .crw{font-family:var(--disp);font-weight:600;font-size:10px;color:#5a3fb0;flex-shrink:0}
-.chrow.done .crw{color:#3f9a57}
+.chrow.done .crw{color:var(--color-primary)}
 .shopcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:8px;margin-bottom:8px}
 .shopcard{display:flex;gap:9px;align-items:center;border:2px solid var(--ink);border-radius:4px;padding:8px;background:var(--paper2);cursor:pointer;transition:.12s}
 .shopcard.bronze{border-color:var(--bronze)}.shopcard.silver{border-color:var(--silver)}.shopcard.gold{border-color:var(--gold)}
@@ -142,7 +142,7 @@
   box-shadow:var(--shadow-sm);
 }
 .card.tier-0,.shopcard.tier-0,.ccard.tier-0{background-color:#f6e5cf;color:var(--color-ink);border-color:#9a6a3b}
-.card.tier-1,.shopcard.tier-1,.ccard.tier-1{background-color:#eef1f2;color:#1f2d35;border-color:#8b9ba7}
+.card.tier-1,.shopcard.tier-1,.ccard.tier-1{background-color:#eef1f2;color:var(--color-ink);border-color:#8b9ba7}
 .card.tier-2,.shopcard.tier-2,.ccard.tier-2{background-color:#fff0bd;color:var(--color-ink);border-color:#d7a11e}
 .card.tier-3,.shopcard.tier-3,.ccard.tier-3{background-color:#e8e4de;color:#1c1c1c;border-color:#3c3c3c}
 .card.tier-0 .copy,.card.tier-1 .copy,.card.tier-2 .copy,.card.tier-3 .copy,

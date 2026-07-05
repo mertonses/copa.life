@@ -408,7 +408,6 @@ a.footer-link{color:var(--ink2)}
 .mn{font-family:var(--mono);font-size:10px;color:var(--ink2);letter-spacing:2px;flex-shrink:0;min-width:22px;padding-top:2px}
 .mt{font-family:var(--disp);font-weight:700;font-size:clamp(16px,4.5vw,20px);line-height:1.2}
 .mt mark{background:var(--ink);color:var(--paper);padding:0 4px;font-style:normal;border-radius:2px}
-.dark .mt mark{color:#1f2d35}
 .mstats{font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
 .mstats b{color:var(--green)}
 
