@@ -3,7 +3,7 @@
    Fixed timestep 1/30s · Seeded RNG · Ball state machine · Slot system */
 
 /* sim and _simPaused declared in index.html */
-var speedMul = parseFloat(localStorage.getItem("copa_spd") || "1") || 1;
+var speedMul = parseFloat(localStorage.getItem("copa_spd") || "30") || 30;
 
 function setSpeed(s) {
   speedMul = s;

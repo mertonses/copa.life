@@ -1,5 +1,5 @@
 /* Kupa Yolu - ekran yerlesimi, giris ve genel paneller */
-.minitiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.minitiles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;max-width:50%}
 .dashtop{display:flex;gap:10px;align-items:stretch;margin-bottom:8px;flex-wrap:wrap}
 .dashtop .actionbar{flex:0 0 auto;margin:0;align-items:stretch}
 .mtile.clickable{cursor:pointer}.mtile.clickable:hover{border-color:var(--ink)}
