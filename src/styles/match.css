@@ -23,8 +23,10 @@
   --shadow-sm:0 2px 6px rgba(12,18,19,0.08);--shadow-md:0 18px 45px rgba(12,18,19,0.16);
   /* Typography scale */
   --text-xs:11px;--text-sm:13px;--text-md:15px;--text-lg:17px;--text-xl:20px;--text-display:clamp(28px,8vw,42px);
-  /* Animation timing */
-  --tr-fast:160ms ease;--tr-modal:220ms ease;
+  /* Motion tokens */
+  --motion-fast:140ms;--motion-standard:220ms;--motion-emphasis:420ms;
+  /* Animation timing — mapped to motion tokens */
+  --tr-fast:var(--motion-fast) ease;--tr-modal:var(--motion-standard) ease;--tr-emphasis:var(--motion-emphasis) ease;
   /* Legacy aliases */
   --paper:var(--color-background);--paper2:var(--surface-bg);
   --ink:var(--color-ink);--ink2:var(--color-slate);--line:var(--border-subtle);

@@ -405,7 +405,7 @@ const CHAIR_ASSET={};
 const CHAIR_BORDER={babacan:"#2d7bae",leydi:"#8e2d20",pinti:"#5a6e60",sansasyoncu:"#e6ad2e",torpilci:"#bf4329",cilgin:"#7b4fa0"};
 const CHAIR_ROLE_COLOR={babacan:"#2d8c5a",leydi:"#2d8c7a",pinti:"#bf4329",sansasyoncu:"#c8860b",torpilci:"#bf4329",cilgin:"#7b4fa0"};
 function chairSrc(id,suf=""){return `assets/chairs/${CHAIR_ASSET[id]||id}${suf}.png`;}
-function buildChairButtons(){const cp=$("chairpick");if(!cp)return;const x=L();cp.innerHTML="";const _lockSVG=`<svg class="chairbtn-lockico" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3V7a5 5 0 0 1 5-5m0 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0-10a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3"/></svg>`;CHAIRMEN.forEach(c=>{const lk=!unlockedChairs.includes(c.id);const isSel=selectedChairId===c.id;const b=document.createElement("button");b.className="fbtn chairbtn"+(lk?" locked":"")+(isSel?" sel":"");b.setAttribute("aria-selected",isSel?"true":"false");const norm=chairSrc(c.id),spot=chairSrc(c.id,"spotlight");const cname=(x.chair&&x.chair[c.id]&&x.chair[c.id].n)||c.id;const shortLbl=cname.split(" ")[0];const thumb=`<img src="${norm}" class="chairthumb" alt="${cname}" onerror="this.style.display='none'" data-normal="${norm}" data-spot="${spot}">`;const checkBadge=isSel?`<span class="chairbtn-check" aria-hidden="true">✓</span>`:"";const nameLbl=`<span class="chairbtn-name">${shortLbl}</span>`;b.innerHTML=thumb+checkBadge+nameLbl+(lk?`<div class="chairbtn-lockover">${_lockSVG}</div>`:"");const img=b.querySelector("img");if(img){img.addEventListener("mouseenter",()=>{img.src=img.dataset.spot;},{passive:true});img.addEventListener("mouseleave",()=>{img.src=img.dataset.normal;},{passive:true});img.addEventListener("touchstart",()=>{img.src=img.dataset.spot;},{passive:true});img.addEventListener("touchend",()=>{img.src=img.dataset.normal;},{passive:true});}if(!lk){b.onclick=()=>pickChair(c.id);}else{b.onclick=()=>_chairLockedFlash(b);}cp.appendChild(b);});const ch=$("chairhdr");if(ch)ch.textContent=LANG==="tr"?"Başkanını seç":"Pick your chairman";_updateIntroSummary();}
+function buildChairButtons(){const cp=$("chairpick");if(!cp)return;const x=L();cp.innerHTML="";const _lockSVG=`<svg class="chairbtn-lockico" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3V7a5 5 0 0 1 5-5m0 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0-10a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3"/></svg>`;CHAIRMEN.forEach(c=>{const lk=!unlockedChairs.includes(c.id);const isSel=selectedChairId===c.id;const b=document.createElement("button");b.className="fbtn chairbtn"+(lk?" locked":"")+(isSel?" sel":"");b.setAttribute("aria-selected",isSel?"true":"false");const norm=chairSrc(c.id);const cname=(x.chair&&x.chair[c.id]&&x.chair[c.id].n)||c.id;const shortLbl=cname.split(" ")[0];const thumb=`<img src="${norm}" class="chairthumb" alt="${cname}" onerror="this.style.display='none'">`;const checkBadge=isSel?`<span class="chairbtn-check" aria-hidden="true">✓</span>`:"";const nameLbl=`<span class="chairbtn-name">${shortLbl}</span>`;b.innerHTML=thumb+checkBadge+nameLbl+(lk?`<div class="chairbtn-lockover">${_lockSVG}</div>`:"");if(!lk){b.onclick=()=>pickChair(c.id);}else{b.onclick=()=>_chairLockedFlash(b);}cp.appendChild(b);});const ch=$("chairhdr");if(ch)ch.textContent=LANG==="tr"?"Başkanını seç":"Pick your chairman";_updateIntroSummary();}
 function pickChair(id){selectedChairId=id;buildChairButtons();showChairPopup(id);}
 const _CHAIR_FX={
   babacan:{pros:{tr:["Borç limiti €28M — en geniş marj","Her turda küçük finansal destek gelebilir"],en:["€28M debt limit — widest margin","Small financial boost possible each round"]},cons:{tr:["Finalde −2 güç bırakabilir"],en:["May impose −2 power in the final"]}},
@@ -873,9 +873,11 @@ function pickTalk(k){if(talkUsed)return;talkUsed=true;try{sfxTalk(k);}catch(e){}
 const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
 function showFx(cb){const dur=760;if(reduce){cb&&cb();return;}const box=$("dicebox"),die=$("fxDie"),cap=$("fxCap"),btns=$("rollbtns");btns.classList.add("hidden");box.classList.remove("hidden");cap.textContent=L().capRoll;die.textContent=rnd(FACES);const iv=setInterval(()=>die.textContent=rnd(FACES),60);setTimeout(()=>{clearInterval(iv);box.classList.add("hidden");btns.classList.remove("hidden");cb&&cb();},dur);}
 let _modalPrevFocus=null,_modalTrapFn=null;
-function showModal(html,{dismissOnOverlay=false}={}){
+function showModal(html,{dismissOnOverlay=false,label="",bare=false}={}){
   const m=$("modal");
-  m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  const ariaLabel=label?` aria-label="${label}"`:" aria-labelledby=\"_mdlttl\"";
+  const sheetCls="sheet"+(bare?" sheet-bare":"");
+  m.innerHTML=`<div class="${sheetCls}" role="dialog" aria-modal="true"${ariaLabel}>${html}</div>`;
   m.classList.remove("hidden");
   m.onclick=dismissOnOverlay?(e=>{if(e.target===m)closeModal();}):null;
   _modalPrevFocus=document.activeElement;
@@ -1244,7 +1246,7 @@ function pickCaptain(){
   const _armSVG=`<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2L10 6L14 6.5L11 9.5L11.8 14L8 12L4.2 14L5 9.5L2 6.5L6 6Z"/></svg>`;
   const opts=sq.map(e=>{
     const isSug=e.i===suggestI,isSel=isCur(e);
-    return `<button class="cap-card${isSel?" cap-card-sel":""}" onclick="setCaptain(${e.i});closeModal()" style="text-align:left">
+    return `<button class="cap-card${isSel?" cap-card-sel":""}" role="option" aria-selected="${isSel}" onclick="setCaptain(${e.i});closeModal()" style="text-align:left">
       <div class="cap-card-top">
         <span class="cap-card-name">${e.p.name||'?'}</span>
         ${isSug?`<span class="cap-card-badge">${_armSVG} ${LANG==="tr"?"ÖNERİ":"PICK"}</span>`:""}
@@ -1259,10 +1261,13 @@ function pickCaptain(){
   }).join("");
   const tr=LANG==="tr";
   showModal(`<div style="padding:16px 16px 12px">
-    <div style="font-family:var(--disp);font-weight:800;font-size:18px;color:var(--color-ink);margin-bottom:4px">${tr?"KAPTANI SEÇ":"PICK CAPTAIN"}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-family:var(--disp);font-weight:800;font-size:18px;color:var(--color-ink)">${tr?"KAPTANI SEÇ":"PICK CAPTAIN"}</div>
+      <button onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}" style="background:none;border:none;cursor:pointer;color:var(--color-slate);font-size:22px;line-height:1;padding:0 2px;opacity:.6">×</button>
+    </div>
     <div style="font-family:var(--mono);font-size:11px;color:var(--color-slate);margin-bottom:14px">${tr?"Kaptan sahada +1 güç sağlar. Sakatlanırsa −2 uygulanır.":"Captain on field: +1 power. If injured: −2 extra."}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
-  </div>`);
+    <div role="listbox" aria-label="${tr?"Kaptan seçimi":"Captain selection"}" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
+  </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
 }
 function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p)pushFeed("🎽 <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");renderHub();}
 function presBtnLockedClick(){const lbl=$("presLabel");if(!lbl)return;const msg=LANG==="tr"?"ÇEYREK FİNALDE":"Q-FINAL";lbl.textContent=msg;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{const pl=$("presLabel");if(pl)pl.textContent=L().ui.seeChair;},3500);}
@@ -1526,6 +1531,7 @@ function _chairLockedFlash(btn){let el=btn.querySelector(".chair-lock-msg");if(!
 
 /* ===== howto i18n ===== */
 const _G="#429A73",_R="#0C1213",_A="#496E71";
+const _badge=(t,bg,fg)=>`<span style="display:inline-block;font-family:var(--mono);font-size:.75em;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:3px;background:${bg};color:${fg};vertical-align:.1em">${t}</span>`;
 const _ICO={
   alert:`<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em" aria-hidden="true"><path d="M8 1.5L1.5 13.5h13Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".7" fill="currentColor" stroke="none"/></svg>`,
   check:`<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em" aria-hidden="true"><polyline points="2,8.5 6,12.5 14,4"/></svg>`,
@@ -1540,7 +1546,7 @@ const _HOWTO={
     ["6 Turda Finali Oyna",`Güçlü olmak şansını artırır — ama <b style="color:${_R}">GALİBİYET GARANTİ DEĞİL</b>. Tıpkı gerçek futbol gibi!<br>Kazandıkça <b style="color:${_A}">para</b> ya da <b style="color:${_G}">kart</b> ödülü seç. <em>Her seçimin bir bedeli vardır.</em>`],
     ["Başkan Araya Girer",`Kasayı eritirsen Başkan seni <b style="color:${_R}">KOVABİLİR</b>. <b style="color:${_G}">Danış</b> butonuyla fikir al — bedava değil, ama getirisi büyük olabilir.<br>Her Başkan'ın <b style="color:${_A}">kendine özgü özellikleri</b> var. Tanı, kullan.`],
     ["Sakatlık ve Yedekler",`Sakat oyuncu güç kaybettirir. <b style="color:${_G}">Yedeklerini</b> akıllıca kullan<br>ya da ücret karşılığında oyuncuyu <b style="color:${_R}">tedavi ettir</b>. <em>Tabii paran kaldıysa.</em>`],
-    ["Kartlar Güç Katlar",`Pazardan kart al: kalıcı <b style="color:${_G}">güç bonusu</b> verenler, <b style="color:${_R}">risk-ödül</b> dengesi sunanlar, finale saklananlar…<br>Her kartın <b>bedeli ve koşulu</b> var. <b style="color:${_A}">Doğru kart, yanlış anda işe yaramaz.</b><br><b style="color:${_A}">GOLDEN</b> ve <b style="color:${_R}">DARK</b> kartlar aynı kartın farklı varyantıdır; her birinin kendine özgü etkisi vardır.`]
+    ["Kartlar Güç Katlar",`Pazardan kart al: kalıcı <b style="color:${_G}">güç bonusu</b> verenler, <b style="color:${_R}">risk-ödül</b> dengesi sunanlar, finale saklananlar…<br>Her kartın <b>bedeli ve koşulu</b> var. <b style="color:${_A}">Doğru kart, yanlış anda işe yaramaz.</b><br>${_badge("GOLDEN","#429A73","#0C1213")} ve ${_badge("DARK","#0C1213","#E6EEEF")} kartlar aynı kartın farklı varyantıdır; her birinin kendine özgü etkisi vardır.`]
   ]},
   en:{toggle:"How to play?",steps:[
     ["Pick Formation & Chairman",`Your formation sets the positions to fill. The chairman shapes your <b style="color:${_A}">budget</b>, <b style="color:${_G}">bonuses</b>, and <b style="color:${_R}">debt limit</b>. Win championships to <b style="color:${_A}">UNLOCK</b> new formations and chairmen.`],
@@ -1548,7 +1554,7 @@ const _HOWTO={
     ["Play 6 Rounds to the Final",`Higher power improves your odds — but <b style="color:${_R}">WINNING IS NEVER GUARANTEED</b>. Just like real football! After each win, choose a <b style="color:${_A}">cash</b> or <b style="color:${_G}">card</b> reward. <em>Every choice has a cost.</em>`],
     ["The Chairman Interferes",`Drain the budget and the chairman will <b style="color:${_R}">SACK YOU</b>. Use the <b style="color:${_G}">Consult</b> button for advice — not free, but the payoff can be huge.<br>Every chairman has <b style="color:${_A}">distinct traits</b>. Learn them, use them.`],
     ["Injuries & Substitutes",`Injured players lose power. Use your <b style="color:${_G}">bench</b> wisely,<br>or pay to <b style="color:${_R}">heal</b> a player. <em>If you can still afford it.</em>`],
-    ["Cards Multiply Your Power",`Buy cards from the market: permanent <b style="color:${_G}">power boosts</b>, <b style="color:${_R}">risk-reward</b> gambles, late-activating finalists…<br>Every card has its own <b>cost and condition</b>. <b style="color:${_A}">The right card at the wrong time is useless.</b><br><b style="color:${_A}">GOLDEN</b> and <b style="color:${_R}">DARK</b> cards are variants of the same card, each with their own distinct effect.`]
+    ["Cards Multiply Your Power",`Buy cards from the market: permanent <b style="color:${_G}">power boosts</b>, <b style="color:${_R}">risk-reward</b> gambles, late-activating finalists…<br>Every card has its own <b>cost and condition</b>. <b style="color:${_A}">The right card at the wrong time is useless.</b><br>${_badge("GOLDEN","#429A73","#0C1213")} and ${_badge("DARK","#0C1213","#E6EEEF")} cards are variants of the same card, each with their own distinct effect.`]
   ]}
 };
 const _HOWTO_SVGS=[
@@ -1571,12 +1577,16 @@ function _applyHowtoLang(){
 }
 function openHowtoModal(){
   const d=_HOWTO[LANG]||_HOWTO.tr;
-  const steps=d.steps.map((s,i)=>{
+  const tr=LANG==="tr";
+  const cards=d.steps.map((s,i)=>{
     const sv=_HOWTO_SVGS[i]||[];
     const ico=i%2===0?(sv[0]||""):(sv[1]||"");
-    return `<div class="howto-mstep"><div class="howto-mico">${ico}</div><div><b class="hwt">${s[0]}</b><p class="hwd">${s[1]}</p></div></div>`;
+    return `<div class="howto-mcard"><div class="howto-mcard-top"><div class="howto-mico">${ico}</div><b class="hwt">${s[0]}</b></div><p class="hwd">${s[1]}</p></div>`;
   }).join("");
-  showModal(`<div><div class="kithdr" style="margin-bottom:12px">${d.toggle}</div><div class="howto-mgrid">${steps}</div><div class="bact" style="margin-top:8px"><button class="btn btn-ghost" onclick="closeModal()">${LANG==="tr"?"KAPAT":"CLOSE"}</button></div></div>`);
+  const closeLabel=tr?"Kapat":"Close";
+  const ctaLabel=tr?"OYUNA DÖN":"BACK TO GAME";
+  const titleLabel=tr?"NASIL OYNANIR?":"HOW TO PLAY?";
+  showModal(`<div class="howto-modal-shell"><div class="howto-mhdr"><span class="howto-mhdr-title">${titleLabel}</span><button class="howto-mhdr-close" onclick="closeModal()" aria-label="${closeLabel}">×</button></div><div class="howto-mbody"><div class="howto-mgrid">${cards}</div></div><div class="howto-mfoot"><button class="btn btn-primary" onclick="closeModal()" style="max-width:240px">${ctaLabel}</button></div></div>`,{dismissOnOverlay:true,label:titleLabel,bare:true});
 }
 
 /* ===== sessionStorage persistence ===== */
