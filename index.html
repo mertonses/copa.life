@@ -409,10 +409,12 @@ function showChairPopup(id){
   const fx=_CHAIR_FX[id]||{pros:{tr:[],en:[]},cons:{tr:[],en:[]}};
   const pros=fx.pros[tr?"tr":"en"]||[];
   const cons=fx.cons[tr?"tr":"en"]||[];
-  const fxHtml=(pros.length?`<div class="cp-fx-hdr">${tr?"AVANTAJLAR":"ADVANTAGES"}</div>${pros.map(p=>`<div class="cp-fx-item cp-pro"><span class="cp-fx-sym">✓</span><span>${p}</span></div>`).join("")}`:"")+(cons.length?`<div class="cp-fx-hdr">${tr?"DEZAVANTAJ":"DISADVANTAGE"}</div>${cons.map(c=>`<div class="cp-fx-item cp-con"><span class="cp-fx-sym">−</span><span>${c}</span></div>`).join("")}`:"");
+  const _hlPro=t=>t.replace(/(€\d+M|[+]\d+%|\+\d+|−\d+|\d+%)/g,'<span class="cp-hl-pro">$1</span>');
+  const _hlCon=t=>t.replace(/(€\d+M|[+]\d+%|\+\d+|−\d+|\d+%)/g,'<span class="cp-hl-con">$1</span>');
+  const fxHtml=(pros.length?`<div class="cp-fx-hdr">${tr?"AVANTAJLAR":"ADVANTAGES"}</div>${pros.map(p=>`<div class="cp-fx-item cp-pro"><span class="cp-fx-sym">✓</span><span>${_hlPro(p)}</span></div>`).join("")}`:"")+(cons.length?`<div class="cp-fx-hdr">${tr?"DEZAVANTAJ":"DISADVANTAGE"}</div>${cons.map(c=>`<div class="cp-fx-item cp-con"><span class="cp-fx-sym">−</span><span>${_hlCon(c)}</span></div>`).join("")}`:"");
   const desc=(cd.desc||"").replace(/<b>|<\/b>/g,"");
   const img=`<img src="${chairSrc(id)}" alt="" class="cpphoto" onerror="this.style.display='none'">`;
-  const h=`<div class="chairpopup chairpopup-v"><button class="cp-close" onclick="closeModal()" aria-label="Kapat">×</button>${img}<div class="chairpopup-name">${cd.n}</div><div class="cp-role-badge">${tr?"ÖZEL YETENEK":"SPECIAL TRAIT"}<b>${cd.role||""}</b></div><div class="chairpopup-desc">${desc}</div><div class="cp-fx">${fxHtml}</div>${nav}<div class="bact" style="margin-top:14px"><button class="btn" style="background:#2d6a48;color:#fff;border-color:#2d6a48" onclick="selectedChairId='${id}';buildChairButtons();closeModal()">${tr?`${cd.n.split(" ")[0]}'i Seç`:`Select ${cd.n.split(" ")[0]}`}</button></div></div>`;
+  const h=`<div class="chairpopup"><button class="cp-close" onclick="closeModal()" aria-label="Kapat">×</button>${img}<div class="chairpopup-name">${cd.n}</div><div class="cp-role-badge">${tr?"ÖZEL YETENEK":"SPECIAL TRAIT"}<b>${cd.role||""}</b></div><div class="chairpopup-desc">${desc}</div><div class="cp-fx">${fxHtml}</div>${nav}<div class="bact" style="margin-top:14px"><button class="btn" style="background:#2d6a48;color:#fff;border-color:#2d6a48;max-width:160px;margin:0 auto" onclick="selectedChairId='${id}';buildChairButtons();closeModal()">${tr?"SEÇ":"SELECT"}</button></div></div>`;
   showModal(h,{dismissOnOverlay:true});
 }
 function applyMeta(){const m=$("metaline");
@@ -1509,7 +1511,6 @@ const _HOWTO_SVGS=[
 ];
 function _applyHowtoLang(){
   const d=_HOWTO[LANG]||_HOWTO.tr;
-  if($("howtoToggle"))$("howtoToggle").textContent=d.toggle;
   const ids=["hw01","hw02","hw03","hw04","hw05","hw06"];
   d.steps.forEach((s,i)=>{
     const el=$(ids[i]);if(el){el.innerHTML=`<b class="hwt"><span class="howto-n">${(i+1).toString().padStart(2,"0")}</span>${s[0]}</b><p class="hwd">${s[1]}</p>`;el.style.cssText=`opacity:0;animation:howtoFadeIn .45s ease-out ${i*90}ms forwards`;}
