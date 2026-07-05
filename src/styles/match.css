@@ -7,11 +7,12 @@
   --surface-default:#F0F5F5;
   --surface-bg:#F5F9F9;--surface-elevated:#FFFFFF;
   --surface-raised:#FFFFFF;
-  --surface-muted:color-mix(in srgb,var(--color-background) 82%,var(--color-slate) 18%);
+  --surface-muted:rgba(73,110,113,0.08);
+  --surface-primary-soft:rgba(66,154,115,0.12);
   --surface-dark:var(--color-ink);
   --text-primary:var(--color-ink);--text-secondary:var(--color-slate);
   --text-on-dark:var(--color-background);--text-on-primary:var(--color-ink);
-  --border-subtle:rgba(12,18,19,0.14);--border-default:rgba(12,18,19,0.24);
+  --border-subtle:rgba(73,110,113,0.18);--border-default:rgba(73,110,113,0.38);
   --border-strong:var(--color-slate);--border-selected:var(--color-primary);
   --action-primary:var(--color-primary);--action-primary-hover:#3B8B68;
   --overlay-bg:rgba(12,18,19,0.62);--focus-ring:rgba(66,154,115,0.38);
@@ -19,11 +20,11 @@
   /* Radius */
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
   /* Shadows */
-  --shadow-sm:0 1px 3px rgba(12,18,19,0.12),0 0 0 1px rgba(12,18,19,0.05);--shadow-md:0 4px 18px rgba(12,18,19,0.16);
+  --shadow-sm:0 2px 6px rgba(12,18,19,0.08);--shadow-md:0 18px 45px rgba(12,18,19,0.16);
   /* Typography scale */
   --text-xs:11px;--text-sm:13px;--text-md:15px;--text-lg:17px;--text-xl:20px;--text-display:clamp(28px,8vw,42px);
   /* Animation timing */
-  --tr-fast:140ms ease;--tr-modal:220ms ease;
+  --tr-fast:160ms ease;--tr-modal:220ms ease;
   /* Legacy aliases */
   --paper:var(--color-background);--paper2:var(--surface-bg);
   --ink:var(--color-ink);--ink2:var(--color-slate);--line:var(--border-subtle);
