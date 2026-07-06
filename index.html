@@ -872,6 +872,16 @@ function pickTalk(k){if(talkUsed)return;talkUsed=true;try{sfxTalk(k);}catch(e){}
 /* ===== fx / modal ===== */
 const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
 function showFx(cb){const dur=760;if(reduce){cb&&cb();return;}const box=$("dicebox"),die=$("fxDie"),cap=$("fxCap"),btns=$("rollbtns");btns.classList.add("hidden");box.classList.remove("hidden");cap.textContent=L().capRoll;die.textContent=rnd(FACES);const iv=setInterval(()=>die.textContent=rnd(FACES),60);setTimeout(()=>{clearInterval(iv);box.classList.add("hidden");btns.classList.remove("hidden");cb&&cb();},dur);}
+/* ===== Toast notifications ===== */
+function showToast(msg,{type="default",duration=2600}={}){
+  let c=document.getElementById("toastContainer");
+  if(!c){c=document.createElement("div");c.id="toastContainer";document.body.appendChild(c);}
+  const t=document.createElement("div");
+  t.className="toast"+(type==="info"?" toast-info":"");
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add("toast-out");t.addEventListener("animationend",()=>t.remove(),{once:true});},duration);
+}
 let _modalPrevFocus=null,_modalTrapFn=null;
 function showModal(html,{dismissOnOverlay=false,label="",bare=false}={}){
   const m=$("modal");
@@ -1041,7 +1051,7 @@ function finishRoundReward(kind,extraText){
   if(loanPlayer&&typeof loanPlayer.turnsLeft!=="undefined"){loanPlayer.turnsLeft--;if(loanPlayer.turnsLeft<=0){const _lname=shortName(loanPlayer);if(typeof loanPlayer.slotIdx!=="undefined"&&loanPlayer.slotIdx>=0&&typeof loanPlayer.displaced!=="undefined"){picksBySlot[loanPlayer.slotIdx]=loanPlayer.displaced;if(loanPlayer.displaced)renderRoundel("h"+loanPlayer.slotIdx,loanPlayer.displaced);}pushFeed("🔄 <b>"+_lname+"</b> "+(LANG==="tr"?"kiralık süresi doldu, gitti":"loan expired, left"),"lose");loanPlayer=null;}}
   const prizes=[0,4,6,8,10,12];let prize=prizes[round]||10;if(kaosHalfReward){prize=Math.floor(prize/2);kaosHalfReward=false;}
   let rewardText=extraText||"";
-  if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);}
+  if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);showToast((LANG==="tr"?"💰 +€"+prize+"M kasa primi":"💰 +€"+prize+"M cash bonus"),{type:"default"});}
   else if(kind==="loan"){const lp=generateLoanPlayer();if(lp){
     /* En zayıf 11 oyuncusunu bul */
     let weakIdx=-1,weakOv=Infinity;
@@ -1269,7 +1279,7 @@ function pickCaptain(){
     <div role="listbox" aria-label="${tr?"Kaptan seçimi":"Captain selection"}" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
   </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
 }
-function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p)pushFeed("🎽 <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");renderHub();}
+function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p){pushFeed("🎽 <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");showToast((LANG==="tr"?"⚽ "+surOf(p)+" kaptan seçildi":"⚽ "+surOf(p)+" named captain"),{type:"default"});}renderHub();}
 function presBtnLockedClick(){const lbl=$("presLabel");if(!lbl)return;const msg=LANG==="tr"?"ÇEYREK FİNALDE":"Q-FINAL";lbl.textContent=msg;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{const pl=$("presLabel");if(pl)pl.textContent=L().ui.seeChair;},3500);}
 const CATMAP={taraftar:"taraftar",genc:"ekonomi",ch_momentum:"hucum",kontra:"hucum",buyuk_mac:"hucum",yildiz:"hucum",otobus:"savunma",kaleci_kalesi:"savunma",anadolu:"ekonomi",altyapi_plani:"ekonomi",tecrubeli_omurga:"savunma",yerli_blok:"ekonomi",kanat_akini:"hucum",cift_forvet:"hucum",derbi:"risk",final_provasi:"risk",son_dans:"risk",taksit_transfer:"ekonomi",son_kredi:"ekonomi",kara_borsa:"risk",sahte_evrak:"risk",deplasman_kafilesi:"risk",kumarbaz:"risk",gecici_prim:"risk",kisa_kamp:"risk",doping:"risk",kriz:"risk",kurban_belli:"risk",primler_yatinca:"ekonomi",vur_igneyi:"risk",bu_adam:"hucum",gec_gec:"hucum",nasip_kismet:"risk",yildiz_krizi:"hucum",kasiga_para:"risk"};
 Object.assign(T.tr.cards,{
@@ -1756,22 +1766,21 @@ function showSeasonStats(){
   const _icoStar=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4L2.2 6.2l4-.6Z"/></svg>`;
   const _icoMVP=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="6" r="3"/><path d="M5 9l-2 5h10l-2-5"/><line x1="8" y1="9" x2="8" y2="14"/></svg>`;
   /* section header */
-  const sec=(icon,label)=>`<div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.4);padding:9px 0 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px;display:flex;align-items:center;gap:5px">${icon}<span>${label}</span></div>`;
+  const sec=(icon,label)=>`<div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--color-slate);padding:9px 0 3px;border-top:1px solid var(--border-subtle);margin-top:4px;display:flex;align-items:center;gap:5px">${icon}<span>${label}</span></div>`;
 
   /* stat row */
-  const row=(label,val,col="#fff",extra="")=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:12px"><span style="color:rgba(255,255,255,.55);font-size:10.5px">${label}</span><b style="color:${col}">${val}</b></div>${extra}`;
+  const row=(label,val,col="var(--color-ink)",extra="")=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border-subtle);font-family:var(--mono);font-size:12px"><span style="color:var(--color-slate);font-size:10.5px">${label}</span><b style="color:${col}">${val}</b></div>${extra}`;
 
   /* animated counter */
-  const ctr=(id,val,col="#fff",suf="")=>`<div style="text-align:center"><div id="${id}" style="font-family:var(--disp);font-size:28px;font-weight:900;color:${col};line-height:1">0${suf}</div></div>`;
+  const ctr=(id,val,col="var(--color-ink)",suf="")=>`<div style="text-align:center"><div id="${id}" style="font-family:var(--disp);font-size:28px;font-weight:900;color:${col};line-height:1">0${suf}</div></div>`;
 
-  const wonStyle="background:linear-gradient(135deg,#132520,#0C1213)";
   const accentCol=r.won?"#429A73":"#496E71";
 
-  const html=`<div style="${wonStyle};color:#fff;border-radius:10px;overflow:hidden;max-height:78vh;overflow-y:auto;scrollbar-width:thin">
+  const html=`<div style="background:var(--color-background);color:var(--color-ink);border-radius:10px;overflow:hidden;max-height:82vh;overflow-y:auto;scrollbar-width:thin;border:1px solid var(--border-subtle)">
   <!-- header -->
-  <div style="background:rgba(0,0,0,.35);padding:14px 18px 10px;position:sticky;top:0;z-index:2;border-bottom:1px solid rgba(255,255,255,.07)">
+  <div style="background:var(--color-ink);padding:14px 18px 10px;position:sticky;top:0;z-index:2;border-bottom:1px solid rgba(12,18,19,.12)">
     <div style="font-family:var(--mono);font-size:9px;letter-spacing:3px;color:${accentCol};margin-bottom:2px">${tr?"SEZON İSTATİSTİKLERİ":"SEASON STATISTICS"}</div>
-    <div style="font-family:var(--disp);font-size:20px;font-weight:900;line-height:1">${teamName||"XI"} <span style="opacity:.4;font-size:13px">${formName}</span></div>
+    <div style="font-family:var(--disp);font-size:20px;font-weight:900;line-height:1;color:var(--color-background)">${teamName||"XI"} <span style="opacity:.45;font-size:13px">${formName}</span></div>
   </div>
 
   <!-- sonuç özeti bar -->
@@ -1781,37 +1790,37 @@ function showSeasonStats(){
 
   <!-- üst 3 rakam -->
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 10px">
-    <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:10px 4px;text-align:center">
+    <div style="background:var(--surface-muted);border-radius:7px;padding:10px 4px;text-align:center;border:1px solid var(--border-subtle)">
       ${ctr("ss_w",wins,"#429A73")}
-      <div style="font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-top:3px">${tr?"GALİBİYET":"WINS"}</div>
+      <div style="font-size:7px;letter-spacing:1.5px;color:var(--color-slate);margin-top:3px">${tr?"GALİBİYET":"WINS"}</div>
     </div>
-    <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:10px 4px;text-align:center">
-      ${ctr("ss_g",goals,goals>conceded?"#429A73":goals<conceded?"rgba(230,238,239,.6)":"#fff")}
-      <div style="font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-top:3px">${tr?"ATILAN GOL":"GOALS FOR"}</div>
+    <div style="background:var(--surface-muted);border-radius:7px;padding:10px 4px;text-align:center;border:1px solid var(--border-subtle)">
+      ${ctr("ss_g",goals,goals>conceded?"#429A73":goals<conceded?"#496E71":"var(--color-ink)")}
+      <div style="font-size:7px;letter-spacing:1.5px;color:var(--color-slate);margin-top:3px">${tr?"ATILAN GOL":"GOALS FOR"}</div>
     </div>
-    <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:10px 4px;text-align:center">
-      ${ctr("ss_p",winPct,"#fff","%")}
-      <div style="font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-top:3px">${tr?"GALİBİYET %":"WIN RATE"}</div>
+    <div style="background:var(--surface-muted);border-radius:7px;padding:10px 4px;text-align:center;border:1px solid var(--border-subtle)">
+      ${ctr("ss_p",winPct,"var(--color-ink)","%")}
+      <div style="font-size:7px;letter-spacing:1.5px;color:var(--color-slate);margin-top:3px">${tr?"GALİBİYET %":"WIN RATE"}</div>
     </div>
   </div>
 
   ${sec(_icoMatch,tr?"MAÇLAR":"MATCHES")}
-  ${row(tr?"G / B / M":"W / D / L",`<span style='color:#429A73'>${wins}</span> / <span style='color:#496E71'>${draws}</span> / <span style='color:rgba(230,238,239,.55)'>${losses}</span>`)}
+  ${row(tr?"G / B / M":"W / D / L",`<span style='color:#429A73'>${wins}</span> / <span style='color:#496E71'>${draws}</span> / <span style='color:rgba(73,110,113,.65)'>${losses}</span>`)}
   ${row(tr?"Atılan Gol":"Goals For",goals,"#429A73",
-    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_gbar" style="height:100%;width:0%;background:#429A73;border-radius:3px;transition:width .9s ease"></div></div>`)}
-  ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"#429A73":conceded>goals?"rgba(230,238,239,.55)":"rgba(255,255,255,.7)",
-    `<div style="height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_cbar" style="height:100%;width:0%;background:#496E71;border-radius:3px;transition:width .9s ease"></div></div>`)}
-  ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"#429A73":gd<0?"rgba(230,238,239,.55)":"#fff")}
-  ${row(tr?"Maç Başı Gol":"Goals/Game",goalsPer,parseFloat(goalsPer)>=1.5?"#429A73":"rgba(255,255,255,.7)")}
+    `<div style="height:4px;background:rgba(12,18,19,.1);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_gbar" style="height:100%;width:0%;background:#429A73;border-radius:3px;transition:width .9s ease"></div></div>`)}
+  ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"#429A73":conceded>goals?"#496E71":"var(--color-slate)",
+    `<div style="height:4px;background:rgba(12,18,19,.1);border-radius:3px;margin-top:3px;overflow:hidden"><div id="ss_cbar" style="height:100%;width:0%;background:#496E71;border-radius:3px;transition:width .9s ease"></div></div>`)}
+  ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"#429A73":gd<0?"#496E71":"var(--color-ink)")}
+  ${row(tr?"Maç Başı Gol":"Goals/Game",goalsPer,parseFloat(goalsPer)>=1.5?"#429A73":"var(--color-slate)")}
 
   ${sec(_icoEcon,tr?"EKONOMİ":"ECONOMY")}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
     ${row(tr?"Kazanılan":"Earned","+€"+(e.earned||0)+"M","#429A73")}
-    ${row(tr?"Harcanan":"Spent","-€"+(e.spent||0)+"M","rgba(230,238,239,.55)")}
-    ${row(tr?"Net":"Net",(((e.earned||0)-(e.spent||0))>=0?"+":"")+((e.earned||0)-(e.spent||0))+"M",((e.earned||0)-(e.spent||0))>=0?"#429A73":"rgba(230,238,239,.55)")}
-    ${row(tr?"Başkan":"Chairman","-€"+(e.president||0)+"M","rgba(255,255,255,.5)")}
+    ${row(tr?"Harcanan":"Spent","-€"+(e.spent||0)+"M","#496E71")}
+    ${row(tr?"Net":"Net",(((e.earned||0)-(e.spent||0))>=0?"+":"")+((e.earned||0)-(e.spent||0))+"M",((e.earned||0)-(e.spent||0))>=0?"#429A73":"#496E71")}
+    ${row(tr?"Başkan":"Chairman","-€"+(e.president||0)+"M","var(--color-slate)")}
   </div>
-  ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" €"+(expensive.price||0)+"M":"—","rgba(255,255,255,.7)")}
+  ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" €"+(expensive.price||0)+"M":"—","var(--color-slate)")}
 
   ${sec(_icoCard,tr?"KARTLAR":"CARDS")}
   ${row(tr?"Kullanılan Kart":"Cards Played",cards.length,"#496E71")}
@@ -1819,17 +1828,17 @@ function showSeasonStats(){
 
   ${sec(_icoPlayer,tr?"OYUNCULAR":"PLAYERS")}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">
-    ${row(tr?"Sakatlık":"Injuries",e.injuries||0,(e.injuries||0)===0?"#429A73":(e.injuries||0)>=2?"rgba(230,238,239,.55)":"#496E71")}
+    ${row(tr?"Sakatlık":"Injuries",e.injuries||0,(e.injuries||0)===0?"#429A73":(e.injuries||0)>=2?"#496E71":"var(--color-ink)")}
     ${row(tr?"Yedek":"Bench Used",benchUsed||0)}
     ${row(tr?"Final Güç":"Squad Power",r.power||0,"#496E71")}
   </div>
-  ${topList.length?sec(_icoStar,tr?"TOP GOLCÜLER":"TOP SCORERS")+topList.map(([n,g],i)=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><div style="width:16px;height:16px;border-radius:50%;background:${["#429A73","rgba(73,110,113,.7)","rgba(73,110,113,.4)"][i]||"rgba(255,255,255,.1)"};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#E6EEEF;flex-shrink:0">${i+1}</div><span style="flex:1;font-family:var(--mono);font-size:11px">${n}</span><b style="color:#429A73;font-family:var(--mono);font-size:11px">${g}</b></div>`).join(""):""}
-  ${runMVP&&runMVP!=="—"?sec(_icoMVP,tr?"FİNAL MVP":"FINAL MVP")+`<div style="display:flex;align-items:center;gap:10px;padding:7px 0"><div style="width:34px;height:34px;border-radius:50%;background:rgba(66,154,115,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">${_icoMVP.replace('stroke="currentColor"','stroke="#429A73"')}</div><div><div style="font-family:var(--disp);font-size:15px;font-weight:700;color:#429A73">${runMVP}${(mvpMem[runMVP]||0)>=2?" ⭐":""}</div><div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1px">${(mvpMem[runMVP]||0)>=2?(tr?"LEGENDARY MVP":"LEGENDARY MVP"):(tr?"FİNAL YILDIZI":"FINAL STAR")}</div></div></div>`:""}
+  ${topList.length?sec(_icoStar,tr?"TOP GOLCÜLER":"TOP SCORERS")+topList.map(([n,g],i)=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border-subtle)"><div style="width:16px;height:16px;border-radius:50%;background:${["#429A73","#496E71","rgba(73,110,113,.35)"][i]||"rgba(12,18,19,.08)"};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#E6EEEF;flex-shrink:0">${i+1}</div><span style="flex:1;font-family:var(--mono);font-size:11px;color:var(--color-ink)">${n}</span><b style="color:#429A73;font-family:var(--mono);font-size:11px">${g}</b></div>`).join(""):""}
+  ${runMVP&&runMVP!=="—"?sec(_icoMVP,tr?"FİNAL MVP":"FINAL MVP")+`<div style="display:flex;align-items:center;gap:10px;padding:7px 0"><div style="width:34px;height:34px;border-radius:50%;background:rgba(66,154,115,.12);border:1px solid rgba(66,154,115,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">${_icoMVP.replace('stroke="currentColor"','stroke="#429A73"')}</div><div><div style="font-family:var(--disp);font-size:15px;font-weight:700;color:#429A73">${runMVP}${(mvpMem[runMVP]||0)>=2?" ⭐":""}</div><div style="font-size:9px;color:var(--color-slate);letter-spacing:1px">${(mvpMem[runMVP]||0)>=2?(tr?"LEGENDARY MVP":"LEGENDARY MVP"):(tr?"FİNAL YILDIZI":"FINAL STAR")}</div></div></div>`:""}
 
-  <div style="margin-top:14px"><button class="btn" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);color:#fff" onclick="closeModal()">${tr?"Kapat":"Close"}</button></div>
+  <div style="margin-top:14px"><button class="btn btn-ghost" onclick="closeModal()">${tr?"Kapat":"Close"}</button></div>
   </div></div>`;
 
-  showModal(`<div style="max-width:420px;margin:0 auto">${html}</div>`);
+  showModal(`<div style="max-width:680px;margin:0 auto">${html}</div>`);
 
   /* animate counters and bars after render */
   setTimeout(()=>{
