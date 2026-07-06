@@ -1,10 +1,20 @@
 /* Hub ekrani: kadro/guc/kimya/koleksiyon/pazar render, kart aktif/pasif, oto-oyna. */
 var collFilter="all";
 
+function _fixHubVisibleText(){
+  const tr=LANG==="tr";
+  const fh=$("feedHdr");if(fh){const label=(typeof L==="function"&&L().feedHdr)||"GELİŞMELER";fh.innerHTML=`<span class="tclive">●</span> <span>${label}</span>`;}
+  const ph=$("powHdr");if(ph)ph.textContent=tr?"KADRO GÜCÜ":"SQUAD POWER";
+  const tv=typeof chairTrust!=="undefined"?chairTrust:3;
+  const trustV=$("trustV"),trustHint=$("trustHint");
+  if(trustV)trustV.textContent="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));
+  if(trustHint)trustHint.textContent=tv>=3?(tr?"güvende":"secure"):tv>=2?(tr?"temkinli":"cautious"):tv>=1?(tr?"kırılgan":"fragile"):(tr?"tehlikede":"at risk");
+}
+
 function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
-  {const _slot=$("hubBudgetSlot");const _bb=$("budgetBox");if(_slot&&_bb&&!_slot.contains(_bb))_slot.appendChild(_bb);}const _tcl=$("tcLines");if(_tcl)_tcl.innerHTML="";
+  const _tcl=$("tcLines");if(_tcl)_tcl.innerHTML="";
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
-  opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;
+  opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
   if(typeof pickWeather==="function")pickWeather();
   if(budget<0&&round>1){let _intAmt=0;if(budget>-10){_intAmt=1;}else if(budget>-20){_intAmt=3;}else{_intAmt=6;}spend(_intAmt,"interest");pushFeed("💸 "+(LANG==="tr"?"Borç faizi: -€"+_intAmt+"M":"Debt interest: -€"+_intAmt+"M"),"lose");}
   /* Borç güven cezası */
@@ -114,7 +124,7 @@ function cardArt(k){return "assets/cards/"+k+".png";}
 function kindLabel(k){const tr=LANG==="tr",kind=cardKind(k),m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["ÖZEL","SPECIAL"],temporary:["ÖZEL","SPECIAL"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[kind]||["GÜÇ","POWER"];const lbl=tr?m[0]:m[1];if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
 function modeLabel(k){if(isInstantCard(k))return LANG==="tr"?"ANINDA ÇALIŞIR":"INSTANT";if(!isProgressCard(k))return LANG==="tr"?"SÖZLEŞME":"CONTRACT";return LANG==="tr"?"GELİŞEN":"SCALING";}
 function cardBadgeHTML(k){return `<span class="kindtag kind-${cardKind(k)}">${kindLabel(k)}</span><span class="modetag">${modeLabel(k)}</span>`;}
-function variantBadge(v){const labels=L().variantLbl||["GOLDEN","DARK"];return labels[Math.min(v||0,1)]||labels[0];}
+function variantBadge(v){const labels=L().variantLbl||["COMMON","DARK"];return labels[Math.min(v||0,1)]||labels[0];}
 function rarLabel(k){return variantBadge(variantOf(k));}
 
 const LOCK_SVG=`<svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3 -3v-6a3 3 0 0 1 3 -3v-3a5 5 0 0 1 5 -5m0 12a2 2 0 0 0 -1.995 1.85l-.005 .15a2 2 0 1 0 2 -2m0 -10a3 3 0 0 0 -3 3v3h6v-3a3 3 0 0 0 -3 -3"/></svg>`;
@@ -168,7 +178,7 @@ function simulateCardCopyPower(k){return simulateEquipPower(k);}
 function simulateShopPower(k){const sv=shopVariants[k]||0,old=cardVariant[k]||0;cardVariant[k]=sv;const r=simulateEquipPower(k);cardVariant[k]=old;return r;}
 function variantDesc(d,v){
   if(!d)return d;
-  const gTag=d.includes("ALTIN:")?"ALTIN:":(d.includes("GOLDEN:")?"GOLDEN:":null);
+  const gTag=d.includes("ALTIN:")?"ALTIN:":(d.includes("COMMON:")?"COMMON:":(d.includes("GOLDEN:")?"GOLDEN:":null));
   const dTag=d.includes("KARA:")?"KARA:":(d.includes("DARK:")?"DARK:":null);
   if(!gTag&&!dTag)return d;
   const gIdx=gTag?d.indexOf(gTag):-1;
@@ -184,6 +194,11 @@ function variantDesc(d,v){
   }
 }
 function shortCardText(k,activeList){const v=cardEff(k,activeList||picksBySlot.filter(Boolean),round),hint=conditionHint(k);if(v===0&&hint)return hint;return (LANG==="tr"?"Güç":"Power")+": "+(v>=0?"+":"")+v;}
+function shopCardDesc(k,raw){
+  const txt=(raw||shortCardText(k,picksBySlot.filter(Boolean))||"").replace(/\s+/g," ").trim();
+  if(!txt)return"";
+  return txt.replace(/; ?/g," · ");
+}
 function conditionHint(k){
  const s=picksBySlot.filter(Boolean),tr=LANG==="tr";
  const countPos=arr=>s.filter(p=>arr.includes(p.pos)).length;
@@ -273,7 +288,7 @@ function cardContractText(k){
 function renderCollectionFilters(){const el=$("collectionFilters");if(!el)return;const tr=LANG==="tr",items=[["all",tr?"Tümü":"All"],["open",tr?"Açık":"Open"],["active",tr?"Aktif":"Active"]];if(collFilter==="near")collFilter="all";el.innerHTML=items.map(([id,label])=>`<button class="${collFilter===id?"on":""}" onclick="collFilter='${id}';renderCollection()">${label}</button>`).join("");}
 function collectionPass(k){const c=invOf(k),active=hasCard(k);if(collFilter==="open")return c>0;if(collFilter==="active")return active;return true;}
 function renderCollection(){const grid=$("collectionGrid");if(!grid)return;const x=L(),s=picksBySlot.filter(Boolean),cap=activeCardSlots();let owned=0,shown=0;grid.innerHTML="";renderCollectionFilters();allCardKeys().forEach(k=>{const cd=x.cards[k];if(!cd||isInstantCard(k))return;const c=invOf(k),open=c>0,active=hasCard(k),cat=CATMAP[k]||"gorev",v=variantOf(k);if(open)owned++;if(!collectionPass(k))return;shown++;const pv=open?simulateEquipPower(k):null,locked=!open;const equipLine=active?(LANG==="tr"?"✓ aktif — çıkarmak için tıkla":"✓ active — click to remove"):(open?(cards.length<cap?(x.ui.clickEquip):(x.ui.slotFull)):(x.ui.unlockFrom));const preview=open&&!active&&cards.length<cap?`<div class="powerpreview cc-preview">${LANG==="tr"?"Takarsan":"Equip"}: ${pv.before} → ${pv.after}</div>`:"";const d=document.createElement("div");d.className="collcard v"+v+" cat-"+cat+(locked?" locked":"")+(active?" active":"");d.title=cd.n+" · "+kindLabel(k)+"\n"+cardContractType(k);d.innerHTML=`<div class="cc-head"><span class="cc-rar var-badge var-${v}">${open?variantBadge(v):(LANG==="tr"?"KİLİTLİ":"LOCKED")}</span><span class="cc-kind">${open?kindLabel(k):""}</span></div><div class="cc-art">${open?(CARD_SVGS[k]||cd.i):LOCK_SVG}</div><div class="cc-body"><div class="cc-name">${open?cd.n:(x.ui.lockedCard)}</div><div class="cc-desc">${open?(cd.d||shortCardText(k,s)):(LANG==="tr"?"Pazardan açılır":"Unlock in market")}</div>${preview}</div><div class="cc-foot"><span class="cc-state">${equipLine}</span>${active?'<span class="cc-dot"></span>':""}</div>`;if(open)d.onclick=()=>toggleCardActive(k);grid.appendChild(d);});const cc=$("collCount");if(cc)cc.textContent=" "+owned+"/"+allCardKeys().filter(k=>!isInstantCard(k)).length+(shown!==allCardKeys().length?" · "+shown:"");}
-function renderDebtWarning(){const el=$("debtWarn");if(!el)return;const tr=LANG==="tr",lim=chairmanSackLimit();let msg="",cls="";if(budget<lim){msg=tr?"Yönetim alarmda: borç sınırı aşıldı.":"Board alarm: debt limit exceeded.";cls="danger";}else if(round>=3&&budget<=lim+3){msg=tr?"Koltuğun sallanıyor: yönetimin eşiği €"+lim+"M.":"Your job is at risk: board limit €"+lim+"M.";cls="danger";}else if(budget<=-10){msg=tr?"Borç büyüdü: yönetim baskısı arttı, bazı pazar teklifleri kapanabilir.":"Debt is growing: board pressure rose, some offers may close.";cls="warn";}else if(budget<0){msg=tr?"Kasa ekside: bu kadro krediyle dönüyor.":"Funds below zero: this squad is running on credit.";cls="soft";}el.className="debtwarn "+cls+(msg?"":" hidden");el.textContent=msg;if(chairman&&chairman.id==="pinti"&&typeof pintiSavings!=="undefined"){let ps=$("pintiSavingsBar");if(!ps){ps=document.createElement("div");ps.id="pintiSavingsBar";ps.style.cssText="font-size:10px;margin-top:4px;color:var(--ink2);display:flex;align-items:center;gap:4px";el.parentNode.insertBefore(ps,el.nextSibling);}const filled=Math.round(pintiSavings/2),total=4;const coins=Array.from({length:total},(_,i)=>`<span style="color:${i<filled?"#e6ad2e":"var(--ink3)"};font-size:11px">🪙</span>`).join("");ps.innerHTML=coins+`<span>${tr?"Birikim":"Savings"} €${pintiSavings}M / €8M${budget>=0?` · <span style='color:#4ade80'>+€2M/tur</span>`:` · <span style='color:#ef4444'>−güç/tur</span>`}</span>`;}
+function renderDebtWarning(){const el=$("debtWarn");if(el){el.className="debtwarn hidden";el.textContent="";}const ps=$("pintiSavingsBar");if(ps)ps.remove();const clash=document.getElementById("cardClashWarn");if(clash)clash.remove();}/*
   // Kart çakışma uyarısı
   const _riskCombos=[['doping','sahte_evrak'],['kumarbaz','son_kredi'],['doping','kasiga_para'],['gec_gec','kasiga_para']];
   let _clashEl=document.getElementById('cardClashWarn');
@@ -282,7 +297,7 @@ function renderDebtWarning(){const el=$("debtWarn");if(!el)return;const tr=LANG=
     if(!_clashEl){_clashEl=document.createElement('div');_clashEl.id='cardClashWarn';_clashEl.className='debtwarn warn';document.getElementById('debtWarn')?.after(_clashEl);}
     _clashEl.textContent=(tr?'⚠ Kart çakışması: ':'⚠ Card clash: ')+_clashes.map(p=>p.join(' + ')).join(', ');
   }else if(_clashEl){_clashEl.remove();}
-}
+}*/
 function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e){}const x=L(),sp=squadPower(round),s=picksBySlot.filter(Boolean);
   $("roundtag").textContent=x.rounds[round-1]+" · "+x.vsword+" "+opponent.name;
   {const wm=$("vsMid");if(wm){const we=currentWeather?currentWeather.e:"";const wn=currentWeather?(LANG==="tr"?currentWeather.tr:currentWeather.en):"";const bases=[8000,14000,22000,34000,52000,75000];const b=bases[Math.min(5,round-1)];const aud=Math.round(b*(0.65+Math.min(0.33,Math.max(0,(sp.power-(opponent?opponent.power:0))/100)))/1000)*1000;const _diff=sp.power-(opponent?opponent.power:0);const _sig=_diff>=10?{t:LANG==="tr"?"Favori":"Favourite",c:"#4ade80"}:_diff<=-10?{t:LANG==="tr"?"Dezavantajlı":"Underdog",c:"#f97316"}:{t:LANG==="tr"?"Dengeli":"Even",c:"#e6ad2e"};wm.innerHTML=`<div class="vs-vs">VS</div>${we?`<div class="vsweather">${we} ${wn}</div>`:"<div class='vsweather'></div>"}<div class="vs-sig" style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;color:${_sig.c};text-transform:uppercase;margin:2px 0">${_sig.t}</div><div class="vsaud"><svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="10"><circle cx="6" cy="4.5" r="2.8"/><circle cx="14" cy="4.5" r="2.8"/><path d="M1 13Q1 9 6 9Q11 9 11 13"/><path d="M13 9.5Q17 9 18.5 13" stroke-opacity=".5"/></svg> ${(aud/1000).toFixed(0)}K ${LANG==="tr"?"seyirci":"fans"}</div><div class="vsround">${x.rounds[round-1]}</div>`;}}
@@ -299,16 +314,60 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     <text x="22" y="37" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="${fg}" letter-spacing="0.5">${lbl}</text>
   </svg>`;}
   const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#C84B36","#a03025","#f5f0e8",lbl);}}}
-  const _pwCol=v=>v>=90?"#16c96b":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
+  const _pwCol=v=>v>=90?"#15803d":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
   {const el=$("youPw");if(el){el.textContent=sp.power;el.style.color=_pwCol(sp.power);}}
   $("youNm").textContent=teamName||"XI";$("oppNm").textContent=opponent.name;
   {const el=$("oppPw");if(el){el.textContent=opponent.power;el.style.color=_pwCol(opponent.power);}}
-  $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").innerHTML=`<svg viewBox="0 0 18 16" width="12" height="11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="5" width="11" height="10" rx="1.5"/><rect x="4" y="2.5" width="11" height="10" rx="1.5" fill="var(--paper2)"/><rect x="6" y="0" width="11" height="10" rx="1.5" fill="var(--paper2)"/></svg>${x.shopLbl}`;$("feedHdr").innerHTML=`<span class="tclive">●</span> <span>${x.feedHdr}</span>`;$("powHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5"/></svg>${x.powHdr}`;$("powV").textContent=sp.power;powerHist[round-1]=sp.power;
-  {const sk=sparkPow();$("powHint").textContent=sk||x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
+  $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").innerHTML=`<span style="display:flex;align-items:center;gap:6px"><span><svg viewBox="0 0 18 16" width="12" height="11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="5" width="11" height="10" rx="1.5"/><rect x="4" y="2.5" width="11" height="10" rx="1.5" fill="var(--paper2)"/><rect x="6" y="0" width="11" height="10" rx="1.5" fill="var(--paper2)"/></svg>${x.shopLbl}</span><button onclick="event.stopPropagation();shopReroll()" title="${LANG==="tr"?"Yenile":"Reroll"}" style="background:none;border:1px solid var(--border-subtle);border-radius:4px;padding:2px 4px;cursor:pointer;color:var(--color-slate);display:inline-flex;align-items:center;justify-content:center;line-height:1"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a6 6 0 1 0 1.5-4"/><path d="M2 4v4h4"/></svg></button></span>`;$("feedHdr").innerHTML=`<span class="tclive">●</span> <span>${x.feedHdr}</span>`;$("powHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5"/></svg>${x.powHdr}`;$("powV").textContent=sp.power;powerHist[round-1]=sp.power;
+  {const rb=$("shopLbl")&&$("shopLbl").querySelector("button");if(rb)rb.innerHTML=`<svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7a6 6 0 0 0-10.5-2.5L4 6"/><path d="M4 3v3h3"/><path d="M4 13a6 6 0 0 0 10.5 2.5L16 14"/><path d="M16 17v-3h-3"/></svg>`;}
+  {$("powHint").textContent=x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
   {const cb=chemBonus(s);$("chemV").textContent="+"+Math.min(3,cb.total);$("chemList").innerHTML=x.powHint;const hp=$("hubPitch");if(hp){hp.classList.toggle("chem-high",cb.total>=3);hp.classList.toggle("chem-low",cb.total<0);}
    const ct=$("chemTile");if(ct){const cv=cb.total;const cbg=cv<0?"#ef4444":cv===0?"#f97316":cv<=1?"#eab308":cv<=2?"#4ade80":"#16c96b";const cfg=cv<=1&&cv>=0?"var(--ink)":"#fff";ct.style.background=cbg;[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color=cfg;});}}
+  /* Kasa tile — rich finance card */
+  {const kt=$("kasaTile");if(kt){
+    const bv=budget;
+    const tr2=LANG==="tr";
+    /* debt limit for active chairman */
+    const _dlMap={pinti:-12,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-31};
+    const debtLim=chairman?((_dlMap[chairman.id])||DEBT_LIMIT):DEBT_LIMIT;
+    const spent=econStats&&econStats.spent?Math.round(econStats.spent):0;
+    /* background state */
+    const nearLimit=debtLim&&bv<0&&(bv<=-18||Math.abs(bv)>=Math.abs(debtLim)*0.62);
+    let statusLabel,subText,kasaState;
+    if(nearLimit){
+      kasaState="kasa-deep-debt";
+      statusLabel=tr2?"SINIRA YAKIN":"CRITICAL";
+      subText=tr2?`Borç limitine €${Math.abs(debtLim)-Math.abs(bv)}M kaldı`:`€${Math.abs(debtLim)-Math.abs(bv)}M to debt limit`;
+    }else if(bv<0){
+      kasaState="kasa-debt";
+      statusLabel=tr2?"BORÇTA":"IN DEBT";subText="";
+    }else if(bv<=3){
+      kasaState="kasa-zero";
+      statusLabel=tr2?"SINIRDA":"AT ZERO";subText="";
+    }else if(bv<20){
+      kasaState="kasa-positive";
+      statusLabel=tr2?"DENGEDE":"BALANCED";subText="";
+    }else{
+      kasaState="kasa-rich";
+      statusLabel=tr2?"RAHAT":"HEALTHY";subText="";
+    }
+    kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");
+    kt.classList.add(kasaState);
+    kt.style.background="";kt.style.color="";kt.style.borderColor="";
+    subText="";
+    const vEl=$("kasaV");if(vEl)vEl.textContent=(bv>=0?"+":"−")+"€"+Math.abs(bv)+"M";
+    const subEl=$("kasaSub");if(subEl)subEl.textContent=subText;
+    const stEl=$("kasaStatus");if(stEl){stEl.textContent=statusLabel;stEl.style.background="";stEl.style.color="";}
+    const dEl=$("kasaDebt");if(dEl)dEl.textContent="−€"+Math.abs(debtLim)+"M";
+    const spEl=$("kasaSpent");if(spEl)spEl.textContent="€"+spent+"M";
+    /* progress bar marker */
+    const _total=Math.abs(debtLim)+30;const _pos=Math.max(0,Math.min(1,(bv-debtLim)/_total));
+    const marker=$("kasaBarMarker");if(marker)marker.style.left=(_pos*100).toFixed(1)+"%";
+  }}
+  /* Başkan Güveni tile */
+  {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"#429A73":tv>=2?"#496E71":tv>=1?"#f97316":"#ef4444";const tfg=tv>=2?"#fff":"#fff";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.style.background=tbg;const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tfg;trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"temkinli":"cautious"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
   {const pv=sp.power,oppPv=opponent?opponent.power:0;const pt=$("powTile");if(pt){
-    const pbg=pv>=90?"#16c96b":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";
+    const pbg=pv>=90?"#15803d":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";
     const pfg=(pv>=70&&pv<90)?"#000":"#fff";
     pt.style.background=pbg;
     const _total=Math.max(pv+oppPv,1);const _yPct=Math.round(pv/_total*100);const _oPct=100-_yPct;
@@ -317,21 +376,45 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     const _bonuses=[{l:LANG==="tr"?"Kart":"Card",v:Math.round(sp.cardBonus||0)},{l:LANG==="tr"?"Stil":"Style",v:Math.round(sp.styleBonus||0)},{l:"Kimya",v:Math.round(sp.chem||0)},{l:LANG==="tr"?"Risk":"Risk",v:Math.round(sp.risk||0)}];
     const _top=_bonuses.filter(b=>b.v!==0).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];
     const _vsBar=`<div style="display:flex;height:3px;overflow:hidden;margin-top:5px;gap:1px"><div style="flex:${_yPct};background:${_youBarCol}"></div><div style="flex:${_oPct};background:${_oppBarCol}"></div></div>`;
-    pt.innerHTML=`<button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="${LANG==="tr"?"Kadro gücü nasıl hesaplanır?":"How is squad power calculated?"}" style="color:${pfg};border-color:${pfg};opacity:.55">?</button><div class="mh" id="powHdr" style="color:${pfg};opacity:.8">${LANG==="tr"?"KADRO GÜCÜ":"SQUAD POWER"}</div><div class="mv" id="powV" style="color:${pfg};font-size:22px;line-height:1.05">${pv}</div><div class="ms" id="powHint" style="color:${pfg};opacity:.75"></div>${_vsBar}`;
+    pt.innerHTML=`<button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="${LANG==="tr"?"Kadro gücü nasıl hesaplanır?":"How is squad power calculated?"}" style="color:${pfg};border-color:${pfg};opacity:.55">?</button><div class="mh" id="powHdr" style="color:${pfg};opacity:.8">${LANG==="tr"?"KADRO GÜCÜ":"SQUAD POWER"}</div><div class="mv" id="powV" style="color:${pfg};font-size:22px;line-height:1.05">${pv}</div><div class="ms" id="powHint" style="color:${pfg};opacity:.75">${x.powHint}</div>${_vsBar}`;
   }}
   {const os=$("oppStars"),oc=$("oppChar"),ys=$("youStars"),yc=$("youChar");if(os)os.textContent="★".repeat(starsOf(opponent.power));if(oc&&oppChar)oc.innerHTML=oppChar.e+" "+oppChar.l;if(ys)ys.textContent="★".repeat(starsOf(sp.power));if(yc){yc.innerHTML=x.styles[style].i+" "+x.styles[style].n;}}
   {const chName=x.chair[chairman.id].n;const src=typeof chairSrc==="function"?chairSrc(chairman.id):`assets/chairs/${chairman.id}.png`;const pb=$("presBtn");pb.innerHTML=`<img src="${src}" class="presbtnphoto" alt="" onerror="this.style.display='none'">`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.style.opacity=locked?"0.42":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl)pl.textContent=x.ui.seeChair;}$("scoutBtn").title=x.scout;
   $("playBtn").innerHTML=round>=6?x.playFinal:x.play;
   $("talkBtn").classList.toggle("hidden",talkUsed);$("talkBtn").innerHTML=x.talk;renderDebtWarning();renderInjbar();
-  const cr=$("cardrow");cr.innerHTML="";const e0=document.createElement("div");e0.className="card style";e0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;cr.appendChild(e0);
-  /* Kaptan chip */
-  if(captainIdx>=0&&picksBySlot[captainIdx]){const cp=picksBySlot[captainIdx];const injured=cp.injured;const isLider=cp.trait==="lider";const isWonder=cp.trait==="wonderkid";const capBonusVal=injured?-3:(isLider?3:isWonder?2:cp.age>=32?2:1);const dc=document.createElement("div");dc.className="card style cap-chip"+(injured?" cap-inj":"")+(isLider?" cap-lider":"");dc.innerHTML=`<svg viewBox="0 0 12 9" width="11" height="8" fill="currentColor" style="margin-right:3px"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg><b>${surOf(cp)}</b><span class="tier">${injured?(LANG==="tr"?"SAKAT KAPTAN":"INJ. CAPTAIN"):isLider?(LANG==="tr"?"LİDER KAPTAN":"LEADER CAPT."):(LANG==="tr"?"KAPTAN":"CAPTAIN")}</span><span class="v">${capBonusVal>=0?"+":""}${capBonusVal}</span>`;cr.appendChild(dc);}
+  /* Oyun anlayışı + kaptan → pitch overlay */
+  {const po=$("pitchOverlay");if(po){po.innerHTML="";const oe0=document.createElement("div");oe0.className="card style overlay-chip";oe0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;po.appendChild(oe0);if(captainIdx>=0&&picksBySlot[captainIdx]){const cp=picksBySlot[captainIdx];const injured=cp.injured;const isLider=cp.trait==="lider";const isWonder=cp.trait==="wonderkid";const capBonusVal=injured?-3:(isLider?3:isWonder?2:cp.age>=32?2:1);const dc=document.createElement("div");dc.className="card style cap-chip overlay-chip"+(injured?" cap-inj":"")+(isLider?" cap-lider":"");dc.innerHTML=`<svg viewBox="0 0 12 9" width="11" height="8" fill="currentColor" style="margin-right:3px"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg><b>${surOf(cp)}</b><span class="tier">${injured?(LANG==="tr"?"SAKAT":"INJ."):isLider?(LANG==="tr"?"LİDER":"LDR"):(LANG==="tr"?"KAPTAN":"CAPT.")}</span><span class="v">${capBonusVal>=0?"+":""}${capBonusVal}</span>`;po.appendChild(dc);}}}
+  let cr=null;{const po2=$("pitchOverlay");if(po2){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";po2.appendChild(cr);}else{cr=$("cardrow");if(!cr){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";}}}cr.innerHTML="";
   /* Kiralık chip */
   if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";const _turnsLeft=typeof loanPlayer.turnsLeft!=="undefined"?` · ${loanPlayer.turnsLeft} tur`:"";lc.innerHTML=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:1px"><path d="M2 10a6 6 0 0 0 10 2"/><path d="M14 6A6 6 0 0 0 4 4"/><path d="M12 8l2 2-2 2"/><path d="M4 2l-2 2 2 2"/></svg> <b>${surOf(loanPlayer)}</b> <span class="tier">KİRALIK · LOAN</span> <span class="v">OV${loanPlayer.ov}</span><span class="copy" style="color:var(--red)">-€${loanPlayer.loanCost}M${_turnsLeft}</span>`;cr.appendChild(lc);}
-  cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy var-badge var-${v}">${variantBadge(v)}</span>`;cr.appendChild(d);});
+  cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round),stance=variantBadge(v);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy active-stance stance-${v}">${stance}</span>`;cr.appendChild(d);});
   activeCombos().forEach(c=>{const d=document.createElement("div");d.className="card combo";d.innerHTML=`<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:-.15em;margin-right:1px"><circle cx="4" cy="4" r="1.5"/><circle cx="10" cy="4" r="1.5"/><circle cx="7" cy="10" r="1.5"/><line x1="5.2" y1="4" x2="8.8" y2="4"/><line x1="4.6" y1="5.4" x2="6.4" y2="8.7"/><line x1="9.4" y1="5.4" x2="7.6" y2="8.7"/></svg> <b>${x.combos[c.k]||L().combos[c.k]||c.k}</b> <span class="v">+${c.b}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
-  const sc=$("shopcards");sc.innerHTML="";shopOffers.forEach(k=>{const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;cardVariant[k]=sv;const cd=x.cards[k];const _basePr=cardPrice(k);const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateEquipPower(k);cardVariant[k]=oldV;const combo=typeof wouldCombo==="function"?wouldCombo(k):null;const comboHint=combo?`<div class="ct-combo">⚡ ${LANG==="tr"?"Kombo":"Combo"}: <b>${x.combos[combo.k]||combo.k}</b> +${combo.b}</div>`:"";const d=document.createElement("div");d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+(combo?" has-combo":"");d.title=cd.n+"\n"+cardContractType(k);const _pintiDisc=chairman&&chairman.id==="pinti"?`<div style="font-size:7px;font-family:var(--mono);color:var(--good);letter-spacing:.3px;text-align:right;margin-bottom:1px">⬇ ${LANG==="tr"?"Başkan İnd.":"Chair Disc."} -2M</div>`:"";const _memBadge=_memDisc?`<div style="font-size:7px;font-family:var(--mono);color:#60a5fa;text-align:right;margin-bottom:1px">↩ -20%</div>`:"";d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-cat">${kindLabel(k)}</span></div><div class="ct-art">${CARD_SVGS[k]||cd.i}</div><div class="ct-body"><div class="ct-name">${cd.n}</div><div class="ct-desc">${variantDesc(cd.d,sv)||shortCardText(k,s)}</div><div class="ct-contract">${cardContractType(k)}</div>${comboHint}</div><div class="ct-foot"><span class="ct-pw">${shopPreviewText(k,pv)}</span><div style="display:flex;flex-direction:column;align-items:flex-end">${_pintiDisc}${_memBadge}<span class="ct-price">€${pr}M</span></div></div>`;if(!cant)d.onclick=()=>confirmBuyCard(k,pr);sc.appendChild(d);});
+  const sc=$("shopcards");sc.innerHTML="";
+  shopOffers.slice(0,3).forEach(k=>{
+    const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;
+    cardVariant[k]=sv;
+    const cd=x.cards[k];
+    const _basePr=cardPrice(k);
+    const _rawCard=CARDDEFS[k]||{};
+    const _normalPr=Math.max(1,Math.round((typeof _rawCard.price==="number"?_rawCard.price:7)*(VARIANT_PRICE_MOD[sv||0]||1)*(typeof cardPriceMod!=="undefined"?cardPriceMod:1.0)));
+    const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
+    const _chairDisc=chairman&&chairman.id==="pinti"&&_basePr>0;
+    const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;
+    const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateEquipPower(k);
+    cardVariant[k]=oldV;
+    const combo=typeof wouldCombo==="function"?wouldCombo(k):null;
+    const comboHint=combo?`<div class="ct-combo">⚡ ${LANG==="tr"?"Kombo":"Combo"}: <b>${x.combos[combo.k]||combo.k}</b> +${combo.b}</div>`:"";
+    const d=document.createElement("div");
+    d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+(combo?" has-combo":"")+((_chairDisc||_memDisc)?" discounted":"");
+    if(_memDisc)d.dataset.discount="20%";
+    else if(_chairDisc)d.dataset.discount=Math.max(1,Math.round((_normalPr-pr)/Math.max(1,_normalPr)*100))+"%";
+    d.title=cd.n+"\n"+cardContractType(k);
+    const desc=shopCardDesc(k,variantDesc(cd.d,sv)||shortCardText(k,s));
+    d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-cat">${kindLabel(k)}</span></div><div class="ct-art">${CARD_SVGS[k]||cd.i}</div><div class="ct-body"><div class="ct-name">${cd.n}</div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div>${comboHint}</div><div class="ct-foot"><span class="ct-pw">${shopPreviewText(k,pv)}</span><span class="ct-price">€${pr}M</span></div>`;
+    if(!cant)d.onclick=()=>confirmBuyCard(k,pr);
+    sc.appendChild(d);
+  });
   if(!shopOffers.length){const e=document.createElement("div");e.className="cardtile-empty";e.style="grid-column:1/-1";e.innerHTML=`<div style="font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:center;padding:16px">— ${x.owned} —</div>`;sc.appendChild(e);}
   /* Bench render */
   {const _tr=LANG==="tr";let _benchEl=document.getElementById("hubBenchSection");
@@ -339,13 +422,13 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";_benchEl.style="margin-bottom:8px";const _anchor=$("injbar")||$("cardrow");if(_anchor&&_anchor.parentNode)_anchor.parentNode.insertBefore(_benchEl,_anchor);}
     const _benched=bench.filter(p=>p&&!p.used);
     if(_benched.length){
-      const _maxBench=3;const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEKLER":"BENCH"} <span style="opacity:.5;font-weight:600">${_benched.length}/${_maxBench}</span></div>`;
+      const _maxBench=4;const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEKLER":"BENCH"} <span style="opacity:.5;font-weight:600">${_benched.length}/${_maxBench}</span></div>`;
       const _dragHandle=`<svg viewBox="0 0 8 14" width="7" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><line x1="1" y1="2" x2="7" y2="2"/><line x1="1" y1="5" x2="7" y2="5"/><line x1="1" y1="8" x2="7" y2="8"/><line x1="1" y1="11" x2="7" y2="11"/></svg>`;
-      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=_ov>=80?"#4ade80":_ov>=70?"#fcd34d":_ov>=60?"#fb923c":"#f87171";const _inj=p.injured?`<span style="display:inline-flex;align-items:center;font-size:7px;font-family:var(--mono);font-weight:700;padding:1px 3px;border-radius:2px;background:var(--red);color:#fff;margin-left:2px">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span style="color:var(--ink2);opacity:.45;flex-shrink:0">${_dragHandle}</span><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:24px;letter-spacing:.5px;flex-shrink:0">${_pos}</span><span style="flex:1;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span style="font-size:12px;font-weight:700;color:${_col};flex-shrink:0">${_eff}</span></div>`;}).join("");
+      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=typeof ovCol==="function"?ovCol(_eff):(_eff>=90?"#15803d":_eff>=80?"#4ade80":_eff>=70?"#eab308":_eff>=60?"#f97316":"#ef4444");const _inj=p.injured?`<span style="display:inline-flex;align-items:center;font-size:7px;font-family:var(--mono);font-weight:700;padding:1px 3px;border-radius:2px;background:var(--red);color:#fff;margin-left:2px">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span style="color:var(--ink2);opacity:.45;flex-shrink:0">${_dragHandle}</span><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:24px;letter-spacing:.5px;flex-shrink:0">${_pos}</span><span style="flex:1;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span style="font-size:12px;font-weight:700;color:${_col};flex-shrink:0">${_eff}</span></div>`;}).join("");
       _benchEl.innerHTML=_benchHdr+`<div style="display:flex;flex-direction:column;gap:4px">${_benchCards}</div>`;
     }else{if(_benchEl)_benchEl.innerHTML="";}
   }else if(_benchEl){_benchEl.innerHTML="";}}
-  setBudget();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();}
+  setBudget();_fixHubVisibleText();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();}
 
 function _initHubDragDrop(){
   let _src=null; /* {type:"slot",idx} or {type:"bench",idx} */
@@ -458,7 +541,9 @@ function _initHubDragDrop(){
   _be.querySelectorAll("[data-bench-idx]").forEach(card=>{const bi=parseInt(card.dataset.benchIdx);_addTouchDrag(card,()=>({type:"bench",idx:bi}));});
 }
 function showCardPopup(k){const x=L(),cd=x.cards[k];if(!cd)return;const v=cardEff(k,picksBySlot.filter(Boolean),round);const kin=kindLabel(k);showModal(`<div style="padding:14px 16px"><div class="card-popup-ico">${CARD_SVGS[k]||cd.i}</div><div style="font-family:var(--mono);font-weight:700;font-size:13px;text-align:center">${cd.n}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;letter-spacing:1px;margin:2px 0">${kin}</div><hr style="border:none;border-top:1px solid var(--line);margin:8px 0"><div style="font-size:11px;line-height:1.55;color:var(--ink)">${variantDesc(cd.d,variantOf(k)||0)}</div><div style="margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700;color:${v>=0?"var(--good)":"var(--red)"}">${LANG==="tr"?"Bu tur etkisi":"Effect now"}: ${v>=0?"+":""}${v}</div><div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${x.presClose||"Kapat"}</button></div></div>`);}
+function shopReroll(){if(shopRerolledThisTurn>=1){showModal(`<div class="bulletin"><div class="bhead"><span>${LANG==="tr"?"KART PAZARI":"CARD MARKET"}</span></div><div class="bbody">${LANG==="tr"?"Bu turda yenileme hakkın doldu.":"You have used your reroll for this turn."}</div><div class="bact"><button class="btn btn-ghost" onclick="closeModal()">${LANG==="tr"?"TAMAM":"OK"}</button></div></div>`);return;}shopRerolledThisTurn++;newShopOffers();renderHub();sfxTick();}
 function buyCard(k,overridePrice){
+  if(cardsBoughtThisTurn>=1){showModal(`<div style="padding:18px 16px 14px"><div class="kithdr">${LANG==="tr"?"Bu Turda 1 Kart Alındı":"Card Already Bought This Turn"}</div><div class="kitsub" style="margin:8px 0 16px">${LANG==="tr"?"Bu turda yalnızca 1 kart satın alabilirsiniz.":"You can only buy 1 card per turn."}</div><div><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${LANG==="tr"?"Tamam":"OK"}</button></div></div>`);return;}
   const sv=shopVariants[k]||0;
   const oldV=cardVariant[k]||0;
   cardVariant[k]=sv;
@@ -468,11 +553,12 @@ function buyCard(k,overridePrice){
   if(!canAffordCost(pr))return;
   spend(pr,"spent");
   recordDebt();
+  cardsBoughtThisTurn++;
   addCard(k,sv,{silent:true});
   shopOffers=shopOffers.filter(o=>o!==k);
   delete shopVariants[k];
   sfxStamp();sfxCoin();
-  const vl=(L().variantLbl||["GOLDEN","DARK"])[sv];
+  const vl=(L().variantLbl||["COMMON","DARK"])[sv];
   pushFeed("💰 <b>"+L().cards[k].n+"</b> "+L().feedBuy+" (-€"+pr+"M) · "+vl,"buy");
   renderHub();
 }

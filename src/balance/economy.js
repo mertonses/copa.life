@@ -12,7 +12,7 @@ function newShopOffers(){
    if(k==="kumarbaz"&&round>=6)return; // Finalde kullanılamaz
    pool.push(k);
  });
- const limit=debtStage()>=3?2:3;
+ const limit=3;
  while(shopOffers.length<limit&&pool.length){
    const idx=rand()*pool.length|0;
    const k=pool.splice(idx,1)[0];
