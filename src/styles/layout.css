@@ -67,7 +67,7 @@
 }
 @media(min-width:760px){#hub .roundtag{text-align:center}}
 .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;border-bottom:2px solid var(--border-subtle);padding-bottom:7px;margin-bottom:10px}
-.logo{font-family:var(--disp);font-weight:800;line-height:1;text-transform:none;color:var(--color-ink);text-align:center;justify-self:center}
+.logo{font-family:var(--disp);font-weight:800;line-height:1;text-transform:none;color:var(--color-ink);text-align:center;justify-self:center;grid-column:2;grid-row:1}
 .brandmark{display:inline-flex;align-items:baseline;background:transparent;border:0;padding:0;font-size:30px;letter-spacing:-.5px}
 .brandmark .copa{color:var(--color-ink)}.brandmark .dot{color:var(--color-slate);opacity:.55}.brandmark .life{color:var(--color-primary);background:transparent;padding:0;margin-left:1px}
 .tools{display:flex;align-items:center;gap:6px;justify-self:end;grid-column:3}
