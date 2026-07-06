@@ -646,16 +646,24 @@ function renderFixtures(){const x=L(),fb=$("fixbar"),rl=LANG==="tr"?["1. Tur","2
 /* ===== opponent scouting ===== */
 function genOppLineup(){const base=opponent.power,f433=FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=f433.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const nm=oppPick(g)[0];return {name:nm,ov,pos:s[0],grp:g,side};});oppXI=oppLineup.map(o=>o.name);
   let has=false;slots.forEach((s,i)=>{const p=picksBySlot[i];if(!p)return;const x=s[1],onSide=weakFlank==="L"?x<42:weakFlank==="R"?x>58:(x>=42&&x<=58);if(onSide&&(FWDP.includes(s[0])||groupOf(s[0])==="FWD"))has=true;});matchupBonus=(has?1:0)-opponentEdge(squadPower(round).power,opponent.power);}
-function openScout(){const x=L();const misled=rand()<0.3,bias=misled?ri(-9,9):0,displayPow=Math.max(30,Math.min(99,opponent.power+bias));
-  const misleadNote=misled?`<div style="font-family:var(--mono);font-size:9px;color:var(--color-primary);text-align:center;margin-bottom:8px">${_ICO.alert} ${LANG==="tr"?"Rapor güvenilmez olabilir":"Scout report may be unreliable"}</div>`:"";
-  const _col=ov=>ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";
-  const _row=(grp,label)=>{const ps=oppLineup.filter(o=>o.grp===grp);if(!ps.length)return "";const cells=ps.map(o=>{const shownOv=misled?Math.max(50,Math.min(95,o.ov+ri(-5,5))):o.ov;return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:32px"><div style="font-size:9px;color:var(--color-slate);font-family:var(--mono);letter-spacing:.3px">${x.abbr[o.pos]||o.pos}</div><div style="font-size:14px;font-weight:700;color:${_col(shownOv)};font-family:var(--mono)">${shownOv}</div></div>`;}).join("");return `<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:10px"><div style="font-size:8px;color:var(--color-slate);font-family:var(--mono);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">${label}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${cells}</div></div>`;};
-  let h=`<div class="scoutmodal"><div style="font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:.5px;margin-bottom:12px;text-align:center">${LANG==="tr"?"RAKİP KADROSU":"OPPONENT SQUAD"} · <span style="color:var(--color-ink);font-weight:700">${clip(opponent.name,16)}</span> · <span style="color:${_col(displayPow)};font-weight:700">${displayPow}</span></div>${misleadNote}`;
-  h+=_row("FWD",LANG==="tr"?"FORVET":"FORWARD");
-  h+=_row("MID",LANG==="tr"?"ORTA SAHA":"MIDFIELD");
-  h+=_row("DEF",LANG==="tr"?"DEFANS":"DEFENCE");
-  h+=_row("GK","GK");
-  h+=`<div class="bact" style="margin-top:8px"><button class="btn btn-primary" onclick="closeModal()">${x.presClose}</button></div></div>`;showModal(h);}
+function openScout(){
+  const x=L();
+  const misled=rand()<0.3,bias=misled?ri(-9,9):0;
+  const displayPow=Math.max(30,Math.min(99,opponent.power+bias));
+  const _pc=ov=>{if(ov>=85)return"#3dda80";if(ov>=75)return"#429A73";if(ov>=65)return"#c8a020";if(ov>=55)return"#d07028";return"#c84040";};
+  const f433=FORMATIONS["4-3-3"];
+  const nodes=oppLineup.map((o,i)=>{
+    const shownOv=misled?Math.max(50,Math.min(95,o.ov+ri(-5,5))):o.ov;
+    const sl=f433[i];if(!sl)return"";
+    const posAbbr=x.abbr[o.pos]||o.pos;
+    const nm=o.name?(o.name.split(" ").slice(-1)[0]||"").slice(0,8):"";
+    const col=_pc(shownOv);
+    return `<div class="scout-node" style="left:${sl[1]}%;top:${sl[2]}%"><div class="scout-ball" style="border-color:${col}55"><span class="scout-pos">${posAbbr}</span><span class="scout-ov" style="color:${col}">${shownOv}</span></div><span class="scout-nm">${nm}</span></div>`;
+  }).join("");
+  const misleadNote=misled?`<div class="scout-unreliable">${_ICO.alert} ${LANG==="tr"?"Rapor güvenilmez olabilir":"Scout report may be unreliable"}</div>`:"";
+  const h=`<div class="scoutmodal"><div class="scout-mhdr"><span class="scout-mhdr-lbl">${LANG==="tr"?"RAKİP KADROSU":"OPPONENT SQUAD"}</span><div class="scout-mhdr-meta"><span class="scout-mhdr-team">${clip(opponent.name,16)}</span><span class="scout-mhdr-sep">·</span><span class="scout-mhdr-pow" style="color:${_pc(displayPow)}">${displayPow}</span></div></div>${misleadNote}<div class="scout-pitch-wrap"><div class="scout-pitch"><div class="scout-pl half"></div><div class="scout-pl circ"></div><div class="scout-pl boxb"></div><div class="scout-pl boxt"></div>${nodes}</div></div><div class="bact" style="padding:0 14px 14px"><button class="btn btn-primary" onclick="closeModal()">${x.presClose}</button></div></div>`;
+  showModal(h);
+}
 
 
 function benchPositions(){const groups=["DEF","MID","FWD"],out=[];for(let i=0;i<3;i++){const g=groups[i%groups.length],cand=slots.filter(sl=>groupOf(sl[0])===g);out.push((cand.length?rnd(cand):rnd(slots))[0]);}return out;}

@@ -118,6 +118,30 @@
 .injbar button{font-family:var(--mono);font-weight:700;font-size:10px;background:var(--color-ink);color:#fff;border:none;border-radius:3px;padding:4px 8px;cursor:pointer}
 .roundel.full .rn,.roundel.full .ov{position:relative;z-index:2}
 .scoutmodal{padding:0}.scoutmodal h4{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;background:var(--color-ink);color:#fff;padding:6px;text-align:center}
+/* ===== Scout pitch view ===== */
+.scout-mhdr{padding:11px 14px 8px;border-bottom:1px solid var(--border-subtle);text-align:center}
+.scout-mhdr-lbl{font-family:var(--mono);font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--color-slate);display:block;margin-bottom:4px}
+.scout-mhdr-meta{display:flex;align-items:baseline;justify-content:center;gap:7px}
+.scout-mhdr-team{font-family:var(--disp);font-weight:800;font-size:16px;color:var(--color-ink)}
+.scout-mhdr-sep{color:var(--color-slate);font-family:var(--mono);font-size:11px}
+.scout-mhdr-pow{font-family:var(--mono);font-size:14px;font-weight:700}
+.scout-unreliable{font-family:var(--mono);font-size:9px;color:var(--color-primary);text-align:center;padding:5px 12px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;gap:4px}
+.scout-pitch-wrap{padding:10px 14px 6px}
+.scout-pitch{position:relative;width:100%;aspect-ratio:68/92;border:2px solid rgba(255,255,255,.55);border-radius:6px;overflow:hidden;
+  background:linear-gradient(to bottom,rgba(73,110,113,.1) 0 12.5%,transparent 12.5% 25%,rgba(73,110,113,.1) 25% 37.5%,transparent 37.5% 50%,rgba(73,110,113,.1) 50% 62.5%,transparent 62.5% 75%,rgba(73,110,113,.1) 75% 87.5%,transparent 87.5% 100%),#429A73;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 2px 8px rgba(0,0,0,.2)}
+.scout-pitch::before{content:"";position:absolute;inset:7px;border:1.5px solid rgba(255,255,255,.42);border-radius:3px;pointer-events:none}
+.scout-pitch::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 2%,rgba(255,255,255,.06) 0%,transparent 45%),radial-gradient(ellipse at 50% 98%,rgba(0,0,0,.08) 0%,transparent 45%);pointer-events:none}
+.scout-pl{position:absolute;border:1.5px solid rgba(255,255,255,.48)}
+.scout-pl.half{left:7px;right:7px;top:50%;height:0}
+.scout-pl.circ{width:28%;aspect-ratio:1;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.scout-pl.boxb{left:28%;right:28%;bottom:7px;height:13%;border-bottom:none;border-radius:0 0 3px 3px}
+.scout-pl.boxt{left:28%;right:28%;top:7px;height:13%;border-top:none;border-radius:3px 3px 0 0}
+.scout-node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;z-index:2}
+.scout-ball{width:36px;height:36px;border-radius:50%;background:rgba(12,18,19,.84);border:2px solid rgba(230,238,239,.28);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;backdrop-filter:blur(3px);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.scout-pos{font-family:var(--mono);font-size:6px;color:rgba(230,238,239,.65);letter-spacing:.2px;line-height:1.4;text-transform:uppercase}
+.scout-ov{font-family:var(--mono);font-size:12px;font-weight:700;line-height:1}
+.scout-nm{font-family:var(--mono);font-size:6.5px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.95),0 0 8px rgba(0,0,0,.7);white-space:nowrap;max-width:50px;overflow:hidden;text-overflow:ellipsis;text-align:center;letter-spacing:.1px}
 @keyframes simShake{0%,100%{transform:translate(0)}15%,45%,75%{transform:translate(-4px,0)}30%,60%,90%{transform:translate(4px,0)}}
 @keyframes simEq{0%,100%{background:var(--surface-default)}50%{background:rgba(74,222,128,.07)}}
 .simwrap.shake{animation:simShake .45s ease}.simwrap.equalize{animation:simEq .9s ease}
