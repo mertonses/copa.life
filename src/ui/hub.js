@@ -51,76 +51,42 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
 }
 const _SPOT_COLORS=["#e6ad2e","#4ade80","#60a5fa","#f472b6","#fb923c","#a78bfa"];
 function showSansSpotlightPicker(){
-  /* modal açıksa (risk-ödül vs.) bekle */
-  const _m=$("modal");if(_m&&!_m.classList.contains("hidden")){setTimeout(showSansSpotlightPicker,500);return;}
-  const tr=LANG==="tr",_xi=picksBySlot.map((p,i)=>({p,i})).filter(({p})=>p&&!p.injured);
-  if(!_xi.length)return;
-  const _spow=chairTrust===3?9:chairTrust===0?3:6;
-  const _beamSvg=`<svg class="spot-beam-svg" viewBox="0 0 64 72" width="40" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g><animateTransform attributeName="transform" type="rotate" values="-20 32 10;20 32 10;-20 32 10" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1"/>
-      <path d="M32 10L2 70L62 70Z" fill="rgba(255,220,60,.06)"/>
-      <path d="M32 10L8 70L56 70Z" fill="rgba(255,220,60,.10)"/>
-      <path d="M32 10L16 70L48 70Z" fill="rgba(255,220,60,.16)"/>
-      <path d="M32 10L22 70L42 70Z" fill="rgba(255,220,60,.22)"/>
-      <line x1="32" y1="10" x2="8" y2="70" stroke="rgba(255,220,60,.30)" stroke-width=".8"/>
-      <line x1="32" y1="10" x2="56" y2="70" stroke="rgba(255,220,60,.30)" stroke-width=".8"/>
-      <ellipse cx="32" cy="68" rx="22" ry="3.5" fill="rgba(255,220,60,.18)"/>
-    </g>
-    <circle cx="32" cy="10" r="5.5" fill="#e6ad2e" opacity=".95"/>
-    <circle cx="32" cy="10" r="3" fill="#fff" opacity=".9"/>
-    <circle cx="32" cy="10" r="9" fill="rgba(255,220,60,.18)"><animate attributeName="r" values="8;11;8" dur="1.6s" repeatCount="indefinite"/></circle>
-    <circle cx="12" cy="28" r="1.2" fill="#e6ad2e"><animate attributeName="opacity" values=".15;.9;.15" dur="1.4s" begin="0s" repeatCount="indefinite"/></circle>
-    <circle cx="52" cy="20" r="1.0" fill="#fff"><animate attributeName="opacity" values=".1;1;.1" dur="1.0s" begin="0.5s" repeatCount="indefinite"/></circle>
-    <circle cx="6" cy="14" r="0.8" fill="#e6ad2e"><animate attributeName="opacity" values=".2;1;.2" dur="1.7s" begin="0.8s" repeatCount="indefinite"/></circle>
-  </svg>`;
-  const _powCol=_spow>=4?"#4ade80":_spow>=3?"#e6ad2e":"#fb923c";
-  const _ovLbl=tr?"GÜÇ":"OV";
-  const _tone=v=>v>=90?"#15803d":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
-  const cards=_xi.map(({p,i},ci)=>{
+  const modalEl=$("modal");
+  if(modalEl&&!modalEl.classList.contains("hidden")){setTimeout(showSansSpotlightPicker,500);return;}
+  const tr=LANG==="tr", choices=picksBySlot.map((p,i)=>({p,i})).filter(({p})=>p&&!p.injured);
+  if(!choices.length)return;
+  const boost=chairTrust===3?9:chairTrust===0?3:6;
+  const boostColor=boost>=4?"#4ade80":boost>=3?"#e6ad2e":"#fb923c";
+  const ratingColor=v=>v>=90?"#15803d":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
+  const cards=choices.map(({p,i},ci)=>{
     const col=_SPOT_COLORS[ci%_SPOT_COLORS.length];
-    const before=effOf(p),after=before+_spow;
-    const label=`${surOf(p)} ${_ovLbl} ${before} -> ${after}. ${tr?"Bu maç":"This match"} +${_spow}. ${tr?"Sakatlanırsa pazar pahalılaşır.":"Injury inflates the transfer market."}`;
-    return `<button class="spot-card" type="button" role="option" aria-selected="false" aria-label="${label}" data-cidx="${ci}" style="--spot-col:${col}" onclick="closeModal();_pickSansSpotlight(${i},${_spow},this)" onmouseenter="_spotHover(this,${ci})" title="${surOf(p)}">
-    <div class="spot-card-head"><span class="spot-card-pos">${L().abbr[p.pos]||p.pos}</span><span class="spot-card-bonus">+${_spow}</span></div>
-    <div class="spot-card-name">${surOf(p)}</div>
-    <div class="spot-card-power"><span style="color:${_tone(before)}">${before}</span><span class="spot-arrow">→</span><b style="color:${_tone(after)}">${after}</b></div>
-    <div class="spot-card-note">${tr?"Bu maç":"This match"}</div>
-    <div class="spot-card-shine"></div>
-  </button>`;}).join("");
+    const before=effOf(p),after=before+boost;
+    const pos=(L().abbr[p.pos]||p.pos);
+    const label=`${surOf(p)} ${pos}: ${before} -> ${after}. ${tr?"Sakatlan\u0131rsa pazar pahal\u0131la\u015f\u0131r.":"Injury inflates the market."}`;
+    return `<button class="spot-card" type="button" role="option" aria-selected="false" aria-label="${label}" data-cidx="${ci}" style="--spot-col:${col}" onclick="closeModal();_pickSansSpotlight(${i},${boost},this)" onmouseenter="_spotHover(this,${ci})" title="${surOf(p)}">
+      <span class="spot-card-pos">${pos}</span>
+      <span class="spot-card-name">${surOf(p)}</span>
+      <span class="spot-card-power"><span class="spot-card-before">${before}</span><span class="spot-arrow">\u2192</span><b style="color:${ratingColor(after)}">${after}</b></span>
+    </button>`;
+  }).join("");
   showModal(`<div class="spotlight-modal">
     <div class="spotlight-header">
-      ${_beamSvg}
-      <div class="spotlight-kicker">${tr?"MEDYA HAMLESİ":"MEDIA MOMENT"}</div>
       <div class="spotlight-title">${tr?"SPOTLIGHT OYUNCUSU":"SPOTLIGHT PLAYER"}</div>
-      <div class="spotlight-sub">${tr?"Bu tur medyanın gözü kim üzerinde?":"Who's in the media spotlight this round?"}</div>
-      <div class="spotlight-pow" style="color:${_powCol}">+${_spow} <span>${tr?"güç bu maç":"power this match"}</span></div>
+      <div class="spotlight-sub">${tr?`Bu ma\u00e7 <b style="color:${boostColor}">+${boost} g\u00fc\u00e7</b> \u00b7 Sakatlan\u0131rsa pazar pahal\u0131la\u015f\u0131r`:`This match <b style="color:${boostColor}">+${boost} power</b> \u00b7 Injury inflates the market`}</div>
     </div>
-    <div class="spotlight-brief"><b>${tr?"Bir oyuncu seç.":"Pick one player."}</b> ${tr?`Bu maç <span>+${_spow} güç</span> kazanır.`:`They gain <span>+${_spow} power</span> this match.`}</div>
-    <div class="spotlight-risk"><svg viewBox="0 0 20 18" width="13" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2L18 16H2Z"/><path d="M10 7v4"/><path d="M10 14h.01"/></svg><span><b>${tr?"Risk":"Risk"}:</b> ${tr?"Spotlight oyuncusu sakatlanırsa pazar pahalılaşır.":"If the spotlight player is injured, the market gets more expensive."}</span></div>
-    <div class="spot-grid" role="listbox" aria-label="${tr?"Spotlight oyuncusu seçimi":"Spotlight player selection"}">${cards}</div>
-    <div class="spotlight-footnote">${tr?"Kartlar mevcut güçten bu maçlık yeni güce geçişi gösterir.":"Cards show current power into this-match boosted power."}</div>
-  </div>`);}
+    <div class="spot-grid" role="listbox" aria-label="${tr?"Spotlight oyuncusu se\u00e7imi":"Spotlight player selection"}">${cards}</div>
+  </div>`);
+}
 function _spotHover(el,ci){
-  const col=_SPOT_COLORS[ci%_SPOT_COLORS.length];
-  const conf=["★","✦","✧","•","·","◆"];
-  for(let j=0;j<8;j++){
-    const s=document.createElement("span");
-    s.className="spot-prtcl";
-    s.textContent=conf[j%conf.length];
-    s.style.cssText=`left:${4+j*13}%;color:${col};animation-delay:${j*45}ms`;
-    el.appendChild(s);
-    setTimeout(()=>s.remove(),650);
-  }
+  return;
 }
 function _pickSansSpotlight(idx,pow,cardEl){
   sansSpotlightIdx=idx;riskPowerMod+=pow;
-  /* konfeti tıklama anında kartın içinden patlar */
-  if(cardEl){const ci=+(cardEl.dataset.cidx||0);const col=_SPOT_COLORS[ci%_SPOT_COLORS.length];const conf=["★","✦","🌟","✧","⚡","◆"];const rect=cardEl.getBoundingClientRect();for(let j=0;j<12;j++){const s=document.createElement("span");s.className="spot-burst";s.textContent=conf[j%conf.length];s.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;pointer-events:none;z-index:9999;color:${col};font-size:${9+Math.random()*9}px;--dx:${(Math.random()-0.5)*130}px;--dy:${-30-Math.random()*90}px;animation:spotBurst .75s ease-out forwards;animation-delay:${j*35}ms`;document.body.appendChild(s);setTimeout(()=>s.remove(),900+j*35);}}
+  if(cardEl)cardEl.setAttribute("aria-selected","true");
   const p=picksBySlot[idx];
-  const _spotIco=`<svg viewBox="0 0 16 16" width="11" height="11" fill="#e6ad2e" style="vertical-align:-.1em;margin-right:2px"><circle cx="8" cy="5" r="3"/><path d="M8 8L2 14L14 14Z" opacity=".7"/></svg>`;
-  if(p){pushFeed(_spotIco+" <b>"+shortName(p)+"</b> "+(LANG==="tr"?"medya spotunda — bu maç +"+pow+" güç":"in the spotlight — +"+pow+" power this match"),"pres");
-  /* sahada rozet */
-  const _rl=$("h"+idx);if(_rl){let _b=_rl.querySelector(".spot-badge");if(!_b){_b=document.createElement("div");_b.className="spot-badge";_rl.appendChild(_b);}_b.textContent="+"+pow;}}
+  const spotIcon=`<svg viewBox="0 0 16 16" width="11" height="11" fill="#e6ad2e" style="vertical-align:-.1em;margin-right:2px"><circle cx="8" cy="5" r="3"/><path d="M8 8L2 14L14 14Z" opacity=".7"/></svg>`;
+  if(p){pushFeed(spotIcon+" <b>"+shortName(p)+"</b> "+(LANG==="tr"?"medya spotunda \u2014 bu ma\u00e7 +"+pow+" g\u00fc\u00e7":"in the spotlight \u2014 +"+pow+" power this match"),"pres");
+  const roundel=$("h"+idx);if(roundel){let badge=roundel.querySelector(".spot-badge");if(!badge){badge=document.createElement("div");badge.className="spot-badge";roundel.appendChild(badge);}badge.textContent="+"+pow;}}
 }
 function showPowerGraph(){
   const tr=LANG==="tr";
@@ -411,7 +377,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     pt.innerHTML=`<button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="${LANG==="tr"?"Kadro gücü nasıl hesaplanır?":"How is squad power calculated?"}" style="color:${pfg};border-color:${pfg};opacity:.55">?</button><div class="mh" id="powHdr" style="color:${pfg};opacity:.8">${LANG==="tr"?"KADRO GÜCÜ":"SQUAD POWER"}</div><div class="mv" id="powV" style="color:${pfg};font-size:22px;line-height:1.05">${pv}</div><div class="ms" id="powHint" style="color:${pfg};opacity:.75">${x.powHint}</div>${_vsBar}`;
   }}
   {const os=$("oppStars"),oc=$("oppChar"),ys=$("youStars"),yc=$("youChar");if(os)os.textContent="★".repeat(starsOf(opponent.power));if(oc&&oppChar)oc.innerHTML=oppChar.e+" "+oppChar.l;if(ys)ys.textContent="★".repeat(starsOf(sp.power));if(yc){yc.innerHTML=x.styles[style].i+" "+x.styles[style].n;}}
-  {const chName=x.chair[chairman.id].n;const src=typeof chairSrc==="function"?chairSrc(chairman.id):`assets/chairs/${chairman.id}.png`;const pb=$("presBtn");pb.innerHTML=`<img src="${src}" class="presbtnphoto" alt="" onerror="this.style.display='none'">`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.style.opacity=locked?"0.42":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl)pl.textContent=x.ui.seeChair;}$("scoutBtn").title=x.scout;
+  {const chName=x.chair[chairman.id].n;const pb=$("presBtn");const _tr=LANG==="tr";const presMascot=`<svg class="pres-mascot" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="pres-mascot-head"><path d="M13 18c0-5 2.7-8 6-8s6 3 6 8v2c0 4-2.7 7-6 7s-6-3-6-7v-2Z"/><path d="M12 17c-1.7-2-2.1-4.1-1.1-6.2 2.8 1.4 5 .9 7.6-1.9 3.1 3.2 5.5 3.7 8.5 1.9 1.1 2.3.6 4.5-1 6.4"/><path d="M16 19h.1M22 19h.1"/><path d="M16.5 23c1.6 1 3.4 1 5 0"/><path d="M9 34c1.3-4.1 4.4-6 10-6s8.7 1.9 10 6"/></g><path class="pres-mascot-tie" d="M18 28l-2 6h6l-2-6"/></svg>`;pb.classList.add("btn-pres-action");pb.innerHTML=`${presMascot}<span>${x.ui.seeChair}</span>`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.classList.toggle("locked",locked);pb.style.opacity=locked?"0.58":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl){pl.textContent="";pl.setAttribute("aria-hidden","true");}}$("scoutBtn").title=x.scout;
   $("playBtn").innerHTML=round>=6?x.playFinal:x.play;
   {const tb=$("talkBtn");if(tb){const talkIcon=`<svg class="talk-ico" viewBox="0 0 24 18" width="19" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3.5h13a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H10l-5 3v-3H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path class="talk-wave" d="M7 7.5h7"/><path class="talk-wave talk-wave-2" d="M7 10h4"/></svg>`;tb.classList.remove("hidden");tb.disabled=!!talkUsed;tb.classList.toggle("used",!!talkUsed);tb.setAttribute("aria-disabled",talkUsed?"true":"false");tb.title=talkUsed?(LANG==="tr"?"Bu tur konuşma kullanıldı":"Team talk already used this round"):"";tb.innerHTML=talkIcon+`<span>${LANG==="tr"?"TAKIMA KONUŞ":"TEAM TALK"}</span>`;}}
   renderDebtWarning();renderInjbar();
@@ -424,7 +390,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   activeCombos().forEach(c=>{const d=document.createElement("div");d.className="card combo";d.innerHTML=`<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="vertical-align:-.15em;margin-right:1px"><circle cx="4" cy="4" r="1.5"/><circle cx="10" cy="4" r="1.5"/><circle cx="7" cy="10" r="1.5"/><line x1="5.2" y1="4" x2="8.8" y2="4"/><line x1="4.6" y1="5.4" x2="6.4" y2="8.7"/><line x1="9.4" y1="5.4" x2="7.6" y2="8.7"/></svg> <b>${x.combos[c.k]||L().combos[c.k]||c.k}</b> <span class="v">+${c.b}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
   const sc=$("shopcards");sc.innerHTML="";
-  shopOffers.slice(0,3).forEach(k=>{
+  shopOffers.slice(0,2).forEach(k=>{
     const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;
     cardVariant[k]=sv;
     const cd=x.cards[k];

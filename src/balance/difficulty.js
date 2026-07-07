@@ -25,7 +25,7 @@ function _riskOfferHTML(o,i){
   return `<button type="button" class="risk-offer ${o.skip?"risk-offer-safe":""}" style="--risk-accent:${o.c}" onclick="${onclick}">
     <span class="risk-offer-icon">${o.i}</span>
     <span class="risk-offer-copy">
-      <span class="risk-offer-head"><b>${o.n}</b><em>${o.badge}</em></span>
+      <span class="risk-offer-head"><b>${o.n}</b></span>
       ${o.lines.map(x=>_riskDraftLine(x[0],x[1],x[2])).join("")}
     </span>
   </button>`;

@@ -148,7 +148,7 @@ function simulateMatch(myPow, oppPow, rng) {
       if(score.A===score.B){
         extraTime=true;limit=FULL+30;
         events.push({minute:Math.floor(clock),type:"et_start",side:null,pos:{x:0.5,y:0.5},
-          label:isTR?"Uzatmalar başlıyor":"Extra time begins",comm:"⏱ "+(isTR?"30 dakika uzatma!":"30 minutes of extra time!")});
+          label:isTR?"Altın Gol başlıyor":"Golden goal begins",comm:"⏱ "+(isTR?"Altın gol: ilk gol kazanır.":"Golden goal: next goal wins.")});
         clock+=0.5;continue;
       } else{gameOver=true;break;}
     }
@@ -168,7 +168,7 @@ function simulateMatch(myPow, oppPow, rng) {
       } else{gameOver=true;break;}
     }
     if(!halfDone&&clock>=45){halfDone=true;events.push({minute:45,type:"halftime",side:null,pos:{x:0.5,y:0.5},label:isTR?"Devre arası":"Half time",comm:"🔔 "+(isTR?"DEVRE ARASI":"HALF TIME")+" · "+score.A+"–"+score.B});}
-    if(extraTime&&!etHalf&&clock>=FULL+15){etHalf=true;events.push({minute:Math.floor(FULL+15),type:"et_half",side:null,pos:{x:0.5,y:0.5},label:isTR?"ET Devresi":"ET Half-Time",comm:"🔔 "+(isTR?"ET Devresi":"ET Half-Time")+" · "+score.A+"–"+score.B});}
+    if(extraTime&&!etHalf&&clock>=FULL+15){etHalf=true;events.push({minute:Math.floor(FULL+15),type:"et_half",side:null,pos:{x:0.5,y:0.5},label:isTR?"Altın Gol arası":"Golden goal break",comm:"🔔 "+(isTR?"Altın Gol arası":"Golden goal break")+" · "+score.A+"–"+score.B});}
     const side=chooseSide();const roll=rng();
     if(roll<0.38){
       const zr=rng();const zone=zr<0.15?"close":zr<0.55?"box":"long";const isGoal=resolveShot(side,zone);stats.shots[side]++;
@@ -180,6 +180,7 @@ function simulateMatch(myPow, oppPow, rng) {
         const comm="⚽ <b>"+min+"'</b> <b>"+scorer+"</b>"+(assist?" <small>"+(isTR?"Asist":"Assist")+" "+assist+"</small>":"")+" — "+score.A+"–"+score.B;
         if(!keyMoment)keyMoment=scorer+" "+min+"'";
         events.push({minute:min,type:"goal",side,pos:evPos(side,"goal"),scorer,assist,label,comm});updateMom(side==="A"?22:-22);
+        if(extraTime){gameOver=true;break;}
       } else{
         const isSave=rng()<0.55;
         if(isSave){stats.saves[side==="A"?"B":"A"]++;const comm="🧤 "+_pickComm(isTR?_COMM.save_tr:_COMM.save_en,rng);events.push({minute:Math.floor(clock),type:"save",side:side==="A"?"B":"A",pos:evPos(side,"save"),label:isTR?"Kaleci kurtardı":"Keeper save",comm});updateMom(side==="A"?-6:6);}
@@ -871,6 +872,13 @@ function buildSim(myPow, oppPow) {
     momDisplay=Math.max(18,Math.min(82,momDisplay+(teamId===0?22:-22)));
     // add to heatgrid
     const gx=Math.min(HGW-1,Math.floor((ball.x/_PW)*HGW));const gy=Math.min(HGH-1,Math.floor((ball.y/_PH)*HGH));heatGrid[gy*HGW+gx]+=4;
+    if(goldenGoalMode){
+      _dom("simState",isTR?"ALTIN GOL!":"GOLDEN GOAL!");
+      lastCarrier=null;lastAssist=null;
+      _updateStats();
+      setTimeout(()=>endMatch(),700);
+      return;
+    }
     _dom("simState",teamId===0?myName.slice(0,8)+" "+(isTR?"önde":"leads"):oppName.slice(0,8)+" "+(isTR?"önde":"leads"));
     reposition();kickoff(1-teamId);
     lastCarrier=null;lastAssist=null;
@@ -1064,7 +1072,7 @@ function buildSim(myPow, oppPow) {
   }
 
   /* halftime check */
-  let halfTimePause=false,etMode=false;
+  let halfTimePause=false,etMode=false,goldenGoalMode=false;
   function checkHalftime(){
     if(!halfDone&&matchTime>=45*60){
       halfDone=true;audio.whistle();
@@ -1076,13 +1084,16 @@ function buildSim(myPow, oppPow) {
   function checkFT(){
     if(!etMode&&matchTime>=fullTimeSec){
       if(score[0]===score[1]){
-        etMode=true;audio.whistle();
-        _dom("simState",isTR?"UZATMALAR":"EXTRA TIME");
-        _html("simComm","⏱ "+(isTR?"30 dakika uzatma!":"30 minutes extra time!"));
+        etMode=true;goldenGoalMode=true;audio.whistle();
+        _dom("simState",isTR?"ALTIN GOL":"GOLDEN GOAL");
+        _html("simComm","ALTIN GOL: "+(isTR?"İlk gol kupayı alır.":"Next goal wins the cup."));
         reposition();kickoff(0);
       } else endMatch();
     }
-    if(etMode&&matchTime>=(90+stoppage+30)*60)endMatch();
+    if(etMode&&matchTime>=(90+stoppage+30)*60){
+      if(score[0]===score[1])goToFinalPenalties();
+      else endMatch();
+    }
   }
 
   /* atmosphere events */
@@ -1155,7 +1166,8 @@ function buildSim(myPow, oppPow) {
     // out of play
     if(ball.state===_BS.OUT_OF_PLAY){outTimer-=dt;if(outTimer<=0)resolveOut();return;}
 
-    ball.update(dt);
+    const motionDt=dt*0.68;
+    ball.update(motionDt);
 
     // boundary check
     if(ball.x<-2||ball.x>_PW+2||ball.y<-4||ball.y>_PH+4){
@@ -1171,8 +1183,8 @@ function buildSim(myPow, oppPow) {
     }
 
     // GK
-    _updateGK(teamA.find(p=>p.role==='GK'),ball,dt);
-    _updateGK(teamB.find(p=>p.role==='GK'),ball,dt);
+    _updateGK(teamA.find(p=>p.role==='GK'),ball,motionDt);
+    _updateGK(teamB.find(p=>p.role==='GK'),ball,motionDt);
 
     // Tactical
     slotTimer+=dt;
@@ -1197,7 +1209,7 @@ function buildSim(myPow, oppPow) {
     if(decTimer>=DEC_INT){decTimer=0;doDecision();}
 
     // Move players
-    for(const p of [...teamA,...teamB])p.update(dt,matchTime);
+    for(const p of [...teamA,...teamB])p.update(motionDt,matchTime);
 
     // Stuck
     if(ball.state===_BS.LOOSE||ball.state===_BS.PASSING||ball.state===_BS.CROSSING){
@@ -1207,7 +1219,7 @@ function buildSim(myPow, oppPow) {
     }else stuckTimer=0;
 
     // Effects
-    effects.update(dt);
+    effects.update(motionDt);
 
     // Possession
     const car2=[...teamA,...teamB].find(p=>p.hasBall);if(car2)stats.possession[car2.teamId]++;
@@ -1271,6 +1283,22 @@ function buildSim(myPow, oppPow) {
     calcRatings();
     _dom("simScore",sc);
     setTimeout(()=>endRun(won,sc),900);
+  }
+
+  function goToFinalPenalties(){
+    if(gameEnded)return;gameEnded=true;
+    if(animId){cancelAnimationFrame(animId);animId=null;}
+    audio.whistle();setTimeout(()=>audio.stop(),800);
+    renderer.clear();renderer.drawPitch();renderer.drawPlayers([...teamA,...teamB],ball);renderer.drawBall(ball);
+    const sc=score[0]+"–"+score[1];
+    window._finalPenaltyScore=sc;
+    window.keyMoment=isTR?"Altın golde gol çıkmadı":"No golden goal";
+    window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";
+    window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
+    calcRatings();
+    _dom("simState",isTR?"PENALTILAR":"PENALTIES");
+    _html("simComm","PENALTILAR: "+(isTR?"Altın gol çıkmadı. Kupa penaltılara kaldı.":"No golden goal. The cup goes to penalties."));
+    setTimeout(()=>{if(typeof showPenaltyShootout==="function")showPenaltyShootout("final");else endRun(false,sc);},850);
   }
 
   /* animation loop */

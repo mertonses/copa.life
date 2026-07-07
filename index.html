@@ -211,6 +211,7 @@
         <div class="mtile clickable" id="chemTile" onclick="showChemBreak()"><button class="mtile-info" onclick="event.stopPropagation();showChemInfo()" title="Kimya nasıl çalışır?">?</button><div class="mh" id="chemHdr">KİMYA</div><div class="mv" id="chemV">+0</div><div class="ms" id="chemList">detay →</div></div>
         <div class="mtile clickable" id="powTile" onclick="showPowerBreak()"><button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="Kadro gücü nasıl hesaplanır?">?</button><div class="mh" id="powHdr">KADRO GÜCÜ</div><div class="mv" id="powV">0</div><div class="ms" id="powHint"><span onclick="event.stopPropagation();showPowerGraph()" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px">📈 grafik →</span></div></div>
         <div class="mtile" id="trustTile"><div class="mh" id="trustHdr">BAŞKAN GÜVENİ</div><div class="mv" id="trustV">—</div><div class="ms" id="trustHint"></div></div>
+        <div class="kasa-card" id="kasaTile"><div class="kasa-top-row"><div class="kasa-status-badge" id="kasaStatus">KASA RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="kasa-sub" id="kasaSub"></div><div class="kasa-metrics"><div class="kasa-metric"><div class="kasa-metric-lbl">BORÇ LİMİTİ</div><div class="kasa-metric-val" id="kasaDebt">—</div></div></div><div class="kasa-bar-wrap"><div class="kasa-bar-track"><div class="kasa-bar-debt" id="kasaDebtBand"></div><div class="kasa-bar-zero" id="kasaZero"></div><div class="kasa-bar-marker" id="kasaBarMarker"></div></div><div class="kasa-bar-labels"><span>Limit</span><span>0</span><span>Kasa</span></div></div></div>
       </div>
       <div class="styletag" id="styletag">—</div>
       <div class="final-pills" id="finalPills"></div>
@@ -221,7 +222,7 @@
      </div>
      <div class="hcol hcol-r">
       <div class="hub-action-panel">
-       <div class="actionbar"><div class="presbtngp"><div class="kasa-card" id="kasaTile"><div class="kasa-top-row"><div class="kasa-status-badge" id="kasaStatus">KASA RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="kasa-sub" id="kasaSub"></div><div class="kasa-metrics"><div class="kasa-metric"><div class="kasa-metric-lbl">BORÇ LİMİTİ</div><div class="kasa-metric-val" id="kasaDebt">—</div></div></div><div class="kasa-bar-wrap"><div class="kasa-bar-track"><div class="kasa-bar-debt" id="kasaDebtBand"></div><div class="kasa-bar-zero" id="kasaZero"></div><div class="kasa-bar-marker" id="kasaBarMarker"></div></div><div class="kasa-bar-labels"><span>Limit</span><span>0</span><span>Kasa</span></div></div></div><button class="btn-pres" id="presBtn" onclick="openPresident()" aria-label="Başkana git"></button><button class="presbtnlabel" id="presLabel" onclick="if(!(document.getElementById('presBtn')||{}).disabled)(document.getElementById('presBtn')||{}).click()">BASKANA GİT</button></div><div class="actionbtns"><button class="btn btn-go" id="playBtn" onclick="playMatch()">Maça çık</button><button class="btn btn-talk hidden" id="talkBtn" onclick="teamTalk()" aria-label="Takım konuşması"><svg viewBox="0 0 18 16" width="15" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2.5h12a1.5 1.5 0 0 1 1.5 1.5v5.5A1.5 1.5 0 0 1 15 11H8l-4 3v-3H3A1.5 1.5 0 0 1 1.5 9.5V4A1.5 1.5 0 0 1 3 2.5Z"/></svg></button></div></div>
+       <div class="actionbar"><div class="actionbtns"><button class="btn btn-go" id="playBtn" onclick="playMatch()">Maça çık</button><button class="btn btn-talk hidden" id="talkBtn" onclick="teamTalk()" aria-label="Takım konuşması"><svg viewBox="0 0 18 16" width="15" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2.5h12a1.5 1.5 0 0 1 1.5 1.5v5.5A1.5 1.5 0 0 1 15 11H8l-4 3v-3H3A1.5 1.5 0 0 1 1.5 9.5V4A1.5 1.5 0 0 1 3 2.5Z"/></svg></button><div class="presbtngp"><button class="btn-pres" id="presBtn" onclick="openPresident()" aria-label="Başkana git"></button><button class="presbtnlabel" id="presLabel" onclick="if(!(document.getElementById('presBtn')||{}).disabled)(document.getElementById('presBtn')||{}).click()">BAŞKANA GİT</button></div></div></div>
       </div>
       <div class="sectlbl" id="shopLbl">Kart Pazar&#305;</div>
       <div class="shopcards" id="shopcards"></div>
@@ -291,7 +292,7 @@ function _genFreeAgents(){
   if(window._freeAgentsRound===round)return;
   window._freeAgentsRound=round;
   if(round>=6){window._freeAgents=[];return;}
-  const count=3;
+  const count=2;
   const agents=[];
   const posPool=slots.map(s=>s[0]);
   for(let i=0;i<count;i++){
@@ -312,7 +313,7 @@ function _renderFreeAgents(){
   if(!fa||!fa.length){if(el)el.innerHTML="";return;}
   const tr=LANG==="tr";
   const hdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>${tr?"SERBEST TRANSFER":"FREE AGENTS"}</div>`;
-  const tiles=fa.slice(0,3).map((a,ai)=>{
+  const tiles=fa.slice(0,2).map((a,ai)=>{
     const p=a.p,pos=p.pos,inEff=typeof effOf==="function"?effOf(p):p.ov,cant=!canAffordCost(a.fee);
     const posLbl=typeof L==="function"?L().abbr[pos]||pos:pos;
     /* find current player in matching slot for comparison */
@@ -433,7 +434,7 @@ function randomClubName(){
 const CHAIR_ASSET={};
 const CHAIR_BORDER={babacan:"#2d7bae",leydi:"#8e2d20",pinti:"#5a6e60",sansasyoncu:"#e6ad2e",torpilci:"#bf4329",cilgin:"#7b4fa0"};
 const CHAIR_ROLE_COLOR={babacan:"#2d8c5a",leydi:"#2d8c7a",pinti:"#bf4329",sansasyoncu:"#c8860b",torpilci:"#bf4329",cilgin:"#7b4fa0"};
-function chairSrc(id,suf=""){return `assets/chairs/${CHAIR_ASSET[id]||id}${suf}.png`;}
+function chairSrc(id,suf=""){return suf?`assets/chairs/${CHAIR_ASSET[id]||id}${suf}.png`:`assets/chairs_opt/${CHAIR_ASSET[id]||id}.webp`;}
 function chairShortLabel(id){const cd=L().chair&&L().chair[id],name=(cd&&cd.n)||id;if(LANG==="en"){const explicit={babacan:"Godfather",leydi:"Adalet",pinti:"Miser",sansasyoncu:"Showman",torpilci:"Fixer",cilgin:"Wild Card"};return explicit[id]||name.replace(/^The\s+/i,"").split(" ")[0];}return name.split(" ")[0];}
 function buildChairButtons(){const cp=$("chairpick");if(!cp)return;const x=L();cp.innerHTML="";const _lockSVG=`<svg class="chairbtn-lockico" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3V7a5 5 0 0 1 5-5m0 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0-10a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3"/></svg>`;CHAIRMEN.forEach(c=>{const lk=!unlockedChairs.includes(c.id);const isSel=selectedChairId===c.id;const b=document.createElement("button");b.className="fbtn chairbtn"+(lk?" locked":"")+(isSel?" sel":"");b.setAttribute("aria-selected",isSel?"true":"false");const norm=chairSrc(c.id);const cname=(x.chair&&x.chair[c.id]&&x.chair[c.id].n)||c.id;const shortLbl=chairShortLabel(c.id);const thumb=`<img src="${norm}" class="chairthumb" alt="${cname}" onerror="this.style.display='none'">`;const checkBadge=isSel?`<span class="chairbtn-check" aria-hidden="true">✓</span>`:"";const nameLbl=`<span class="chairbtn-name" title="${cname}">${shortLbl}</span>`;b.innerHTML=thumb+checkBadge+nameLbl+(lk?`<div class="chairbtn-lockover">${_lockSVG}</div>`:"");if(!lk){b.onclick=()=>pickChair(c.id);}else{b.onclick=()=>_chairLockedFlash(b);}cp.appendChild(b);});const ch=$("chairhdr");if(ch)ch.textContent=LANG==="tr"?"Başkanını seç":"Pick your chairman";_updateIntroSummary();}
 function pickChair(id){selectedChairId=id;try{sfxSeat();}catch(e){}buildChairButtons();showChairPopup(id);}
@@ -815,36 +816,47 @@ function _rejectNephew(){
 /* ===== Çılgın: kaos zarı ===== */
 function _kaosThresholds(){if(round<=1)return[0.35,0.70,0.85];if(round<=3)return[0.28,0.56,0.78];return[0.20,0.40,0.70];}
 function _kaosOutcomes(){const t=chairTrust;if(t>=3)return{cash:15,pow:7,loss:6,fin:2};if(t>=2)return{cash:10,pow:5,loss:8,fin:3};if(t>=1)return{cash:8,pow:4,loss:10,fin:4};return{cash:8,pow:4,loss:12,fin:5};}
-function _declineKaos(){const tr=LANG==="tr";if(rand()<0.30){spend(3,"president");pushFeed("🎲 "+(tr?"Başkan ısrar etti: −€3M":"Chairman insisted: −€3M"),"lose");setBudget();renderHub();}closeModal();}
+function _declineKaos(){
+  const tr=LANG==="tr";
+  if(rand()<0.30){
+    spend(3,"president");
+    pushFeed("?? "+(tr?"Ba\u015fkan \u0131srar etti: \u2212\u20ac3M":"Chairman insisted: \u2212\u20ac3M"),"lose");
+    setBudget();renderHub();
+  }
+  closeModal();
+}
 function _kaosDiceSvg(sz){sz=sz||72;return `<svg viewBox="0 0 72 72" width="${sz}" height="${sz}" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="30" stroke="rgba(73,110,113,.25)" stroke-width="1.5" stroke-dasharray="3 4"><animateTransform attributeName="transform" type="rotate" values="0 36 36;-360 36 36" dur="7s" repeatCount="indefinite"/></circle><circle cx="8" cy="36" r="2.5" fill="#429A73"><animate attributeName="opacity" values="0;1;0;0;0;0" dur="1.8s" repeatCount="indefinite"/><animate attributeName="r" values="1;3.5;1" dur="1.8s" repeatCount="indefinite"/></circle><circle cx="64" cy="22" r="2" fill="rgba(230,238,239,.65)"><animate attributeName="opacity" values="0;0;1;0;0;0" dur="1.4s" begin=".5s" repeatCount="indefinite"/></circle><circle cx="14" cy="60" r="1.8" fill="#429A73"><animate attributeName="opacity" values="0;0;0;1;0;0" dur="1.6s" begin=".9s" repeatCount="indefinite"/></circle><circle cx="60" cy="58" r="2.2" fill="rgba(230,238,239,.5)"><animate attributeName="opacity" values="0;0;0;0;1;0" dur="1.9s" begin="1.3s" repeatCount="indefinite"/></circle><circle cx="36" cy="4" r="1.5" fill="#496E71"><animate attributeName="opacity" values="1;0;0;0;0;0;1" dur="2.1s" begin=".2s" repeatCount="indefinite"/></circle><g><animateTransform attributeName="transform" type="rotate" values="20 57 10;-25 57 10;20 57 10" dur="1.9s" repeatCount="indefinite"/><rect x="52" y="5" width="10" height="10" rx="2.5" fill="none" stroke="#496E71" stroke-width="1.3"/><circle cx="55" cy="8" r="1.2" fill="#496E71"/><circle cx="62" cy="12" r="1.2" fill="#496E71"/></g><g><animateTransform attributeName="transform" type="rotate" values="-18 10 62;30 10 62;-18 10 62" dur="2.3s" begin=".6s" repeatCount="indefinite"/><rect x="5" y="57" width="10" height="10" rx="2.5" fill="none" stroke="#429A73" stroke-width="1.3"/><circle cx="10" cy="62" r="1.5" fill="#429A73"/></g><g><animateTransform attributeName="transform" type="rotate" values="-5 36 36;9 36 36;-5 36 36" dur="1.25s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><rect x="14" y="14" width="44" height="44" rx="9" fill="var(--surface-elevated,#fff)" stroke="#496E71" stroke-width="2.2"/><g><animate attributeName="opacity" values="1;0;0;0;0;0;1" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><text x="36" y="43" text-anchor="middle" font-size="22" font-weight="900" fill="#496E71" font-family="monospace">?</text></g><g><animate attributeName="opacity" values="0;1;0;0;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="36" cy="36" r="5" fill="#429A73"/></g><g><animate attributeName="opacity" values="0;0;1;0;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="24" cy="24" r="3.5" fill="#496E71"/><circle cx="36" cy="36" r="3.5" fill="#496E71"/><circle cx="48" cy="48" r="3.5" fill="#496E71"/></g><g><animate attributeName="opacity" values="0;0;0;1;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="23" cy="23" r="3" fill="#429A73"/><circle cx="49" cy="23" r="3" fill="#429A73"/><circle cx="36" cy="36" r="3" fill="#429A73"/><circle cx="23" cy="49" r="3" fill="#429A73"/><circle cx="49" cy="49" r="3" fill="#429A73"/></g><g><animate attributeName="opacity" values="0;0;0;0;1;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><text x="36" y="43" text-anchor="middle" font-size="22" font-weight="900" fill="rgba(230,238,239,.8)" font-family="monospace">!</text></g><g><animate attributeName="opacity" values="0;0;0;0;0;1;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="23" cy="23" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="23" cy="36" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="23" cy="49" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="23" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="36" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="49" r="2.8" fill="rgba(230,238,239,.6)"/></g></g></svg>`;}
 function showKaosOffer(){
+  if(chairman.id!=="cilgin"||round<2||runEnded)return;
+  if(window._kaosOfferRound===round)return;
+  const tr=LANG==="tr",forced=chairTrust<=0,offerChance=forced?1:0.45;
+  if(rand()>offerChance)return;
   const _m=$("modal");if(_m&&!_m.classList.contains("hidden")){setTimeout(showKaosOffer,600);return;}
-  if(runEnded||round>=6)return;
-  const tr=LANG==="tr",forced=chairTrust===0;
-  const decBtn=forced?"":` <button class="btn btn-ghost" onclick="_declineKaos()">${tr?"REDDET":"DECLINE"}</button>`;
-  const _trustLbl=chairTrust>=3?tr?"(güven bonusu aktif ✦)":"(trust bonus active ✦)":chairTrust===0?tr?"(güven sıfır — ödüller zayıf)":"(trust zero — weak rewards)":"";
-  const _trustNote=forced?"":(chairTrust>=3?`<span style='color:var(--color-primary);font-size:9px'> ${_trustLbl}</span>`:(chairTrust===0?`<span style='color:var(--color-slate);font-size:9px'> ${_trustLbl}</span>`:""));
-  showModal(`<div class="kaos-modal"><div class="kaos-hdr"><span class="kaos-title">${tr?"KAOS ZARI":"CHAOS DICE"}</span><span class="kaos-round">${L().rounds[round-1]}</span></div><div class="kaos-svg">${_kaosDiceSvg()}</div><div class="kaos-sub">${tr?"BAŞKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE"}</div><div class="kaos-desc">${forced?tr?"<b style='color:var(--color-slate)'>Güven sıfır — zar zorunlu!</b>":"<b style='color:var(--color-slate)'>Trust is zero — roll is mandatory!</b>":tr?`Zarı at, kaderini gör.${_trustNote}`:`Roll the dice, face your fate.${_trustNote}`}</div><div class="bact"><button class="btn btn-primary" onclick="_kaosStartRoll(false)">${tr?"ZARI AT":"ROLL THE DICE"}</button>${decBtn}</div></div>`);
+  window._kaosOfferRound=round;
+  const decBtn=forced?"":"<button class=\"btn btn-ghost\" onclick=\"closeModal()\">"+(tr?"Pas\u00e7":"Decline")+"</button><button class=\"btn btn-ghost\" onclick=\"showKaosPeek()\">"+(tr?"Olas\u0131l\u0131klar\u0131 g\u00f6r (\u2212\u20ac3M)":"Peek odds (\u2212\u20ac3M)")+"</button>";
+  const _trustLbl=chairTrust>=3?(tr?"(g\u00fcven bonusu aktif \u2726)":"(trust bonus active \u2726)"):chairTrust===0?(tr?"(g\u00fcven s\u0131f\u0131r - \u00f6d\u00fcller zay\u0131f)":"(trust zero - weak rewards)"):"";
+  const _trustNote=forced?"":(chairTrust>=3?"<span style='color:var(--color-primary);font-size:9px'> "+_trustLbl+"</span>":(chairTrust===0?"<span style='color:var(--color-slate);font-size:9px'> "+_trustLbl+"</span>":""));
+  showModal("<div class=\"kaos-modal\"><div class=\"kaos-hdr\"><span class=\"kaos-title\">"+(tr?"KAOS ZARI":"CHAOS DICE")+"</span><span class=\"kaos-round\">"+L().rounds[round-1]+"</span></div><div class=\"kaos-svg\">"+_kaosDiceSvg()+"</div><div class=\"kaos-sub\">"+(tr?"BA\u015eKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE")+"</div><div class=\"kaos-desc\">"+(forced?(tr?"<b style='color:var(--color-slate)'>G\u00fcven s\u0131f\u0131r - zar zorunlu!</b>":"<b style='color:var(--color-slate)'>Trust is zero - roll is mandatory!</b>"):(tr?"Zar\u0131 at, kaderini g\u00f6r.":"Roll the dice, face your fate.")+_trustNote)+"</div><div class=\"bact\"><button class=\"btn btn-primary\" onclick=\"_kaosStartRoll(false)\">"+(tr?"ZARI AT":"ROLL THE DICE")+"</button>"+decBtn+"</div></div>");
 }
 function showKaosPeek(){
   closeModal();const tr=LANG==="tr";
   const [t1,t2,t3]=_kaosThresholds(),o=_kaosOutcomes();
   const p1=Math.round(t1*100),p2=Math.round((t2-t1)*100),p3=Math.round((t3-t2)*100),p4=100-Math.round(t3*100);
-  showModal(`<div class="kaos-modal"><div class="kaos-peek-title">${tr?"OLASILIKLAR":"ODDS"}</div><div class="kaos-odds"><div class="kaos-odd good"><span class="ko-pct">%${p1}</span><span class="ko-out">+€${o.cash}M</span></div><div class="kaos-odd good"><span class="ko-pct">%${p2}</span><span class="ko-out">+${o.pow} ${tr?"güç (bu maç)":"power (this match)"}</span></div><div class="kaos-odd bad"><span class="ko-pct">%${p3}</span><span class="ko-out">−€${o.loss}M</span></div><div class="kaos-odd bad"><span class="ko-pct">%${p4}</span><span class="ko-out">${tr?`finalde −${o.fin} güç`:`final −${o.fin} power`}</span></div></div><div class="kaos-half-warn">−€3M ${tr?"bakış bedeli":"peek cost"}</div><div class="bact"><button class="btn btn-go" onclick="_kaosStartRoll(true)">${tr?"ZARLA (−€3M)":"ROLL (−€3M)"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"Vazgeç":"Decline"}</button></div></div>`);
+  showModal("<div class=\"kaos-modal\"><div class=\"kaos-peek-title\">"+(tr?"OLASILIKLAR":"ODDS")+"</div><div class=\"kaos-odds\"><div class=\"kaos-odd good\"><span class=\"ko-pct\">%"+p1+"</span><span class=\"ko-out\">+\u20ac"+o.cash+"M</span></div><div class=\"kaos-odd good\"><span class=\"ko-pct\">%"+p2+"</span><span class=\"ko-out\">+"+o.pow+" "+(tr?"g\u00fc\u00e7 (bu ma\u00e7)":"power (this match)")+"</span></div><div class=\"kaos-odd bad\"><span class=\"ko-pct\">%"+p3+"</span><span class=\"ko-out\">\u2212\u20ac"+o.loss+"M</span></div><div class=\"kaos-odd bad\"><span class=\"ko-pct\">%"+p4+"</span><span class=\"ko-out\">"+(tr?"finalde \u2212"+o.fin+" g\u00fc\u00e7":"final \u2212"+o.fin+" power")+"</span></div></div><div class=\"kaos-half-warn\">\u2212\u20ac3M "+(tr?"bak\u0131\u015f bedeli":"peek cost")+"</div><div class=\"bact\"><button class=\"btn btn-go\" onclick=\"_kaosStartRoll(true)\">"+(tr?"ZARLA (\u2212\u20ac3M)":"ROLL (\u2212\u20ac3M)")+"</button><button class=\"btn btn-ghost\" onclick=\"closeModal()\">"+(tr?"Vazge\u00e7":"Decline")+"</button></div></div>");
 }
 function _computeKaos(){
   const r=rand(),tr=LANG==="tr",[t1,t2,t3]=_kaosThresholds(),o=_kaosOutcomes();
-  if(r<t1)return{type:'cash',val:o.cash,good:true,label:`+€${o.cash}M`,desc:tr?"Kasa doldu!":"Cash boost!",feed:tr?`Kaos zarı: +€${o.cash}M`:`Chaos dice: +€${o.cash}M`};
-  if(r<t2)return{type:'pow',val:o.pow,good:true,label:tr?`+${o.pow} GUC`:`+${o.pow} POWER`,desc:tr?"Bu maç güç bonusu!":"Power bonus this match!",feed:tr?`Kaos zarı: bu maç +${o.pow} güç`:`Chaos dice: +${o.pow} power this match`};
-  if(r<t3)return{type:'loss',val:o.loss,good:false,label:`−€${o.loss}M`,desc:tr?"Başkan kasadan aldı.":"Chairman took from budget.",feed:tr?`Kaos zarı: −€${o.loss}M`:`Chaos dice: −€${o.loss}M`};
-  return{type:'fin',val:o.fin,good:false,label:tr?`FINALDE −${o.fin} GUC`:`FINAL −${o.fin} POWER`,desc:tr?"Final maçına ceza biniyor.":"Penalty stacks for the final.",feed:tr?`Kaos zarı: finalde −${o.fin} güç`:`Chaos dice: −${o.fin} power in final`};
+  if(r<t1)return{type:"cash",val:o.cash,good:true,label:"+\u20ac"+o.cash+"M",desc:tr?"Kasa doldu!":"Cash boost!",feed:tr?"Kaos zar\u0131: +\u20ac"+o.cash+"M":"Chaos dice: +\u20ac"+o.cash+"M"};
+  if(r<t2)return{type:"pow",val:o.pow,good:true,label:tr?"+"+o.pow+" G\u00dc\u00c7":"+"+o.pow+" POWER",desc:tr?"Bu ma\u00e7 g\u00fc\u00e7 bonusu!":"Power bonus this match!",feed:tr?"Kaos zar\u0131: bu ma\u00e7 +"+o.pow+" g\u00fc\u00e7":"Chaos dice: +"+o.pow+" power this match"};
+  if(r<t3)return{type:"loss",val:o.loss,good:false,label:"\u2212\u20ac"+o.loss+"M",desc:tr?"Ba\u015fkan kasadan ald\u0131.":"Chairman took from budget.",feed:tr?"Kaos zar\u0131: \u2212\u20ac"+o.loss+"M":"Chaos dice: \u2212\u20ac"+o.loss+"M"};
+  return{type:"fin",val:o.fin,good:false,label:tr?"F\u0130NALDE \u2212"+o.fin+" G\u00dc\u00c7":"FINAL \u2212"+o.fin+" POWER",desc:tr?"Final ma\u00e7\u0131na ceza biniyor.":"Penalty stacks for the final.",feed:tr?"Kaos zar\u0131: finalde \u2212"+o.fin+" g\u00fc\u00e7":"Chaos dice: final \u2212"+o.fin+" power"};
 }
 function _applyKaos(res){
   if(res.type==='cash')earn(res.val,"earned");
   else if(res.type==='pow')riskPowerMod+=res.val;
   else if(res.type==='loss')spend(res.val,"president");
   else finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+res.val);
-  pushFeed("🎲 "+res.feed,res.good?"buy":"lose");
+  pushFeed("?? "+res.feed,res.good?"buy":"lose");
   setBudget();renderHub();
 }
 function _kaosStartRoll(isPeek){
@@ -852,15 +864,15 @@ function _kaosStartRoll(isPeek){
   closeModal();
   const res=_computeKaos();
   sfxRoll();
-  showModal(`<div class="kaos-modal kaos-rolling"><div class="kaos-roll-lbl">${LANG==="tr"?"ZARLIYOR...":"ROLLING..."}</div><div class="kaos-roll-wrap">${_kaosDiceSvg(110)}</div><div class="kaos-roll-dots"><span></span><span></span><span></span></div></div>`);
-  setTimeout(()=>{closeModal();_applyKaos(res);_showKaosResult(res);},2700);
+  showModal(`<div class="kaos-modal kaos-rolling"><div class="kaos-kicker">${LANG==="tr"?"&#199;ILGIN BA&#350;KAN":"WILD CHAIRMAN"}</div><div class="kaos-roll-lbl">${LANG==="tr"?"Zar at&#305;l&#305;yor...":"Rolling the dice..."}</div><div class="kaos-roll-wrap">${_kaosDiceSvg(110)}</div><div class="kaos-roll-dots"><span></span><span></span><span></span></div></div>`);
+  setTimeout(()=>{_applyKaos(res);_showKaosResult(res);},2700);
 }
 function _showKaosResult(res){
   const tr=LANG==="tr";
   const cols=['#429A73','#496E71','#E6EEEF','rgba(66,154,115,.75)','rgba(73,110,113,.75)','rgba(230,238,239,.55)'];
   const ptcls=res.good?Array.from({length:14},(_,i)=>`<span class="kr-prtcl" style="--kra:${i*26}deg;--krx:${(Math.random()*100-50).toFixed(0)}px;--kry:${(-40-Math.random()*60).toFixed(0)}px;background:${cols[i%6]}"></span>`).join(''):'';
   const icon=res.good?`<svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#429A73" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="rgba(66,154,115,.18)"/></svg>`:`<svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#496E71" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="rgba(73,110,113,.13)"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-  showModal(`<div class="kaos-modal kaos-result ${res.good?'kr-good':'kr-bad'}">${ptcls}<div class="kr-glow"></div><div class="kr-icon">${icon}</div><div class="kr-label">${res.label}</div><div class="kr-desc">${res.desc}</div><div class="bact" style="margin-top:20px"><button class="btn ${res.good?'btn-go':'btn-primary'}" onclick="closeModal()">${tr?"TAMAM":"OK"}</button></div></div>`);
+  showModal(`<div class="kaos-modal kaos-result ${res.good?'kr-good':'kr-bad'}">${ptcls}<button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="kaos-kicker">${tr?"&#199;ILGIN BA&#350;KAN KARARI":"WILD CHAIRMAN CALL"}</div><div class="kr-glow"></div><div class="kr-icon">${icon}</div><div class="kr-label">${res.label}</div><div class="kr-desc">${res.desc}</div></div>`,{dismissOnOverlay:true,label:tr?"&#199;&#305;lg&#305;n Ba&#351;kan":"Wild Chairman"});
 }
 
 function maybeInjure(){if(round>1&&injuredIdx<0){const base=hasCard("temiz_sayfa")?0.049:0.07,p=applyRandomInjury(base);if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"idmanda sakatland\u0131":"was injured in training"),"lose");renderRoundel("h"+injuredIdx,p);}}}
@@ -935,7 +947,26 @@ const POUT=[{id:"generous",run:()=>{const d=ri(7,13);earn(d,"earned");finalPenal
 function freeName(idx){const old=picksBySlot[idx];if(old&&!old.fab)usedNames.delete(old.name);}
 function upgradeSlot(lo,hi,fee){let idx=0,low=999;picksBySlot.forEach((p,i)=>{if(p&&effOf(p)<low){low=effOf(p);idx=i;}});const pos=slots[idx][0];freeName(idx);const np=takeUnique(pos,lo,hi);np.price=fee==="fee"?ri(3,8):0;spend(np.price||0,"president");picksBySlot[idx]=np;renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos],fee:np.price};}
 function downgradeSlot(lo,hi){const idx=rand()*picksBySlot.length|0,pos=slots[idx][0];freeName(idx);const np=fabPlayer(pos,lo,hi);np.price=0;np.pos=pos;picksBySlot[idx]=np;renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos]};}
-function openPresident(){if(presidentBlocked>0){showModal('<div style="padding:16px;text-align:center">'+(LANG==="tr"?"Başkan bu tur müsait değil.":"President unavailable this turn.")+'</div>');return;}const x=L(),cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="${chairSrc(chairman.id)}" alt="" class="cpphoto" onerror="this.style.display='none'">`;const av=round>=4&&presCharges>0;const _babDisc=chairman.id==="babacan"&&chairTrust>=3;const _sansPrice=chairman.id==="sansasyoncu"&&sansMediaPressure>0?5:3;const _consultCost=_babDisc?1:_sansPrice;const _trustSvg=chairTrust>=3?`<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary)"><path d="M12 17.75l-6.172 3.245l1.179-6.873l-5-4.867l6.9-1l3.086-6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg> `:"";const _discNote=_babDisc?`<span style="color:var(--color-primary);font-size:9px;font-family:var(--mono)"> ${LANG==="tr"?"(güven indirimi)":"(trust discount)"}</span>`:"";const _mediaCost=chairman.id==="sansasyoncu"&&sansMediaPressure>0?`<span style="color:var(--color-slate);font-size:9px;font-family:var(--mono)"> ${LANG==="tr"?"(medya baskısı +€2M)":"(media pressure +€2M)"}</span>`:"";const consultBtn=av?`<button class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center" onclick="consultPresident()">${_trustSvg}${LANG==="tr"?"Danış":"Consult"} −€${_consultCost}M${_discNote}${_mediaCost}</button>`:round>=4?`<p class="psub" style="margin:6px 0 0;font-size:9px;opacity:.7">${LANG==="tr"?"Bu tur hakkın bitti":"No charges left"}</p>`:``;const hints=cd&&cd.hint?cd.hint.split("·").map(s=>s.replace(/\p{Emoji_Presentation}\s*/gu,"").trim()).filter(Boolean):[];const traitList=hints.length?`<ul class="cptraits">${hints.map(h=>`<li>${h}</li>`).join("")}</ul>`:"";const _trustNum=`<div style="font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:.5px;margin:4px 0 8px;text-align:center">${LANG==="tr"?"BAŞKAN GÜVENİ":"CHAIR TRUST"} <span style="color:var(--color-ink);font-weight:700">${chairTrust}/3</span></div>`;showModal(`<div class="chairpopup chairpopup-v">${phimg}<div class="chairpopup-name">${cd?cd.n:chairman.id}</div><div class="chairpopup-sub">${cd?cd.role:""}</div>${_trustNum}<div class="chairpopup-desc">${cd?cd.desc:""}</div>${traitList}${consultBtn}<div class="bact" style="margin-top:20px"><button class="btn btn-ghost" style="width:100%" onclick="closeModal()">${x.presClose}</button></div></div>`);}
+function openPresident(){
+  if(presidentBlocked>0){showModal('<div style="padding:16px;text-align:center">'+(LANG==="tr"?"Ba&#351;kan bu tur m&uuml;sait de&#287;il.":"President unavailable this turn.")+'</div>');return;}
+  const x=L(),cd=x.chair&&x.chair[chairman.id],tr=LANG==="tr";
+  const phimg='<img src="'+chairSrc(chairman.id)+'" alt="" class="cpphoto" onerror="this.style.display=\'none\'">';
+  const av=round>=4&&presCharges>0;
+  const _babDisc=chairman.id==="babacan"&&chairTrust>=3;
+  const _sansPrice=chairman.id==="sansasyoncu"&&sansMediaPressure>0?5:3;
+  const _consultCost=_babDisc?1:_sansPrice;
+  const _trustSvg=chairTrust>=3?'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-primary)"><path d="M12 17.75l-6.172 3.245l1.179-6.873l-5-4.867l6.9-1l3.086-6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg> ':"";
+  const _discNote=_babDisc?'<div class="chair-consult-note">'+(tr?"G&uuml;ven indirimi aktif":"Trust discount active")+'</div>':"";
+  const _mediaCost=chairman.id==="sansasyoncu"&&sansMediaPressure>0?'<div class="chair-consult-note warn">'+(tr?"Medya bask&#305;s&#305;: dan&#305;&#351;ma +&euro;2M":"Media pressure: consult +&euro;2M")+'</div>':"";
+  const consultBtn=av?_discNote+_mediaCost+'<button class="btn btn-primary chair-consult-btn" onclick="consultPresident()">'+_trustSvg+(tr?"Dan&#305;&#351;":"Consult")+' &minus;&euro;'+_consultCost+'M</button>':round>=4?'<div class="chair-status-pill">'+(tr?"Bu tur hakk&#305;n bitti":"Used this round")+'</div>':"";
+  const fx=_CHAIR_FX&&_CHAIR_FX[chairman.id],fxLang=tr?"tr":"en";
+  const hints=fx?[...(fx.pros&&fx.pros[fxLang]||[]),...(fx.cons&&fx.cons[fxLang]||[])].map(v=>String(v).replace(/\p{Emoji_Presentation}\s*/gu,"").trim()).filter(Boolean):[];
+  let sections="";
+  if(chairman.id==="sansasyoncu"){sections='<div class="chair-sections"><div class="chair-section"><b>'+(tr?"Art&#305;lar":"Upside")+'</b><span>'+(tr?"Y&#305;ld&#305;z bonusu y&uuml;ksek":"High star bonus")+'</span><span>'+(tr?"B&uuml;y&uuml;k transferlerde etkili":"Strong with big transfers")+'</span></div><div class="chair-section"><b>'+(tr?"Riskler":"Risks")+'</b><span>'+(tr?"Pazar pahal&#305;":"Expensive market")+'</span></div></div>';}
+  else if(hints.length){sections='<div class="chair-sections"><div class="chair-section"><b>'+(tr?"&Ouml;zellikler":"Traits")+'</b>'+hints.map(h=>'<span>'+h+'</span>').join("")+'</div></div>';}
+  const _trustNum='<div class="chair-trust-line">'+(tr?"BA&#350;KAN G&Uuml;VEN&#304;":"CHAIR TRUST")+' <span>'+chairTrust+'/3</span></div>';
+  showModal('<div class="chairpopup chair-profile"><button class="modal-x" onclick="closeModal()" aria-label="'+(tr?"Kapat":"Close")+'">&times;</button>'+phimg+'<div class="chairpopup-name">'+(cd?cd.n:chairman.id)+'</div><div class="chairpopup-sub">'+(cd?cd.role:"")+'</div>'+_trustNum+'<div class="chairpopup-desc">'+(cd?cd.desc:"")+'</div>'+sections+consultBtn+'</div>',{dismissOnOverlay:true,label:tr?"Ba&#351;kan":"Chairman"});
+}
 function consultPresident(){if(round<4||presCharges<=0)return;closeModal();presCharges--;const _cCost=(chairman.id==="babacan"&&chairTrust>=3)?1:(chairman.id==="sansasyoncu"&&sansMediaPressure>0)?5:3;spend(_cCost,"president");pushFeed("\u{1f3db} "+(LANG==="tr"?"Başkan görüşmesi: -€"+_cCost+"M":"Chairman meeting: -€"+_cCost+"M"),"pres");setBudget();sfxStamp();sfxGrumble();const x=L();const cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="assets/chairs/${chairman.id}.png" alt="" class="chairphoto bchairphoto" onerror="this.replaceWith(document.createTextNode('${chairman.e}'))">`;showModal(`<div class="bulletin"><div class="bhead"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot" id="presMascot">${phimg}</div><div class="bhl">${x.presThink}</div><div class="bbody">${cd?cd.role:""}</div><div class="beff"></div></div>`);let tick=0;const iv=setInterval(()=>{tick++;if($("presMascot"))$("presMascot").style.transform=`rotate(${tick%2?7:-7}deg)`;},120);setTimeout(()=>{clearInterval(iv);resolvePresident();},reduce?0:1000);}
 function resolvePresident(){if(runEnded)return;const x=L();let oc=pickOutcome();const _negSafe=budget>=chairmanSackLimit()+36;if(!_negSafe&&(oc.id==="cut"||oc.id==="yacht"||oc.id==="tax")){oc=pickOutcome();if(oc.id==="cut"||oc.id==="yacht"||oc.id==="tax")oc=POUT.find(o=>o.id==="sale")||oc;}if(chairman.id==="torpilci"&&rand()<0.22)oc=POUT.find(o=>o.id==="nephew")||oc;sfxJingle();
   if(chairman.id==="torpilci"&&oc.id==="nephew"){const _nephewOc=round>=5?{...oc,down:[70,78]}:oc;_torpilNephewChoice(_nephewOc);return;}
@@ -953,7 +984,7 @@ function _resolvePresidentOc(oc){if(runEnded)return;const x=L();
   pushFeed(_pIco+" <b>"+t[0]+"</b> "+t[3],"pres");if(round>=3&&checkChairmanSack("president"))return;
   /* Çılgın: %30 ihtimalle ikinci pozitif event */
   let _extraHtml="";if(chairman.id==="cilgin"&&rand()<0.30){const _posOc=POUT.filter(o=>o.id==="generous"||o.id==="sponsor"||o.id==="sale");const _eo=rnd(_posOc);if(_eo){const _ei=_eo.run();setBudget();const _et=x.pp[_eo.id](_ei);pushFeed("🤪 <b>"+_et[0]+"</b> "+_et[3]+" (kaos bonusu)","buy");_extraHtml=`<div class="beff up" style="margin-top:8px">🤪 ${_et[0]} ${_et[3]}</div>`;}}
-  showModal(`<div class="bulletin"><div class="bhead"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG[oc.id]||t[1]}</div><div class="bhl ${t[4]?"up":"down"}">${t[0]}</div><div class="bbody">${t[2]}</div><div class="beff ${t[4]?"up":"down"}">${t[3]}</div>${_extraHtml}<div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${x.presClose}</button></div></div>`);}
+  renderHub();showModal(`<div class="bulletin bulletin-editorial ${t[4]?"is-good":"is-bad"}"><button class="modal-x" onclick="closeModal()" aria-label="${LANG==="tr"?"Kapat":"Close"}">&times;</button><div class="bhead"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG[oc.id]||t[1]}</div><div class="bhl ${t[4]?"up":"down"}">${t[0]}</div><div class="bbody">${oc.id==="sale"?(LANG==="tr"?"B&uuml;y&uuml;k isim gitti, kasa nefes ald&#305;.":"A big name left; the budget breathed."):t[2]}</div><div class="beff ${t[4]?"up":"down"}">${t[3]}</div>${_extraHtml}</div>`,{dismissOnOverlay:true,label:x.presHead});}
 
 /* ===== team talk ===== */
 function talkContext(){
@@ -972,7 +1003,7 @@ function talkPreview(k){
  const ctx=c.under?(tr?"Rakip favori":"Opponent favoured"):(tr?"Sen favorisin":"You are favoured");
  return `${tr?"Bu maçlık moral etkisi":"One-match morale effect"}: ${d>=0?"+":""}${d} · ${ctx} · ${risk}`;
 }
-function teamTalk(){if(talkUsed)return;const x=L(),tr=LANG==="tr";const meta={gaz:{tone:"risk",badge:tr?"R\u0130SKL\u0130":"RISKY",detail:tr?"Rakip favoriyse daha g\u00fc\u00e7l\u00fc etki verir.":"Stronger when the opponent is favoured.",effect:tr?"+G\u00fc\u00e7 \u00b7 Sakatl\u0131k riski \u2191":"+Power \u00b7 Injury risk \u2191"},mantik:{tone:"safe",badge:tr?"G\u00dcVENL\u0130":"SAFE",detail:tr?"Dengeli se\u00e7im. Ek risk olu\u015fturmaz.":"Balanced choice. Adds no extra risk.",effect:tr?"G\u00fcvenli katk\u0131":"Safe boost"},sert:{tone:"conditional",badge:tr?"KO\u015eULLU":"CONDITIONAL",detail:tr?"Favoriyken kontrol sa\u011flar.":"Adds control when you are favoured.",effect:tr?"Kontrol \u00b7 Gen\u00e7 kadroda moral riski":"Control \u00b7 Youth morale risk"}};const sub=tr?"Bir konu\u015fma se\u00e7. Etkisi sadece bu ma\u00e7 i\u00e7in ge\u00e7erli olur.":"Pick one talk. Its effect applies only to this match.";const o=k=>{const m=meta[k],t=x.talkOpt[k];return `<button type="button" class="stylebtn talk-choice talk-choice-${m.tone}" data-talk="${k}" onclick="pickTalk('${k}')"><div class="ssi">${t.i}</div><div class="ssm talk-copy"><div class="talk-row"><div class="sst">${t.n}</div><span class="talk-badge">${m.badge}</span></div><div class="ssd">${m.detail}</div><div class="talk-effect">${m.effect}</div></div></button>`};showModal(`<div class="talkmodal"><div class="kithdr">${x.talkHead}</div><div class="kitsub talk-sub">${sub}</div><div class="stylelist talk-list">${o("gaz")+o("mantik")+o("sert")}</div></div>`);}
+function teamTalk(){if(talkUsed)return;const x=L(),tr=LANG==="tr";const tone={gaz:"risk",mantik:"safe",sert:"conditional"};const micro={gaz:tr?"Riski b&uuml;y&uuml;t, tempoyu y&uuml;kselt.":"Raise the tempo, accept the risk.",mantik:tr?"Dengeli ve g&uuml;venli bir konu&#351;ma.":"Balanced and safe.",sert:tr?"D&uuml;zeni koru, gev&#351;emeye izin verme.":"Keep order, allow no slack."};const o=k=>{const t=x.talkOpt[k];return `<button type="button" class="stylebtn talk-choice talk-choice-${tone[k]}" data-talk="${k}" onclick="pickTalk('${k}')"><div class="talk-accent"></div><div class="ssi">${t.i}</div><div class="ssm talk-copy"><div class="sst">${t.n}</div><div class="talk-micro">${micro[k]}</div></div></button>`};showModal(`<div class="talkmodal talkmodal-simple"><div class="talk-head"><div class="kithdr">${x.talkHead}</div><div class="talk-subline">${tr?"Tak&#305;m&#305;n ruh h&acirc;lini belirle.":"Set the team mood."}</div></div><div class="stylelist talk-list">${o("gaz")+o("mantik")+o("sert")}</div><div class="talk-foot">${tr?"Etkisi yaln&#305;zca bu ma&ccedil; s&uuml;rer.":"Applies to this match only."}</div></div>`,{dismissOnOverlay:true,label:x.talkHead});}
 function pickTalk(k){if(talkUsed)return;talkUsed=true;try{sfxTalk(k);}catch(e){}const x=L(),c=talkContext();let d=talkDelta(k,c),backfire=false;if(k==="gaz"&&c.troubled&&rand()<0.25){d=-2;backfire=true;}if(k==="sert"&&c.young&&rand()<0.15){d=-1;backfire=true;}talkMod.all=d;lastTalkResult={key:k,name:x.talkOpt[k].n,delta:d,backfire,young:c.young,veteran:c.veteran,under:c.under};sfxStamp();pushFeed("💬 <b>"+x.talkOpt[k].n+"</b> "+(d>=0?"+":"")+d+(backfire?(LANG==="tr"?" · ters tepti":" · backfired"):""),backfire?"lose":"pres");showModal(`<div class="bulletin"><div class="bhead"><span>${x.talkHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${x.talkOpt[k].i}</div><div class="bhl ${d>=0?"up":"down"}">${x.talkOpt[k].n}</div><div class="bbody">${LANG==="tr"?"Bu maçlık moral etkisi. ":"One-match morale effect. "}${backfire?(LANG==="tr"?"Ton ters tepti.": "The tone backfired."):(c.under?x.talkUnder:x.talkFav)}</div><div class="beff ${d>=0?"up":"down"}">${x.talkDelta} ${d>=0?"+":""}${d}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${x.presClose}</button></div></div>`);}
 
 /* ===== fx / modal ===== */
@@ -1077,9 +1108,9 @@ function playMatch(skipRisk){if(runEnded)return;pintiSavings=0;window._pintiSavi
   /* Sansasyoncu MOTM bonusu */
   if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0&&win){const _me=chairTrust===3?10:6;earn(_me,"earned");setBudget();pushFeed("🎤 "+(LANG==="tr"?"Spotlight MOTM — +€"+_me+"M":"Spotlight MOTM — +€"+_me+"M"),"buy");}
   if(chairman.id==="sansasyoncu"&&win&&(gf-ga>=2||picksBySlot.some(p=>p&&p.ov>=85))){const _headline=gf-ga>=2?5:3;earn(_headline,"earned");setBudget();pushFeed("🎤 "+(LANG==="tr"?"Manşet primi: +€"+_headline+"M":"Headline bonus: +€"+_headline+"M"),"buy");}
-  const vcls=win?"win":draw?"draw":"lose",vtxt=draw?(LANG==="tr"?"PENALTİLER":"PENALTIES"):(advance?x.matchWin:x.matchLose);
+  const vcls=win?"win":draw?"draw":"lose",vtxt=draw?(LANG==="tr"?"PENALTILAR":"PENALTIES"):(advance?x.matchWin:x.matchLose);
   if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
-  const _drawBtn=draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTİLERE →":"PENALTIES →"}</button>`:
+  const _drawBtn=draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTILARA →":"PENALTIES →"}</button>`:
     `<button class="btn btn-primary" onclick="afterMatch(${advance})">${advance?(round===5?x.toFinal:x.cont):x.again}</button>`;
   showModal(`<div class="tele tele-${vcls}"><div class="thead">${x.teleHead} · ${x.rounds[round-1]}</div><div class="tele-body"><div class="tscore"><div class="tt ${win?"winner":""}">${clip(teamName||"US",13)}</div><div class="scoreblock"><span class="tn">${gf}</span><span class="score-sep">-</span><span class="tn">${ga}</span></div><div class="tt ${!win&&!draw?"winner":""}">${clip(opponent.name,13)}</div></div><div class="match-summary"><div class="perfnote">${lastMatchPerf.note}</div><div class="perfwhy">${lastMatchPerf.why}</div></div>${matchEventsHTML(lastMatchEvents)}<div class="tv ${vcls}"><span>${vtxt}</span></div></div><div class="bact tele-footer">${_drawBtn}</div></div>`);
   if(autoPlay)setTimeout(()=>{if(!$("modal").classList.contains("hidden")){draw?showPenaltyShootout():afterMatch(advance);}},1300);}
@@ -1114,12 +1145,12 @@ function showRewardChoice(){
   const _rBand=`<svg viewBox='0 0 36 28' width='28' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='28' height='12' rx='5' transform='rotate(-15 18 14)'><animate attributeName='stroke-width' values='2;3.2;2' dur='0.9s' repeatCount='indefinite'/></rect><line x1='18' y1='10' x2='18' y2='18'/><line x1='14' y1='14' x2='22' y2='14'/></svg>`;
   const arrow=`<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h9"/><path d="M10 5l4 4-4 4"/></svg>`;
   const lock=`<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M6.2 11.8 11.8 6.2"/></svg>`;
-  const rewardCard=(kind,enabled,icon,title,desc,effect,meta,status)=>`<button type="button" class="reward-card ${enabled?"is-active":"is-disabled"} reward-${kind}" ${enabled?`onclick="finishRoundReward('${kind}')"`:"disabled aria-disabled=\"true\""}><span class="reward-ico">${icon}</span><span class="reward-copy"><span class="reward-title-row"><span class="reward-title">${title}</span>${enabled?"":`<span class="reward-badge">${tr?"UYGUN DEĞİL":"UNAVAILABLE"}</span>`}</span><span class="reward-desc">${desc}</span><span class="reward-impact">${effect}</span><span class="reward-meta">${meta}</span>${status?`<span class="reward-status">${status}</span>`:""}</span><span class="reward-action">${enabled?arrow:lock}</span></button>`;
+  const rewardCard=(kind,enabled,icon,title,desc,effect,meta,status)=>`<button type="button" class="reward-card ${enabled?"is-active":"is-disabled"} reward-${kind}" ${enabled?`onclick="finishRoundReward('${kind}')"`:"disabled aria-disabled=\"true\""}><span class="reward-ico">${icon}</span><span class="reward-copy"><span class="reward-title-row"><span class="reward-title">${title}</span></span><span class="reward-desc">${desc}</span><span class="reward-impact">${effect}</span><span class="reward-meta">${meta}</span>${status?`<span class="reward-status">${status}</span>`:""}</span><span class="reward-action">${enabled?arrow:lock}</span></button>`;
   showModal("<div class=\"reward-modal\"><div class=\"kithdr\">"+(tr?"Galibiyet Ödülü":"Win Reward")+"</div><div class=\"kitsub\">"+(tr?"Bir ödül seç. Sonraki turu buna göre kur.":"Choose one reward. Build the next round around it.")+"</div><div class=\"reward-list\">"+
-    rewardCard("cash",true,_rCash,tr?"Kasa Primi":"Cash Bonus",tr?"Kasaya doğrudan para ekler.":"Adds money directly to the budget.","+€"+prize+"M",rewardPreview("cash",prize),"")+
-    rewardCard("loan",true,_rLoan,tr?"Kiralık Oyuncu":"Loan Player",tr?"En zayıf oyuncunun yerine 1 turluk takviye gelir.":"A one-round reinforcement replaces your weakest player.",tr?"Zayıf halka değişir":"Weak link replaced",tr?"Tur sonunda -€5M":"-€5M at round end",tr?"Bedelli güç hamlesi":"Short-term power move")+
-    rewardCard("swap",swapOk,_rSwap,tr?"Kart Takas":"Card Swap",tr?"Bir aktif kartı başka bir kartla değiştirebilirsin.":"Trade one active card for a random replacement.",swapOk?(tr?"Kart iade et, yenisi gelsin":"Return a card, get a new one"):(tr?"Aktif kart yok":"No active cards"),rewardPreview("swap",prize),swapOk?"":(tr?"Önce aktif kart gerekir.":"Needs an active card first."))+
-    rewardCard("care",careOk,_rBand,tr?"Sakatlık Tedavisi":"Injury Care",tr?"Sakat bir oyuncuyu tedavi eder.":"Heals one injured player.",careOk?(tr?"Sakat oyuncu iyileşir":"Injured player recovers"):(tr?"Sakat oyuncu yok":"No injured player"),rewardPreview("care",prize),careOk?"":(tr?"Tedavi edilecek oyuncu yok.":"No player needs treatment."))+
+    rewardCard("cash",true,_rCash,tr?"Kasa Primi":"Cash Bonus",tr?"Kasaya doğrudan para ekler.":"Adds money directly to the budget.","+€"+prize+"M","","")+
+    rewardCard("loan",true,_rLoan,tr?"Kiralık Oyuncu":"Loan Player",tr?"En zayıf oyuncunun yerine 1 turluk takviye gelir.":"A one-round reinforcement replaces your weakest player.",tr?"Zayıf halka değişir":"Weak link replaced",tr?"Tur sonunda -€5M":"-€5M at round end","")+
+    rewardCard("swap",swapOk,_rSwap,tr?"Kart Takas":"Card Swap",tr?"Bir aktif kartı başka bir kartla değiştirebilirsin.":"Trade one active card for a random replacement.",swapOk?(tr?"Kart iade et, yenisi gelsin":"Return a card, get a new one"):(tr?"Önce aktif kart gerekir.":"Needs an active card first."),"","")+
+    rewardCard("care",careOk,_rBand,tr?"Sakatlık Tedavisi":"Injury Care",tr?"Sakat bir oyuncuyu tedavi eder.":"Heals one injured player.",careOk?(tr?"Sakat oyuncu iyileşir":"Injured player recovers"):(tr?"Tedavi edilecek oyuncu yok.":"No player needs treatment."),"","")+
     "</div><div class=\"reward-foot\">"+(tr?"Devam etmek için bir ödül seç.":"Pick a reward to continue.")+"</div></div>");
 }
 function showCardSwapModal(){
@@ -1413,7 +1444,7 @@ function pickCaptain(){
   </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
 }
 function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p){pushFeed("🎽 <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");showToast((LANG==="tr"?"⚽ "+surOf(p)+" kaptan seçildi":"⚽ "+surOf(p)+" named captain"),{type:"default"});}renderHub();}
-function presBtnLockedClick(){const lbl=$("presLabel");if(!lbl)return;const msg=LANG==="tr"?"ÇEYREK FİNALDE":"Q-FINAL";lbl.textContent=msg;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{const pl=$("presLabel");if(pl)pl.textContent=L().ui.seeChair;},3500);}
+function presBtnLockedClick(){const btn=$("presBtn"),msg=LANG==="tr"?"ÇEYREK FİNALDE AÇILIR":"UNLOCKS IN Q-FINAL";if(!btn)return;const old=btn.innerHTML;btn.innerHTML=`<span>${msg}</span>`;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{if(btn)btn.innerHTML=old;},2200);}
 const CATMAP={taraftar:"taraftar",genc:"ekonomi",ch_momentum:"hucum",kontra:"hucum",buyuk_mac:"hucum",yildiz:"hucum",otobus:"savunma",kaleci_kalesi:"savunma",anadolu:"ekonomi",altyapi_plani:"ekonomi",tecrubeli_omurga:"savunma",yerli_blok:"ekonomi",kanat_akini:"hucum",cift_forvet:"hucum",derbi:"risk",final_provasi:"risk",son_dans:"risk",taksit_transfer:"ekonomi",son_kredi:"ekonomi",kara_borsa:"risk",sahte_evrak:"risk",deplasman_kafilesi:"risk",kumarbaz:"risk",gecici_prim:"risk",kisa_kamp:"risk",doping:"risk",kriz:"risk",kurban_belli:"risk",primler_yatinca:"ekonomi",vur_igneyi:"risk",bu_adam:"hucum",gec_gec:"hucum",nasip_kismet:"risk",yildiz_krizi:"hucum",kasiga_para:"risk"};
 Object.assign(T.tr.cards,{
   taraftar:{n:"12. Adam",d:"1. turda +2; 2. turda +3; 3. turdan itibaren +4 güç.",i:"📣"},
@@ -1651,6 +1682,7 @@ function showFinalCard(sp){
   </div>`);
 }function startFinalSim(myPow){
   const oppPow=opponent?opponent.power:50;
+  window._finalPenPower={home:myPow,away:oppPow};
   ["hub","draft","result"].forEach(id=>{const el=$(id);if(el)el.classList.add("hidden");});
   const simEl=$("sim");if(simEl){simEl.classList.remove("hidden");setTimeout(()=>simEl.scrollIntoView({behavior:"smooth",block:"start"}),80);}
   if(typeof buildSim==="function"){buildSim(myPow,oppPow);}
@@ -1823,61 +1855,46 @@ function _tryRestoreState(){
   window._smilObs=obs;
 })();
 
-/* ===== Penaltı Minigame ===== */
-function showPenaltyShootout(){
+/* ===== Penalty Shootout v2 ===== */
+function showPenaltyShootout(mode){
   closeModal();
-  const tr=LANG==="tr";
-  const saveChance=window._penSaveChance||1/3;
-  window._penState={kicks:0,goals:0,saves:0,log:[],saveChance};
+  const home=clip(teamName||"COPA",12),away=clip(opponent&&opponent.name?opponent.name:"Rakip",12);
+  window._penState={phase:"shoot",round:1,homeGoals:0,awayGoals:0,homeShots:[],awayShots:[],log:[],home,away,mode:mode||"round"};
   _renderPenaltyModal();
 }
+function _penDirLabel(d){const tr=LANG==="tr";return d==="L"?(tr?"Sol":"Left"):d==="C"?(tr?"Orta":"Center"):(tr?"Sağ":"Right");}
+function _penPick(){const dirs=["L","C","R"];return dirs[Math.floor(rand()*dirs.length)];}
+function _penShotResult(shooterPower,keeperPower,shotDir,keeperDir){let chance=0.72+(shooterPower-keeperPower)/180;if(shotDir===keeperDir)chance-=0.34;if(shotDir==="C"&&keeperDir!=="C")chance+=0.08;chance=Math.max(0.18,Math.min(0.9,chance));return rand()<chance;}
+function _penCanCatch(leader,trail,leaderTaken,trailTaken){return leader-trail<=5-trailTaken;}
+function _penIsDone(s){const ht=s.homeShots.length,at=s.awayShots.length;if(ht>=5&&at>=5&&s.homeGoals!==s.awayGoals)return true;if(ht<5||at<5){if(s.homeGoals>s.awayGoals&&!_penCanCatch(s.homeGoals,s.awayGoals,ht,at))return true;if(s.awayGoals>s.homeGoals&&!_penCanCatch(s.awayGoals,s.homeGoals,at,ht))return true;}return false;}
+function _penWinner(s){return s.homeGoals>s.awayGoals;}
+function _penDots(arr){return Array.from({length:Math.max(5,arr.length)},function(_,i){const v=arr[i];return "<span class=\"pen-dot "+(v==null?"":v?"is-goal":"is-miss")+"\">"+(v==null?"":v?"✓":"×")+"</span>";}).join("");}
 function _renderPenaltyModal(){
-  const tr=LANG==="tr",s=window._penState;
-  const remaining=3-s.kicks;
-  const log=s.log.map(l=>`<div class="pen-log-row ${l.goal?"pen-goal":"pen-save"}"><span>${l.dir}</span><span>${l.goal?(tr?"GOL ⚽":"GOAL ⚽"):(tr?"KURTARMA 🧤":"SAVED 🧤")}</span></div>`).join("");
-  const _gkSvg=`<svg viewBox="0 0 48 52" width="52" height="56" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="9" r="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.2"/>
-    <line x1="24" y1="15" x2="24" y2="30" stroke="#e8e8e8" stroke-width="3" stroke-linecap="round"/>
-    <line x1="24" y1="22" x2="14" y2="18" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="24" y1="22" x2="34" y2="18" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="24" y1="30" x2="18" y2="44" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="24" y1="30" x2="30" y2="44" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round"/>
-    <rect x="2" y="16" width="44" height="28" rx="2" stroke="#429A73" stroke-width="1.5" fill="none" opacity=".4"/>
-  </svg>`;
-  const dots=Array.from({length:3},(_,i)=>{
-    const done=i<s.kicks;
-    const col=done?(s.log[i]&&s.log[i].goal?"#429A73":"#496E71"):"rgba(255,255,255,.2)";
-    return `<svg viewBox="0 0 12 12" width="14" height="14"><circle cx="6" cy="6" r="5" fill="${col}"/></svg>`;
-  }).join("");
-  showModal(`<div class="postcard" style="padding:0;overflow:hidden;min-width:280px">
-    <div style="background:#0f1923;padding:14px 16px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07)">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:700">${tr?"PENALTİ ATIŞLARI":"PENALTY SHOOTOUT"}</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px">${dots}</div>
-    </div>
-    <div style="padding:12px 16px;text-align:center">${_gkSvg}
-      ${remaining>0?`<div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.6);margin:8px 0 4px">${tr?`${s.kicks+1}. penaltı — yönünü seç:`:`Penalty ${s.kicks+1} — pick direction:`}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
-        <button class="btn" style="padding:10px 0;font-size:13px;font-weight:800" onclick="_takePenalty('L')">${tr?"← SOL":"← LEFT"}</button>
-        <button class="btn" style="padding:10px 0;font-size:13px;font-weight:800" onclick="_takePenalty('C')">${tr?"ORTA":"CENTER"}</button>
-        <button class="btn" style="padding:10px 0;font-size:13px;font-weight:800" onclick="_takePenalty('R')">${tr?"SAĞ →":"RIGHT →"}</button>
-      </div>`
-      :`<div style="font-family:var(--mono);font-size:13px;font-weight:700;margin:10px 0;color:${s.goals>=2?"#429A73":"rgba(230,238,239,.7)"}">${s.goals>=2?(tr?"DEVAM! "+s.goals+"/3 gol":"ADVANCE! "+s.goals+"/3 goals"):(tr?"ELENDİN! "+s.goals+"/3 gol":"OUT! "+s.goals+"/3 goals")}</div>
-      <button class="btn btn-primary" style="width:100%" onclick="closeModal();afterMatch(${s.goals>=2})">${s.goals>=2?(tr?"İlerle →":"Advance →"):(tr?"Run bitti":"Run over")}</button>`}
-      ${log?`<div style="margin-top:8px;font-family:var(--mono);font-size:10px">${log}</div>`:""}
-    </div>
-  </div>`);
+  const tr=LANG==="tr",s=window._penState,done=_penIsDone(s),homeWon=done&&_penWinner(s);
+  const finalMode=s.mode==="final";
+  const phaseText=done?(homeWon?(finalMode?(tr?"Penaltılarla kupayı aldın":"You win the cup on penalties"):(tr?"Penaltılarla tur atladın":"You advance on penalties")):(finalMode?(tr?"Penaltılarla finali kaybettin":"Lost the final on penalties"):(tr?"Penaltılarla elendin":"Out on penalties"))):(s.phase==="shoot"?(tr?"Şut yönünü seç":"Pick your shot"):(tr?"Kalecinin atlayacağı yönü seç":"Pick keeper dive"));
+  const phaseSub=done?(tr?"Seri tamamlandı.":"Shootout complete."):(s.phase==="shoot"?(tr?"Top sende. Köşeyi seç, kaleci tahmin edecek.":"Your kick. Choose a corner; the keeper guesses."):(tr?"Rakip vuruyor. Kalecini bir yöne gönder.":"Opponent shoots. Send your keeper."));
+  const log=s.log.slice(-6).map(function(l){return "<div class=\"pen-log-row "+(l.goal?"pen-goal":"pen-save")+"\"><span>"+l.side+" "+l.no+"</span><span>"+_penDirLabel(l.shot)+" / "+_penDirLabel(l.keeper)+"</span><b>"+(l.goal?(tr?"GOL":"GOAL"):(tr?"KAÇTI":"MISS"))+"</b></div>";}).join("");
+  const actionBtns=done?"<button class=\"btn btn-primary pen-continue\" onclick=\"_finishPenaltyShootout("+homeWon+")\">"+(homeWon?(finalMode?(tr?"Kupayı kaldır":"Lift the cup"):(tr?"Turu geç":"Advance")):(tr?"Run bitti":"Run over"))+"</button>":"<div class=\"pen-dir-grid\"><button class=\"btn\" onclick=\"_takePenalty('L')\">← "+(tr?"SOL":"LEFT")+"</button><button class=\"btn\" onclick=\"_takePenalty('C')\">"+(tr?"ORTA":"CENTER")+"</button><button class=\"btn\" onclick=\"_takePenalty('R')\">"+(tr?"SAĞ":"RIGHT")+" →</button></div>";
+  showModal("<div class=\"pen-modal\"><div class=\"pen-head\"><div class=\"pen-kicker\">"+(tr?"PENALTILAR":"PENALTIES")+"</div><div class=\"pen-score\"><span>"+s.home+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+s.away+"</span></div><div class=\"pen-phase\">"+phaseText+"</div><p>"+phaseSub+"</p></div><div class=\"pen-goal\"><div class=\"pen-net\"></div><div class=\"pen-keeper "+(s.phase==='save'?'is-ready':'')+"\"></div><div class=\"pen-ball\"></div></div><div class=\"pen-slots\"><div><span>"+s.home+"</span>"+_penDots(s.homeShots)+"</div><div><span>"+s.away+"</span>"+_penDots(s.awayShots)+"</div></div>"+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
 }
-function _takePenalty(dir){
-  const s=window._penState;if(s.kicks>=3)return;
-  const dirs=["L","C","R"];
-  const gkDir=dirs[Math.floor(rand()*3)];
-  const goal=dir!==gkDir||(rand()<0.08);
-  s.log.push({dir,gkDir,goal});
-  s.kicks++;if(goal)s.goals++;else s.saves++;
-  _renderPenaltyModal();
-  try{if(goal){sfxGoal&&sfxGoal();}else{sfxWhistle&&sfxWhistle();}}catch(e){}
+function _takePenalty(dir){const s=window._penState;if(!s||_penIsDone(s))return;const fp=window._finalPenPower||{};const homePower=s.mode==="final"?(fp.home||75):((lastMatchPerf&&lastMatchPerf.power)||75),awayPower=s.mode==="final"?(fp.away||75):((lastMatchPerf&&lastMatchPerf.oppPower)||75);if(s.phase==="shoot"){const keeper=_penPick(),goal=_penShotResult(homePower,awayPower,dir,keeper);s.homeShots.push(goal);if(goal)s.homeGoals++;s.log.push({side:s.home,no:s.homeShots.length,shot:dir,keeper,goal});s.phase="save";}else{const shot=_penPick(),goal=_penShotResult(awayPower,homePower,shot,dir);s.awayShots.push(goal);if(goal)s.awayGoals++;s.log.push({side:s.away,no:s.awayShots.length,shot,keeper:dir,goal});s.round=Math.max(s.homeShots.length,s.awayShots.length)+1;s.phase="shoot";}if(_penIsDone(s))s.phase="done";try{if(s.log[s.log.length-1].goal){sfxGoal&&sfxGoal();}else{sfxWhistle&&sfxWhistle();}}catch(e){}_renderPenaltyModal();}
+function _finishPenaltyShootout(homeWon){
+  const s=window._penState||{};
+  if(s.mode==="final"){
+    const tr=LANG==="tr";
+    const base=window._finalPenaltyScore||"0-0";
+    const shootout=(s.homeGoals||0)+"-"+(s.awayGoals||0);
+    window.penaltyNote=homeWon?(tr?"penaltılarda kupayı aldın":"won the cup on penalties"):(tr?"penaltılarda finali kaybettin":"lost the final on penalties");
+    window.keyMoment=window.penaltyNote;
+    window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${tr?"Kırılma anı":"Key moment"}</span><b>${window.penaltyNote}</b></div><div class="frrow"><span>${tr?"Penaltılar":"Penalties"}</span><b>${shootout}</b></div><div class="frrow"><span>${tr?"Final yorumu":"Final note"}</span><b>${homeWon?(tr?"Altın gol çıkmadı, seri penaltılarla kupa geldi.":"No golden goal, the shootout delivered the cup."):(tr?"Altın gol çıkmadı, seri penaltılarda final kaçtı.":"No golden goal, the final slipped away in the shootout.")}</b></div>`;
+    closeModal();
+    endRun(!!homeWon,base+" p "+shootout);
+    return;
+  }
+  closeModal();
+  afterMatch(!!homeWon);
 }
-
 /* ===== Kart Belleği (localStorage) ===== */
 function _cardMemLoad(){try{return JSON.parse(localStorage.getItem("copa_cardmem")||"{}")}catch(e){return{};}}
 function _cardMemSave(obj){try{localStorage.setItem("copa_cardmem",JSON.stringify(obj));}catch(e){}}
