@@ -9,6 +9,7 @@ var loanPlayer=null;
 var legacyFund=0;
 var shopBlocked=0,presidentBlocked=0,cardPriceMod=1.0,cardPriceModTurns=0;
 var deferredBudgetPenalty=0,deferredPowerPenalty=0,oppPowerMod=0;
+var draftFatigueTurns=0,draftDebtTurns=0,draftPendingInjury=0;
 var shopVariantLock={};
 var eskiKurtSlotIdx=-1,eskiKurtPenalty=0;
 var kurbanScheduled={count:0,turns:0};

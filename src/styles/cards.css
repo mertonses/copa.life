@@ -383,3 +383,147 @@
   background:transparent;
   color:var(--color-ink);
 }
+
+/* ===== Match Prep market polish ===== */
+#hub .cardtile{
+  min-height:202px;
+  border-color:color-mix(in srgb,var(--border-subtle) 86%,var(--color-slate));
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(12,18,19,.09);
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,background .14s ease;
+}
+#hub .cardtile:hover:not(.cant){
+  transform:translateY(-2px);
+  border-color:var(--color-primary);
+  box-shadow:0 8px 20px rgba(12,18,19,.14);
+}
+#hub .ct-head{
+  min-height:24px;
+  padding:5px 8px;
+  background:color-mix(in srgb,var(--surface-muted) 84%,var(--surface-elevated));
+  border-bottom-color:color-mix(in srgb,var(--border-subtle) 80%,var(--color-slate));
+}
+#hub .ct-rar{
+  border:1px solid rgba(73,110,113,.30);
+  border-radius:999px;
+  padding:2px 7px;
+  background:transparent;
+  color:var(--color-slate);
+}
+#hub .cardtile.sv-1 .ct-rar{
+  border-style:dashed;
+  color:var(--color-ink);
+}
+#hub .ct-cat{
+  font-size:7px;
+  letter-spacing:1.4px;
+}
+#hub .ct-art{
+  height:58px;
+  padding:9px 14px 3px;
+}
+#hub .ct-art svg{
+  max-width:50px;
+  max-height:50px;
+  stroke-width:1.75;
+}
+#hub .ct-body{
+  padding:7px 11px 6px;
+  gap:4px;
+}
+#hub .ct-name{
+  font-size:15px;
+  line-height:1.15;
+  letter-spacing:-.1px;
+}
+#hub .ct-desc{
+  font-size:10.3px;
+  line-height:1.42;
+}
+#hub .ct-contract{
+  font-size:8px;
+  color:var(--color-slate);
+}
+#hub .ct-foot{
+  padding:7px 10px 9px;
+}
+#hub .ct-pw{
+  font-size:8px;
+  color:var(--color-primary);
+}
+#hub .ct-price{
+  min-width:44px;
+  padding:3px 8px;
+  border-radius:7px;
+  font-size:13px;
+  box-shadow:none;
+}
+#hub .cardtile.discounted::after{
+  content:attr(data-discount);
+  top:7px;
+  right:7px;
+  width:auto;
+  transform:none;
+  padding:2px 6px;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--color-primary) 18%,var(--surface-elevated));
+  border:1px solid color-mix(in srgb,var(--color-primary) 42%,var(--border-subtle));
+  color:var(--color-ink);
+  font-size:7px;
+  box-shadow:none;
+}
+#freeAgentRow .cardtile{
+  min-height:154px;
+}
+#freeAgentRow .ct-art{
+  height:38px;
+  padding:5px 10px 0;
+}
+#freeAgentRow .ct-art svg{
+  width:26px;
+  height:32px;
+}
+#freeAgentRow .ct-name{
+  font-size:14px;
+}
+#freeAgentRow .ct-desc{
+  font-size:10px;
+}
+#freeAgentRow .ct-foot{
+  padding-top:6px;
+}
+
+#hub .feedwrap{
+  max-height:178px;
+  border-radius:10px;
+  overflow:auto;
+}
+#hub .feedwrap .tch{
+  position:sticky;
+  top:0;
+  z-index:2;
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  background:var(--surface-elevated);
+  border-bottom:1px solid var(--border-subtle);
+  font-size:11px;
+  letter-spacing:2.4px;
+}
+#hub .feeditem{
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  font-size:10.5px;
+  line-height:1.35;
+}
+#hub .feeditem .ft{
+  flex:0 0 auto;
+  border-radius:999px;
+  padding:2px 7px;
+  background:color-mix(in srgb,var(--color-slate) 10%,var(--surface-muted));
+}

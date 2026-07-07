@@ -13,6 +13,23 @@ function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
 function chairmanSackLimit(){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};let lim=m[chairman&&chairman.id]||DEBT_LIMIT;if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -2;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
+function chairmanReactToSpend(cost,context,payload){
+ cost=Math.round(cost||0);payload=payload||{};
+ if(!chairman||cost<=0||typeof chairTrust==="undefined")return;
+ const tr=typeof LANG==="undefined"||LANG==="tr";
+ if(chairman.id==="pinti"&&cost>=14){
+  chairTrust=Math.max(0,chairTrust-1);
+  if(typeof pushFeed==="function")pushFeed("🪙 "+(tr?"Pahalı harcama: Pinti Başkan güveni -1":"Expensive spend: Miser trust -1"),"lose");
+ }
+ if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov>=85){
+  const bonus=payload.ov>=90?4:2;
+  if(typeof riskPowerMod!=="undefined")riskPowerMod+=bonus;
+  if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Manşet transferi: +"+bonus+" güç":"Headline signing: +"+bonus+" power"),"buy");
+ }else if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov&&payload.ov<72&&cost>=6){
+  chairTrust=Math.max(0,chairTrust-1);
+  if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Sıkıcı transfer: Sansasyoncu güveni -1":"Boring signing: Showman trust -1"),"lose");
+ }
+}
 function opponentEdge(power,oppPower){const gap=(power||0)-(oppPower||0);return gap>=24?5:gap>=18?4:gap>=12?3:gap>=8?2:0;}
 function injuryRiskFor(power){const s=picksBySlot.filter(Boolean);let risk=0.09;risk+=s.filter(p=>p.age>=32).length*0.022;if(style==="gegen")risk+=0.035;if(lastTalkResult&&lastTalkResult.key==="gaz"&&lastTalkResult.delta>0)risk+=0.025;if(power>=90)risk+=0.035;if(power>=95)risk+=0.035;if(hasRunCard("temiz_sayfa"))risk*=0.70;return Math.min(0.40,Math.max(0.02,risk));}
 var _r=function(){return typeof rand==="function"?rand():Math.random();};

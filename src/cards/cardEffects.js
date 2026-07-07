@@ -102,8 +102,6 @@ function applyRiskCardGain(k){
   const s=picksBySlot.filter(Boolean);
   const gk=s.find(p=>p.pos==="GK");
   if(gk){gk.ov=Math.min(99,gk.ov+boost);gk.eff=Math.min(99,gk.eff+boost);renderRoundel&&renderRoundel("h"+picksBySlot.indexOf(gk),gk);pushFeed("🧤 <b>"+L().cards[k].n+"</b> GK OV+"+boost,"buy");}
-  const fwds=s.filter(p=>p.pos==="ST");
-  if(fwds.length&&rand()<0.5){const fw=fwds[ri(0,fwds.length-1)];fw.ov=Math.min(99,fw.ov+boost);fw.eff=Math.min(99,fw.eff+boost);renderRoundel&&renderRoundel("h"+picksBySlot.indexOf(fw),fw);pushFeed("🧤 "+(tr?"Forvet de OV+"+boost:"Forward also OV+"+boost)+"!","buy");}
   if(v===1&&rand()<0.15){spend(15,"spent");pushFeed("🧤 "+(tr?"Transfer cezası: -€15M":"Transfer penalty: -€15M"),"lose");}
   return;
  }
@@ -254,12 +252,15 @@ function applyRiskCardGain(k){
  if(k==="kumarbaz"){return;} // yukarida islendi
  if(k==="sahte_evrak"){
   const pow=v===1?10:6;
+  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Evrak riski: g?ven -1":"Paperwork risk: trust -1"),"lose");}
+  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Ba?kan evrak? sorgulad?: g?ven -1":"Chairman questioned the papers: trust -1"),"lose");}
   pushFeed("📄 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur (kontrat)":" power/turn (contract)"),"buy");
   return;
  }
  if(k==="doping"){
   const pow=v===1?10:6;
   const fineChance=v===1?25:35,fineAmt=v===1?25:15;
+  if(v===1||rand()<0.20){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Doping ??phesi: g?ven -1":"Doping suspicion: trust -1"),"lose");}
   pushFeed("🧪 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur; %"+fineChance+" -€"+fineAmt+"M":" power/turn; "+fineChance+"% -€"+fineAmt+"M")+(v===1?" · finalde -6":""),"pres");
   return;
  }
