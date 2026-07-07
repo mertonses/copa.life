@@ -552,6 +552,7 @@ function buyCard(k,overridePrice){
   const pr=overridePrice!==undefined?overridePrice:_basePr;
   if(!canAffordCost(pr))return;
   spend(pr,"spent");
+  if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(pr,"card",{card:k});
   recordDebt();
   cardsBoughtThisTurn++;
   addCard(k,sv,{silent:true});

@@ -677,7 +677,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
   const rb=$("rerollBtn");if(rb){rb.disabled=draftRerollUsed;const _rerollSvg=`<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><path d="M3 9Q3 5.5 6.5 3.8Q10 2 13.5 4.5"/><path d="M15 9Q15 12.5 11.5 14.2Q8 16 4.5 13.5"/><polyline points="11.5,2.5 14,5 16,2.5" stroke-width="1.6"/><polyline points="6.5,15.5 4,13 2,15.5" stroke-width="1.6"/></svg>`;rb.innerHTML=draftRerollUsed?(tr?"Yenileme kullanıldı ✗":"Reroll used ✗"):(tr?_rerollSvg+"Ücretsiz yenile (1 hak)":_rerollSvg+"Free reroll (1 left)");const rd=$("rerollDesc");if(rd)rd.textContent=tr?"Aynı mevki için 3 yeni aday getirir.":"Brings 3 new candidates for the same position.";}
   const om=$("optmsg");if(om){om.style.color="";om.textContent=any?(debtPick?(tr?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}}
 function rerollOptions(){if(draftRerollUsed||currentSlot<0)return;draftRerollUsed=true;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6,_cap=budget-_reserve-DEBT_LIMIT;currentOpts=draftOptions(_pos);if(!currentOpts.some(o=>o.price<=_cap)){const fp=fabPlayer(_pos,55,61);fp.price=0;fp.free=true;currentOpts[0]=fp;}sfxRoll();renderOpts();}
-function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.pos))+(p.train||0);picksBySlot[idx]=p;filled[idx]=true;remaining--;spend(p.price||0,"spent");setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();}
+function fillSlot(idx,p){p.pos=slots[idx][0];p.eff=p.ov-misPen(p.natG,groupOf(p.pos))+(p.train||0);picksBySlot[idx]=p;filled[idx]=true;remaining--;spend(p.price||0,"spent");if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(p.price||0,"transfer",p);setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();}
 function surOf(p){const w=(p.name||"").trim().split(" ");const last=w[w.length-1];if(/^\d+$/.test(last)&&w.length>1)return w[w.length-2];return last;}
 function _ovCol(ov){return ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";}
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?"#429A73":"rgba(12,18,19,.2)";const s=done?"rgba(66,154,115,.7)":"rgba(12,18,19,.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
@@ -778,6 +778,8 @@ function _acceptNephew(){
   const oc=window._pendingNephewOc;window._pendingNephewOc=null;if(!oc)return;
   const x=L();const _namesBefore=picksBySlot.map(p=>p?p.name:null);let info=downgradeSlot(oc.down[0],oc.down[1]);setBudget();
   picksBySlot.forEach((p,i)=>{if(p&&_namesBefore[i]!==p.name){p.isNephew=true;}});
+  earn(3,"earned");finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+2);
+  pushFeed("👨‍👦 "+(LANG==="tr"?"Kontenjan kolaylığı: +€3M · finalde -2 güç riski":"Crony subsidy: +€3M · -2 final power risk"),"pres");
   const t=x.pp[oc.id](info);sfxStamp();if(info&&info.delta)sfxCoin();pushFeed("🎩 <b>"+t[0]+"</b> "+t[3],"pres");
   if(round>=3&&checkChairmanSack("president"))return;
   showModal(`<div class="bulletin"><div class="bhead"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG[oc.id]||t[1]}</div><div class="bhl down">${t[0]}</div><div class="bbody">${t[2]}</div><div class="beff down">${t[3]}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${x.presClose}</button></div></div>`);
@@ -1054,6 +1056,7 @@ function playMatch(skipRisk){if(runEnded)return;pintiSavings=0;window._pintiSavi
   if(win)chairTrust=Math.min(3,chairTrust+1);else chairTrust=Math.max(0,chairTrust-1);
   /* Sansasyoncu MOTM bonusu */
   if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0&&win){const _me=chairTrust===3?10:6;earn(_me,"earned");setBudget();pushFeed("🎤 "+(LANG==="tr"?"Spotlight MOTM — +€"+_me+"M":"Spotlight MOTM — +€"+_me+"M"),"buy");}
+  if(chairman.id==="sansasyoncu"&&win&&(gf-ga>=2||picksBySlot.some(p=>p&&p.ov>=85))){const _headline=gf-ga>=2?5:3;earn(_headline,"earned");setBudget();pushFeed("🎤 "+(LANG==="tr"?"Manşet primi: +€"+_headline+"M":"Headline bonus: +€"+_headline+"M"),"buy");}
   const vcls=win?"win":draw?"draw":"lose",vtxt=draw?(LANG==="tr"?"PENALTİLER":"PENALTIES"):(advance?x.matchWin:x.matchLose);
   if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
   const _drawBtn=draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTİLERE →":"PENALTIES →"}</button>`:
