@@ -16,8 +16,13 @@ function applyRiskDraftCarryovers(){
   }
 }
 
+function _riskValueHTML(value,cls){
+  const tone=cls==="risk-offer-gain"?"good":((cls==="risk-offer-cost"||cls==="risk-offer-risk")?"bad":"neutral");
+  return String(value).replace(/(%\d+(?:[.,]\d+)?|[+\-−]?\s?€?\d+(?:[.,]\d+)?M?|[+\-−]\d+)/g,`<span class="risk-num risk-num-${tone}">$1</span>`);
+}
+
 function _riskDraftLine(label,value,cls){
-  return `<div class="risk-offer-line ${cls||""}"><span>${label}</span><b>${value}</b></div>`;
+  return `<div class="risk-offer-line ${cls||""}"><span>${label}</span><b>${_riskValueHTML(value,cls)}</b></div>`;
 }
 
 function _riskOfferHTML(o,i){
@@ -31,13 +36,20 @@ function _riskOfferHTML(o,i){
   </button>`;
 }
 
+function _decisionIcon(name){
+  const icons={
+    press:`<svg class="decision-ico" viewBox="0 0 32 32" aria-hidden="true"><path class="ico-fill" d="M8 20h16l-8 7-8-7Z"/><path d="M6 22c5.5-.5 9.5-3 12-7"/><path d="M18 15h-5"/><path d="M18 15v5"/><path d="M14 8c3 1 5.5 3 7 6"/><path d="M22 8l2-3 2 3 3 1-3 1-2 3-2-3-3-1 3-1Z"/><circle cx="8" cy="23" r="2.2"/><circle cx="24" cy="23" r="2.2"/></svg>`,
+    envelope:`<svg class="decision-ico" viewBox="0 0 32 32" aria-hidden="true"><path class="ico-fill" d="M5 10h22v15H5z"/><rect x="5" y="10" width="22" height="15" rx="3"/><path d="M6.5 12l9.5 7 9.5-7"/><path d="M6.5 24l7-6"/><path d="M25.5 24l-7-6"/><circle cx="22" cy="20" r="3.2"/><path d="M22 18.2v3.6M20.5 19.7h3"/></svg>`,
+    contract:`<svg class="decision-ico" viewBox="0 0 32 32" aria-hidden="true"><path class="ico-fill" d="M8 4h14l4 5v19H8z"/><path d="M8 4h14l4 5v19H8z"/><path d="M22 4v5h4"/><path d="M13 13h8"/><path d="M13 24c3-3 6 2 9-2"/><path d="M14 18h5"/><path d="M19.5 16.5h3v2.5c0 2.2-1.4 3.8-3 4.4-1.6-.6-3-2.2-3-4.4v-2.5h3Z"/></svg>`,
+    grit:`<svg class="decision-ico" viewBox="0 0 32 32" aria-hidden="true"><path class="ico-fill" d="M8 14h15c2 0 4 2 4 5 0 5-4 8-10 8H9z"/><path d="M8 14V9a2.5 2.5 0 0 1 5 0v5"/><path d="M13 14V7a2.5 2.5 0 0 1 5 0v7"/><path d="M18 14V9a2.5 2.5 0 0 1 5 0v7"/><path d="M23 16h1.5c2.5 0 4.5 2 4.5 4.6C29 25 25 28 18 28H9c-2.5-2.4-3.5-5.2-3-9l2-5"/><path d="M10 21h12"/><path d="M12 24h8"/></svg>`,
+    hold:`<svg class="decision-ico" viewBox="0 0 32 32" aria-hidden="true"><path class="ico-fill" d="M8 16h16v5c0 5-3 8-8 8s-8-3-8-8z"/><path d="M8 17V8a2.4 2.4 0 0 1 4.8 0v7"/><path d="M12.8 14V6.5a2.4 2.4 0 0 1 4.8 0V15"/><path d="M17.6 15V8a2.4 2.4 0 0 1 4.8 0v8"/><path d="M22.4 16v-4a2.4 2.4 0 0 1 4.8 0v7c0 5.5-4.2 9-10 9H16c-5 0-8-3.2-8-8v-3"/><path d="M4 7c2-2 4-2 6 0"/><path d="M4 11c2-2 4-2 6 0"/></svg>`
+  };
+  return icons[name]||"";
+}
+
 function showDraftEvent(){
  if($("hub").classList.contains("hidden"))return;const tr=LANG==="tr";
- const _bolt=`<svg viewBox='0 0 22 32' width='22' height='28' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2L5 17H12L8 30L19 14H12L14 2Z' fill='currentColor' opacity='.18'/><path d='M14 2L5 17H12L8 30L19 14H12L14 2Z'><animate attributeName='opacity' values='1;0.3;1' dur='0.7s' repeatCount='indefinite'/></path></svg>`;
- const _case=`<svg viewBox='0 0 32 32' width='28' height='28' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='16' cy='16' r='13'/><line x1='16' y1='7' x2='16' y2='25'/><path d='M12 11C12 9.5 14 8.5 16 9C18 9.5 19.5 11.5 18 13C16.5 14.5 13 15 12.5 17.5C12 20 14 22 16 22.5C18 23 20.5 21.5 20 19.5'><animate attributeName="stroke-dasharray" values="0 60;60 0" dur="2s" repeatCount="indefinite"/></path></svg>`;
- const _dice=`<svg viewBox='0 0 28 28' width='26' height='26' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><g><animateTransform attributeName='transform' type='rotate' values='0 14 14;-9 14 14;0 14 14;9 14 14;0 14 14' dur='2.2s' repeatCount='indefinite'/><rect x='2' y='2' width='24' height='24' rx='4'/><circle cx='9' cy='9' r='2.2' fill='currentColor'/><circle cx='19' cy='9' r='2.2' fill='currentColor'/><circle cx='9' cy='19' r='2.2' fill='currentColor'/><circle cx='19' cy='19' r='2.2' fill='currentColor'/><circle cx='14' cy='14' r='2.2' fill='currentColor'/></g></svg>`;
- const _band=`<svg viewBox='0 0 26 34' width='22' height='30' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><g><animateTransform attributeName='transform' type='scale' values='1 1;1.05 1.08;1 1;0.97 0.95;1 1' dur='1.4s' repeatCount='indefinite' additive='sum' transformOrigin='13 17'/><path d='M13 30C6 30 4 24 6 19C7 17 8.5 15.5 7.5 12C11 14 10.5 18 9.5 20C11.5 18.5 12.5 15 11.5 11C15 13 15.5 17.5 14 21C16 19.5 17.5 15 15.5 11C21 13 23 18.5 21 23C20 26 17 30 13 30Z' fill='currentColor' opacity='.18'/><path d='M13 30C6 30 4 24 6 19C7 17 8.5 15.5 7.5 12C11 14 10.5 18 9.5 20C11.5 18.5 12.5 15 11.5 11C15 13 15.5 17.5 14 21C16 19.5 17.5 15 15.5 11C21 13 23 18.5 21 23C20 26 17 30 13 30Z'/></g></svg>`;
- const _hand=`<svg viewBox='0 0 26 32' width='22' height='28' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><g><animateTransform attributeName='transform' type='rotate' values='0 13 24;-12 13 24;0 13 24;12 13 24;0 13 24' dur='2s' repeatCount='indefinite' calcMode='spline' keySplines='0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1'/><path d='M7 18V8a2.5 2.5 0 0 1 5 0v5'/><path d='M12 8V6a2.5 2.5 0 0 1 5 0v8'/><path d='M17 9V7a2.5 2.5 0 0 1 5 0v6'/><path d='M7 18c0 6 3 10 9 10s9-4 9-10v-5'/></g></svg>`;
+ const _bolt=_decisionIcon("press"),_case=_decisionIcon("envelope"),_dice=_decisionIcon("contract"),_band=_decisionIcon("grit"),_hand=_decisionIcon("hold");
  const gain=tr?"Kazanç":"Gain",cost=tr?"Bedel":"Cost",risk=tr?"Risk":"Risk",note=tr?"Not":"Note";
  const opts=[
   {i:_bolt,c:"#f59e0b",n:tr?"Tam Saha Baskı":"Full Press",badge:tr?"RİSKLİ":"RISKY",lines:[[gain,tr?"Bu maç +6 güç":"This match +6 power","risk-offer-gain"],[cost,tr?"-€8M, sonraki maç -2 güç":"-€8M, next match -2 power","risk-offer-cost"]],go:()=>{riskPowerMod+=6;spend(8,"spent");draftFatigueTurns=Math.max(draftFatigueTurns,1);pushFeed("⚡ "+(tr?"Tam Saha Baskı: +6 güç, sonraki maç -2":"Full Press: +6 power, next match -2"),"pres");}},

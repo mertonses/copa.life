@@ -3,9 +3,8 @@
    Fixed timestep 1/30s · Seeded RNG · Ball state machine · Slot system */
 
 /* sim and _simPaused declared in index.html */
-/* 1× target: ≤160 real seconds for a 90+4 min match.
-   speedMul=35 → 5640s / 35 ≈ 161s; 2× ≈ 81s; 5× ≈ 32s */
-var speedMul = parseFloat(localStorage.getItem("copa_spd") || "35") || 35;
+/* 1x target: every final sim starts calm; speed changes are match-local. */
+var speedMul = 12;
 
 const UI_COLORS = {
   pitchLight: "#429A73",
@@ -236,8 +235,10 @@ class _Ball {
     this.state=_BS.LOOSE;this.owner=null;
     this.height=0;this.vz=0;
     this._target=null;this._shooter=null;this._passTarget=null;this._lastTeam=0;
+    this._shotResult=null;
   }
   setOwner(p){
+    if(p&&p.sentOff){this.release();return;}
     if(this.owner)this.owner.hasBall=false;
     this.owner=p;this.state=_BS.OWNED;this.vx=0;this.vy=0;
     if(p){p.hasBall=true;this.x=p.x;this.y=p.y;this._lastTeam=p.teamId;}
@@ -251,10 +252,10 @@ class _Ball {
   shoot(tx,ty){
     if(this.owner){this.owner.hasBall=false;this.owner=null;}
     const dx=tx-this.x,dy=ty-this.y,d=Math.hypot(dx,dy);if(d<0.3)return;
-    const spd=26;this.vx=dx/d*spd;this.vy=dy/d*spd;this.state=_BS.SHOOTING;this.owner=null;
+    const spd=18;this.vx=dx/d*spd;this.vy=dy/d*spd;this.state=_BS.SHOOTING;this.owner=null;
     this.height=0.4;this.vz=2.5;this._target={x:tx,y:ty};
   }
-  cross(tx,ty){this.passTo(tx,ty,18);this.state=_BS.CROSSING;this.height=1.5;this.vz=0.8;}
+  cross(tx,ty){this.passTo(tx,ty,13);this.state=_BS.CROSSING;this.height=1.5;this.vz=0.8;}
   update(dt){
     if(this.state===_BS.OWNED){if(this.owner){this.x=this.owner.x;this.y=this.owner.y;}return;}
     if(this.state===_BS.OUT_OF_PLAY)return;
@@ -279,18 +280,20 @@ class _Player {
     this.shooting=stats.shooting||60;this.defending=stats.defending||60;
     this.positioning=stats.positioning||60;this.anticipation=stats.anticipation||60;
     this.pace=stats.pace||65;this.goalkeeping=stats.goalkeeping||20;
-    this.maxSpeed=4+this.pace*0.04;
+    this.maxSpeed=3.1+this.pace*0.032;
     this.name=stats.name||'?';this.number=stats.number||id;this.injured=!!stats.injured;
+    this.yellowCards=0;this.sentOff=false;
   }
   setTarget(x,y){
     const dx=x-this.targetX,dy=y-this.targetY;
     if(dx*dx+dy*dy>0.36){this.targetX=x;this.targetY=y;}
   }
   update(dt,t){
+    if(this.sentOff){this.hasBall=false;this.vx=0;this.vy=0;return;}
     if(this.hasBall){
       // carrier moves toward target at reduced pace (dribbling)
       const dx=this.targetX-this.x,dy=this.targetY-this.y,d2=dx*dx+dy*dy;
-      if(d2>1){const d=Math.sqrt(d2),spd=this.maxSpeed*0.72;this.vx+=(dx/d*spd-this.vx)*Math.min(1,8*dt);this.vy+=(dy/d*spd-this.vy)*Math.min(1,8*dt);const cs=Math.hypot(this.vx,this.vy);if(cs>spd){this.vx*=spd/cs;this.vy*=spd/cs;}this.x+=this.vx*dt;this.y+=this.vy*dt;this.x=Math.max(0.5,Math.min(_PW-0.5,this.x));this.y=Math.max(0.5,Math.min(_PH-0.5,this.y));}else{this.vx*=0.7;this.vy*=0.7;}return;
+      if(d2>1){const d=Math.sqrt(d2),spd=this.maxSpeed*0.58;this.vx+=(dx/d*spd-this.vx)*Math.min(1,6*dt);this.vy+=(dy/d*spd-this.vy)*Math.min(1,6*dt);const cs=Math.hypot(this.vx,this.vy);if(cs>spd){this.vx*=spd/cs;this.vy*=spd/cs;}this.x+=this.vx*dt;this.y+=this.vy*dt;this.x=Math.max(0.5,Math.min(_PW-0.5,this.x));this.y=Math.max(0.5,Math.min(_PH-0.5,this.y));}else{this.vx*=0.7;this.vy*=0.7;}return;
     }
     const dx=this.targetX-this.x,dy=this.targetY-this.y,d2=dx*dx+dy*dy;
     if(d2<0.09){this.vx*=0.6;this.vy*=0.6;return;}
@@ -322,7 +325,7 @@ function _clampPitchY(y){return Math.max(2,Math.min(_PH-2,y));}
 function _isWideLeft(x){return x<_PW*0.24;}
 function _isWideRight(x){return x>_PW*0.76;}
 function _teamSecondLine(teamId,opponents){
-  const ys=opponents.filter(p=>p.role!=='GK').map(p=>p.y).sort((a,b)=>a-b);
+  const ys=opponents.filter(p=>p.role!=='GK'&&!p.sentOff).map(p=>p.y).sort((a,b)=>a-b);
   if(ys.length<2)return teamId===0?_PH-9:9;
   return teamId===0?ys[ys.length-2]:ys[1];
 }
@@ -336,7 +339,7 @@ function _isOffsideCandidate(teamId,carrier,receiver,opponents){
   return beyondBall&&beyondLine&&attackingHalf;
 }
 function _nearestPlayers(list,x,y,count,skip){
-  return list.filter(p=>p!==skip).map(p=>({p,d:p.dist(x,y)})).sort((a,b)=>a.d-b.d).slice(0,count).map(o=>o.p);
+  return list.filter(p=>p!==skip&&!p.sentOff).map(p=>({p,d:p.dist(x,y)})).sort((a,b)=>a.d-b.d).slice(0,count).map(o=>o.p);
 }
 function _sequenceLabel(seq,isTR){
   if(!seq)return "";
@@ -377,9 +380,10 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
   const attackY=tid===0?Math.min(55,by+15):Math.max(13,by-15);
   const defY=tid===0?Math.min(by-5,30):Math.max(by+5,38);
   const line=_teamSecondLine(tid,opponents);
-  const defRoles=!hasBall?_nearestPlayers(players.filter(p=>p.role!=='GK'),bx,by,3,null):[];
+  const defRoles=!hasBall?_nearestPlayers(players.filter(p=>p.role!=='GK'&&!p.sentOff),bx,by,3,null):[];
 
   players.forEach(p=>{
+    if(p.sentOff)return;
     if(p.hasBall||p.role==='GK')return;
     if(p.roleCommitUntil>matchTime)return;
     let tx=p.hx,ty=p.hy;
@@ -426,7 +430,7 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
           break;
       }
     } else {
-      const pball=ball.owner||opponents.find(p=>p.hasBall);
+      const pball=ball.owner&&!ball.owner.sentOff?ball.owner:opponents.find(p=>p.hasBall&&!p.sentOff);
       if(press&&pball){
         tx=pball.x+rng.rng(-8,8);ty=tid===0?Math.min(pball.y+6,_PH*0.9):Math.max(pball.y-6,_PH*0.1);
       } else {
@@ -478,7 +482,7 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
   const sig=_attackSign(tid);
 
   // Nearest opponent pressure
-  let pressDist=99;for(const o of opponents){if(o.role!=='GK'){const d=carrier.dist(o.x,o.y);if(d<pressDist)pressDist=d;}}
+  let pressDist=99;for(const o of opponents){if(o.role!=='GK'&&!o.sentOff){const d=carrier.dist(o.x,o.y);if(d<pressDist)pressDist=d;}}
   const pressured=pressDist<3.5;
 
   const acts=[];
@@ -491,7 +495,7 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
     acts.push({type:'SHOOT',score:sc});
   }
   // PASS — rewarded for forward progress only
-  const rcvrs=teammates.filter(t=>!t.hasBall&&t.role!=='GK');
+  const rcvrs=teammates.filter(t=>!t.hasBall&&t.role!=='GK'&&!t.sentOff);
   let _bestPasser=null,_bsc=-99,_throughBall=null;
   if(rcvrs.length){
     for(const r of rcvrs){
@@ -638,6 +642,7 @@ function _mkRenderer(canvas,W,H){
     drawPlayers(players,ball){
       const PR=Math.max(7,Math.round(W*0.013));
       for(const p of players){
+        if(p.sentOff)continue;
         const sc=toS(p.x,p.y);
         // shadow
         ctx.beginPath();ctx.ellipse(sc.x+1.5,sc.y+2.5,PR*0.9,PR*0.45,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fill();
@@ -776,7 +781,7 @@ function buildSim(myPow, oppPow) {
 
   /* match state */
   const score=[0,0];
-  const stats={shots:[0,0],saves:[0,0],corners:[0,0],yellows:[0,0],possession:[0,0]};
+  const stats={shots:[0,0],saves:[0,0],corners:[0,0],yellows:[0,0],reds:[0,0],possession:[0,0]};
   const goalEvents=[];
   let matchTime=0;
   const stoppage=Math.floor(rng.rng(2,6));
@@ -829,13 +834,27 @@ function buildSim(myPow, oppPow) {
   function _dom(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
   function _html(id,v){const e=document.getElementById(id);if(e)e.innerHTML=v;}
   function _addRow(side,html){const el=document.getElementById("simGoals");if(!el)return;const d=document.createElement("div");d.className=(side===0?"home":"away")+" goal";d.innerHTML=html;el.prepend(d);while(el.children.length>10)el.removeChild(el.lastChild);}
+  function _sendOffPlayer(p,reason){
+    if(!p||p.sentOff)return;
+    p.sentOff=true;p.hasBall=false;p.vx=0;p.vy=0;p.targetX=p.x;p.targetY=p.y;
+    if(ball.owner===p)ball.release();
+    if(ball._passTarget===p)ball._passTarget=null;
+    p.x=p.teamId===0?-8:_PW+8;p.y=_PH/2;
+    stats.reds[p.teamId]=(stats.reds[p.teamId]||0)+1;
+    const nm=p.name.split(' ').pop();
+    _html("simComm","<b>"+nm+"</b> — "+reason);
+    _addRow(p.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟥 "+nm+"</span>");
+    _updateStats();
+  }
   function _updateStats(){
     _dom("statShot",stats.shots[0]+"-"+stats.shots[1]);
     _dom("statSave",stats.saves[0]+"-"+stats.saves[1]);
     const dangerA=stats.saves[1]+score[0],dangerB=stats.saves[0]+score[1];
     _dom("statDanger",dangerA+"-"+dangerB);
     _dom("statCorner",stats.corners[0]+"-"+stats.corners[1]);
-    _dom("statYellow",stats.yellows[0]+"-"+stats.yellows[1]);
+    const cardsA=stats.reds[0]?stats.yellows[0]+"+"+stats.reds[0]+"K":stats.yellows[0];
+    const cardsB=stats.reds[1]?stats.yellows[1]+"+"+stats.reds[1]+"K":stats.yellows[1];
+    _dom("statYellow",cardsA+"-"+cardsB);
     const tot=stats.possession[0]+stats.possession[1]+1;
     const pct=Math.round(stats.possession[0]/tot*100);
     _dom("statPoss",pct+"–"+(100-pct));
@@ -848,13 +867,13 @@ function buildSim(myPow, oppPow) {
   /* kickoff */
   function kickoff(teamId){
     ball.x=_PW/2;ball.y=_PH/2;ball.vx=0;ball.vy=0;ball.state=_BS.LOOSE;
-    const st=(teamId===0?teamA:teamB).find(p=>p.role==='ST')||(teamId===0?teamA:teamB).find(p=>p.role!=='GK');
+    const st=(teamId===0?teamA:teamB).find(p=>p.role==='ST'&&!p.sentOff)||(teamId===0?teamA:teamB).find(p=>p.role!=='GK'&&!p.sentOff);
     if(st){st.x=_PW/2+rng.rng(-1,1);st.y=_PH/2+rng.rng(-1,1);ball.setOwner(st);chooseSequence(st);}
     ball._lastTeam=teamId;
   }
 
   function reposition(){
-    [...teamA,...teamB].forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;p.targetX=p.hx;p.targetY=p.hy;p.hasBall=false;});
+    [...teamA,...teamB].forEach(p=>{if(p.sentOff)return;p.x=p.hx;p.y=p.hy;p.vx=0;p.vy=0;p.targetX=p.hx;p.targetY=p.hy;p.hasBall=false;});
   }
 
   /* goal */
@@ -886,14 +905,21 @@ function buildSim(myPow, oppPow) {
   }
 
   /* shot resolution */
-  function handleShot(shooter){
-    stats.shots[shooter.teamId]++;
-    shotCooldown[shooter.teamId]=SHOT_COOLDOWN;
+  function handleShot(shooter, forcedResult, alreadyCounted){
+    if(!shooter)return;
+    if(!alreadyCounted){
+      stats.shots[shooter.teamId]++;
+      shotCooldown[shooter.teamId]=SHOT_COOLDOWN;
+    }
     const gk=shooter.teamId===0?teamB.find(p=>p.role==='GK'):teamA.find(p=>p.role==='GK');
-    const res=_resolveShot(shooter,gk,rng);
+    const res=forcedResult||_resolveShot(shooter,gk,rng);
     const goalX=_PW/2,goalY=shooter.teamId===0?_PH:0;
-    effects.spawn('SHOT',shooter.x,shooter.y,goalX,goalY,'#fbbf2466',0.55);
-    audio.shot();
+    if(!alreadyCounted){
+      effects.spawn('SHOT',shooter.x,shooter.y,goalX,goalY,'#fbbf2466',0.55);
+      audio.shot();
+    }
+    ball._shotResult=null;
+    ball._shooter=null;
     switch(res){
       case'GOAL':ball.state=_BS.OUT_OF_PLAY;ball.x=goalX;ball.y=goalY;onGoal(shooter.teamId);break;
       case'KEEPER_SAVE':case'KEEPER_CLAIM':
@@ -920,6 +946,12 @@ function buildSim(myPow, oppPow) {
   let outTimer=0,inHalfTime=false,halfDone=false,etStarted=false;
 
   function resolveOut(){
+    if(ball._shooter&&ball._shotResult){
+      const shooter=ball._shooter;
+      const res=ball._shotResult;
+      handleShot(shooter,res,true);
+      return;
+    }
     const inGoalX=ball.x/_PW>0.44&&ball.x/_PW<0.56;
     // y=0 is team A's goal (team B scores); y=_PH is team B's goal (team A scores)
     if(ball.y<=0&&inGoalX){ball.state=_BS.LOOSE;onGoal(1);return;}
@@ -952,13 +984,13 @@ function buildSim(myPow, oppPow) {
     const throwTeam=lastTeam===0?1:0;
     const ty=Math.max(4,Math.min(_PH-4,ball.y));const tx=ball.x<=0?1:_PW-1;
     ball.x=tx;ball.y=ty;ball.vx=0;ball.vy=0;ball.state=_BS.LOOSE;
-    const takers=(throwTeam===0?teamA:teamB).filter(p=>p.role!=='GK');
+      const takers=(throwTeam===0?teamA:teamB).filter(p=>p.role!=='GK'&&!p.sentOff);
     if(takers.length){const tk=takers.reduce((a,b)=>a.dist(tx,ty)<b.dist(tx,ty)?a:b);tk.x=tx;tk.y=ty;ball.setOwner(tk);}
   }
 
   /* pickup */
   let decTimer=0;
-  const DEC_INT=0.95; // faster decisions → snappier passing sequences
+  const DEC_INT=1.45; // calmer decisions: visual football needs readable beats
   let slotTimer=0;
   // Per-team shot cooldown — prevents shot spam; resets after each shot
   const SHOT_COOLDOWN=80; // ~1.3 sim minutes between shots per team
@@ -969,14 +1001,15 @@ function buildSim(myPow, oppPow) {
   function tryPickup(){
     if(ball.state===_BS.OWNED||ball.state===_BS.OUT_OF_PLAY)return;
     if(ball.state===_BS.SHOOTING&&ball.height>0.4)return;
-    const PR2=36; // 6-unit pickup radius
+    const PR2=12.25; // tighter pickup radius; prevents crowded instant possessions
     for(const p of [...teamA,...teamB]){
+      if(p.sentOff)continue;
       const d2=p.distSq(ball.x,ball.y);if(d2>PR2)continue;
       if(ball.state===_BS.SHOOTING){
         if(p.role==='GK'&&p.teamId!==(ball._shooter?ball._shooter.teamId:-1)){
-          handleShot(ball._shooter||p);return;
+          handleShot(ball._shooter||p,ball._shotResult,true);return;
         }
-        if(p.teamId!==(ball._shooter?ball._shooter.teamId:-1)&&rng.bool(0.3)){ball.state=_BS.LOOSE;return;}
+        if(p.teamId!==(ball._shooter?ball._shooter.teamId:-1)&&rng.bool(0.3)){ball._shotResult=null;ball._shooter=null;ball.state=_BS.LOOSE;return;}
         continue;
       }
       if(ball.state===_BS.PASSING||ball.state===_BS.CROSSING){
@@ -1004,10 +1037,10 @@ function buildSim(myPow, oppPow) {
   }
 
   function doDecision(){
-    const carrier=[...teamA,...teamB].find(p=>p.hasBall);if(!carrier)return;
+    const carrier=[...teamA,...teamB].find(p=>p.hasBall&&!p.sentOff);if(!carrier)return;
     const tid=carrier.teamId;
-    const mates=(tid===0?teamA:teamB).filter(p=>!p.hasBall);
-    const opps=(tid===0?teamB:teamA);
+    const mates=(tid===0?teamA:teamB).filter(p=>!p.hasBall&&!p.sentOff);
+    const opps=(tid===0?teamB:teamA).filter(p=>!p.sentOff);
     const seq=currentSequence(carrier);
     const action=_decide(carrier,ball,mates,opps,score,matchTime,fullTimeSec,shapeCfg,rng,shotCooldown[tid],seq);
     sequenceBeat(action,carrier);
@@ -1016,17 +1049,24 @@ function buildSim(myPow, oppPow) {
     if(action.type==='SHOOT'){
       const goalX=_PW/2,goalY=tid===0?_PH:0;
       const jitter=rng.rng(-5,5);
-      ball._shooter=carrier;ball.shoot(goalX+jitter,goalY);
-      handleShot(carrier);
+      const gk=tid===0?teamB.find(p=>p.role==='GK'):teamA.find(p=>p.role==='GK');
+      stats.shots[tid]++;
+      shotCooldown[tid]=SHOT_COOLDOWN;
+      ball._shooter=carrier;
+      ball._shotResult=_resolveShot(carrier,gk,rng);
+      effects.spawn('SHOT',carrier.x,carrier.y,goalX,goalY,'#fbbf2466',0.55);
+      audio.shot();
+      ball.shoot(goalX+jitter,goalY);
+      _updateStats();
     } else if(action.type==='CROSS'||action.type==='CUTBACK'){
       const gx=action.type==='CUTBACK'?_PW/2+rng.rng(-7,7):_PW/2+rng.rng(-10,10);
       const gy=action.type==='CUTBACK'?(tid===0?_PH-18:18):(tid===0?_PH-10:10);
-      ball._shooter=carrier;ball._passTarget=(tid===0?teamA:teamB).find(p=>p.role==='ST'||p.role==='AM')||(tid===0?teamA:teamB)[9];
+      ball._shooter=carrier;ball._passTarget=(tid===0?teamA:teamB).find(p=>(p.role==='ST'||p.role==='AM')&&!p.sentOff)||(tid===0?teamA:teamB).find(p=>!p.sentOff);
       effects.spawn('PASS',carrier.x,carrier.y,gx,gy,action.type==='CUTBACK'?'#4ade8055':'#a78bfa55',0.4);
-      if(action.type==='CUTBACK')ball.passTo(gx,gy,17);else ball.cross(gx,gy);
+      if(action.type==='CUTBACK')ball.passTo(gx,gy,12);else ball.cross(gx,gy);
       if(action.type==='CUTBACK'&&rng.bool(0.45))_html("simComm",isTR?"↩️ Cutback! Ceza alanı yayı hedeflendi.":"↩️ Cutback into the edge of the box.");
     } else if(['SHORT_PASS','DRIVEN_PASS','THROUGH_BALL','LONG_PASS','BACK_PASS'].includes(action.type)&&action.receiver){
-      const spds={SHORT_PASS:16,DRIVEN_PASS:22,THROUGH_BALL:24,LONG_PASS:26,BACK_PASS:14};
+      const spds={SHORT_PASS:11,DRIVEN_PASS:15,THROUGH_BALL:17,LONG_PASS:18,BACK_PASS:10};
       const qual=(carrier.passing*0.4+carrier.vision*0.25+carrier.decisions*0.2+carrier.anticipation*0.15)/100;
       const err=(1-qual)*(action.type==='THROUGH_BALL'?3.5:4.5);
       // Through ball target is ahead of receiver (run into space)
@@ -1060,9 +1100,26 @@ function buildSim(myPow, oppPow) {
     heatGrid[Math.min(HGH-1,Math.floor((carrier.y/_PH)*HGH))*HGW+Math.min(HGW-1,Math.floor((carrier.x/_PW)*HGW))]+=0.5;
   }
 
+  function applyPlayerSeparation(){
+    const all=[...teamA,...teamB].filter(p=>!p.sentOff);
+    const minD=2.15,minD2=minD*minD;
+    for(let i=0;i<all.length;i++){
+      for(let j=i+1;j<all.length;j++){
+        const a=all[i],b=all[j];
+        if(a.role==='GK'||b.role==='GK')continue;
+        const dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy;
+        if(d2<=0.0001||d2>=minD2)continue;
+        const d=Math.sqrt(d2),push=(minD-d)*0.28;
+        const nx=dx/d,ny=dy/d;
+        if(!a.hasBall){a.x=_clampPitchX(a.x-nx*push);a.y=_clampPitchY(a.y-ny*push);}
+        if(!b.hasBall){b.x=_clampPitchX(b.x+nx*push);b.y=_clampPitchY(b.y+ny*push);}
+      }
+    }
+  }
+
   /* crowd danger */
   function updateCrowd(){
-    const carrier=[...teamA,...teamB].find(p=>p.hasBall);
+    const carrier=[...teamA,...teamB].find(p=>p.hasBall&&!p.sentOff);
     if(!carrier){audio.crowd(0.1);return;}
     const goalY=carrier.teamId===0?_PH:0;
     const dg=carrier.dist(_PW/2,goalY);
@@ -1086,7 +1143,8 @@ function buildSim(myPow, oppPow) {
       if(score[0]===score[1]){
         etMode=true;goldenGoalMode=true;audio.whistle();
         _dom("simState",isTR?"ALTIN GOL":"GOLDEN GOAL");
-        _html("simComm","ALTIN GOL: "+(isTR?"İlk gol kupayı alır.":"Next goal wins the cup."));
+        _html("simComm","<b>"+(isTR?"ALTIN GOL":"GOLDEN GOAL")+"</b>: "+(isTR?"\u0130lk gol kupay\u0131 al\u0131r.":"Next goal wins the cup."));
+        renderer.burst(isTR?"ALTIN GOL":"GOLDEN GOAL");
         reposition();kickoff(0);
       } else endMatch();
     }
@@ -1108,25 +1166,35 @@ function buildSim(myPow, oppPow) {
     const roll=rng.next();
     if(roll<0.06){
       // yellow card
-      stats.yellows[1-tid]++;
-      const pl=oppTeam.find(p=>p.role!=='GK');
+      const pl=oppTeam.filter(p=>p.role!=='GK'&&!p.sentOff).sort((a,b)=>(b.yellowCards||0)-(a.yellowCards||0))[0];
       const nm=pl?pl.name.split(' ').pop():'?';
+      if(pl){
+        pl.yellowCards=(pl.yellowCards||0)+1;
+        if(pl.yellowCards>=2){
+          _sendOffPlayer(pl,isTR?"İkinci sarıdan kırmızı! Oyundan çıktı.":"Second yellow, red card! Sent off.");
+        } else {
+          stats.yellows[pl.teamId]++;
+          _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
+          _addRow(pl.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟨 "+nm+"</span>");
+        }
+        return;
+      }
       _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
       _addRow(1-tid,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟨 "+nm+"</span>");
     } else if(roll<0.11){
       // tackle / interception with player name
-      const defender=oppTeam.find(p=>p.role==='CB'||p.role==='DM')||oppTeam.find(p=>p.role!=='GK');
+      const defender=oppTeam.find(p=>(p.role==='CB'||p.role==='DM')&&!p.sentOff)||oppTeam.find(p=>p.role!=='GK'&&!p.sentOff);
       const nm=defender?defender.name.split(' ').pop():'?';
       _html("simComm","🦵 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.tackle_tr:_COMM.tackle_en));
       effects.spawn('TACKLE',defender?defender.x:_PW/2,defender?defender.y:_PH/2,0,0,'#f59e0b',0.4);
     } else if(roll<0.16){
       // counter attack sequence
-      const fwd=atkTeam.find(p=>p.role==='ST'||p.role==='LW'||p.role==='RW');
+      const fwd=atkTeam.find(p=>(p.role==='ST'||p.role==='LW'||p.role==='RW')&&!p.sentOff);
       const nm=fwd?fwd.name.split(' ').pop():'?';
       _html("simComm","⚡ <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.counter_tr:_COMM.counter_en));
     } else if(roll<0.23){
       // free kick
-      const pl=atkTeam.find(p=>p.role==='CM'||p.role==='AM')||atkTeam[4];
+      const pl=atkTeam.find(p=>(p.role==='CM'||p.role==='AM')&&!p.sentOff)||atkTeam.find(p=>!p.sentOff);
       const nm=pl?pl.name.split(' ').pop():'?';
       _html("simComm","🎯 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.freekick_tr:_COMM.freekick_en));
     } else if(roll<0.30){
@@ -1149,7 +1217,7 @@ function buildSim(myPow, oppPow) {
       _html("simComm",ctx);
     } else {
       // player-specific moment
-      const star=atkTeam.find(p=>p.role==='ST')||atkTeam.find(p=>p.role==='AM')||atkTeam[9];
+      const star=atkTeam.find(p=>p.role==='ST'&&!p.sentOff)||atkTeam.find(p=>p.role==='AM'&&!p.sentOff)||atkTeam.find(p=>!p.sentOff);
       const nm=star?star.name.split(' ').pop():'?';
       const pComms=isTR?["🌟 <b>"+nm+"</b> yine sahada!","💫 <b>"+nm+"</b> fırsatı kolluyor!","🎯 <b>"+nm+"</b> pozisyon arıyor!"]:["🌟 <b>"+nm+"</b> on the ball!","💫 <b>"+nm+"</b> looking for his chance!","🎯 <b>"+nm+"</b> seeking the opening!"];
       _html("simComm",rng.pick(pComms));
@@ -1166,7 +1234,7 @@ function buildSim(myPow, oppPow) {
     // out of play
     if(ball.state===_BS.OUT_OF_PLAY){outTimer-=dt;if(outTimer<=0)resolveOut();return;}
 
-    const motionDt=dt*0.68;
+    const motionDt=dt*0.46;
     ball.update(motionDt);
 
     // boundary check
@@ -1189,15 +1257,15 @@ function buildSim(myPow, oppPow) {
     // Tactical
     slotTimer+=dt;
     if(slotTimer>=SLOT_INT){slotTimer=0;
-      const hasBallA=teamA.some(p=>p.hasBall);
-      const hasBallB=teamB.some(p=>p.hasBall);
+      const hasBallA=teamA.some(p=>p.hasBall&&!p.sentOff);
+      const hasBallB=teamB.some(p=>p.hasBall&&!p.sentOff);
       const seqA=hasBallA?tacticalSeq:null;
       const seqB=hasBallB?tacticalSeq:null;
       _tacticalTargets(teamA,ball,teamB,0,hasBallA,shapeCfg.shout,matchTime,rng,seqA);
       _tacticalTargets(teamB,ball,teamA,1,hasBallB,shapeCfg.shout==='push'&&hasBallA?'push':null,matchTime,rng,seqB);
       // presser
-      const carrierRef=[...teamA,...teamB].find(p=>p.hasBall);
-      if(carrierRef){const oppTeam=carrierRef.teamId===0?teamB:teamA;let bst=null,bd=99;for(const p of oppTeam){if(p.role==='GK')continue;const d=p.dist(ball.x,ball.y);if(d<bd){bd=d;bst=p;}}if(bst)bst.setTarget(ball.x,ball.y);}
+      const carrierRef=[...teamA,...teamB].find(p=>p.hasBall&&!p.sentOff);
+      if(carrierRef){const oppTeam=carrierRef.teamId===0?teamB:teamA;let bst=null,bd=99;for(const p of oppTeam){if(p.role==='GK'||p.sentOff)continue;const d=p.dist(ball.x,ball.y);if(d<bd){bd=d;bst=p;}}if(bst)bst.setTarget(ball.x,ball.y);}
     }
 
     // Shot cooldown
@@ -1210,19 +1278,20 @@ function buildSim(myPow, oppPow) {
 
     // Move players
     for(const p of [...teamA,...teamB])p.update(motionDt,matchTime);
+    applyPlayerSeparation();
 
     // Stuck
     if(ball.state===_BS.LOOSE||ball.state===_BS.PASSING||ball.state===_BS.CROSSING){
       stuckTimer+=dt;
       const stuckLimit=ball.state===_BS.LOOSE?3.5:2.0;
-      if(stuckTimer>stuckLimit){stuckTimer=0;let n=null,nd=99;for(const p of[...teamA,...teamB]){const d=p.dist(ball.x,ball.y);if(d<nd){nd=d;n=p;}}if(n){ball.setOwner(n);ball._passTarget=null;}}
+      if(stuckTimer>stuckLimit){stuckTimer=0;let n=null,nd=99;for(const p of[...teamA,...teamB]){if(p.sentOff)continue;const d=p.dist(ball.x,ball.y);if(d<nd){nd=d;n=p;}}if(n){ball.setOwner(n);ball._passTarget=null;}}
     }else stuckTimer=0;
 
     // Effects
     effects.update(motionDt);
 
     // Possession
-    const car2=[...teamA,...teamB].find(p=>p.hasBall);if(car2)stats.possession[car2.teamId]++;
+    const car2=[...teamA,...teamB].find(p=>p.hasBall&&!p.sentOff);if(car2)stats.possession[car2.teamId]++;
 
     // Crowd
     if(Math.floor(matchTime*2)%3===0)updateCrowd();
@@ -1297,8 +1366,9 @@ function buildSim(myPow, oppPow) {
     window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
     calcRatings();
     _dom("simState",isTR?"PENALTILAR":"PENALTIES");
-    _html("simComm","PENALTILAR: "+(isTR?"Altın gol çıkmadı. Kupa penaltılara kaldı.":"No golden goal. The cup goes to penalties."));
-    setTimeout(()=>{if(typeof showPenaltyShootout==="function")showPenaltyShootout("final");else endRun(false,sc);},850);
+    renderer.burst(isTR?"PENALTILAR":"PENALTIES");
+    _html("simComm","<b>"+(isTR?"PENALTILAR":"PENALTIES")+"</b>: "+(isTR?"Alt\u0131n gol \u00e7\u0131kmad\u0131. Kupa penalt\u0131lara kald\u0131.":"No golden goal. The cup goes to penalties."));
+    setTimeout(()=>{if(typeof showPenaltyShootout==="function")showPenaltyShootout("final");else endRun(false,sc);},1500);
   }
 
   /* animation loop */
@@ -1313,7 +1383,7 @@ function buildSim(myPow, oppPow) {
     const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1);
     accumulator+=frameMs*spd;
     // Cap steps per frame to prevent spiral of death at very high speeds
-    const MAX_STEPS=Math.ceil(spd*0.55)+4;
+    const MAX_STEPS=Math.ceil(spd*0.38)+4;
     let _steps=0;
     while(accumulator>=FIXED_STEP&&_steps<MAX_STEPS){simStep(FIXED_STEP);accumulator-=FIXED_STEP;_steps++;}
     renderer.decay(frameMs);
@@ -1333,7 +1403,7 @@ function buildSim(myPow, oppPow) {
   _dom("simComm","—");_dom("simRadio","📻 —");
   const sg=document.getElementById("simGoals");if(sg)sg.innerHTML="";
   _updateStats();
-  _dom("simA",myName.slice(0,8));_dom("simB",oppName.slice(0,8));
+  _dom("simA",myName);_dom("simB",oppName);
 
   /* kickoff */
   reposition();kickoff(0);
