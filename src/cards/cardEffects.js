@@ -4,7 +4,7 @@ function squadBasePower(){const s=picksBySlot.filter(Boolean);return s.length?Ma
 /* Variant bonus kaldirildi — her kart kendi eff() icinde variant farkini yonetiyor */
 var VARIANT_BONUS=[0,0];
 
-/* KARA variant'ta finalde dususecek guc — sadece DARK kart alindiginda eklenir */
+/* DARK variant'ta finalde dususecek guc — sadece DARK kart alindiginda eklenir */
 var KARA_PEN={
  taraftar:8,genc:4,ch_momentum:6,
  yildiz:2,otobus:3,
@@ -327,7 +327,7 @@ function applyKriz(){
  }
 }
 
-/* ===== Ana kart ekleme fonksiyonu. v=0 ALTIN, v=1 KARA. ===== */
+/* ===== Ana kart ekleme fonksiyonu. v=0 COMMON, v=1 DARK. ===== */
 function addCard(k,v,opts){
  opts=opts||{};const silent=!!opts.silent,variant=v||0;
  const instant=isInstantCard(k);
@@ -339,11 +339,11 @@ function addCard(k,v,opts){
  }
  cardInv[k]=1;cardVariant[k]=variant;
  if(!instant&&!hasCard(k)&&cards.length<activeCardSlots())cards.push(k);
- /* Kara variant: final guc cezasi — TUM modlar icin (instant dahil) */
+ /* DARK variant: final guc cezasi — TUM modlar icin (instant dahil) */
  if(variant===1&&(KARA_PEN[k]||0)>0){
    const pen=KARA_PEN[k];
    finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+pen);
-   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"KARA — finalde -"+pen+" güç":"DARK — -"+pen+" in the final"),"lose");
+   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+pen+" güç":"DARK — -"+pen+" in the final"),"lose");
  }
  if(instant)applyRiskCardGain(k);
  /* Contract kartlar satin alindiginda ani etkilerini uygula */

@@ -3,7 +3,7 @@
 var VARIANT_PRICE_MOD=[1.15,0.85];
 
 function weightedVariant(){
- return rand()<0.5?0:1; // 50/50 ALTIN / KARA
+ return rand()<0.5?0:1; // 50/50 COMMON / DARK
 }
 
 function cardPrice(k){

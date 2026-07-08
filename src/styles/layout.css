@@ -4992,3 +4992,63 @@ img,svg,canvas{max-width:100%}
 .backup-empty{grid-column:1/-1;text-align:center;padding:24px;color:var(--color-slate);font-weight:800;border:1px dashed var(--border-default);border-radius:10px}
 .backup-actions{padding:0 18px 18px!important}.backup-cta{width:100%;height:48px}.backup-cta:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:560px){.backup-head{flex-direction:column}.backup-injury{text-align:left}.backup-grid{grid-template-columns:1fr}}
+
+/* ===== Responsive overflow guardrails ===== */
+html,
+body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+*,*::before,*::after{
+  box-sizing:border-box;
+}
+
+@media(max-width:900px){
+  #app,
+  .screen,
+  .wrap,
+  #hub,
+  #draft,
+  #sim,
+  #result{
+    width:100%;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+  #hub .hubcols,
+  #hub .hcol-l,
+  #hub .hcol-r,
+  #hub .vsbar,
+  #hub .hub-stat-row,
+  #hub .pitch-area,
+  #hub #hubPitch,
+  #hub #hubBenchSection,
+  #fixbar.cuproad,
+  #hub .shopcards,
+  #hub #freeAgentRow,
+  #hub .feedwrap,
+  #draft .draft-cols,
+  #draft .draft-left,
+  #draft .draft-right,
+  #draft .draft-right .pitch{
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  #hub .hub-stat-row{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:620px){
+  #hub .hub-stat-row{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #draft .draft-cols{
+    width:100%!important;
+  }
+  #draft .draft-right .pitch{
+    width:100%!important;
+    aspect-ratio:68/92;
+  }
+}

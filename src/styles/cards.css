@@ -7,7 +7,7 @@
 .card.style{display:flex;align-items:center;gap:5px}
 .card b{font-family:var(--disp);font-size:11px;letter-spacing:.3px}.card .v{font-weight:700}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--color-slate)}
-/* Variant badges — GOLDEN(0) primary / DARK(1) ink / SPECIAL(2) slate */
+/* Variant badges — COMMON(0) primary / DARK(1) ink */
 .var-badge{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:0}
 .var-0{background:var(--color-primary);color:var(--color-ink)}
 .var-1{background:var(--color-ink);color:var(--color-background)}
@@ -15,7 +15,7 @@
 .card .copy{display:inline-block;font-size:8px;color:var(--color-slate);margin-top:2px;border-radius:2px}
 .card.locked{opacity:.52;border-style:dashed}.card.ready{box-shadow:0 0 0 2px var(--color-primary) inset}
 .card .tier{display:inline-block;margin-left:3px;font-size:8px;font-weight:700;color:var(--color-slate)}
-/* Shop tile variant tinting — GOLDEN(0) primary, DARK(1) ink */
+/* Shop tile variant tinting — COMMON(0) primary, DARK(1) ink */
 .shopcard.sv-0{border-color:var(--color-primary);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary) 35%,transparent)}
 .shopcard.sv-1{border-color:var(--color-ink);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-ink) 25%,transparent)}
 .shopcard.sv-2{border-color:var(--color-slate);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-slate) 30%,transparent)}
@@ -206,7 +206,7 @@
 .cardtile.rar-silver .ct-head{background:var(--surface-muted);border-left:3px solid var(--color-slate)}
 .cardtile.rar-gold .ct-head{background:var(--surface-muted);border-left:3px solid var(--color-primary)}
 .cardtile.rar-risk .ct-head{background:var(--surface-muted);border-left:3px solid var(--color-ink)}
-/* Variant-based header — sv-0 GOLDEN(primary) / sv-1 DARK(ink) / sv-2(slate) */
+/* Variant-based header — sv-0 COMMON(primary) / sv-1 DARK(ink) / sv-2(slate) */
 .cardtile.sv-0 .ct-head{border-left:3px solid var(--color-primary)}
 .cardtile.sv-1 .ct-head{border-left:3px solid var(--color-ink)}
 .cardtile.sv-2 .ct-head{border-left:3px solid var(--color-slate)}

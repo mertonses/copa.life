@@ -177,4 +177,86 @@ function _patchCardCopy(){
  });
 }
 _patchCardCopy();
+function _patchVariantDescriptions(){
+ const split={
+  tr:{
+   taraftar:"COMMON: Her tur +5 güç. DARK: Her tur +10 güç; alırken %25 ihtimal başkan güveni -1.",
+   genc:"COMMON: Her tur büyür, max +6. DARK: Daha hızlı büyür ama final cezası taşır.",
+   ch_momentum:"COMMON: Geç oyun ivmesi verir. DARK: Daha güçlü ivme verir ama final baskısı ekler.",
+   kontra:"COMMON: Forvet başına +1 güç. DARK: Forvet başına +2 güç ve para cezası riski.",
+   buyuk_mac:"COMMON: Bu maç +6 güç. DARK: Daha güçlü riskli hamle; para cezası ihtimali var.",
+   yildiz:"COMMON: En yüksek OV oyuncuna göre tek maçlık güç. DARK: Daha güçlü, küçük para riski taşır.",
+   otobus:"COMMON: Stoper başına savunma gücü. DARK: Daha güçlü savunma hamlesi, ceza riski taşır.",
+   kaleci_kalesi:"COMMON: Kaleci OV +15. DARK: Kaleci OV +30, küçük transfer cezası riski.",
+   anadolu:"COMMON: 70 altı oyuncular güç üretir, max +9. DARK: Daha yüksek tavan, güçlü oyuncu cezası.",
+   altyapi_plani:"COMMON: 23 yaş altı oyuncular güç üretir. DARK: Daha yüksek tavan, final cezası.",
+   tecrubeli_omurga:"COMMON: 32+ oyuncular güç üretir. DARK: Daha yüksek tavan, final cezası.",
+   yerli_blok:"COMMON: Yerli oyuncu sayısına göre güç. DARK: Daha yüksek yerli bonusu.",
+   kanat_akini:"COMMON: Kanat ve beklerden güç üretir. DARK: Daha güçlü kanat etkisi ve Final.sim kanat akışı.",
+   cift_forvet:"COMMON: SNT başına +2, max +4. DARK: SNT başına +4, max +8.",
+   derbi:"COMMON: Çeyrek +2, yarı +4, final +8. DARK: Çeyrek +6, yarı +10, final +14.",
+   final_provasi:"COMMON: Finalde +6 güç. DARK: Finalde +12 güç.",
+   son_dans:"COMMON: Finalde sakatsız kadro +8. DARK: Finalde sakatsız kadro +14, sakatlıkta ağır düşer.",
+   taksit_transfer:"COMMON: Şimdi +€4M. DARK: Şimdi +€8M, başkan güveni -1 ve final cezası.",
+   son_kredi:"COMMON: Kasa -€10M altındaysa +€15M. DARK: +€20M, güven riski taşır.",
+   kara_borsa:"COMMON: Bedava 2 kalıcı kart açar. DARK: Bedava 3 kalıcı kart açar, %30 para cezası riski.",
+   sahte_evrak:"COMMON: Her tur +6 güç. DARK: Her tur +10 güç, başkan güveni düşer.",
+   kumarbaz:"COMMON: +€15M şimdi, 2 tur -€5M. DARK: +€25M şimdi, 2 tur -€10M ve güven -1.",
+   gecici_prim:"COMMON: Bu maç +6 güç, %30 sakatlık riski. DARK: Bu maç +12 güç, %60 sakatlık riski.",
+   kisa_kamp:"COMMON: Bu maç +4, sonraki maç -2. DARK: Bu maç +6, sonraki maç -4.",
+   doping:"COMMON: +6 güç; her tur %35 ihtimal -€15M. DARK: +10 güç; %25 ihtimal -€25M.",
+   kriz:"COMMON: Final cezasını %50 temizler. DARK: Final cezasını %75 temizler.",
+   primler_yatinca:"COMMON: Şimdi +4 güç, gelecek tur -€8M. DARK: Şimdi +8 güç, gelecek tur -€16M.",
+   vur_igneyi:"COMMON: 1 sakat oyuncuyu iyileştirir. DARK: 2 sakat oyuncuyu iyileştirir, masraf riski.",
+   bu_adam:"COMMON: 70-79 güçlü rastgele bir oyuncuyu yedeğe ekler. DARK: 80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.",
+   gec_gec:"COMMON: Rakip güçlüyse +5, değilse +2. DARK: Daha riskli savunma hamlesi, sakatlık ve final cezası.",
+   nasip_kismet:"COMMON: Kart fiyatları bu tur -%50. DARK: Kart fiyatları -%75, talih cezası riski.",
+   yildiz_krizi:"COMMON: En güçlü oyuncu dışarıda, kalan kadro +3. DARK: Kalan kadro +4, medya cezası riski.",
+   kasiga_para:"COMMON: Rakip -4 güç, gelecek tur pazar kapalı. DARK: Rakip -8 güç, fiyatlar artar ve güven -1."
+  },
+  en:{
+   taraftar:"COMMON: +5 power each round. DARK: +10 power each round; 25% trust -1 on buy.",
+   genc:"COMMON: Grows each round, max +6. DARK: Grows faster but carries final penalty.",
+   ch_momentum:"COMMON: Late-run momentum. DARK: Stronger late momentum with final pressure.",
+   kontra:"COMMON: +1 power per forward. DARK: +2 power per forward and cash penalty risk.",
+   buyuk_mac:"COMMON: +6 power this match. DARK: Stronger risky boost with cash penalty chance.",
+   yildiz:"COMMON: One-match power from your highest OVR player. DARK: Stronger with small cash risk.",
+   otobus:"COMMON: Defensive power per centre-back. DARK: Stronger defensive boost with penalty risk.",
+   kaleci_kalesi:"COMMON: Goalkeeper OVR +15. DARK: Goalkeeper OVR +30 with small transfer fine risk.",
+   anadolu:"COMMON: Sub-70 players generate power, max +9. DARK: Higher ceiling, high-player penalty.",
+   altyapi_plani:"COMMON: U23 players generate power. DARK: Higher ceiling, final penalty.",
+   tecrubeli_omurga:"COMMON: 32+ players generate power. DARK: Higher ceiling, final penalty.",
+   yerli_blok:"COMMON: Power from local-player count. DARK: Higher local bonus.",
+   kanat_akini:"COMMON: Wings and fullbacks generate power. DARK: Stronger wing effect and Final.sim wide play.",
+   cift_forvet:"COMMON: +2 per ST, max +4. DARK: +4 per ST, max +8.",
+   derbi:"COMMON: QF +2, semi +4, final +8. DARK: QF +6, semi +10, final +14.",
+   final_provasi:"COMMON: +6 power in the final. DARK: +12 power in the final.",
+   son_dans:"COMMON: Healthy final squad +8. DARK: Healthy final squad +14, punished hard by injuries.",
+   taksit_transfer:"COMMON: +€4M now. DARK: +€8M now, trust -1 and final penalty.",
+   son_kredi:"COMMON: +€15M if cash is below -€10M. DARK: +€20M with trust risk.",
+   kara_borsa:"COMMON: Unlocks 2 free persistent cards. DARK: Unlocks 3 free persistent cards, 30% fine risk.",
+   sahte_evrak:"COMMON: +6 power each round. DARK: +10 power each round, trust drops.",
+   kumarbaz:"COMMON: +€15M now, 2 rounds -€5M. DARK: +€25M now, 2 rounds -€10M and trust -1.",
+   gecici_prim:"COMMON: +6 power this match, 30% injury risk. DARK: +12 power this match, 60% injury risk.",
+   kisa_kamp:"COMMON: +4 this match, next match -2. DARK: +6 this match, next match -4.",
+   doping:"COMMON: +6 power; 35% chance each round -€15M. DARK: +10 power; 25% chance -€25M.",
+   kriz:"COMMON: 50% to clear final penalty. DARK: 75% to clear final penalty.",
+   primler_yatinca:"COMMON: +4 power now, next round -€8M. DARK: +8 power now, next round -€16M.",
+   vur_igneyi:"COMMON: Heals 1 injured player. DARK: Heals 2 injured players with cost risk.",
+   bu_adam:"COMMON: Adds a random 70-79 OVR player to the bench. DARK: Adds a random 80-89 OVR player to the bench.",
+   gec_gec:"COMMON: +5 if opponent is stronger, otherwise +2. DARK: Riskier defence boost with injury and final penalty.",
+   nasip_kismet:"COMMON: Card prices -50% this round. DARK: Card prices -75% with luck penalty risk.",
+   yildiz_krizi:"COMMON: Best player sits out, remaining squad +3. DARK: Remaining squad +4 with media fine risk.",
+   kasiga_para:"COMMON: Opponent -4 power, next market closed. DARK: Opponent -8 power, prices rise and trust -1."
+  }
+ };
+ for(const lang of Object.keys(split)){
+  const cards=T[lang]&&T[lang].cards;
+  if(!cards)continue;
+  for(const key of Object.keys(split[lang])){
+   if(cards[key])cards[key].d=split[lang][key];
+  }
+ }
+}
+_patchVariantDescriptions();
 var LANG="tr"; var L=()=>T[LANG];

@@ -172,7 +172,23 @@ function variantDesc(d,v){
   if(!d)return d;
   const gTag=d.includes("ALTIN:")?"ALTIN:":(d.includes("COMMON:")?"COMMON:":(d.includes("GOLDEN:")?"GOLDEN:":null));
   const dTag=d.includes("KARA:")?"KARA:":(d.includes("DARK:")?"DARK:":null);
-  if(!gTag&&!dTag)return displayCardTerms(d);
+  if(!gTag&&!dTag){
+    const commonMatch=d.match(/\b(COMMON|GOLDEN|ALTIN)\b/);
+    const darkMatch=d.match(/\b(DARK|KARA)\b/);
+    if(commonMatch&&darkMatch){
+      const gIdx=commonMatch.index,dIdx=darkMatch.index;
+      const first=Math.min(gIdx,dIdx);
+      const prefix=first>0?d.substring(0,first).trim():"";
+      const pre=prefix?prefix+" ":"";
+      if(v===0){
+        const start=gIdx+commonMatch[0].length,end=dIdx>gIdx?dIdx:d.length;
+        return displayCardTerms((pre+d.substring(start,end)).trim().replace(/^[\s:;,.·-]+/,""));
+      }
+      const start=dIdx+darkMatch[0].length,end=gIdx>dIdx?gIdx:d.length;
+      return displayCardTerms((pre+d.substring(start,end)).trim().replace(/^[\s:;,.·-]+/,""));
+    }
+    return displayCardTerms(d);
+  }
   const gIdx=gTag?d.indexOf(gTag):-1;
   const dIdx=dTag?d.indexOf(dTag):-1;
   const prefix=gIdx>0?d.substring(0,gIdx).trim():((gIdx<0&&dIdx>0)?d.substring(0,dIdx).trim():"");
@@ -297,7 +313,7 @@ function cardContractText(k){
 }
 function renderCollectionFilters(){const el=$("collectionFilters");if(!el)return;const tr=LANG==="tr",items=[["all",tr?"Tümü":"All"],["open",tr?"Açık":"Open"],["active",tr?"Aktif":"Active"]];if(collFilter==="near")collFilter="all";el.innerHTML=items.map(([id,label])=>`<button class="${collFilter===id?"on":""}" onclick="collFilter='${id}';renderCollection()">${label}</button>`).join("");}
 function collectionPass(k){const c=invOf(k),active=hasCard(k);if(collFilter==="open")return c>0;if(collFilter==="active")return active;return true;}
-function renderCollection(){const grid=$("collectionGrid");if(!grid)return;const x=L(),s=picksBySlot.filter(Boolean),cap=activeCardSlots();let owned=0,shown=0;grid.innerHTML="";renderCollectionFilters();allCardKeys().forEach(k=>{const cd=x.cards[k];if(!cd||isInstantCard(k))return;const c=invOf(k),open=c>0,active=hasCard(k),cat=CATMAP[k]||"gorev",v=variantOf(k);if(open)owned++;if(!collectionPass(k))return;shown++;const pv=open?simulateEquipPower(k):null,locked=!open;const equipLine=active?(LANG==="tr"?"✓ aktif — çıkarmak için tıkla":"✓ active — click to remove"):(open?(cards.length<cap?(x.ui.clickEquip):(x.ui.slotFull)):(x.ui.unlockFrom));const preview=open&&!active&&cards.length<cap?`<div class="powerpreview cc-preview">${LANG==="tr"?"Takarsan":"Equip"}: ${pv.before} → ${pv.after}</div>`:"";const d=document.createElement("div");d.className="collcard v"+v+" cat-"+cat+(locked?" locked":"")+(active?" active":"");d.title=cd.n+" · "+kindLabel(k)+"\n"+cardContractType(k);d.innerHTML=`<div class="cc-head"><span class="cc-rar var-badge var-${v}">${open?variantBadge(v):(LANG==="tr"?"KİLİTLİ":"LOCKED")}</span><span class="cc-kind">${open?kindLabel(k):""}</span></div><div class="cc-art">${open?(CARD_SVGS[k]||cd.i):LOCK_SVG}</div><div class="cc-body"><div class="cc-name">${open?cd.n:(x.ui.lockedCard)}</div><div class="cc-desc">${open?(cd.d||shortCardText(k,s)):(LANG==="tr"?"Pazardan açılır":"Unlock in market")}</div>${preview}</div><div class="cc-foot"><span class="cc-state">${equipLine}</span>${active?'<span class="cc-dot"></span>':""}</div>`;if(open)d.onclick=()=>toggleCardActive(k);grid.appendChild(d);});const cc=$("collCount");if(cc)cc.textContent=" "+owned+"/"+allCardKeys().filter(k=>!isInstantCard(k)).length+(shown!==allCardKeys().length?" · "+shown:"");}
+function renderCollection(){const grid=$("collectionGrid");if(!grid)return;const x=L(),s=picksBySlot.filter(Boolean),cap=activeCardSlots();let owned=0,shown=0;grid.innerHTML="";renderCollectionFilters();allCardKeys().forEach(k=>{const cd=x.cards[k];if(!cd||isInstantCard(k))return;const c=invOf(k),open=c>0,active=hasCard(k),cat=CATMAP[k]||"gorev",v=variantOf(k);if(open)owned++;if(!collectionPass(k))return;shown++;const pv=open?simulateEquipPower(k):null,locked=!open;const equipLine=active?(LANG==="tr"?"✓ aktif — çıkarmak için tıkla":"✓ active — click to remove"):(open?(cards.length<cap?(x.ui.clickEquip):(x.ui.slotFull)):(x.ui.unlockFrom));const preview=open&&!active&&cards.length<cap?`<div class="powerpreview cc-preview">${LANG==="tr"?"Takarsan":"Equip"}: ${pv.before} → ${pv.after}</div>`:"";const d=document.createElement("div");d.className="collcard v"+v+" cat-"+cat+(locked?" locked":"")+(active?" active":"");d.title=cd.n+" · "+kindLabel(k)+"\n"+cardContractType(k);d.innerHTML=`<div class="cc-head"><span class="cc-rar var-badge var-${v}">${open?variantBadge(v):(LANG==="tr"?"KİLİTLİ":"LOCKED")}</span><span class="cc-kind">${open?kindLabel(k):""}</span></div><div class="cc-art">${open?(CARD_SVGS[k]||cd.i):LOCK_SVG}</div><div class="cc-body"><div class="cc-name">${open?cd.n:(x.ui.lockedCard)}</div><div class="cc-desc">${open?(variantDesc(cd.d,v)||shortCardText(k,s)):(LANG==="tr"?"Pazardan açılır":"Unlock in market")}</div>${preview}</div><div class="cc-foot"><span class="cc-state">${equipLine}</span>${active?'<span class="cc-dot"></span>':""}</div>`;if(open)d.onclick=()=>toggleCardActive(k);grid.appendChild(d);});const cc=$("collCount");if(cc)cc.textContent=" "+owned+"/"+allCardKeys().filter(k=>!isInstantCard(k)).length+(shown!==allCardKeys().length?" · "+shown:"");}
 function renderDebtWarning(){const el=$("debtWarn");if(el){el.className="debtwarn hidden";el.textContent="";}const ps=$("pintiSavingsBar");if(ps)ps.remove();const clash=document.getElementById("cardClashWarn");if(clash)clash.remove();}/*
   // Kart çakışma uyarısı
   const _riskCombos=[['doping','sahte_evrak'],['kumarbaz','son_kredi'],['doping','kasiga_para'],['gec_gec','kasiga_para']];
