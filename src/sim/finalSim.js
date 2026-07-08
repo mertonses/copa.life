@@ -187,7 +187,7 @@ function simulateMatch(myPow, oppPow, rng) {
       }
     } else if(roll<0.53){stats.corners[side]++;const cComm=(side==="A"?"⛳ ":"⚑ ")+_pickComm(isTR?_COMM.corner_tr:_COMM.corner_en,rng);events.push({minute:Math.floor(clock),type:"corner",side,pos:evPos(side,"corner"),label:isTR?"Köşe vuruşu":"Corner kick",comm:cComm});updateMom(side==="A"?4:-4);}
     else if(roll<0.66){const comm=_pickComm(isTR?_COMM.chance_tr:_COMM.chance_en,rng);events.push({minute:Math.floor(clock),type:"chance",side,pos:evPos(side,"chance"),label:isTR?"Büyük fırsat!":"Big chance!",comm});updateMom(side==="A"?3:-3);}
-    else if(roll<0.74){const fouler=side==="A"?_pickerB(rng):_pickerA(rng);const isRed=rng()<0.003;const isYellow=!isRed&&rng()<0.22;const comm=isRed?("🟥 "+fouler+" — "+(isTR?"KIRMIZI KART! Oyundan ihraç!":"RED CARD! Sent off!")):isYellow?"🟨 "+fouler+" — "+(isTR?"Sarı kart!":"Yellow card!"):"⚠️ "+fouler+" — "+(isTR?"Faul!":"Foul!");const evType=isRed?"red_card":isYellow?"yellow":"foul";if(isRed&&side==="A"&&typeof window!=="undefined"){window._matchRedCard=true;window._redCardPlayerName=fouler;}events.push({minute:Math.floor(clock),type:evType,side:side==="A"?"B":"A",pos:evPos(side,"chance"),label:isRed?(isTR?"Kırmızı kart":"Red card"):isYellow?(isTR?"Sarı kart":"Yellow card"):(isTR?"Faul":"Foul"),comm});updateMom(side==="A"?-2:2);}
+    else if(roll<0.74){const fouler=side==="A"?_pickerB(rng):_pickerA(rng);const isRed=rng()<0.001;const isYellow=!isRed&&rng()<0.12;const comm=isRed?("🟥 "+fouler+" — "+(isTR?"KIRMIZI KART! Oyundan ihraç!":"RED CARD! Sent off!")):isYellow?"🟨 "+fouler+" — "+(isTR?"Sarı kart!":"Yellow card!"):"⚠️ "+fouler+" — "+(isTR?"Faul!":"Foul!");const evType=isRed?"red_card":isYellow?"yellow":"foul";if(isRed&&side==="A"&&typeof window!=="undefined"){window._matchRedCard=true;window._redCardPlayerName=fouler;}events.push({minute:Math.floor(clock),type:evType,side:side==="A"?"B":"A",pos:evPos(side,"chance"),label:isRed?(isTR?"Kırmızı kart":"Red card"):isYellow?(isTR?"Sarı kart":"Yellow card"):(isTR?"Faul":"Foul"),comm});updateMom(side==="A"?-2:2);}
     else if(roll<0.80){const fkComm="🎯 "+_pickComm(isTR?_COMM.freekick_tr:_COMM.freekick_en,rng);events.push({minute:Math.floor(clock),type:"freekick",side,pos:evPos(side,"chance"),label:isTR?"Serbest vuruş":"Free kick",comm:fkComm});updateMom(side==="A"?2:-2);}
     else{const comm=isTR?["📣 Tribünler ayakta!","🌊 Baskı devam ediyor!","💨 Tempo yükseliyor!","🔔 Kritik anlar!","⚡ Her iki takım baskılıyor!"][Math.floor(rng()*5)]:["📣 Crowd on their feet!","🌊 Pressure building!","💨 The pace is high!","🔔 Critical moments!","⚡ Both teams pressing!"][Math.floor(rng()*5)];events.push({minute:Math.floor(clock),type:"atmosphere",side,pos:{x:0.5,y:0.5},label:isTR?"Atmosfer":"Atmosphere",comm});updateMom(0);}
     clock+=nextGap(phase);
@@ -379,8 +379,9 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
   const seq=sequence&&sequence.team===tid?sequence:null;
   const ownReds=players.filter(p=>p.sentOff).length;
   const oppReds=opponents.filter(p=>p.sentOff).length;
-  const redAttackDrag=ownReds>0?Math.min(0.82,1-ownReds*0.12):1;
-  const redWidthBoost=oppReds>0?1+Math.min(0.22,oppReds*0.12):1;
+  const redAttackDrag=ownReds>0?Math.min(0.78,1-ownReds*0.18):1;
+  const redCompact=ownReds>0?Math.min(0.20,ownReds*0.09):0;
+  const redWidthBoost=oppReds>0?1+Math.min(0.26,oppReds*0.13):1;
   const attackY=tid===0?Math.min(55,by+15):Math.max(13,by-15);
   const defY=tid===0?Math.min(by-5,30):Math.max(by+5,38);
   const line=_teamSecondLine(tid,opponents);
@@ -397,15 +398,15 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
       switch(p.role){
         case'CB':
           tx=Math.max(15,Math.min(_PW-15,bx*0.18+_PW/2*0.82));
-          ty=tid===0?Math.min(31,p.hy+12*redAttackDrag):Math.max(37,p.hy-12*redAttackDrag);
+          ty=tid===0?Math.min(33,p.hy+14*redAttackDrag):Math.max(35,p.hy-14*redAttackDrag);
           break;
         case'LB':
-          tx=wideSide<0?Math.max(4,_PW*(wideMode==='underlap'?0.20:0.06)):Math.max(7,_PW*0.16);
-          ty=tid===0?Math.min(attackY+(wideSide<0?12*redWidthBoost:0),p.hy+24*redAttackDrag):Math.max(_PH-attackY-(wideSide<0?12*redWidthBoost:0),p.hy-24*redAttackDrag);
+          tx=wideSide<0?Math.max(4,_PW*(wideMode==='underlap'?0.22:0.07)):Math.max(7,_PW*0.16);
+          ty=tid===0?Math.min(attackY+(wideSide<0?15*redWidthBoost:0),p.hy+26*redAttackDrag):Math.max(_PH-attackY-(wideSide<0?15*redWidthBoost:0),p.hy-26*redAttackDrag);
           break;
         case'RB':
-          tx=wideSide>0?Math.min(_PW-4,_PW*(wideMode==='underlap'?0.80:0.94)):Math.min(_PW-7,_PW*0.84);
-          ty=tid===0?Math.min(attackY+(wideSide>0?12*redWidthBoost:0),p.hy+24*redAttackDrag):Math.max(_PH-attackY-(wideSide>0?12*redWidthBoost:0),p.hy-24*redAttackDrag);
+          tx=wideSide>0?Math.min(_PW-4,_PW*(wideMode==='underlap'?0.78:0.93)):Math.min(_PW-7,_PW*0.84);
+          ty=tid===0?Math.min(attackY+(wideSide>0?15*redWidthBoost:0),p.hy+26*redAttackDrag):Math.max(_PH-attackY-(wideSide>0?15*redWidthBoost:0),p.hy-26*redAttackDrag);
           break;
         case'DM':
           tx=_PW/2+(bx-_PW/2)*0.28;
@@ -441,15 +442,15 @@ function _tacticalTargets(players,ball,opponents,teamId,hasBall,shout,matchTime,
       } else {
         switch(p.role){
           case'CB':
-            tx=Math.max(18,Math.min(_PW-18,bx*0.32+_PW/2*0.68));
+            tx=Math.max(18,Math.min(_PW-18,bx*(0.32-redCompact)+_PW/2*(0.68+redCompact)));
             ty=tid===0?Math.min(defY+(ownReds?3:0),p.hy):Math.max(_PH-defY-(ownReds?3:0),p.hy);
             break;
           case'LB':
-            tx=Math.max(6,bx<_PW/2?_PW*0.10:_PW*(ownReds?0.24:0.20));
+            tx=Math.max(6,bx<_PW/2?_PW*(0.10+redCompact):_PW*(ownReds?0.27:0.20));
             ty=tid===0?Math.min(defY+5,p.hy):Math.max(_PH-defY-5,p.hy);
             break;
           case'RB':
-            tx=Math.min(_PW-6,bx>_PW/2?_PW*0.90:_PW*(ownReds?0.76:0.80));
+            tx=Math.min(_PW-6,bx>_PW/2?_PW*(0.90-redCompact):_PW*(ownReds?0.73:0.80));
             ty=tid===0?Math.min(defY+5,p.hy):Math.max(_PH-defY-5,p.hy);
             break;
           case'DM':case'CM':
@@ -818,7 +819,7 @@ function buildSim(myPow, oppPow) {
     const hasCounterCard=typeof hasCard==='function'&&hasCard('kontra');
     const ownReds=(tid===0?teamA:teamB).filter(p=>p.sentOff).length;
     const oppReds=(tid===0?teamB:teamA).filter(p=>p.sentOff).length;
-    const wideBias=Math.max(0.08,(hasWingCard?0.44:0.26)+(oppReds?0.10:0)-(ownReds?0.08:0));
+    const wideBias=Math.max(0.12,(hasWingCard?0.52:0.34)+(finalThird?0.06:0)+(oppReds?0.12:0)-(ownReds?0.12:0));
     const canWide=(tid===0?teamA:teamB).some(p=>!p.sentOff&&(p.role==='LW'||p.role==='RW'||p.role==='LB'||p.role==='RB'));
     let type='BUILD_CENTER';
     let mode='support';
@@ -826,7 +827,11 @@ function buildSim(myPow, oppPow) {
     else if((carrier.role==='CB'||carrier.role==='DM')&&ownHalf&&(losing||rng.bool(0.24)))type='LONG_BALL';
     else if((carrier.role==='LW'||carrier.role==='LB'||_isWideLeft(carrier.x))&&(finalThird||midThird))type='WIDE_LEFT';
     else if((carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&(finalThird||midThird))type='WIDE_RIGHT';
-    else if(canWide&&rng.bool(wideBias))type=rng.bool(0.5)?'WIDE_LEFT':'WIDE_RIGHT';
+    else if(canWide&&rng.bool(wideBias)){
+      const leftReady=(tid===0?teamA:teamB).some(p=>!p.sentOff&&(p.role==='LW'||p.role==='LB')&&p.x<_PW*0.46);
+      const rightReady=(tid===0?teamA:teamB).some(p=>!p.sentOff&&(p.role==='RW'||p.role==='RB')&&p.x>_PW*0.54);
+      type=leftReady&&!rightReady?'WIDE_LEFT':rightReady&&!leftReady?'WIDE_RIGHT':(rng.bool(0.5)?'WIDE_LEFT':'WIDE_RIGHT');
+    }
     else if(hasCounterCard&&rng.bool(0.18))type='COUNTER';
     else if(rng.bool(0.16))type='RECYCLE';
     if(type==='WIDE_LEFT'||type==='WIDE_RIGHT')mode=rng.pick(['overlap','underlap','cutback']);
@@ -1197,7 +1202,7 @@ function buildSim(myPow, oppPow) {
 
   /* atmosphere events */
   let atmTimer=0;
-  let disciplineCooldown=60;
+  let disciplineCooldown=90;
   let comboCount=0; // track pass sequences for combo commentary
   function maybeAtmosphere(){
     atmTimer+=_FIXED_STEP;
@@ -1207,18 +1212,18 @@ function buildSim(myPow, oppPow) {
     const oppTeam=tid===0?teamB:teamA;
     const atkTeam=tid===0?teamA:teamB;
     const roll=rng.next();
-    if(roll<0.022&&disciplineCooldown<=0){
+    if(roll<0.014&&disciplineCooldown<=0){
       // yellow card
       const cardable=oppTeam.filter(p=>p.role!=='GK'&&!p.sentOff&&(p.yellowCards||0)<2);
       const fresh=cardable.filter(p=>(p.yellowCards||0)===0);
       const warned=cardable.filter(p=>(p.yellowCards||0)===1);
       let pl=null;
-      if(warned.length&&rng.bool(0.07)&&stats.reds[0]+stats.reds[1]<2)pl=rng.pick(warned);
+      if(warned.length&&rng.bool(0.018)&&stats.reds[0]+stats.reds[1]<1)pl=rng.pick(warned);
       else if(fresh.length)pl=rng.pick(fresh);
-      else if(warned.length&&rng.bool(0.03)&&stats.reds[0]+stats.reds[1]<2)pl=rng.pick(warned);
+      else if(warned.length&&rng.bool(0.008)&&stats.reds[0]+stats.reds[1]<1)pl=rng.pick(warned);
       const nm=pl?pl.name.split(' ').pop():'?';
       if(pl){
-        disciplineCooldown=150+rng.rng(0,120);
+        disciplineCooldown=230+rng.rng(0,210);
         pl.yellowCards=(pl.yellowCards||0)+1;
         if(pl.yellowCards>=2){
           stats.yellows[pl.teamId]++;

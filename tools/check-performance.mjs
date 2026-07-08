@@ -84,6 +84,10 @@ const budgets = [
 ];
 
 let failed = false;
+if (/assets\/chairs\/[^`"' )]+\.png/.test(sourceText) || /assets\/chairs\/\$\{/.test(sourceText)) {
+  failed = true;
+  console.error("performance budget failed: runtime must not reference full-size chair PNG files");
+}
 for (const [name, value, limit] of budgets) {
   console.log(`${name}: ${kb(value)} / ${kb(limit)}`);
   if (value > limit) {
