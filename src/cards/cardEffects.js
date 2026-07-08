@@ -248,15 +248,15 @@ function applyRiskCardGain(k){
  if(k==="kumarbaz"){return;} // yukarida islendi
  if(k==="sahte_evrak"){
   const pow=v===1?10:6;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Evrak riski: g?ven -1":"Paperwork risk: trust -1"),"lose");}
-  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Ba?kan evrak? sorgulad?: g?ven -1":"Chairman questioned the papers: trust -1"),"lose");}
+  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Evrak riski: güven -1":"Paperwork risk: trust -1"),"lose");}
+  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Başkan evrakı sorguladı: güven -1":"Chairman questioned the papers: trust -1"),"lose");}
   pushFeed("📄 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur (kontrat)":" power/turn (contract)"),"buy");
   return;
  }
  if(k==="doping"){
   const pow=v===1?10:6;
   const fineChance=v===1?25:35,fineAmt=v===1?25:15;
-  if(v===1||rand()<0.20){chairTrust=Math.max(0,chairTrust-1);pushFeed("?? "+(tr?"Doping ??phesi: g?ven -1":"Doping suspicion: trust -1"),"lose");}
+  if(v===1||rand()<0.20){chairTrust=Math.max(0,chairTrust-1);pushFeed("🧪 "+(tr?"Doping şüphesi: güven -1":"Doping suspicion: trust -1"),"lose");}
   pushFeed("🧪 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur; %"+fineChance+" -€"+fineAmt+"M":" power/turn; "+fineChance+"% -€"+fineAmt+"M")+(v===1?" · finalde -6":""),"pres");
   return;
  }

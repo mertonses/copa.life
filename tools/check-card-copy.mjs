@@ -7,7 +7,7 @@ const html = fs.readFileSync("index.html", "utf8");
 const checks = [
   {
     name: "shop cards render selected variant description only",
-    pass: /const desc=shopCardDesc\(k,variantDesc\(cd\.d,sv\)\|\|shortCardText\(k,s\)\)/.test(hub),
+    pass: /const desc=shopCardDesc\(k,variantDesc\(cd\.d,sv\)\|\|shortCardText\(k,s\),sv\)/.test(hub),
   },
   {
     name: "card collection renders selected owned variant only",

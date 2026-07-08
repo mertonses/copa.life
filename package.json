@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "favicons": "node tools/generate-favicons.mjs favicon.svg",
     "check:encoding": "node tools/check-encoding.mjs",
     "check:responsive": "node tools/check-responsive.mjs",
     "check:cards": "node tools/check-card-copy.mjs",
