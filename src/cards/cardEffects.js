@@ -195,20 +195,16 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="bu_adam"){
-  const minOV=v===1?90:80,maxOV=v===1?99:89;
-  const emptySlot=picksBySlot.findIndex(p=>!p);
-  const slotIdx=emptySlot>=0?emptySlot:picksBySlot.length-1;
-  const displaced=picksBySlot[slotIdx]||null;
-  const positions=["ST","CM","CB","GK","LW","RW","LM","RM","WB","CDM","CAM"];
-  const pos=positions[ri(0,positions.length-1)];
-  const ov=ri(minOV,maxOV);
-  const tempP={name:"Misafir",sur:"Misafir "+ov,age:ri(25,32),pos,ov,tr:false,eff:Math.round(ov*0.95),isTemp:true};
-  picksBySlot[slotIdx]=tempP;
-  renderRoundel&&renderRoundel("h"+slotIdx,tempP);
-  loanPlayer={...tempP,loanCost:0,turnsLeft:1,slotIdx,displaced};
-  const commission=v===1&&rand()<0.5?6:0;
-  if(commission>0){spend(commission,"spent");}
-  pushFeed("⚡ <b>"+L().cards[k].n+"</b> OV"+ov+" "+pos+(tr?" 1 tur sahada":" on pitch 1 turn")+(commission>0?" · -€"+commission+"M":""),"pres");
+  const minOV=v===1?80:70,maxOV=v===1?89:79;
+  const pos=(slots&&slots.length?rnd(slots)[0]:rnd(["ST","CM","CB","GK","LW","RW","LM","RM","WB","CDM","CAM"]));
+  const p=typeof takeUnique==="function"?takeUnique(pos,minOV,maxOV):fabPlayer(pos,minOV,maxOV);
+  p.price=0;
+  p.bench=true;
+  p.used=false;
+  p.isSurprise=true;
+  bench.push(p);
+  pushFeed("<b>"+L().cards[k].n+"</b> "+(tr?"yedek kulübesine geldi: ":"joins the bench: ")+shortName(p)+" OV"+p.ov,"pres");
+  if(typeof renderHub==="function")renderHub();
   return;
  }
  if(k==="nasip_kismet"){

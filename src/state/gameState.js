@@ -6,7 +6,7 @@ var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUs
 var cardsBoughtThisTurn=0,freeAgentBoughtThisTurn=0,shopRerolledThisTurn=0;
 var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
 var loanPlayer=null;
-var legacyFund=0;
+var legacyFund=0,legacyCash=0;
 var shopBlocked=0,presidentBlocked=0,cardPriceMod=1.0,cardPriceModTurns=0;
 var deferredBudgetPenalty=0,deferredPowerPenalty=0,oppPowerMod=0;
 var draftFatigueTurns=0,draftDebtTurns=0,draftPendingInjury=0;

@@ -527,3 +527,27 @@
   padding:2px 7px;
   background:color-mix(in srgb,var(--color-slate) 10%,var(--surface-muted));
 }
+
+/* Contextual card footer readability */
+.cardtile .ct-foot{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:6px;
+  align-items:center;
+}
+.cardtile .ct-pw{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding-right:2px;
+  font-size:10px;
+  line-height:1.15;
+  max-width:100%;
+}
+.cardtile .ct-pw .ov-val{color:var(--ovc);font-weight:900}
+.cardtile .ct-pw .pw-arrow{color:var(--color-slate);opacity:.75;margin:0 2px}
+.cardtile .ct-pw .ov-delta{font-weight:900}
+.cardtile .ct-pw .ov-delta.pos{color:var(--color-primary)}
+.cardtile .ct-pw .ov-delta.neg{color:#ef4444}
+.cardtile .ct-price{white-space:nowrap}

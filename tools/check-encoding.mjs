@@ -90,6 +90,15 @@ function hasDefiniteMojibake(line) {
 }
 
 const problems = [];
+const forbiddenCardTypeTerms = [
+  [84, 69, 77, 75, 304, 78, 76, 304],
+  [116, 101, 109, 107, 105, 110, 108, 105],
+  [84, 101, 109, 107, 105, 110, 108, 105],
+  [84, 69, 77, 75, 73, 78, 76, 73],
+  [67, 69, 83, 85, 82],
+  [99, 101, 115, 117, 114],
+  [67, 101, 115, 117, 114],
+].map((codes) => String.fromCodePoint(...codes));
 
 for (const file of walk(ROOT)) {
   const relative = path.relative(ROOT, file).replace(/\\/g, "/");
@@ -108,6 +117,11 @@ for (const file of walk(ROOT)) {
   lines.forEach((line, index) => {
     if (hasDefiniteMojibake(line)) {
       problems.push(`${relative}:${index + 1}: olası mojibake: ${line.slice(0, 180)}`);
+    }
+    for (const term of forbiddenCardTypeTerms) {
+      if (line.includes(term)) {
+        problems.push(`${relative}:${index + 1}: forbidden card type term: ${term}`);
+      }
     }
   });
 }

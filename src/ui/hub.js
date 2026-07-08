@@ -26,7 +26,7 @@ function _fixHubVisibleText(){
   const tv=typeof chairTrust!=="undefined"?chairTrust:3;
   const trustV=$("trustV"),trustHint=$("trustHint");
   if(trustV)trustV.textContent="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));
-  if(trustHint)trustHint.textContent=tv>=3?(tr?"güvende":"secure"):tv>=2?(tr?"temkinli":"cautious"):tv>=1?(tr?"kırılgan":"fragile"):(tr?"tehlikede":"at risk");
+  if(trustHint)trustHint.textContent=tv>=3?(tr?"güvende":"secure"):tv>=2?(tr?"dengede":"steady"):tv>=1?(tr?"kırılgan":"fragile"):(tr?"tehlikede":"at risk");
 }
 
 function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
@@ -194,6 +194,15 @@ function displayCardTerms(txt){
 }
 function shortCardText(k,activeList){const v=cardEff(k,activeList||picksBySlot.filter(Boolean),round),hint=conditionHint(k);if(v===0&&hint)return hint;return (LANG==="tr"?"Güç":"Power")+": "+(v>=0?"+":"")+v;}
 function shopCardDesc(k,raw){
+  const tr=LANG==="tr";
+  const sv=typeof cardVariant==="function"?cardVariant(k):variantOf(k);
+  const specific={
+    bu_adam:()=>sv===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
+    kisa_kamp:()=>sv===1?(tr?"Bu maç +6 güç. Sonraki maç -4.":"This match +6 power. Next match -4."):(tr?"Bu maç +4 güç. Sonraki maç -2.":"This match +4 power. Next match -2."),
+    doping:()=>sv===1?(tr?"+10 güç. Her tur %25 ihtimal -€25M ceza.":"+10 power. 25% chance each round for -€25M fine."):(tr?"+6 güç. Her tur %35 ihtimal -€15M ceza.":"+6 power. 35% chance each round for -€15M fine."),
+    cift_forvet:()=>sv===1?(tr?"SNT başına +4 güç, max +8.":"ST +4 each, max +8."):(tr?"SNT başına +2 güç, max +4.":"ST +2 each, max +4.")
+  };
+  if(specific[k])return specific[k]();
   const txt=(raw||shortCardText(k,picksBySlot.filter(Boolean))||"").replace(/\s+/g," ").trim();
   if(!txt)return"";
   return displayCardTerms(txt.replace(/; ?/g," · "));
@@ -224,6 +233,7 @@ function shopPreviewText(k,pv){
   taksit_transfer:()=>money(b,b+10)+" · "+(tr?"2 tur -€4M":"2 rounds -€4M"),
   son_kredi:()=>b<-10?money(b,b+15)+" · "+(tr?"başkan eşiği sertleşir":"chairman limit tightens"):(tr?"Kasa -€10M altına düşerse +€15M":"Triggers below -€10M for +€15M"),
   kara_borsa:()=>tr?"Bedava kart · %30 ihtimal -€12M":"Free card · 30% chance -€12M",
+  bu_adam:()=>variantOf(k)===1?(tr?"80-89 güçlü yedek":"80-89 OVR bench player"):(tr?"70-79 güçlü yedek":"70-79 OVR bench player"),
 
   kriz:()=>finalLoss(fp,Math.max(0,fp-6)),
   kisa_kamp:()=>tr?"Bu maç +4 güç · sonra -1":"This match +4 power · then -1",
@@ -270,7 +280,7 @@ function cardContractText(k){
     tecrubeli_omurga:tr?"32+ yaş başına +1; max +3, şu an "+plus+".":"32+ +1 each; max +3, now "+plus+".",
     yerli_blok:tr?"2+ yerli: +1; 4+: +3; 6+: +5; şu an "+plus+".":"2+ locals: +1; 4+: +3; 6+: +5; now "+plus+".",
     kanat_akini:tr?"Kanat/bek başına +1; max +4, şu an "+plus+".":"Wing/wingback +1; max +4, now "+plus+".",
-    cift_forvet:tr?"1 ST: +1, 2+ ST: +3; şu an "+plus+".":"1 ST: +1, 2+ ST: +3; now "+plus+".",
+    cift_forvet:tr?"1 SNT: +1, 2+ SNT: +3; şu an "+plus+".":"1 ST: +1, 2+ ST: +3; now "+plus+".",
     deplasman_kafilesi:tr?"Güçlü rakibe +4; hemen -€3M, şu an "+plus+".":"Vs stronger opponent +4; instant -€3M, now "+plus+".",
     sosyal_medya:tr?"Underdog +3; favori -2, şu an "+plus+".":"Underdog +3; favourite -2, now "+plus+".",
     final_provasi:tr?"Şimdi -€4M; yarıda +3, finalde +5.":"Now -€4M; semi +3, final +5.",
@@ -279,7 +289,8 @@ function cardContractText(k){
     son_dans:tr?"Finalde +4 güç.":"Final +4 power.",
     kumarbaz:tr?"Hemen +€16M; finalde -8 güç; her tur %20 ihtimal -€24M.":"Instant +€16M; final -8 power; 20% each round -€24M.",
     gecici_prim:tr?"Bu maç +8; sonra %35 sakatlık, sıradaki maç -2, kart kaybolur.":"This match +8; then 35% injury, next match -2, card expires.",
-    doping:tr?"+8 güç; her tur %35 ihtimal -€15M ceza.":"+8 power; 35% each round -€15M fine.",
+    doping:variantOf(k)===1?(tr?"+10 güç; her tur %25 ihtimal -€25M ceza.":"+10 power; 25% each round -€25M fine."):(tr?"+6 güç; her tur %35 ihtimal -€15M ceza.":"+6 power; 35% each round -€15M fine."),
+    bu_adam:variantOf(k)===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
     kriz:tr?"Finaldeki eksi gücü en fazla 6 azaltır.":"Reduces final power loss by up to 6."
   };
   return map[k]||((tr?"Net güç ":"Net power ")+plus+".");
@@ -363,11 +374,13 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     const zero=$("kasaZero");if(zero)zero.style.left=(Math.abs(debtLim)/_total*100).toFixed(1)+"%";
   }}
   /* Başkan Güveni tile */
-  {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"#429A73":tv>=2?"#496E71":tv>=1?"#f97316":"#ef4444";const tfg=tv>=2?"#fff":"#fff";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.style.background=tbg;const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tfg;trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"temkinli":"cautious"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
+  {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"#429A73":tv>=2?"#eab308":tv>=1?"#f97316":"#ef4444";const tfg="var(--color-ink)";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.classList.add("context-metric");tt.style.setProperty("--metric-accent",tbg);tt.style.background="";const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tbg;trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"dengede":"steady"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
   {const pv=sp.power,oppPv=opponent?opponent.power:0;const pt=$("powTile");if(pt){
     const pbg=pv>=90?"#15803d":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";
-    const pfg=(pv>=70&&pv<90)?"#000":"#fff";
-    pt.style.background=pbg;
+    const pfg="var(--color-ink)";
+    pt.classList.add("context-metric");
+    pt.style.setProperty("--metric-accent",pbg);
+    pt.style.background="";
     const _total=Math.max(pv+oppPv,1);const _yPct=Math.round(pv/_total*100);const _oPct=100-_yPct;
     const _oppBarCol=oppPv>=pv?"rgba(255,100,100,.45)":"rgba(0,0,0,.18)";
     const _youBarCol=pfg==="#000"?"rgba(0,0,0,.3)":"rgba(255,255,255,.45)";

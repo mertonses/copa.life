@@ -4,11 +4,14 @@ var BUDGET=30,DEBT_LIMIT=-28,MAX_CARD_COPIES=4,FINAL_DEBT_CAP=18;
 var CONTACT_FORM_KEY="2eb11e4e-335a-401e-b2e7-104c07ecd4a6";
 function cnt(s,arr){return s.filter(p=>arr.includes(p.pos)).length;}
 function activeDebtLimit(){return round>=3?Math.max(DEBT_LIMIT,chairmanSackLimit()):DEBT_LIMIT;}
-function canAffordCost(cost){return budget-cost>=activeDebtLimit();}
+function legacySpendable(){return Math.max(0,Math.round(legacyCash||0));}
+function budgetAfterCost(cost){cost=Math.max(0,Math.round(cost||0));return Math.round((budget||0)-Math.max(0,cost-legacySpendable()));}
+function canAffordCost(cost){return budgetAfterCost(cost)>=activeDebtLimit();}
 function recordDebt(){if(econStats)econStats.worstDebt=Math.min(econStats.worstDebt||0,budget||0);}
 function debtStage(){return budget<=-20?3:budget<=-10?2:budget<0?1:0;}
-function spend(cost,tag){cost=Math.round(cost||0);budget=Math.round(budget-cost);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+cost;recordDebt();return budget;}
+function spend(cost,tag){cost=Math.round(cost||0);if(cost<=0)return budget;const fromLegacy=Math.min(legacySpendable(),cost);if(fromLegacy>0)legacyCash=Math.max(0,Math.round((legacyCash||0)-fromLegacy));const fromBudget=cost-fromLegacy;budget=Math.round(budget-fromBudget);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+cost;recordDebt();return budget;}
 function earn(amount,tag){amount=Math.round(amount||0);budget=Math.round(budget+amount);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+amount;recordDebt();return budget;}
+function addLegacyCash(amount){amount=Math.max(0,Math.round(amount||0));legacyCash=Math.round((legacyCash||0)+amount);return legacyCash;}
 function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
 function chairmanSackLimit(){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};let lim=m[chairman&&chairman.id]||DEBT_LIMIT;if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
