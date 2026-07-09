@@ -1546,6 +1546,21 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   color:var(--color-ink);
   border-color:var(--color-primary);
 }
+#againBtn .again-brand{
+  display:inline-flex;
+  align-items:baseline;
+  gap:0;
+  margin:0 2px;
+  padding:1px 5px;
+  border-radius:6px;
+  background:rgba(255,255,255,.9);
+  color:var(--color-ink);
+  letter-spacing:0;
+  text-transform:none;
+}
+#againBtn .again-copa{color:var(--color-ink)}
+#againBtn .again-dot{color:var(--color-slate);opacity:.72;margin:0 1px}
+#againBtn .again-life{color:var(--color-primary)}
 #quickBtn{
   background:rgba(12,18,19,.92);
   color:#fff;

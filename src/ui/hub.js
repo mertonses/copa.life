@@ -336,7 +336,7 @@ function cardContractText(k){
     kupaci_kadro:tr?"Yarı final/final +4; finalde -2 güç.":"Semi/final +4; final -2 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
     son_dans:tr?"Finalde +4 güç.":"Final +4 power.",
-    kumarbaz:tr?"Hemen +€16M; finalde -8 güç; her tur %20 ihtimal -€24M.":"Instant +€16M; final -8 power; 20% each round -€24M.",
+    kumarbaz:variantOf(k)===1?(tr?"Şimdi +€25M; sonraki 2 turda -€10M öde. Güven -1.":"Now +€25M; pay -€10M for the next 2 rounds. Trust -1."):(tr?"Şimdi +€15M; sonraki 2 turda -€5M öde.":"Now +€15M; pay -€5M for the next 2 rounds."),
     gecici_prim:variantOf(k)===1?(tr?"Bu maç +12 güç; maç sonu %60 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +12 power; 60% injury risk after; next match -2; card expires."):(tr?"Bu maç +6 güç; maç sonu %30 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +6 power; 30% injury risk after; next match -2; card expires."),
     kurban_belli:variantOf(k)===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
     doping:variantOf(k)===1?(tr?"+10 güç; her tur %25 ihtimal -€25M ceza.":"+10 power; 25% each round -€25M fine."):(tr?"+6 güç; her tur %35 ihtimal -€15M ceza.":"+6 power; 35% each round -€15M fine."),
@@ -443,28 +443,30 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";const _turnsLeft=typeof loanPlayer.turnsLeft!=="undefined"?` · ${loanPlayer.turnsLeft} tur`:"";lc.innerHTML=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:1px"><path d="M2 10a6 6 0 0 0 10 2"/><path d="M14 6A6 6 0 0 0 4 4"/><path d="M12 8l2 2-2 2"/><path d="M4 2l-2 2 2 2"/></svg> <b>${surOf(loanPlayer)}</b> <span class="tier">KİRALIK · LOAN</span> <span class="v">OV${loanPlayer.ov}</span><span class="copy" style="color:var(--red)">-€${loanPlayer.loanCost}M${_turnsLeft}</span>`;cr.appendChild(lc);}
   cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round),stance=variantBadge(v);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy active-stance stance-${v}">${stance}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
+  function _flashInsufficient(el){
+    if(!el)return;
+    el.classList.add("show-insufficient");
+    clearTimeout(el._insufficientTimer);
+    el._insufficientTimer=setTimeout(()=>el.classList.remove("show-insufficient"),1500);
+  }
+  window._flashInsufficient=_flashInsufficient;
   const sc=$("shopcards");sc.innerHTML="";
   shopOffers.slice(0,2).forEach(k=>{
     const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;
     cardVariant[k]=sv;
     const cd=x.cards[k];
     const _basePr=cardPrice(k);
-    const _rawCard=CARDDEFS[k]||{};
-    const _normalPr=Math.max(1,Math.round((typeof _rawCard.price==="number"?_rawCard.price:7)*(VARIANT_PRICE_MOD[sv||0]||1)*(typeof cardPriceMod!=="undefined"?cardPriceMod:1.0)));
     const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
-    const _chairDisc=chairman&&chairman.id==="pinti"&&_basePr>0;
     const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;
     const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateShopPower(k);
     cardVariant[k]=oldV;
     const d=document.createElement("div");
-    d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+((_chairDisc||_memDisc)?" discounted":"");
-    if(_memDisc)d.dataset.discount="20%";
-    else if(_chairDisc)d.dataset.discount=Math.max(1,Math.round((_normalPr-pr)/Math.max(1,_normalPr)*100))+"%";
+    d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"");
     d.title=cd.n+"\n"+cardContractType(k);
     const desc=formatCardDesc(shopCardDesc(k,variantDesc(cd.d,sv)||shortCardText(k,s),sv));
     const priceLabel=pr<=0?(LANG==="tr"?"ÜCRETSİZ":"FREE"):`€${pr}M`;
-    d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-cat">${kindLabel(k)}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div></div><div class="ct-foot ct-foot-price-only"><span class="ct-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div>`;
-    if(!cant)d.onclick=()=>confirmBuyCard(k,pr);
+    d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div></div><div class="ct-foot ct-foot-price-only"></div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
+    d.onclick=()=>cant?_flashInsufficient(d):confirmBuyCard(k,pr);
     sc.appendChild(d);
   });
   if(!shopOffers.length){const e=document.createElement("div");e.className="cardtile-empty";e.style="grid-column:1/-1";e.innerHTML=`<div style="font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:center;padding:16px">— ${x.owned} —</div>`;sc.appendChild(e);}
