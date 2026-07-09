@@ -24,6 +24,10 @@ const IGNORED_DIRS = new Set([
   ".claude",
   ".npm-cache",
   ".pw-browsers",
+  ".tmp",
+  ".vscode",
+  "assets/story-icons",
+  "godot-final-sim",
   "outputs",
   "playtest",
 ]);
@@ -106,17 +110,17 @@ for (const file of walk(ROOT)) {
   const decoded = buffer.toString("utf8");
 
   if (hasUtf8Bom(buffer)) {
-    problems.push(`${relative}: UTF-8 BOM kullanma; dosya BOM'suz UTF-8 olmalı.`);
+    problems.push(`${relative}: UTF-8 BOM found; files must be UTF-8 without BOM.`);
   }
 
   if (decoded.includes("\uFFFD")) {
-    problems.push(`${relative}: geçersiz UTF-8 byte dizisi veya replacement character içeriyor.`);
+    problems.push(`${relative}: invalid UTF-8 byte sequence or replacement character found.`);
   }
 
   const lines = decoded.split(/\r?\n/);
   lines.forEach((line, index) => {
     if (hasDefiniteMojibake(line)) {
-      problems.push(`${relative}:${index + 1}: olası mojibake: ${line.slice(0, 180)}`);
+      problems.push(`${relative}:${index + 1}: possible mojibake: ${line.slice(0, 180)}`);
     }
     for (const term of forbiddenCardTypeTerms) {
       if (line.includes(term)) {
@@ -127,10 +131,10 @@ for (const file of walk(ROOT)) {
 }
 
 if (problems.length) {
-  console.error("Encoding kontrolü başarısız:");
+  console.error("Encoding check failed:");
   for (const problem of problems.slice(0, 80)) console.error(`- ${problem}`);
-  if (problems.length > 80) console.error(`... ${problems.length - 80} ek problem`);
+  if (problems.length > 80) console.error(`... ${problems.length - 80} more problem(s)`);
   process.exit(1);
 }
 
-console.log("Encoding OK: UTF-8 ve mojibake kontrolü temiz.");
+console.log("Encoding OK: UTF-8 and mojibake checks are clean.");

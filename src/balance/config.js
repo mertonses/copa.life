@@ -13,7 +13,8 @@ function spend(cost,tag){cost=Math.round(cost||0);if(cost<=0)return budget;const
 function earn(amount,tag){amount=Math.round(amount||0);budget=Math.round(budget+amount);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+amount;recordDebt();return budget;}
 function addLegacyCash(amount){amount=Math.max(0,Math.round(amount||0));legacyCash=Math.round((legacyCash||0)+amount);return legacyCash;}
 function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
-function chairmanSackLimit(){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};let lim=m[chairman&&chairman.id]||DEBT_LIMIT;if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
+function baseChairmanSackLimit(id){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};return m[id||(chairman&&chairman.id)]||DEBT_LIMIT;}
+function chairmanSackLimit(){let lim=baseChairmanSackLimit();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -2;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanReactToSpend(cost,context,payload){

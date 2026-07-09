@@ -220,10 +220,10 @@ function applyRiskCardGain(k){
   const removeCount=v===1?2:1,netPow=v===1?4:3;
   const sorted=[...s].sort((a,b)=>effOf(b)-effOf(a));
   const removed=sorted.slice(0,removeCount);
-  // Stars underperform but the rest of the squad rallies: flat net bonus
+  // Stars draw media heat, but the rest of the squad rallies: flat net bonus.
   riskPowerMod+=netPow;
-  removed.forEach(p=>pushFeed("⭐ <b>"+shortName(p)+"</b> "+(tr?"kriz içinde":"in crisis"),"lose"));
-  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?"takım ruhu: +"+netPow+" güç":"team spirit: +"+netPow+" power"),"pres");
+  removed.forEach(p=>pushFeed("⭐ <b>"+shortName(p)+"</b> "+(tr?"medyada hedef":"draws media heat"),"lose"));
+  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?"krize tepki: +"+netPow+" güç":"crisis response: +"+netPow+" power"),"pres");
   if(v===1&&rand()<0.20){spend(4,"spent");pushFeed("⭐ "+(tr?"Medya cezası: -€4M":"Media fine: -€4M"),"lose");}
   return;
  }
@@ -231,10 +231,10 @@ function applyRiskCardGain(k){
   const debuff=v===1?8:4;
   const priceRise=v===1?0.50:0.25;
   if(typeof opponent!=="undefined"&&opponent)opponent.power=Math.max(1,opponent.power-debuff);
-  shopBlocked=1;
-  cardPriceMod=1+priceRise;cardPriceModTurns=1;
+  shopBlocked=2;
+  cardPriceMod=1+priceRise;cardPriceModTurns=3;
   if(v===1){chairTrust=Math.max(0,chairTrust-1);}
-  pushFeed("🤑 <b>"+L().cards[k].n+"</b> "+(tr?"rakip -"+debuff+" güç · pazar kapalı":"opp -"+debuff+" power · market closed")+(v===1?" · güven -1":""),"pres");
+  pushFeed("🤑 <b>"+L().cards[k].n+"</b> "+(tr?"rakip -"+debuff+" güç · gelecek pazar kapalı · sonraki fiyat +%"+Math.round(priceRise*100):"opp -"+debuff+" power · next market closed · then prices +"+Math.round(priceRise*100)+"%")+(v===1?" · güven -1":""),"pres");
   return;
  }
 

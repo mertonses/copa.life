@@ -16,15 +16,15 @@ function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
  let cardBonus=0;cards.forEach(k=>cardBonus+=cardEff(k,s,r));
- const combo=comboBonus(),matchup=matchupBonus;
+ const matchup=matchupBonus;
  const risk=riskPowerMod+tempPrimePenalty+shortCampPenalty-(r>=6?finalPenalty:0);
  let trait=0;s.forEach(p=>{if(p.trait&&TRAITS[p.trait])trait+=TRAITS[p.trait].pw();});
  const moral=talkMod.all+talkMod.def*Math.min(2,cnt(s,DEFP)/4)+talkMod.atk*Math.min(2,cnt(s,FWDP)/3);
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
  const cap=typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null;
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
- const cappedRaw=styleBonus+cardBonus+combo+matchup+risk+trait;
+ const cappedRaw=styleBonus+cardBonus+matchup+risk+trait;
  const rawBonus=cappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.min(3,chemBonus(s).total);
- return {avg,styleBonus,cardBonus,combo,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ return {avg,styleBonus,cardBonus,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

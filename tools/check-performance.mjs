@@ -88,6 +88,26 @@ if (/assets\/chairs\/[^`"' )]+\.png/.test(sourceText) || /assets\/chairs\/\$\{/.
   failed = true;
   console.error("performance budget failed: runtime must not reference full-size chair PNG files");
 }
+const indexHtml = fs.readFileSync(indexFile, "utf8");
+const hubSource = fs.readFileSync(path.join(ROOT, "src", "ui", "hub.js"), "utf8");
+const layoutSource = fs.readFileSync(path.join(ROOT, "src", "styles", "layout.css"), "utf8");
+if (/<script[^>]+html2canvas/i.test(indexHtml)) {
+  failed = true;
+  console.error("performance budget failed: html2canvas must be lazy-loaded only when sharing");
+}
+if (
+  !/cleanupTouchDragGhosts/.test(hubSource) ||
+  !/orientationchange/.test(hubSource) ||
+  !/visibilitychange/.test(hubSource) ||
+  !/touch-drag-ghost/.test(hubSource)
+) {
+  failed = true;
+  console.error("performance budget failed: mobile touch drag must clean stale ghosts on lifecycle changes");
+}
+if (!/\.touch-drag-ghost\{[^}]*contain:layout paint style/.test(layoutSource)) {
+  failed = true;
+  console.error("performance budget failed: touch drag ghost must be paint-contained");
+}
 for (const [name, value, limit] of budgets) {
   console.log(`${name}: ${kb(value)} / ${kb(limit)}`);
   if (value > limit) {

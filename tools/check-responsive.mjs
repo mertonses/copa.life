@@ -39,7 +39,7 @@ const checks = [
   },
   {
     name: "final sim default speed uses visible 1x value",
-    pass: /setSpeed\(12\)/.test(html),
+    pass: /setSpeed\(10\)/.test(html),
   },
 ];
 

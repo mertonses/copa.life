@@ -3,11 +3,36 @@ import fs from "node:fs";
 const hub = fs.readFileSync("src/ui/hub.js", "utf8");
 const i18n = fs.readFileSync("src/data/i18n.js", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
+const cardReportTool = fs.existsSync("tools/card-balance-report.mjs")
+  ? fs.readFileSync("tools/card-balance-report.mjs", "utf8")
+  : "";
+const visibleCopy = [hub, i18n, html].join("\n");
+
+const forbiddenTierTerms = [
+  [84, 69, 77, 75, 304, 78, 76, 304],
+  [116, 101, 109, 107, 105, 110, 108, 105],
+  [84, 101, 109, 107, 105, 110, 108, 105],
+  [84, 69, 77, 75, 73, 78, 76, 73],
+  [67, 69, 83, 85, 82],
+  [99, 101, 115, 117, 114],
+  [67, 101, 115, 117, 114],
+].map((codes) => String.fromCodePoint(...codes));
+
+const strikerMistakes = [`ST ${String.fromCodePoint(98, 97, 351, 305, 110, 97)}`];
+const mojibakeMarkers = [0x00c2, 0x00c3, 0x00c4, 0x00c5].map((code) => String.fromCodePoint(code));
+const unclearCardCopy = [
+  "Kasığa Para",
+  "Backhander",
+  "Rakibi düşür",
+  "Rakibi daha sert",
+  "fiyat ve güven riski",
+  "price/trust risk",
+];
 
 const checks = [
   {
     name: "shop cards render selected variant description only",
-    pass: /const desc=shopCardDesc\(k,variantDesc\(cd\.d,sv\)\|\|shortCardText\(k,s\),sv\)/.test(hub),
+    pass: /const desc=(?:formatCardDesc\()?shopCardDesc\(k,variantDesc\(cd\.d,sv\)\|\|shortCardText\(k,s\),sv\)/.test(hub),
   },
   {
     name: "card collection renders selected owned variant only",
@@ -26,6 +51,22 @@ const checks = [
   {
     name: "how-to explains only COMMON and DARK",
     pass: html.includes('_howtoTier("COMMON")') && html.includes('_howtoTier("DARK")'),
+  },
+  {
+    name: "forbidden card tier terms are absent from visible copy",
+    pass: !forbiddenTierTerms.some((term) => visibleCopy.includes(term)),
+  },
+  {
+    name: "Turkish striker card copy uses SNT instead of ST",
+    pass: !strikerMistakes.some((term) => visibleCopy.includes(term)),
+  },
+  {
+    name: "backroom pressure card copy stays explicit",
+    pass: !unclearCardCopy.some((term) => visibleCopy.includes(term)),
+  },
+  {
+    name: "card balance report generator is UTF-8 clean",
+    pass: cardReportTool.includes("Kart Balance Tablosu") && !mojibakeMarkers.some((marker) => cardReportTool.includes(marker)),
   },
 ];
 

@@ -1,11 +1,13 @@
 {
   "scripts": {
     "favicons": "node tools/generate-favicons.mjs favicon.svg",
+    "fix:encoding": "node tools/fix-mojibake.mjs",
     "check:encoding": "node tools/check-encoding.mjs",
     "check:responsive": "node tools/check-responsive.mjs",
     "check:cards": "node tools/check-card-copy.mjs",
     "check:finalsim": "node tools/check-final-sim.mjs",
     "check:performance": "node tools/check-performance.mjs",
+    "report:cards": "node tools/card-balance-report.mjs",
     "test": "npm run check:encoding && npm run check:responsive && npm run check:cards && npm run check:finalsim && npm run check:performance"
   },
   "devDependencies": {

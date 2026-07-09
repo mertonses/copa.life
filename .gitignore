@@ -8,6 +8,12 @@ node_modules/
 .claude/
 .godot-user/
 .godot-user-test/
+godot-final-sim/
+.godot/
+*.godot
+*.tscn
+*.gd
+*.import
 *.log
 test/
 src/legacy/
@@ -22,3 +28,6 @@ card-editor.html
 .codex-translation-test/
 .codex_tmp_frames*/
 video_frames_tmp/
+.tmp/
+.vscode/
+assets/story-icons/

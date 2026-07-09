@@ -20,7 +20,7 @@ var CARDDEFS={
    eff:(s,r)=>0},
  /* KADRO */
  anadolu:{price:4,kind:"squad",mode:"scaling",
-   eff:(s,r)=>{const v=variantOf("anadolu");const sub70=s.filter(p=>p&&p.ov<70).length;if(v===1){const over85=s.filter(p=>p&&p.ov>=85).length;return Math.min(9,sub70*3-over85*4);}return Math.min(9,sub70*3);}},
+   eff:(s,r)=>{const v=variantOf("anadolu");const starters=(s||[]).filter(Boolean);const sub70=starters.filter(p=>p.ov<70).length;return Math.min(v===1?5:3,sub70);}},
  altyapi_plani:{price:4,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.age<=23).length;return Math.min(variantOf("altyapi_plani")===1?16:8,n*(variantOf("altyapi_plani")===1?4:2));}},
  tecrubeli_omurga:{price:6,kind:"squad",mode:"scaling",
@@ -28,8 +28,8 @@ var CARDDEFS={
  yerli_blok:{price:8,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(variantOf("yerli_blok")===1?9:5,n*(variantOf("yerli_blok")===1?3:1));}},
  /* HÜCUM */
- kanat_akini:{price:7,kind:"power",mode:"scaling",
-   eff:(s,r)=>{const n=s.filter(p=>p&&["LW","RW","LM","RM","WB"].includes(p.pos)).length;return Math.min(variantOf("kanat_akini")===1?16:8,n*(variantOf("kanat_akini")===1?4:2));}},
+kanat_akini:{price:7,kind:"power",mode:"scaling",
+   eff:(s,r)=>{const wide=["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"];const n=s.filter(p=>p&&wide.includes(p.pos)).length;return Math.min(4,n);}},
  cift_forvet:{price:6,kind:"power",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.pos==="ST").length;return Math.min(variantOf("cift_forvet")===1?8:4,n*(variantOf("cift_forvet")===1?4:2));}},
  /* FİNAL */

@@ -264,7 +264,6 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .goalburst.show{animation:goalpop 1s ease-out}
 .goalburst b{display:block;font-family:var(--disp);font-size:25px;line-height:1;color:var(--color-ink);letter-spacing:0;margin-bottom:4px}
 @keyframes goalpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.82)}12%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
-.godot-ctrl-bar{display:flex;align-items:center;gap:5px;padding:5px 8px;border:1.5px solid var(--border-subtle);border-top:none;background:var(--surface-elevated);font-family:var(--mono);font-size:10px;letter-spacing:.04em;margin-bottom:8px}
 .gctrl-btn{background:transparent;border:1.5px solid var(--border-subtle);color:var(--color-ink);padding:3px 9px;font-family:var(--mono);font-size:10px;cursor:pointer;letter-spacing:.04em;line-height:1.5}
 .gctrl-btn:hover,.gctrl-btn.active{background:var(--color-ink);color:var(--surface-default)}
 .gctrl-lbl{color:var(--color-slate);font-size:9px;letter-spacing:.1em;margin-right:1px}
@@ -1189,18 +1188,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .result .scoreboard.sacked .big{color:#E6EEEF}
 .result .scoreboard.elendi .big{color:#D94A3A}
 .result .verdict{
-  max-width:100%;
-  margin:0 0 12px;
-  padding:10px 14px;
-  border:1px solid var(--border-subtle);
-  border-top:0;
-  border-radius:7px;
-  background:rgba(255,255,255,.62);
-  color:var(--color-slate);
-  text-align:center;
-  font-family:var(--disp);
-  font-weight:650;
-  line-height:1.45;
+  display:none;
 }
 .result .motm{
   margin:0 0 8px;
@@ -1278,9 +1266,9 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 }
 .storyevent{
   display:grid;
-  grid-template-columns:42px 1fr;
-  gap:11px;
-  padding:9px 0;
+  grid-template-columns:44px 1fr;
+  gap:12px;
+  padding:10px 0;
   border-bottom:1px solid rgba(73,110,113,.14);
   position:relative;
 }
@@ -1293,10 +1281,10 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   padding-top:1px;
 }
 .storyicon{
-  width:34px;
-  height:34px;
+  width:38px;
+  height:38px;
   border:1px solid rgba(73,110,113,.22);
-  border-radius:10px;
+  border-radius:11px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -1309,12 +1297,21 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   height:19px;
   display:block;
 }
+.storyicon .story-svg-icon{
+  width:23px;
+  height:23px;
+  display:block;
+  flex:0 0 auto;
+  stroke:currentColor;
+  vector-effect:non-scaling-stroke;
+}
 .storynum{
   font-family:var(--mono);
-  font-size:8px;
+  font-size:7.5px;
   font-weight:900;
-  letter-spacing:.9px;
-  color:rgba(73,110,113,.68);
+  letter-spacing:1px;
+  color:rgba(73,110,113,.58);
+  line-height:1;
 }
 .storycopy{
   min-width:0;
@@ -1368,9 +1365,10 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .story-win .storyicon{background:linear-gradient(135deg,rgba(66,154,115,.17),rgba(230,238,239,.72))}
 @media(max-width:680px){
   .storytile .stb{padding:12px!important}
-  .storyevent{grid-template-columns:38px 1fr;gap:9px;padding:8px 0}
-  .storyicon{width:31px;height:31px;border-radius:9px}
+  .storyevent{grid-template-columns:40px 1fr;gap:10px;padding:9px 0}
+  .storyicon{width:34px;height:34px;border-radius:10px}
   .storyicon svg{width:17px;height:17px}
+  .storyicon .story-svg-icon{width:21px;height:21px}
   .storyevent b{font-size:13.5px}
   .storyevent p{font-size:12.5px;line-height:1.48}
   .storypath span{font-size:8px;padding:3px 6px}
@@ -1522,10 +1520,16 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   font-weight:900;
   text-align:center;
 }
+.pr-rt.pr-pow{
+  color:var(--color-ink)!important;
+}
 .result-actions{
   display:grid;
   gap:8px;
   margin-top:14px;
+}
+.result-actions #againBtn{
+  order:-1;
 }
 .result-row{
   display:grid!important;
