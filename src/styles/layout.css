@@ -2613,9 +2613,11 @@ img,svg,canvas{max-width:100%}
   min-width:0!important;
   padding:0!important;
   gap:0!important;
-  border-radius:8px;
-  overflow:hidden;
-  background:var(--surface-elevated);
+  border:0!important;
+  border-radius:0!important;
+  overflow:visible!important;
+  background:transparent!important;
+  box-shadow:none!important;
 }
 #hub .hub-action-panel .btn-pres{
   width:100%!important;
@@ -3522,6 +3524,33 @@ img,svg,canvas{max-width:100%}
   .pen-modal .pen-goal{height:126px!important}
   .pen-modal .pen-log{max-height:84px!important}
 }
+
+/* ===== Final sim: timeline + event map ===== */
+#simTimeline{
+  margin-bottom:8px;
+  padding:2px 0;
+}
+.tl-svg{
+  width:100%;
+  display:block;
+  overflow:visible;
+}
+.sim-eventmap{
+  width:100%;
+  border-radius:6px;
+  overflow:hidden;
+  background:#1d4d1b;
+  aspect-ratio:105/65;
+}
+.sim-eventmap svg{
+  display:block;
+  width:100%;
+  height:100%;
+}
+#sim .fieldframe{
+  padding:6px;
+}
+#sim #cv{display:none} /* hide legacy cv if still present */
 
 /* ===== Compact spotlight player picker ===== */
 .spotlight-modal{
@@ -5585,6 +5614,12 @@ body{
     min-width:0!important;
     display:block!important;
     margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overflow:visible!important;
   }
 
   #hub .hub-action-panel .actionbar #talkBtn{

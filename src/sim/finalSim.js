@@ -7,6 +7,7 @@
 const SIM_SPEED_1X = 10;
 const SIM_SPEED_2X = 20;
 const SIM_SPEED_4X = 40;
+const SIM_SPEED_8X = 80;
 var speedMul = SIM_SPEED_1X;
 
 const UI_COLORS = {
@@ -31,6 +32,10 @@ function setSpeed(s) {
 }
 function simPause() { if (sim && sim.pause) sim.pause(); }
 function simSkip()  {
+  if (window._finalPenaltyPending && typeof window.openCopaFinalPenalties === "function") {
+    window.openCopaFinalPenalties(true);
+    return;
+  }
   if (window._finalPenaltyPending && typeof window._openFinalPenaltyShootout === "function") {
     window._openFinalPenaltyShootout(true);
     return;
@@ -521,12 +526,13 @@ function _chooseSequenceArchetype(ctx,rng){
   const leftReady=(ctx.team||[]).some(p=>!p.sentOff&&(p.role==='LW'||p.role==='LB')&&p.x<_PW*0.50);
   const rightReady=(ctx.team||[]).some(p=>!p.sentOff&&(p.role==='RW'||p.role==='RB')&&p.x>_PW*0.50);
   const wideNeed=widePct<0.34&&((ctx.matchTime||0)>12*60);
+  const wideRunNeed=((audit.overlapRuns||0)<Math.max(1,Math.floor((audit.wide||0)*0.12)))&&((ctx.matchTime||0)>18*60);
   const weights=[
     {v:'BUILD_FROM_BACK',w:(ownHalf?16:4)+(carrier.role==='GK'?18:0)+(finalEarly?8:0)+(shout==='calm'?8:0)},
     {v:'GK_SHORT_START',w:carrier.role==='GK'?34+(shout==='calm'?10:0):0},
     {v:'CENTRAL_TRIANGLE',w:18+(midThird?9:0)+(profile.pass>70?6:0)+(finalEarly?5:0)},
-    {v:'WIDE_LEFT',w:canWide?Math.round(wideBase*34)+(leftReady?6:0)+(wideNeed?18:0)+(finalThird?7:0)+(shout==='more'?5:0):0},
-    {v:'WIDE_RIGHT',w:canWide?Math.round(wideBase*34)+(rightReady?6:0)+(wideNeed?18:0)+(finalThird?7:0)+(shout==='more'?5:0):0},
+    {v:'WIDE_LEFT',w:canWide?Math.round(wideBase*34)+(leftReady?6:0)+(wideNeed?18:0)+(wideRunNeed?10:0)+(finalThird?7:0)+(shout==='more'?5:0):0},
+    {v:'WIDE_RIGHT',w:canWide?Math.round(wideBase*34)+(rightReady?6:0)+(wideNeed?18:0)+(wideRunNeed?10:0)+(finalThird?7:0)+(shout==='more'?5:0):0},
     {v:'LONG_BALL',w:(ownHalf?9:4)+(ctx.losing?8:0)+(late?7:0)+(shout==='hold'?10:0)},
     {v:'COUNTER',w:(hasCounterCard?14:7)+(shout==='push'?8:0)+(golden?8:0)},
     {v:'PRESS_RECOVERY',w:shout==='push'?18:5},
@@ -694,6 +700,11 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
   // Nearest opponent pressure
   let pressDist=99;for(const o of opponents){if(o.role!=='GK'&&!o.sentOff){const d=carrier.dist(o.x,o.y);if(d<pressDist)pressDist=d;}}
   const pressured=pressDist<3.5;
+  const carrierWide=carrier.role==='LW'||carrier.role==='RW'||carrier.role==='LB'||carrier.role==='RB'||carrier.x<_PW*0.24||carrier.x>_PW*0.76;
+  const centralCarrier=carrier.x>_PW*0.32&&carrier.x<_PW*0.68;
+  let nearbyOpp=0;
+  for(const o of opponents){if(o.role!=='GK'&&!o.sentOff&&carrier.dist(o.x,o.y)<7.2)nearbyOpp++;}
+  const centralCongested=centralCarrier&&nearbyOpp>=3;
 
   const acts=[];
 
@@ -729,10 +740,11 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
       if(buildFromBack&&(r.role==='LB'||r.role==='RB')&&d<28)sc2+=0.16;
       if(_isCentralSeqType(seqType)&&(r.role==='CM'||r.role==='DM'||r.role==='AM'))sc2+=0.18;
       if(_isWideSeqType(seqType)&&sameWide)sc2+=0.34;
+      if(_isWideSeqType(seqType)&&!carrierWide&&wideReceiver)sc2+=0.18;
       if(wideReceiver)sc2+=0.28;
       if(overlapReceiver)sc2+=0.30;
       if(_isWideSeqType(seqType)&&(r.role==='CM'||r.role==='AM')&&seqMode==='cutback')sc2+=0.22;
-      if(_isRecycleSeqType(seqType)&&support)sc2+=0.28;
+      if((_isRecycleSeqType(seqType)||centralCongested)&&support)sc2+=0.28;
       if((seqType==='COUNTER'||seqType==='PRESS_RECOVERY')&&fwd>8)sc2+=0.20;
       if(seqType==='LONG_BALL'&&r.role==='ST'&&fwd>10)sc2+=0.30;
       if(profile){
@@ -742,7 +754,7 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
         if(_isRecycleSeqType(seqType)||buildFromBack)sc2+=(profile.build_up_success-0.55)*0.22+(profile.press_resist-0.52)*0.18;
       }
       if(offside)sc2-=0.75;
-      if(sc2>_bsc){_bsc=sc2;const pt=d<12?'SHORT_PASS':d<25?'DRIVEN_PASS':'LONG_PASS';_bestPasser={player:r,type:pt,score:_bsc};}
+      if(sc2>_bsc){_bsc=sc2;const longLimit=seqType==='LONG_BALL'?24:32;const pt=d<12?'SHORT_PASS':d<longLimit?'DRIVEN_PASS':'LONG_PASS';_bestPasser={player:r,type:pt,score:_bsc};}
       // through ball — ST running in behind
       if(r.role==='ST'&&fwd>10&&d<30&&!pressured&&!offside){
         const tbSc=0.45+(carrier.vision/100)*0.25+(carrier.passing/100)*0.15+(seqType==='COUNTER'||seqType==='PRESS_RECOVERY'||seqType==='LONG_BALL'?0.18:0)+(profile?profile.central_progress*0.08:0);
@@ -753,10 +765,8 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
     if(_throughBall)acts.push({type:'THROUGH_BALL',score:_throughBall.score,receiver:_throughBall.player});
   }
   // CARRY — advance toward goal; competitive with pass
-  const carrierWide=carrier.role==='LW'||carrier.role==='RW'||carrier.role==='LB'||carrier.role==='RB'||carrier.x<_PW*0.24||carrier.x>_PW*0.76;
-  const centralCarrier=carrier.x>_PW*0.32&&carrier.x<_PW*0.68;
   const wideCarryBonus=_isWideSeqType(seqType)&&carrierWide?0.18:0;
-  const centralCarryPenalty=centralCarrier&&!(seqType==='COUNTER'||seqType==='PRESS_RECOVERY'||seqType==='LONG_BALL')?0.09:0;
+  const centralCarryPenalty=(centralCarrier||centralCongested)&&!(seqType==='COUNTER'||seqType==='PRESS_RECOVERY'||seqType==='LONG_BALL')?0.12:0;
   acts.push({type:'CARRY',score:0.42+(carrier.dribbling/100)*0.20-(pressured?0.26:0)-(inOppBox?0.06:0)+(dGoal>25?0.05:0)+wideCarryBonus-centralCarryPenalty+(profile&&_isWideSeqType(seqType)?(profile.wide_progress-0.46)*0.22:0)});
   // CROSS
   const wx=carrier.x/_PW;
@@ -767,7 +777,16 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
     acts.push({type:cutbackIntent?'CUTBACK':'CROSS',score:0.48+(carrier.passing/100)*0.30+(wideSeq?0.30:0)+(cutbackIntent?0.18:0)+(profile?(cutbackIntent?profile.cutback_quality:profile.cross_quality)*0.12:0)});
   }
   // BACK PASS
-  if(pressured&&!desperate){const bp=rcvrs.filter(r=>(tid===0?r.y<carrier.y+4:r.y>carrier.y-4)&&carrier.dist(r.x,r.y)<18);if(bp.length)acts.push({type:'BACK_PASS',score:0.45,receiver:bp[0]});}
+  if((pressured||centralCongested||_isRecycleSeqType(seqType)||shout==='calm'||shout==='hold')&&!desperate){
+    const bp=rcvrs
+      .filter(r=>(tid===0?r.y<carrier.y+6:r.y>carrier.y-6)&&carrier.dist(r.x,r.y)<24)
+      .sort((a,b)=>carrier.dist(a.x,a.y)-carrier.dist(b.x,b.y));
+    if(bp.length){
+      let bpScore=0.40+(pressured?0.18:0)+(centralCongested?0.20:0)+(_isRecycleSeqType(seqType)?0.24:0);
+      if(shout==='calm'||shout==='hold')bpScore+=0.12;
+      acts.push({type:'BACK_PASS',score:bpScore,receiver:bp[0]});
+    }
+  }
   // CLEAR
   if((carrier.role==='GK'||carrier.role==='CB')&&pressured)acts.push({type:'CLEAR',score:0.6});
 
@@ -1015,17 +1034,89 @@ function buildSim(myPow, oppPow) {
   const myName=(typeof teamName!=="undefined"&&teamName)?teamName:"US";
   const oppName=(typeof opponent!=="undefined"&&opponent&&opponent.name)?opponent.name:"RAKİP";
 
-  /* canvas setup */
-  const cvEl=document.getElementById("cv");
-  const W=Math.max(300,Math.min(960,(document.getElementById("sim")&&document.getElementById("sim").clientWidth)||560));
+  /* event map setup (replaces canvas) */
+  const cvEl=document.getElementById("simEventMap")||document.getElementById("cv");
+  const W=320; // retained for legacy refs (heatmap, etc.)
   const H=Math.round(W*0.565);
-  const dpr=Math.min(2,window.devicePixelRatio||1);
-  const canvas=document.createElement("canvas");
-  canvas.width=W*dpr;canvas.height=H*dpr;
-  canvas.style.cssText="display:block;width:100%;border-radius:6px";
-  cvEl.innerHTML="";cvEl.style.cssText="position:relative;border-radius:6px;overflow:hidden;background:#3a7a2e";
-  cvEl.appendChild(canvas);
-  const rawCtx=canvas.getContext("2d");rawCtx.scale(dpr,dpr);
+  const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
+  const rawCtx=canvas.getContext("2d"); // offscreen only, used for heatmap
+
+  /* ── Live UI helpers (timeline + event map SVG) ── */
+  function _initLiveUI(el){
+    if(el){
+      el.innerHTML='<svg id="emSvg" viewBox="0 0 100 65" preserveAspectRatio="xMidYMid meet" style="width:100%;display:block;border-radius:6px">'
+        +'<defs><linearGradient id="emGnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1d4d1b"/><stop offset="100%" stop-color="#265e22"/></linearGradient></defs>'
+        +'<rect width="100" height="65" fill="url(#emGnd)"/>'
+        +'<rect x="3" y="2" width="94" height="61" rx="0.5" fill="none" stroke="rgba(255,255,255,0.42)" stroke-width="0.5"/>'
+        +'<line x1="3" y1="32.5" x2="97" y2="32.5" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
+        +'<circle cx="50" cy="32.5" r="9" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.4"/>'
+        +'<circle cx="50" cy="32.5" r="0.9" fill="rgba(255,255,255,0.3)"/>'
+        +'<rect x="30" y="2" width="40" height="14" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
+        +'<rect x="30" y="49" width="40" height="14" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
+        +'<rect x="40" y="0.2" width="20" height="2.2" fill="rgba(255,255,255,0.5)" rx="0.3"/>'
+        +'<rect x="40" y="62.6" width="20" height="2.2" fill="rgba(255,255,255,0.5)" rx="0.3"/>'
+        +'<g id="emMarkers"></g>'
+        +'<rect id="emEvBg" x="22" y="27" width="56" height="11" rx="1.5" fill="rgba(12,18,19,0.84)" opacity="0"/>'
+        +'<text id="emEvTxt" x="50" y="34.5" text-anchor="middle" font-size="4" fill="#E6EEEF" font-family="system-ui,sans-serif" font-weight="700" opacity="0"></text>'
+        +'<text x="50" y="5.5" text-anchor="middle" font-size="3.4" fill="rgba(230,238,239,0.5)" font-family="system-ui,sans-serif" id="emLblTop">'+oppName.toUpperCase().slice(0,10)+'</text>'
+        +'<text x="50" y="63" text-anchor="middle" font-size="3.4" fill="rgba(66,154,115,0.9)" font-family="system-ui,sans-serif" id="emLblBot">'+myName.toUpperCase().slice(0,10)+'</text>'
+        +'</svg>';
+    }
+    const tlEl=document.getElementById('simTimeline');
+    if(tlEl){
+      const ticks=[0,15,30,45,60,75,90];
+      const mkTick=m=>{const x=(2+m/90*296).toFixed(1);return '<line x1="'+x+'" y1="9" x2="'+x+'" y2="15" stroke="#496E71" stroke-width="1"/>'
+        +'<text x="'+x+'" y="22.5" text-anchor="middle" font-size="4.5" fill="rgba(230,238,239,0.45)" font-family="system-ui,sans-serif">'+m+"'</text>";};
+      tlEl.innerHTML='<svg class="tl-svg" viewBox="0 0 300 24" preserveAspectRatio="xMidYMid meet">'
+        +'<rect x="2" y="11" width="296" height="3" rx="1.5" fill="rgba(73,110,113,0.3)"/>'
+        +'<rect id="tlProg" x="2" y="11" width="0" height="3" rx="1.5" fill="#429A73"/>'
+        +ticks.map(mkTick).join('')
+        +'<g id="tlMarkers"></g>'
+        +'<line id="tlCursor" x1="2" y1="7" x2="2" y2="17" stroke="#E6EEEF" stroke-width="1.2" opacity="0.65" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+  }
+  function _updateTimelineCursor(min){
+    const x=(2+Math.min(1,min/90)*296).toFixed(1);
+    const cur=document.getElementById('tlCursor');
+    const prog=document.getElementById('tlProg');
+    if(cur){cur.setAttribute('x1',x);cur.setAttribute('x2',x);}
+    if(prog)prog.setAttribute('width',Math.max(0,parseFloat(x)-2).toFixed(1));
+  }
+  function _addTimelineMarker(min,type,side){
+    const g=document.getElementById('tlMarkers');if(!g)return;
+    const x=(2+Math.min(1,min/90)*296).toFixed(1);
+    const c=side===0?'#429A73':'#496E71';
+    const r=type==='goal'?3.2:type==='save'?2.2:1.8;
+    const ci=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ci.setAttribute('cx',x);ci.setAttribute('cy','12.5');ci.setAttribute('r',r);ci.setAttribute('fill',c);
+    if(type==='goal'){ci.setAttribute('stroke','#E6EEEF');ci.setAttribute('stroke-width','0.6');}
+    g.appendChild(ci);
+  }
+  function _flashEventMap(type,side,posX,posY,label){
+    const mg=document.getElementById('emMarkers');
+    if(mg){
+      const mx=(3+posX*94).toFixed(1);
+      const my=(2+posY*61).toFixed(1);
+      const mc=side===0?'#429A73':'#496E71';
+      const r=type==='goal'?3.8:2.0;
+      const ci=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      ci.setAttribute('cx',mx);ci.setAttribute('cy',my);ci.setAttribute('r',r);
+      ci.setAttribute('fill',mc);ci.setAttribute('opacity','0.9');
+      if(type==='goal'){ci.setAttribute('stroke','#E6EEEF');ci.setAttribute('stroke-width','0.7');}
+      mg.appendChild(ci);
+      if(type!=='goal')setTimeout(()=>{try{mg.removeChild(ci);}catch(e){}},5000);
+    }
+    if(!label)return;
+    const bg=document.getElementById('emEvBg');
+    const txt=document.getElementById('emEvTxt');
+    if(bg&&txt){
+      txt.textContent=label;
+      bg.setAttribute('opacity','1');txt.setAttribute('opacity','1');
+      setTimeout(()=>{bg.setAttribute('opacity','0');txt.setAttribute('opacity','0');},type==='goal'?2200:1200);
+    }
+  }
+  _initLiveUI(cvEl);
 
   /* RNG */
   const seedBase=typeof seedNum!=="undefined"?seedNum:(Date.now()&0xffffff);
@@ -1081,7 +1172,15 @@ function buildSim(myPow, oppPow) {
   while(teamB.length<11){const i=teamB.length;teamB.push(new _Player(i,1,'CM',_PW/2+rng.rng(-10,10),_PH*0.5,mkStatsB(i,powOffB,_namesB)));}
 
   const ball=new _Ball();
-  const renderer=_mkRenderer(canvas,W,H);
+  const renderer={
+    goalFlash(){},
+    burst(txt){
+      const bg=document.getElementById('emEvBg');const t=document.getElementById('emEvTxt');
+      if(bg&&t){t.textContent=txt;bg.setAttribute('opacity','1');t.setAttribute('opacity','1');
+      setTimeout(()=>{bg.setAttribute('opacity','0');t.setAttribute('opacity','0');},1800);}
+    },
+    clear(){},drawPitch(){},drawPlayers(){},drawBall(){},drawEffects(){},drawHUD(){},decay(){}
+  };
   const audio=_mkAudio();
   const effects=_mkPool(40);
 
@@ -1091,7 +1190,7 @@ function buildSim(myPow, oppPow) {
   const goalEvents=[];
   const audit={
     wide:0,leftWide:0,rightWide:0,central:0,recycle:0,longBall:0,counter:0,
-    overlapRuns:0,cutbacks:0,crosses:0,throughBalls:0,backPasses:0,pressWins:0,
+    overlapRuns:0,cutbacks:0,crosses:0,throughBalls:0,longPasses:0,tacticalLongBalls:0,backPasses:0,pressWins:0,
     interceptions:0,passes:0,shots:0,carries:0,discipline:0,buildFromBack:0,
     setPieces:0,gkShortStarts:0,centralTriangles:0,lowTempoBeats:0,resets:0,
     pressRecoveries:0,sequenceCounts:{},profileSamples:0,shotQualitySum:0,keeperResponseSum:0,
@@ -1109,7 +1208,7 @@ function buildSim(myPow, oppPow) {
   let lastSeqCommTime=-999;
 
   const shapeCfg={shout:null};
-  const tacticalSeq={team:0,type:'BUILD_CENTER',mode:'support',phase:'preparation',profile:null,beat:0,until:0,lastCarrierId:-1};
+  const tacticalSeq={team:0,type:'BUILD_CENTER',mode:'support',phase:'preparation',profile:null,beat:0,until:0,lastCarrierId:-1,countedOverlap:false,countedReset:false};
   const plannedSequenceQueue=[[],[]];
 
   function sequenceContext(tid,carrier){
@@ -1131,7 +1230,6 @@ function buildSim(myPow, oppPow) {
     const ctx=sequenceContext(tid,carrier);
     plannedSequenceQueue[tid]=[];
     for(let i=0;i<6;i++)plannedSequenceQueue[tid].push(_chooseSequenceArchetype(ctx,rng));
-    audit.plannedSequences+=plannedSequenceQueue[tid].length;
   }
   function nextPlannedSequence(tid,carrier){
     if(!plannedSequenceQueue[tid]||plannedSequenceQueue[tid].length<2)refillSequenceQueue(tid,carrier);
@@ -1149,8 +1247,9 @@ function buildSim(myPow, oppPow) {
     if((carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&rng.bool(0.28))type='WIDE_RIGHT';
     const mode=_sequenceMode(type,rng);
     const profile=_profileForSequence({type,mode},{team,opp,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive,isFinal:typeof round!=="undefined"&&round>=6,losing,leading});
-    tacticalSeq.team=tid;tacticalSeq.type=type;tacticalSeq.mode=mode;tacticalSeq.phase='preparation';tacticalSeq.profile=profile;tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(type==='LOW_TEMPO'||type==='RECYCLE'?10:8,type==='LOW_TEMPO'||type==='RECYCLE'?18:15);tacticalSeq.lastCarrierId=carrier.id;
+    tacticalSeq.team=tid;tacticalSeq.type=type;tacticalSeq.mode=mode;tacticalSeq.phase='preparation';tacticalSeq.profile=profile;tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(type==='LOW_TEMPO'||type==='RECYCLE'?10:8,type==='LOW_TEMPO'||type==='RECYCLE'?18:15);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.sequenceCounts[type]=(audit.sequenceCounts[type]||0)+1;
+    audit.plannedSequences++;
     audit.profileSamples++;
     audit.shotQualitySum+=profile.shot_quality;
     audit.keeperResponseSum+=profile.keeper_response;
@@ -1159,7 +1258,7 @@ function buildSim(myPow, oppPow) {
     if(_isWideSeqType(type)){audit.wide++;if(type==='WIDE_LEFT')audit.leftWide++;else audit.rightWide++;}
     else if(_isCentralSeqType(type)){audit.central++;if(type==='CENTRAL_TRIANGLE')audit.centralTriangles++;if(type==='BUILD_FROM_BACK')audit.buildFromBack++;}
     else if(_isRecycleSeqType(type)){audit.recycle++;if(type==='LOW_TEMPO')audit.lowTempoBeats++;}
-    else if(type==='LONG_BALL')audit.longBall++;
+    else if(type==='LONG_BALL'){audit.longBall++;audit.tacticalLongBalls++;}
     else if(type==='COUNTER'){audit.counter++;}
     else if(type==='PRESS_RECOVERY'){audit.counter++;audit.pressRecoveries++;}
     else if(type==='SET_PIECE')audit.setPieces++;
@@ -1197,7 +1296,19 @@ function buildSim(myPow, oppPow) {
     else if(action&&(action.type==='SHORT_PASS'||action.type==='DRIVEN_PASS'||action.type==='BACK_PASS'||action.type==='CARRY'))tacticalSeq.phase='development';
     else if(action&&(action.type==='CROSS'||action.type==='CUTBACK'||action.type==='THROUGH_BALL'||action.type==='LONG_PASS'))tacticalSeq.phase='action';
     else if(action&&(action.type==='SHOOT'||action.type==='CLEAR'))tacticalSeq.phase='result';
-    if(_isRecycleSeqType(tacticalSeq.type)&&(action&&action.type==='BACK_PASS'))audit.resets++;
+    if(_isRecycleSeqType(tacticalSeq.type)&&(action&&action.type==='BACK_PASS')&&!tacticalSeq.countedReset){
+      audit.resets++;
+      tacticalSeq.countedReset=true;
+    }
+    if(_isWideSeqType(tacticalSeq.type)&&action&&!tacticalSeq.countedOverlap){
+      const wideCarrier=carrier.role==='LW'||carrier.role==='RW'||carrier.role==='LB'||carrier.role==='RB'||carrier.x<_PW*0.26||carrier.x>_PW*0.74;
+      if(wideCarrier||action.type==='CROSS'||action.type==='CUTBACK'){
+        if(action.type==='CARRY'||action.type==='SHORT_PASS'||action.type==='DRIVEN_PASS'||action.type==='CROSS'||action.type==='CUTBACK'){
+          audit.overlapRuns++;
+          tacticalSeq.countedOverlap=true;
+        }
+      }
+    }
     if(tacticalSeq.type==='GK_SHORT_START'&&action&&(action.type==='SHORT_PASS'||action.type==='DRIVEN_PASS'))audit.gkShortStarts++;
     if(tacticalSeq.type==='PRESS_RECOVERY'&&action&&action.type!=='BACK_PASS')audit.pressRecoveries++;
     if(action&&(action.type==='CUTBACK'||action.type==='SHOOT'||action.type==='CLEAR'))tacticalSeq.until=0;
@@ -1205,16 +1316,16 @@ function buildSim(myPow, oppPow) {
   function decisionIntervalFor(seq){
     const phase=seq&&seq.phase?seq.phase:'preparation';
     let base=DEC_INT;
-    if(phase==='preparation')base+=0.34;
-    else if(phase==='development')base+=0.08;
-    else if(phase==='action')base-=0.22;
-    else if(phase==='result')base+=0.18;
-    if(seq&&_isRecycleSeqType(seq.type))base+=0.22;
-    if(seq&&seq.type==='COUNTER')base-=0.18;
-    if(shapeCfg.shout==='calm'||shapeCfg.shout==='hold')base+=0.16;
-    if(shapeCfg.shout==='more'||shapeCfg.shout==='push')base-=0.12;
-    if(typeof goldenGoalMode!=="undefined"&&goldenGoalMode)base+=0.08;
-    return _simClamp(base,1.08,2.55);
+    if(phase==='preparation')base+=0.42;
+    else if(phase==='development')base+=0.14;
+    else if(phase==='action')base-=0.14;
+    else if(phase==='result')base+=0.20;
+    if(seq&&_isRecycleSeqType(seq.type))base+=0.28;
+    if(seq&&seq.type==='COUNTER')base-=0.10;
+    if(shapeCfg.shout==='calm'||shapeCfg.shout==='hold')base+=0.18;
+    if(shapeCfg.shout==='more'||shapeCfg.shout==='push')base-=0.08;
+    if(typeof goldenGoalMode!=="undefined"&&goldenGoalMode)base+=0.10;
+    return _simClamp(base,1.35,3.10);
   }
 
   /* heatmap */
@@ -1292,6 +1403,8 @@ function buildSim(myPow, oppPow) {
     const comm="⚽ <b>"+Math.floor(matchTime/60)+"'</b> <b>"+nm+"</b>"+(lastAssist?" <small>"+(isTR?"Asist":"Assist")+" "+lastAssist+"</small>":"")+" — "+sc2;
     _html("simComm",comm);_html("simRadio","📻 "+comm);
     _addRow(teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>⚽ "+nm+" "+sc2+"</span>");
+    _addTimelineMarker(Math.floor(matchTime/60),'goal',teamId);
+    _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,"⚽ "+nm+" "+sc2);
     momDisplay=Math.max(18,Math.min(82,momDisplay+(teamId===0?22:-22)));
     // add to heatgrid
     addHeat(ball.x,ball.y,4);
@@ -1336,6 +1449,8 @@ function buildSim(myPow, oppPow) {
         effects.spawn('RECEIVE',gk?gk.x:goalX,gk?gk.y:goalY,0,0,'#fbbf24',0.5);
         _html("simComm","🧤 "+(isTR?_COMM.save_tr[rng.int(_COMM.save_tr.length)]:_COMM.save_en[rng.int(_COMM.save_en.length)]));
         _addRow(1-shooter.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🧤 "+(isTR?"Kurtarış":"Save")+"</span>");
+        _addTimelineMarker(Math.floor(matchTime/60),'save',1-shooter.teamId);
+        _flashEventMap('save',shooter.teamId,ball.x/_PW,ball.y/_PH,isTR?"🧤 Kurtarış":"🧤 Save");
         momDisplay=Math.max(18,Math.min(82,momDisplay+(shooter.teamId===0?-8:8)));
         break;
       case'POST':
@@ -1387,12 +1502,13 @@ function buildSim(myPow, oppPow) {
       const side=bx<_PW/2?'WIDE_LEFT':'WIDE_RIGHT';
       tacticalSeq.team=atkTeam;tacticalSeq.type=side;tacticalSeq.mode='cutback';tacticalSeq.phase='preparation';
       tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:atkTeam===0?teamA:teamB,opp:atkTeam===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[atkTeam]<score[1-atkTeam],leading:score[atkTeam]>score[1-atkTeam]});
-      tacticalSeq.beat=0;tacticalSeq.until=matchTime+10;tacticalSeq.lastCarrierId=winger.id;
+      tacticalSeq.beat=0;tacticalSeq.until=matchTime+10;tacticalSeq.lastCarrierId=winger.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
       primeBoxRuns(atkTeam,bx,by,side);
       shotCooldown[atkTeam]=Math.min(shotCooldown[atkTeam],5);
     }
     momDisplay=Math.max(18,Math.min(82,momDisplay+(atkTeam===0?4:-4)));
     _html("simComm","⛳ "+rng.pick(isTR?_COMM.corner_tr:_COMM.corner_en));
+    _addTimelineMarker(Math.floor(matchTime/60),'corner',atkTeam);
     _updateStats();
   }
   function onGoalKick(defTeam){
@@ -1410,12 +1526,12 @@ function buildSim(myPow, oppPow) {
 
   /* pickup */
   let decTimer=0;
-  const DEC_INT=1.82; // calmer decisions: visual football needs readable beats
+  const DEC_INT=2.10; // visual football needs readable beats between decisions
   let slotTimer=0;
   // Per-team shot cooldown — prevents shot spam; resets after each shot
   const SHOT_COOLDOWN=58; // keeps shots readable without making 0-0 finals feel empty
   const shotCooldown=[0,0];
-  const SLOT_INT=0.17;
+  const SLOT_INT=0.22;
   let stuckTimer=0;
 
   function tryPickup(){
@@ -1456,7 +1572,7 @@ function buildSim(myPow, oppPow) {
           return;
         }
         if(p.teamId!==(ball._shooter?ball._shooter.teamId:ball._lastTeam)){
-          const intC=(p.anticipation/100)*0.045+(d2<4?0.06:0);
+          const intC=(p.anticipation/100)*0.030+(d2<4?0.040:0);
           if(rng.bool(intC)){ball.setOwner(p);chooseSequence(p);ball._lastTeam=p.teamId;lastAssist=null;lastCarrier=p.name;audit.interceptions++;audit.pressWins++;effects.spawn('TACKLE',p.x,p.y,0,0,'#f59e0b',0.35);
             if(rng.bool(0.35))_html("simComm","🦵 <b>"+p.name.split(' ').pop()+"</b> — "+rng.pick(isTR?_COMM.tackle_tr:_COMM.tackle_en));
             return;}
@@ -1512,7 +1628,7 @@ function buildSim(myPow, oppPow) {
       audit.passes++;
       if(buildFromBack&&(action.type==='SHORT_PASS'||action.type==='DRIVEN_PASS'||action.type==='BACK_PASS'))audit.buildFromBack++;
       if(action.type==='THROUGH_BALL')audit.throughBalls++;
-      if(action.type==='LONG_PASS')audit.longBall++;
+      if(action.type==='LONG_PASS')audit.longPasses++;
       if(action.type==='BACK_PASS')audit.backPasses++;
       const spds={SHORT_PASS:8.6,DRIVEN_PASS:11.5,THROUGH_BALL:13.2,LONG_PASS:14.5,BACK_PASS:8.2};
       const qual=(carrier.passing*0.4+carrier.vision*0.25+carrier.decisions*0.2+carrier.anticipation*0.15)/100;
@@ -1687,18 +1803,19 @@ function buildSim(myPow, oppPow) {
     tacticalSeq.team=teamId;tacticalSeq.type=side;tacticalSeq.mode=rng.pick(['overlap','overlap','cutback','cutback','underlap']);
     tacticalSeq.phase='preparation';
     tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
-    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(10,16);tacticalSeq.lastCarrierId=carrier.id;
+    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(10,16);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.sequenceCounts[side]=(audit.sequenceCounts[side]||0)+1;
     audit.wide++;if(side==='WIDE_LEFT')audit.leftWide++;else audit.rightWide++;
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],12);
     addHeat(carrier.x,carrier.y,1.6);
+    let countedWideRun=false;
     const runner=team.find(p=>!p.sentOff&&!p.hasBall&&((side==='WIDE_LEFT'&&(p.role==='LB'||p.role==='LW'))||(side==='WIDE_RIGHT'&&(p.role==='RB'||p.role==='RW'))));
     if(runner){
       const rx=side==='WIDE_LEFT'?_PW*(tacticalSeq.mode==='underlap'?0.24:0.08):_PW*(tacticalSeq.mode==='underlap'?0.76:0.92);
       const ry=_clampPitchY(carrier.y+(teamId===0?1:-1)*rng.rng(8,13));
       runner.setTarget(rx,ry);
       addHeat(rx,ry,0.9);
-      audit.overlapRuns++;
+      countedWideRun=true;
       effects.spawn('RUN',carrier.x,carrier.y,rx,ry,'rgba(217,249,157,0.78)',0.95);
     }
     const support=team.find(p=>!p.sentOff&&!p.hasBall&&(p.role==='CM'||p.role==='AM'));
@@ -1707,9 +1824,10 @@ function buildSim(myPow, oppPow) {
       const sy=_clampPitchY(carrier.y+(teamId===0?1:-1)*rng.rng(4,8));
       support.setTarget(sx,sy);
       addHeat(sx,sy,0.65);
-      audit.overlapRuns++;
+      countedWideRun=true;
       effects.spawn('RUN',carrier.x,carrier.y,sx,sy,'rgba(134,239,172,0.55)',0.75);
     }
+    if(countedWideRun){audit.overlapRuns++;tacticalSeq.countedOverlap=true;}
     primeBoxRuns(teamId,carrier.x,carrier.y,side);
     const label=side==='WIDE_LEFT'?(isTR?"Sol kanat yüklendi":"Left flank overload"):(isTR?"Sağ kanat yüklendi":"Right flank overload");
     _html("simComm",(reason||"")+" <b>"+label+"</b>.");
@@ -1730,7 +1848,7 @@ function buildSim(myPow, oppPow) {
     _setCarrier(taker);
     tacticalSeq.team=teamId;tacticalSeq.type=side;tacticalSeq.mode='cutback';tacticalSeq.phase='preparation';
     tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
-    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,12);tacticalSeq.lastCarrierId=taker.id;
+    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,12);tacticalSeq.lastCarrierId=taker.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.setPieces++;
     primeBoxRuns(teamId,taker.x,taker.y,side);
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],5);
@@ -1751,7 +1869,7 @@ function buildSim(myPow, oppPow) {
     _setCarrier(carrier);
     tacticalSeq.team=teamId;tacticalSeq.type=rng.bool(0.35)?'COUNTER':'CENTRAL_TRIANGLE';tacticalSeq.mode='triangle';tacticalSeq.phase='preparation';
     tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
-    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,13);tacticalSeq.lastCarrierId=carrier.id;
+    tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,13);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],8);
     addHeat(carrier.x,carrier.y,1.4);
     _html("simComm",(reason||"")+" <b>"+(isTR?"Merkezden yoklama":"Central probe")+"</b>.");
@@ -1887,7 +2005,7 @@ function buildSim(myPow, oppPow) {
     // out of play
     if(ball.state===_BS.OUT_OF_PLAY){outTimer-=dt;if(outTimer<=0)resolveOut();return;}
 
-    const motionDt=dt*0.285;
+    const motionDt=dt*0.255;
     ball.update(motionDt);
     if(ball.state===_BS.LOOSE&&ball._shooter&&ball._shotResult){
       handleShot(ball._shooter,ball._shotResult,true);
@@ -1994,12 +2112,16 @@ function buildSim(myPow, oppPow) {
     const leftPct=Math.round((audit.leftWide||0)/Math.max(1,audit.wide)*100);
     const rightPct=Math.round((audit.rightWide||0)/Math.max(1,audit.wide)*100);
     const centralPct=Math.round(audit.central/totalSeq*100);
-    const pressureTotal=audit.pressWins+audit.interceptions;
+    const pressureTotal=audit.pressWins;
     const avgShot=audit.profileSamples?Math.round((audit.shotQualitySum/audit.profileSamples)*100):0;
     const avgKeeper=audit.profileSamples?Math.round((audit.keeperResponseSum/audit.profileSamples)*100):0;
     const avgBuild=audit.profileSamples?Math.round((audit.buildUpSuccessSum/audit.profileSamples)*100):0;
     const avgPressResist=audit.profileSamples?Math.round((audit.pressResistSum/audit.profileSamples)*100):0;
-    const note=widePct<22
+    const note=audit.overlapRuns<2&&widePct>=18
+      ?(isTR?"Kanat seçiliyor ama bek/kanat koşusu az görünüyor; bindirme tetikleri izlenmeli.":"Wide play is selected, but fullback/wing runs are still low; overlap triggers need watching.")
+      :audit.backPasses<2&&(audit.recycle>2||audit.buildFromBack>8)
+        ?(isTR?"Kurulum var ama geri pas/reset az; oyun fazla tek yönlü akmış.":"Build-up exists, but back-pass resets are low; the match may be too one-way.")
+        :widePct<22
       ?(isTR?"Kanat akışı düşük kaldı; sonraki sprintte bek bindirmeleri artırılmalı.":"Wide play stayed low; next tuning should push fullback overlaps.")
       :pressureTotal<2
         ?(isTR?"Pres kazanımı sınırlı kaldı; baskı tepkileri izlenmeli.":"Press wins stayed limited; defensive pressure needs watching.")
@@ -2020,7 +2142,8 @@ function buildSim(myPow, oppPow) {
       [isTR?"Düşük tempo / reset":"Low tempo / resets",audit.lowTempoBeats+" / "+audit.resets],
       [isTR?"Duran top tehdidi":"Set-piece threats",audit.setPieces],
       [isTR?"Cutback / orta":"Cutbacks / crosses",audit.cutbacks+" / "+audit.crosses],
-      [isTR?"Ara/uzun pas":"Through / long balls",audit.throughBalls+" / "+audit.longBall],
+      [isTR?"Ara/uzun pas":"Through / long balls",audit.throughBalls+" / "+audit.longPasses],
+      [isTR?"Dikey uzun top sekansı":"Tactical long-ball sequences",audit.tacticalLongBalls],
       [isTR?"Geri pas":"Back passes",audit.backPasses],
       [isTR?"Pres kazanımı":"Press wins",audit.pressWins],
       [isTR?"Kart olayı":"Card events",audit.discipline],
@@ -2040,6 +2163,7 @@ function buildSim(myPow, oppPow) {
     if(gameEnded)return;gameEnded=true;
     window._finalPenaltyPending=false;
     window._openFinalPenaltyShootout=null;
+    window.openCopaFinalPenalties=null;
     if(animId){cancelAnimationFrame(animId);animId=null;}
     audio.whistle();setTimeout(()=>audio.stop(),1000);
     // final heatmap
@@ -2069,7 +2193,7 @@ function buildSim(myPow, oppPow) {
 
   let finalPenaltyOpening=false,finalPenaltyTimer=null,finalPenaltyAttempts=0;
   function _penaltyButtonHTML(label){
-    return "<button type=\"button\" class=\"final-penalty-btn\" style=\"margin-left:10px;border:1px solid rgba(230,238,239,.5);background:#429A73;color:#0C1213;border-radius:8px;padding:7px 12px;font-weight:900;letter-spacing:1px;cursor:pointer\" onclick=\"window._openFinalPenaltyShootout&&window._openFinalPenaltyShootout(true)\">"+label+"</button>";
+    return "<button type=\"button\" class=\"final-penalty-btn\" style=\"margin-left:10px;border:1px solid rgba(230,238,239,.5);background:#429A73;color:#0C1213;border-radius:8px;padding:7px 12px;font-weight:900;letter-spacing:1px;cursor:pointer\" onclick=\"(window.openCopaFinalPenalties&&window.openCopaFinalPenalties(true))||(window._openFinalPenaltyShootout&&window._openFinalPenaltyShootout(true))\">"+label+"</button>";
   }
   function _findPenaltyShootoutHandler(){
     if(typeof window!=="undefined"&&typeof window.showPenaltyShootout==="function")return window.showPenaltyShootout;
@@ -2096,6 +2220,9 @@ function buildSim(myPow, oppPow) {
         const fn=_findPenaltyShootoutHandler();
         if(fn){
           fn("final");
+          if(!(window._penState&&window._penState.mode==="final")){
+            throw new Error("Penalty shootout handler returned without final penalty state");
+          }
           window._finalPenaltyPending=false;
           finalPenaltyOpening=false;
           return;
@@ -2125,6 +2252,7 @@ function buildSim(myPow, oppPow) {
     const sc=score[0]+"–"+score[1];
     window._finalPenaltyPending=true;
     window._openFinalPenaltyShootout=(manual)=>openFinalPenaltyShootout(sc,0,!!manual);
+    window.openCopaFinalPenalties=(manual)=>{openFinalPenaltyShootout(sc,0,!!manual);return true;};
     window._finalPenaltyScore=sc;
     window.finalSimAudit=audit;
     window._finalAuditHTML=auditReportHTML();
@@ -2152,25 +2280,18 @@ function buildSim(myPow, oppPow) {
     const frameMs=Math.min((now-prevTime)/1000,0.25);prevTime=now;
     const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1);
     accumulator+=frameMs*spd;
-    // Cap steps per frame to prevent spiral of death at very high speeds
-    const MAX_STEPS=Math.ceil(spd*0.38)+4;
+    const MAX_STEPS=Math.ceil(spd*0.28)+6;
     let _steps=0;
     while(accumulator>=FIXED_STEP&&_steps<MAX_STEPS){simStep(FIXED_STEP);accumulator-=FIXED_STEP;_steps++;}
-    renderer.decay(frameMs);
-    renderer.clear();
-    renderer.drawPitch();
-    renderer.drawEffects(effects.all());
-    renderer.drawPlayers([...teamA,...teamB],ball);
-    renderer.drawBall(ball);
-    renderer.drawHUD(momDisplay,score,Math.floor(matchTime/60),myName,oppName,shoutMode,isTR);
     statUpdateTimer+=frameMs;
-    if(statUpdateTimer>0.5){statUpdateTimer=0;_updateStats();}
+    if(statUpdateTimer>0.4){statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));}
     if(!gameEnded)animId=requestAnimationFrame(tick);
   }
 
   /* init DOM */
   window._finalPenaltyPending=false;
   window._openFinalPenaltyShootout=null;
+  window.openCopaFinalPenalties=null;
   _dom("simScore","0–0");_dom("simClk","0'");_dom("simState",isTR?"Dengeli final":"Even game");
   _dom("simComm","—");_dom("simRadio","📻 —");
   const sg=document.getElementById("simGoals");if(sg)sg.innerHTML="";
