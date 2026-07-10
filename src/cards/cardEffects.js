@@ -191,7 +191,7 @@ function applyRiskCardGain(k){
    const secondInj=picksBySlot.findIndex((p,i)=>p&&p.injured&&i!==injuredIdx);
    if(secondInj>=0){const _sp=picksBySlot[secondInj];_sp.injured=false;healed++;pushFeed("💉 <b>"+shortName(_sp)+"</b> "+(tr?"iyileşti":"healed"),"buy");}
   }
-  if(!healed){pushFeed("💉 <b>"+L().cards[k].n+"</b> "+(tr?"sakat oyuncu yok":"no injured player"),"lose");return;}
+  if(!healed){const refund=cardPrice(k);if(refund>0)earn(refund,"earned");pushFeed("💉 <b>"+L().cards[k].n+"</b> "+(tr?"sakat oyuncu yok — iade +€"+refund+"M":"no injured player — refund +€"+refund+"M"),"buy");return;}
   if(v===1&&rand()<0.25){spend(6,"spent");pushFeed("💉 "+(tr?"Tedavi masrafı: -€6M":"Treatment cost: -€6M"),"lose");}
   pushFeed("💉 <b>"+L().cards[k].n+"</b> "+healed+(tr?" oyuncu iyileşti":" player(s) healed"),"buy");
   return;
