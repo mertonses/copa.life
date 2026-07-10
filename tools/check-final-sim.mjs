@@ -24,8 +24,10 @@ const checks = [
     pass: /redCompact=ownReds>0\?Math\.min\(0\.20,ownReds\*0\.09\):0/.test(sim),
   },
   {
-    name: "live yellow-card rate stays restrained",
-    pass: Number.isFinite(toRate(yellowRateMatch)) && toRate(yellowRateMatch) <= 0.008,
+    // Card volume was intentionally raised (matches were finishing with 0 bookings);
+    // the effective per-tick rate is clamped in-engine to [0.008, 0.022].
+    name: "live yellow-card rate stays in a readable band",
+    pass: Number.isFinite(toRate(yellowRateMatch)) && toRate(yellowRateMatch) <= 0.022,
   },
   {
     name: "second yellow red cards are rare",

@@ -4007,12 +4007,19 @@ img,svg,canvas{max-width:100%}
   min-width:44px;
   font-size:13px;
   border-color:var(--color-ink);
+  background:var(--surface-elevated);
+  color:var(--color-ink);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
+#sim .spd.spd-pause svg{fill:currentColor;display:block}
 #sim .spd.spd-pause.pause{
   background:var(--color-slate);
   border-color:var(--color-slate);
   color:#fff;
 }
+#sim .spd.spd-pause.pause svg{fill:#fff}
 #sim .spd-sep{
   width:1px;
   height:20px;

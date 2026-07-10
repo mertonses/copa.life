@@ -209,8 +209,10 @@ function applyRiskCardGain(k){
  }
  if(k==="nasip_kismet"){
   const discount=v===1?0.25:0.50; // 0.25 = 75% indirim, 0.50 = 50% indirim
-  cardPriceMod=discount;cardPriceModTurns=1;
-  pushFeed("🍀 <b>"+L().cards[k].n+"</b> "+(tr?"bu tur fiyatlar "+(v===1?"-%75":"-%50"):"prices "+(v===1?"-75%":"-50%")+" this turn"),"buy");
+  // Bought this turn consumes the 1-card purchase, so the discount must land NEXT turn.
+  // turns=2 survives the end-of-turn decrement and stays active through the next round's shopping.
+  cardPriceMod=discount;cardPriceModTurns=2;
+  pushFeed("🍀 <b>"+L().cards[k].n+"</b> "+(tr?"sonraki tur kart fiyatları "+(v===1?"-%75":"-%50"):"next round card prices "+(v===1?"-75%":"-50%")),"buy");
   if(v===1&&rand()<0.25){spend(4,"spent");pushFeed("🍀 "+(tr?"Talih cezası: -€4M":"Fate penalty: -€4M"),"lose");}
   return;
  }

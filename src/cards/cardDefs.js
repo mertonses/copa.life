@@ -22,11 +22,11 @@ var CARDDEFS={
  anadolu:{price:4,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const v=variantOf("anadolu");const starters=(s||[]).filter(Boolean);const sub70=starters.filter(p=>p.ov<70).length;return Math.min(v===1?5:3,sub70);}},
  altyapi_plani:{price:4,kind:"squad",mode:"scaling",
-   eff:(s,r)=>{const n=s.filter(p=>p&&p.age<=23).length;return Math.min(variantOf("altyapi_plani")===1?16:8,n*(variantOf("altyapi_plani")===1?4:2));}},
+   eff:(s,r)=>{const n=s.filter(p=>p&&p.age<=23).length;return Math.min(variantOf("altyapi_plani")===1?6:4,n*(variantOf("altyapi_plani")===1?2:1));}},
  tecrubeli_omurga:{price:6,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.age>=32).length;return Math.min(variantOf("tecrubeli_omurga")===1?16:8,n*(variantOf("tecrubeli_omurga")===1?4:2));}},
  yerli_blok:{price:8,kind:"squad",mode:"scaling",
-   eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(variantOf("yerli_blok")===1?9:5,n*(variantOf("yerli_blok")===1?3:1));}},
+   eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(5,n*(variantOf("yerli_blok")===1?2:1));}},
  /* HÜCUM */
 kanat_akini:{price:7,kind:"power",mode:"scaling",
    eff:(s,r)=>{const wide=["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"];const n=s.filter(p=>p&&wide.includes(p.pos)).length;return Math.min(4,n);}},
