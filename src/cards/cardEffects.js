@@ -9,12 +9,14 @@ var KARA_PEN={
  taraftar:8,genc:4,ch_momentum:6,
  yildiz:2,otobus:3,
  altyapi_plani:4,tecrubeli_omurga:4,
- yerli_blok:3,kanat_akini:7,
+ yerli_blok:3,kanat_akini:5,
  taksit_transfer:6,
  sahte_evrak:10,
  doping:6,
- gec_gec:1,
- kasiga_para:2
+ gec_gec:3,
+ kasiga_para:2,
+ /* DARK now carries real final risk on cards that previously had free upside */
+ kaleci_kalesi:8,cift_forvet:4
 };
 
 function cardEff(k,s,r){

@@ -259,18 +259,18 @@ function shopCardDesc(k,raw,variantOverride){
   const tr=LANG==="tr";
   const sv=typeof variantOverride==="number"?variantOverride:variantOf(k);
   const specific={
-    kanat_akini:()=>tr?"Kanat/bek başına +1 güç. Maksimum +4.":"Wings/fullbacks: +1 power each. Maximum +4.",
+    kanat_akini:()=>sv===1?(tr?"Kanat/bek başına +2 güç, max +6. Finalde -5.":"Wings/fullbacks: +2 each, max +6. -5 in the final."):(tr?"Kanat/bek başına +1 güç, max +4.":"Wings/fullbacks: +1 each, max +4."),
     bu_adam:()=>sv===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
     kontra:()=>sv===1?(tr?"Forvet başına +2 güç. %25 ihtimal -€10M ceza.":"Forward +2 each. 25% chance -€10M fine."):(tr?"Forvet başına +1 güç.":"Forward +1 each."),
     buyuk_mac:()=>sv===1?(tr?"Tek maçlık +6 güç. %20 ihtimal -€12M ceza.":"Single-match +6 power. 20% chance -€12M fine."):(tr?"Tek maçlık +6 güç.":"Single-match +6 power."),
     yildiz:()=>{const st=starCardPowerForVariant(sv);return sv===1?(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç. %25 ihtimal -€6M ceza.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match. 25% chance -€6M fine.`):(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match.`);},
     otobus:()=>sv===1?(tr?"Stoper başına +6 güç. %10 ihtimal -€6M ceza.":"CB +6 each. 10% chance -€6M fine."):(tr?"Stoper başına +3 güç.":"CB +3 each."),
-    kaleci_kalesi:()=>sv===1?(tr?"Kaleci OV +30. %15 ihtimal -€15M ceza.":"Goalkeeper OVR +30. 15% chance -€15M fine."):(tr?"Kaleci OV +15.":"Goalkeeper OVR +15."),
+    kaleci_kalesi:()=>sv===1?(tr?"Kaleci OV +30. %15 ihtimal -€15M ceza. Finalde -8.":"Goalkeeper OVR +30. 15% chance -€15M fine. -8 in the final."):(tr?"Kaleci OV +15.":"Goalkeeper OVR +15."),
     deplasman_kafilesi:()=>sv===1?(tr?"Güçlü rakibe karşı +8 güç. Değilse %50 +4 / %50 -4 güç.":"Against stronger opponent: +8 power. Otherwise 50% +4 / 50% -4 power."):(tr?"Güçlü rakibe karşı +4 güç. Değilse +2 güç.":"Against stronger opponent: +4 power. Otherwise +2 power."),
     kisa_kamp:()=>sv===1?(tr?"Bu maç +6 güç. Sonraki maç -4.":"This match +6 power. Next match -4."):(tr?"Bu maç +4 güç. Sonraki maç -2.":"This match +4 power. Next match -2."),
     primler_yatinca:()=>sv===1?(tr?"Şimdi +8 güç. Gelecek tur −€16M.":"Now +8 power. Next round −€16M."):(tr?"Şimdi +4 güç. Gelecek tur −€8M.":"Now +4 power. Next round −€8M."),
     doping:()=>sv===1?(tr?"+10 güç. Her tur %25 ihtimal -€25M ceza.":"+10 power. 25% chance each round for -€25M fine."):(tr?"+6 güç. Her tur %35 ihtimal -€15M ceza.":"+6 power. 35% chance each round for -€15M fine."),
-    cift_forvet:()=>sv===1?(tr?"SNT başına +4 güç, max +8.":"ST +4 each, max +8."):(tr?"SNT başına +2 güç, max +4.":"ST +2 each, max +4."),
+    cift_forvet:()=>sv===1?(tr?"SNT başına +4 güç, max +8. Finalde -4.":"ST +4 each, max +8. -4 in the final."):(tr?"SNT başına +2 güç, max +4.":"ST +2 each, max +4."),
     gecici_prim:()=>sv===1?(tr?"Bu maç +12 güç. Maç sonu %60 sakatlık riski.":"This match +12 power. 60% injury risk after."):(tr?"Bu maç +6 güç. Maç sonu %30 sakatlık riski.":"This match +6 power. 30% injury risk after."),
     kurban_belli:()=>sv===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır. %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after. 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
     kara_borsa:()=>sv===1?(tr?"Bedava 3 kart açar. %50 ihtimal -€10M ceza.":"Unlocks 3 free cards. 50% chance -€10M fine."):(tr?"Bedava 2 kart açar.":"Unlocks 2 free cards."),

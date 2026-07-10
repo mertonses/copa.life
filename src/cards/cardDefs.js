@@ -29,7 +29,7 @@ var CARDDEFS={
    eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(5,n*(variantOf("yerli_blok")===1?2:1));}},
  /* HÜCUM */
 kanat_akini:{price:7,kind:"power",mode:"scaling",
-   eff:(s,r)=>{const wide=["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"];const n=s.filter(p=>p&&wide.includes(p.pos)).length;return Math.min(4,n);}},
+   eff:(s,r)=>{const wide=["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"];const n=s.filter(p=>p&&wide.includes(p.pos)).length;const v=variantOf("kanat_akini")===1;return Math.min(v?6:4,n*(v?2:1));}},
  cift_forvet:{price:6,kind:"power",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.pos==="ST").length;return Math.min(variantOf("cift_forvet")===1?8:4,n*(variantOf("cift_forvet")===1?4:2));}},
  /* FİNAL */
@@ -58,7 +58,7 @@ kanat_akini:{price:7,kind:"power",mode:"scaling",
  vur_igneyi:{price:6,kind:"risk",mode:"instant",eff:(s,r)=>0},
  bu_adam:{price:6,kind:"power",mode:"instant",eff:(s,r)=>0},
  gec_gec:{price:5,kind:"defense",mode:"scaling",
-   eff:(s,r)=>{const avg=s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;const stronger=typeof opponent!=="undefined"&&opponent&&opponent.power>avg;return stronger?5:2;}},
+   eff:(s,r)=>{const avg=s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;const stronger=typeof opponent!=="undefined"&&opponent&&opponent.power>avg;const base=stronger?5:2;return variantOf("gec_gec")===1?base+2:base;}},
  nasip_kismet:{price:4,kind:"risk",mode:"instant",eff:(s,r)=>0},
  yildiz_krizi:{price:6,kind:"power",mode:"instant",eff:(s,r)=>0},
  kasiga_para:{price:4,kind:"power",mode:"instant",eff:(s,r)=>0}
