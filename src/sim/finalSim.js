@@ -814,11 +814,15 @@ function _resolveShot(shooter,gk,rng){
   const dGoal=shooter?shooter.dist(_PW/2,shooter.teamId===0?_PH:0):25;
   const shootQ=shooter?(shooter.shooting*0.5+shooter.decisions*0.3+shooter.vision*0.2)/100:0.5;
   const distF=Math.max(0,1-dGoal/30);
-  const shotP=Math.min(0.50,Math.max(0.05,shootQ*0.35+distF*0.25));
+  const shotP=Math.min(0.56,Math.max(0.05,shootQ*0.35+distF*0.25));
   if(!rng.bool(shotP))return rng.bool(0.55)?'WIDE':'KEEPER_CLAIM';
   const gkQ=gk?(gk.goalkeeping*0.65+gk.anticipation*0.2+gk.pace*0.15)/100:0.55;
   const gkDist=gk?gk.dist(shooter?shooter.x:_PW/2,gk.teamId===0?0:_PH):99;
-  const saveP=Math.min(0.88,gkQ*0.80+(gkDist<8?0.12:0));
+  // Per-shot keeper form swing: without it saveP is near-deterministic and finals
+  // collapse onto 1-0 / 2-1. The swing widens the scoreline distribution without
+  // changing expected strength (mean is unchanged, ±0.10 around it).
+  const formSwing=(rng.next()-0.5)*0.20;
+  const saveP=Math.min(0.90,Math.max(0.30,gkQ*0.74+(gkDist<8?0.12:0)+formSwing));
   if(rng.bool(saveP))return 'KEEPER_SAVE';
   if(rng.bool(0.10))return 'POST';
   return 'GOAL';
@@ -1102,8 +1106,8 @@ function buildSim(myPow, oppPow) {
         +'<text id="emEvTxt" x="50" y="35.6" text-anchor="middle" font-size="3.5" fill="#E6EEEF" font-family="system-ui,sans-serif" font-weight="700"></text>'
         +'</g>'
         // attack direction hint + team labels: top half = ours (we attack downward)
-        +'<text x="6" y="5.6" text-anchor="start" font-size="3.1" fill="rgba(66,154,115,0.85)" font-family="system-ui,sans-serif" font-weight="700" id="emLblTop">'+myName.toUpperCase().slice(0,12)+' ▾</text>'
-        +'<text x="6" y="61.5" text-anchor="start" font-size="3.1" fill="rgba(230,238,239,0.45)" font-family="system-ui,sans-serif" font-weight="700" id="emLblBot">'+oppName.toUpperCase().slice(0,12)+' ▴</text>'
+        +'<text x="6" y="5.6" text-anchor="start" font-size="3.1" fill="rgba(66,154,115,0.85)" font-family="system-ui,sans-serif" font-weight="700" id="emLblTop">'+myName.toUpperCase()+' ▾</text>'
+        +'<text x="6" y="61.5" text-anchor="start" font-size="3.1" fill="rgba(230,238,239,0.45)" font-family="system-ui,sans-serif" font-weight="700" id="emLblBot">'+oppName.toUpperCase()+' ▴</text>'
         +'</svg>';
     }
     const tlEl=document.getElementById('simTimeline');
@@ -1155,6 +1159,20 @@ function buildSim(myPow, oppPow) {
   }
   const _SVGNS='http://www.w3.org/2000/svg';
   let _emCardTimer=null,_emZoneTimer=null;
+  /* Shrink an SVG <text> until it fits maxW (user units); never cut a word in half.
+     Falls back to dropping whole trailing words, then a word-safe ellipsis. */
+  function _fitSvgText(el,maxW,baseSize,minSize){
+    if(!el)return;
+    const full=el.textContent;
+    let size=baseSize;
+    el.setAttribute('font-size',size);
+    const width=()=>{try{return el.getComputedTextLength();}catch(e){return 0;}};
+    if(!width())return; // not rendered yet; leave as-is
+    while(width()>maxW&&size>minSize){size=Math.max(minSize,size-0.15);el.setAttribute('font-size',size.toFixed(2));}
+    if(width()<=maxW)return;
+    const words=full.split(' ');
+    while(words.length>1&&width()>maxW){words.pop();el.textContent=words.join(' ')+'…';}
+  }
   function _emAttackColor(type){
     // signal colors: goal/positive=primary green, danger=amber, miss/card=muted red, neutral=slate
     if(type==='goal')return '#429A73';
@@ -1217,8 +1235,13 @@ function buildSim(myPow, oppPow) {
     const meta=document.getElementById('emEvMeta');
     const txt=document.getElementById('emEvTxt');
     if(card&&txt){
-      if(typeof info==='string'){if(meta)meta.textContent='';txt.textContent=info.slice(0,34);}
-      else{if(meta)meta.textContent=(info.meta||'').slice(0,30);txt.textContent=(info.main||'').slice(0,34);}
+      const mainTxt=typeof info==='string'?info:(info.main||'');
+      const metaTxt=typeof info==='string'?'':(info.meta||'');
+      if(meta)meta.textContent=metaTxt;
+      txt.textContent=mainTxt;
+      // shrink to fit the card instead of cutting words mid-word
+      _fitSvgText(txt,60,3.5,2.3);
+      if(meta)_fitSvgText(meta,62,3.1,2.1);
       card.setAttribute('opacity','1');
       if(_emCardTimer)clearTimeout(_emCardTimer);
       // major cards stay readable even at 8×; minor ones clear faster
@@ -1227,6 +1250,9 @@ function buildSim(myPow, oppPow) {
     }
   }
   _initLiveUI(cvEl);
+  // long club names must never be cut mid-word; shrink corner labels to fit the pitch
+  _fitSvgText(document.getElementById('emLblTop'),44,3.1,2.0);
+  _fitSvgText(document.getElementById('emLblBot'),44,3.1,2.0);
 
   /* RNG */
   const seedBase=typeof seedNum!=="undefined"?seedNum:(Date.now()&0xffffff);
@@ -1471,7 +1497,7 @@ function buildSim(myPow, oppPow) {
     _html("simComm","<b>"+nm+"</b> — "+reason);
     _addRow(p.teamId,"<b>"+rMin+"'</b><span><b>🟥 "+(isTR?"KIRMIZI KART":"RED CARD")+" · "+nm+"</b><small>"+rTeam+" · "+(isTR?"10 kişi kaldı":"down to 10")+"</small></span>",true);
     _addTimelineMarker(rMin,'card',p.teamId,(isTR?"Kırmızı kart — ":"Red card — ")+nm);
-    _flashEventMap('card',p.teamId,0.5,p.teamId===0?0.35:0.65,{meta:rMin+"' · "+(isTR?"KIRMIZI KART":"RED CARD"),main:rTeam.slice(0,12)+" · "+nm});
+    _flashEventMap('card',p.teamId,0.5,p.teamId===0?0.35:0.65,{meta:rMin+"' · "+(isTR?"KIRMIZI KART":"RED CARD"),main:rTeam+" · "+nm});
     audio.card&&audio.card();
     _updateStats();
   }
@@ -1501,7 +1527,7 @@ function buildSim(myPow, oppPow) {
     const dTeam=teamId===0?myName:oppName;
     _addRow(teamId,"<b>"+dMin+"'</b><span><b>"+(icon||"⚠")+" "+(isTR?"TEHLİKELİ ATAK":"DANGEROUS ATTACK")+"</b><small>"+dTeam+" · "+label+"</small></span>");
     audio.tension&&audio.tension();
-    _flashEventMap('danger',teamId,ball.x/_PW,ball.y/_PH,{meta:dMin+"' · "+(isTR?"TEHLİKELİ ATAK":"DANGER"),main:dTeam.slice(0,12)+" · "+label.slice(0,20)});
+    _flashEventMap('danger',teamId,ball.x/_PW,ball.y/_PH,{meta:dMin+"' · "+(isTR?"TEHLİKELİ ATAK":"DANGER"),main:dTeam+" · "+label});
     _updateStats();
   }
 
@@ -1532,7 +1558,7 @@ function buildSim(myPow, oppPow) {
     const gTeam=teamId===0?myName:oppName;
     _addRow(teamId,"<b>"+gMin+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+nm+"</b><small>"+gTeam+(lastAssist?" · "+(isTR?"asist ":"assist ")+lastAssist:"")+" · "+sc2+"</small></span>",true);
     _addTimelineMarker(gMin,'goal',teamId,(isTR?"Gol — ":"Goal — ")+nm+" ("+gTeam+")");
-    _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,{meta:gMin+"' · "+(isTR?"GOL":"GOAL"),main:gTeam.slice(0,12)+" · "+nm});
+    _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,{meta:gMin+"' · "+(isTR?"GOL":"GOAL"),main:gTeam+" · "+nm});
     _flashArrow(ball.x/_PW,Math.max(0.06,Math.min(0.94,ball.y/_PH-(teamId===0?0.14:-0.14))),0.5,teamId===0?0.985:0.015,'#429A73',1600);
     momDisplay=Math.max(18,Math.min(82,momDisplay+(teamId===0?22:-22)));
     // add to heatgrid
@@ -1583,7 +1609,7 @@ function buildSim(myPow, oppPow) {
         _html("simComm","🧤 <b>"+gkNm+"</b> — "+(isTR?shNm+"'in şutunu çıkardı!":"denies "+shNm+"!"));
         _addRow(1-shooter.teamId,"<b>"+svMin+"'</b><span><b>🧤 "+(isTR?"KURTARIŞ":"SAVE")+" · "+gkNm+"</b><small>"+(isTR?shNm+"'in şutunu çıkardı":"stopped "+shNm+"'s shot")+"</small></span>");
         _addTimelineMarker(svMin,'save',1-shooter.teamId,(isTR?"Kurtarış — ":"Save — ")+gkNm);
-        _flashEventMap('save',1-shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:svMin+"' · "+(isTR?"KURTARIŞ":"SAVE"),main:gkTeam.slice(0,10)+" · "+gkNm});
+        _flashEventMap('save',1-shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:svMin+"' · "+(isTR?"KURTARIŞ":"SAVE"),main:gkTeam+" · "+gkNm});
         momDisplay=Math.max(18,Math.min(82,momDisplay+(shooter.teamId===0?-8:8)));
         break;}
       case'POST':{
@@ -1593,7 +1619,7 @@ function buildSim(myPow, oppPow) {
         const poNm=shooter.name.split(' ').pop();
         _addRow(shooter.teamId,"<b>"+poMin+"'</b><span><b>▥ "+(isTR?"DİREK":"POST")+" · "+poNm+"</b><small>"+(isTR?"Şut direkten döndü":"Shot came off the post")+"</small></span>");
         _addTimelineMarker(poMin,'post',shooter.teamId,(isTR?"Direk — ":"Post — ")+poNm);
-        _flashEventMap('danger',shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:poMin+"' · "+(isTR?"DİREK":"POST"),main:(shooter.teamId===0?myName:oppName).slice(0,10)+" · "+poNm});
+        _flashEventMap('danger',shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:poMin+"' · "+(isTR?"DİREK":"POST"),main:(shooter.teamId===0?myName:oppName)+" · "+poNm});
         _html("simComm","▥ <b>"+poNm+"</b> — "+(isTR?"direğe çarptı!":"off the post!"));
         break;}
       case'WIDE':{ball.state=_BS.LOOSE;ball.vx*=0.2;ball.vy*=0.2;
@@ -1668,7 +1694,7 @@ function buildSim(myPow, oppPow) {
   const DEC_INT=2.10; // visual football needs readable beats between decisions
   let slotTimer=0;
   // Per-team shot cooldown — prevents shot spam; resets after each shot
-  const SHOT_COOLDOWN=58; // keeps shots readable without making 0-0 finals feel empty
+  const SHOT_COOLDOWN=46; // keeps shots readable; lower than before so scorelines vary more
   const shotCooldown=[0,0];
   const SLOT_INT=0.22;
   let stuckTimer=0;
@@ -2073,7 +2099,7 @@ function buildSim(myPow, oppPow) {
           _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
           _addRow(pl.teamId,"<b>"+yMin+"'</b><span><b>🟨 "+(isTR?"SARI KART":"YELLOW")+" · "+nm+"</b><small>"+yTeam+"</small></span>",true);
           _addTimelineMarker(yMin,'card',pl.teamId,(isTR?"Sarı kart — ":"Yellow — ")+nm);
-          _flashEventMap('card',pl.teamId,0.5,pl.teamId===0?0.35:0.65,{meta:yMin+"' · "+(isTR?"SARI KART":"YELLOW CARD"),main:yTeam.slice(0,12)+" · "+nm});
+          _flashEventMap('card',pl.teamId,0.5,pl.teamId===0?0.35:0.65,{meta:yMin+"' · "+(isTR?"SARI KART":"YELLOW CARD"),main:yTeam+" · "+nm});
           audio.card&&audio.card();
         }
         return;
@@ -2489,7 +2515,7 @@ function buildSim(myPow, oppPow) {
       const msg=msgs[t]||"";_html("simComm",msg);_html("simRadio","📻 "+msg);
       const tMin=Math.floor(matchTime/60);
       _addRow(0,"<b>"+tMin+"'</b><span><b>📋 "+(isTR?"TAKTİK":"TACTIC")+" · "+(labels[t]||"")+"</b><small>"+myName+" · "+msg.replace(/^[^ ]+ /,'')+"</small></span>");
-      _flashEventMap('tactic',0,0.5,0.32,{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName.slice(0,12)+" · "+(labels[t]||"")});
+      _flashEventMap('tactic',0,0.5,0.32,{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName+" · "+(labels[t]||"")});
       audio.shoutCue&&audio.shoutCue();
     }
   };

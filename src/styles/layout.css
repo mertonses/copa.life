@@ -3435,6 +3435,73 @@ img,svg,canvas{max-width:100%}
   .pen-modal .pen-log-row{grid-template-columns:62px minmax(0,1fr) auto!important}
 }
 
+/* Bench picker: dismiss without substituting */
+.backup-modal{position:relative}
+.backup-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border:1px solid var(--border-subtle);
+  border-radius:7px;
+  background:var(--surface-elevated);
+  color:var(--color-slate);
+  cursor:pointer;
+}
+.backup-close:hover{border-color:var(--color-ink);color:var(--color-ink)}
+.backup-modal .backup-head{padding-right:44px}
+
+/* Heat map sits beside the final report on wide screens, stacks under it on narrow.
+   Row 1: report | heat map. Row 2: story | econ. */
+@media(min-width:700px){
+  #finalRow{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #finalRow>.finalreport:not(.hidden){grid-column:1!important}
+  #finalRow>.heattile:not(.hidden){grid-column:2}
+}
+
+/* ===== Final report: heat map as its own tile ===== */
+.heattile{
+  border:1px solid var(--border-subtle);
+  border-radius:8px;
+  background:var(--surface-elevated);
+  padding:0 0 10px;
+  overflow:hidden;
+  align-self:start;
+}
+.heattile.hidden{display:none}
+.heattile h4{
+  margin:0 0 10px;
+  padding:9px 10px;
+  background:var(--surface-muted);
+  border-bottom:1px solid var(--border-subtle);
+  font-family:var(--mono);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.6px;
+  text-transform:uppercase;
+  text-align:center;
+  color:var(--color-slate);
+}
+.heattile img{
+  display:block;
+  width:calc(100% - 20px);
+  max-width:320px;
+  margin:0 auto;
+  border-radius:6px;
+  border:1px solid var(--border-subtle);
+}
+.heattile .heatnote{
+  margin:8px 10px 0;
+  font-size:10px;
+  line-height:1.4;
+  color:var(--color-slate);
+  text-align:center;
+}
+
 /* ===== Tap-to-select squad placement (coarse pointers) ===== */
 .tap-helper{
   position:fixed;
