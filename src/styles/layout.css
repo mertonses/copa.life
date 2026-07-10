@@ -3435,6 +3435,136 @@ img,svg,canvas{max-width:100%}
   .pen-modal .pen-log-row{grid-template-columns:62px minmax(0,1fr) auto!important}
 }
 
+/* ===== Penalty shootout: phase clarity redesign ===== */
+.pen-phase-badge{
+  display:inline-block;
+  margin:0 auto 5px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-family:var(--mono);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:2px;
+  font-style:normal;
+}
+.pen-modal.is-shoot .pen-phase-badge{background:var(--color-primary);color:#fff}
+.pen-modal.is-save .pen-phase-badge{background:var(--color-background);color:var(--color-ink)}
+.pen-modal .pen-phase b{font-size:17px;letter-spacing:2.5px}
+.pen-modal.is-shoot .pen-head{border-bottom:3px solid var(--color-primary)}
+.pen-modal.is-save .pen-head{border-bottom:3px solid var(--color-background)}
+.pen-modal.is-done .pen-head{border-bottom:3px solid var(--color-slate)}
+/* duel cards: label + dominant name */
+.pen-modal .pen-actors .pen-duel{
+  display:grid;
+  gap:2px;
+  padding:8px 10px;
+  text-align:left;
+}
+.pen-modal .pen-actors .pen-duel i{
+  font-style:normal;
+  font-family:var(--mono);
+  font-size:8.5px;
+  font-weight:900;
+  letter-spacing:1.4px;
+  color:var(--color-slate);
+}
+.pen-modal .pen-actors .pen-duel em{
+  font-size:14px;
+  font-weight:900;
+  color:var(--color-ink);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.pen-modal .pen-actors .pen-duel.is-you{
+  border-color:color-mix(in srgb,var(--color-primary) 55%,var(--border-subtle));
+  background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-muted));
+}
+.pen-modal .pen-actors .pen-duel.is-you i{color:var(--color-primary)}
+/* three-zone guide inside the goal */
+.pen-modal .pen-zones{
+  position:absolute;
+  left:10%;
+  right:10%;
+  top:16px;
+  height:72px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  pointer-events:none;
+  opacity:.4;
+}
+.pen-modal .pen-zones i{border-left:1px dashed rgba(255,255,255,.4)}
+.pen-modal .pen-zones i:first-child{border-left:0}
+.pen-modal.is-save .pen-zones{opacity:.75}
+/* phase-based emphasis: shot = ball dominant, save = keeper dominant */
+.pen-modal.is-shoot .pen-goal .pen-ball{
+  width:19px;height:19px;
+  box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 0 4px color-mix(in srgb,var(--color-primary) 45%,transparent);
+}
+.pen-modal.is-shoot .pen-goal .pen-keeper{opacity:.6}
+.pen-modal.is-save .pen-goal .pen-keeper{
+  transform:translateX(-50%) scale(1.15);
+  filter:drop-shadow(0 0 5px rgba(230,238,239,.5));
+}
+.pen-modal.is-save .pen-goal .pen-ball{opacity:.55}
+/* slots: active side + next kicker */
+.pen-modal .pen-slots>div.is-active{
+  border-color:color-mix(in srgb,var(--color-primary) 60%,var(--border-subtle));
+  background:color-mix(in srgb,var(--color-primary) 7%,var(--surface-muted));
+}
+.pen-modal .pen-slots>div.is-active span:first-child{color:var(--color-primary)}
+.pen-dot.is-next{
+  border-color:var(--color-primary);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--color-primary) 45%,transparent);
+}
+/* direction buttons */
+.pen-modal .pen-dir-btn{
+  min-height:48px;
+  padding:12px 8px!important;
+  font-size:12.5px!important;
+  font-weight:900!important;
+  letter-spacing:.4px;
+  white-space:nowrap;
+}
+.pen-modal .pen-dir-btn:hover{border-color:var(--color-primary)}
+.pen-modal .pen-dir-btn:active{transform:translateY(1px)}
+/* richer log rows: no | headline + description */
+.pen-modal .pen-log-row{
+  grid-template-columns:24px minmax(0,1fr)!important;
+  align-items:start!important;
+  padding:7px 9px!important;
+}
+.pen-modal .pen-log-row>span{
+  font-family:var(--mono);
+  font-size:10px;
+  font-weight:900;
+  color:var(--color-slate);
+  padding-top:1px;
+}
+.pen-modal .pen-log-row strong{
+  white-space:normal!important;
+  font-size:11px;
+}
+.pen-modal .pen-log-row em{
+  margin-top:1px;
+  font-size:10px;
+}
+.pen-modal .pen-log-row.pen-log-goal strong{color:var(--color-primary)}
+.pen-modal .pen-log-row.pen-log-save strong{color:var(--color-slate)}
+.pen-modal .pen-log-row.pen-miss strong{color:#b0564a}
+.pen-modal .pen-log{max-height:min(150px,26dvh)!important}
+@media(max-width:480px){
+  .pen-modal{width:calc(100vw - 34px)!important;max-width:calc(100vw - 34px)!important;box-sizing:border-box}
+  .pen-modal .pen-dir-grid{grid-template-columns:1fr!important;gap:7px}
+  .pen-modal .pen-dir-btn{min-height:46px}
+  .pen-modal .pen-actors .pen-duel em{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pen-reveal{animation:none}
+  .pen-goal .pen-keeper.is-ready{animation:none}
+  .pen-modal .pen-goal .pen-keeper,.pen-modal .pen-goal .pen-ball{transition:none}
+}
+
 /* ===== Final.sim visual readability pass ===== */
 #sim #cv canvas{
   aspect-ratio:105/59.325;

@@ -2087,17 +2087,44 @@ function _penIsDone(s){
   return false;
 }
 function _penWinner(s){return s.homeGoals>s.awayGoals;}
-function _penStatusText(type,byUser){
+/* Neutral word for logs/slots; user-relative headline for the pitch result */
+function _penLogWord(type){
   const tr=LANG==="tr";
-  if(type==="goal")return tr?"GOL!":"GOAL!";
-  if(type==="save")return byUser?(tr?"KURTARDIN!":"SAVED!"):(tr?"KURTARDI!":"SAVED!");
-  if(type==="post")return tr?"DİREKTEN DÖNDÜ!":"OFF THE POST!";
-  return tr?"KAÇTI!":"MISSED!";
+  if(type==="goal")return tr?"GOL":"GOAL";
+  if(type==="save")return tr?"KURTARILDI":"SAVED";
+  if(type==="post")return tr?"DİREK":"POST";
+  return tr?"DIŞARI":"WIDE";
 }
-function _penDots(arr,team){
+function _penStatusText(type,byUser){return _penLogWord(type)+"!";}
+function _penHeadline(type,userShot){
   const tr=LANG==="tr";
-  return Array.from({length:Math.max(5,arr.length)},function(_,i){
-    const v=arr[i],cls=v?("is-"+v.type):"",label=v?(_penStatusText(v.type,false).replace("!","")):(tr?"Boş":"Empty");
+  if(type==="goal")return userShot?(tr?"GOL!":"GOAL!"):(tr?"RAKİP GOL ATTI":"OPPONENT SCORES");
+  if(type==="save")return userShot?(tr?"RAKİP KURTARDI!":"KEEPER SAVES IT!"):(tr?"KURTARDIN!":"YOU SAVED IT!");
+  if(type==="post")return tr?"DİREKTEN DÖNDÜ!":"OFF THE POST!";
+  return userShot?(tr?"DIŞARI!":"WIDE!"):(tr?"RAKİP KAÇIRDI!":"THEY MISSED!");
+}
+function _penRevealDesc(r){
+  const tr=LANG==="tr";
+  const userShot=!r.byUser;
+  const kName=r.keeperName||(tr?"Kaleci":"Keeper");
+  const pName=r.player||(tr?"Oyuncu":"Player");
+  if(r.type==="goal")return tr?pName+" topu "+(r.shot==="C"?"ortaya":r.shot==="L"?"sol köşeye":"sağ köşeye")+" gönderdi.":pName+" buries it "+(r.shot==="C"?"down the middle":r.shot==="L"?"in the left corner":"in the right corner")+".";
+  if(r.type==="save")return userShot?(tr?kName+" şutu çıkardı.":kName+" keeps it out."):(tr?kName+" doğru yöne gitti.":kName+" guessed right.");
+  if(r.type==="post")return tr?pName+" direğe takıldı.":pName+" hits the woodwork.";
+  return tr?pName+" dışarı vurdu.":pName+" drags it wide.";
+}
+function _penKeeperMoveText(dir){
+  const tr=LANG==="tr";
+  if(dir==="C")return tr?"ortada kaldı":"stayed central";
+  return tr?((dir==="L"?"sola":"sağa")+" atladı"):("dove "+(dir==="L"?"left":"right"));
+}
+function _penDots(arr,team,active){
+  const tr=LANG==="tr";
+  const len=Math.max(5,arr.length+(active?1:0));
+  return Array.from({length:len},function(_,i){
+    const v=arr[i],isNext=active&&i===arr.length;
+    const cls=(v?("is-"+v.type):"")+(isNext?" is-next":"");
+    const label=v?_penLogWord(v.type):(isNext?(tr?"Sırada":"Up next"):(tr?"Boş":"Empty"));
     const mark=!v?"":v.type==="goal"?"✓":v.type==="save"?"▣":v.type==="post"?"!":"×";
     return "<span class=\"pen-dot "+cls+"\" aria-label=\""+team+" "+(i+1)+": "+label+"\">"+mark+"</span>";
   }).join("");
@@ -2112,18 +2139,41 @@ function _renderPenaltyModal(){
   const finalMode=s.mode==="final";
   const sudden=s.homeShots.length>=5&&s.awayShots.length>=5&&!done;
   if(sudden&&!s.suddenAnnounced){s.suddenAnnounced=true;_penSfx("sudden_death_start");}
-  const phaseText=done?(homeWon?(sudden||s.sudden?(finalMode?(tr?"ANI ÖLÜMDE KUPAYI ALDIN":"YOU WIN THE CUP IN SUDDEN DEATH"):(tr?"ANI ÖLÜMDE TURU GEÇTİN":"YOU ADVANCE IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA KUPAYI ALDIN":"YOU WIN THE CUP ON PENALTIES"):(tr?"PENALTILARLA TURU GEÇTİN":"YOU ADVANCE ON PENALTIES"))):(sudden||s.sudden?(finalMode?(tr?"ANI ÖLÜMDE FİNALİ KAYBETTİN":"LOST THE FINAL IN SUDDEN DEATH"):(tr?"ANI ÖLÜMDE ELENDİN":"OUT IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA FİNALİ KAYBETTİN":"LOST THE FINAL ON PENALTIES"):(tr?"PENALTILARLA ELENDİN":"OUT ON PENALTIES")))):(s.phase==="shoot"?(tr?"SEN VURUYORSUN":"YOUR KICK"):(tr?"KALECİ SENSİN":"YOU ARE THE KEEPER"));
-  const shooter=s.phase==="shoot"?_penActor(s,"home"):_penActor(s,"away");
-  const keeper=s.phase==="shoot"?s.awayKeeper:s.homeKeeper;
-  const phaseSub=done?(tr?"Seri tamamlandı.":"Shootout complete."):(s.phase==="shoot"?(tr?"Şut yönünü seç.":"Pick your shot direction."):(tr?"Atlayacağın yönü seç.":"Pick your dive direction."));
-  const actorLine=done?"":("<div class=\"pen-actors\"><span>"+(s.phase==="shoot"?(tr?"Vuran":"Shooter"):(tr?"Rakip vuran":"Opponent shooter"))+": <em>"+_penPlayerName(shooter,s.phase==="shoot"?s.home:s.away)+"</em></span><span>"+(tr?"Kaleci":"Keeper")+": <em>"+_penPlayerName(keeper,tr?"Kaleci":"Keeper")+"</em></span></div>");
+  const shootPhase=s.phase==="shoot";
+  const phaseText=done?(homeWon?(sudden||s.sudden?(finalMode?(tr?"ANI ÖLÜMDE KUPAYI ALDIN":"YOU WIN THE CUP IN SUDDEN DEATH"):(tr?"ANI ÖLÜMDE TURU GEÇTİN":"YOU ADVANCE IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA KUPAYI ALDIN":"YOU WIN THE CUP ON PENALTIES"):(tr?"PENALTILARLA TURU GEÇTİN":"YOU ADVANCE ON PENALTIES"))):(sudden||s.sudden?(finalMode?(tr?"ANI ÖLÜMDE FİNALİ KAYBETTİN":"LOST THE FINAL IN SUDDEN DEATH"):(tr?"ANI ÖLÜMDE ELENDİN":"OUT IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA FİNALİ KAYBETTİN":"LOST THE FINAL ON PENALTIES"):(tr?"PENALTILARLA ELENDİN":"OUT ON PENALTIES")))):(shootPhase?(tr?"ŞUT SENDE":"YOUR KICK"):(tr?"KALECİ SENSİN":"YOU ARE THE KEEPER"));
+  const phaseBadge=done?"":("<i class=\"pen-phase-badge\">"+(shootPhase?(tr?"ŞUT":"SHOT"):(tr?"KURTARIŞ":"SAVE"))+"</i>");
+  const shooter=shootPhase?_penActor(s,"home"):_penActor(s,"away");
+  const keeper=shootPhase?s.awayKeeper:s.homeKeeper;
+  const shooterName=_penPlayerName(shooter,shootPhase?s.home:s.away);
+  const keeperName=_penPlayerName(keeper,tr?"Kaleci":"Keeper");
+  const phaseSub=done?(tr?"Seri tamamlandı.":"Shootout complete."):(shootPhase?(tr?"Şut yönünü seç.":"Pick your shot direction."):(tr?"Atlayacağın yönü seç.":"Pick your dive direction."));
+  const actorLine=done?"":("<div class=\"pen-actors\">"
+    +"<span class=\"pen-duel"+(shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"VURAN":"SHOOTER"):(tr?"RAKİP VURAN":"OPP. SHOOTER"))+"</i><em>"+shooterName+"</em></span>"
+    +"<span class=\"pen-duel"+(!shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"RAKİP KALECİ":"OPP. KEEPER"):(tr?"SENİN KALECİN":"YOUR KEEPER"))+"</i><em>"+keeperName+"</em></span>"
+    +"</div>");
   const reveal=s.reveal||null;
   const clsShot=reveal?(" is-shot-"+reveal.shot):"";
   const clsKeeper=reveal?(" is-keeper-"+reveal.keeper):(s.phase==="save"?" is-ready":"");
-  const revealHtml=reveal?"<div class=\"pen-reveal "+reveal.type+"\" aria-live=\"polite\"><b>"+_penStatusText(reveal.type,reveal.byUser)+"</b><span>"+_penDirLabel(reveal.shot)+" "+(tr?"şut":"shot")+" · "+(tr?"kaleci":"keeper")+" "+_penDirLabel(reveal.keeper)+"</span></div>":"";
-  const log=s.log.slice(-5).map(function(l){return "<div class=\"pen-log-row "+(l.type==="goal"?"pen-log-goal":l.type==="save"?"pen-log-save":"pen-miss")+"\"><span>"+l.no+" · "+l.side+"</span><div><strong>"+l.player+"</strong><em>"+_penDirLabel(l.shot)+" "+(tr?"şut":"shot")+" · "+(tr?"kaleci":"keeper")+" "+_penDirLabel(l.keeper)+"</em></div><b>"+_penStatusText(l.type,l.byUser).replace("!","")+"</b></div>";}).join("");
-  const actionBtns=done?"<button type=\"button\" class=\"btn btn-primary pen-continue\" onclick=\"_finishPenaltyShootout("+homeWon+")\">"+(finalMode&&homeWon?(tr?"KUPAYI KALDIR":"LIFT THE CUP"):(tr?"DEVAM":"CONTINUE"))+"</button>":"<div class=\"pen-dir-grid\"><button type=\"button\" class=\"btn\" aria-label=\""+(tr?"Sol yön":"Left direction")+"\" onclick=\"_takePenalty('L')\">← "+(tr?"SOL":"LEFT")+"</button><button type=\"button\" class=\"btn\" aria-label=\""+(tr?"Orta yön":"Center direction")+"\" onclick=\"_takePenalty('C')\">"+(tr?"ORTA":"CENTER")+"</button><button type=\"button\" class=\"btn\" aria-label=\""+(tr?"Sağ yön":"Right direction")+"\" onclick=\"_takePenalty('R')\">"+(tr?"SAĞ":"RIGHT")+" →</button></div>";
-  showModal("<div class=\"pen-modal\"><div class=\"pen-head\"><div class=\"pen-kicker\">"+(tr?"PENALTILAR":"PENALTIES")+"</div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANI ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\"><b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+"<div class=\"pen-goal\"><div class=\"pen-net\"></div><div class=\"pen-keeper"+clsKeeper+"\"></div><div class=\"pen-ball"+clsShot+"\"></div>"+revealHtml+"</div><div class=\"pen-slots\"><div><span>"+clip(s.home,20)+"</span>"+_penDots(s.homeShots,s.home)+"</div><div><span>"+clip(s.away,20)+"</span>"+_penDots(s.awayShots,s.away)+"</div></div>"+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
+  const revealHtml=reveal?"<div class=\"pen-reveal "+reveal.type+"\" aria-live=\"polite\"><b>"+_penHeadline(reveal.type,!reveal.byUser)+"</b><span>"+_penRevealDesc(reveal)+"</span></div>":"";
+  const log=s.log.slice(-6).reverse().map(function(l){
+    const desc=l.player+" "+_penDirLabel(l.shot).toLowerCase()+" "+(tr?"vurdu":"shot")+" · "+(l.keeperName||(tr?"kaleci":"keeper"))+" "+_penKeeperMoveText(l.keeper);
+    return "<div class=\"pen-log-row "+(l.type==="goal"?"pen-log-goal":l.type==="save"?"pen-log-save":"pen-miss")+"\"><span>"+l.no+"</span><div><strong>"+l.side+" — "+_penLogWord(l.type)+"</strong><em>"+desc+"</em></div></div>";
+  }).join("");
+  const dirBtn=function(d,label,aria){return "<button type=\"button\" class=\"btn pen-dir-btn\" aria-label=\""+aria+"\" onclick=\"_takePenalty('"+d+"')\">"+label+"</button>";};
+  const actionBtns=done
+    ?"<button type=\"button\" class=\"btn btn-primary pen-continue\" onclick=\"_finishPenaltyShootout("+homeWon+")\">"+(finalMode&&homeWon?(tr?"KUPAYI KALDIR":"LIFT THE CUP"):(tr?"DEVAM":"CONTINUE"))+"</button>"
+    :"<div class=\"pen-dir-grid\">"
+      +(shootPhase
+        ?dirBtn("L","← "+(tr?"SOLA VUR":"SHOOT LEFT"),tr?"Sola vur":"Shoot left")
+         +dirBtn("C",tr?"ORTAYA VUR":"SHOOT CENTER",tr?"Ortaya vur":"Shoot center")
+         +dirBtn("R",(tr?"SAĞA VUR":"SHOOT RIGHT")+" →",tr?"Sağa vur":"Shoot right")
+        :dirBtn("L","← "+(tr?"SOLA ATLA":"DIVE LEFT"),tr?"Sola atla":"Dive left")
+         +dirBtn("C",tr?"ORTADA KAL":"STAY CENTER",tr?"Ortada kal":"Stay center")
+         +dirBtn("R",(tr?"SAĞA ATLA":"DIVE RIGHT")+" →",tr?"Sağa atla":"Dive right"))
+      +"</div>";
+  const activeHome=!done&&shootPhase,activeAway=!done&&!shootPhase;
+  const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save");
+  showModal("<div class=\""+rootCls+"\"><div class=\"pen-head\"><div class=\"pen-kicker\">"+(tr?"PENALTILAR":"PENALTIES")+"</div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANI ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+"<div class=\"pen-goal\"><div class=\"pen-net\"></div><div class=\"pen-zones\" aria-hidden=\"true\"><i></i><i></i><i></i></div><div class=\"pen-keeper"+clsKeeper+"\"></div><div class=\"pen-ball"+clsShot+"\"></div>"+revealHtml+"</div><div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
 }
 function _takePenalty(dir){
   const s=window._penState;if(!s||_penIsDone(s))return;
@@ -2142,9 +2192,10 @@ function _takePenalty(dir){
   const res=_penShotResult(powA,powB,shot,keeperDir),item={type:res.type,shot,keeper:keeperDir};
   arr.push(item);if(res.goal){if(s.phase==="shoot")s.homeGoals++;else s.awayGoals++;}
   const no=arr.length,player=_penPlayerName(shooter,side);
+  const keeperName=_penPlayerName(keeper,LANG==="tr"?"Kaleci":"Keeper");
   s.sudden=s.sudden||(s.homeShots.length>=5&&s.awayShots.length>=5&&s.homeGoals===s.awayGoals);
-  s.log.push({side,no,player,shot,keeper:keeperDir,type:res.type,byUser});
-  s.reveal={type:res.type,shot,keeper:keeperDir,byUser};
+  s.log.push({side,no,player,keeperName,shot,keeper:keeperDir,type:res.type,byUser});
+  s.reveal={type:res.type,shot,keeper:keeperDir,byUser,player,keeperName};
   _penSfx("shot_reveal");
   setTimeout(function(){_penSfx(res.type==="goal"?"goal_scored":res.type==="save"?"goalkeeper_save":res.type==="post"?"post_hit":"shot_missed");},reduce?0:160);
   s.phase=s.phase==="shoot"?"save":"shoot";
