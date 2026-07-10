@@ -3162,7 +3162,7 @@ img,svg,canvas{max-width:100%}
   margin-inline:auto;
 }
 #sim .simstage{
-  grid-template-columns:minmax(0,1fr) minmax(150px,180px);
+  grid-template-columns:minmax(0,1fr) minmax(190px,250px);
   gap:10px;
 }
 #sim .fieldframe{
@@ -3582,6 +3582,12 @@ img,svg,canvas{max-width:100%}
 @media(prefers-reduced-motion:reduce){
   #sim #emCard,#sim #emZone,#sim #emArrows line,#sim #emArrows path{transition:none;animation:none}
 }
+#sim .board{border-bottom:2px solid color-mix(in srgb,var(--color-primary) 55%,transparent)}
+#sim .simgoals div.ev-major{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--color-primary) 14%,transparent),transparent 70%);
+  border-left:2px solid var(--color-primary);
+}
+#sim .eventpanel .simgoals{max-height:340px;overflow-y:auto}
 
 /* ===== Compact spotlight player picker ===== */
 .spotlight-modal{

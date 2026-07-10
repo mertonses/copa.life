@@ -1448,7 +1448,18 @@ function buildSim(myPow, oppPow) {
   /* DOM helpers */
   function _dom(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
   function _html(id,v){const e=document.getElementById(id);if(e)e.innerHTML=v;}
-  function _addRow(side,html){const el=document.getElementById("simGoals");if(!el)return;const d=document.createElement("div");d.className=(side===0?"home":"away")+" goal";d.innerHTML=html;el.prepend(d);while(el.children.length>10)el.removeChild(el.lastChild);}
+  function _addRow(side,html,major){
+    const el=document.getElementById("simGoals");if(!el)return;
+    const d=document.createElement("div");
+    d.className=(side===0?"home":"away")+" goal"+(major?" ev-major":"");
+    d.innerHTML=html;el.prepend(d);
+    // trim minor rows first so goals/cards stay visible in the story
+    while(el.children.length>14){
+      let victim=null;
+      for(let i=el.children.length-1;i>=0;i--){if(!el.children[i].classList.contains("ev-major")){victim=el.children[i];break;}}
+      el.removeChild(victim||el.lastChild);
+    }
+  }
   function _sendOffPlayer(p,reason){
     if(!p||p.sentOff)return;
     p.sentOff=true;p.hasBall=false;p.vx=0;p.vy=0;p.targetX=p.x;p.targetY=p.y;
@@ -1460,7 +1471,7 @@ function buildSim(myPow, oppPow) {
     const rMin=Math.floor(matchTime/60);
     const rTeam=p.teamId===0?myName:oppName;
     _html("simComm","<b>"+nm+"</b> — "+reason);
-    _addRow(p.teamId,"<b>"+rMin+"'</b><span><b>🟥 "+(isTR?"KIRMIZI KART":"RED CARD")+" · "+nm+"</b><small>"+rTeam+" · "+(isTR?"10 kişi kaldı":"down to 10")+"</small></span>");
+    _addRow(p.teamId,"<b>"+rMin+"'</b><span><b>🟥 "+(isTR?"KIRMIZI KART":"RED CARD")+" · "+nm+"</b><small>"+rTeam+" · "+(isTR?"10 kişi kaldı":"down to 10")+"</small></span>",true);
     _addTimelineMarker(rMin,'card',p.teamId,(isTR?"Kırmızı kart — ":"Red card — ")+nm);
     _flashEventMap('card',p.teamId,0.5,p.teamId===0?0.35:0.65,{meta:rMin+"' · "+(isTR?"KIRMIZI KART":"RED CARD"),main:rTeam.slice(0,12)+" · "+nm});
     audio.card&&audio.card();
@@ -1521,7 +1532,7 @@ function buildSim(myPow, oppPow) {
     _html("simComm",comm);_html("simRadio","📻 "+comm);
     const gMin=Math.floor(matchTime/60);
     const gTeam=teamId===0?myName:oppName;
-    _addRow(teamId,"<b>"+gMin+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+nm+"</b><small>"+gTeam+(lastAssist?" · "+(isTR?"asist ":"assist ")+lastAssist:"")+" · "+sc2+"</small></span>");
+    _addRow(teamId,"<b>"+gMin+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+nm+"</b><small>"+gTeam+(lastAssist?" · "+(isTR?"asist ":"assist ")+lastAssist:"")+" · "+sc2+"</small></span>",true);
     _addTimelineMarker(gMin,'goal',teamId,(isTR?"Gol — ":"Goal — ")+nm+" ("+gTeam+")");
     _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,{meta:gMin+"' · "+(isTR?"GOL":"GOAL"),main:gTeam.slice(0,12)+" · "+nm});
     _flashArrow(ball.x/_PW,Math.max(0.06,Math.min(0.94,ball.y/_PH-(teamId===0?0.14:-0.14))),0.5,teamId===0?0.985:0.015,'#429A73',1600);
@@ -2060,7 +2071,7 @@ function buildSim(myPow, oppPow) {
           const yMin=Math.floor(matchTime/60);
           const yTeam=pl.teamId===0?myName:oppName;
           _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
-          _addRow(pl.teamId,"<b>"+yMin+"'</b><span><b>🟨 "+(isTR?"SARI KART":"YELLOW")+" · "+nm+"</b><small>"+yTeam+"</small></span>");
+          _addRow(pl.teamId,"<b>"+yMin+"'</b><span><b>🟨 "+(isTR?"SARI KART":"YELLOW")+" · "+nm+"</b><small>"+yTeam+"</small></span>",true);
           _addTimelineMarker(yMin,'card',pl.teamId,(isTR?"Sarı kart — ":"Yellow — ")+nm);
           _flashEventMap('card',pl.teamId,0.5,pl.teamId===0?0.35:0.65,{meta:yMin+"' · "+(isTR?"SARI KART":"YELLOW CARD"),main:yTeam.slice(0,12)+" · "+nm});
           audio.card&&audio.card();
@@ -2073,12 +2084,16 @@ function buildSim(myPow, oppPow) {
       const defender=oppTeam.find(p=>(p.role==='CB'||p.role==='DM')&&!p.sentOff)||oppTeam.find(p=>p.role!=='GK'&&!p.sentOff);
       const nm=defender?defender.name.split(' ').pop():'?';
       _html("simComm","🦵 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.tackle_tr:_COMM.tackle_en));
+      _addRow(1-tid,"<b>"+Math.floor(matchTime/60)+"'</b><span>🦵 "+nm+" · "+(isTR?"top kazandı":"won the ball")+"</span>");
+      _flashEventMap('press',1-tid,defender?defender.x/_PW:0.5,defender?defender.y/_PH:0.5,null);
       effects.spawn('TACKLE',defender?defender.x:_PW/2,defender?defender.y:_PH/2,0,0,'#f59e0b',0.4);
     } else if(roll<0.16){
       // counter attack sequence
       const fwd=atkTeam.find(p=>(p.role==='ST'||p.role==='LW'||p.role==='RW')&&!p.sentOff);
       const nm=fwd?fwd.name.split(' ').pop():'?';
       _html("simComm","⚡ <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.counter_tr:_COMM.counter_en));
+      _addRow(tid,"<b>"+Math.floor(matchTime/60)+"'</b><span>⚡ "+(tid===0?myName:oppName)+" · "+(isTR?"hızlı geçiş, "+nm+" koşuda":"quick transition, "+nm+" running")+"</span>");
+      _flashArrow(tid===0?0.35:0.65,0.5,0.5,tid===0?0.86:0.14,'#c9973f',900);
       if(matchTime-lastForcedAttackTime>120&&rng.bool(goldenGoalMode?0.65:0.38)){
         lastForcedAttackTime=matchTime;
         startCentralProbe(tid,isTR?"Hızlı geçiş fırsatı.":"Transition chance.");
@@ -2088,6 +2103,7 @@ function buildSim(myPow, oppPow) {
       const pl=atkTeam.find(p=>(p.role==='CM'||p.role==='AM')&&!p.sentOff)||atkTeam.find(p=>!p.sentOff);
       const nm=pl?pl.name.split(' ').pop():'?';
       _html("simComm","🎯 <b>"+nm+"</b> — "+rng.pick(isTR?_COMM.freekick_tr:_COMM.freekick_en));
+      _addRow(tid,"<b>"+Math.floor(matchTime/60)+"'</b><span>🎯 "+(isTR?"Serbest vuruş":"Free kick")+" · "+(tid===0?myName:oppName)+" · "+nm+"</span>");
       if(matchTime-lastDangerTime>140&&rng.bool(0.28)){
         _registerDanger(tid,isTR?"Serbest vuruş tehlikesi":"Free-kick threat","🎯");
       }
@@ -2416,12 +2432,19 @@ function buildSim(myPow, oppPow) {
     const frameMs=Math.min((now-prevTime)/1000,0.25);prevTime=now;
     const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1)*(typeof SIM_TIME_SCALE!=="undefined"?SIM_TIME_SCALE:1);
     accumulator+=frameMs*spd;
-    // Steps needed per frame ≈ spd*frameMs/FIXED_STEP; allow headroom so playback keeps pace
-    const MAX_STEPS=Math.ceil(spd*0.6)+8;
-    let _steps=0;
-    while(accumulator>=FIXED_STEP&&_steps<MAX_STEPS){simStep(FIXED_STEP);accumulator-=FIXED_STEP;_steps++;}
+    // Adaptive step size: keep step COUNT roughly constant across speeds so the
+    // frame rate never collapses and wall-clock pacing holds (1×≈45s … 8×≈5.6s).
+    // Timer-driven game logic is dt-based, so a coarser step preserves event rates.
+    const stepScale=Math.max(1,Math.min(8,Math.round(spd/(SIM_SPEED_1X*SIM_TIME_SCALE))));
+    const stepDt=FIXED_STEP*stepScale;
+    const t0=(typeof performance!=="undefined"&&performance.now)?performance.now():0;
+    while(accumulator>=stepDt){
+      simStep(stepDt);accumulator-=stepDt;
+      if(t0&&performance.now()-t0>24)break; // real-time budget guard
+    }
+    if(accumulator>spd*0.5)accumulator=spd*0.5; // never bank more than 0.5s of backlog
     statUpdateTimer+=frameMs;
-    if(statUpdateTimer>0.4){statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));}
+    if(statUpdateTimer>0.35){statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));}
     if(!gameEnded)animId=requestAnimationFrame(tick);
   }
 
