@@ -231,8 +231,6 @@ function drawHeatmap(ctx,W,H,heatGrid,HGW,HGH){
   for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){let v=0,w=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const rr=r+dr,cc=c+dc;if(rr>=0&&rr<HGH&&cc>=0&&cc<HGW){const ki=(dr+1)*3+(dc+1);v+=heatGrid[rr*HGW+cc]*kn[ki];w+=kn[ki];}}sm[r*HGW+c]=v/w;}
   const mx=Math.max(1,...Array.from(sm));const cw=W/HGW,ch=H/HGH;
   for(let r=0;r<HGH;r++)for(let c=0;c<HGW;c++){const v=sm[r*HGW+c]/mx;if(v<0.04)continue;const hue=v<0.3?220-v/0.3*80:v<0.6?140-(v-0.3)/0.3*100:v<0.85?40-(v-0.6)/0.25*40:0;const sat=v<0.15?70:85;const lit=v<0.2?55:48-v*4;const alpha=Math.min(0.85,v<0.15?v/0.15*0.3:0.3+v*0.55);ctx.fillStyle=`hsla(${hue},${sat}%,${lit}%,${alpha})`;ctx.fillRect(c*cw,r*ch,cw,ch);}
-  const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";const lbl="🔥 "+(isTR?"ISI HARİTASI":"HEAT MAP");
-  ctx.font="bold 8px 'Inter',sans-serif";const lblW=ctx.measureText(lbl).width+16;ctx.fillStyle="rgba(0,0,0,0.58)";ctx.fillRect((W-lblW)/2,H-22,lblW,17);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(lbl,W/2,H-13);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1059,7 +1057,7 @@ function buildSim(myPow, oppPow) {
 
   /* event map setup (replaces canvas) */
   const cvEl=document.getElementById("simEventMap")||document.getElementById("cv");
-  const W=320; // retained for legacy refs (heatmap, etc.)
+  const W=720; // offscreen heatmap render resolution (2x display size, avoids pixelation on hi-dpi)
   const H=Math.round(W*0.565);
   const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
   const rawCtx=canvas.getContext("2d"); // offscreen only, used for heatmap
@@ -2046,9 +2044,11 @@ function buildSim(myPow, oppPow) {
     const recentDanger=matchTime-lastDangerTime<95;
     const sterile=(stats.shots[0]+stats.shots[1]<2&&matchTime>35*60)||(stats.danger[0]+stats.danger[1]<2&&matchTime>55*60);
     const activeProfile=tacticalSeq&&tacticalSeq.profile?tacticalSeq.profile:null;
-    const cardGate=_simClamp(0.0036+(activeProfile?activeProfile.card_risk*0.042:0)+(goldenGoalMode?0.0008:0),0.0028,0.0062);
-    const liveCardRate=Math.min(cardGate,0.0062);
-    if(roll<0.0062&&disciplineCooldown<=0&&roll<liveCardRate){
+    // Audit-driven tuning: matches too often ended with 0 card events; widen the gate
+    // (~1-2 bookings/match expected; disciplineCooldown still spaces them out)
+    const cardGate=_simClamp(0.011+(activeProfile?activeProfile.card_risk*0.10:0)+(goldenGoalMode?0.002:0),0.008,0.022);
+    const liveCardRate=Math.min(cardGate,0.022);
+    if(roll<0.022&&disciplineCooldown<=0&&roll<liveCardRate){
       // yellow card
       const cardable=oppTeam.filter(p=>p.role!=='GK'&&!p.sentOff&&(p.yellowCards||0)<2);
       const fresh=cardable.filter(p=>(p.yellowCards||0)===0);
@@ -2336,8 +2336,7 @@ function buildSim(myPow, oppPow) {
     const fw=["Kupa sandığa girdi.","Rüya sezon!","Son düdüğe kadar didindi.","Bu takım birlikte büyüdü."];const lw=["Finale geldi, yetmedi.","Son adımda tökezledi.","Sıfırdan başla.","Bir sonraki run."];
     const ni=Math.floor(Math.random()*fw.length);
     window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>`;
-    window.finalSimAudit=audit;
-    window.finalReportHTML+=auditReportHTML();
+    window.finalSimAudit=audit; // audit kept for tuning/telemetry; no longer rendered in the report
     calcRatings();
     _dom("simScore",sc);
     setTimeout(()=>endRun(won,sc),900);
@@ -2407,7 +2406,7 @@ function buildSim(myPow, oppPow) {
     window.openCopaFinalPenalties=(manual)=>{openFinalPenaltyShootout(sc,0,!!manual);return true;};
     window._finalPenaltyScore=sc;
     window.finalSimAudit=audit;
-    window._finalAuditHTML=auditReportHTML();
+    window._finalAuditHTML="";
     window.keyMoment=isTR?"Altın golde gol çıkmadı":"No golden goal";
     window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";
     window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;

@@ -609,6 +609,160 @@ function _initHubDragDrop(){
   }
   slots.forEach((_,i)=>{const el=document.getElementById("h"+i);if(el)_addTouchDrag(el,()=>({type:"slot",idx:i}));});
   _be.querySelectorAll("[data-bench-idx]").forEach(card=>{const bi=parseInt(card.dataset.benchIdx);_addTouchDrag(card,()=>({type:"bench",idx:bi}));});
+  _initTapPlacement();
+}
+
+/* ═══ Tap-to-select placement layer (coarse pointers) ═══
+   Primary mobile interaction: tap a bench player or pitch player to select,
+   valid targets highlight, tap a target to place/swap. Long-press drag stays
+   as a secondary method. Desktop mouse drag/drop is untouched. */
+let _tapSel=null;
+function _tapCoarse(){return !!(window.matchMedia&&window.matchMedia("(pointer: coarse)").matches);}
+function _renderEmptyHubSlot(i){
+  const r=document.getElementById("h"+i);if(!r)return;
+  r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";
+  r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";
+}
+function _tapClearHighlights(){
+  document.querySelectorAll(".tap-good,.tap-off,.tap-no,.tap-selected").forEach(e=>{
+    e.classList.remove("tap-good","tap-off","tap-no","tap-selected");
+    e.removeAttribute("aria-disabled");e.removeAttribute("aria-pressed");
+  });
+}
+function _tapBarEl(){
+  let b=document.getElementById("tapHelperBar");
+  if(!b){
+    b=document.createElement("div");b.id="tapHelperBar";b.className="tap-helper hidden";
+    b.innerHTML='<span id="tapHelperTxt"></span><button type="button" class="tap-cancel" onclick="_tapCancel()">'+(LANG==="tr"?"İptal":"Cancel")+'</button>';
+    document.body.appendChild(b);
+  }
+  return b;
+}
+function _tapShowBar(msg){const b=_tapBarEl();b.classList.remove("hidden");const t=document.getElementById("tapHelperTxt");if(t)t.innerHTML=msg;}
+function _tapHideBar(){const b=document.getElementById("tapHelperBar");if(b)b.classList.add("hidden");}
+function _tapToast(msg){_tapShowBar(msg);clearTimeout(window._tapToastT);window._tapToastT=setTimeout(()=>{if(!_tapSel)_tapHideBar();},1500);}
+function _tapCancel(){_tapSel=null;_tapClearHighlights();_tapHideBar();}
+window._tapCancel=_tapCancel;
+function _tapHighlightTargets(){
+  _tapClearHighlights();
+  if(!_tapSel)return;
+  const tr=LANG==="tr";
+  if(_tapSel.type==="bench"){
+    const _benched=bench.filter(p=>p&&!p.used);
+    const bp=_benched[_tapSel.idx];if(!bp)return;
+    const card=document.querySelector('[data-bench-idx="'+_tapSel.idx+'"]');
+    if(card){card.classList.add("tap-selected");card.setAttribute("aria-pressed","true");}
+    const g=typeof groupOf==="function"?groupOf(bp.pos):null;
+    slots.forEach((s,i)=>{
+      const el=document.getElementById("h"+i);if(!el)return;
+      const sg=typeof groupOf==="function"?groupOf(s[0]):null;
+      const fit=s[0]===bp.pos||sg===g;
+      el.classList.add(fit?"tap-good":"tap-off");
+      el.setAttribute("aria-label",(L().abbr[s[0]]||s[0])+" · "+(fit?(tr?"yerleştir":"place"):(tr?"pozisyon dışı":"out of position")));
+    });
+  } else if(_tapSel.type==="slot"){
+    const src=_tapSel.idx;
+    const sEl=document.getElementById("h"+src);
+    if(sEl){sEl.classList.add("tap-selected");sEl.setAttribute("aria-pressed","true");}
+    const srcIsGK=slots[src][0]==="GK";
+    const g=typeof groupOf==="function"?groupOf(slots[src][0]):null;
+    slots.forEach((s,i)=>{
+      if(i===src)return;
+      const el=document.getElementById("h"+i);if(!el)return;
+      const dstIsGK=s[0]==="GK";
+      if(srcIsGK!==dstIsGK){
+        const _a=picksBySlot[src],_b=picksBySlot[i];
+        if(!(_a&&_a.injured)&&!(_b&&_b.injured)){el.classList.add("tap-no");el.setAttribute("aria-disabled","true");return;}
+      }
+      const sg=typeof groupOf==="function"?groupOf(s[0]):null;
+      el.classList.add(sg===g?"tap-good":"tap-off");
+      el.setAttribute("aria-label",(L().abbr[s[0]]||s[0])+" · "+(tr?"yer değiştir":"swap"));
+    });
+  }
+}
+function _tapSelectBench(bi){
+  const _benched=bench.filter(p=>p&&!p.used);
+  const bp=_benched[bi];if(!bp)return;
+  if(_tapSel&&_tapSel.type==="bench"&&_tapSel.idx===bi){_tapCancel();return;}
+  _tapSel={type:"bench",idx:bi};
+  _tapHighlightTargets();
+  const nm=typeof surOf==="function"?surOf(bp):(bp.name||"?");
+  _tapShowBar("<b>"+nm.toUpperCase()+"</b> "+(LANG==="tr"?"seçildi · hedef pozisyon seç":"selected · tap a position"));
+}
+function _tapSelectSlot(i){
+  if(!picksBySlot[i])return;
+  if(_tapSel&&_tapSel.type==="slot"&&_tapSel.idx===i){_tapCancel();return;}
+  _tapSel={type:"slot",idx:i};
+  _tapHighlightTargets();
+  const nm=typeof surOf==="function"?surOf(picksBySlot[i]):(picksBySlot[i].name||"?");
+  _tapShowBar("<b>"+nm.toUpperCase()+"</b> "+(LANG==="tr"?"seçildi · yer değiştirmek için hedef seç":"selected · tap a target to swap"));
+}
+function _tapPlaceOnSlot(i){
+  const sel=_tapSel;if(!sel)return false;
+  const tr=LANG==="tr";
+  if(sel.type==="bench"){
+    /* same operation as the drag-drop bench→slot path */
+    const _benched=bench.filter(p=>p&&!p.used);
+    const bp=_benched[sel.idx];if(!bp){_tapCancel();return true;}
+    const bIdx=bench.indexOf(bp);
+    const old=picksBySlot[i];
+    const posLbl=L().abbr[slots[i][0]]||slots[i][0];
+    const nm=typeof surOf==="function"?surOf(bp):(bp.name||"?");
+    bp.used=true;bp.bench=false;
+    if(typeof fillSlotReplace==="function")fillSlotReplace(i,bp);
+    if(bIdx>=0)bench.splice(bIdx,1);
+    if(old){old.bench=true;old.used=false;bench.push(old);}
+    _tapSel=null;_tapClearHighlights();_tapHideBar();
+    if(typeof renderHub==="function")renderHub();
+    _tapToast("<b>"+nm+"</b> "+(tr?posLbl+" pozisyonuna geçti":"placed at "+posLbl)+(old?" · "+(typeof surOf==="function"?surOf(old):(old.name||"?"))+" "+(tr?"yedeğe alındı":"benched"):""));
+    return true;
+  }
+  if(sel.type==="slot"){
+    const src=sel.idx;
+    if(src===i){_tapCancel();return true;}
+    /* same GK restriction as drag-drop */
+    const srcIsGK=slots[src][0]==="GK",dstIsGK=slots[i][0]==="GK";
+    if(srcIsGK!==dstIsGK){
+      const _a=picksBySlot[src],_b=picksBySlot[i];
+      if(!(_a&&_a.injured)&&!(_b&&_b.injured)){_tapToast(tr?"Kaleci slotu ile değişim yapılamaz":"Cannot swap with the GK slot");return true;}
+    }
+    const a=picksBySlot[src],b=picksBySlot[i];
+    picksBySlot[src]=b;picksBySlot[i]=a;
+    if(a){a.pos=slots[i][0];a.eff=typeof effOf==="function"?effOf(a):a.ov;renderRoundel("h"+i,a);}else _renderEmptyHubSlot(i);
+    if(b){b.pos=slots[src][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+src,b);}else _renderEmptyHubSlot(src);
+    _tapSel=null;_tapClearHighlights();
+    _initHubDragDrop();
+    _tapToast(tr?"Oyuncular yer değiştirdi":"Players swapped");
+    return true;
+  }
+  return false;
+}
+function _initTapPlacement(){
+  if(!_tapCoarse())return;
+  slots.forEach((_,i)=>{
+    const el=document.getElementById("h"+i);if(!el||el._tapReady)return;el._tapReady=true;
+    el.addEventListener("click",e=>{
+      if(!_tapCoarse())return;
+      e.stopPropagation();
+      if(_tapSel)_tapPlaceOnSlot(i);
+      else _tapSelectSlot(i);
+    });
+  });
+  const be=document.getElementById("hubBenchSection");
+  if(be)be.querySelectorAll("[data-bench-idx]").forEach(card=>{
+    if(card._tapReady)return;card._tapReady=true;
+    card.setAttribute("role","button");
+    card.addEventListener("click",e=>{if(!_tapCoarse())return;e.stopPropagation();_tapSelectBench(parseInt(card.dataset.benchIdx));});
+  });
+  if(!window._tapGlobalReady){
+    window._tapGlobalReady=true;
+    document.addEventListener("click",e=>{
+      if(!_tapSel)return;
+      if(e.target.closest("#tapHelperBar")||e.target.closest("[data-bench-idx]")||e.target.closest(".roundel"))return;
+      _tapCancel();
+    });
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&_tapSel)_tapCancel();});
+  }
 }
 function showCardPopup(k){const x=L(),cd=x.cards[k];if(!cd)return;const v=cardEff(k,picksBySlot.filter(Boolean),round);const kin=kindLabel(k);showModal(`<div style="padding:14px 16px"><div class="card-popup-ico">${CARD_SVGS[k]||cd.i}</div><div style="font-family:var(--mono);font-weight:700;font-size:13px;text-align:center">${cd.n}</div><div style="font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;letter-spacing:1px;margin:2px 0">${kin}</div><hr style="border:none;border-top:1px solid var(--line);margin:8px 0"><div class="card-desc-rich" style="font-size:11px;line-height:1.55;color:var(--ink)">${formatCardDesc(variantDesc(cd.d,variantOf(k)||0))}</div><div style="margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700;color:${v>=0?"var(--good)":"var(--red)"}">${LANG==="tr"?"Bu tur etkisi":"Effect now"}: ${v>=0?"+":""}${v}</div><div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${x.presClose||"Kapat"}</button></div></div>`);}
 function shopReroll(){if(shopRerolledThisTurn>=1){showModal(`<div class="bulletin"><div class="bhead"><span>${LANG==="tr"?"KART PAZARI":"CARD MARKET"}</span></div><div class="bbody">${LANG==="tr"?"Bu turda yenileme hakkın doldu.":"You have used your reroll for this turn."}</div><div class="bact"><button class="btn btn-ghost" onclick="closeModal()">${LANG==="tr"?"TAMAM":"OK"}</button></div></div>`);return;}shopRerolledThisTurn++;newShopOffers();renderHub();sfxTick();}
