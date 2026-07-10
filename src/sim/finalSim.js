@@ -8,6 +8,9 @@ const SIM_SPEED_1X = 10;
 const SIM_SPEED_2X = 20;
 const SIM_SPEED_4X = 40;
 const SIM_SPEED_8X = 80;
+// Playback time scale: sim-seconds per real-second = speedMul * SIM_TIME_SCALE.
+// Target: full match (~93 sim-min) plays in ~45s at 1×, ~5.6s at 8×.
+const SIM_TIME_SCALE = 12.4;
 var speedMul = SIM_SPEED_1X;
 
 const UI_COLORS = {
@@ -836,24 +839,44 @@ function _mkPool(n){
 
 /* ── Audio (Web Audio synth) ── */
 function _mkAudio(){
-  let AC=null,mg=null,cg=null,fg=null;
+  let AC=null,mg=null,cg=null,fg=null,ambNodes=null;
   function boot(){
+    if(typeof muted!=="undefined"&&muted)return false; // respect global SFX setting
     if(AC)return true;
-    try{AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();mg.gain.value=0.32;mg.connect(AC.destination);cg=AC.createGain();cg.gain.value=0.3;cg.connect(mg);fg=AC.createGain();fg.gain.value=0.7;fg.connect(mg);return true;}catch(e){return false;}
+    try{AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();mg.gain.value=0.32;mg.connect(AC.destination);cg=AC.createGain();cg.gain.value=0.12;cg.connect(mg);fg=AC.createGain();fg.gain.value=0.7;fg.connect(mg);return true;}catch(e){return false;}
   }
   function beep(freq,dur,type,gain){if(!boot())return;try{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(fg);o.type=type||'sine';o.frequency.value=freq;g.gain.setValueAtTime(gain||0.14,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);o.start();o.stop(AC.currentTime+dur);}catch(e){}}
   function noise(dur,gain,freq){if(!boot())return;try{const buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.25;const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=freq||250;s.buffer=buf;s.connect(f);f.connect(g);g.connect(cg);g.gain.setValueAtTime(gain||0.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);s.start();s.stop(AC.currentTime+dur);}catch(e){}}
+  function ambience(){
+    // Low stadium bed: looping filtered noise through the crowd gain; danger swells it
+    if(!boot()||ambNodes)return;
+    try{
+      const dur=3,buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.22;
+      const src=AC.createBufferSource();src.buffer=buf;src.loop=true;
+      const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
+      const g=AC.createGain();g.gain.value=0.5;
+      src.connect(f);f.connect(g);g.connect(cg);src.start();
+      ambNodes={src,g};
+    }catch(e){}
+  }
   return{
-    shortPass(){beep(820,0.04,'square',0.07);},
-    drivenPass(){beep(580,0.07,'square',0.11);},
+    /* continuous pass/ball ticks removed — event-based SFX only */
+    shortPass(){},
+    drivenPass(){},
+    ambience,
+    tension(){beep(300,0.12,'sine',0.07);setTimeout(()=>beep(380,0.12,'sine',0.08),90);},
     shot(){beep(170,0.2,'sawtooth',0.22);noise(0.18,0.14,180);},
     save(){beep(380,0.14,'square',0.17);noise(0.12,0.1,220);},
     goal(){beep(900,0.14,'sine',0.28);setTimeout(()=>beep(1120,0.18,'sine',0.28),110);setTimeout(()=>beep(1340,0.28,'sine',0.32),260);noise(0.9,0.38,120);},
     whistle(){beep(2100,0.45,'sine',0.18);setTimeout(()=>beep(2500,0.3,'sine',0.14),280);},
     tackle(){beep(190,0.09,'sawtooth',0.13);noise(0.07,0.09,300);},
     post(){beep(340,0.28,'sine',0.18);},
-    crowd(danger){if(cg&&AC)cg.gain.setTargetAtTime(0.15+danger*0.55,AC.currentTime,0.6);},
-    stop(){try{if(AC){AC.close();AC=null;}}catch(e){}}
+    card(){noise(0.05,0.12,1400);beep(920,0.05,'square',0.06);},
+    shoutCue(){beep(640,0.06,'square',0.08);beep(520,0.05,'square',0.06);},
+    crowd(danger){if(cg&&AC)cg.gain.setTargetAtTime(0.07+danger*0.22,AC.currentTime,0.6);},
+    stop(){try{if(ambNodes){ambNodes.src.stop();ambNodes=null;}}catch(e){}try{if(AC){AC.close();AC=null;}}catch(e){}}
   };
 }
 
@@ -1044,22 +1067,45 @@ function buildSim(myPow, oppPow) {
   /* ── Live UI helpers (timeline + event map SVG) ── */
   function _initLiveUI(el){
     if(el){
-      el.innerHTML='<svg id="emSvg" viewBox="0 0 100 65" preserveAspectRatio="xMidYMid meet" style="width:100%;display:block;border-radius:6px">'
-        +'<defs><linearGradient id="emGnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1d4d1b"/><stop offset="100%" stop-color="#265e22"/></linearGradient></defs>'
+      // Tactical-board pitch in copa palette (ink/slate, primary accents) — no grass block
+      el.innerHTML='<svg id="emSvg" viewBox="0 0 100 65" preserveAspectRatio="xMidYMid meet" style="width:100%;display:block;border-radius:6px" role="img" aria-label="Maç olay haritası">'
+        +'<defs>'
+        +'<linearGradient id="emGnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10201f"/><stop offset="52%" stop-color="#14282a"/><stop offset="100%" stop-color="#10201f"/></linearGradient>'
+        +'<radialGradient id="emVig" cx="50%" cy="50%" r="72%"><stop offset="62%" stop-color="rgba(12,18,19,0)"/><stop offset="100%" stop-color="rgba(12,18,19,0.42)"/></radialGradient>'
+        +'</defs>'
         +'<rect width="100" height="65" fill="url(#emGnd)"/>'
-        +'<rect x="3" y="2" width="94" height="61" rx="0.5" fill="none" stroke="rgba(255,255,255,0.42)" stroke-width="0.5"/>'
-        +'<line x1="3" y1="32.5" x2="97" y2="32.5" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
-        +'<circle cx="50" cy="32.5" r="9" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.4"/>'
-        +'<circle cx="50" cy="32.5" r="0.9" fill="rgba(255,255,255,0.3)"/>'
-        +'<rect x="30" y="2" width="40" height="14" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
-        +'<rect x="30" y="49" width="40" height="14" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.4"/>'
-        +'<rect x="40" y="0.2" width="20" height="2.2" fill="rgba(255,255,255,0.5)" rx="0.3"/>'
-        +'<rect x="40" y="62.6" width="20" height="2.2" fill="rgba(255,255,255,0.5)" rx="0.3"/>'
+        // subtle tactical grid
+        +'<g stroke="rgba(230,238,239,0.045)" stroke-width="0.25">'
+        +[10,20,30,40,60,70,80,90].map(x=>'<line x1="'+x+'" y1="2" x2="'+x+'" y2="63"/>').join('')
+        +[13,22,43,54.5,65.5].map(y=>'<line x1="3" y1="'+y+'" x2="97" y2="'+(y>63?63:y)+'"/>').join('')
+        +'</g>'
+        // third guides (dashed, low opacity)
+        +'<line x1="3" y1="22" x2="97" y2="22" stroke="rgba(66,154,115,0.16)" stroke-width="0.35" stroke-dasharray="1.6 1.8"/>'
+        +'<line x1="3" y1="43" x2="97" y2="43" stroke="rgba(66,154,115,0.16)" stroke-width="0.35" stroke-dasharray="1.6 1.8"/>'
+        // pitch lines
+        +'<rect x="3" y="2" width="94" height="61" rx="0.8" fill="none" stroke="rgba(230,238,239,0.34)" stroke-width="0.5"/>'
+        +'<line x1="3" y1="32.5" x2="97" y2="32.5" stroke="rgba(230,238,239,0.24)" stroke-width="0.4"/>'
+        +'<circle cx="50" cy="32.5" r="8.5" fill="none" stroke="rgba(230,238,239,0.20)" stroke-width="0.4"/>'
+        +'<circle cx="50" cy="32.5" r="0.8" fill="rgba(230,238,239,0.28)"/>'
+        +'<rect x="30" y="2" width="40" height="13" fill="rgba(230,238,239,0.025)" stroke="rgba(230,238,239,0.25)" stroke-width="0.4"/>'
+        +'<rect x="30" y="50" width="40" height="13" fill="rgba(230,238,239,0.025)" stroke="rgba(230,238,239,0.25)" stroke-width="0.4"/>'
+        +'<rect x="40" y="2" width="20" height="5" fill="none" stroke="rgba(230,238,239,0.18)" stroke-width="0.35"/>'
+        +'<rect x="40" y="58" width="20" height="5" fill="none" stroke="rgba(230,238,239,0.18)" stroke-width="0.35"/>'
+        +'<rect x="41" y="0.4" width="18" height="1.8" fill="rgba(230,238,239,0.42)" rx="0.3"/>'
+        +'<rect x="41" y="62.8" width="18" height="1.8" fill="rgba(230,238,239,0.42)" rx="0.3"/>'
+        +'<rect width="100" height="65" fill="url(#emVig)" pointer-events="none"/>'
+        +'<g id="emZone" opacity="0"></g>'
+        +'<g id="emArrows"></g>'
         +'<g id="emMarkers"></g>'
-        +'<rect id="emEvBg" x="22" y="27" width="56" height="11" rx="1.5" fill="rgba(12,18,19,0.84)" opacity="0"/>'
-        +'<text id="emEvTxt" x="50" y="34.5" text-anchor="middle" font-size="4" fill="#E6EEEF" font-family="system-ui,sans-serif" font-weight="700" opacity="0"></text>'
-        +'<text x="50" y="5.5" text-anchor="middle" font-size="3.4" fill="rgba(230,238,239,0.5)" font-family="system-ui,sans-serif" id="emLblTop">'+oppName.toUpperCase().slice(0,10)+'</text>'
-        +'<text x="50" y="63" text-anchor="middle" font-size="3.4" fill="rgba(66,154,115,0.9)" font-family="system-ui,sans-serif" id="emLblBot">'+myName.toUpperCase().slice(0,10)+'</text>'
+        // event callout card (meta + main line)
+        +'<g id="emCard" opacity="0">'
+        +'<rect id="emEvBg" x="17" y="24.5" width="66" height="14.5" rx="2" fill="rgba(12,18,19,0.90)" stroke="rgba(66,154,115,0.55)" stroke-width="0.35"/>'
+        +'<text id="emEvMeta" x="50" y="30" text-anchor="middle" font-size="3.1" fill="#429A73" font-family="system-ui,sans-serif" font-weight="800" letter-spacing="0.4"></text>'
+        +'<text id="emEvTxt" x="50" y="35.6" text-anchor="middle" font-size="3.5" fill="#E6EEEF" font-family="system-ui,sans-serif" font-weight="700"></text>'
+        +'</g>'
+        // attack direction hint + team labels: top half = ours (we attack downward)
+        +'<text x="6" y="5.6" text-anchor="start" font-size="3.1" fill="rgba(66,154,115,0.85)" font-family="system-ui,sans-serif" font-weight="700" id="emLblTop">'+myName.toUpperCase().slice(0,12)+' ▾</text>'
+        +'<text x="6" y="61.5" text-anchor="start" font-size="3.1" fill="rgba(230,238,239,0.45)" font-family="system-ui,sans-serif" font-weight="700" id="emLblBot">'+oppName.toUpperCase().slice(0,12)+' ▴</text>'
         +'</svg>';
     }
     const tlEl=document.getElementById('simTimeline');
@@ -1083,37 +1129,103 @@ function buildSim(myPow, oppPow) {
     if(cur){cur.setAttribute('x1',x);cur.setAttribute('x2',x);}
     if(prog)prog.setAttribute('width',Math.max(0,parseFloat(x)-2).toFixed(1));
   }
-  function _addTimelineMarker(min,type,side){
+  function _addTimelineMarker(min,type,side,label){
     const g=document.getElementById('tlMarkers');if(!g)return;
     const x=(2+Math.min(1,min/90)*296).toFixed(1);
     const c=side===0?'#429A73':'#496E71';
-    const r=type==='goal'?3.2:type==='save'?2.2:1.8;
-    const ci=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    ci.setAttribute('cx',x);ci.setAttribute('cy','12.5');ci.setAttribute('r',r);ci.setAttribute('fill',c);
-    if(type==='goal'){ci.setAttribute('stroke','#E6EEEF');ci.setAttribute('stroke-width','0.6');}
-    g.appendChild(ci);
+    const NS='http://www.w3.org/2000/svg';
+    let el;
+    if(type==='card'){
+      // small tilted square, reads as a booking
+      el=document.createElementNS(NS,'rect');
+      el.setAttribute('x',(parseFloat(x)-1.5).toFixed(1));el.setAttribute('y','10.5');
+      el.setAttribute('width','3');el.setAttribute('height','4');el.setAttribute('rx','0.5');
+      el.setAttribute('fill','#b0564a');
+      el.setAttribute('transform','rotate(12 '+x+' 12.5)');
+    }else{
+      el=document.createElementNS(NS,'circle');
+      el.setAttribute('cx',x);el.setAttribute('cy','12.5');
+      el.setAttribute('r',type==='goal'?3.2:type==='save'?2.2:1.5);
+      el.setAttribute('fill',type==='post'?'#c9973f':c);
+      if(type==='goal'){el.setAttribute('stroke','#E6EEEF');el.setAttribute('stroke-width','0.6');}
+      if(type==='corner')el.setAttribute('opacity','0.6');
+    }
+    const full=(min+"' "+(label||type));
+    el.setAttribute('aria-label',full);
+    const ti=document.createElementNS(NS,'title');ti.textContent=full;el.appendChild(ti);
+    g.appendChild(el);
   }
-  function _flashEventMap(type,side,posX,posY,label){
+  const _SVGNS='http://www.w3.org/2000/svg';
+  let _emCardTimer=null,_emZoneTimer=null;
+  function _emAttackColor(type){
+    // signal colors: goal/positive=primary green, danger=amber, miss/card=muted red, neutral=slate
+    if(type==='goal')return '#429A73';
+    if(type==='danger'||type==='chance')return '#c9973f';
+    if(type==='wide'||type==='card'||type==='injury')return '#b0564a';
+    return '#496E71';
+  }
+  function _flashZone(posX,posY,color){
+    const zg=document.getElementById('emZone');if(!zg)return;
+    zg.innerHTML='';
+    const zx=Math.max(3,Math.min(97-30,3+posX*94-15)).toFixed(1);
+    const zy=Math.max(2,Math.min(63-16,2+posY*61-8)).toFixed(1);
+    const r=document.createElementNS(_SVGNS,'rect');
+    r.setAttribute('x',zx);r.setAttribute('y',zy);
+    r.setAttribute('width','30');r.setAttribute('height','16');r.setAttribute('rx','2');
+    r.setAttribute('fill',color);r.setAttribute('opacity','0.14');
+    zg.appendChild(r);
+    zg.setAttribute('opacity','1');
+    if(_emZoneTimer)clearTimeout(_emZoneTimer);
+    _emZoneTimer=setTimeout(()=>zg.setAttribute('opacity','0'),900);
+  }
+  function _flashArrow(x1,y1,x2,y2,color,ms){
+    const ag=document.getElementById('emArrows');if(!ag)return;
+    const sx=(3+x1*94),sy=(2+y1*61),ex=(3+x2*94),ey=(2+y2*61);
+    const ln=document.createElementNS(_SVGNS,'line');
+    ln.setAttribute('x1',sx.toFixed(1));ln.setAttribute('y1',sy.toFixed(1));
+    ln.setAttribute('x2',ex.toFixed(1));ln.setAttribute('y2',ey.toFixed(1));
+    ln.setAttribute('stroke',color);ln.setAttribute('stroke-width','0.7');
+    ln.setAttribute('stroke-dasharray','2 1.4');ln.setAttribute('opacity','0.8');
+    ln.setAttribute('stroke-linecap','round');
+    const a=Math.atan2(ey-sy,ex-sx);
+    const hd=document.createElementNS(_SVGNS,'path');
+    hd.setAttribute('d','M'+ex.toFixed(1)+' '+ey.toFixed(1)
+      +' L'+(ex-Math.cos(a-0.5)*2.6).toFixed(1)+' '+(ey-Math.sin(a-0.5)*2.6).toFixed(1)
+      +' L'+(ex-Math.cos(a+0.5)*2.6).toFixed(1)+' '+(ey-Math.sin(a+0.5)*2.6).toFixed(1)+' Z');
+    hd.setAttribute('fill',color);hd.setAttribute('opacity','0.85');
+    ag.appendChild(ln);ag.appendChild(hd);
+    setTimeout(()=>{try{ag.removeChild(ln);ag.removeChild(hd);}catch(e){}},ms||1100);
+  }
+  /* info: {meta:"62' · KURTARIŞ", main:"Takım · Oyuncu"} or plain string (main only) */
+  function _flashEventMap(type,side,posX,posY,info){
     const mg=document.getElementById('emMarkers');
+    const sig=_emAttackColor(type);
     if(mg){
       const mx=(3+posX*94).toFixed(1);
       const my=(2+posY*61).toFixed(1);
       const mc=side===0?'#429A73':'#496E71';
-      const r=type==='goal'?3.8:2.0;
-      const ci=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const major=type==='goal';
+      const r=major?3.4:type==='save'||type==='danger'?2.2:1.6;
+      const ci=document.createElementNS(_SVGNS,'circle');
       ci.setAttribute('cx',mx);ci.setAttribute('cy',my);ci.setAttribute('r',r);
-      ci.setAttribute('fill',mc);ci.setAttribute('opacity','0.9');
-      if(type==='goal'){ci.setAttribute('stroke','#E6EEEF');ci.setAttribute('stroke-width','0.7');}
+      ci.setAttribute('fill',major?mc:sig);ci.setAttribute('opacity',major?'0.95':'0.8');
+      if(major){ci.setAttribute('stroke','#E6EEEF');ci.setAttribute('stroke-width','0.7');}
       mg.appendChild(ci);
-      if(type!=='goal')setTimeout(()=>{try{mg.removeChild(ci);}catch(e){}},5000);
+      if(!major)setTimeout(()=>{try{mg.removeChild(ci);}catch(e){}},4200);
     }
-    if(!label)return;
-    const bg=document.getElementById('emEvBg');
+    if(type==='goal'||type==='save'||type==='danger'||type==='chance')_flashZone(posX,posY,sig);
+    if(!info)return;
+    const card=document.getElementById('emCard');
+    const meta=document.getElementById('emEvMeta');
     const txt=document.getElementById('emEvTxt');
-    if(bg&&txt){
-      txt.textContent=label;
-      bg.setAttribute('opacity','1');txt.setAttribute('opacity','1');
-      setTimeout(()=>{bg.setAttribute('opacity','0');txt.setAttribute('opacity','0');},type==='goal'?2200:1200);
+    if(card&&txt){
+      if(typeof info==='string'){if(meta)meta.textContent='';txt.textContent=info.slice(0,34);}
+      else{if(meta)meta.textContent=(info.meta||'').slice(0,30);txt.textContent=(info.main||'').slice(0,34);}
+      card.setAttribute('opacity','1');
+      if(_emCardTimer)clearTimeout(_emCardTimer);
+      // major cards stay readable even at 8×; minor ones clear faster
+      const hold=type==='goal'?1800:type==='save'||type==='danger'||type==='card'||type==='injury'?1000:600;
+      _emCardTimer=setTimeout(()=>card.setAttribute('opacity','0'),hold);
     }
   }
   _initLiveUI(cvEl);
@@ -1174,11 +1286,7 @@ function buildSim(myPow, oppPow) {
   const ball=new _Ball();
   const renderer={
     goalFlash(){},
-    burst(txt){
-      const bg=document.getElementById('emEvBg');const t=document.getElementById('emEvTxt');
-      if(bg&&t){t.textContent=txt;bg.setAttribute('opacity','1');t.setAttribute('opacity','1');
-      setTimeout(()=>{bg.setAttribute('opacity','0');t.setAttribute('opacity','0');},1800);}
-    },
+    burst(txt){_flashEventMap('danger',0,0.5,0.5,{meta:'',main:txt});},
     clear(){},drawPitch(){},drawPlayers(){},drawBall(){},drawEffects(){},drawHUD(){},decay(){}
   };
   const audio=_mkAudio();
@@ -1349,8 +1457,13 @@ function buildSim(myPow, oppPow) {
     p.x=p.teamId===0?-8:_PW+8;p.y=_PH/2;
     stats.reds[p.teamId]=(stats.reds[p.teamId]||0)+1;
     const nm=p.name.split(' ').pop();
+    const rMin=Math.floor(matchTime/60);
+    const rTeam=p.teamId===0?myName:oppName;
     _html("simComm","<b>"+nm+"</b> — "+reason);
-    _addRow(p.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟥 "+nm+"</span>");
+    _addRow(p.teamId,"<b>"+rMin+"'</b><span><b>🟥 "+(isTR?"KIRMIZI KART":"RED CARD")+" · "+nm+"</b><small>"+rTeam+" · "+(isTR?"10 kişi kaldı":"down to 10")+"</small></span>");
+    _addTimelineMarker(rMin,'card',p.teamId,(isTR?"Kırmızı kart — ":"Red card — ")+nm);
+    _flashEventMap('card',p.teamId,0.5,p.teamId===0?0.35:0.65,{meta:rMin+"' · "+(isTR?"KIRMIZI KART":"RED CARD"),main:rTeam.slice(0,12)+" · "+nm});
+    audio.card&&audio.card();
     _updateStats();
   }
   function _updateStats(){
@@ -1375,7 +1488,11 @@ function buildSim(myPow, oppPow) {
     stats.danger[teamId]=(stats.danger[teamId]||0)+1;
     lastDangerTime=matchTime;
     momDisplay=Math.max(18,Math.min(82,momDisplay+(teamId===0?3:-3)));
-    _addRow(teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>"+(icon||"⚠")+" "+label+"</span>");
+    const dMin=Math.floor(matchTime/60);
+    const dTeam=teamId===0?myName:oppName;
+    _addRow(teamId,"<b>"+dMin+"'</b><span><b>"+(icon||"⚠")+" "+(isTR?"TEHLİKELİ ATAK":"DANGEROUS ATTACK")+"</b><small>"+dTeam+" · "+label+"</small></span>");
+    audio.tension&&audio.tension();
+    _flashEventMap('danger',teamId,ball.x/_PW,ball.y/_PH,{meta:dMin+"' · "+(isTR?"TEHLİKELİ ATAK":"DANGER"),main:dTeam.slice(0,12)+" · "+label.slice(0,20)});
     _updateStats();
   }
 
@@ -1402,9 +1519,12 @@ function buildSim(myPow, oppPow) {
     audio.goal();
     const comm="⚽ <b>"+Math.floor(matchTime/60)+"'</b> <b>"+nm+"</b>"+(lastAssist?" <small>"+(isTR?"Asist":"Assist")+" "+lastAssist+"</small>":"")+" — "+sc2;
     _html("simComm",comm);_html("simRadio","📻 "+comm);
-    _addRow(teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>⚽ "+nm+" "+sc2+"</span>");
-    _addTimelineMarker(Math.floor(matchTime/60),'goal',teamId);
-    _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,"⚽ "+nm+" "+sc2);
+    const gMin=Math.floor(matchTime/60);
+    const gTeam=teamId===0?myName:oppName;
+    _addRow(teamId,"<b>"+gMin+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+nm+"</b><small>"+gTeam+(lastAssist?" · "+(isTR?"asist ":"assist ")+lastAssist:"")+" · "+sc2+"</small></span>");
+    _addTimelineMarker(gMin,'goal',teamId,(isTR?"Gol — ":"Goal — ")+nm+" ("+gTeam+")");
+    _flashEventMap('goal',teamId,ball.x/_PW,ball.y/_PH,{meta:gMin+"' · "+(isTR?"GOL":"GOAL"),main:gTeam.slice(0,12)+" · "+nm});
+    _flashArrow(ball.x/_PW,Math.max(0.06,Math.min(0.94,ball.y/_PH-(teamId===0?0.14:-0.14))),0.5,teamId===0?0.985:0.015,'#429A73',1600);
     momDisplay=Math.max(18,Math.min(82,momDisplay+(teamId===0?22:-22)));
     // add to heatgrid
     addHeat(ball.x,ball.y,4);
@@ -1443,26 +1563,36 @@ function buildSim(myPow, oppPow) {
     lastDangerTime=matchTime;
     switch(res){
       case'GOAL':ball.state=_BS.OUT_OF_PLAY;ball.x=goalX;ball.y=goalY;onGoal(shooter.teamId);break;
-      case'KEEPER_SAVE':case'KEEPER_CLAIM':
+      case'KEEPER_SAVE':case'KEEPER_CLAIM':{
         if(gk){ball.setOwner(gk);chooseSequence(gk);lastCarrier=gk.name;}
         stats.saves[gk?gk.teamId:1-shooter.teamId]++;audio.save();
         effects.spawn('RECEIVE',gk?gk.x:goalX,gk?gk.y:goalY,0,0,'#fbbf24',0.5);
-        _html("simComm","🧤 "+(isTR?_COMM.save_tr[rng.int(_COMM.save_tr.length)]:_COMM.save_en[rng.int(_COMM.save_en.length)]));
-        _addRow(1-shooter.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🧤 "+(isTR?"Kurtarış":"Save")+"</span>");
-        _addTimelineMarker(Math.floor(matchTime/60),'save',1-shooter.teamId);
-        _flashEventMap('save',shooter.teamId,ball.x/_PW,ball.y/_PH,isTR?"🧤 Kurtarış":"🧤 Save");
+        const svMin=Math.floor(matchTime/60);
+        const gkNm=gk?gk.name.split(' ').pop():(isTR?"Kaleci":"Keeper");
+        const shNm=shooter.name.split(' ').pop();
+        const gkTeam=(gk?gk.teamId:1-shooter.teamId)===0?myName:oppName;
+        _html("simComm","🧤 <b>"+gkNm+"</b> — "+(isTR?shNm+"'in şutunu çıkardı!":"denies "+shNm+"!"));
+        _addRow(1-shooter.teamId,"<b>"+svMin+"'</b><span><b>🧤 "+(isTR?"KURTARIŞ":"SAVE")+" · "+gkNm+"</b><small>"+(isTR?shNm+"'in şutunu çıkardı":"stopped "+shNm+"'s shot")+"</small></span>");
+        _addTimelineMarker(svMin,'save',1-shooter.teamId,(isTR?"Kurtarış — ":"Save — ")+gkNm);
+        _flashEventMap('save',1-shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:svMin+"' · "+(isTR?"KURTARIŞ":"SAVE"),main:gkTeam.slice(0,10)+" · "+gkNm});
         momDisplay=Math.max(18,Math.min(82,momDisplay+(shooter.teamId===0?-8:8)));
-        break;
-      case'POST':
+        break;}
+      case'POST':{
         ball.vx*=-0.4;ball.vy*=-0.4;ball.state=_BS.LOOSE;audio.post();
         effects.spawn('TACKLE',ball.x,ball.y,0,0,'#94a3b8',0.5);
-        _addRow(shooter.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>▥ "+(isTR?"Direk":"Post")+"</span>");
-        _html("simComm",isTR?"🏃 Direğe çarptı!":"🏃 Off the post!");
-        break;
-      case'WIDE':ball.state=_BS.LOOSE;ball.vx*=0.2;ball.vy*=0.2;
-        _html("simComm","😮 "+rng.pick(isTR?_COMM.wide_tr:_COMM.wide_en));
-        _addRow(shooter.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>↗ "+(isTR?"İsabetsiz şut":"Shot wide")+"</span>");
-        break;
+        const poMin=Math.floor(matchTime/60);
+        const poNm=shooter.name.split(' ').pop();
+        _addRow(shooter.teamId,"<b>"+poMin+"'</b><span><b>▥ "+(isTR?"DİREK":"POST")+" · "+poNm+"</b><small>"+(isTR?"Şut direkten döndü":"Shot came off the post")+"</small></span>");
+        _addTimelineMarker(poMin,'post',shooter.teamId,(isTR?"Direk — ":"Post — ")+poNm);
+        _flashEventMap('danger',shooter.teamId,ball.x/_PW,ball.y/_PH,{meta:poMin+"' · "+(isTR?"DİREK":"POST"),main:(shooter.teamId===0?myName:oppName).slice(0,10)+" · "+poNm});
+        _html("simComm","▥ <b>"+poNm+"</b> — "+(isTR?"direğe çarptı!":"off the post!"));
+        break;}
+      case'WIDE':{ball.state=_BS.LOOSE;ball.vx*=0.2;ball.vy*=0.2;
+        const wdNm=shooter.name.split(' ').pop();
+        _html("simComm","😮 <b>"+wdNm+"</b> — "+rng.pick(isTR?_COMM.wide_tr:_COMM.wide_en));
+        _addRow(shooter.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>↗ "+wdNm+" · "+(isTR?"isabetsiz şut":"shot wide")+"</span>");
+        _flashEventMap('wide',shooter.teamId,ball.x/_PW,ball.y/_PH,null);
+        break;}
     }
     addHeat(ball.x,ball.y,2);
     _updateStats();
@@ -1493,7 +1623,7 @@ function buildSim(myPow, oppPow) {
   function onCorner(atkTeam){
     stats.corners[atkTeam]++;
     audit.setPieces++;
-    _addRow(atkTeam,"<b>"+Math.floor(matchTime/60)+"'</b><span>🚩 "+(isTR?"Köşe":"Corner")+"</span>");
+    _addRow(atkTeam,"<b>"+Math.floor(matchTime/60)+"'</b><span>🚩 "+(isTR?"Köşe":"Corner")+" · "+(atkTeam===0?myName:oppName)+"</span>");
     const bx=ball.x<_PW/2?0.5:_PW-0.5,by=atkTeam===0?_PH-0.5:0.5;
     ball.x=bx;ball.y=by;ball.vx=0;ball.vy=0;ball.state=_BS.LOOSE;
     const winger=(atkTeam===0?teamA:teamB).find(p=>p.role==='LW'||p.role==='RW'||p.role==='LB'||p.role==='RB');
@@ -1508,7 +1638,7 @@ function buildSim(myPow, oppPow) {
     }
     momDisplay=Math.max(18,Math.min(82,momDisplay+(atkTeam===0?4:-4)));
     _html("simComm","⛳ "+rng.pick(isTR?_COMM.corner_tr:_COMM.corner_en));
-    _addTimelineMarker(Math.floor(matchTime/60),'corner',atkTeam);
+    _addTimelineMarker(Math.floor(matchTime/60),'corner',atkTeam,(isTR?"Köşe — ":"Corner — ")+(atkTeam===0?myName:oppName));
     _updateStats();
   }
   function onGoalKick(defTeam){
@@ -1606,6 +1736,7 @@ function buildSim(myPow, oppPow) {
       ball._shotResult=_resolveShot(carrier,gk,rng);
       effects.spawn('SHOT',carrier.x,carrier.y,goalX,goalY,'#fbbf2466',0.55);
       audio.shot();
+      _flashArrow(carrier.x/_PW,carrier.y/_PH,0.5,tid===0?0.97:0.03,'#c9973f',700);
       ball.shoot(goalX+jitter,goalY);
       _updateStats();
     } else if(action.type==='CROSS'||action.type==='CUTBACK'){
@@ -1926,8 +2057,13 @@ function buildSim(myPow, oppPow) {
           momDisplay=Math.max(18,Math.min(82,momDisplay+(pl.teamId===0?-8:8)));
         } else {
           stats.yellows[pl.teamId]++;
+          const yMin=Math.floor(matchTime/60);
+          const yTeam=pl.teamId===0?myName:oppName;
           _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
-          _addRow(pl.teamId,"<b>"+Math.floor(matchTime/60)+"'</b><span>🟨 "+nm+"</span>");
+          _addRow(pl.teamId,"<b>"+yMin+"'</b><span><b>🟨 "+(isTR?"SARI KART":"YELLOW")+" · "+nm+"</b><small>"+yTeam+"</small></span>");
+          _addTimelineMarker(yMin,'card',pl.teamId,(isTR?"Sarı kart — ":"Yellow — ")+nm);
+          _flashEventMap('card',pl.teamId,0.5,pl.teamId===0?0.35:0.65,{meta:yMin+"' · "+(isTR?"SARI KART":"YELLOW CARD"),main:yTeam.slice(0,12)+" · "+nm});
+          audio.card&&audio.card();
         }
         return;
       }
@@ -2278,9 +2414,10 @@ function buildSim(myPow, oppPow) {
     if(gameEnded)return;
     if(!prevTime)prevTime=now;
     const frameMs=Math.min((now-prevTime)/1000,0.25);prevTime=now;
-    const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1);
+    const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1)*(typeof SIM_TIME_SCALE!=="undefined"?SIM_TIME_SCALE:1);
     accumulator+=frameMs*spd;
-    const MAX_STEPS=Math.ceil(spd*0.28)+6;
+    // Steps needed per frame ≈ spd*frameMs/FIXED_STEP; allow headroom so playback keeps pace
+    const MAX_STEPS=Math.ceil(spd*0.6)+8;
     let _steps=0;
     while(accumulator>=FIXED_STEP&&_steps<MAX_STEPS){simStep(FIXED_STEP);accumulator-=FIXED_STEP;_steps++;}
     statUpdateTimer+=frameMs;
@@ -2301,6 +2438,7 @@ function buildSim(myPow, oppPow) {
 
   /* kickoff */
   reposition();kickoff(0);
+  audio.ambience&&audio.ambience(); // low stadium bed; silent if SFX muted
 
   /* sim object */
   sim={
@@ -2323,9 +2461,14 @@ function buildSim(myPow, oppPow) {
       plannedSequenceQueue[1]=[];
       audit.reweightedSequences++;
       const msgs={more:isTR?"⚡ Yükleniyoruz! Tam gaz!":"⚡ We're surging! Full attack!",push:isTR?"📣 Önde baskı! Rakibi boğ!":"📣 High press! Suffocate them!",calm:isTR?"🧘 Tempoyu düşür, kontrol et.":"🧘 Slow it down, keep control.",hold:isTR?"🛡️ Skoru koru! Savunma duvarı!":"🛡️ Hold the score! Defensive wall!"};
+      const labels={more:isTR?"YÜKLEN":"SURGE",push:isTR?"ÖNDE BAS":"HIGH PRESS",calm:isTR?"TEMPOYU DÜŞÜR":"SLOW TEMPO",hold:isTR?"SKORU KORU":"HOLD"};
       const boosts={more:10,push:7,calm:-5,hold:-7};
       momDisplay=Math.max(18,Math.min(82,momDisplay+(boosts[t]||0)));
       const msg=msgs[t]||"";_html("simComm",msg);_html("simRadio","📻 "+msg);
+      const tMin=Math.floor(matchTime/60);
+      _addRow(0,"<b>"+tMin+"'</b><span><b>📋 "+(isTR?"TAKTİK":"TACTIC")+" · "+(labels[t]||"")+"</b><small>"+myName+" · "+msg.replace(/^[^ ]+ /,'')+"</small></span>");
+      _flashEventMap('tactic',0,0.5,0.32,{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName.slice(0,12)+" · "+(labels[t]||"")});
+      audio.shoutCue&&audio.shoutCue();
     }
   };
 

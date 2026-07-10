@@ -3539,8 +3539,8 @@ img,svg,canvas{max-width:100%}
   width:100%;
   border-radius:6px;
   overflow:hidden;
-  background:#1d4d1b;
-  aspect-ratio:105/65;
+  background:#10201f;
+  aspect-ratio:100/65;
 }
 .sim-eventmap svg{
   display:block;
@@ -3551,6 +3551,37 @@ img,svg,canvas{max-width:100%}
   padding:6px;
 }
 #sim #cv{display:none} /* hide legacy cv if still present */
+
+/* live feed: two-line event rows (headline + context) */
+#sim .simgoals div{
+  display:block;
+  padding:5px 8px;
+  min-height:34px;
+  font-size:11px;
+  line-height:1.35;
+}
+#sim .simgoals div span{display:block}
+#sim .simgoals div span>b{
+  display:block;
+  font-size:11px;
+  letter-spacing:.02em;
+}
+#sim .simgoals div span>small{
+  display:block;
+  font-size:10px;
+  color:var(--color-slate);
+  opacity:.92;
+}
+#sim .simgoals div>b{
+  float:left;
+  margin-right:7px;
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--color-primary);
+}
+@media(prefers-reduced-motion:reduce){
+  #sim #emCard,#sim #emZone,#sim #emArrows line,#sim #emArrows path{transition:none;animation:none}
+}
 
 /* ===== Compact spotlight player picker ===== */
 .spotlight-modal{

@@ -282,7 +282,7 @@
 <script src="src/balance/difficulty.js?v=20260707"></script>
 <script src="src/balance/rewards.js?v=20260707"></script>
 <script src="src/audio/sfx.js?v=20260707"></script>
-<script src="src/sim/finalSim.js?v=20260710a"></script>
+<script src="src/sim/finalSim.js?v=20260710b"></script>
 <script src="src/ui/hub.js?v=20260709q"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
@@ -1841,7 +1841,7 @@ function showFinalCard(sp){
 }
 function startFinalSim2(){startFinalSim(squadPower(round).power||squadPower(round));}
 function radioLine(poss,sA,sB,mn){const home=poss==="A",lead=sA>sB?"A":sB>sA?"B":"",diff=Math.abs(sA-sB),tr=LANG==="tr";const pool=[];if(tr){pool.push(home?"top bizde, çizgiye iniyoruz":"top rakipte, blok daralıyor");pool.push("orta sahada ikinci toplar çok değerli");pool.push("kaleciler oyunun içinde kalmak zorunda");if(diff>=2)pool.push("skor farkı açıldı, tempo kontrol ediliyor");if(lead==="A")pool.push("öndeyiz, acele etmeye gerek yok");if(lead==="B")pool.push("kritik an, bir gol oyunu yeniden açar");pool.push(mn>=75?"son dakikalar, tribün ayakta":"final kontrollü ama her top tehlike");}else{pool.push(home?"we have it, attacking the channel":"they have it, block narrows");pool.push("second balls matter now");pool.push("keepers have to stay sharp");if(diff>=2)pool.push("gap opened, tempo is managed");if(lead==="A")pool.push("we lead, no need to rush");if(lead==="B")pool.push("one goal changes everything");pool.push(mn>=75?"final minutes, crowd on feet":"controlled final, every touch matters");}return " "+rnd(pool);}
-function simShout(t){if(sim&&sim.shout){sim.shout(t);const id={more:"shMore",push:"shPush",calm:"shCalm",hold:"shHold"}[t];document.querySelectorAll(".shoutbtn").forEach(b=>b.classList.remove("lit"));const el=$(id);if(el)el.classList.add("lit");try{sfxStamp();}catch(e){}}}
+function simShout(t){if(sim&&sim.shout){sim.shout(t);const id={more:"shMore",push:"shPush",calm:"shCalm",hold:"shHold"}[t];document.querySelectorAll(".shoutbtn").forEach(b=>{b.classList.remove("lit");b.setAttribute("aria-pressed","false");});const el=$(id);if(el){el.classList.add("lit");el.setAttribute("aria-pressed","true");}try{sfxStamp();}catch(e){}}}
 function simPause(){if(!sim)return;const b=$("pauseBtn");if(_simPaused){_simPaused=false;if(b){b.textContent="⏸";b.classList.remove("pause");}sim.resume&&sim.resume();}else{_simPaused=true;if(b){b.textContent="▶";b.classList.add("pause");}sim.pause&&sim.pause();}}
 /* ===== geo default ===== */
 function geoDefaultCountry(){const lang=(navigator.language||"").toLowerCase();if(lang.startsWith("tr"))return;const saved=localStorage.getItem("copa_country");if(saved)return;pickCountry("ENG");}
