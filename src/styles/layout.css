@@ -3719,6 +3719,182 @@ img,svg,canvas{max-width:100%}
 }
 #sim .eventpanel .simgoals{max-height:340px;overflow-y:auto}
 
+/* ===== Final live screen polish pass ===== */
+/* header / scoreboard */
+#sim .bn{
+  font-size:clamp(13px,1.2vw,17px);
+  letter-spacing:.03em;
+  color:rgba(230,238,239,.92);
+}
+#sim .bsc{
+  font-size:clamp(30px,3.2vw,44px);
+  letter-spacing:.01em;
+}
+#sim .bclk{
+  margin-top:4px;
+  padding:2px 8px;
+  display:inline-block;
+  border-radius:999px;
+  background:rgba(230,238,239,.10);
+  color:rgba(230,238,239,.85);
+}
+#sim .simstate{
+  border-radius:999px;
+  border-width:1px;
+  padding:4px 12px;
+  font-size:9.5px;
+  letter-spacing:1.6px;
+  background:color-mix(in srgb,var(--color-primary) 88%,#fff);
+  box-shadow:0 2px 0 rgba(12,18,19,.14);
+}
+#sim .momentum{margin-bottom:8px}
+#sim .momentum i{
+  height:6px;
+  border-width:1px;
+  border-color:color-mix(in srgb,var(--color-ink) 55%,transparent);
+}
+/* stat row: calmer surfaces, dominant values */
+#sim .simstats{gap:6px;margin-bottom:10px}
+#sim .simstats span{
+  border:1px solid var(--border-subtle);
+  border-radius:7px;
+  background:var(--surface-muted);
+  padding:6px 8px;
+  letter-spacing:.8px;
+  line-height:1.2;
+}
+#sim .simstats b{
+  font-size:14px;
+  margin-top:2px;
+  font-weight:800;
+}
+/* timeline: match-flow tracker feel */
+#simTimeline{
+  padding:4px 6px;
+  border:1px solid var(--border-subtle);
+  border-radius:8px;
+  background:var(--surface-muted);
+}
+#simTimeline text{font-weight:700}
+#simTimeline #tlCursor{stroke-width:1.6}
+/* pitch frame refinement */
+.sim-eventmap{box-shadow:inset 0 0 0 1px rgba(230,238,239,.05)}
+#sim .fieldframe{border-radius:10px}
+/* MAÇ OLAYLARI panel: editorial side panel */
+#sim .eventpanel{
+  border:1px solid var(--border-subtle);
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--surface-elevated);
+}
+#sim .eventpanel h4{
+  background:linear-gradient(180deg,var(--color-ink),color-mix(in srgb,var(--color-ink) 82%,var(--color-slate)));
+  font-size:9px;
+  letter-spacing:2.2px;
+  padding:9px 10px;
+  border-bottom:2px solid var(--color-primary);
+}
+#sim .simgoals div{
+  border-top:1px solid color-mix(in srgb,var(--border-subtle) 60%,transparent);
+  padding:7px 10px;
+  min-height:36px;
+}
+#sim .simgoals div>b{
+  min-width:26px;
+  font-size:9.5px;
+  opacity:.9;
+}
+#sim .simgoals div span>b{letter-spacing:.03em}
+#sim .simgoals div span>small{margin-top:1px;line-height:1.3}
+#sim .simgoals:empty::before{padding:14px 10px;letter-spacing:.5px}
+#sim .simgoals::-webkit-scrollbar{width:5px}
+#sim .simgoals::-webkit-scrollbar-track{background:transparent}
+#sim .simgoals::-webkit-scrollbar-thumb{
+  background:color-mix(in srgb,var(--color-slate) 45%,transparent);
+  border-radius:99px;
+}
+/* transition / status band (golden goal, penalties, match end) */
+#sim .radioband{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border-radius:8px;
+  border:1px solid color-mix(in srgb,var(--color-primary) 55%,transparent);
+  padding:8px 12px;
+  font-size:10.5px;
+  line-height:1.4;
+  white-space:normal;
+  text-overflow:clip;
+}
+/* tactic controls: one coherent segmented group */
+#sim .shoutrow{
+  grid-template-columns:repeat(4,1fr);
+  gap:0;
+  border:1.5px solid var(--color-ink);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:8px;
+}
+#sim .shoutbtn{
+  border:none;
+  border-left:1px solid var(--border-subtle);
+  padding:9px 6px;
+  background:var(--surface-elevated);
+  transition:background .12s ease;
+}
+#sim .shoutbtn:first-child{border-left:none}
+#sim .shoutbtn:hover{background:var(--surface-muted)}
+#sim .shoutbtn:active{transform:none;background:color-mix(in srgb,var(--color-primary) 14%,var(--surface-elevated))}
+#sim .shoutbtn.lit{
+  background:var(--color-ink);
+  color:#fff;
+  box-shadow:inset 0 -2px 0 var(--color-primary);
+}
+/* playback controls: pause | speeds | skip */
+#sim .speedrow{
+  gap:6px;
+  padding:6px 8px;
+  border:1px solid var(--border-subtle);
+  border-radius:8px;
+  background:var(--surface-muted);
+}
+#sim .spd{
+  border:1px solid var(--border-subtle);
+  border-radius:6px;
+  padding:6px 9px;
+  min-width:40px;
+  background:var(--surface-elevated);
+}
+#sim .spd.on{
+  background:var(--color-primary);
+  border-color:var(--color-primary);
+  color:#fff;
+}
+#sim .spd.spd-pause{
+  min-width:44px;
+  font-size:13px;
+  border-color:var(--color-ink);
+}
+#sim .spd.spd-pause.pause{
+  background:var(--color-slate);
+  border-color:var(--color-slate);
+  color:#fff;
+}
+#sim .spd-sep{
+  width:1px;
+  height:20px;
+  background:var(--border-subtle);
+  margin:0 2px;
+}
+@media(max-width:760px){
+  #sim .speedrow{flex-wrap:wrap;row-gap:6px}
+  #sim .spd{min-width:38px;padding:6px 7px;font-size:11px}
+  #sim .simgoals{max-height:180px}
+  #sim .shoutbtn span{font-size:9.5px}
+}
+
 /* ===== Compact spotlight player picker ===== */
 .spotlight-modal{
   width:min(520px,calc(100vw - 24px))!important;
