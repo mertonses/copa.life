@@ -22,6 +22,7 @@ expect(!/faiz|interest/i.test(all),"interest mechanic or copy still exists");
 expect(/VARIANT_PRICE_MOD=\[1\.0,1\.25\]/.test(files.prices),"DARK price multiplier is not 1.25");
 expect(/FINAL_DEBT_CAP=30/.test(files.config),"final risk cap is not 30");
 expect(/FINAL_CARD_POWER_CAP=18/.test(files.config),"final-only card stack cap is not 18");
+expect(!/final_provasi\s*:\s*4/.test(files.effects),"Final Provası DARK still cancels its own final-only bonus");
 expect(/CARD_PRICE_FLOOR=2/.test(files.config),"paid-card price floor is not 2");
 expect(/playerMarketValue\(p\.ov,"free_agent",round\)/.test(files.html),"free agents do not use the shared player valuation curve");
 expect(/playerMarketValue/.test(files.core)&&/chairmanTransferMultiplier/.test(files.generate),"draft valuation or chairman transfer modifier is disconnected");

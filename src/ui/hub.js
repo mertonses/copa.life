@@ -270,6 +270,7 @@ function shopCardDesc(k,raw,variantOverride){
     ch_momentum:()=>sv===1?(tr?"Turnuva ritmini takım gücüne çevirir: 1-2. tur +4, 3-4. tur +6, 5. turdan itibaren +8. Finalde -6 güç.":"Converts tournament rhythm into team power: +4 in rounds 1-2, +6 in rounds 3-4, then +8. -6 power in the final."):(tr?"Turnuva ritmini takım gücüne çevirir: 1-2. tur +2, 3-4. tur +3, 5. turdan itibaren +4.":"Converts tournament rhythm into team power: +2 in rounds 1-2, +3 in rounds 3-4, then +4."),
     tecrubeli_omurga:()=>sv===1?(tr?"İlk 11'deki 32 yaş ve üzeri her oyuncu +2 güç verir; en fazla +6. Finalde -4 güç.":"Each age-32+ starter adds +2 power, max +6. -4 power in the final."):(tr?"İlk 11'deki 32 yaş ve üzeri her oyuncu +1 güç verir; en fazla +4.":"Each age-32+ starter adds +1 power, max +4."),
     derbi:()=>sv===1?(tr?"İlk 3 tur etkisizdir. Çeyrek final +4, yarı final +7, final +10 verir; finalde -4 güç.":"Inactive in the first 3 rounds. Adds +4 in the quarter-final, +7 in the semi-final and +10 in the final; -4 power in the final."):(tr?"İlk 3 tur etkisizdir. Çeyrek final +2, yarı final +4, final +8 verir.":"Inactive in the first 3 rounds. Adds +2 in the quarter-final, +4 in the semi-final and +8 in the final."),
+    final_provasi:()=>sv===1?(tr?"Yalnız final maçında çalışır ve takım gücüne +9 ekler. Ek final cezası yoktur.":"Works only in the final and adds +9 team power. There is no additional final penalty."):(tr?"Yalnız final maçında çalışır ve takım gücüne +5 ekler.":"Works only in the final and adds +5 team power."),
     kanat_akini:()=>sv===1?(tr?"Kanat/bek başına +2 güç, max +6. Finalde -5.":"Wings/fullbacks: +2 each, max +6. -5 in the final."):(tr?"Kanat/bek başına +1 güç, max +4.":"Wings/fullbacks: +1 each, max +4."),
     bu_adam:()=>sv===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
     kontra:()=>sv===1?(tr?"Forvet başına +2 güç. %25 ihtimal -€10M ceza.":"Forward +2 each. 25% chance -€10M fine."):(tr?"Forvet başına +1 güç.":"Forward +1 each."),
@@ -344,7 +345,7 @@ function cardContractText(k){
     cift_forvet:variantOf(k)===1?(tr?"SNT başına +4 güç, max +8; şu an "+plus+".":"ST +4 each, max +8; now "+plus+"."):(tr?"SNT başına +2 güç, max +4; şu an "+plus+".":"ST +2 each, max +4; now "+plus+"."),
     deplasman_kafilesi:tr?"Güçlü rakibe karşı +4; hemen -€3M, şu an "+plus+".":"Against stronger opponent +4; instant -€3M, now "+plus+".",
     sosyal_medya:tr?"Underdog +3; favori -2, şu an "+plus+".":"Underdog +3; favourite -2, now "+plus+".",
-    final_provasi:variantOf(k)===1?(tr?"Yalnız finalde +9; final cezası -4.":"Final only +9; -4 final penalty."):(tr?"Yalnız finalde +5.":"Final only +5."),
+    final_provasi:variantOf(k)===1?(tr?"Yalnız finalde çalışır; net +9 takım gücü.":"Final only; net +9 team power."):(tr?"Yalnız finalde çalışır; net +5 takım gücü.":"Final only; net +5 team power."),
     kupaci_kadro:tr?"Yarı final/final +4; finalde -2 güç.":"Semi/final +4; final -2 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
     son_dans:variantOf(k)===1?(tr?"Yalnızca finalde: ilk 11'de sakat yoksa +14; en az 1 sakat varsa -8 güç.":"Final only: +14 with no injured starter; -8 with at least 1."):(tr?"Yalnızca finalde: ilk 11'de sakat yoksa +8; en az 1 sakat varsa +2 güç.":"Final only: +8 with no injured starter; +2 with at least 1."),
@@ -476,7 +477,12 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     d.title=cd.n+"\n"+cardContractType(k);
     const desc=formatCardDesc(shopCardDesc(k,variantDesc(cd.d,sv)||shortCardText(k,s),sv));
     const priceLabel=pr<=0?(LANG==="tr"?"ÜCRETSİZ":"FREE"):`€${pr}M`;
-    d.innerHTML=`<div class="ct-head"><span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span><span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div></div><div class="ct-foot ct-foot-price-only"></div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
+    /* DARK visual: risk warning badge when this variant carries a final penalty */
+    const _darkPen=(sv===1&&typeof KARA_PEN!=="undefined"&&KARA_PEN[k])?KARA_PEN[k]:0;
+    if(sv===1)d.classList.add("is-dark");
+    const _darkBadge=sv===1?`<span class="ct-darkflag" aria-hidden="true"><svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor"><path d="M6 1 1 10.5h10z"/><rect x="5.3" y="4.4" width="1.4" height="3" rx=".5" fill="#0C1213"/><rect x="5.3" y="8.2" width="1.4" height="1.4" rx=".5" fill="#0C1213"/></svg>DARK</span>`:`<span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span>`;
+    const _darkPenBadge=_darkPen?`<span class="ct-darkpen" title="${LANG==="tr"?"DARK: finalde güç cezası":"DARK: final power penalty"}">${LANG==="tr"?"FİNAL":"FINAL"} −${_darkPen}</span>`:"";
+    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}${_darkPenBadge}</div></div><div class="ct-foot ct-foot-price-only"></div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
     d.onclick=()=>cant?_flashInsufficient(d):confirmBuyCard(k,pr);
     sc.appendChild(d);
   });

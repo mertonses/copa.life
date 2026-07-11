@@ -216,6 +216,45 @@
 .cardtile.sv-0 .ct-head{border-left:3px solid var(--color-primary)}
 .cardtile.sv-1 .ct-head{border-left:3px solid var(--color-ink)}
 .cardtile.sv-2 .ct-head{border-left:3px solid var(--color-slate)}
+/* ===== DARK card — strong, instantly-readable risk look ===== */
+.cardtile.is-dark{
+  border-color:var(--color-ink);
+  box-shadow:0 0 0 1px var(--color-ink), var(--shadow-sm);
+  background:
+    linear-gradient(180deg,color-mix(in srgb,var(--color-ink) 6%,var(--surface-elevated)),var(--surface-elevated));
+}
+.cardtile.is-dark:hover:not(.cant){box-shadow:0 0 0 1px var(--color-ink),0 6px 20px rgba(12,18,19,.28)}
+.cardtile.is-dark .ct-head{
+  background:var(--color-ink);
+  color:var(--color-background);
+  border-left:3px solid #c9973f;
+  border-bottom-color:rgba(230,238,239,.14);
+}
+.cardtile.is-dark .ct-head-price{
+  background:rgba(230,238,239,.12);
+  color:var(--color-background);
+}
+.cardtile.is-dark .ct-head-price.ct-price-free{background:var(--color-primary);color:#fff}
+/* DARK flag with warning triangle */
+.ct-darkflag{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:1px 6px 1px 5px;border-radius:3px;
+  background:#c9973f;color:var(--color-ink);
+  font-family:var(--mono);font-size:7px;font-weight:900;letter-spacing:1px;
+  flex:0 0 auto;
+}
+.ct-darkflag svg{display:block}
+/* "FİNAL −Z" penalty badge in the contract row */
+.ct-darkpen{
+  display:inline-block;margin-left:6px;
+  padding:1px 6px;border-radius:999px;
+  background:color-mix(in srgb,#b0564a 16%,transparent);
+  color:#b0564a;
+  font-family:var(--mono);font-size:8px;font-weight:900;letter-spacing:.4px;
+  border:1px solid color-mix(in srgb,#b0564a 45%,transparent);
+  vertical-align:middle;
+}
+.cardtile.is-dark .ct-contract{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
 .ct-head{padding:4px 8px 4px 3px}
 .ct-rar{opacity:.9;flex:0 0 auto}
 .ct-cat{opacity:.75;font-size:6.5px}

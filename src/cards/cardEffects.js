@@ -14,7 +14,7 @@ var KARA_PEN={
  sahte_evrak:10,
  doping:6,
  gec_gec:3,
- kasiga_para:2,derbi:4,final_provasi:4,
+ kasiga_para:2,derbi:4,
  /* DARK now carries real final risk on cards that previously had free upside */
  kaleci_kalesi:8,cift_forvet:4
 };

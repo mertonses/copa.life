@@ -75,7 +75,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260712a">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260711-stability1p">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260712b">
 <link rel="stylesheet" href="src/styles/match.css?v=20260711-stability1b">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <style>
@@ -284,7 +284,7 @@
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260711-stability1"></script>
 <script src="src/sim/finalSim.js?v=20260711-stability1h"></script>
-<script src="src/ui/hub.js?v=20260711-economy3"></script>
+<script src="src/ui/hub.js?v=20260712b"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -1627,7 +1627,7 @@ Object.assign(T.tr.cards,{
   kanat_akini:{n:"Kanat Akını",d:"COMMON: Kanat/bek başına +1, max +4. DARK: +2 (max +6), finalde -5.",i:""},
   cift_forvet:{n:"Çift Forvet",d:"COMMON: SNT başına +2, max +4. DARK: SNT başına +4, max +8, finalde -4.",i:"⚔️"},
   derbi:{n:"Derbi Aslanı",d:"İlk üç tur etkisizdir; yalnız büyük maçlarda açılır. COMMON: çeyrek final +2, yarı final +4, final +8. DARK: +4/+7/+10; finalde -4 güç.",i:""},
-  final_provasi:{n:"Final Provası",d:"COMMON: Finalde +5. DARK: Finalde +9; final cezası -4.",i:"️"},
+  final_provasi:{n:"Final Provası",d:"Yalnız final maçında çalışır. COMMON finalde +5, DARK finalde +9 takım gücü verir; ek final cezası yoktur.",i:"️"},
   son_dans:{n:"Son Dans",d:"COMMON: Finalde sakatsız +8, sakatlık varsa +2. DARK: sakatsız +14, sakatlık varsa -8.",i:""},
   taksit_transfer:{n:"Taksitli Transfer",d:"COMMON: Hemen +€10M, sonraki 2 tur -€4M. DARK: +€18M, 2 tur -€7M; güven -1, finalde -6.",i:""},
   son_kredi:{n:"Son Kredi",d:"COMMON: Kasa -€10M altındaysa +€15M. DARK: +€20M, güven -1. Başkan eşiği 5M sertleşir.",i:""},
@@ -1664,7 +1664,7 @@ Object.assign(T.en.cards,{
   kanat_akini:{n:"Wing Surge",d:"COMMON: +1 per wing/wingback, max +4. DARK: +2 (max +6), -5 in the final.",i:""},
   cift_forvet:{n:"Two Strikers",d:"COMMON: ST +2 each, max +4. DARK: ST +4 each, max +8, -4 in the final.",i:"⚔️"},
   derbi:{n:"Derby Lion",d:"Inactive in the first three rounds; activates only in big matches. COMMON: quarter-final +2, semi-final +4, final +8. DARK: +4/+7/+10; -4 power in the final.",i:""},
-  final_provasi:{n:"Final Rehearsal",d:"COMMON: Final +5. DARK: Final +9; -4 final penalty.",i:"️"},
+  final_provasi:{n:"Final Rehearsal",d:"Works only in the final. COMMON adds +5 team power and DARK adds +9; there is no additional final penalty.",i:"️"},
   son_dans:{n:"Last Dance",d:"COMMON: Final +8 if healthy, +2 if injured. DARK: +14 if healthy, -8 if injured.",i:""},
   taksit_transfer:{n:"Installment Deal",d:"COMMON: +€10M now, -€4M for 2 rounds. DARK: +€18M, -€7M for 2 rounds; trust -1, final -6.",i:""},
   son_kredi:{n:"Last Credit",d:"COMMON: Below -€10M: +€15M. DARK: +€20M, trust -1. Chairman limit tightens by 5M.",i:""},
