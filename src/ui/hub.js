@@ -341,7 +341,7 @@ function cardContractText(k){
     kurban_belli:variantOf(k)===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
     doping:variantOf(k)===1?(tr?"+10 güç; her tur %25 ihtimal -€25M ceza.":"+10 power; 25% each round -€25M fine."):(tr?"+6 güç; her tur %35 ihtimal -€15M ceza.":"+6 power; 35% each round -€15M fine."),
     bu_adam:variantOf(k)===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
-    kriz:tr?"Finaldeki eksi gücü en fazla 6 telafi eder.":"Offsets final power loss by up to 6.",
+    kriz:variantOf(k)===1?(tr?"Finaldeki güç cezasını 14'e kadar telafi eder (garanti).":"Offsets up to 14 final power penalty (guaranteed)."):(tr?"Finaldeki güç cezasını 8'e kadar telafi eder (garanti).":"Offsets up to 8 final power penalty (guaranteed)."),
     kasiga_para:variantOf(k)===1?(tr?"Rakip -8 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%50, başkan güveni -1.":"Opponent -8 power. Next market closes; the next open market has +50% prices, chairman trust -1."):(tr?"Rakip -4 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Next market closes; the next open market has +25% prices.")
   };
   return map[k]||((tr?"Net güç ":"Net power ")+plus+".");

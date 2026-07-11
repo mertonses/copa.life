@@ -321,14 +321,13 @@ function applyKriz(){
  krizActive=false;
  if(!hasCard("kriz"))return;
  const v=variantOf("kriz");
- const chance=v===1?0.75:0.50;
- if(rand()<chance){
-  const cleared=finalPenalty;
-  finalPenalty=0;
-  pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: finaldeki -"+cleared+" güç sıfırlandı!":"Crisis Management: -"+cleared+" final power penalty cleared!"),"buy");
- }else{
-  pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi işe yaramadı.":"Crisis Management failed."),"lose");
- }
+ /* Deterministic relief (no coin-flip): COMMON offsets up to 8, DARK up to 14 of the
+    accumulated final penalty. Reliable insurance for DARK-stacking builds. */
+ const relief=v===1?14:8;
+ const cleared=Math.min(finalPenalty,relief);
+ finalPenalty=Math.max(0,finalPenalty-cleared);
+ if(cleared>0)pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: finalde -"+cleared+" güç telafi edildi.":"Crisis Management: -"+cleared+" final power offset."),"buy");
+ else pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: telafi edilecek final cezası yoktu.":"Crisis Management: no final penalty to offset."),"pres");
 }
 
 /* ===== Ana kart ekleme fonksiyonu. v=0 COMMON, v=1 DARK. ===== */

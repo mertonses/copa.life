@@ -266,24 +266,24 @@
 <script src="src/data/players_italy.js?v=20260707"></script>
 <script src="src/data/players_germany.js?v=20260707"></script>
 <script src="src/data/kits.js?v=20260707"></script>
-<script src="src/data/i18n.js?v=20260711b"></script>
+<script src="src/data/i18n.js?v=20260711d"></script>
 <script src="src/core/squad.js?v=20260707"></script>
 <script src="src/game/generate.js?v=20260707"></script>
 <script src="src/balance/config.js?v=20260707"></script>
 <script src="src/state/metaState.js?v=20260710g"></script>
 <script src="src/state/gameState.js?v=20260710g"></script>
 <script src="src/state/saveLoad.js?v=20260710g"></script>
-<script src="src/cards/cardDefs.js?v=20260711c"></script>
+<script src="src/cards/cardDefs.js?v=20260711d"></script>
 <script src="src/cards/cardInventory.js?v=20260707"></script>
 <script src="src/cards/cardBalance.js?v=20260707"></script>
-<script src="src/cards/cardEffects.js?v=20260711c"></script>
+<script src="src/cards/cardEffects.js?v=20260711d"></script>
 <script src="src/balance/power.js?v=20260709f"></script>
 <script src="src/balance/economy.js?v=20260707"></script>
 <script src="src/balance/difficulty.js?v=20260707"></script>
 <script src="src/balance/rewards.js?v=20260707"></script>
 <script src="src/audio/sfx.js?v=20260707"></script>
 <script src="src/sim/finalSim.js?v=20260710g"></script>
-<script src="src/ui/hub.js?v=20260711c"></script>
+<script src="src/ui/hub.js?v=20260711d"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -1609,7 +1609,7 @@ Object.assign(T.tr.cards,{
   gecici_prim:{n:"Geçici Prim",d:"COMMON: Bu maç +6; %30 sakatlık riski. Sonraki maç -2. DARK: Bu maç +12; %60 sakatlık riski. Sonraki maç -2.",i:""},
   kisa_kamp:{n:"Kısa Kamp",d:"COMMON: Bu maç +4, sonraki maç -2. DARK: Bu maç +6, sonraki maç -4.",i:"⛺"},
   doping:{n:"Doping Söylentisi",d:"COMMON: +6 güç; her tur %35 ihtimal -€15M. DARK: +10 güç; %25 ihtimal -€25M.",i:""},
-  kriz:{n:"Kriz Yönetimi",d:"Finaldeki güç eksiğini max 6 telafi eder.",i:""},
+  kriz:{n:"Kriz Yönetimi",d:"Finaldeki güç cezasını telafi eder (garanti): COMMON max 8, DARK max 14.",i:""},
   kurban_belli:{n:"Kurban Belli",d:"COMMON: +6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır. DARK: +12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.",i:""},
   primler_yatinca:{n:"Primler Yatınca",d:"+4 güç; gelecek tur −€8M.",i:""},
   vur_igneyi:{n:"Vur İğneyi",d:"COMMON: 1 sakat oyuncuyu iyileştirir; kart bedeli dışında ek masraf yok. DARK: 2 sakat oyuncuyu iyileştirir; %25 ihtimal -€6M ek masraf.",i:""},
@@ -1646,7 +1646,7 @@ Object.assign(T.en.cards,{
   gecici_prim:{n:"Temp Bonus",d:"COMMON: This match +6; 30% injury risk. Next match -2. DARK: This match +12; 60% injury risk. Next match -2.",i:""},
   kisa_kamp:{n:"Short Camp",d:"COMMON: This match +4, next match -2. DARK: This match +6, next match -4.",i:"⛺"},
   doping:{n:"Doping Rumour",d:"COMMON: +6 power; 35% each round -€15M. DARK: +10 power; 25% chance -€25M.",i:""},
-  kriz:{n:"Crisis Mgmt",d:"Reduces final power loss by up to 6.",i:""},
+  kriz:{n:"Crisis Mgmt",d:"Offsets final power penalty (guaranteed): COMMON up to 8, DARK up to 14.",i:""},
   kurban_belli:{n:"Sacrificial Lamb",d:"COMMON: +6 power; 1 player injured for 1 round after. DARK: +12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine.",i:""},
   primler_yatinca:{n:"Bonus Day",d:"+4 power; next round −€8M.",i:""},
   vur_igneyi:{n:"Play Through Pain",d:"COMMON: Heals 1 injured player; no extra cost beyond the card price. DARK: Heals 2 injured players; 25% chance -€6M extra cost.",i:""},
