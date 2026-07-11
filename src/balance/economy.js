@@ -8,6 +8,8 @@ function newShopOffers(){
  CARDKEYS.forEach(k=>{
    if(invOf(k)>0)return; // zaten sahip
    if(pintiShop&&CARDDEFS[k]&&(CARDDEFS[k].price||0)>=10)return;
+   if(k==="taksit_transfer"&&typeof installmentTurns!=="undefined"&&installmentTurns>0)return;
+   if(k==="kumarbaz"&&typeof kumarbazInstallmentTurns!=="undefined"&&kumarbazInstallmentTurns>0)return;
    if(k==="kurban_belli"&&round>=6)return; // Finalde kullanılamaz
    if(k==="kumarbaz"&&round>=6)return; // Finalde kullanılamaz
    pool.push(k);
@@ -20,6 +22,10 @@ function newShopOffers(){
      shopOffers.push(k);
      shopVariants[k]=shopVariantLock[k]!==undefined?shopVariantLock[k]:weightedVariant();
      shopVariantLock[k]=shopVariants[k];
+     if(typeof trackCardOffered==="function"){
+       const old=cardVariant[k]||0;cardVariant[k]=shopVariants[k];const price=cardPrice(k);cardVariant[k]=old;
+       trackCardOffered(k,shopVariants[k],price);
+     }
    }
  }
 }

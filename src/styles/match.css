@@ -1232,15 +1232,26 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 }
 #finalRow{
   display:grid!important;
-  grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+  grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr) minmax(0,.92fr);
   gap:12px;
-  align-items:stretch;
+  align-items:start;
   margin-bottom:12px;
 }
 #finalRow>.finalreport.hidden{display:none!important}
 #finalRow>.finalreport:not(.hidden){
-  grid-column:1/-1;
+  grid-column:1;
   margin:0;
+}
+#finalRow:has(>.finalreport:not(.hidden))>.storytile{grid-column:2}
+#finalRow:has(>.finalreport:not(.hidden))>.econtile{grid-column:3}
+#finalRow:has(>.finalreport:not(.hidden))>.heattile:not(.hidden){grid-column:1/-1;grid-row:2}
+#finalRow:not(:has(>.finalreport:not(.hidden))){grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)}
+@media (min-width:761px) and (max-width:1100px){
+  #finalRow:has(>.finalreport:not(.hidden)){grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+  #finalRow:has(>.finalreport:not(.hidden))>.finalreport{grid-column:1}
+  #finalRow:has(>.finalreport:not(.hidden))>.storytile{grid-column:2}
+  #finalRow:has(>.finalreport:not(.hidden))>.econtile,
+  #finalRow:has(>.finalreport:not(.hidden))>.heattile:not(.hidden){grid-column:1/-1;grid-row:auto}
 }
 #finalRow>.storytile,
 #finalRow>.econtile{

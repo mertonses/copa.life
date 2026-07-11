@@ -1,4 +1,5 @@
 node_modules/
+dist/
 .npm-cache/
 .pw-browsers/
 .agents/
@@ -28,6 +29,9 @@ card-editor.html
 .codex-translation-test/
 .codex_tmp_frames*/
 video_frames_tmp/
+playtest/playtest-output/
+outputs/
 .tmp/
 .vscode/
 assets/story-icons/
+assets/chairs/

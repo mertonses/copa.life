@@ -31,6 +31,15 @@ const unclearCardCopy = [
 
 const checks = [
   {
+    name: "round-scaling and lineup cards explain their actual trigger",
+    pass:
+      i18n.includes("Oyuncuları büyütmez; kartın takım gücü katkısı her tur artar") &&
+      i18n.includes("Yalnız ilk 11'deki 32 yaş ve üzeri oyuncuları sayar") &&
+      i18n.includes("İlk üç tur etkisizdir; yalnız büyük maçlarda açılır") &&
+      hub.includes("Turnuva ritmini takım gücüne çevirir") &&
+      !hub.includes("Sabit +3 güç; götürü yok"),
+  },
+  {
     name: "shop cards render selected variant description only",
     pass: /const desc=(?:formatCardDesc\()?shopCardDesc\(k,variantDesc\(cd\.d,sv\)\|\|shortCardText\(k,s\),sv\)/.test(hub),
   },

@@ -7,31 +7,43 @@ const html = fs.readFileSync("index.html", "utf8");
 const checks = [
   {
     name: "global overflow guard",
-    pass: /html,\s*\nbody\{[^}]*overflow-x:hidden/s.test(layout),
+    pass: /html,\s*\nbody\{[\s\S]*?overflow-x:hidden/s.test(layout),
   },
   {
-    name: "mobile hub single-flow guard",
-    pass: /@media\(max-width:900px\)[\s\S]*#hub \.hubcols[\s\S]*flex-direction:column/s.test(layout),
+    name: "mobile viewport-bound screens",
+    pass: /@media\(max-width:900px\)\{[\s\S]*#app,[\s\S]*#result\{[\s\S]*max-width:100%!important;[\s\S]*overflow-x:hidden!important/s.test(layout),
   },
   {
-    name: "mobile hub stat row wraps",
-    pass: /#hub \.hub-stat-row\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/s.test(layout),
+    name: "mobile hub stat row keeps four compact metrics",
+    pass: /@media\(max-width:620px\)\{[\s\S]*#hub \.hub-stat-row\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/s.test(layout),
   },
   {
-    name: "mobile hub action panel cannot overflow",
-    pass: /@media\(max-width:900px\)[\s\S]*#hub \.hub-action-panel \.actionbar\{[\s\S]*grid-template-columns:1fr!important/s.test(layout),
+    name: "mobile hub action buttons stay in a compact three-up row",
+    pass: /@media\(max-width:620px\)\{[\s\S]*#hub \.hub-action-panel \.actionbtns\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/s.test(layout),
+  },
+  {
+    name: "mobile hub play button remains the rightmost action",
+    pass: /#hub \.hub-action-panel \.actionbar #playBtn\{[\s\S]*order:3!important/s.test(layout),
+  },
+  {
+    name: "mobile free transfer cards stay two-up",
+    pass: /@media\(max-width:620px\)\{[\s\S]*#hub #freeAgentRow \.shopcards\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/s.test(layout),
   },
   {
     name: "mobile hub core blocks bound to viewport",
-    pass: /#hub \.pitch-area,\s*\n\s*#hub #hubBenchSection,\s*\n\s*#hub \.fixturebar,\s*\n\s*#hub \.hub-action-panel/s.test(layout),
+    pass: /#hub \.pitch-area,\s*\n\s*#hub #hubPitch,\s*\n\s*#hub #hubBenchSection,[\s\S]*#fixbar\.cuproad/s.test(layout),
+  },
+  {
+    name: "draft desktop columns stay equal and centered",
+    pass: /@media\(min-width:901px\)\{[\s\S]*#draft \.draft-cols\{[\s\S]*grid-template-columns:minmax\(0,420px\) minmax\(0,420px\)!important/s.test(layout),
   },
   {
     name: "draft field never collapses",
-    pass: /#draft \.draft-right \.pitch\{[\s\S]*aspect-ratio:68\/92/s.test(layout),
+    pass: /#draft \.draft-right \.pitch\{[\s\S]*aspect-ratio:68\/92!important/s.test(layout),
   },
   {
     name: "draft mobile pitch has usable width",
-    pass: /@media\(max-width:900px\)[\s\S]*#draft \.draft-right \.pitch\{[\s\S]*width:100%!important/s.test(layout),
+    pass: /@media\(max-width:900px\)\{[\s\S]*#draft \.draft-right \.pitch\{[\s\S]*width:100%!important/s.test(layout),
   },
   {
     name: "final sim stage collapses before phone width",

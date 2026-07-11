@@ -10,7 +10,7 @@ function chemBonus(s){
  const yn=s.filter(p=>p.age<=21).length;
  if(yn>=2){const pt=yn>=4?2:1;total+=pt;parts.push(["🌱",yn+" "+L().chem.young,pt]);}
  const tn=s.filter(p=>p.tr).length;
- if(tn>=5){const leydiBonus=(typeof chairman!=="undefined"&&chairman&&chairman.id==="leydi")?1:0;const pt=Math.min(4,(tn>=8?3:2)+leydiBonus);total+=pt;parts.push(["TR",tn+" "+L().chem.tr,pt]);}
+ if(tn>=5){const pt=tn>=8?3:2;total+=pt;parts.push(["TR",tn+" "+L().chem.tr,pt]);}
  if(s.filter(p=>p.age>=32).length>=2){total+=1;parts.push(["VET",L().chem.vet,1]);}
  /* Negatif kimya: neredeyse herkes farklı kulüpten → dağınık kadro cezası */
  const filled=s.length,distinctClubs=Object.keys(byc).length;
@@ -23,7 +23,10 @@ function chemBonus(s){
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
- let cardBonus=0;cards.forEach(k=>cardBonus+=cardEff(k,s,r));
+ let cardBonus=0,finalCardRaw=0;
+ cards.forEach(k=>{const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
+ const finalCardApplied=r>=6?Math.max(-FINAL_CARD_POWER_CAP,Math.min(FINAL_CARD_POWER_CAP,finalCardRaw)):0;
+ cardBonus+=finalCardApplied;
  const matchup=matchupBonus;
  const risk=riskPowerMod+tempPrimePenalty+shortCampPenalty-(r>=6?finalPenalty:0);
  let trait=0;s.forEach(p=>{if(p.trait&&TRAITS[p.trait])trait+=TRAITS[p.trait].pw();});
@@ -33,6 +36,6 @@ function powerBreakdown(r){
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
  const cappedRaw=styleBonus+cardBonus+matchup+risk+trait;
  const rawBonus=cappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-3,Math.min(5,chemBonus(s).total));
- return {avg,styleBonus,cardBonus,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ return {avg,styleBonus,cardBonus,finalCardRaw,finalCardApplied,finalCardOverflow:finalCardRaw-finalCardApplied,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

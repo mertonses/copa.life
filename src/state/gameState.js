@@ -5,7 +5,7 @@ var injuredIdx=-1,oppLineup=[],weakFlank="C",matchupBonus=0,autoTimer=null,undoD
 var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUsed=false;
 var DRAFT_REROLLS=2,draftRerollsLeft=DRAFT_REROLLS;
 var cardsBoughtThisTurn=0,freeAgentBoughtThisTurn=0,shopRerolledThisTurn=0;
-var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
+var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,installmentAmt=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};
 var loanPlayer=null;
 var legacyFund=0,legacyCash=0;
 var shopBlocked=0,presidentBlocked=0,cardPriceMod=1.0,cardPriceModTurns=0;
@@ -15,7 +15,7 @@ var shopVariantLock={};
 var eskiKurtSlotIdx=-1,eskiKurtPenalty=0;
 var kurbanScheduled={count:0,turns:0};
 var kaynasmaDark=false;
-var pintiSavings=0,sansSpotlightIdx=-1,sansMediaPressure=0,torpilDebtPenalty=0,chairTrust=1,kaosHalfReward=false;
+var pintiSavings=0,sansSpotlightIdx=-1,sansMediaPressure=0,sansHeadlineRound=0,sansStarBonusRound=0,torpilDebtPenalty=0,chairTrust=1,chairSupportDebt=0,kaosHalfReward=false,usedRiskCards=[];
 var NAMEP=["Anadolu","Demir","Yıldız","Kartal","Şimşek","Bordo","Gençlik","Deniz","Ankara","Toros","Çelik","Boğaz"],NAMES2=["spor","gücü FK","SK","Birliği","FK","United"];
 
 var nativeRandom=Math.random,runRng=nativeRandom;function rand(){return runRng();}

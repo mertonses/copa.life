@@ -1,6 +1,6 @@
 /* Kart fiyatlari ve variant dengesi. */
-/* Variant fiyat carpani: altin/kara */
-var VARIANT_PRICE_MOD=[1.15,0.85];
+/* DARK daha yuksek tavan karsiliginda daha pahali ve daha risklidir. */
+var VARIANT_PRICE_MOD=[1.0,1.25];
 
 function weightedVariant(){
  return rand()<0.5?0:1; // 50/50 COMMON / DARK
@@ -10,9 +10,9 @@ function cardPrice(k){
  const d=CARDDEFS[k];
  const base=typeof d.price==="number"?d.price:7;
  if(base===0)return 0;
- const vm=VARIANT_PRICE_MOD[variantOf(k)||0];
+ const vm=d.fixedPrice?1:VARIANT_PRICE_MOD[variantOf(k)||0];
  const pm=typeof cardPriceMod!=="undefined"?cardPriceMod:1.0;
- return Math.max(1,Math.round(base*vm*pm)+chairmanMarketMod());
+ return Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.round(base*vm*pm)+chairmanMarketMod());
 }
 
 function variantText(k){

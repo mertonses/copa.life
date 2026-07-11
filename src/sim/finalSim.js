@@ -1137,12 +1137,12 @@ function buildSim(myPow, oppPow) {
     const c=side===0?'#429A73':'#496E71';
     const NS='http://www.w3.org/2000/svg';
     let el;
-    if(type==='card'){
+    if(type==='card'||type==='yellow_card'||type==='red_card'){
       // small tilted square, reads as a booking
       el=document.createElementNS(NS,'rect');
       el.setAttribute('x',(parseFloat(x)-1.5).toFixed(1));el.setAttribute('y','10.5');
       el.setAttribute('width','3');el.setAttribute('height','4');el.setAttribute('rx','0.5');
-      el.setAttribute('fill','#b0564a');
+      el.setAttribute('fill',type==='yellow_card'?'#e6ad2e':'#b0564a');
       el.setAttribute('transform','rotate(12 '+x+' 12.5)');
     }else{
       el=document.createElementNS(NS,'circle');
@@ -1496,7 +1496,7 @@ function buildSim(myPow, oppPow) {
     const rTeam=p.teamId===0?myName:oppName;
     _html("simComm","<b>"+nm+"</b> — "+reason);
     _addRow(p.teamId,"<b>"+rMin+"'</b><span><b>🟥 "+(isTR?"KIRMIZI KART":"RED CARD")+" · "+nm+"</b><small>"+rTeam+" · "+(isTR?"10 kişi kaldı":"down to 10")+"</small></span>",true);
-    _addTimelineMarker(rMin,'card',p.teamId,(isTR?"Kırmızı kart — ":"Red card — ")+nm);
+    _addTimelineMarker(rMin,'red_card',p.teamId,(isTR?"Kırmızı kart — ":"Red card — ")+nm);
     _flashEventMap('card',p.teamId,0.5,p.teamId===0?0.35:0.65,{meta:rMin+"' · "+(isTR?"KIRMIZI KART":"RED CARD"),main:rTeam+" · "+nm});
     audio.card&&audio.card();
     _updateStats();
@@ -2098,7 +2098,7 @@ function buildSim(myPow, oppPow) {
           const yTeam=pl.teamId===0?myName:oppName;
           _html("simComm","🟨 <b>"+nm+"</b> — "+(isTR?"Sarı kart!":"Yellow card!"));
           _addRow(pl.teamId,"<b>"+yMin+"'</b><span><b>🟨 "+(isTR?"SARI KART":"YELLOW")+" · "+nm+"</b><small>"+yTeam+"</small></span>",true);
-          _addTimelineMarker(yMin,'card',pl.teamId,(isTR?"Sarı kart — ":"Yellow — ")+nm);
+          _addTimelineMarker(yMin,'yellow_card',pl.teamId,(isTR?"Sarı kart — ":"Yellow — ")+nm);
           _flashEventMap('card',pl.teamId,0.5,pl.teamId===0?0.35:0.65,{meta:yMin+"' · "+(isTR?"SARI KART":"YELLOW CARD"),main:yTeam+" · "+nm});
           audio.card&&audio.card();
         }

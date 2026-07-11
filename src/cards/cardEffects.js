@@ -6,7 +6,7 @@ var VARIANT_BONUS=[0,0];
 
 /* DARK variant'ta finalde dususecek guc — sadece DARK kart alindiginda eklenir */
 var KARA_PEN={
- taraftar:8,genc:4,ch_momentum:6,
+ taraftar:6,genc:4,ch_momentum:6,
  yildiz:2,otobus:3,
  altyapi_plani:4,tecrubeli_omurga:4,
  yerli_blok:3,kanat_akini:5,
@@ -14,7 +14,7 @@ var KARA_PEN={
  sahte_evrak:10,
  doping:6,
  gec_gec:3,
- kasiga_para:2,
+ kasiga_para:2,derbi:4,final_provasi:4,
  /* DARK now carries real final risk on cards that previously had free upside */
  kaleci_kalesi:8,cift_forvet:4
 };
@@ -27,7 +27,13 @@ function cardEff(k,s,r){
 /* Kumarbaz taksit sistemi */
 var kumarbazInstallmentTurns=0,kumarbazInstallmentAmt=0;
 /* Kriz bayragi */
-var krizActive=false;
+var krizActive=false,krizVariant=0;
+function applyCardCashPenalty(k,amount){
+ amount=Math.max(0,Math.round(amount||0));
+ if(!amount)return;
+ spend(amount,"spent");
+ if(typeof trackCardPenalty==="function")trackCardPenalty(k,0,0,amount);
+}
 
 /* ===== Kart satin alma etkileri ===== */
 function applyRiskCardGain(k){
@@ -36,10 +42,12 @@ function applyRiskCardGain(k){
 
  /* --- GÜVENILIR EKONOMI --- */
  if(k==="taksit_transfer"){
-  const gain=v===1?8:4;
+  const gain=v===1?18:10,pay=v===1?7:4;
   earn(gain,"earned");
+  installmentTurns=2;installmentAmt=pay;
   if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("💳 <b>"+L().cards[k].n+"</b> +€"+gain+"M · güven -1","buy");}
   else{pushFeed("💳 <b>"+L().cards[k].n+"</b> +€"+gain+"M","buy");}
+  pushFeed("💳 "+(tr?"Sonraki 2 tur: -€"+pay+"M":"Next 2 rounds: -€"+pay+"M"),"pres");
   return;
  }
  if(k==="son_kredi"){
@@ -70,13 +78,13 @@ function applyRiskCardGain(k){
   const pow=fwds*(v===1?2:1);
   riskPowerMod+=pow;
   pushFeed("⚡ <b>"+L().cards[k].n+"</b> "+fwds+(tr?" forvet → +"+pow+" güç":" forwards → +"+pow+" power"),"pres");
-  if(v===1&&rand()<0.25){spend(10,"spent");pushFeed("⚡ "+(tr?"Kontra cezası: -€10M":"Counter penalty: -€10M"),"lose");}
+  if(v===1&&rand()<0.25){applyCardCashPenalty(k,10);pushFeed("⚡ "+(tr?"Kontra cezası: -€10M":"Counter penalty: -€10M"),"lose");}
   return;
  }
  if(k==="buyuk_mac"){
   riskPowerMod+=6;
   pushFeed("🎯 <b>"+L().cards[k].n+"</b> +6"+(tr?" güç":" power"),"pres");
-  if(v===1&&rand()<0.20){spend(12,"spent");pushFeed("🎯 "+(tr?"Büyük maç riski: -€12M":"Big game risk: -€12M"),"lose");}
+  if(v===1&&rand()<0.20){applyCardCashPenalty(k,12);pushFeed("🎯 "+(tr?"Büyük maç riski: -€12M":"Big game risk: -€12M"),"lose");}
   return;
  }
  if(k==="yildiz"){
@@ -85,26 +93,26 @@ function applyRiskCardGain(k){
   const pow=v===1?(maxOV>=90?14:maxOV>=85?10:maxOV>=80?8:6):(maxOV>=90?10:maxOV>=85?8:maxOV>=80?6:4);
   riskPowerMod+=pow;
   pushFeed("🍰 <b>"+L().cards[k].n+"</b> OV"+maxOV+" → +"+pow+(tr?" güç":" power"),"pres");
-  if(v===1&&rand()<0.25){spend(6,"spent");pushFeed("🍰 "+(tr?"Yıldız riski: -€6M":"Star risk: -€6M"),"lose");}
+  if(v===1&&rand()<0.25){applyCardCashPenalty(k,6);pushFeed("🍰 "+(tr?"Yıldız riski: -€6M":"Star risk: -€6M"),"lose");}
   return;
  }
  if(k==="otobus"){
   const s=picksBySlot.filter(Boolean);
   const cbs=s.filter(p=>p.pos==="CB").length;
-  const pow=cbs*(v===1?6:3);
+   const pow=Math.min(v===1?12:9,cbs*(v===1?4:3));
   riskPowerMod+=pow;
   pushFeed("🚌 <b>"+L().cards[k].n+"</b> "+cbs+(tr?" stoper → +"+pow+" güç":" CBs → +"+pow+" power"),"pres");
-  if(v===1&&rand()<0.10){spend(6,"spent");pushFeed("🚌 "+(tr?"Savunma cezası: -€6M":"Defensive penalty: -€6M"),"lose");}
+  if(v===1&&rand()<0.10){applyCardCashPenalty(k,6);pushFeed("🚌 "+(tr?"Savunma cezası: -€6M":"Defensive penalty: -€6M"),"lose");}
   return;
  }
 
  /* --- OYUNCU OV BOOST (INSTANT) --- */
  if(k==="kaleci_kalesi"){
-  const boost=v===1?30:15;
+   const boost=v===1?9:5;
   const s=picksBySlot.filter(Boolean);
   const gk=s.find(p=>p.pos==="GK");
   if(gk){gk.ov=Math.min(99,gk.ov+boost);gk.eff=Math.min(99,gk.eff+boost);renderRoundel&&renderRoundel("h"+picksBySlot.indexOf(gk),gk);pushFeed("🧤 <b>"+L().cards[k].n+"</b> GK OV+"+boost,"buy");}
-  if(v===1&&rand()<0.15){spend(15,"spent");pushFeed("🧤 "+(tr?"Transfer cezası: -€15M":"Transfer penalty: -€15M"),"lose");}
+  if(v===1&&rand()<0.15){applyCardCashPenalty(k,15);pushFeed("🧤 "+(tr?"Transfer cezası: -€15M":"Transfer penalty: -€15M"),"lose");}
   return;
  }
 
@@ -125,12 +133,12 @@ function applyRiskCardGain(k){
 
  /* --- KARA BORSA (INSTANT) --- */
  if(k==="kara_borsa"){
-  const count=v===1?3:2;
-  const pool=CARDKEYS.filter(x=>x!==k&&invOf(x)<=0&&!isInstantCard(x));
-  let added=0;
-  for(let i=0;i<count&&pool.length;i++){const idx=ri(0,pool.length-1);const fk=pool.splice(idx,1)[0];addCard(fk,weightedVariant(),{silent:false});added++;}
-  pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(tr?added+" bedava kart":added+" free cards"),"buy");
-  if(v===1&&rand()<0.50){spend(10,"spent");pushFeed("🖤 "+(tr?"Kara Borsa cezası: -€10M":"Black Market fine: -€10M"),"lose");}
+   const count=v===1?2:1;
+   const pool=CARDKEYS.filter(x=>x!==k&&invOf(x)<=0&&!isInstantCard(x));
+   let added=0;
+   for(let i=0;i<count&&pool.length;i++){const idx=ri(0,pool.length-1);const fk=pool.splice(idx,1)[0];addCard(fk,v===1&&i>0?weightedVariant():0,{silent:false,freeSource:"kara_borsa"});added++;}
+   pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(tr?added+" bedava kart":added+" free cards"),"buy");
+   if(v===1&&rand()<0.40){applyCardCashPenalty(k,10);pushFeed("🖤 "+(tr?"Kara Borsa cezası: -€10M":"Black Market fine: -€10M"),"lose");}
   return;
  }
 
@@ -153,8 +161,8 @@ function applyRiskCardGain(k){
 
  /* --- KRIZ BAYRAĞI (INSTANT) --- */
  if(k==="kriz"){
-  krizActive=true;
-  pushFeed("🧯 <b>"+L().cards[k].n+"</b> "+(tr?"finale hazır — final cezasını sıfırlamayı dener":"finale ready — will attempt to reset final penalty"),"buy");
+  krizActive=true;krizVariant=v;
+  pushFeed("🧯 <b>"+L().cards[k].n+"</b> "+(tr?"final sigortası hazır":"final insurance ready"),"buy");
   return;
  }
 
@@ -164,7 +172,7 @@ function applyRiskCardGain(k){
   riskPowerMod+=pow;
   if(v===1){
    kurbanScheduled={count:2,turns:1};
-   if(rand()<0.25){spend(6,"spent");pushFeed("🔪 "+(tr?"Kurban cezası: -€6M":"Sacrifice penalty: -€6M"),"lose");}
+   if(rand()<0.25){applyCardCashPenalty(k,6);pushFeed("🔪 "+(tr?"Kurban cezası: -€6M":"Sacrifice penalty: -€6M"),"lose");}
   }else{
    kurbanScheduled={count:1,turns:1};
   }
@@ -192,7 +200,7 @@ function applyRiskCardGain(k){
    if(secondInj>=0){const _sp=picksBySlot[secondInj];_sp.injured=false;healed++;pushFeed("💉 <b>"+shortName(_sp)+"</b> "+(tr?"iyileşti":"healed"),"buy");}
   }
   if(!healed){const refund=cardPrice(k);if(refund>0)earn(refund,"earned");pushFeed("💉 <b>"+L().cards[k].n+"</b> "+(tr?"sakat oyuncu yok — iade +€"+refund+"M":"no injured player — refund +€"+refund+"M"),"buy");return;}
-  if(v===1&&rand()<0.25){spend(6,"spent");pushFeed("💉 "+(tr?"Tedavi masrafı: -€6M":"Treatment cost: -€6M"),"lose");}
+  if(v===1&&rand()<0.25){applyCardCashPenalty(k,6);pushFeed("💉 "+(tr?"Tedavi masrafı: -€6M":"Treatment cost: -€6M"),"lose");}
   pushFeed("💉 <b>"+L().cards[k].n+"</b> "+healed+(tr?" oyuncu iyileşti":" player(s) healed"),"buy");
   return;
  }
@@ -210,25 +218,19 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="nasip_kismet"){
-  const discount=v===1?0.25:0.50; // 0.25 = 75% indirim, 0.50 = 50% indirim
+   const discount=v===1?0.60:0.75;
   // Bought this turn consumes the 1-card purchase, so the discount must land NEXT turn.
   // turns=2 survives the end-of-turn decrement and stays active through the next round's shopping.
   cardPriceMod=discount;cardPriceModTurns=2;
-  pushFeed("🍀 <b>"+L().cards[k].n+"</b> "+(tr?"sonraki tur kart fiyatları "+(v===1?"-%75":"-%50"):"next round card prices "+(v===1?"-75%":"-50%")),"buy");
-  if(v===1&&rand()<0.25){spend(4,"spent");pushFeed("🍀 "+(tr?"Talih cezası: -€4M":"Fate penalty: -€4M"),"lose");}
+   pushFeed("🍀 <b>"+L().cards[k].n+"</b> "+(tr?"sonraki tur kart fiyatları "+(v===1?"-%40":"-%25"):"next round card prices "+(v===1?"-40%":"-25%")),"buy");
+  if(v===1&&rand()<0.25){applyCardCashPenalty(k,4);pushFeed("🍀 "+(tr?"Talih cezası: -€4M":"Fate penalty: -€4M"),"lose");}
   return;
  }
  if(k==="yildiz_krizi"){
-  const s=picksBySlot.filter(Boolean);
-  if(!s.length)return;
-  const removeCount=v===1?2:1,netPow=v===1?4:3;
-  const sorted=[...s].sort((a,b)=>effOf(b)-effOf(a));
-  const removed=sorted.slice(0,removeCount);
-  // Stars draw media heat, but the rest of the squad rallies: flat net bonus.
+  const netPow=v===1?4:3;
   riskPowerMod+=netPow;
-  removed.forEach(p=>pushFeed("⭐ <b>"+shortName(p)+"</b> "+(tr?"medyada hedef":"draws media heat"),"lose"));
-  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?"krize tepki: +"+netPow+" güç":"crisis response: +"+netPow+" power"),"pres");
-  if(v===1&&rand()<0.20){spend(4,"spent");pushFeed("⭐ "+(tr?"Medya cezası: -€4M":"Media fine: -€4M"),"lose");}
+  pushFeed("⭐ <b>"+L().cards[k].n+"</b> "+(tr?"takım kenetlendi: +"+netPow+" güç":"squad rallied: +"+netPow+" power"),"pres");
+  if(v===1&&rand()<0.20){applyCardCashPenalty(k,4);pushFeed("⭐ "+(tr?"Medya cezası: -€4M":"Media fine: -€4M"),"lose");}
   return;
  }
  if(k==="kasiga_para"){
@@ -244,8 +246,8 @@ function applyRiskCardGain(k){
 
  /* --- CONTRACT KART SATIN ALMA MESAJLARI --- */
  if(k==="taraftar"){
-  const pow=v===1?10:5;
-  pushFeed("📣 <b>"+L().cards[k].n+"</b> +"+(pow)+(tr?" güç/tur":" power/turn"),"buy");
+   const pow=cardEff(k,picksBySlot.filter(Boolean),round);
+   pushFeed("📣 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç (bu tur)":" power (this round)"),"buy");
   if(v===1&&rand()<0.25){chairTrust=Math.max(0,chairTrust-1);pushFeed("📣 "+(tr?"Taraftar baskısı — güven -1":"Fan pressure — trust -1"),"lose");}
   return;
  }
@@ -269,6 +271,13 @@ function applyRiskCardGain(k){
 /* ===== Tur sonu risk kartlari ===== */
 function processRiskCards(){
  const tr=LANG==="tr";
+ /* Taksitli Transfer geri ödemeleri */
+ if(installmentTurns>0){
+  installmentTurns--;
+  spend(installmentAmt,"spent");
+  pushFeed("💳 "+(tr?"Taksitli Transfer ödemesi: -€":"Installment payment: -€")+installmentAmt+"M","lose");
+  if(installmentTurns<=0)installmentAmt=0;
+ }
  /* Kumarbaz taksit odemeleri */
  if(kumarbazInstallmentTurns>0){
   kumarbazInstallmentTurns--;
@@ -286,7 +295,7 @@ function processRiskCards(){
  if(hasCard("doping")&&round>1){
   const v=variantOf("doping");
   const fineChance=v===1?0.25:0.35,fineAmt=v===1?25:15;
-  if(rand()<fineChance){spend(fineAmt,"spent");pushFeed("🧪 "+(tr?"Doping incelemesi: -€":"Doping review: -€")+fineAmt+"M","lose");}
+  if(rand()<fineChance){applyCardCashPenalty("doping",fineAmt);pushFeed("🧪 "+(tr?"Doping incelemesi: -€":"Doping review: -€")+fineAmt+"M","lose");}
  }
  /* Gec Gec dark: sakatlık riski */
  if(hasCard("gec_gec")&&variantOf("gec_gec")===1&&rand()<0.25){
@@ -319,12 +328,10 @@ function expireTemporaryCards(){
 function applyKriz(){
  if(!krizActive)return;
  krizActive=false;
- if(!hasCard("kriz"))return;
- const v=variantOf("kriz");
- /* Deterministic relief (no coin-flip): COMMON offsets up to 8, DARK up to 14 of the
-    accumulated final penalty. Reliable insurance for DARK-stacking builds. */
- const relief=v===1?14:8;
- const cleared=Math.min(finalPenalty,relief);
+ const v=krizVariant;krizVariant=0;
+ /* Sigorta riski tamamen silmez: cezanın en fazla yarısını ve sabit tavanı telafi eder. */
+ const relief=v===1?8:6;
+ const cleared=Math.min(finalPenalty,relief,Math.ceil(finalPenalty*0.5));
  finalPenalty=Math.max(0,finalPenalty-cleared);
  if(cleared>0)pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: finalde -"+cleared+" güç telafi edildi.":"Crisis Management: -"+cleared+" final power offset."),"buy");
  else pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: telafi edilecek final cezası yoktu.":"Crisis Management: no final penalty to offset."),"pres");
@@ -333,6 +340,7 @@ function applyKriz(){
 /* ===== Ana kart ekleme fonksiyonu. v=0 COMMON, v=1 DARK. ===== */
 function addCard(k,v,opts){
  opts=opts||{};const silent=!!opts.silent,variant=v||0;
+ const powerBefore=typeof squadPower==="function"?squadPower(round).power:0;
  const instant=isInstantCard(k);
  if(!instant&&invOf(k)>0){
    const refund=Math.max(1,Math.floor(cardPrice(k)*0.35));
@@ -341,16 +349,22 @@ function addCard(k,v,opts){
    return{added:false,refund};
  }
  cardInv[k]=1;cardVariant[k]=variant;
+ if(typeof usedRiskCards!=="undefined"&&(variant===1||((typeof PRESIDENT_RISK_CARDS!=="undefined")&&PRESIDENT_RISK_CARDS.has(k)))&&!usedRiskCards.includes(k))usedRiskCards.push(k);
  if(!instant&&!hasCard(k)&&cards.length<activeCardSlots())cards.push(k);
  /* DARK variant: final guc cezasi — TUM modlar icin (instant dahil) */
  if(variant===1&&(KARA_PEN[k]||0)>0){
    const pen=KARA_PEN[k];
-   finalPenalty=Math.min(FINAL_DEBT_CAP,finalPenalty+pen);
-   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+pen+" güç":"DARK — -"+pen+" in the final"),"lose");
- }
+   const debt=typeof addFinalPenalty==="function"?addFinalPenalty(pen,k):{added:pen,overflow:0,cash:0};
+   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+debt.added+" güç":"DARK — -"+debt.added+" in the final")+(debt.overflow?(LANG==="tr"?" · tavan aşımı -€"+debt.cash+"M":" · overflow -€"+debt.cash+"M"):""),"lose");
+  }
+ if(typeof trackCardAcquired==="function")trackCardAcquired(k,variant,opts);
  if(instant)applyRiskCardGain(k);
  /* Contract kartlar satin alindiginda ani etkilerini uygula */
  if(!instant&&cardMode(k)==="contract")applyRiskCardGain(k);
+ if(typeof trackCardImpact==="function"){
+  const powerAfter=typeof squadPower==="function"?squadPower(round).power:powerBefore;
+  trackCardImpact(k,variant,powerAfter-powerBefore,Number(opts.price)||0);
+ }
  if(instant){cardInv[k]=0;cardVariant[k]=0;cards=cards.filter(c=>c!==k);return{added:true,instant:true};}
  if(!silent)pushFeed("🃏 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"aktif slota hazır":"ready for slot")+(variant>0?" · "+variantText(k):""),"ch");
  return{added:true};

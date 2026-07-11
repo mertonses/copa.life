@@ -35,19 +35,25 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
-  if(budget<0&&round>1){let _intAmt=0;if(budget>-10){_intAmt=1;}else if(budget>-20){_intAmt=3;}else{_intAmt=6;}spend(_intAmt,"interest");pushFeed("💸 "+(LANG==="tr"?"Borç faizi: -€"+_intAmt+"M":"Debt interest: -€"+_intAmt+"M"),"lose");}
   /* Borç güven cezası */
   if(budget<-10&&chairTrust>0&&round>1){chairTrust--;pushFeed("📉 "+(LANG==="tr"?"Başkan güveni azaldı ("+chairTrust+"/3)":"Chairman confidence drops ("+chairTrust+"/3)"),"lose");}
-  /* Leydi yerli kadro bonusu/cezası */
-  if(chairman.id==="leydi"&&round>1){const _lc=picksBySlot.filter(Boolean).filter(p=>p.tr).length;if(_lc>=5){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Leydi: yerli baskın kadro — bu maç +1 güç":"Leydi: local-dominant squad — +1 power"),"pres");}else if(_lc<3){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Leydi: yabancı ağırlıklı kadro — bu maç -1 güç":"Leydi: foreign-heavy squad — -1 power"),"lose");}}
+  /* Adalet: oyuncu milliyetini ikinci kez saymak yerine toplam kimyayı ödüllendirir. */
+  if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Adalet: uyumlu kadro — bu maç +1 güç":"Adalet: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Adalet: dağınık kadro — bu maç -1 güç":"Adalet: disjointed squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
   /* Kırmızı kart cezası: askıya alınan oyuncuyu bildir */
   {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");const _tr=LANG==="tr";setTimeout(()=>{showModal(`<div class="scoutmodal suspended-modal"><h4>🟥 ${_tr?"Cezalı Oyuncu":"Player Suspended"}</h4><p><b>${_sn}</b> ${_tr?"kırmızı kartı nedeniyle bu maçta oynayamaz. Kadrodan çıkarmanız gerekiyor.":"received a red card and cannot play this match. You must remove them from the lineup."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${_tr?"Anladım":"Got it"}</button></div></div>`);},400);}}
   /* Sansasyoncu spotlight — her iki turda bir */
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
+  if(chairman.id==="torpilci"&&round===3&&!eventSeen.torpil_guaranteed){eventSeen.torpil_guaranteed=1;setTimeout(_queueGuaranteedTorpil,760);}
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&captainIdx<0&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
   if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
+}
+function _queueGuaranteedTorpil(){
+  const modal=$("modal");
+  if(modal&&!modal.classList.contains("hidden")){setTimeout(_queueGuaranteedTorpil,450);return;}
+  const oc=typeof POUT!=="undefined"&&POUT.find(o=>o.id==="nephew");
+  if(oc&&typeof _torpilNephewChoice==="function")_torpilNephewChoice(oc);
 }
 const _SPOT_COLORS=["#e6ad2e","#4ade80","#60a5fa","#f472b6","#fb923c","#a78bfa"];
 function showSansSpotlightPicker(){
@@ -55,7 +61,7 @@ function showSansSpotlightPicker(){
   if(modalEl&&!modalEl.classList.contains("hidden")){setTimeout(showSansSpotlightPicker,500);return;}
   const tr=LANG==="tr", choices=picksBySlot.map((p,i)=>({p,i})).filter(({p})=>p&&!p.injured);
   if(!choices.length)return;
-  const boost=chairTrust===3?9:chairTrust===0?3:6;
+  const boost=chairTrust>=3?6:chairTrust<=0?3:5;
   const boostColor=boost>=4?"#4ade80":boost>=3?"#e6ad2e":"#fb923c";
   const ratingColor=v=>v>=90?"#15803d":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
   const cards=choices.map(({p,i},ci)=>{
@@ -259,13 +265,18 @@ function shopCardDesc(k,raw,variantOverride){
   const tr=LANG==="tr";
   const sv=typeof variantOverride==="number"?variantOverride:variantOf(k);
   const specific={
+    taraftar:()=>sv===1?(tr?"Taraftar desteği tüm takım gücüne eklenir: 1. tur +3, 2. tur +5, sonraki turlar +6. Satın alırken %25 ihtimalle güven -1; finalde -6 güç.":"Crowd support is added to the whole team: +3 in round 1, +5 in round 2, then +6. 25% chance of trust -1 on purchase; -6 power in the final."):(tr?"Taraftar desteği tüm takım gücüne eklenir: 1. tur +2, 2. tur +3, sonraki turlar +4.":"Crowd support is added to the whole team: +2 in round 1, +3 in round 2, then +4."),
+    genc:()=>sv===1?(tr?"Oyuncuları büyütmez; takım gücüne 1. tur +4'ten finalde +9'a kadar artan katkı verir. Finalde -4 güç.":"Does not develop players; adds rising team power from +4 in round 1 to +9 in the final. -4 power in the final."):(tr?"Oyuncuları büyütmez; takım gücüne turun numarası kadar katkı verir: 1. tur +1'den finalde +6'ya.":"Does not develop players; adds the round number to team power: +1 in round 1 through +6 in the final."),
+    ch_momentum:()=>sv===1?(tr?"Turnuva ritmini takım gücüne çevirir: 1-2. tur +4, 3-4. tur +6, 5. turdan itibaren +8. Finalde -6 güç.":"Converts tournament rhythm into team power: +4 in rounds 1-2, +6 in rounds 3-4, then +8. -6 power in the final."):(tr?"Turnuva ritmini takım gücüne çevirir: 1-2. tur +2, 3-4. tur +3, 5. turdan itibaren +4.":"Converts tournament rhythm into team power: +2 in rounds 1-2, +3 in rounds 3-4, then +4."),
+    tecrubeli_omurga:()=>sv===1?(tr?"İlk 11'deki 32 yaş ve üzeri her oyuncu +2 güç verir; en fazla +6. Finalde -4 güç.":"Each age-32+ starter adds +2 power, max +6. -4 power in the final."):(tr?"İlk 11'deki 32 yaş ve üzeri her oyuncu +1 güç verir; en fazla +4.":"Each age-32+ starter adds +1 power, max +4."),
+    derbi:()=>sv===1?(tr?"İlk 3 tur etkisizdir. Çeyrek final +4, yarı final +7, final +10 verir; finalde -4 güç.":"Inactive in the first 3 rounds. Adds +4 in the quarter-final, +7 in the semi-final and +10 in the final; -4 power in the final."):(tr?"İlk 3 tur etkisizdir. Çeyrek final +2, yarı final +4, final +8 verir.":"Inactive in the first 3 rounds. Adds +2 in the quarter-final, +4 in the semi-final and +8 in the final."),
     kanat_akini:()=>sv===1?(tr?"Kanat/bek başına +2 güç, max +6. Finalde -5.":"Wings/fullbacks: +2 each, max +6. -5 in the final."):(tr?"Kanat/bek başına +1 güç, max +4.":"Wings/fullbacks: +1 each, max +4."),
     bu_adam:()=>sv===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
     kontra:()=>sv===1?(tr?"Forvet başına +2 güç. %25 ihtimal -€10M ceza.":"Forward +2 each. 25% chance -€10M fine."):(tr?"Forvet başına +1 güç.":"Forward +1 each."),
     buyuk_mac:()=>sv===1?(tr?"Tek maçlık +6 güç. %20 ihtimal -€12M ceza.":"Single-match +6 power. 20% chance -€12M fine."):(tr?"Tek maçlık +6 güç.":"Single-match +6 power."),
     yildiz:()=>{const st=starCardPowerForVariant(sv);return sv===1?(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç. %25 ihtimal -€6M ceza.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match. 25% chance -€6M fine.`):(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match.`);},
-    otobus:()=>sv===1?(tr?"Stoper başına +6 güç. %10 ihtimal -€6M ceza.":"CB +6 each. 10% chance -€6M fine."):(tr?"Stoper başına +3 güç.":"CB +3 each."),
-    kaleci_kalesi:()=>sv===1?(tr?"Kaleci OV +30 — asıl etki penaltı seansında kurtarış şansı. %15 ihtimal -€15M ceza, finalde -8.":"Keeper OVR +30 — mainly boosts penalty-shootout saves. 15% chance -€15M fine, -8 in the final."):(tr?"Kaleci OV +15 — asıl etki penaltı seansında kurtarış şansı.":"Keeper OVR +15 — mainly boosts penalty-shootout saves."),
+    otobus:()=>sv===1?(tr?"Stoper başına +4 güç, en fazla +12. %10 ihtimal -€6M ceza; finalde -3.":"CB +4 each, max +12. 10% chance -€6M fine; -3 in the final."):(tr?"Stoper başına +3 güç, en fazla +9.":"CB +3 each, max +9."),
+    kaleci_kalesi:()=>sv===1?(tr?"Kaleci gücü +9. %15 ihtimal -€15M ceza; finalde -8.":"Goalkeeper rating +9. 15% chance -€15M fine; -8 in the final."):(tr?"Kaleci gücü +5.":"Goalkeeper rating +5."),
     deplasman_kafilesi:()=>sv===1?(tr?"Güçlü rakibe karşı +8 güç. Değilse %50 +4 / %50 -4 güç.":"Against stronger opponent: +8 power. Otherwise 50% +4 / 50% -4 power."):(tr?"Güçlü rakibe karşı +4 güç. Değilse +2 güç.":"Against stronger opponent: +4 power. Otherwise +2 power."),
     kisa_kamp:()=>sv===1?(tr?"Bu maç +6 güç. Sonraki maç -4.":"This match +6 power. Next match -4."):(tr?"Bu maç +4 güç. Sonraki maç -2.":"This match +4 power. Next match -2."),
     primler_yatinca:()=>sv===1?(tr?"Şimdi +8 güç. Gelecek tur −€16M.":"Now +8 power. Next round −€16M."):(tr?"Şimdi +4 güç. Gelecek tur −€8M.":"Now +4 power. Next round −€8M."),
@@ -273,9 +284,11 @@ function shopCardDesc(k,raw,variantOverride){
     cift_forvet:()=>sv===1?(tr?"SNT başına +4 güç, max +8. Finalde -4.":"ST +4 each, max +8. -4 in the final."):(tr?"SNT başına +2 güç, max +4.":"ST +2 each, max +4."),
     gecici_prim:()=>sv===1?(tr?"Bu maç +12 güç. Maç sonu %60 sakatlık riski.":"This match +12 power. 60% injury risk after."):(tr?"Bu maç +6 güç. Maç sonu %30 sakatlık riski.":"This match +6 power. 30% injury risk after."),
     kurban_belli:()=>sv===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır. %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after. 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
-    kara_borsa:()=>sv===1?(tr?"Bedava 3 kart açar. %50 ihtimal -€10M ceza.":"Unlocks 3 free cards. 50% chance -€10M fine."):(tr?"Bedava 2 kart açar.":"Unlocks 2 free cards."),
-    nasip_kismet:()=>sv===1?(tr?"Kart fiyatları: -%75. Risk: %25 ihtimal -€4M ceza.":"Card prices: -75%. Risk: 25% chance -€4M fine."):(tr?"Kart fiyatları: -%50.":"Card prices: -50%."),
-    yildiz_krizi:()=>sv===1?(tr?"En güçlü 2 oyuncu medyada hedef olur; takım tepki verir: bu maç +4 güç. %20 ihtimal -€4M medya cezası.":"Best 2 players draw media heat; the squad responds: +4 power this match. 20% chance -€4M media fine."):(tr?"En güçlü oyuncu medyada hedef olur; takım tepki verir: bu maç +3 güç.":"Best player draws media heat; the squad responds: +3 power this match."),
+    kara_borsa:()=>sv===1?(tr?"2 bedava kalıcı kart verir. %40 ihtimal -€10M ceza.":"Grants 2 free persistent cards. 40% chance -€10M fine."):(tr?"1 bedava COMMON kalıcı kart verir.":"Grants 1 free COMMON persistent card."),
+    nasip_kismet:()=>sv===1?(tr?"Sonraki tur kart fiyatları -%40. %25 ihtimal -€4M ceza.":"Next-round card prices -40%. 25% chance -€4M fine."):(tr?"Sonraki tur kart fiyatları -%25.":"Next-round card prices -25%."),
+    yildiz_krizi:()=>sv===1?(tr?"Medya baskısı bu maç +4 güç verir. %20 ihtimal -€4M ceza.":"Media pressure grants +4 power this match. 20% chance -€4M fine."):(tr?"Medya ilgisi bu maç +3 güç verir.":"Media attention grants +3 power this match."),
+    taksit_transfer:()=>sv===1?(tr?"Hemen +€18M. Sonraki 2 tur -€7M; güven -1 ve finalde -6.":"+€18M now. -€7M for the next 2 rounds; trust -1 and -6 in the final."):(tr?"Hemen +€10M. Sonraki 2 tur -€4M.":"+€10M now. -€4M for the next 2 rounds."),
+    kriz:()=>sv===1?(tr?"Final cezasının yarısını, en fazla 8 gücü telafi eder.":"Offsets half the final penalty, up to 8 power."):(tr?"Final cezasının yarısını, en fazla 6 gücü telafi eder.":"Offsets half the final penalty, up to 6 power."),
     vur_igneyi:()=>sv===1?(tr?"2 sakat oyuncuyu iyileştirir. %25 ihtimal -€6M ek masraf. Sakat yoksa kart iade edilir.":"Heals 2 injured players. 25% chance -€6M extra cost. Refunded if no one is injured."):(tr?"1 sakat oyuncuyu iyileştirir. Sakat yoksa kart iade edilir.":"Heals 1 injured player. Refunded if no one is injured."),
     kasiga_para:()=>sv===1?(tr?"Rakip -8 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%50, güven -1.":"Opponent -8 power. Next market closes; the next open market has +50% prices, trust -1."):(tr?"Rakip -4 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Next market closes; the next open market has +25% prices.")
   };
@@ -290,7 +303,7 @@ function conditionHint(k){
  const map={
   yerli_blok:()=>`${tr?"Yerli":"Locals"}: ${s.filter(p=>p.tr).length}/4`,
   altyapi_plani:()=>`${tr?"U23":"U23"}: ${s.filter(p=>p.age<=23).length}/4`,
-  tecrubeli_omurga:()=>`${tr?"32+":"32+"}: ${s.filter(p=>p.age>=32).length}/3`,
+  tecrubeli_omurga:()=>`${tr?"İlk 11'de 32+":"Age-32+ starters"}: ${s.filter(p=>p.age>=32).length}/${variantOf("tecrubeli_omurga")===1?3:4}`,
   cift_forvet:()=>`${tr?"Santrfor":"Strikers"}: ${s.filter(p=>p.pos==="ST").length}`,
   kanat_akini:()=>`${tr?"Kanat/bek":"Wing/WB"}: ${countPos(["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"])}/4`,
   otobus:()=>`${tr?"Stoper":"CB"}: ${s.filter(p=>p.pos==="CB").length}`,
@@ -305,37 +318,36 @@ function conditionHint(k){
 function cardContractText(k){
   const tr=LANG==="tr",v=cardEff(k,picksBySlot.filter(Boolean),round),plus=(v>=0?"+":"")+v;
   const map={
-    taraftar:tr?"Garanti güç "+plus+"; götürü yok.":"Guaranteed power "+plus+"; no downside.",
-    genc:tr?"Bu tur güç "+plus+"; her yeni tur +1 büyür.":"Power this round "+plus+"; grows +1 each round.",
+    taraftar:tr?"Taraftar desteği tüm takıma bu tur "+plus+" güç veriyor.":"Crowd support gives the whole team "+plus+" power this round.",
+    genc:tr?"Oyuncular büyümez; kart bu tur takım gücüne "+plus+" ekliyor.":"Players do not grow; the card adds "+plus+" to team power this round.",
     kontra:tr?"Forvet başına +1; şu an "+plus+".":"Forward +1 each; now "+plus+".",
-    otobus:tr?"Stoper başına +1; şu an "+plus+".":"Centre-back +1 each; now "+plus+".",
+    otobus:variantOf(k)===1?(tr?"Stoper başına +4, max +12; şu an "+plus+".":"CB +4 each, max +12; now "+plus+"."):(tr?"Stoper başına +3, max +9; şu an "+plus+".":"CB +3 each, max +9; now "+plus+"."),
     anadolu:tr?"Sahadaki 70 altı oyuncu başına +1; şu an "+plus+".":"Sub-70 starters +1 each; now "+plus+".",
     yildiz:(()=>{const st=starCardPowerForVariant(variantOf("yildiz"));return tr?`En iyi oyuncun OV ${st.maxOV}; bu maç +${st.pow} güç.`:`Best player OVR ${st.maxOV}; +${st.pow} power this match.`;})(),
-    veteran:tr?"Erken güç "+plus+"; ilerleyen turlarda azalır.":"Early power "+plus+"; fades later.",
-    derbi:tr?"Bu tur +0; finalde +8 güç.":"Now +0; final +8 power.",
-    ch_momentum:tr?"Sabit +3 güç; götürü yok.":"Flat +3 power; no downside.",
+    derbi:round<4?(tr?"İlk 3 tur etkisiz; çeyrek finalde açılır.":"Inactive for the first 3 rounds; activates in the quarter-final."):(variantOf(k)===1?(tr?"Büyük maç bonusu bu tur "+plus+"; finalde -4 güç.":"Big-match bonus is "+plus+" this round; -4 power in the final."):(tr?"Büyük maç bonusu bu tur "+plus+".":"Big-match bonus is "+plus+" this round.")),
+    ch_momentum:tr?"Turnuva ritmi bu tur takım gücüne "+plus+" ekliyor.":"Tournament rhythm adds "+plus+" to team power this round.",
     buyuk_mac:tr?"4. turdan itibaren +2 güç; şu an "+plus+".":"From round 4: +2 power; now "+plus+".",
-    kaleci_kalesi:tr?"Kaleci GÜÇ 80+: +4, 70-79: +2; şu an "+plus+".":"GK OVR 80+: +4, 70-79: +2; now "+plus+".",
+    kaleci_kalesi:variantOf(k)===1?(tr?"Kaleci gücü +9; %15 ihtimal -€15M, final -8.":"Goalkeeper +9; 15% chance -€15M, final -8."):(tr?"Kaleci gücü +5.":"Goalkeeper +5."),
     ch_final:tr?"Yarı finalde +3, finalde +6; şu an "+plus+".":"Semi-final +3, final +6; now "+plus+".",
     cilgin_basin:tr?"%60 ihtimal +€15M; %40 ihtimal -€10M; kart kaybolur.":"60% +€15M; 40% -€10M; card expires.",
     temiz_sayfa:tr?"Sakatlık riski -%30; güç +0.":"Injury risk -30%; power +0.",
     kisa_kamp:variantOf(k)===1?(tr?"Bu maç +6 güç; sonraki maç -4; kart kaybolur.":"This match +6 power; next match -4; card expires."):(tr?"Bu maç +4 güç; sonraki maç -2; kart kaybolur.":"This match +4 power; next match -2; card expires."),
     primler_yatinca:variantOf(k)===1?(tr?"Bu tur +8 güç; gelecek tur −€16M.":"This round +8 power; next round −€16M."):(tr?"Bu tur +4 güç; gelecek tur −€8M.":"This round +4 power; next round −€8M."),
-    taksit_transfer:tr?"Hemen +€10M; sonraki 2 tur -€4M.":"Instant +€10M; next 2 rounds -€4M.",
-    kara_borsa:variantOf(k)===1?(tr?"Bedava 3 kart; %50 ihtimal -€10M ceza.":"3 free cards; 50% chance -€10M fine."):(tr?"Bedava 2 kart; ceza riski %0.":"2 free cards; fine risk 0%."),
+    taksit_transfer:variantOf(k)===1?(tr?"Hemen +€18M; sonraki 2 tur -€7M, güven -1.":"+€18M now; -€7M for 2 rounds, trust -1."):(tr?"Hemen +€10M; sonraki 2 tur -€4M.":"+€10M now; -€4M for 2 rounds."),
+    kara_borsa:variantOf(k)===1?(tr?"2 bedava kalıcı kart; %40 ihtimal -€10M.":"2 free persistent cards; 40% chance -€10M."):(tr?"1 bedava COMMON kalıcı kart.":"1 free COMMON persistent card."),
     sahte_evrak:tr?"Güç +6; finalde -8 güç.":"Power +6; final -8 power.",
     son_kredi:tr?"Kasa -€10M altındaysa +€15M; başkan eşiği 5M sertleşir.":"If below -€10M: +€15M; chairman limit tightens 5M.",
     altyapi_plani:tr?"23 yaş altı başına +1; max +4, şu an "+plus+".":"U23 +1 each; max +4, now "+plus+".",
-    tecrubeli_omurga:tr?"32+ yaş başına +1; max +3, şu an "+plus+".":"32+ +1 each; max +3, now "+plus+".",
+    tecrubeli_omurga:variantOf(k)===1?(tr?"İlk 11'deki 32+ oyuncu başına +2, en fazla +6; şu an "+plus+".":"Each age-32+ starter adds +2, max +6; now "+plus+"."):(tr?"İlk 11'deki 32+ oyuncu başına +1, en fazla +4; şu an "+plus+".":"Each age-32+ starter adds +1, max +4; now "+plus+"."),
     yerli_blok:tr?"2+ yerli: +1; 4+: +3; 6+: +5; şu an "+plus+".":"2+ locals: +1; 4+: +3; 6+: +5; now "+plus+".",
     kanat_akini:tr?"Kanat/bek başına +1; max +4, şu an "+plus+".":"Wing/wingback +1; max +4, now "+plus+".",
     cift_forvet:variantOf(k)===1?(tr?"SNT başına +4 güç, max +8; şu an "+plus+".":"ST +4 each, max +8; now "+plus+"."):(tr?"SNT başına +2 güç, max +4; şu an "+plus+".":"ST +2 each, max +4; now "+plus+"."),
     deplasman_kafilesi:tr?"Güçlü rakibe karşı +4; hemen -€3M, şu an "+plus+".":"Against stronger opponent +4; instant -€3M, now "+plus+".",
     sosyal_medya:tr?"Underdog +3; favori -2, şu an "+plus+".":"Underdog +3; favourite -2, now "+plus+".",
-    final_provasi:tr?"Şimdi -€4M; yarıda +3, finalde +5.":"Now -€4M; semi +3, final +5.",
+    final_provasi:variantOf(k)===1?(tr?"Yalnız finalde +9; final cezası -4.":"Final only +9; -4 final penalty."):(tr?"Yalnız finalde +5.":"Final only +5."),
     kupaci_kadro:tr?"Yarı final/final +4; finalde -2 güç.":"Semi/final +4; final -2 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
-    son_dans:variantOf(k)===1?(tr?"Finalde sakatsız +14, sakatlık varsa -8 güç.":"Final: +14 healthy, -8 if injured."):(tr?"Finalde sakatsız +8, sakatlık varsa +2 güç.":"Final: +8 healthy, +2 if injured."),
+    son_dans:variantOf(k)===1?(tr?"Yalnızca finalde: ilk 11'de sakat yoksa +14; en az 1 sakat varsa -8 güç.":"Final only: +14 with no injured starter; -8 with at least 1."):(tr?"Yalnızca finalde: ilk 11'de sakat yoksa +8; en az 1 sakat varsa +2 güç.":"Final only: +8 with no injured starter; +2 with at least 1."),
     kumarbaz:variantOf(k)===1?(tr?"Şimdi +€25M; sonraki 2 turda -€10M öde. Güven -1.":"Now +€25M; pay -€10M for the next 2 rounds. Trust -1."):(tr?"Şimdi +€15M; sonraki 2 turda -€5M öde.":"Now +€15M; pay -€5M for the next 2 rounds."),
     gecici_prim:variantOf(k)===1?(tr?"Bu maç +12 güç; maç sonu %60 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +12 power; 60% injury risk after; next match -2; card expires."):(tr?"Bu maç +6 güç; maç sonu %30 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +6 power; 30% injury risk after; next match -2; card expires."),
     kurban_belli:variantOf(k)===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
@@ -380,8 +392,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     const bv=budget;
     const tr2=LANG==="tr";
     /* debt limit for active chairman */
-    const _dlMap={pinti:-12,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-31};
-    const debtLim=chairman?((_dlMap[chairman.id])||DEBT_LIMIT):DEBT_LIMIT;
+    const debtLim=chairman&&typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT;
     /* background state */
     const nearLimit=debtLim&&bv<0&&(bv<=-18||Math.abs(bv)>=Math.abs(debtLim)*0.62);
     let statusLabel,subText,kasaState;
@@ -457,7 +468,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     const cd=x.cards[k];
     const _basePr=cardPrice(k);
     const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
-    const pr=_memDisc?Math.max(0,Math.ceil(_basePr*0.8)):_basePr;
+    const pr=_memDisc?(_basePr<=0?0:Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.ceil(_basePr*0.8))):_basePr;
     const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateShopPower(k);
     cardVariant[k]=oldV;
     const d=document.createElement("div");
@@ -784,7 +795,7 @@ function buyCard(k,overridePrice){
   if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(pr,"card",{card:k});
   recordDebt();
   cardsBoughtThisTurn++;
-  addCard(k,sv,{silent:true});
+  addCard(k,sv,{silent:true,source:"market",price:pr});
   shopOffers=shopOffers.filter(o=>o!==k);
   delete shopVariants[k];
   sfxStamp();sfxCoin();

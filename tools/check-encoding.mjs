@@ -27,6 +27,7 @@ const IGNORED_DIRS = new Set([
   ".tmp",
   ".vscode",
   "assets/story-icons",
+  "dist",
   "godot-final-sim",
   "outputs",
   "playtest",

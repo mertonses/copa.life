@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260707 */
-const CACHE = "copa-v20260707";
+/* copa.life Service Worker - v20260711-economy3 */
+const CACHE = "copa-v20260711-economy3";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -23,12 +23,12 @@ const PRECACHE = [
   "/src/balance/config.js",
   "/src/balance/power.js",
   "/src/balance/economy.js",
+  "/src/balance/telemetry.js",
   "/src/balance/difficulty.js",
   "/src/balance/rewards.js",
   "/src/cards/cardDefs.js",
   "/src/cards/cardEffects.js",
   "/src/cards/cardBalance.js",
-  "/src/cards/cardCombos.js",
   "/src/cards/cardInventory.js",
   "/src/audio/sfx.js",
   "/src/state/saveLoad.js",
@@ -36,8 +36,15 @@ const PRECACHE = [
   "/src/state/gameState.js",
   "/src/ui/hub.js",
   "/src/sim/finalSim.js",
+  "/favicon.svg",
+  "/favicon-16x16.png",
+  "/favicon-32x32.png",
+  "/favicon-48x48.png",
+  "/apple-touch-icon.png",
+  "/web-app-icon-192.png",
+  "/web-app-icon-512.png",
+  "/site.webmanifest",
   "/assets/mascot.webp",
-  "/assets/mascot.jpg",
   "/assets/icons/cl.png",
   "/assets/icons/copa.png",
   "/assets/flags/TR.png",
