@@ -4,7 +4,7 @@ var CARDDEFS={
  taraftar:{price:4,kind:"power",mode:"contract",
    eff:(s,r)=>variantOf("taraftar")===1?10:5},
  genc:{price:6,kind:"power",mode:"scaling",
-   eff:(s,r)=>Math.min(6,r)},
+   eff:(s,r)=>{const base=Math.min(6,r);return variantOf("genc")===1?Math.min(9,base+3):base;}},
  ch_momentum:{price:4,kind:"power",mode:"scaling",
    eff:(s,r)=>{const b=r<=2?2:r<=4?3:4;return variantOf("ch_momentum")===1?b*2:b;}},
  kontra:{price:4,kind:"power",mode:"instant",
@@ -24,7 +24,7 @@ var CARDDEFS={
  altyapi_plani:{price:4,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.age<=23).length;return Math.min(variantOf("altyapi_plani")===1?6:4,n*(variantOf("altyapi_plani")===1?2:1));}},
  tecrubeli_omurga:{price:6,kind:"squad",mode:"scaling",
-   eff:(s,r)=>{const n=s.filter(p=>p&&p.age>=32).length;return Math.min(variantOf("tecrubeli_omurga")===1?16:8,n*(variantOf("tecrubeli_omurga")===1?4:2));}},
+   eff:(s,r)=>{const n=s.filter(p=>p&&p.age>=32).length;const v=variantOf("tecrubeli_omurga")===1;return Math.min(v?6:4,n*(v?2:1));}},
  yerli_blok:{price:6,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(5,n*(variantOf("yerli_blok")===1?2:1));}},
  /* HÜCUM */

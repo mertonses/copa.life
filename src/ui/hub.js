@@ -335,7 +335,7 @@ function cardContractText(k){
     final_provasi:tr?"Şimdi -€4M; yarıda +3, finalde +5.":"Now -€4M; semi +3, final +5.",
     kupaci_kadro:tr?"Yarı final/final +4; finalde -2 güç.":"Semi/final +4; final -2 power.",
     sogukkanli_penaltici:tr?"Beraberlikte tur geçme şansı +%15; güç +0.":"Draw advance chance +15%; power +0.",
-    son_dans:tr?"Finalde +4 güç.":"Final +4 power.",
+    son_dans:variantOf(k)===1?(tr?"Finalde sakatsız +14, sakatlık varsa -8 güç.":"Final: +14 healthy, -8 if injured."):(tr?"Finalde sakatsız +8, sakatlık varsa +2 güç.":"Final: +8 healthy, +2 if injured."),
     kumarbaz:variantOf(k)===1?(tr?"Şimdi +€25M; sonraki 2 turda -€10M öde. Güven -1.":"Now +€25M; pay -€10M for the next 2 rounds. Trust -1."):(tr?"Şimdi +€15M; sonraki 2 turda -€5M öde.":"Now +€15M; pay -€5M for the next 2 rounds."),
     gecici_prim:variantOf(k)===1?(tr?"Bu maç +12 güç; maç sonu %60 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +12 power; 60% injury risk after; next match -2; card expires."):(tr?"Bu maç +6 güç; maç sonu %30 sakatlık riski; sıradaki maç -2; kart kaybolur.":"This match +6 power; 30% injury risk after; next match -2; card expires."),
     kurban_belli:variantOf(k)===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
