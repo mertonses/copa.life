@@ -158,7 +158,7 @@ function applyRiskCardGain(k){
   return;
  }
 
- /* --- OYUNCU OV BOOST (INSTANT) --- */
+ /* --- PLAYER POWER BOOST (INSTANT) --- */
  if(k==="kaleci_kalesi"){
    const boost=v===1?9:5;
   const s=picksBySlot.filter(Boolean);
@@ -266,7 +266,7 @@ function applyRiskCardGain(k){
   p.used=false;
   p.isSurprise=true;
   bench.push(p);
-  pushFeed("<b>"+L().cards[k].n+"</b> "+(tr?"yedek kulübesine geldi: ":"joins the bench: ")+shortName(p)+" OV"+p.ov,"pres");
+  pushFeed("<b>"+L().cards[k].n+"</b> "+(tr?"yedek kulübesine geldi: ":"joins the bench: ")+shortName(p)+" · "+(tr?"Güç ":"Power ")+p.ov,"pres");
   if(typeof renderHub==="function")renderHub();
   return;
  }

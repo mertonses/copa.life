@@ -226,7 +226,7 @@ function displayCardTerms(txt){
     .replace(/\bGOLDEN\b/g,"COMMON")
     .replace(/\bALTIN\b/g,"COMMON")
     .replace(/\bKARA\b/g,"DARK")
-    // Historical copy still contains a few OVR references. The product-facing
+    // Historical copy can contain legacy rating terms. The product-facing
     // label is always Güç / Power, while the underlying numeric stat stays intact.
     .replace(/\bOVR\b/gi,LANG==="tr"?"Güç":"Power")
     .replace(/\bOV\b/gi,LANG==="tr"?"Güç":"Power");

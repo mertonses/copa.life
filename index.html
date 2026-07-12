@@ -40,7 +40,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="rating" content="general">
 <link rel="manifest" href="manifest.json">
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-playback2").catch(()=>{});</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-playback3").catch(()=>{});</script>
 
 <!-- Structured data -->
 <script type="application/ld+json">
@@ -266,7 +266,7 @@
 <script src="src/data/players_italy.js?v=20260711-stability1"></script>
 <script src="src/data/players_germany.js?v=20260711-stability1"></script>
 <script src="src/data/kits.js?v=20260711-stability1"></script>
-<script src="src/data/i18n.js?v=20260712d"></script>
+<script src="src/data/i18n.js?v=20260713-playback3"></script>
 <script src="src/core/squad.js?v=20260711-economy3"></script>
 <script src="src/game/generate.js?v=20260711-economy3"></script>
 <script src="src/balance/config.js?v=20260712d"></script>
@@ -277,7 +277,7 @@
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
 <script src="src/balance/telemetry.js?v=20260711-economy3"></script>
-<script src="src/cards/cardEffects.js?v=20260713-playback2"></script>
+<script src="src/cards/cardEffects.js?v=20260713-playback3"></script>
 <script src="src/balance/power.js?v=20260712e"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260711-stability1"></script>
@@ -1363,7 +1363,7 @@ function finishRoundReward(kind,extraText){
   if(shopBlocked>0){shopBlocked--;if(shopBlocked>0)pushFeed(" "+(LANG==="tr"?"Pazar hâlâ kapalı":"Market still closed"),"lose");}
   if(presidentBlocked>0){presidentBlocked--;}
   if(cardPriceModTurns>0){cardPriceModTurns--;if(cardPriceModTurns<=0)cardPriceMod=1.0;}
-  /* Eski Kurt OV penalty */
+  /* Eski Kurt power penalty */
   if(eskiKurtSlotIdx>=0&&picksBySlot[eskiKurtSlotIdx]){const _p=picksBySlot[eskiKurtSlotIdx];_p.ov=Math.max(55,_p.ov-eskiKurtPenalty);_p.eff=effOf(_p);renderRoundel("h"+eskiKurtSlotIdx,_p);pushFeed(" <b>"+shortName(_p)+"</b> "+(LANG==="tr"?"eski kurt bedeli: -"+eskiKurtPenalty+" puan":"veteran, -"+eskiKurtPenalty+" rating"),"lose");eskiKurtSlotIdx=-1;eskiKurtPenalty=0;}
   /* Kurban Belli deferred injury */
   if(kurbanScheduled&&kurbanScheduled.count>0){const _kinj=applyMultiInjury(kurbanScheduled.count);pushFeed(" "+(LANG==="tr"?"Kurban bedeli: "+_kinj.length+" oyuncu sakatlandı":"Sacrifice price: "+_kinj.length+" player(s) injured"),"lose");kurbanScheduled={count:0,turns:0};}
@@ -1382,7 +1382,7 @@ function finishRoundReward(kind,extraText){
       lp.turnsLeft=1;lp.slotIdx=weakIdx;lp.displaced=displaced;
       loanPlayer=lp;lp.bench=false;
       picksBySlot[weakIdx]=lp;
-      pushFeed(" "+(LANG==="tr"?"<b>"+shortName(lp)+"</b> (OV"+lp.ov+") kiralık kadroya katıldı":"<b>"+shortName(lp)+"</b> (OV"+lp.ov+") joined on loan"),"buy");
+      pushFeed(" "+(LANG==="tr"?"<b>"+shortName(lp)+"</b> (Güç "+lp.ov+") kiralık kadroya katıldı":"<b>"+shortName(lp)+"</b> (Power "+lp.ov+") joined on loan"),"buy");
       pushFeed("⬇️ "+(LANG==="tr"?"<b>"+shortName(displaced)+"</b> geçici devre dışı — 1 tur":"<b>"+shortName(displaced)+"</b> temporarily benched — 1 round"),"lose");
       rewardText=(LANG==="tr"?"Kiralık: "+shortName(lp)+" geldi, "+shortName(displaced)+" çıktı":"Loan: "+shortName(lp)+" in, "+shortName(displaced)+" out");
     }else{earn(prize,"earned");rewardText=L().prize(prize);}
@@ -1405,7 +1405,7 @@ function finishRoundReward(kind,extraText){
   const inj=applyRandomInjury(injuryRiskFor(perf.power));if(inj){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"maçtan sonra sakatlandı":"was injured after the match"),"lose");}
   if(chairman.id==="pinti"&&budget>=0&&round<6){pintiSavings=Math.min(12,pintiSavings+2);pushFeed("🪙 "+(LANG==="tr"?"Pinti birikimi +€2M (toplam €"+pintiSavings+"M)":"Miser savings +€2M (total €"+pintiSavings+"M)"),"buy");}
   /* Torpilci: yeğen gelişimi */
-  if(chairman.id==="torpilci"){picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){p.ov++;p.eff=effOf(p);renderRoundel("h"+i,p);pushFeed(`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><path d="M17 6.1h3v12h-3"/><path d="M13 6h3v7"/><path d="M9 6h3v10"/><path d="M5 10h3v6"/></svg> <b>`+shortName(p)+"</b> "+(LANG==="tr"?"yeğen gelişiyor (+1 OV)":"nephew developing (+1 OV)"),"pres");}});}
+  if(chairman.id==="torpilci"){picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){p.ov++;p.eff=effOf(p);renderRoundel("h"+i,p);pushFeed(`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><path d="M17 6.1h3v12h-3"/><path d="M13 6h3v7"/><path d="M9 6h3v10"/><path d="M5 10h3v6"/></svg> <b>`+shortName(p)+"</b> "+(LANG==="tr"?"yeğen gelişiyor (+1 Güç)":"nephew developing (+1 Power)"),"pres");}});}
   /* Sansasyoncu spotlight sakatlık kontrolü */
   if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0){if(inj&&picksBySlot[sansSpotlightIdx]===inj){sansMediaPressure=1;pushFeed(" "+(LANG==="tr"?"Spotlight oyuncusu sakatlandı — sonraki tur pazar pahalı":"Spotlight player injured — market inflated next round"),"lose");}sansSpotlightIdx=-1;}
   devWonderkids();round++;enterHub();
@@ -2298,7 +2298,7 @@ function _renderPenaltyModal(){
   const kickNo=Math.max(s.homeShots.length,s.awayShots.length)+(done?0:1);
   const roundLbl=(sudden||s.sudden)?(tr?"ANİ ÖLÜM":"SUDDEN DEATH"):(kickNo+"/5");
   const ctxLbl=(finalMode?(tr?"FİNAL · ":"FINAL · "):"")+(tr?"PENALTILAR":"PENALTIES");
-  /* Duel cards with keeper/shooter OV */
+  /* Duel cards with keeper/shooter power */
   const shooterOV=Math.round(_penPower(shooter,75)),keeperOV=Math.round(_penPower(keeper,75));
   const ovChip=v=>"<b class=\"pen-ov\" title=\""+(tr?"Güç":"Rating")+"\">"+v+"</b>";
   /* Hint under the shooter card: your accuracy when shooting, opponent's tendency when keeping */
