@@ -1055,6 +1055,9 @@ function _mkRenderer(canvas,W,H){
    buildSim — main entry point
 ═══════════════════════════════════════════════════════ */
 function buildSim(myPow, oppPow) {
+  // A new match must never inherit the previous final's report image.
+  window._heatmapImg=null;
+  window._penaltyModalReady=false;
   const isTR=(typeof LANG!=="undefined"?LANG:"tr")==="tr";
   const myName=(typeof teamName!=="undefined"&&teamName)?teamName:"US";
   const oppName=(typeof opponent!=="undefined"&&opponent&&opponent.name)?opponent.name:"RAKİP";
@@ -1318,7 +1321,7 @@ function buildSim(myPow, oppPow) {
 
   /* match state */
   const score=[0,0];
-  const stats={shots:[0,0],saves:[0,0],corners:[0,0],yellows:[0,0],reds:[0,0],possession:[0,0],danger:[0,0],blocked:[0,0]};
+  const stats={shots:[0,0],saves:[0,0],corners:[0,0],yellows:[0,0],reds:[0,0],possession:[0,0],danger:[0,0],blocked:[0,0],xg:[0,0]};
   const goalEvents=[];
   const audit={
     wide:0,leftWide:0,rightWide:0,central:0,recycle:0,longBall:0,counter:0,
@@ -1507,9 +1510,7 @@ function buildSim(myPow, oppPow) {
     const dangerA=Math.max(stats.danger[0],score[0]),dangerB=Math.max(stats.danger[1],score[1]);
     _dom("statDanger",dangerA+"-"+dangerB);
     _dom("statCorner",stats.corners[0]+"-"+stats.corners[1]);
-    const cardsA=stats.reds[0]?stats.yellows[0]+"+"+stats.reds[0]+"K":stats.yellows[0];
-    const cardsB=stats.reds[1]?stats.yellows[1]+"+"+stats.reds[1]+"K":stats.yellows[1];
-    _dom("statYellow",cardsA+"-"+cardsB);
+    _dom("statXg",stats.xg[0].toFixed(1)+"-"+stats.xg[1].toFixed(1));
     const tot=stats.possession[0]+stats.possession[1]+1;
     const pct=Math.round(stats.possession[0]/tot*100);
     _dom("statPoss",pct+"–"+(100-pct));
@@ -1579,7 +1580,25 @@ function buildSim(myPow, oppPow) {
   }
 
   /* shot resolution */
-  function handleShot(shooter, forcedResult, alreadyCounted){
+  function shotExpectedGoals(shooter,deliveryType){
+    const goalX=_PW/2,goalY=shooter.teamId===0?_PH:0;
+    const distance=Math.hypot(shooter.x-goalX,shooter.y-goalY);
+    const centrality=1-Math.min(1,Math.abs(shooter.x-goalX)/(_PW*.5));
+    const inBox=_inBox(shooter.x,shooter.y,shooter.teamId===0?1:0);
+    const nearbyDefenders=(shooter.teamId===0?teamB:teamA).filter(p=>!p.sentOff&&p.role!=="GK"&&p.dist(shooter.x,shooter.y)<7).length;
+    const finish=_pseudoAttrs(shooter).finishing/100;
+    const sequence=deliveryType||(tacticalSeq&&tacticalSeq.team===shooter.teamId?tacticalSeq.type:"");
+    let value=.025+centrality*.075+finish*.055;
+    value+=Math.max(0,.18-(distance/_PH)*.18);
+    if(inBox)value+=.07;
+    if(sequence==="CUTBACK")value+=.12;
+    else if(sequence==="CROSS")value+=.045;
+    else if(sequence==="THROUGH_BALL"||sequence==="LONG_BALL")value+=.035;
+    value-=nearbyDefenders*.025;
+    return _simClamp(value,.02,.58);
+  }
+
+  function handleShot(shooter, forcedResult, alreadyCounted, xgContext){
     if(!shooter)return;
     if(!alreadyCounted){
       stats.shots[shooter.teamId]++;
@@ -1591,6 +1610,7 @@ function buildSim(myPow, oppPow) {
     if(!alreadyCounted){
       effects.spawn('SHOT',shooter.x,shooter.y,goalX,goalY,'#fbbf2466',0.55);
       audio.shot();
+      stats.xg[shooter.teamId]+=shotExpectedGoals(shooter,xgContext);
     }
     ball._shotResult=null;
     ball._shooter=null;
@@ -1725,7 +1745,7 @@ function buildSim(myPow, oppPow) {
             const chanceP=_simClamp((deliveryType==='CUTBACK'?0.56:0.46)+(prof?(deliveryType==='CUTBACK'?prof.cutback_quality:prof.cross_quality)*0.18:0),0.22,0.76);
             if(rng.bool(chanceP)){
               ball._deliveryType=null;
-              handleShot(p,null,false);
+              handleShot(p,null,false,deliveryType);
             } else {
               _registerDanger(p.teamId,deliveryType==='CUTBACK'?(isTR?"Cutback savunmadan döndü":"Cutback blocked"):(isTR?"Orta savunmadan sekti":"Cross cleared"),deliveryType==='CUTBACK'?'↩':'↗');
               ball._deliveryType=null;
@@ -1766,6 +1786,7 @@ function buildSim(myPow, oppPow) {
       const jitter=rng.rng(-5,5);
       const gk=tid===0?teamB.find(p=>p.role==='GK'):teamA.find(p=>p.role==='GK');
       stats.shots[tid]++;
+      stats.xg[tid]+=shotExpectedGoals(carrier,"OPEN_PLAY");
       shotCooldown[tid]=SHOT_COOLDOWN;
       ball._shooter=carrier;
       ball._shotResult=_resolveShot(carrier,gk,rng);
@@ -2337,6 +2358,17 @@ function buildSim(myPow, oppPow) {
       `<div class="frrow"><span>${isTR?"Disiplin":"Discipline"}</span><b>${disciplineNote}</b></div>`;
   }
 
+  function captureFinalHeatmap(){
+    [...teamA,...teamB].forEach(p=>{
+      const gy=Math.min(HGH-1,Math.floor(p.hy/_PH*HGH));
+      const gx=Math.min(HGW-1,Math.floor(p.hx/_PW*HGW));
+      if(p.role!=='GK')heatGrid[gy*HGW+gx]+=0.5;
+    });
+    renderer.clear();renderer.drawPitch();renderer.drawPlayers([...teamA,...teamB],ball);renderer.drawBall(ball);
+    drawHeatmap(rawCtx,W,H,heatGrid,HGW,HGH);
+    try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e){}
+  }
+
   function endMatch(){
     if(gameEnded)return;gameEnded=true;
     window._finalPenaltyPending=false;
@@ -2344,12 +2376,7 @@ function buildSim(myPow, oppPow) {
     window.openCopaFinalPenalties=null;
     if(animId){cancelAnimationFrame(animId);animId=null;}
     audio.whistle();setTimeout(()=>audio.stop(),1000);
-    // final heatmap
-    [...teamA,...teamB].forEach(p=>{const gy=Math.min(HGH-1,Math.floor(p.hy/_PH*HGH));const gx=Math.min(HGW-1,Math.floor(p.hx/_PW*HGW));if(p.role!=='GK')heatGrid[gy*HGW+gx]+=0.5;});
-    // draw final frame with heatmap
-    renderer.clear();renderer.drawPitch();renderer.drawPlayers([...teamA,...teamB],ball);renderer.drawBall(ball);
-    drawHeatmap(rawCtx,W,H,heatGrid,HGW,HGH);
-    try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e2){}
+    captureFinalHeatmap();
     // globals
     const won=score[0]>score[1];const sc=score[0]+"–"+score[1];
     const aScorers=goalEvents.filter(e=>e.side==='A').map(e=>e.scorer).filter(Boolean);
@@ -2357,11 +2384,11 @@ function buildSim(myPow, oppPow) {
     if(!window.motm&&typeof picksBySlot!=="undefined"&&picksBySlot){const out=(picksBySlot).filter(p=>p&&p.pos!=='GK');const pp=out[Math.floor(Math.random()*out.length)];window.motm=pp?pp.name.split(' ').pop():'?';}
     if(!window.motm)window.motm='?';
     window.keyMoment=goalEvents[0]?.scorer?(goalEvents[0].scorer+" "+goalEvents[0].minute+"'"):sc;
-    window.penaltyNote='';window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
+    window.penaltyNote='';window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.xgA=stats.xg[0];window.xgB=stats.xg[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
     const isTR2=isTR;const kM=window.keyMoment||"-";
     const fw=["Kupa sandığa girdi.","Rüya sezon!","Son düdüğe kadar didindi.","Bu takım birlikte büyüdü."];const lw=["Finale geldi, yetmedi.","Son adımda tökezledi.","Sıfırdan başla.","Bir sonraki run."];
     const ni=Math.floor(Math.random()*fw.length);
-    window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>`;
+    window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>xG</span><b>${stats.xg[0].toFixed(1)}-${stats.xg[1].toFixed(1)}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>`;
     window.finalSimAudit=audit; // audit kept for tuning/telemetry; no longer rendered in the report
     calcRatings();
     _dom("simScore",sc);
@@ -2396,8 +2423,8 @@ function buildSim(myPow, oppPow) {
       try{
         const fn=_findPenaltyShootoutHandler();
         if(fn){
-          fn("final");
-          if(!(window._penState&&window._penState.mode==="final")){
+          const rendered=fn("final");
+          if(rendered===false||!window._penaltyModalReady||!(window._penState&&window._penState.mode==="final")){
             throw new Error("Penalty shootout handler returned without final penalty state");
           }
           window._finalPenaltyPending=false;
@@ -2425,9 +2452,10 @@ function buildSim(myPow, oppPow) {
     if(gameEnded)return;gameEnded=true;
     if(animId){cancelAnimationFrame(animId);animId=null;}
     audio.whistle();setTimeout(()=>audio.stop(),800);
-    renderer.clear();renderer.drawPitch();renderer.drawPlayers([...teamA,...teamB],ball);renderer.drawBall(ball);
+    captureFinalHeatmap();
     const sc=score[0]+"–"+score[1];
     window._finalPenaltyPending=true;
+    window._penaltyModalReady=false;
     window._openFinalPenaltyShootout=(manual)=>openFinalPenaltyShootout(sc,0,!!manual);
     window.openCopaFinalPenalties=(manual)=>{openFinalPenaltyShootout(sc,0,!!manual);return true;};
     window._finalPenaltyScore=sc;
@@ -2435,7 +2463,7 @@ function buildSim(myPow, oppPow) {
     window._finalAuditHTML="";
     window.keyMoment=isTR?"Altın golde gol çıkmadı":"No golden goal";
     window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";
-    window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
+    window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.xgA=stats.xg[0];window.xgB=stats.xg[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
     calcRatings();
     _dom("simState",isTR?"PENALTILAR":"PENALTIES");
     const stateEl=document.getElementById("simState");if(stateEl)stateEl.classList.remove("is-golden");

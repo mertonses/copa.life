@@ -34,7 +34,7 @@ kanat_akini:{price:6,kind:"power",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.pos==="ST").length;return Math.min(variantOf("cift_forvet")===1?8:4,n*(variantOf("cift_forvet")===1?4:2));}},
  /* FİNAL */
  derbi:{price:10,kind:"final",mode:"scaling",
-   eff:(s,r)=>{const v=variantOf("derbi");const g=v===1?[4,7,10]:[2,4,8];return r>=6?g[2]:r>=5?g[1]:r>=4?g[0]:0;}},
+   eff:(s,r)=>{const v=variantOf("derbi");const g=v===1?[4,7,6]:[2,4,8];return r>=6?g[2]:r>=5?g[1]:r>=4?g[0]:0;}},
  final_provasi:{price:6,kind:"final",mode:"scaling",
    eff:(s,r)=>r>=6?(variantOf("final_provasi")===1?9:5):0},
  son_dans:{price:6,kind:"final",mode:"scaling",

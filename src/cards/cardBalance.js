@@ -1,5 +1,5 @@
 /* Kart fiyatlari ve variant dengesi. */
-/* DARK daha yuksek tavan karsiliginda daha pahali ve daha risklidir. */
+/* DARK daha yuksek etki karsiliginda daha pahali ve daha risklidir. */
 var VARIANT_PRICE_MOD=[1.0,1.25];
 
 function weightedVariant(){

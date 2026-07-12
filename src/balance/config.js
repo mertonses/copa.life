@@ -1,5 +1,5 @@
 /* Oyun genel sabitleri ve ortak sayac yardimcisi. */
-var BUDGET=30,DEBT_LIMIT=-28,MAX_CARD_COPIES=4,FINAL_DEBT_CAP=30,CARD_PRICE_FLOOR=2,FINAL_CARD_POWER_CAP=18;
+var BUDGET=30,DEBT_LIMIT=-28,FINAL_DEBT_CAP=30,CARD_PRICE_FLOOR=2;
 /* İletişim formu — web3forms.com'dan ücretsiz key al, buraya yapıştır */
 var CONTACT_FORM_KEY="2eb11e4e-335a-401e-b2e7-104c07ecd4a6";
 function cnt(s,arr){return s.filter(p=>arr.includes(p.pos)).length;}
@@ -20,7 +20,7 @@ function addFinalPenalty(amount,source){
  const overflow=Math.max(0,amount-added);
  finalPenalty=before+added;
  let cash=0;
- /* Tavandan sonraki risk bedavaya donusmez: guc borcu yerine kasa ve guven baskisi yaratir. */
+ /* Final cezası 30'da durur; taşan risk bedavaya dönüşmez. */
  if(overflow>0){
   cash=Math.min(12,overflow*2);
   spend(cash,"spent");

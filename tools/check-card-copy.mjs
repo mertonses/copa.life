@@ -3,6 +3,7 @@ import fs from "node:fs";
 const hub = fs.readFileSync("src/ui/hub.js", "utf8");
 const i18n = fs.readFileSync("src/data/i18n.js", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
+const cardCss = fs.readFileSync("src/styles/cards.css", "utf8");
 const cardReportTool = fs.existsSync("tools/card-balance-report.mjs")
   ? fs.readFileSync("tools/card-balance-report.mjs", "utf8")
   : "";
@@ -60,6 +61,13 @@ const checks = [
   {
     name: "how-to explains only COMMON and DARK",
     pass: html.includes('_howtoTier("COMMON")') && html.includes('_howtoTier("DARK")'),
+  },
+  {
+    name: "DARK market cards keep the black-white identity and readable price",
+    pass:
+      /#hub \.cardtile\.is-dark\{[^}]*background:var\(--color-ink\)/s.test(cardCss) &&
+      /#hub \.cardtile\.is-dark \.ct-name,[\s\S]*color:#fff/s.test(cardCss) &&
+      /#hub \.cardtile\.is-dark \.ct-head-price,[\s\S]*background:#fff;[\s\S]*color:var\(--color-ink\)/s.test(cardCss),
   },
   {
     name: "forbidden card tier terms are absent from visible copy",

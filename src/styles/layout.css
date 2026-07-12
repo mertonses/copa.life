@@ -3460,7 +3460,6 @@ img,svg,canvas{max-width:100%}
 @media(min-width:700px){
   #finalRow{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #finalRow>.finalreport:not(.hidden){grid-column:1!important}
-  #finalRow>.heattile:not(.hidden){grid-column:2}
 }
 
 /* ===== Final report: heat map as its own tile ===== */
@@ -6406,3 +6405,23 @@ body{
   .pen-modal.is-sudden .pen-goal,.pen-tension,.pen-crowd::before,.pen-streak{animation:none!important}
   .pen-modal .pen-goal.goal.ball-L .z-L,.pen-modal .pen-goal.goal.ball-C .z-C,.pen-modal .pen-goal.goal.ball-R .z-R{animation:none!important}
 }
+
+/* Final heatmap belongs to the final report, not a detached result tile. */
+.finalreport .final-heatmap{border-top:1px solid var(--border-subtle);padding:10px;background:color-mix(in srgb,var(--surface-muted) 42%,var(--surface-elevated))}
+.finalreport .final-heatmap-title{color:var(--color-slate);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.4px;text-align:center}
+.finalreport .final-heatmap img{display:block;width:min(100%,330px);margin:8px auto 0;border:1px solid var(--border-subtle);border-radius:6px}
+.finalreport .final-heatmap p{margin:7px 0 0;color:var(--color-slate);font-size:10px;line-height:1.4;text-align:center}
+
+/* Keeper SVG: a readable goalkeeper with face, shirt, arms and gloves. */
+.pen-modal .pen-goal .pen-keeper::before{display:none}
+.pen-modal .pen-goal .pen-keeper{overflow:visible;filter:drop-shadow(0 2px 3px rgba(12,18,19,.5))}
+.pen-modal .pen-goal .pen-keeper-svg{display:block;width:100%;height:100%;overflow:visible}
+.pen-keeper-svg .pen-gk-head{fill:#f2c7a5;stroke:#0c1213;stroke-width:2}
+.pen-keeper-svg .pen-gk-hair{fill:#0c1213}
+.pen-keeper-svg .pen-gk-shirt{fill:#244b5a;stroke:#e6eeef;stroke-width:2}
+.pen-keeper-svg .pen-gk-arm,.pen-keeper-svg .pen-gk-leg,.pen-keeper-svg .pen-gk-boot{fill:none;stroke:#e6eeef;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.pen-keeper-svg .pen-gk-glove{fill:#f8fafc;stroke:#0c1213;stroke-width:1.5}
+.pen-keeper-svg .pen-gk-shorts{fill:#0c1213;stroke:#e6eeef;stroke-width:1.5}
+.pen-modal.is-save .pen-keeper-svg .pen-gk-shirt{fill:#429a73}
+.pen-modal.is-save .pen-keeper-svg .pen-gk-glove{fill:#fff}
+@media(max-width:480px){.finalreport .final-heatmap{padding:8px}.finalreport .final-heatmap img{width:100%}}

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 
 const sim = fs.readFileSync("src/sim/finalSim.js", "utf8");
+const index = fs.readFileSync("index.html", "utf8");
 
 const wideBiasMatch = sim.match(/hasWingCard\?0\.(\d+):0\.(\d+)/);
 const yellowRateMatch = sim.match(/roll<0\.(\d+)&&disciplineCooldown<=0/);
@@ -53,6 +54,26 @@ const checks = [
     name: "golden goal falls through to penalties",
     pass: /goToFinalPenalties\(\)/.test(sim) && /goldenGoalMode=true/.test(sim),
   },
+  {
+    name: "penalty modal has a concrete goalkeeper visual",
+    pass: /const _PEN_GK_SVG=/.test(index) && /class=\"pen-keeper-svg\"/.test(index),
+  },
+  {
+    name: "final penalty transition requires a rendered modal",
+    pass: /window\._penaltyModalReady=true/.test(index) && /rendered===false\|\|!window\._penaltyModalReady/.test(sim),
+  },
+  {
+    name: "final match HUD reports xG rather than an unnamed card stat",
+    pass: /xg:\[0,0\]/.test(sim) && /shotExpectedGoals\(shooter,deliveryType\)/.test(sim) && /_dom\("statXg",stats\.xg/.test(sim) && /id=\"statXg\"/.test(index),
+  },
+  {
+    name: "final report includes position-based xG in regular time and penalties",
+    pass: /<span>xG<\/span>/.test(sim) && /const xgA=Number\(window\.xgA\|\|0\)\.toFixed\(1\)/.test(index),
+  },
+  {
+    name: "Turkish sudden-death copy uses ANİ ÖLÜM",
+    pass: /ANİ ÖLÜM/.test(index) && !/ANI ÖLÜM/.test(index),
+  },
 ];
 
 let failed = false;
@@ -64,4 +85,4 @@ for (const check of checks) {
 }
 
 if (failed) process.exit(1);
-console.log("Final.sim OK: pacing, discipline, wide play, and final transition guards are present.");
+console.log("Final.sim OK: pacing, discipline, wide play, xG, and final transition guards are present.");

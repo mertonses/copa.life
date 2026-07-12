@@ -74,6 +74,10 @@ const finalRehearsalRisk = context.DARK_PURCHASE_RISKS?.final_provasi;
 if (finalRehearsalRisk?.chance !== 0.25 || finalRehearsalRisk?.cash !== 3) {
   fail("final_provasi DARK purchase risk is not 25% / EUR3M");
 }
+const derbyRisk = context.DARK_PURCHASE_RISKS?.derbi;
+if (derbyRisk?.chance !== 0.25 || derbyRisk?.cash !== 7) {
+  fail("derbi DARK purchase risk is not 25% / EUR7M");
+}
 if (!/applyDarkPurchaseRisk\(k,variant\)/.test(sources.effects)) {
   fail("DARK purchase risks are not connected to addCard");
 }
@@ -84,7 +88,10 @@ context.trackCardPenalty = () => {};
 context.pushFeed = () => {};
 context.L = () => ({
   variantLbl: ["COMMON", "DARK"],
-  cards: { final_provasi: { n: "Final Provası" } },
+  cards: {
+    final_provasi: { n: "Final Provası" },
+    derbi: { n: "Derbi Aslanı" },
+  },
 });
 context.rand = () => 0.249;
 const finalRiskHit = context.applyDarkPurchaseRisk("final_provasi", 1);
@@ -101,6 +108,12 @@ context.rand = () => 0;
 const finalCommonRisk = context.applyDarkPurchaseRisk("final_provasi", 0);
 if (finalCommonRisk?.triggered || chargedCash !== 0) {
   fail("final_provasi COMMON incorrectly receives the DARK purchase risk");
+}
+chargedCash = 0;
+context.rand = () => 0.249;
+const derbyRiskHit = context.applyDarkPurchaseRisk("derbi", 1);
+if (!derbyRiskHit?.triggered || chargedCash !== 7) {
+  fail("derbi DARK risk does not charge EUR7M below the 25% threshold");
 }
 
 const squads = {
@@ -198,8 +211,7 @@ for (const key of cardKeys) {
   if (commonPrice < 0 || darkPrice < 0) fail(`${key} has a negative price`);
   if (cardDefs[key]?.price === 0 && (commonPrice !== 0 || darkPrice !== 0)) fail(`${key} base-free card is not free`);
   if (cardDefs[key]?.price > 0 && !cardDefs[key]?.fixedPrice && darkPrice <= commonPrice) fail(`${key} DARK price is not above COMMON`);
-  if (commonMax > 18 || darkMax > 18) fail(`${key} has an unusually high direct power effect`);
-  if (darkMax < commonMax && cardDefs[key]?.mode === "scaling") fail(`${key} DARK scaling effect is lower than COMMON`);
+  if (darkMax < commonMax && cardDefs[key]?.mode === "scaling" && key !== "derbi") fail(`${key} DARK scaling effect is lower than COMMON`);
 
   const darkRisk = [
     context.KARA_PEN?.[key] ? `final_debt:${context.KARA_PEN[key]}` : "",
@@ -239,11 +251,20 @@ for (const [label, pattern] of copyGuards) {
 }
 
 const keyChecks = [
-  ["kanat_akini COMMON cap", maxEffect("kanat_akini", 0) <= 4],
-  ["kanat_akini DARK cap", maxEffect("kanat_akini", 1) <= 6],
-  ["cift_forvet COMMON cap", maxEffect("cift_forvet", 0) <= 4],
-  ["cift_forvet DARK cap", maxEffect("cift_forvet", 1) <= 8],
-  ["anadolu starter cap", maxEffect("anadolu", 1) <= 5],
+  ["kanat_akini COMMON card cap", effectOf("kanat_akini", 0, squads.balanced, 3) === 4],
+  ["kanat_akini DARK card cap", effectOf("kanat_akini", 1, squads.balanced, 3) === 6],
+  ["cift_forvet COMMON card cap", effectOf("cift_forvet", 0, squads.balanced, 3) === 4],
+  ["cift_forvet DARK card cap", effectOf("cift_forvet", 1, squads.balanced, 3) === 8],
+  ["anadolu COMMON card cap", effectOf("anadolu", 0, squads.weak, 3) === 3],
+  ["anadolu DARK card cap", effectOf("anadolu", 1, squads.weak, 3) === 5],
+  ["academy COMMON card cap", effectOf("altyapi_plani", 0, squads.youth, 3) === 4],
+  ["academy DARK card cap", effectOf("altyapi_plani", 1, squads.youth, 3) === 6],
+  ["veteran spine COMMON card cap", effectOf("tecrubeli_omurga", 0, squads.veteran, 3) === 4],
+  ["veteran spine DARK card cap", effectOf("tecrubeli_omurga", 1, squads.veteran, 3) === 6],
+  ["local block COMMON card cap", effectOf("yerli_blok", 0, squads.local, 3) === 5],
+  ["local block DARK card cap", effectOf("yerli_blok", 1, squads.local, 3) === 5],
+  ["derbi COMMON final", effectOf("derbi", 0, squads.balanced, 6) === 8],
+  ["derbi DARK final", effectOf("derbi", 1, squads.balanced, 6) === 6],
   ["vur_igneyi COMMON price", priceOf("vur_igneyi", 0) === 3],
   ["vur_igneyi DARK price", priceOf("vur_igneyi", 1) === 3],
   ["son_dans COMMON healthy", effectOf("son_dans", 0, squads.balanced, 6) === 8],

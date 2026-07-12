@@ -1,6 +1,6 @@
-/* Takim gucu, kimya ve bonus tavan hesaplari. */
+/* Takim gucu, kimya ve kart bonusu hesaplari. */
 /* Kimya: aynı kulüp / uyruk (yerli) / genç çekirdek / veteran pozitif; dağınık kadro negatif.
-   Tavan +5 (koşullu), taban -3. min-cap yükseltildi ki "yerli blok / aynı kulüp" build'leri anlamlansın. */
+   Kimya aralığı -5 ile +5'tir. Kartların kendi tavanları korunur; final kartı toplamı ayrıca tavanlanmaz. */
 function chemBonus(s){
  let total=0,parts=[],byc={};
  s.forEach(p=>{if(p.club)byc[p.club]=(byc[p.club]||0)+1;});
@@ -18,14 +18,25 @@ function chemBonus(s){
   const pen=distinctClubs>=filled?-2:-1;total+=pen;
   parts.push(["⚠",(L().chem&&L().chem.scattered?L().chem.scattered:(LANG==="tr"?"Dağınık kadro":"Scattered squad"))+" ("+distinctClubs+")",pen]);
  }
- return {total:Math.max(-3,Math.min(5,total)),parts};
+ /* Ortak yerel çekirdek yoksa saha içi iletişim zayıflar. */
+ if(filled>=9&&tn<=2){
+  total-=2;
+  parts.push(["TR",(L().chem&&L().chem.localGap?L().chem.localGap:(LANG==="tr"?"Yerli çekirdek yok":"No local core"))+" ("+tn+")",-2]);
+ }
+ /* Tecrübeli oyuncu veya lider özelliği olmayan genç kadro baskıda dağılır. */
+ const hasLeader=s.some(p=>p&&(p.trait==="lider"||p.age>=29));
+ if(filled>=9&&!hasLeader){
+  total-=1;
+  parts.push(["VET",L().chem&&L().chem.leaderGap?L().chem.leaderGap:(LANG==="tr"?"Saha içi lider yok":"No on-pitch leader"),-1]);
+ }
+ return {total:Math.max(-5,Math.min(5,total)),parts};
 }
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
  let cardBonus=0,finalCardRaw=0;
  cards.forEach(k=>{const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
- const finalCardApplied=r>=6?Math.max(-FINAL_CARD_POWER_CAP,Math.min(FINAL_CARD_POWER_CAP,finalCardRaw)):0;
+ const finalCardApplied=r>=6?finalCardRaw:0;
  cardBonus+=finalCardApplied;
  const matchup=matchupBonus;
  const risk=riskPowerMod+tempPrimePenalty+shortCampPenalty-(r>=6?finalPenalty:0);
@@ -34,8 +45,8 @@ function powerBreakdown(r){
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
  const cap=typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null;
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
- const cappedRaw=styleBonus+cardBonus+matchup+risk+trait;
- const rawBonus=cappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-3,Math.min(5,chemBonus(s).total));
- return {avg,styleBonus,cardBonus,finalCardRaw,finalCardApplied,finalCardOverflow:finalCardRaw-finalCardApplied,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ const uncappedRaw=styleBonus+cardBonus+matchup+risk+trait;
+ const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total));
+ return {avg,styleBonus,cardBonus,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

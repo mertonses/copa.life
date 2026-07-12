@@ -103,7 +103,7 @@ function noteFor(key, common, dark) {
   if (copy.includes("risk") || copy.includes("ceza") || copy.includes("sakat")) notes.push("risk içerir");
   if (copy.includes("final")) notes.push("final etkisi var");
   if (dark.max >= Math.max(8, common.max * 1.8) && dark.price <= common.price + 2) notes.push("DARK yüksek kaldıraç");
-  if (Math.max(common.max, dark.max) >= 12 && Math.min(common.price, dark.price) <= 6) notes.push("yüksek tavan / ucuz");
+  if (Math.max(common.max, dark.max) >= 12 && Math.min(common.price, dark.price) <= 6) notes.push("yüksek kaldıraç / ucuz");
   if (Math.max(common.max, dark.max) <= 2 && Math.min(common.price, dark.price) >= 6) notes.push("düşük görünen güç etkisi");
 
   return [...new Set(notes)].join(", ") || "düşük karmaşıklık";

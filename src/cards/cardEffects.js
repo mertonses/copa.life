@@ -14,7 +14,7 @@ var KARA_PEN={
  sahte_evrak:10,
  doping:6,
  gec_gec:3,
- kasiga_para:2,derbi:4,
+ kasiga_para:2,
  /* DARK now carries real final risk on cards that previously had free upside */
  kaleci_kalesi:8,cift_forvet:4
 };
@@ -24,7 +24,8 @@ var DARK_PURCHASE_RISKS={
  anadolu:{chance:0.20,cash:5},
  final_provasi:{chance:0.25,cash:3},
  kriz:{chance:0.20,cash:5},
- bu_adam:{chance:0.25,cash:6}
+ bu_adam:{chance:0.25,cash:6},
+ derbi:{chance:0.25,cash:7}
 };
 
 function cardEff(k,s,r){
@@ -345,9 +346,9 @@ function applyKriz(){
  if(!krizActive)return;
  krizActive=false;
  const v=krizVariant;krizVariant=0;
- /* Sigorta riski tamamen silmez: cezanın en fazla yarısını ve sabit tavanı telafi eder. */
- const relief=v===1?8:6;
- const cleared=Math.min(finalPenalty,relief,Math.ceil(finalPenalty*0.5));
+ /* Sigorta riski tamamen silmez; sabit tavan yerine toplam cezanın bir bölümünü telafi eder. */
+ const rate=v===1?0.75:0.50;
+ const cleared=Math.min(finalPenalty,Math.ceil(finalPenalty*rate));
  finalPenalty=Math.max(0,finalPenalty-cleared);
  if(cleared>0)pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: finalde -"+cleared+" güç telafi edildi.":"Crisis Management: -"+cleared+" final power offset."),"buy");
  else pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: telafi edilecek final cezası yoktu.":"Crisis Management: no final penalty to offset."),"pres");
@@ -371,7 +372,7 @@ function addCard(k,v,opts){
  if(variant===1&&(KARA_PEN[k]||0)>0){
    const pen=KARA_PEN[k];
    const debt=typeof addFinalPenalty==="function"?addFinalPenalty(pen,k):{added:pen,overflow:0,cash:0};
-   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+debt.added+" güç":"DARK — -"+debt.added+" in the final")+(debt.overflow?(LANG==="tr"?" · tavan aşımı -€"+debt.cash+"M":" · overflow -€"+debt.cash+"M"):""),"lose");
+   if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+debt.added+" güç":"DARK — -"+debt.added+" in the final")+(debt.overflow?(LANG==="tr"?" · fazla risk -€"+debt.cash+"M":" · excess risk -€"+debt.cash+"M"):""),"lose");
   }
  applyDarkPurchaseRisk(k,variant);
  if(typeof trackCardAcquired==="function")trackCardAcquired(k,variant,opts);
