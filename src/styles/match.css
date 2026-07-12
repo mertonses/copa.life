@@ -1629,7 +1629,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   color:var(--color-background);
   flex-shrink:0;
 }
-.ss-head span{
+.ss-kicker{
   display:block;
   margin-bottom:4px;
   color:var(--color-primary);
@@ -1647,10 +1647,19 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   letter-spacing:-.03em;
 }
 .ss-head h3 small{
-  margin-left:6px;
+  display:inline-flex;
+  align-items:center;
+  margin-left:7px;
+  padding:3px 6px;
+  border:1px solid rgba(230,238,239,.2);
+  border-radius:999px;
+  background:rgba(230,238,239,.07);
   color:rgba(230,238,239,.56);
-  font-size:14px;
+  font-family:var(--mono);
+  font-size:10px;
+  font-weight:900;
   letter-spacing:0;
+  vertical-align:middle;
 }
 .ss-head p{
   margin:8px 0 0;
@@ -1659,6 +1668,12 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   font-size:10px;
   letter-spacing:.6px;
 }
+.ss-run-meta{color:rgba(230,238,239,.58)}
+.ss-result-meta{margin-left:8px;padding-left:8px;border-left:1px solid rgba(230,238,239,.16);font-weight:900}
+.ss-head .stat-positive,.ss-head .stat-elite{color:#86d6b5!important}
+.ss-head .stat-negative{color:#ffaaa7!important}
+.ss-head .stat-warning{color:#f3c36e!important}
+.ss-head .stat-neutral{color:rgba(230,238,239,.72)!important}
 .ss-close{
   width:32px;
   height:32px;
@@ -1719,10 +1734,15 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   font-size:9px;
   font-style:normal;
 }
-.ss-metric.pos b,.ss-row .pos,.ss-scorer em{color:var(--color-primary)!important}
-.ss-metric.neg b,.ss-row .neg{color:#ef4444!important}
-.ss-metric.slate b,.ss-row .slate{color:var(--color-slate)!important}
-.ss-metric.ink b,.ss-row .ink{color:var(--color-ink)!important}
+.ss-metric.stat-positive{border-color:color-mix(in srgb,var(--color-primary) 26%,var(--border-subtle))}
+.ss-metric.stat-negative{border-color:rgba(239,68,68,.28)}
+.ss-metric.stat-warning{border-color:rgba(214,151,38,.3)}
+.ss-metric.stat-elite{border-color:color-mix(in srgb,var(--color-primary) 42%,var(--border-subtle));box-shadow:inset 0 2px 0 rgba(66,154,115,.18)}
+.season-stats-modal .stat-positive,.ss-scorer em{color:var(--color-primary)!important}
+.season-stats-modal .stat-negative{color:#d94b47!important}
+.season-stats-modal .stat-warning{color:#b97712!important}
+.season-stats-modal .stat-neutral{color:var(--color-slate)!important}
+.season-stats-modal .stat-elite{color:#208158!important}
 .ss-fixtures{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(58px,1fr));
@@ -1743,6 +1763,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 .ss-fixture.win{background:rgba(66,154,115,.16);border-color:rgba(66,154,115,.25)}
 .ss-fixture.draw{background:rgba(73,110,113,.16)}
 .ss-fixture.loss{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.18)}
+.ss-fixture.none{opacity:.54;border-style:dashed}
 .ss-fixture b{
   color:var(--color-ink);
   font-size:10px;
@@ -1751,6 +1772,9 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   color:var(--color-slate);
   font-size:9px;
 }
+.ss-fixture.win b{color:#208158}
+.ss-fixture.loss b{color:#d94b47}
+.ss-fixture.draw b{color:#b97712}
 .ss-grid{
   display:grid;
   gap:12px;
@@ -1819,7 +1843,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   background:var(--color-primary);
   transition:width .85s cubic-bezier(.4,0,.2,1);
 }
-#ss_cbar{background:var(--color-slate)}
+.ss-bar.danger i{background:#d94b47}
 .ss-scorer{
   display:grid;
   grid-template-columns:24px 1fr auto;
@@ -1829,6 +1853,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   border-bottom:1px solid rgba(73,110,113,.12);
 }
 .ss-scorer:last-child{border-bottom:0}
+.ss-scorer:first-child{background:rgba(66,154,115,.045)}
 .ss-scorer span{
   width:20px;
   height:20px;
@@ -1878,6 +1903,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   background:linear-gradient(135deg,rgba(66,154,115,.16),rgba(230,238,239,.48));
   border:1px solid rgba(66,154,115,.25);
 }
+.ss-section-mvp{background:linear-gradient(135deg,rgba(66,154,115,.07),rgba(255,255,255,.72))}
 .ss-mvp-icon{
   width:38px;
   height:38px;
@@ -1912,7 +1938,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
   display:flex;
   justify-content:flex-end;
   gap:8px;
-  padding:12px 18px 16px;
+  padding:10px 18px 12px;
   border-top:1px solid var(--border-subtle);
   background:rgba(230,238,239,.46);
   flex-shrink:0;

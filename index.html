@@ -76,7 +76,7 @@
 <link rel="stylesheet" href="src/styles/base.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260712g">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260712g">
-<link rel="stylesheet" href="src/styles/match.css?v=20260712e">
+<link rel="stylesheet" href="src/styles/match.css?v=20260712f">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1a2e22);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
@@ -2446,50 +2446,56 @@ function showSeasonStats(){
   const reached=r&&r.round?((L().rounds&&L().rounds[Math.max(0,r.round-1)])||String(r.round)):"—";
   const money=v=>typeof runMoney==="function"?runMoney(v):((v<0?"-€"+Math.abs(v):"€"+v)+"M");
   const signed=v=>(v>0?"+":"")+money(v);
-  const fixtureBoxes=fixtures.map(f=>`<div class="ss-fixture ${f.res==="W"?"win":f.res==="D"?"draw":f.res==="L"?"loss":"none"}"><b>${f.res||"·"}</b><span>${f.gf!=null?f.gf+"-"+f.ga:"?"}</span></div>`).join("");
-  const metric=(id,val,label,cls="",sub="")=>`<div class="ss-metric ${cls}"><b${id?` id="${id}"`:""}>${val}</b><span>${label}</span>${sub?`<em>${sub}</em>`:""}</div>`;
+  const getMoneyTone=v=>v>0?"stat-positive":v<0?"stat-negative":"stat-neutral";
+  const getRatingTone=v=>v>=80?"stat-elite":v>=70?"stat-positive":v>=60?"stat-warning":v>=50?"stat-warning":"stat-negative";
+  const getWinRateTone=v=>v>=75?"stat-elite":v>=50?"stat-positive":v>=30?"stat-warning":"stat-negative";
+  const getInjuryTone=v=>v===0?"stat-positive":v<=2?"stat-warning":"stat-negative";
+  const resultTone=r&&r.endType==="sacked"?"stat-negative":r&&r.won?"stat-elite":(r&&r.round>=5?"stat-positive":"stat-neutral");
+  const resultLabel=r&&r.endType==="sacked"?(tr?"KOVULDUN":"SACKED"):(r&&r.won?(tr?"KUPAYI ALDIN":"CUP WINNERS"):reached);
+  const fixtureBoxes=fixtures.map(f=>{const type=f.res==="W"?"win":f.res==="D"?"draw":f.res==="L"?"loss":"none";const label=f.res==="W"?(tr?"Galibiyet":"Win"):f.res==="D"?(tr?"Beraberlik":"Draw"):f.res==="L"?(tr?"Mağlubiyet":"Loss"):(tr?"Oynanmadı":"Unplayed");return `<div class="ss-fixture ${type}" title="${label}" aria-label="${label}"><b>${f.res||"·"}</b><span>${f.gf!=null?f.gf+"-"+f.ga:"?"}</span></div>`;}).join("");
+  const metric=(id,val,label,cls="stat-neutral",sub="")=>`<div class="ss-metric ${cls}"><b${id?` id="${id}"`:""}>${val}</b><span>${label}</span>${sub?`<em>${sub}</em>`:""}</div>`;
   const row=(label,val,cls="",extra="")=>`<div class="ss-row"><span>${label}</span><b class="${cls}">${val}</b></div>${extra}`;
-  const bar=(id)=>`<div class="ss-bar"><i id="${id}"></i></div>`;
+  const bar=(id,cls="")=>`<div class="ss-bar ${cls}"><i id="${id}"></i></div>`;
   const section=(title,body,extra="")=>`<section class="ss-section ${extra}"><h4>${title}</h4>${body}</section>`;
   const scorerRows=topList.length?topList.map(([n,g],i)=>`<div class="ss-scorer"><span>${i+1}</span><b>${n}</b><em>${g}</em></div>`).join(""):`<div class="ss-empty">${tr?"Gol kaydı yok":"No scorers"}</div>`;
   const mvpHtml=runMVP&&runMVP!=="—"?`<div class="ss-mvp-card"><div class="ss-mvp-icon">★</div><div><b>${runMVP}</b><span>${(mvpMem[runMVP]||0)>=2?(tr?"Efsane MVP":"Legendary MVP"):(tr?"Final Yıldızı":"Final Star")}</span></div></div>`:`<div class="ss-empty">${tr?"MVP kaydı yok":"No MVP"}</div>`;
   const html=`<div class="season-stats-modal">
     <div class="ss-head">
-      <div><span>${tr?"SEZON İSTATİSTİKLERİ":"SEASON STATISTICS"}</span><h3>${teamName||"XI"} <small>${formName}</small></h3><p>${tr?"Run Kimliği":"Run ID"} #${String(seedNum).padStart(4,"0")} · ${tr?"Sonuç":"Result"}: ${reached}</p></div>
+      <div><span class="ss-kicker">${tr?"SEZON İSTATİSTİKLERİ":"SEASON STATISTICS"}</span><h3>${teamName||"XI"} <small>${formName}</small></h3><p><span class="ss-run-meta">${tr?"Run Kimliği":"Run ID"} #${String(seedNum).padStart(4,"0")}</span><span class="ss-result-meta ${resultTone}">${tr?"Sonuç":"Result"}: ${resultLabel}</span></p></div>
       <button class="ss-close" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">×</button>
     </div>
     <div class="ss-body">
       <div class="ss-metrics">
-        ${metric("ss_w",0,tr?"Galibiyet":"Wins","pos",`${wins}/${played||0}`)}
-        ${metric("ss_g",0,tr?"Atılan Gol":"Goals","pos")}
-        ${metric("ss_p","0%",tr?"Galibiyet %":"Win Rate","ink")}
-        ${metric("",r.power||0,tr?"Kadro Gücü":"Squad Power","ink")}
-        ${metric("",cards.length,tr?"Kart":"Cards","slate")}
-        ${metric("",money(lowCash),tr?"En Düşük Kasa":"Lowest Funds",lowCash<0?"neg":lowCash>0?"pos":"ink")}
+        ${metric("ss_w",0,tr?"Galibiyet":"Wins",wins>losses?"stat-positive":wins===losses?"stat-neutral":"stat-warning",`${wins}/${played||0}`)}
+        ${metric("ss_g",0,tr?"Atılan Gol":"Goals",goals>0?"stat-positive":"stat-neutral")}
+        ${metric("ss_p","0%",tr?"Galibiyet %":"Win Rate",getWinRateTone(winPct))}
+        ${metric("",r.power||0,tr?"Kadro Gücü":"Squad Power",getRatingTone(r.power||0))}
+        ${metric("",cards.length,tr?"Kart":"Cards",cards.length>3?"stat-elite":cards.length>0?"stat-positive":"stat-neutral")}
+        ${metric("",money(lowCash),tr?"En Düşük Kasa":"Lowest Funds",getMoneyTone(lowCash))}
       </div>
       <div class="ss-fixtures">${fixtureBoxes}</div>
       <div class="ss-grid ss-grid-main">
         ${section(tr?"MAÇLAR":"MATCHES",`
-          ${row(tr?"G / B / M":"W / D / L",`<span class="pos">${wins}</span> / <span class="slate">${draws}</span> / <span class="neg">${losses}</span>`)}
-          ${row(tr?"Atılan Gol":"Goals For",goals,"pos")}${bar("ss_gbar")}
-          ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"pos":conceded>goals?"neg":"slate")}${bar("ss_cbar")}
-          ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"pos":gd<0?"neg":"ink")}
-          ${row(tr?"Maç Başına Gol":"Goals / Game",goalsPer,parseFloat(goalsPer)>=1.5?"pos":"slate")}
+          ${row(tr?"G / B / M":"W / D / L",`<span class="stat-positive">${wins}</span> / <span class="stat-neutral">${draws}</span> / <span class="stat-negative">${losses}</span>`)}
+          ${row(tr?"Atılan Gol":"Goals For",goals,goals>0?"stat-positive":"stat-neutral")}${bar("ss_gbar")}
+          ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"stat-positive":conceded>goals?"stat-negative":"stat-warning")}${bar("ss_cbar","danger")}
+          ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"stat-positive":gd<0?"stat-negative":"stat-neutral")}
+          ${row(tr?"Maç Başına Gol":"Goals / Game",goalsPer,parseFloat(goalsPer)>=2?"stat-positive":parseFloat(goalsPer)>=1?"stat-neutral":"stat-warning")}
         `)}
         ${section(tr?"EKONOMİ":"ECONOMY",`
-          ${row(tr?"Kazanılan":"Earned",signed(e.earned||0),"pos")}
-          ${row(tr?"Harcanan":"Spent",money(-(e.spent||0)),(e.spent||0)>0?"neg":"ink")}
-          ${row(tr?"Başkan":"Chairman",money(-(e.president||0)),(e.president||0)>0?"neg":"ink")}
-          ${row(tr?"Net":"Net",signed(net),net>=0?"pos":"neg")}
-          ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" "+money(expensive.price||0):"—","ink")}
-          ${row(tr?"En Güçlü Kart":"Best Card",bestVal>0?bestCard+" +"+bestVal:bestCard||"—",bestVal>0?"pos":"ink")}
+          ${row(tr?"Kazanılan":"Earned",signed(e.earned||0),getMoneyTone(e.earned||0))}
+          ${row(tr?"Harcanan":"Spent",money(-(e.spent||0)),(e.spent||0)>0?"stat-negative":"stat-neutral")}
+          ${row(tr?"Başkan":"Chairman",money(-(e.president||0)),(e.president||0)>0?"stat-negative":"stat-neutral")}
+          ${row(tr?"Net":"Net",signed(net),getMoneyTone(net))}
+          ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" "+money(expensive.price||0):"—",expensive&&expensive.price>=10?"stat-warning":"stat-neutral")}
+          ${row(tr?"En Güçlü Kart":"Best Card",bestVal>0?bestCard+" +"+bestVal:bestCard||"—",bestVal>0?"stat-positive":"stat-neutral")}
         `)}
       </div>
       <div class="ss-grid ss-grid-detail">
         ${section(tr?"OYUNCULAR":"PLAYERS",`
-          ${row(tr?"Sakatlık":"Injuries",e.injuries||0,(e.injuries||0)===0?"pos":"neg")}
-          ${row(tr?"Yedek":"Bench Used",benchUsed||0,"ink")}
-          ${row(tr?"Final Güç":"Final Power",r.power||0,"ink")}
+          ${row(tr?"Sakatlık":"Injuries",e.injuries||0,getInjuryTone(e.injuries||0))}
+          ${row(tr?"Yedek":"Bench Used",benchUsed||0,(benchUsed||0)>0?"stat-positive":"stat-neutral")}
+          ${row(tr?"Final Güç":"Final Power",r.power||0,getRatingTone(r.power||0))}
         `)}
         ${section(tr?"GOLCÜLER":"SCORERS",scorerRows)}
         ${section(tr?"MVP":"MVP",mvpHtml,"ss-section-mvp")}
