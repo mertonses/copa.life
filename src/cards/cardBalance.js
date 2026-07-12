@@ -64,7 +64,7 @@ function cardCostLines(k,v){
    gecici_prim:{0:tr?"Maç sonu risk %30: sakatlık; sonraki maç -2":"Post-match risk 30%: injury; next match -2",1:tr?"Maç sonu risk %60: sakatlık; sonraki maç -2":"Post-match risk 60%: injury; next match -2"},
    deplasman_kafilesi:{1:tr?"Rakip güçlü değilse %50: -4 güç":"If opponent is not stronger: 50% -4 power"},
    kurban_belli:{0:tr?"Tur sonunda 1 oyuncu sakatlanır":"1 player injured after the round",1:tr?"Tur sonunda 2 oyuncu sakatlanır":"2 players injured after the round"},
-   son_kredi:{0:tr?"Kovulma eşiği €5M daralır":"Sack limit tightens by €5M",1:tr?"Kovulma eşiği €5M daralır":"Sack limit tightens by €5M"}
+   son_kredi:{0:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M",1:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M"}
  };
  if(custom[k]&&custom[k][v])add(custom[k][v]);
  return out;
