@@ -504,7 +504,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     /* DARK visual: risk warning badge when this variant carries a final penalty */
     const _darkPen=(sv===1&&typeof KARA_PEN!=="undefined"&&KARA_PEN[k])?KARA_PEN[k]:0;
     if(sv===1)d.classList.add("is-dark");
-    const _darkBadge=sv===1?`<span class="ct-darkflag" aria-hidden="true"><svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor"><path d="M6 1 1 10.5h10z"/><rect x="5.3" y="4.4" width="1.4" height="3" rx=".5" fill="#0C1213"/><rect x="5.3" y="8.2" width="1.4" height="1.4" rx=".5" fill="#0C1213"/></svg>DARK</span>`:`<span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span>`;
+    const _darkBadge=sv===1?`<span class="ct-darkflag" aria-hidden="true">DARK</span>`:`<span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span>`;
     const _darkPenBadge=_darkPen?`<span class="ct-darkpen" title="${LANG==="tr"?"DARK: finalde güç cezası":"DARK: final power penalty"}">${LANG==="tr"?"FİNAL":"FINAL"} −${_darkPen}</span>`:"";
     const _costLines=typeof cardCostLines==="function"?cardCostLines(k,sv):[];
     const _costList=_costLines.length?`<ul class="ct-cost-list">${_costLines.map(line=>`<li>${formatCardDesc(line)}</li>`).join("")}</ul>`:"";

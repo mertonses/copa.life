@@ -348,9 +348,8 @@
 .ct-foot-price-only{justify-content:flex-end}
 .ct-foot-price-only .ct-price{margin-left:auto}
 .ct-foot-cost{min-height:42px;justify-content:flex-start;align-items:center}
-.ct-cost-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;width:100%;font-family:var(--mono);font-size:7.5px;font-weight:800;line-height:1.25;color:var(--color-slate)}
-.ct-cost-list li{display:flex;align-items:baseline;gap:4px;min-width:0}
-.ct-cost-list li::before{content:"-";color:var(--red,#ef4444);font-weight:900;flex:0 0 auto}
+.ct-cost-list{display:flex;flex-wrap:wrap;gap:4px;margin:0;padding:0;list-style:none;width:100%;font-family:var(--mono);font-size:7.2px;font-weight:850;line-height:1.2}
+.ct-cost-list li{display:inline-flex;align-items:center;min-width:0;max-width:100%;padding:3px 5px;border:1px solid color-mix(in srgb,var(--red,#ef4444) 34%,var(--border-subtle));border-radius:5px;background:color-mix(in srgb,var(--red,#ef4444) 8%,var(--surface-elevated));color:color-mix(in srgb,var(--red,#ef4444) 78%,var(--color-ink));white-space:normal;overflow-wrap:anywhere}
 .ct-cost-badge{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-muted);color:var(--color-slate);font-family:var(--mono);font-size:7px;font-weight:800;line-height:1.15;letter-spacing:.15px;white-space:nowrap}
 .cardtile.is-dark .ct-cost-badge{background:color-mix(in srgb,var(--color-ink) 7%,var(--surface-elevated));border-color:color-mix(in srgb,var(--color-ink) 24%,var(--border-subtle));color:var(--color-ink)}
 .ct-pw{font-family:var(--mono);font-size:8px;color:var(--color-primary);font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -658,8 +657,7 @@
 #hub .cardtile.is-dark .ct-foot{
   border-top-color:rgba(255,255,255,.16);
 }
-#hub .cardtile.is-dark .ct-cost-list{color:rgba(244,248,248,.84)}
-#hub .cardtile.is-dark .ct-cost-list li::before{color:#f0a469}
+#hub .cardtile.is-dark .ct-cost-list li{border-color:rgba(255,116,112,.5);background:rgba(239,68,68,.14);color:#ffb4b1}
 #hub .cardtile.is-dark .ct-head-price,
 #hub .cardtile.is-dark .ct-head-price.ct-price-free{
   background:#fff;
