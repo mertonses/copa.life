@@ -929,6 +929,9 @@ a.footer-link{color:var(--color-slate)}
 .howto-mcard-title-row{display:flex;align-items:baseline;gap:6px}
 /* ===== music button active state ===== */
 #musicBtn.playing,#musicBtn.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.sd-audio-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sd-audio-row .sdbtn{min-width:0;justify-content:center;padding-inline:7px;font-size:8px;white-space:nowrap}
+.sd-audio-row .sdbtn svg{flex:0 0 auto}
 
 /* ===== pixel art icons ===== */
 .si{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;display:inline-block;flex-shrink:0}

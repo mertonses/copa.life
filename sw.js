@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260711-economy3 */
-const CACHE = "copa-v20260711-economy3";
+/* copa.life Service Worker - v20260713-playback2 */
+const CACHE = "copa-v20260713-playback2";
 const PRECACHE = [
   "/",
   "/index.html",

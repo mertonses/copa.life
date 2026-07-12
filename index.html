@@ -40,7 +40,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="rating" content="general">
 <link rel="manifest" href="manifest.json">
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260711-stability2").catch(()=>{});</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-playback2").catch(()=>{});</script>
 
 <!-- Structured data -->
 <script type="application/ld+json">
@@ -74,8 +74,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260712g">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260712i">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260713-playback2">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260713-playback2">
 <link rel="stylesheet" href="src/styles/match.css?v=20260712f">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <style>
@@ -275,16 +275,16 @@
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/cards/cardDefs.js?v=20260712c"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
-<script src="src/cards/cardBalance.js?v=20260712h"></script>
+<script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
 <script src="src/balance/telemetry.js?v=20260711-economy3"></script>
-<script src="src/cards/cardEffects.js?v=20260712f"></script>
+<script src="src/cards/cardEffects.js?v=20260713-playback2"></script>
 <script src="src/balance/power.js?v=20260712e"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260711-stability1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260711-stability1"></script>
-<script src="src/sim/finalSim.js?v=20260712f"></script>
-<script src="src/ui/hub.js?v=20260712i"></script>
+<script src="src/sim/finalSim.js?v=20260713-playback2"></script>
+<script src="src/ui/hub.js?v=20260713-playback2"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -320,6 +320,17 @@ function _playerMonogram(name){
   if(!out)out="UN";
   return out.slice(0,2).toLocaleUpperCase("tr-TR");
 }
+function _freeAgentDisplayName(name){
+  const clean=String(name||"Unknown").replace(/\s+/g," ").trim();
+  if(clean.length<=22)return clean;
+  const words=clean.split(" ").filter(Boolean);
+  if(words.length>=2){
+    const first=words[0],last=words[words.length-1];
+    if((first+" "+last).length<=22)return first+" "+last;
+    return first.charAt(0)+". "+last;
+  }
+  return clean.slice(0,20).trim();
+}
 function _renderFreeAgents(){
   const fa=window._freeAgents;
   let el=$("freeAgentRow");
@@ -335,7 +346,10 @@ function _renderFreeAgents(){
     const priceLabel=a.fee<=0?(tr?"ÜCRETSİZ":"FREE"):`€${a.fee}M`;
     const action=cant?`window._flashInsufficient&&window._flashInsufficient(this)`: `_signFreeAgent(${ai})`;
     const keyAction=`if(event.key==='Enter'||event.key===' '){event.preventDefault();${cant?`window._flashInsufficient&&window._flashInsufficient(this)`: `_signFreeAgent(${ai})`}}`;
-    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" cant":""}" role="button" tabindex="0" aria-disabled="${cant?"true":"false"}" onclick="${action}" onkeydown="${keyAction}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true">${monogram}</div><div class="ct-body"><div class="ct-name">${p.name||("FA "+ai)}</div><div class="free-agent-meta">${posLbl} · ${tr?"Güç":"OV"} <span class="ov-val" style="--ovc:${powerTone(inEff)}">${inEff}</span></div></div></div><div class="ct-foot"><span class="ct-pw">${tr?"Yedeğe katılır":"Joins bench"}</span></div><div class="insufficient-pop" aria-hidden="true">${tr?"Kasa yetersiz":"Insufficient funds"}</div></div>`;
+    const fullName=p.name||("FA "+ai);
+    const playerName=_freeAgentDisplayName(fullName);
+    const powerWord=tr?"Güç":"Power";
+    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" cant":""}" role="button" tabindex="0" aria-disabled="${cant?"true":"false"}" onclick="${action}" onkeydown="${keyAction}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true">${monogram}</div><div class="ct-body"><div class="ct-name">${playerName}</div><div class="free-agent-meta"><span>${posLbl}</span><span class="free-agent-meta-dot" aria-hidden="true">·</span><span>${powerWord}</span><span class="ov-val" style="--ovc:${powerTone(inEff)}">${inEff}</span></div></div></div><div class="ct-foot"><span class="ct-pw">${tr?"Yedeğe katılır":"Joins bench"}</span></div><div class="insufficient-pop" aria-hidden="true">${tr?"Kasa yetersiz":"Insufficient funds"}</div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--border-subtle);margin-top:10px;opacity:.5"></div>`;
 }
@@ -958,7 +972,25 @@ function toggleVocal(){if(!_vocalAudio){_vocalAudio=new Audio("assets/audio/voca
 let _musicAudio=null,_musicEnabled=false;
 function _musicIcon(off){return off?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/><line x1="2" y1="2" x2="18" y2="18" stroke-width="2.2"/></svg>':'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/></svg>';}
 function _updateMusicButton(){const b=$("musicBtn");if(!b)return;const tr=LANG==="tr",on=_musicEnabled;b.classList.toggle("on",on);b.innerHTML=_musicIcon(!on)+`<span id="musicBtnLbl">${on?(tr?"M\u00dcZ\u0130K A\u00c7IK":"MUSIC ON"):(tr?"M\u00dcZ\u0130K A\u00c7":"MUSIC OFF")}</span>`;b.title=tr?"Arka plan m\u00fczi\u011fi":"Background music";b.setAttribute("aria-label",b.title);}
-function ensureMusicSetting(){const drop=$("settingsDrop");if(!drop||$("musicBtn"))return;const g=document.createElement("div");g.className="sd-group";g.innerHTML=`<div class="sd-hdr" id="sdHdrMusic">${LANG==="tr"?"M\u00dcZ\u0130K":"MUSIC"}</div><button class="sdbtn sd-full" id="musicBtn" type="button" onclick="toggleMusic()"></button>`;drop.appendChild(g);_updateMusicButton();}
+function ensureMusicSetting(){
+  const drop=$("settingsDrop"),soundBtn=$("muteBtn");
+  if(!drop||!soundBtn||$("musicBtn"))return;
+  const group=soundBtn.closest(".sd-group");
+  if(!group)return;
+  const hdr=group.querySelector(".sd-hdr");
+  if(hdr)hdr.textContent=LANG==="tr"?"SES VE M\u00dcZ\u0130K":"SOUND & MUSIC";
+  const row=document.createElement("div");
+  row.className="sd-audio-row";
+  soundBtn.parentNode.insertBefore(row,soundBtn);
+  row.appendChild(soundBtn);
+  const music=document.createElement("button");
+  music.className="sdbtn";
+  music.id="musicBtn";
+  music.type="button";
+  music.onclick=toggleMusic;
+  row.appendChild(music);
+  _updateMusicButton();
+}
 function _getMusic(){if(_musicAudio)return _musicAudio;const a=new Audio();a.preload="none";a.loop=true;a.volume=.16;a.src="assets/audio/ui/clockwork-boardroom-loop.ogg";a.onerror=()=>{_musicEnabled=false;_updateMusicButton();};_musicAudio=a;return a;}
 function toggleMusic(){_musicEnabled=!_musicEnabled;try{localStorage.setItem("copa_music",_musicEnabled?"1":"0");}catch(e){}const a=_getMusic();if(_musicEnabled){a.play().catch(()=>{ /* A browser can reject synthetic clicks; keep the user setting for the next real tap. */ _updateMusicButton();});}else a.pause();_updateMusicButton();}
 document.addEventListener("visibilitychange",()=>{if(!_musicAudio)return;if(document.hidden)_musicAudio.pause();else if(_musicEnabled)_musicAudio.play().catch(()=>{});});
@@ -1689,7 +1721,7 @@ Object.assign(T.en.cards,{
   kurban_belli:{n:"Sacrificial Lamb",d:"COMMON: +6 power; 1 player injured for 1 round after. DARK: +12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine.",i:""},
   primler_yatinca:{n:"Bonus Day",d:"+4 power; next round −€8M.",i:""},
   vur_igneyi:{n:"Play Through Pain",d:"COMMON: Heals 1 injured player; no extra cost beyond the card price. DARK: Heals 2 injured players; 25% chance -€6M extra cost.",i:""},
-  bu_adam:{n:"Surprise Factor",d:"COMMON: Adds a 70-79 OVR bench player. DARK: Adds an 80-89 OVR player; 25% chance of an extra €6M cost.",i:""},
+  bu_adam:{n:"Surprise Factor",d:"COMMON: Adds a Power 70-79 bench player. DARK: Adds a Power 80-89 player; 25% chance of an extra €6M cost.",i:""},
   gec_gec:{n:"Try and Stop Us",d:"COMMON: +5 against stronger opponent, +2 otherwise. DARK: +2 extra (+7/+4), -3 in the final.",i:"⏱️"},
   nasip_kismet:{n:"Luck of the Draw",d:"COMMON: Next-round card prices -25%. DARK: -40%; 25% chance -€4M fine.",i:""},
   yildiz_krizi:{n:"Star Crisis",d:"COMMON: Media attention grants +3 this match. DARK: +4 this match; 20% chance -€4M fine.",i:""},

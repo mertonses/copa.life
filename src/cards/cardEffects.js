@@ -144,7 +144,7 @@ function applyRiskCardGain(k){
   const maxOV=s.length?s.reduce((a,p)=>Math.max(a,p.ov||0),0):0;
   const pow=v===1?(maxOV>=90?14:maxOV>=85?10:maxOV>=80?8:6):(maxOV>=90?10:maxOV>=85?8:maxOV>=80?6:4),chairBoost=chairmanCardBoost(k);
   riskPowerMod+=pow+chairBoost;
-  pushFeed("🍰 <b>"+L().cards[k].n+"</b> OV"+maxOV+" → +"+(pow+chairBoost)+(tr?" güç":" power"),"pres");
+  pushFeed("🍰 <b>"+L().cards[k].n+"</b> "+(tr?"Güç ":"Power ")+maxOV+" → +"+(pow+chairBoost)+(tr?" güç":" power"),"pres");
   if(v===1&&rand()<0.25){applyCardCashPenalty(k,6);pushFeed("🍰 "+(tr?"Yıldız riski: -€6M":"Star risk: -€6M"),"lose");}
   return;
  }
@@ -163,7 +163,7 @@ function applyRiskCardGain(k){
    const boost=v===1?9:5;
   const s=picksBySlot.filter(Boolean);
   const gk=s.find(p=>p.pos==="GK");
-  if(gk){gk.ov=Math.min(99,gk.ov+boost);gk.eff=Math.min(99,gk.eff+boost);renderRoundel&&renderRoundel("h"+picksBySlot.indexOf(gk),gk);pushFeed("🧤 <b>"+L().cards[k].n+"</b> GK OV+"+boost,"buy");}
+  if(gk){gk.ov=Math.min(99,gk.ov+boost);gk.eff=Math.min(99,gk.eff+boost);renderRoundel&&renderRoundel("h"+picksBySlot.indexOf(gk),gk);pushFeed("🧤 <b>"+L().cards[k].n+"</b> "+(tr?"Kaleci gücü +":"Goalkeeper power +")+boost,"buy");}
   if(v===1&&rand()<0.15){applyCardCashPenalty(k,15);pushFeed("🧤 "+(tr?"Transfer cezası: -€15M":"Transfer penalty: -€15M"),"lose");}
   return;
  }

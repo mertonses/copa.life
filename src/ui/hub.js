@@ -225,7 +225,11 @@ function displayCardTerms(txt){
   return String(txt)
     .replace(/\bGOLDEN\b/g,"COMMON")
     .replace(/\bALTIN\b/g,"COMMON")
-    .replace(/\bKARA\b/g,"DARK");
+    .replace(/\bKARA\b/g,"DARK")
+    // Historical copy still contains a few OVR references. The product-facing
+    // label is always Güç / Power, while the underlying numeric stat stays intact.
+    .replace(/\bOVR\b/gi,LANG==="tr"?"Güç":"Power")
+    .replace(/\bOV\b/gi,LANG==="tr"?"Güç":"Power");
 }
 function escapeCardText(txt){
   // Use a named apostrophe entity: the numeric form was later matched as a card
@@ -284,10 +288,10 @@ function shopCardDesc(k,raw,variantOverride){
     final_provasi:()=>sv===1?(tr?"Yalnız final maçında +9 takım gücü. Satın alırken %25 ihtimalle €3M ek masraf.":"Final only: +9 team power. 25% chance of an extra €3M cost on acquisition."):(tr?"Yalnız final maçında çalışır ve takım gücüne +5 ekler.":"Works only in the final and adds +5 team power."),
     kanat_akini:()=>sv===1?(tr?"İlk 11'deki kanat/bek başına +2 güç (max +6). Finalde -5 güç.":"+2 power per starting wing/fullback (max +6). -5 in the final."):(tr?"İlk 11'deki kanat/bek başına +1 güç (max +4).":"+1 power per starting wing/fullback (max +4)."),
     anadolu:()=>sv===1?(tr?"Sahadaki 70 altı oyuncu başına +1 güç (max +5). %20 ihtimalle €5M ek masraf.":"+1 power per sub-70 starter (max +5). 20% chance of an extra €5M cost."):(tr?"Sahadaki 70 altı oyuncu başına +1 güç (max +3).":"+1 power per sub-70 starter (max +3)."),
-    bu_adam:()=>sv===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler. %25 ihtimalle €6M ek masraf.":"Adds a random 80-89 OVR player to the bench. 25% chance of an extra €6M cost."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
+    bu_adam:()=>sv===1?(tr?"Gücü 80-89 olan rastgele bir oyuncuyu yedeğe ekler. %25 ihtimalle €6M ek masraf.":"Adds a random Power 80-89 player to the bench. 25% chance of an extra €6M cost."):(tr?"Gücü 70-79 olan rastgele bir oyuncuyu yedeğe ekler.":"Adds a random Power 70-79 player to the bench."),
     kontra:()=>sv===1?(tr?"Forvet başına +2 güç. %25 ihtimal -€10M ceza.":"Forward +2 each. 25% chance -€10M fine."):(tr?"Forvet başına +1 güç.":"Forward +1 each."),
     buyuk_mac:()=>sv===1?(tr?"Tek maçlık +10 güç. %20 ihtimal -€12M ceza.":"Single-match +10 power. 20% chance -€12M fine."):(tr?"Tek maçlık +6 güç.":"Single-match +6 power."),
-    yildiz:()=>{const st=starCardPowerForVariant(sv);return sv===1?(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç. %25 ihtimal -€6M ceza.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match. 25% chance -€6M fine.`):(tr?`En iyi oyuncun OV ${st.maxOV}: bu maç +${st.pow} güç.`:`Best player OVR ${st.maxOV}: +${st.pow} power this match.`);},
+    yildiz:()=>{const st=starCardPowerForVariant(sv);return sv===1?(tr?`Gücü ${st.maxOV} olan en iyi oyuncun bu maç +${st.pow} güç verir. %25 ihtimalle -€6M ceza.`:`Your highest-power player (${st.maxOV}) gives +${st.pow} power this match. 25% chance of a -€6M fine.`):(tr?`Gücü ${st.maxOV} olan en iyi oyuncun bu maç +${st.pow} güç verir.`:`Your highest-power player (${st.maxOV}) gives +${st.pow} power this match.`);},
     otobus:()=>sv===1?(tr?"Sahadaki stoper başına +4 güç (max +12). %10 ihtimal -€6M ceza; finalde -3 güç.":"+4 power per starting CB (max +12). 10% chance -€6M fine; -3 in the final."):(tr?"Sahadaki stoper başına +3 güç (max +9).":"+3 power per starting CB (max +9)."),
     kaleci_kalesi:()=>sv===1?(tr?"Kaleci gücü +9. %15 ihtimal -€15M ceza; finalde -8.":"Goalkeeper rating +9. 15% chance -€15M fine; -8 in the final."):(tr?"Kaleci gücü +5.":"Goalkeeper rating +5."),
     deplasman_kafilesi:()=>sv===1?(tr?"Güçlü rakibe karşı +8 güç. Değilse %50 +4 / %50 -4 güç.":"Against stronger opponent: +8 power. Otherwise 50% +4 / 50% -4 power."):(tr?"Güçlü rakibe karşı +4 güç. Değilse +2 güç.":"Against stronger opponent: +4 power. Otherwise +2 power."),
@@ -330,7 +334,7 @@ function conditionHint(k){
   otobus:()=>`${tr?"Stoper":"CB"}: ${s.filter(p=>p.pos==="CB").length}/3`,
   kontra:()=>`${tr?"Forvet":"Forwards"}: ${cnt(s,FWDP)}`,
   anadolu:()=>`${tr?"Sahadaki 70 altı":"Sub-70 starters"}: ${s.filter(p=>p&&p.ov<70).length}/${variantOf("anadolu")===1?5:3}`,
-  kaleci_kalesi:()=>{const gk=s.find(p=>p.pos==="GK");return `GK: ${gk?gk.ov+" "+(tr?"GÜÇ":"OVR"):(tr?"yok":"none")}`;},
+  kaleci_kalesi:()=>{const gk=s.find(p=>p.pos==="GK");return `${tr?"Kaleci":"Goalkeeper"}: ${gk?gk.ov+" "+(tr?"GÜÇ":"POWER"):(tr?"yok":"none")}`;},
   buyuk_mac:()=>`${tr?"Aktif tur":"Active round"}: ${round}/4`,
   ch_final:()=>`${tr?"Yarı/Final'de aktif":"Active in Semi/Final"}: ${round>=5?(tr?"hazır":"ready"):(tr?"tur 5'te":"from round 5")}`
  };
@@ -344,7 +348,7 @@ function cardContractText(k){
     kontra:tr?"Forvet başına +1; şu an "+plus+".":"Forward +1 each; now "+plus+".",
     otobus:variantOf(k)===1?(tr?"Stoper başına +4, max +12; şu an "+plus+".":"CB +4 each, max +12; now "+plus+"."):(tr?"Stoper başına +3, max +9; şu an "+plus+".":"CB +3 each, max +9; now "+plus+"."),
     anadolu:variantOf(k)===1?(tr?"Sahadaki 70 altı başına +1, max +5; şu an "+plus+".":"Sub-70 starter +1 each, max +5; now "+plus+"."):(tr?"Sahadaki 70 altı başına +1, max +3; şu an "+plus+".":"Sub-70 starter +1 each, max +3; now "+plus+"."),
-    yildiz:(()=>{const st=starCardPowerForVariant(variantOf("yildiz"));return tr?`En iyi oyuncun OV ${st.maxOV}; bu maç +${st.pow} güç.`:`Best player OVR ${st.maxOV}; +${st.pow} power this match.`;})(),
+    yildiz:(()=>{const st=starCardPowerForVariant(variantOf("yildiz"));return tr?`Gücü ${st.maxOV} olan en iyi oyuncun: bu maç +${st.pow} güç.`:`Your highest-power player (${st.maxOV}): +${st.pow} power this match.`;})(),
     derbi:round<4?(tr?"İlk 3 tur etkisiz; çeyrek finalde açılır.":"Inactive for the first 3 rounds; activates in the quarter-final."):(tr?"Büyük maç bonusu bu tur "+plus+".":"Big-match bonus is "+plus+" this round."),
     ch_momentum:tr?"Turnuva ritmi bu tur takım gücüne "+plus+" ekliyor.":"Tournament rhythm adds "+plus+" to team power this round.",
     buyuk_mac:variantOf(k)===1?(tr?"Tek maçlık +10 güç; %20 ihtimal -€12M ceza.":"Single-match +10 power; 20% chance -€12M fine."):(tr?"Tek maçlık +6 güç.":"Single-match +6 power."),
@@ -374,7 +378,7 @@ function cardContractText(k){
     kurban_belli:variantOf(k)===1?(tr?"+12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.":"+12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine."):(tr?"+6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır.":"+6 power; 1 player injured for 1 round after."),
     doping:variantOf(k)===1?(tr?"Her tur +10 güç; güven -1, %25 ihtimal -€25M, finalde -6.":"+10 each round; trust -1, 25% chance -€25M, final -6."):(tr?"Her tur +6 güç; edinirken %20 güven riski, %35 ihtimal -€15M.":"+6 each round; 20% trust risk on acquisition, 35% chance -€15M."),
     gec_gec:variantOf(k)===1?(tr?"Rakip güçlüyse +7, değilse +4; her tur %25 sakatlık, finalde -3.":"+7 vs stronger, otherwise +4; 25% injury each round, final -3."):(tr?"Rakip güçlüyse +5, değilse +2.":"+5 vs stronger, otherwise +2."),
-    bu_adam:variantOf(k)===1?(tr?"80-89 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 80-89 OVR player to the bench."):(tr?"70-79 güçlü rastgele bir oyuncuyu yedeğe ekler.":"Adds a random 70-79 OVR player to the bench."),
+    bu_adam:variantOf(k)===1?(tr?"Gücü 80-89 olan rastgele bir oyuncuyu yedeğe ekler.":"Adds a random Power 80-89 player to the bench."):(tr?"Gücü 70-79 olan rastgele bir oyuncuyu yedeğe ekler.":"Adds a random Power 70-79 player to the bench."),
     kriz:variantOf(k)===1?(tr?"Toplam final cezasının %75'ini telafi eder.":"Offsets 75% of the total final penalty."):(tr?"Toplam final cezasının %50'sini telafi eder.":"Offsets 50% of the total final penalty."),
     kasiga_para:variantOf(k)===1?(tr?"Rakip -8 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%50, başkan güveni -1.":"Opponent -8 power. Next market closes; the next open market has +50% prices, chairman trust -1."):(tr?"Rakip -4 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Next market closes; the next open market has +25% prices.")
   };
@@ -473,7 +477,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   {const po=$("pitchOverlay");if(po){po.innerHTML="";const oe0=document.createElement("div");oe0.className="card style overlay-chip";oe0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;po.appendChild(oe0);if(captainIdx>=0&&picksBySlot[captainIdx]){const cp=picksBySlot[captainIdx];const injured=cp.injured;const isLider=cp.trait==="lider";const isWonder=cp.trait==="wonderkid";const capBonusVal=injured?-3:(isLider?3:isWonder?2:cp.age>=32?2:1);const capTag=injured?(LANG==="tr"?"SAKAT":"INJ."):(isLider?(LANG==="tr"?"LİDER":"LDR"):"");const dc=document.createElement("div");dc.className="card style cap-chip overlay-chip"+(injured?" cap-inj":"")+(isLider?" cap-lider":"");dc.innerHTML=`<svg viewBox="0 0 12 9" width="11" height="8" fill="currentColor" style="margin-right:3px"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg><b>${surOf(cp)}</b>${capTag?`<span class="tier">${capTag}</span>`:""}<span class="v">${capBonusVal>=0?"+":""}${capBonusVal}</span>`;po.appendChild(dc);}}}
   let cr=null;{const po2=$("pitchOverlay");if(po2){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";po2.appendChild(cr);}else{cr=$("cardrow");if(!cr){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";}}}cr.innerHTML="";
   /* Kiralık chip */
-  if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";const _turnsLeft=typeof loanPlayer.turnsLeft!=="undefined"?` · ${loanPlayer.turnsLeft} tur`:"";lc.innerHTML=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:1px"><path d="M2 10a6 6 0 0 0 10 2"/><path d="M14 6A6 6 0 0 0 4 4"/><path d="M12 8l2 2-2 2"/><path d="M4 2l-2 2 2 2"/></svg> <b>${surOf(loanPlayer)}</b> <span class="tier">KİRALIK · LOAN</span> <span class="v">OV${loanPlayer.ov}</span><span class="copy" style="color:var(--color-slate)">${loanPlayer.loanCost>0?"-€"+loanPlayer.loanCost+"M":""}${_turnsLeft}</span>`;cr.appendChild(lc);}
+  if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";const _turnsLeft=typeof loanPlayer.turnsLeft!=="undefined"?` · ${loanPlayer.turnsLeft} tur`:"";lc.innerHTML=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:1px"><path d="M2 10a6 6 0 0 0 10 2"/><path d="M14 6A6 6 0 0 0 4 4"/><path d="M12 8l2 2-2 2"/><path d="M4 2l-2 2 2 2"/></svg> <b>${surOf(loanPlayer)}</b> <span class="tier">KİRALIK · LOAN</span> <span class="v">${LANG==="tr"?"Güç ":"Power "}${loanPlayer.ov}</span><span class="copy" style="color:var(--color-slate)">${loanPlayer.loanCost>0?"-€"+loanPlayer.loanCost+"M":""}${_turnsLeft}</span>`;cr.appendChild(lc);}
   cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round),stance=variantBadge(v);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy active-stance stance-${v}">${stance}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
   function _flashInsufficient(el,msg){

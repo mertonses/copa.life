@@ -13,7 +13,8 @@ var CARD_COST_META={
  taksit_transfer:{0:{nextTurn:4,turns:2},1:{trust:1,nextTurn:7,turns:2}},
  kumarbaz:{0:{nextTurn:5,turns:2},1:{trust:1,nextTurn:10,turns:2}},
  primler_yatinca:{0:{nextTurn:8},1:{nextTurn:16}},
- doping:{0:{risk:35,cash:15},1:{trust:1,risk:25,cash:25}},
+ // Doping's risks are rendered as individual warning chips below the card.
+ doping:{},
  gecici_prim:{0:{risk:30},1:{risk:60}},
  kurban_belli:{1:{risk:25,cash:6}},
  nasip_kismet:{1:{risk:25,cash:4}},
@@ -48,6 +49,7 @@ function cardCostBadge(k,v){
 function cardCostLines(k,v){
  const c=cardCostMeta(k,v),tr=typeof LANG!=="undefined"&&LANG==="tr",out=[];
  const add=s=>{if(s&&!out.includes(s))out.push(s);};
+ const addMany=s=>Array.isArray(s)?s.forEach(add):add(s);
  if(c.chem)add(tr?"Kimya -"+c.chem:"Chemistry -"+c.chem);
  if(c.trust)add(tr?"Güven -"+c.trust:"Trust -"+c.trust);
  if(c.nextMarket)add(tr?"Sonraki pazar +%"+c.priceRise:"Next market +"+c.priceRise+"%");
@@ -58,15 +60,15 @@ function cardCostLines(k,v){
  if(pen)add(tr?"Finalde -"+pen+" güç":"Final -"+pen+" power");
  const custom={
    taraftar:{1:tr?"Risk %25: Güven -1":"Risk 25%: Trust -1"},
-   doping:{0:tr?"Risk %20: Güven -1; her tur %35 -€15M":"Risk 20%: Trust -1; each round 35% -€15M",1:tr?"Her tur %25: -€25M":"Each round 25%: -€25M"},
+   doping:{0:tr?["Risk %20: Güven -1","Her tur %35: -€15M"]:["Risk 20%: Trust -1","Each round 35%: -€15M"],1:tr?["Güven -1","Her tur %25: -€25M"]:["Trust -1","Each round 25%: -€25M"]},
    sahte_evrak:{0:tr?"Risk %18: Güven -1":"Risk 18%: Trust -1"},
    kisa_kamp:{0:tr?"Sonraki maç -2 güç":"Next match -2 power",1:tr?"Sonraki maç -4 güç":"Next match -4 power"},
-   gecici_prim:{0:tr?"Maç sonu risk %30: sakatlık; sonraki maç -2":"Post-match risk 30%: injury; next match -2",1:tr?"Maç sonu risk %60: sakatlık; sonraki maç -2":"Post-match risk 60%: injury; next match -2"},
+   gecici_prim:{0:tr?["Maç sonu risk %30: sakatlık","Sonraki maç -2 güç"]:["Post-match risk 30%: injury","Next match -2 power"],1:tr?["Maç sonu risk %60: sakatlık","Sonraki maç -2 güç"]:["Post-match risk 60%: injury","Next match -2 power"]},
    deplasman_kafilesi:{1:tr?"Rakip güçlü değilse %50: -4 güç":"If opponent is not stronger: 50% -4 power"},
    kurban_belli:{0:tr?"Tur sonunda 1 oyuncu sakatlanır":"1 player injured after the round",1:tr?"Tur sonunda 2 oyuncu sakatlanır":"2 players injured after the round"},
    son_kredi:{0:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M",1:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M"}
  };
- if(custom[k]&&custom[k][v])add(custom[k][v]);
+ if(custom[k]&&custom[k][v])addMany(custom[k][v]);
  return out;
 }
 

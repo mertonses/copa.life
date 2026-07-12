@@ -1334,7 +1334,7 @@ function buildSim(myPow, oppPow) {
   let matchTime=0;
   const stoppage=Math.floor(rng.rng(2,6));
   const fullTimeSec=(90+stoppage)*60;
-  let gameEnded=false,animId=null;
+  let gameEnded=false,goldenGoalLocked=false,animId=null;
   let momDisplay=50,shoutMode=null;
   const liveScore=[0,0];
   let lastCarrier=null,lastAssist=null;
@@ -1471,6 +1471,21 @@ function buildSim(myPow, oppPow) {
     const hy=Math.max(0,Math.min(HGH-1,Math.floor((y/_PH)*HGH)));
     heatGrid[hy*HGW+hx]+=w||0.5;
   }
+  function addWideAttackHeat(teamId,side,weight){
+    const lane=side==='WIDE_LEFT'?_PW*.10:_PW*.90;
+    const insideLane=side==='WIDE_LEFT'?_PW*.24:_PW*.76;
+    const buildY=teamId===0?_PH*.58:_PH*.42;
+    const finalY=teamId===0?_PH*.78:_PH*.22;
+    const boxY=teamId===0?_PH*.87:_PH*.13;
+    const w=weight||1;
+    // A flank sequence leaves a trail: build-up, overlap and final-third delivery.
+    // The map therefore reflects the actual route rather than only the box target.
+    addHeat(lane,buildY,.8*w);
+    addHeat(insideLane,(buildY+finalY)*.5,.62*w);
+    addHeat(lane,finalY,1.4*w);
+    addHeat(side==='WIDE_LEFT'?_PW*.42:_PW*.58,boxY,.85*w);
+    addHeat(_PW*.5,boxY,.45*w);
+  }
 
   /* DOM helpers */
   function _dom(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
@@ -1565,6 +1580,11 @@ function buildSim(myPow, oppPow) {
     // add to heatgrid
     addHeat(ball.x,ball.y,4);
     if(goldenGoalMode){
+      // Golden goal ends the football immediately. Stop the simulation before
+      // the visual celebration delay so a second goal cannot be generated.
+      goldenGoalLocked=true;
+      if(animId){cancelAnimationFrame(animId);animId=null;}
+      ball.vx=0;ball.vy=0;ball.release();
       _dom("simState",isTR?"ALTIN GOL!":"GOLDEN GOAL!");
       const stateEl=document.getElementById("simState");if(stateEl)stateEl.classList.add("is-golden");
       lastCarrier=null;lastAssist=null;
@@ -1710,7 +1730,7 @@ function buildSim(myPow, oppPow) {
   }
 
   /* pickup */
-  let decTimer=0;
+  let decTimer=0,heatSampleTimer=0;
   const DEC_INT=2.10; // visual football needs readable beats between decisions
   let slotTimer=0;
   // Per-team shot cooldown — prevents shot spam; resets after each shot
@@ -1797,6 +1817,7 @@ function buildSim(myPow, oppPow) {
       _updateStats();
     } else if(action.type==='CROSS'||action.type==='CUTBACK'){
       if(action.type==='CUTBACK')audit.cutbacks++;else audit.crosses++;
+      addWideAttackHeat(tid,carrier.x<_PW*.5?'WIDE_LEFT':'WIDE_RIGHT',.6);
       const gx=action.type==='CUTBACK'?_PW/2+rng.rng(-7,7):_PW/2+rng.rng(-10,10);
       const gy=action.type==='CUTBACK'?(tid===0?_PH-18:18):(tid===0?_PH-10:10);
       const targetPool=(tid===0?teamA:teamB).filter(p=>!p.sentOff&&!p.hasBall);
@@ -1993,6 +2014,7 @@ function buildSim(myPow, oppPow) {
     tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(10,16);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.sequenceCounts[side]=(audit.sequenceCounts[side]||0)+1;
     audit.wide++;if(side==='WIDE_LEFT')audit.leftWide++;else audit.rightWide++;
+    addWideAttackHeat(teamId,side,1.35);
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],12);
     addHeat(carrier.x,carrier.y,1.6);
     let countedWideRun=false;
@@ -2001,7 +2023,7 @@ function buildSim(myPow, oppPow) {
       const rx=side==='WIDE_LEFT'?_PW*(tacticalSeq.mode==='underlap'?0.24:0.08):_PW*(tacticalSeq.mode==='underlap'?0.76:0.92);
       const ry=_clampPitchY(carrier.y+(teamId===0?1:-1)*rng.rng(8,13));
       runner.setTarget(rx,ry);
-      addHeat(rx,ry,0.9);
+      addHeat(rx,ry,1.25);
       countedWideRun=true;
       effects.spawn('RUN',carrier.x,carrier.y,rx,ry,'rgba(217,249,157,0.78)',0.95);
     }
@@ -2010,7 +2032,7 @@ function buildSim(myPow, oppPow) {
       const sx=side==='WIDE_LEFT'?_PW*rng.rng(0.30,0.40):_PW*rng.rng(0.60,0.70);
       const sy=_clampPitchY(carrier.y+(teamId===0?1:-1)*rng.rng(4,8));
       support.setTarget(sx,sy);
-      addHeat(sx,sy,0.65);
+      addHeat(sx,sy,.82);
       countedWideRun=true;
       effects.spawn('RUN',carrier.x,carrier.y,sx,sy,'rgba(134,239,172,0.55)',0.75);
     }
@@ -2037,6 +2059,7 @@ function buildSim(myPow, oppPow) {
     tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
     tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,12);tacticalSeq.lastCarrierId=taker.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.setPieces++;
+    addWideAttackHeat(teamId,side,.8);
     primeBoxRuns(teamId,taker.x,taker.y,side);
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],5);
     addHeat(taker.x,taker.y,1.2);
@@ -2143,7 +2166,8 @@ function buildSim(myPow, oppPow) {
       _flashArrow(tid===0?0.35:0.65,0.5,0.5,tid===0?0.86:0.14,'#c9973f',900);
       if(matchTime-lastForcedAttackTime>120&&rng.bool(goldenGoalMode?0.65:0.38)){
         lastForcedAttackTime=matchTime;
-        startCentralProbe(tid,isTR?"Hızlı geçiş fırsatı.":"Transition chance.");
+        if(rng.bool(.58))startWidePressure(tid,isTR?"Hızlı geçiş kanada açıldı.":"Transition released down the flank.");
+        else startCentralProbe(tid,isTR?"Hızlı geçiş fırsatı.":"Transition chance.");
       }
     } else if(roll<0.23){
       // free kick
@@ -2197,7 +2221,7 @@ function buildSim(myPow, oppPow) {
 
   /* main sim step */
   function simStep(dt){
-    if(gameEnded||halfTimePause)return;
+    if(gameEnded||goldenGoalLocked||halfTimePause)return;
     matchTime+=dt;
     checkHalftime();checkFT();if(gameEnded)return;
 
@@ -2206,9 +2230,17 @@ function buildSim(myPow, oppPow) {
 
     const motionDt=dt*0.255;
     ball.update(motionDt);
+    // Sustained possession supports the event heat without flattening it into
+    // a formation map. Sequence samples carry the larger visual weight.
+    heatSampleTimer+=dt;
+    if(heatSampleTimer>=1.2){
+      heatSampleTimer=0;
+      if(ball.state!==_BS.OUT_OF_PLAY)addHeat(ball.x,ball.y,.16);
+    }
     if(ball.state===_BS.LOOSE&&ball._shooter&&ball._shotResult){
       handleShot(ball._shooter,ball._shotResult,true);
     }
+    if(goldenGoalLocked)return;
 
     // boundary check
     if(ball.x<-2||ball.x>_PW+2||ball.y<-4||ball.y>_PH+4){
@@ -2217,6 +2249,7 @@ function buildSim(myPow, oppPow) {
     }
 
     tryPickup();
+    if(goldenGoalLocked)return;
 
     // Pass receiver chases ball
     if((ball.state===_BS.PASSING||ball.state===_BS.CROSSING)&&ball._passTarget){
@@ -2359,18 +2392,13 @@ function buildSim(myPow, oppPow) {
   }
 
   function captureFinalHeatmap(){
-    [...teamA,...teamB].forEach(p=>{
-      const gy=Math.min(HGH-1,Math.floor(p.hy/_PH*HGH));
-      const gx=Math.min(HGW-1,Math.floor(p.hx/_PW*HGW));
-      if(p.role!=='GK')heatGrid[gy*HGW+gx]+=0.5;
-    });
     renderer.clear();renderer.drawPitch();renderer.drawPlayers([...teamA,...teamB],ball);renderer.drawBall(ball);
     drawHeatmap(rawCtx,W,H,heatGrid,HGW,HGH);
     try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e){}
   }
 
   function endMatch(){
-    if(gameEnded)return;gameEnded=true;
+    if(gameEnded)return;gameEnded=true;goldenGoalLocked=false;
     window._finalPenaltyPending=false;
     window._openFinalPenaltyShootout=null;
     window.openCopaFinalPenalties=null;
@@ -2480,7 +2508,7 @@ function buildSim(myPow, oppPow) {
   let statUpdateTimer=0;
 
   function tick(now){
-    if(gameEnded)return;
+    if(gameEnded||goldenGoalLocked)return;
     if(!prevTime)prevTime=now;
     const frameMs=Math.min((now-prevTime)/1000,0.25);prevTime=now;
     const spd=Math.max(0.1,typeof speedMul!=="undefined"?speedMul:1)*(typeof SIM_TIME_SCALE!=="undefined"?SIM_TIME_SCALE:1);
@@ -2498,7 +2526,7 @@ function buildSim(myPow, oppPow) {
     if(accumulator>spd*0.5)accumulator=spd*0.5; // never bank more than 0.5s of backlog
     statUpdateTimer+=frameMs;
     if(statUpdateTimer>0.35){statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));}
-    if(!gameEnded)animId=requestAnimationFrame(tick);
+    if(!gameEnded&&!goldenGoalLocked)animId=requestAnimationFrame(tick);
   }
 
   /* init DOM */
@@ -2519,7 +2547,7 @@ function buildSim(myPow, oppPow) {
   /* sim object */
   sim={
     pause(){if(animId){cancelAnimationFrame(animId);animId=null;}},
-    resume(){if(!gameEnded&&!animId){prevTime=null;animId=requestAnimationFrame(tick);}},
+    resume(){if(!gameEnded&&!goldenGoalLocked&&!animId){prevTime=null;animId=requestAnimationFrame(tick);}},
     skip(){
       if(gameEnded)return;
       if(animId){cancelAnimationFrame(animId);animId=null;}
@@ -2527,7 +2555,7 @@ function buildSim(myPow, oppPow) {
       halfTimePause=false;
       const maxSec=(90+stoppage+30)*60;
       let guard=0;
-      while(!gameEnded&&matchTime<maxSec&&guard<300000){simStep(FIXED_STEP);guard++;}
+      while(!gameEnded&&!goldenGoalLocked&&matchTime<maxSec&&guard<300000){simStep(FIXED_STEP);guard++;}
       if(!gameEnded)endMatch();
     },
     shout(t){
