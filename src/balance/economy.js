@@ -2,6 +2,7 @@
 function newShopOffers(){
  shopOffers=[];
  shopVariants={};
+ shopPriceChaos={};
  if(shopBlocked>0)return; // market is closed
  const pool=[];
  const pintiShop=typeof chairman!=="undefined"&&chairman&&chairman.id==="pinti";
@@ -30,6 +31,9 @@ function newShopOffers(){
      shopOffers.push(k);
      shopVariants[k]=shopVariantLock[k]!==undefined?shopVariantLock[k]:weightedVariant();
      shopVariantLock[k]=shopVariants[k];
+     if(typeof chairman!=="undefined"&&chairman&&chairman.id==="cilgin"&&(CARDDEFS[k].price||0)>0&&rand()<0.35){
+       shopPriceChaos[k]=rand()<0.5?-1:1;
+     }
      if(typeof trackCardOffered==="function"){
        const old=cardVariant[k]||0;cardVariant[k]=shopVariants[k];const price=cardPrice(k);cardVariant[k]=old;
        trackCardOffered(k,shopVariants[k],price);

@@ -33,6 +33,8 @@ function cardCostMeta(k,v){
 function cardCostBadge(k,v){
  const c=cardCostMeta(k,v);
  const tr=typeof LANG!=="undefined"&&LANG==="tr";
+ const chaos=typeof shopPriceChaos!=="undefined"?Number(shopPriceChaos[k]||0):0;
+ if(chaos)return tr?"Kaos "+(chaos>0?"+":"-")+"€"+Math.abs(chaos)+"M":"Chaos "+(chaos>0?"+":"-")+"€"+Math.abs(chaos)+"M";
  if(c.chem)return tr?"Kimya -"+c.chem:"Chemistry -"+c.chem;
  if(c.trust)return tr?"G\u00fcven -"+c.trust:"Trust -"+c.trust;
  if(c.nextMarket)return tr?"Pazar +%"+c.priceRise:"Market +"+c.priceRise+"%";
@@ -54,7 +56,8 @@ function cardPrice(k){
  if(base===0)return 0;
  const vm=d.fixedPrice?1:VARIANT_PRICE_MOD[variantOf(k)||0];
  const pm=typeof cardPriceMod!=="undefined"?cardPriceMod:1.0;
- return Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.round(base*vm*pm)+chairmanMarketMod());
+ const chaos=typeof shopPriceChaos!=="undefined"?Number(shopPriceChaos[k]||0):0;
+ return Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.round(base*vm*pm)+chairmanMarketMod()+chaos);
 }
 
 function variantText(k){
