@@ -74,7 +74,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260712a">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260712d">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260712b">
 <link rel="stylesheet" href="src/styles/match.css?v=20260711-stability1b">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
@@ -1616,33 +1616,33 @@ Object.assign(T.tr.cards,{
   genc:{n:"Wonderkid",d:"Oyuncuları büyütmez; kartın takım gücü katkısı her tur artar. COMMON: 1. tur +1'den finalde +6'ya. DARK: 1. tur +4'ten finalde +9'a; finalde -4 güç.",i:""},
   ch_momentum:{n:"İvme",d:"Turnuva ilerledikçe takımın kazandığı ritmi güce çevirir. COMMON: 1-2. tur +2, 3-4. tur +3, 5. turdan itibaren +4. DARK: +4/+6/+8; finalde -6 güç.",i:""},
   kontra:{n:"Kontra",d:"COMMON: Forvet başına +1 güç. DARK: Forvet başına +2 güç; %25 ihtimal -€10M ceza.",i:"⚡"},
-  buyuk_mac:{n:"Büyük Maç Adamı",d:"COMMON: Tek maçlık +6 güç. DARK: Tek maçlık +6 güç; %20 ihtimal -€12M ceza.",i:""},
+  buyuk_mac:{n:"Büyük Maç Adamı",d:"COMMON: Tek maçlık +6 güç. DARK: Tek maçlık +10 güç; %20 ihtimal -€12M ceza.",i:""},
   yildiz:{n:"Pastanın Çileği",d:"COMMON: En iyi oyuncuna göre +4/+6/+8/+10 güç. DARK: +6/+8/+10/+14 güç; %25 ihtimal -€6M ceza.",i:"⭐"},
   otobus:{n:"Otobüs",d:"COMMON: Stoper başına +3, max +9. DARK: +4, max +12; %10 ihtimal -€6M; finalde -3.",i:""},
   kaleci_kalesi:{n:"Kaleci Kalesi",d:"COMMON: Kaleci gücü +5. DARK: +9; %15 ihtimal -€15M; finalde -8.",i:""},
-  anadolu:{n:"Anadolu Eksp.",d:"Sahadaki 70 altı oyuncu başına +1 güç. COMMON max +3, DARK max +5.",i:"️"},
+  anadolu:{n:"Anadolu Eksp.",d:"Sahadaki 70 altı oyuncu başına +1 güç. COMMON max +3. DARK max +5; %20 ihtimalle €5M ek masraf.",i:"️"},
   altyapi_plani:{n:"Altyapı Planı",d:"COMMON: 23 yaş altı başına +1, max +4. DARK: +2 (max +6), finalde -4.",i:""},
   tecrubeli_omurga:{n:"Tecrübeli Omurga",d:"Yalnız ilk 11'deki 32 yaş ve üzeri oyuncuları sayar. COMMON: oyuncu başına +1, en fazla +4. DARK: oyuncu başına +2, en fazla +6; finalde -4 güç.",i:""},
   yerli_blok:{n:"Yerli Blok",d:"COMMON: Yerli başına +1, max +5. DARK: +2 (max +5), finalde -3.",i:""},
   kanat_akini:{n:"Kanat Akını",d:"COMMON: Kanat/bek başına +1, max +4. DARK: +2 (max +6), finalde -5.",i:""},
   cift_forvet:{n:"Çift Forvet",d:"COMMON: SNT başına +2, max +4. DARK: SNT başına +4, max +8, finalde -4.",i:"⚔️"},
   derbi:{n:"Derbi Aslanı",d:"İlk üç tur etkisizdir; yalnız büyük maçlarda açılır. COMMON: çeyrek final +2, yarı final +4, final +8. DARK: +4/+7/+10; finalde -4 güç.",i:""},
-  final_provasi:{n:"Final Provası",d:"Yalnız final maçında çalışır. COMMON finalde +5, DARK finalde +9 takım gücü verir; ek final cezası yoktur.",i:"️"},
+  final_provasi:{n:"Final Provası",d:"Yalnız final maçında çalışır. COMMON finalde +5 güç verir. DARK finalde +9 güç verir; satın alırken %25 ihtimalle €3M ek masraf çıkarır.",i:"️"},
   son_dans:{n:"Son Dans",d:"COMMON: Finalde sakatsız +8, sakatlık varsa +2. DARK: sakatsız +14, sakatlık varsa -8.",i:""},
   taksit_transfer:{n:"Taksitli Transfer",d:"COMMON: Hemen +€10M, sonraki 2 tur -€4M. DARK: +€18M, 2 tur -€7M; güven -1, finalde -6.",i:""},
   son_kredi:{n:"Son Kredi",d:"COMMON: Kasa -€10M altındaysa +€15M. DARK: +€20M, güven -1. Başkan eşiği 5M sertleşir.",i:""},
   kara_borsa:{n:"Kara Borsa",d:"COMMON: 1 bedava COMMON kalıcı kart. DARK: 2 bedava kalıcı kart; %40 ihtimal -€10M.",i:""},
-  sahte_evrak:{n:"Sahte Evrak",d:"COMMON: +6 güç/tur. DARK: +10 güç/tur, başkan güveni -1.",i:""},
+  sahte_evrak:{n:"Sahte Evrak",d:"COMMON: +6 güç/tur, %18 güven riski. DARK: +10 güç/tur, güven -1 ve finalde -10.",i:""},
   deplasman_kafilesi:{n:"Deplasman Kafilesi",d:"COMMON: Güçlü rakibe karşı +4, değilse +2. DARK: Güçlü rakibe karşı +8; değilse %50 +4 / %50 -4.",i:"✈️"},
   kumarbaz:{n:"Kumarbaz",d:"COMMON: Şimdi +€15M, sonraki 2 tur -€5M öde. DARK: Şimdi +€25M, sonraki 2 tur -€10M öde, başkan güveni -1.",i:""},
   gecici_prim:{n:"Geçici Prim",d:"COMMON: Bu maç +6; %30 sakatlık riski. Sonraki maç -2. DARK: Bu maç +12; %60 sakatlık riski. Sonraki maç -2.",i:""},
   kisa_kamp:{n:"Kısa Kamp",d:"COMMON: Bu maç +4, sonraki maç -2. DARK: Bu maç +6, sonraki maç -4.",i:"⛺"},
-  doping:{n:"Doping Söylentisi",d:"COMMON: +6 güç; her tur %35 ihtimal -€15M. DARK: +10 güç; %25 ihtimal -€25M.",i:""},
-  kriz:{n:"Kriz Yönetimi",d:"Final cezasının yarısını telafi eder. COMMON max 6, DARK max 8.",i:""},
+  doping:{n:"Doping Söylentisi",d:"COMMON: +6 güç/tur, %20 güven riski ve her tur %35 ihtimal -€15M. DARK: +10 güç/tur, güven -1, her tur %25 ihtimal -€25M ve finalde -6.",i:""},
+  kriz:{n:"Kriz Yönetimi",d:"Final cezasının yarısını telafi eder. COMMON max 6. DARK max 8; %20 ihtimalle €5M ek masraf.",i:""},
   kurban_belli:{n:"Kurban Belli",d:"COMMON: +6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır. DARK: +12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.",i:""},
   primler_yatinca:{n:"Primler Yatınca",d:"+4 güç; gelecek tur −€8M.",i:""},
   vur_igneyi:{n:"Vur İğneyi",d:"COMMON: 1 sakat oyuncuyu iyileştirir; kart bedeli dışında ek masraf yok. DARK: 2 sakat oyuncuyu iyileştirir; %25 ihtimal -€6M ek masraf.",i:""},
-  bu_adam:{n:"Sürpriz Faktör",d:"COMMON: 70-79 güçlü yedek ekler. DARK: 80-89 güçlü yedek ekler.",i:""},
+  bu_adam:{n:"Sürpriz Faktör",d:"COMMON: 70-79 güçlü yedek ekler. DARK: 80-89 güçlü yedek ekler; %25 ihtimalle €6M ek masraf.",i:""},
   gec_gec:{n:"Geç Geçebilirsen",d:"COMMON: Güçlü rakibe karşı +5, diğer +2. DARK: +2 ekstra (+7/+4), finalde -3.",i:"⏱️"},
   nasip_kismet:{n:"Nasip, Kısmet",d:"COMMON: Sonraki tur kart fiyatları -%25. DARK: -%40; %25 ihtimal -€4M ceza.",i:""},
   yildiz_krizi:{n:"Yıldız Krizi",d:"COMMON: Medya ilgisi bu maç +3 güç verir. DARK: Bu maç +4 güç; %20 ihtimal -€4M ceza.",i:""},
@@ -1653,33 +1653,33 @@ Object.assign(T.en.cards,{
   genc:{n:"Wonderkid",d:"Does not develop players; the card's team-power contribution rises each round. COMMON: +1 in round 1 to +6 in the final. DARK: +4 to +9; -4 power in the final.",i:""},
   ch_momentum:{n:"Momentum",d:"Converts the team's growing tournament rhythm into power. COMMON: +2 in rounds 1-2, +3 in rounds 3-4, then +4. DARK: +4/+6/+8; -6 power in the final.",i:""},
   kontra:{n:"Counter",d:"COMMON: +1 power per striker. DARK: +2 power per striker; 25% chance -€10M fine.",i:"⚡"},
-  buyuk_mac:{n:"Big Game Player",d:"COMMON: Single-match +6 power. DARK: Single-match +6 power; 20% chance -€12M fine.",i:""},
+  buyuk_mac:{n:"Big Game Player",d:"COMMON: Single-match +6 power. DARK: Single-match +10 power; 20% chance -€12M fine.",i:""},
   yildiz:{n:"Cherry on Top",d:"COMMON: +4/+6/+8/+10 power from your best player. DARK: +6/+8/+10/+14 power; 25% chance -€6M fine.",i:"⭐"},
   otobus:{n:"The Bus",d:"COMMON: +3 per CB, max +9. DARK: +4, max +12; 10% chance -€6M; -3 in final.",i:""},
   kaleci_kalesi:{n:"Keeper's Fortress",d:"COMMON: Goalkeeper rating +5. DARK: +9; 15% chance -€15M; -8 in final.",i:""},
-  anadolu:{n:"Anadolu Express",d:"+1 power per sub-70 starter. COMMON max +3, DARK max +5.",i:"️"},
+  anadolu:{n:"Anadolu Express",d:"+1 power per sub-70 starter. COMMON max +3. DARK max +5; 20% chance of an extra €5M cost.",i:"️"},
   altyapi_plani:{n:"Academy Plan",d:"COMMON: +1 per U23, max +4. DARK: +2 (max +6), -4 in the final.",i:""},
   tecrubeli_omurga:{n:"Veteran Spine",d:"Counts only age-32+ players in the starting XI. COMMON: +1 each, max +4. DARK: +2 each, max +6; -4 power in the final.",i:""},
   yerli_blok:{n:"Local Block",d:"COMMON: +1 per local, max +5. DARK: +2 (max +5), -3 in the final.",i:""},
   kanat_akini:{n:"Wing Surge",d:"COMMON: +1 per wing/wingback, max +4. DARK: +2 (max +6), -5 in the final.",i:""},
   cift_forvet:{n:"Two Strikers",d:"COMMON: ST +2 each, max +4. DARK: ST +4 each, max +8, -4 in the final.",i:"⚔️"},
   derbi:{n:"Derby Lion",d:"Inactive in the first three rounds; activates only in big matches. COMMON: quarter-final +2, semi-final +4, final +8. DARK: +4/+7/+10; -4 power in the final.",i:""},
-  final_provasi:{n:"Final Rehearsal",d:"Works only in the final. COMMON adds +5 team power and DARK adds +9; there is no additional final penalty.",i:"️"},
+  final_provasi:{n:"Final Rehearsal",d:"Works only in the final. COMMON adds +5 power. DARK adds +9 power and has a 25% chance of an extra €3M cost when acquired.",i:"️"},
   son_dans:{n:"Last Dance",d:"COMMON: Final +8 if healthy, +2 if injured. DARK: +14 if healthy, -8 if injured.",i:""},
   taksit_transfer:{n:"Installment Deal",d:"COMMON: +€10M now, -€4M for 2 rounds. DARK: +€18M, -€7M for 2 rounds; trust -1, final -6.",i:""},
   son_kredi:{n:"Last Credit",d:"COMMON: Below -€10M: +€15M. DARK: +€20M, trust -1. Chairman limit tightens by 5M.",i:""},
   kara_borsa:{n:"Black Market",d:"COMMON: 1 free COMMON persistent card. DARK: 2 free persistent cards; 40% chance -€10M.",i:""},
-  sahte_evrak:{n:"Fake Papers",d:"COMMON: +6 power/round. DARK: +10 power/round, chairman trust -1.",i:""},
+  sahte_evrak:{n:"Fake Papers",d:"COMMON: +6 power/round, 18% trust risk. DARK: +10 power/round, trust -1 and -10 in the final.",i:""},
   deplasman_kafilesi:{n:"Away Convoy",d:"COMMON: +4 against stronger opponent, otherwise +2. DARK: +8 against stronger opponent; otherwise 50% +4 / 50% -4.",i:"✈️"},
   kumarbaz:{n:"Gambler",d:"COMMON: +€15M now, pay -€5M for the next 2 rounds. DARK: +€25M now, pay -€10M for the next 2 rounds, chairman trust -1.",i:""},
   gecici_prim:{n:"Temp Bonus",d:"COMMON: This match +6; 30% injury risk. Next match -2. DARK: This match +12; 60% injury risk. Next match -2.",i:""},
   kisa_kamp:{n:"Short Camp",d:"COMMON: This match +4, next match -2. DARK: This match +6, next match -4.",i:"⛺"},
-  doping:{n:"Doping Rumour",d:"COMMON: +6 power; 35% each round -€15M. DARK: +10 power; 25% chance -€25M.",i:""},
-  kriz:{n:"Crisis Mgmt",d:"Offsets half the final penalty. COMMON max 6, DARK max 8.",i:""},
+  doping:{n:"Doping Rumour",d:"COMMON: +6 power/round, 20% trust risk and 35% chance -€15M each round. DARK: +10, trust -1, 25% chance -€25M each round and -6 in the final.",i:""},
+  kriz:{n:"Crisis Mgmt",d:"Offsets half the final penalty. COMMON max 6. DARK max 8; 20% chance of an extra €5M cost.",i:""},
   kurban_belli:{n:"Sacrificial Lamb",d:"COMMON: +6 power; 1 player injured for 1 round after. DARK: +12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine.",i:""},
   primler_yatinca:{n:"Bonus Day",d:"+4 power; next round −€8M.",i:""},
   vur_igneyi:{n:"Play Through Pain",d:"COMMON: Heals 1 injured player; no extra cost beyond the card price. DARK: Heals 2 injured players; 25% chance -€6M extra cost.",i:""},
-  bu_adam:{n:"Surprise Factor",d:"COMMON: Adds a 70-79 OVR bench player. DARK: Adds an 80-89 OVR bench player.",i:""},
+  bu_adam:{n:"Surprise Factor",d:"COMMON: Adds a 70-79 OVR bench player. DARK: Adds an 80-89 OVR player; 25% chance of an extra €6M cost.",i:""},
   gec_gec:{n:"Try and Stop Us",d:"COMMON: +5 against stronger opponent, +2 otherwise. DARK: +2 extra (+7/+4), -3 in the final.",i:"⏱️"},
   nasip_kismet:{n:"Luck of the Draw",d:"COMMON: Next-round card prices -25%. DARK: -40%; 25% chance -€4M fine.",i:""},
   yildiz_krizi:{n:"Star Crisis",d:"COMMON: Media attention grants +3 this match. DARK: +4 this match; 20% chance -€4M fine.",i:""},
@@ -2207,9 +2207,16 @@ function _renderPenaltyModal(){
   /* Duel cards with keeper/shooter OV */
   const shooterOV=Math.round(_penPower(shooter,75)),keeperOV=Math.round(_penPower(keeper,75));
   const ovChip=v=>"<b class=\"pen-ov\" title=\""+(tr?"Güç":"Rating")+"\">"+v+"</b>";
+  /* Hint under the shooter card: your accuracy when shooting, opponent's tendency when keeping */
+  const shooterHint=done?"":(shootPhase
+    ?(tr?"İsabet: "+(shooterOV>=82?"yüksek":shooterOV>=72?"iyi":"değişken"):"Accuracy: "+(shooterOV>=82?"high":shooterOV>=72?"good":"shaky"))
+    :_penTendency(shooterName,shooterOV,tr));
+  const keeperHint=done?"":(!shootPhase
+    ?(tr?"Refleks: "+(keeperOV>=82?"üstün":keeperOV>=72?"iyi":"sıradan"):"Reflexes: "+(keeperOV>=82?"elite":keeperOV>=72?"good":"average"))
+    :"");
   const actorLine=done?"":("<div class=\"pen-actors\">"
-    +"<span class=\"pen-duel"+(shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"VURAN":"SHOOTER"):(tr?"RAKİP VURAN":"OPP. SHOOTER"))+"</i><em>"+shooterName+"</em>"+ovChip(shooterOV)+"</span>"
-    +"<span class=\"pen-duel"+(!shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"RAKİP KALECİ":"OPP. KEEPER"):(tr?"SENİN KALECİN":"YOUR KEEPER"))+"</i><em>"+keeperName+"</em>"+ovChip(keeperOV)+"</span>"
+    +"<span class=\"pen-duel"+(shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"VURAN":"SHOOTER"):(tr?"RAKİP VURAN":"OPP. SHOOTER"))+"</i><em>"+shooterName+"</em>"+ovChip(shooterOV)+(shooterHint?"<span class=\"pen-hint\">"+shooterHint+"</span>":"")+"</span>"
+    +"<span class=\"pen-duel"+(!shootPhase?" is-you":"")+"\"><i>"+(shootPhase?(tr?"RAKİP KALECİ":"OPP. KEEPER"):(tr?"SENİN KALECİN":"YOUR KEEPER"))+"</i><em>"+keeperName+"</em>"+ovChip(keeperOV)+(keeperHint?"<span class=\"pen-hint\">"+keeperHint+"</span>":"")+"</span>"
     +"</div>");
   const reveal=s.reveal||null;
   const clsShot=reveal?(" is-shot-"+reveal.shot):"";
@@ -2243,11 +2250,48 @@ function _renderPenaltyModal(){
          +dirBtn("R",(tr?"SAĞA ATLA":"DIVE RIGHT")+" →",tr?"Sağa atla":"Dive right"))
       +"</div>";
   const activeHome=!done&&shootPhase,activeAway=!done&&!shootPhase;
+  /* Streak badge: your scoring streak (shoot) or your keeper's save streak (keep) */
+  let homeStreakBadge="",awayStreakBadge="";
+  if(!done){
+    const goalStreak=_penTailStreak(s.homeShots,"goal");
+    const saveStreak=_penTailStreak(s.awayShots,"save");
+    if(activeHome&&goalStreak>=2)homeStreakBadge="<span class=\"pen-streak\">"+(tr?"SICAK ×":"HOT ×")+goalStreak+"</span>";
+    if(activeAway&&saveStreak>=2)awayStreakBadge="<span class=\"pen-streak\">"+(tr?"KALECİ FORMDA":"KEEPER HOT")+"</span>";
+  }
+  /* Decision-moment tension */
+  const tensionHtml=(!done&&_penDecisive(s))?"<div class=\"pen-tension\">"+(shootPhase?(tr?"⚡ Kritik atış — golle avantaj yakalarsın":"⚡ Match pressure — score to seize control"):(tr?"⚡ Kritik an — kurtarış seriyi çevirir":"⚡ Match pressure — a save turns the tie"))+"</div>":"";
+  /* Crowd reaction sweep on a fresh result */
+  const crowdHtml=reveal?"<div class=\"pen-crowd "+reveal.type+"\" aria-hidden=\"true\"></div>":"";
   const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save")+((sudden||s.sudden)?" is-sudden":"");
-  showModal("<div class=\""+rootCls+"\"><div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANI ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
+  showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANI ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
 }
 /* Hover a direction button → highlight the matching goal zone (preview) */
 window._penHoverZone=function(d){const g=document.querySelector(".pen-modal .pen-goal");if(!g)return;g.classList.remove("hover-L","hover-C","hover-R");if(d)g.classList.add("hover-"+d);};
+/* Deterministic "reading" hint for the opposing shooter (spoiler-free) */
+function _penTendency(name,ov,tr){
+  let h=0;const n=(name||"");for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;
+  const trs=["köşeleri sever","ortayı dener","sağ ayak baskın","soğukkanlı","tahmin edilemez"];
+  const ens=["loves the corners","tries the middle","right-foot heavy","ice cold","unpredictable"];
+  const t=(tr?trs:ens)[h%5];
+  return (tr?"Eğilim: ":"Reads: ")+t;
+}
+/* Count consecutive results of one type at the tail of a shots array */
+function _penTailStreak(arr,type){let c=0;for(let i=arr.length-1;i>=0;i--){if(arr[i]&&arr[i].type===type)c++;else break;}return c;}
+/* Is the current kick a match-point / high-pressure moment? */
+function _penDecisive(s){if(_penIsDone(s))return false;const ht=s.homeShots.length,at=s.awayShots.length;if(ht>=5&&at>=5)return true;return ht>=4||at>=4;}
+/* Keyboard shortcuts: ←/1 left · ↑/2 center · →/3 right (registered once) */
+if(typeof window!=="undefined"&&!window._penKeyReady){
+  window._penKeyReady=true;
+  document.addEventListener("keydown",function(e){
+    const m=document.querySelector(".pen-modal");if(!m||m.classList.contains("is-done"))return;
+    const s=window._penState;if(!s||_penIsDone(s))return;
+    let d=null;
+    if(e.key==="ArrowLeft"||e.key==="1")d="L";
+    else if(e.key==="ArrowUp"||e.key==="2")d="C";
+    else if(e.key==="ArrowRight"||e.key==="3")d="R";
+    if(d){e.preventDefault();_takePenalty(d);}
+  });
+}
 function _takePenalty(dir){
   const s=window._penState;if(!s||_penIsDone(s))return;
   _penSfx("direction_select");
@@ -2270,7 +2314,8 @@ function _takePenalty(dir){
   s.log.push({side,no,player,keeperName,shot,keeper:keeperDir,type:res.type,byUser});
   s.reveal={type:res.type,shot,keeper:keeperDir,byUser,player,keeperName};
   _penSfx("shot_reveal");
-  setTimeout(function(){_penSfx(res.type==="goal"?"goal_scored":res.type==="save"?"goalkeeper_save":res.type==="post"?"post_hit":"shot_missed");},reduce?0:160);
+  /* result SFX fires when the ball reaches the goal (~ball arc duration), synced to the animation */
+  setTimeout(function(){_penSfx(res.type==="goal"?"goal_scored":res.type==="save"?"goalkeeper_save":res.type==="post"?"post_hit":"shot_missed");},reduce?0:360);
   s.phase=s.phase==="shoot"?"save":"shoot";
   s.round=Math.max(s.homeShots.length,s.awayShots.length)+1;
   if(_penIsDone(s)){s.phase="done";setTimeout(function(){_penSfx(_penWinner(s)?"shootout_won":"shootout_lost");},reduce?0:420);}

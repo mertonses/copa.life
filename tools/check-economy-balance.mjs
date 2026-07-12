@@ -23,6 +23,11 @@ expect(/VARIANT_PRICE_MOD=\[1\.0,1\.25\]/.test(files.prices),"DARK price multipl
 expect(/FINAL_DEBT_CAP=30/.test(files.config),"final risk cap is not 30");
 expect(/FINAL_CARD_POWER_CAP=18/.test(files.config),"final-only card stack cap is not 18");
 expect(!/final_provasi\s*:\s*4/.test(files.effects),"Final Provası DARK still cancels its own final-only bonus");
+expect(/final_provasi:\{chance:0\.25,cash:3\}/.test(files.effects),"Final Provası DARK purchase risk is not 25% / EUR3M");
+expect(/anadolu:\{chance:0\.20,cash:5\}/.test(files.effects),"Anadolu Eksp. DARK is missing its purchase risk");
+expect(/kriz:\{chance:0\.20,cash:5\}/.test(files.effects),"Crisis Management DARK is missing its purchase risk");
+expect(/bu_adam:\{chance:0\.25,cash:6\}/.test(files.effects),"Surprise Factor DARK is missing its purchase risk");
+expect(/applyDarkPurchaseRisk\(k,variant\)/.test(files.effects),"DARK purchase risk is not connected to card acquisition");
 expect(/CARD_PRICE_FLOOR=2/.test(files.config),"paid-card price floor is not 2");
 expect(/playerMarketValue\(p\.ov,"free_agent",round\)/.test(files.html),"free agents do not use the shared player valuation curve");
 expect(/playerMarketValue/.test(files.core)&&/chairmanTransferMultiplier/.test(files.generate),"draft valuation or chairman transfer modifier is disconnected");
@@ -36,6 +41,7 @@ expect(!/pinti:-12|cilgin:-31/.test(files.html),"stale chairman debt limits rema
 expect(/finalPenalty,relief,Math\.ceil\(finalPenalty\*0\.5\)/.test(files.effects),"Crisis Management does not enforce the half-penalty rule");
 expect(/const gain=v===1\?18:10,pay=v===1\?7:4/.test(files.effects),"Installment Transfer behavior is out of sync");
 expect(/const netPow=v===1\?4:3/.test(files.effects)&&/riskPowerMod\+=netPow/.test(files.effects),"Star Crisis behavior is out of sync");
+expect(/if\(k==="buyuk_mac"\)\{\s*const pow=v===1\?10:6/.test(files.effects),"Big Game Player DARK reward is still dominated by COMMON");
 
 if(failures.length){console.error(failures.join("\n"));process.exit(1);}
 console.log("Economy balance OK: interest removed, caps/valuation/chairmen/telemetry verified.");

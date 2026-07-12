@@ -32,9 +32,76 @@ vm.createContext(context);
 vm.runInContext(sources.i18n, context, { filename: "src/data/i18n.js" });
 vm.runInContext(sources.defs, context, { filename: "src/cards/cardDefs.js" });
 vm.runInContext(sources.balance, context, { filename: "src/cards/cardBalance.js" });
+vm.runInContext(sources.effects, context, { filename: "src/cards/cardEffects.js" });
 
 const cardDefs = context.CARDDEFS || {};
 const cardKeys = context.CARDKEYS || Object.keys(cardDefs);
+
+for (const [key, risk] of Object.entries(context.DARK_PURCHASE_RISKS || {})) {
+  if (!cardDefs[key]) fail(`DARK purchase risk references unknown card: ${key}`);
+  if (!(risk.chance > 0 && risk.chance < 1) || !(risk.cash > 0)) {
+    fail(`${key} has an invalid DARK purchase risk`);
+  }
+}
+
+const directDarkDownsides = new Set([
+  "kontra",
+  "buyuk_mac",
+  "son_dans",
+  "son_kredi",
+  "kara_borsa",
+  "deplasman_kafilesi",
+  "kumarbaz",
+  "gecici_prim",
+  "kisa_kamp",
+  "kurban_belli",
+  "primler_yatinca",
+  "vur_igneyi",
+  "nasip_kismet",
+  "yildiz_krizi",
+]);
+const darkRiskCoverage = new Set([
+  ...Object.keys(context.KARA_PEN || {}),
+  ...Object.keys(context.DARK_PURCHASE_RISKS || {}),
+  ...directDarkDownsides,
+]);
+const uncoveredDarkCards = cardKeys.filter((key) => !darkRiskCoverage.has(key));
+if (uncoveredDarkCards.length) {
+  fail(`DARK variants without a downside: ${uncoveredDarkCards.join(", ")}`);
+}
+
+const finalRehearsalRisk = context.DARK_PURCHASE_RISKS?.final_provasi;
+if (finalRehearsalRisk?.chance !== 0.25 || finalRehearsalRisk?.cash !== 3) {
+  fail("final_provasi DARK purchase risk is not 25% / EUR3M");
+}
+if (!/applyDarkPurchaseRisk\(k,variant\)/.test(sources.effects)) {
+  fail("DARK purchase risks are not connected to addCard");
+}
+
+let chargedCash = 0;
+context.spend = (amount) => { chargedCash += Number(amount) || 0; };
+context.trackCardPenalty = () => {};
+context.pushFeed = () => {};
+context.L = () => ({
+  variantLbl: ["COMMON", "DARK"],
+  cards: { final_provasi: { n: "Final Provası" } },
+});
+context.rand = () => 0.249;
+const finalRiskHit = context.applyDarkPurchaseRisk("final_provasi", 1);
+if (!finalRiskHit?.triggered || chargedCash !== 3) {
+  fail("final_provasi DARK risk does not charge EUR3M below the 25% threshold");
+}
+chargedCash = 0;
+context.rand = () => 0.25;
+const finalRiskMiss = context.applyDarkPurchaseRisk("final_provasi", 1);
+if (finalRiskMiss?.triggered || chargedCash !== 0) {
+  fail("final_provasi DARK risk triggers at or above the 25% threshold");
+}
+context.rand = () => 0;
+const finalCommonRisk = context.applyDarkPurchaseRisk("final_provasi", 0);
+if (finalCommonRisk?.triggered || chargedCash !== 0) {
+  fail("final_provasi COMMON incorrectly receives the DARK purchase risk");
+}
 
 const squads = {
   balanced: [
@@ -69,6 +136,27 @@ const squads = {
     eff: 58 + (index % 7),
     age: 19 + (index % 18),
     tr: index % 2 === 0,
+  })),
+  youth: Array.from({ length: 11 }, (_, index) => ({
+    pos: ["GK", "LB", "CB", "CB", "RB", "LW", "CM", "CM", "RW", "ST", "ST"][index],
+    ov: 68 + (index % 8),
+    eff: 68 + (index % 8),
+    age: 19 + (index % 5),
+    tr: index % 2 === 0,
+  })),
+  veteran: Array.from({ length: 11 }, (_, index) => ({
+    pos: ["GK", "LB", "CB", "CB", "RB", "LW", "CM", "CM", "RW", "ST", "ST"][index],
+    ov: 70 + (index % 8),
+    eff: 70 + (index % 8),
+    age: 32 + (index % 5),
+    tr: index % 2 === 0,
+  })),
+  local: Array.from({ length: 11 }, (_, index) => ({
+    pos: ["GK", "LB", "CB", "CB", "RB", "LW", "CM", "CM", "RW", "ST", "ST"][index],
+    ov: 70 + (index % 8),
+    eff: 70 + (index % 8),
+    age: 23 + (index % 9),
+    tr: true,
   })),
 };
 
@@ -113,7 +201,14 @@ for (const key of cardKeys) {
   if (commonMax > 18 || darkMax > 18) fail(`${key} has an unusually high direct power effect`);
   if (darkMax < commonMax && cardDefs[key]?.mode === "scaling") fail(`${key} DARK scaling effect is lower than COMMON`);
 
-  summary.push({ key, commonPrice, darkPrice, commonMax, darkMax });
+  const darkRisk = [
+    context.KARA_PEN?.[key] ? `final_debt:${context.KARA_PEN[key]}` : "",
+    context.DARK_PURCHASE_RISKS?.[key]
+      ? `purchase:${Math.round(context.DARK_PURCHASE_RISKS[key].chance * 100)}%/EUR${context.DARK_PURCHASE_RISKS[key].cash}M`
+      : "",
+    directDarkDownsides.has(key) ? "direct_or_conditional" : "",
+  ].filter(Boolean).join("+");
+  summary.push({ key, commonPrice, darkPrice, commonMax, darkMax, darkRisk });
 }
 
 const visibleCopy = [sources.hub, sources.html].join("\n");

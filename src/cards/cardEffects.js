@@ -19,6 +19,14 @@ var KARA_PEN={
  kaleci_kalesi:8,cift_forvet:4
 };
 
+/* DARK risks resolved once when the card is acquired. */
+var DARK_PURCHASE_RISKS={
+ anadolu:{chance:0.20,cash:5},
+ final_provasi:{chance:0.25,cash:3},
+ kriz:{chance:0.20,cash:5},
+ bu_adam:{chance:0.25,cash:6}
+};
+
 function cardEff(k,s,r){
  if(!CARDDEFS[k])return 0;
  return CARDDEFS[k].eff(s,r)||0;
@@ -33,6 +41,13 @@ function applyCardCashPenalty(k,amount){
  if(!amount)return;
  spend(amount,"spent");
  if(typeof trackCardPenalty==="function")trackCardPenalty(k,0,0,amount);
+}
+function applyDarkPurchaseRisk(k,variant){
+ const risk=DARK_PURCHASE_RISKS[k];
+ if(variant!==1||!risk||rand()>=risk.chance)return{triggered:false,cash:0};
+ applyCardCashPenalty(k,risk.cash);
+ pushFeed("<b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK ek masrafı: -€":"DARK extra cost: -€")+risk.cash+"M","lose");
+ return{triggered:true,cash:risk.cash};
 }
 
 /* ===== Kart satin alma etkileri ===== */
@@ -82,8 +97,9 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="buyuk_mac"){
-  riskPowerMod+=6;
-  pushFeed("🎯 <b>"+L().cards[k].n+"</b> +6"+(tr?" güç":" power"),"pres");
+  const pow=v===1?10:6;
+  riskPowerMod+=pow;
+  pushFeed("🎯 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç":" power"),"pres");
   if(v===1&&rand()<0.20){applyCardCashPenalty(k,12);pushFeed("🎯 "+(tr?"Büyük maç riski: -€12M":"Big game risk: -€12M"),"lose");}
   return;
  }
@@ -357,6 +373,7 @@ function addCard(k,v,opts){
    const debt=typeof addFinalPenalty==="function"?addFinalPenalty(pen,k):{added:pen,overflow:0,cash:0};
    if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+debt.added+" güç":"DARK — -"+debt.added+" in the final")+(debt.overflow?(LANG==="tr"?" · tavan aşımı -€"+debt.cash+"M":" · overflow -€"+debt.cash+"M"):""),"lose");
   }
+ applyDarkPurchaseRisk(k,variant);
  if(typeof trackCardAcquired==="function")trackCardAcquired(k,variant,opts);
  if(instant)applyRiskCardGain(k);
  /* Contract kartlar satin alindiginda ani etkilerini uygula */

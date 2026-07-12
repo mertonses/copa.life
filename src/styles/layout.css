@@ -6324,3 +6324,85 @@ body{
   .pen-modal .pen-goal .pen-keeper,.pen-modal .pen-goal .pen-ball,.pen-modal .pen-zones i{transition:none!important}
   .pen-modal .pen-goal.goal .pen-net,.pen-modal .pen-goal .pen-keeper.is-ready,.pen-modal .pen-dot.is-next,.pen-modal .pen-outcome{animation:none!important}
 }
+
+/* ============================================================
+   PENALTY SHOOTOUT — animation & drama pass (appended last)
+   ============================================================ */
+/* 1. ball kick: arc from the spot up to the corner, with spin */
+.pen-goal.show-ball .pen-ball{
+  animation:penBallKick .42s cubic-bezier(.25,.7,.3,1) both;
+}
+@keyframes penBallKick{
+  0%{transform:translateX(-50%) translateY(52px) scale(.62) rotate(0deg)}
+  55%{transform:translateX(-50%) translateY(-11px) scale(1.06) rotate(230deg)}
+  100%{transform:translateX(-50%) translateY(0) scale(1) rotate(360deg)}
+}
+/* 2. keeper dive: quick lunge + settle toward the guessed side */
+.pen-goal.show-ball .pen-keeper.is-keeper-L{animation:penDiveL .34s cubic-bezier(.3,.8,.35,1) both}
+.pen-goal.show-ball .pen-keeper.is-keeper-R{animation:penDiveR .34s cubic-bezier(.3,.8,.35,1) both}
+.pen-goal.show-ball .pen-keeper.is-keeper-C{animation:penDiveC .3s ease-out both}
+@keyframes penDiveL{0%{transform:translateX(-50%) rotate(0)}60%{transform:translateX(-50%) rotate(-30deg) scale(1.08)}100%{transform:translateX(-50%) rotate(-24deg)}}
+@keyframes penDiveR{0%{transform:translateX(-50%) rotate(0)}60%{transform:translateX(-50%) rotate(30deg) scale(1.08)}100%{transform:translateX(-50%) rotate(24deg)}}
+@keyframes penDiveC{0%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px) scale(1.06)}100%{transform:translateX(-50%) translateY(-4px)}}
+/* 3. goal: local net reaction in the zone the ball entered */
+.pen-modal .pen-goal.goal.ball-L .z-L,
+.pen-modal .pen-goal.goal.ball-C .z-C,
+.pen-modal .pen-goal.goal.ball-R .z-R{animation:penGoalZone .6s ease both}
+@keyframes penGoalZone{
+  0%{background:color-mix(in srgb,var(--color-primary) 55%,transparent);box-shadow:inset 0 0 18px color-mix(in srgb,var(--color-primary) 60%,transparent)}
+  100%{background:color-mix(in srgb,#c9973f 26%,transparent);box-shadow:none}
+}
+/* 8. sudden death scene: darker goal + amber frame pulse */
+.pen-modal.is-sudden .pen-goal{
+  background:
+    radial-gradient(120% 80% at 50% 8%, rgba(255,255,255,.04), transparent 55%),
+    linear-gradient(180deg,#112e23 0%,#153b2c 46%,#0d241b 100%)!important;
+  animation:penSuddenFrame 1.8s ease-in-out infinite;
+}
+@keyframes penSuddenFrame{0%,100%{box-shadow:inset 0 0 0 2px rgba(201,151,63,.28),inset 0 -30px 40px rgba(12,18,19,.4),0 8px 0 rgba(12,18,19,.1)}50%{box-shadow:inset 0 0 0 2px rgba(201,151,63,.6),inset 0 -30px 40px rgba(12,18,19,.4),0 8px 0 rgba(12,18,19,.1)}}
+/* 9. crowd reaction: brief light sweep across the top of the modal */
+.pen-crowd{
+  position:absolute;left:0;right:0;top:0;height:46px;pointer-events:none;z-index:5;border-radius:12px 12px 0 0;overflow:hidden;
+}
+.pen-crowd::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-primary) 30%,transparent),transparent);
+  transform:translateX(-100%);animation:penCrowdSweep .7s ease-out both;
+}
+.pen-crowd.save::before{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-slate) 34%,transparent),transparent)}
+.pen-crowd.miss::before,.pen-crowd.post::before{background:linear-gradient(90deg,transparent,color-mix(in srgb,#b0564a 26%,transparent),transparent)}
+@keyframes penCrowdSweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+/* 7. decision-moment tension banner (above the buttons) */
+.pen-tension{
+  margin:2px 0 8px;padding:7px 12px;border-radius:8px;text-align:center;
+  background:color-mix(in srgb,#c9973f 14%,var(--surface-elevated));
+  border:1px solid color-mix(in srgb,#c9973f 45%,transparent);
+  color:#9a7220;font-family:var(--mono);font-size:10.5px;font-weight:900;letter-spacing:.4px;
+  animation:penTensionPulse 1.4s ease-in-out infinite;
+}
+@keyframes penTensionPulse{0%,100%{border-color:color-mix(in srgb,#c9973f 45%,transparent)}50%{border-color:color-mix(in srgb,#c9973f 80%,transparent)}}
+/* 4/5. tendency / accuracy hint under a duel player */
+.pen-modal .pen-actors .pen-duel .pen-hint{
+  display:block;margin-top:2px;
+  font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.3px;
+  color:var(--color-slate);opacity:.85;
+}
+.pen-modal .pen-actors .pen-duel.is-you .pen-hint{color:color-mix(in srgb,var(--color-primary) 70%,var(--color-slate))}
+/* 6. streak badge near the active slot row */
+.pen-streak{
+  display:inline-block;margin-left:6px;vertical-align:middle;
+  padding:1px 7px;border-radius:999px;
+  font-family:var(--mono);font-size:8px;font-weight:900;letter-spacing:.6px;
+  background:var(--color-primary);color:#fff;
+  animation:penStreakPop .3s ease both;
+}
+.pen-streak.cold{background:var(--color-slate)}
+@keyframes penStreakPop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  .pen-goal.show-ball .pen-ball,
+  .pen-goal.show-ball .pen-keeper.is-keeper-L,
+  .pen-goal.show-ball .pen-keeper.is-keeper-R,
+  .pen-goal.show-ball .pen-keeper.is-keeper-C{animation:none!important}
+  .pen-modal.is-sudden .pen-goal,.pen-tension,.pen-crowd::before,.pen-streak{animation:none!important}
+  .pen-modal .pen-goal.goal.ball-L .z-L,.pen-modal .pen-goal.goal.ball-C .z-C,.pen-modal .pen-goal.goal.ball-R .z-R{animation:none!important}
+}
