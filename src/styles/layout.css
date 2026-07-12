@@ -928,7 +928,7 @@ a.footer-link{color:var(--color-slate)}
 /* ===== howto title row ===== */
 .howto-mcard-title-row{display:flex;align-items:baseline;gap:6px}
 /* ===== music button active state ===== */
-#musicBtn.playing{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+#musicBtn.playing,#musicBtn.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
 
 /* ===== pixel art icons ===== */
 .si{width:22px;height:22px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;display:inline-block;flex-shrink:0}

@@ -301,6 +301,11 @@ function shopCardDesc(k,raw,variantOverride){
     vur_igneyi:()=>sv===1?(tr?"2 sakat oyuncuyu iyileştirir. %25 ihtimal -€6M ek masraf. Sakat yoksa kart iade edilir.":"Heals 2 injured players. 25% chance -€6M extra cost. Refunded if no one is injured."):(tr?"1 sakat oyuncuyu iyileştirir. Sakat yoksa kart iade edilir.":"Heals 1 injured player. Refunded if no one is injured."),
     kasiga_para:()=>sv===1?(tr?"Rakip -8 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%50, güven -1.":"Opponent -8 power. Next market closes; the next open market has +50% prices, trust -1."):(tr?"Rakip -4 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Next market closes; the next open market has +25% prices.")
   };
+  // These two cards spend team resources as well as applying their match effect.
+  // Keep the text here in sync with CARD_COST_META, rather than hiding the price in a tooltip.
+  specific.yildiz_krizi=()=>sv===1?(tr?"Bu maç +4 güç. Kimya -2; %20 ihtimal -€4M medya cezası.":"+4 power this match. Chemistry -2; 20% chance of a €4M media fine."):(tr?"Bu maç +3 güç. Kimya -1.":"+3 power this match. Chemistry -1.");
+  specific.kasiga_para=()=>sv===1?(tr?"Rakip -8 güç. Kimya -1, güven -1; sonraki açık pazarda fiyatlar +%50.":"Opponent -8 power. Chemistry -1, trust -1; next open market prices +50%."):(tr?"Rakip -4 güç. Kimya -1; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Chemistry -1; next open market prices +25%.");
+  specific.kara_borsa=()=>sv===1?(tr?"Bir kart yak; 2 kart al. %35 ihtimal -€10M ceza.":"Burn one card; take 2 cards. 35% chance of a €10M fine."):(tr?"Bir kart yak; 2 kalıcı kart al.":"Burn one card; take 2 persistent cards.");
   if(specific[k])return stripZeroRiskText(specific[k]());
   const txt=(raw||shortCardText(k,picksBySlot.filter(Boolean))||"").replace(/\s+/g," ").trim();
   if(!txt)return"";
@@ -491,7 +496,9 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     if(sv===1)d.classList.add("is-dark");
     const _darkBadge=sv===1?`<span class="ct-darkflag" aria-hidden="true"><svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor"><path d="M6 1 1 10.5h10z"/><rect x="5.3" y="4.4" width="1.4" height="3" rx=".5" fill="#0C1213"/><rect x="5.3" y="8.2" width="1.4" height="1.4" rx=".5" fill="#0C1213"/></svg>DARK</span>`:`<span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span>`;
     const _darkPenBadge=_darkPen?`<span class="ct-darkpen" title="${LANG==="tr"?"DARK: finalde güç cezası":"DARK: final power penalty"}">${LANG==="tr"?"FİNAL":"FINAL"} −${_darkPen}</span>`:"";
-    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}${_darkPenBadge}</div></div><div class="ct-foot ct-foot-price-only"></div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
+    const _cost=typeof cardCostBadge==="function"?cardCostBadge(k,sv):"";
+    const _costBadge=_cost?`<span class="ct-cost-badge">${_cost}</span>`:"";
+    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}${_darkPenBadge}</div></div><div class="ct-foot ct-foot-cost">${_costBadge}</div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
     d.onclick=()=>cant?_flashInsufficient(d):confirmBuyCard(k,pr);
     sc.appendChild(d);
   });
@@ -807,7 +814,7 @@ function buyCard(k,overridePrice){
   const pr=overridePrice!==undefined?overridePrice:_basePr;
   if(!canAffordCost(pr))return;
   spend(pr,"spent");
-  if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(pr,"card",{card:k});
+  if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(pr,"card",{card:k,variant:sv});
   recordDebt();
   cardsBoughtThisTurn++;
   addCard(k,sv,{silent:true,source:"market",price:pr});

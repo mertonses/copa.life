@@ -74,8 +74,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260712e">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260712c">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260712g">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260712e">
 <link rel="stylesheet" href="src/styles/match.css?v=20260712e">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <style>
@@ -266,25 +266,25 @@
 <script src="src/data/players_italy.js?v=20260711-stability1"></script>
 <script src="src/data/players_germany.js?v=20260711-stability1"></script>
 <script src="src/data/kits.js?v=20260711-stability1"></script>
-<script src="src/data/i18n.js?v=20260712c"></script>
+<script src="src/data/i18n.js?v=20260712d"></script>
 <script src="src/core/squad.js?v=20260711-economy3"></script>
 <script src="src/game/generate.js?v=20260711-economy3"></script>
-<script src="src/balance/config.js?v=20260712c"></script>
+<script src="src/balance/config.js?v=20260712d"></script>
 <script src="src/state/metaState.js?v=20260711-stability1g"></script>
-<script src="src/state/gameState.js?v=20260711-stability1g"></script>
+<script src="src/state/gameState.js?v=20260712i"></script>
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/cards/cardDefs.js?v=20260712c"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
-<script src="src/cards/cardBalance.js?v=20260712c"></script>
+<script src="src/cards/cardBalance.js?v=20260712e"></script>
 <script src="src/balance/telemetry.js?v=20260711-economy3"></script>
-<script src="src/cards/cardEffects.js?v=20260712c"></script>
-<script src="src/balance/power.js?v=20260712c"></script>
-<script src="src/balance/economy.js?v=20260711-economy3"></script>
+<script src="src/cards/cardEffects.js?v=20260712e"></script>
+<script src="src/balance/power.js?v=20260712e"></script>
+<script src="src/balance/economy.js?v=20260712e"></script>
 <script src="src/balance/difficulty.js?v=20260711-stability1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260711-stability1"></script>
 <script src="src/sim/finalSim.js?v=20260712f"></script>
-<script src="src/ui/hub.js?v=20260712d"></script>
+<script src="src/ui/hub.js?v=20260712f"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -412,7 +412,7 @@ function _brandAgainHTML(text){
   const brand=`<span class="again-brand"><span class="again-copa">copa</span><span class="again-dot">.</span><span class="again-life">life</span></span>`;
   return esc(raw).replace(/copa\.life/gi,brand);
 }
-function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();buildFormButtons();applyMeta();
+function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(typeof _updateMusicButton==="function")_updateMusicButton();buildFormButtons();applyMeta();
   if(!$("hub").classList.contains("hidden"))renderHub();if(!$("draft").classList.contains("hidden"))refreshDraft();if(!$("result").classList.contains("hidden")&&lastResult)renderResult();if(!$("fixbar").classList.contains("hidden"))renderFixtures();}
 function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.life — Roguelite futbol. Şans + strateji.":"copa.life — Roguelite football. Luck + strategy.";$("lblBudget").innerHTML=x.budget;$("coverTitle").textContent=x.coverTitle;const _csTR={ENG:"İngiltere Kupası",ES:"İspanya Kupası",IT:"İtalya Kupası",DE:"Almanya Kupası"};const _csEN={ENG:"FA Cup",ES:"Copa del Rey",IT:"Coppa Italia",DE:"DFB-Pokal"};$("coverSub").textContent=(tr?_csTR[selectedCountry]:_csEN[selectedCountry])||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;const _patHtml=x.patreonText.replace("copa.life","<span style='font-family:var(--mono);font-weight:900'>copa<span style='opacity:.38'>.</span>life</span>");if($("patreonIntroText"))$("patreonIntroText").innerHTML=_patHtml;if($("patreonResultText"))$("patreonResultText").innerHTML=_patHtml;if($("contactIntroLabel"))$("contactIntroLabel").textContent=tr?"İletişim":"Contact";if($("contactIntroText"))$("contactIntroText").textContent=tr?"Soru, fikir, hata? · ":"Question, idea, bug? · ";$("pickhdr").textContent=x.pickhdr;const _ico_ball="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='7' cy='7' r='5.5'/><polygon points='7,4.5 8.8,5.8 8.1,7.8 5.9,7.8 5.2,5.8' fill='currentColor' opacity='.25' stroke-width='.8'/></svg>";const _ico_person="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' style='vertical-align:-.15em'><circle cx='6' cy='4' r='2.5'/><path d='M1 13Q1 9 6 9Q11 9 11 13'/></svg>";const _ico_club="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><path d='M7 1L13 4V8Q13 12 7 13Q1 12 1 8V4Z'/></svg>";const _ico_card="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' style='vertical-align:-.1em'><rect x='1' y='1' width='10' height='12' rx='1.5'/><line x1='3.5' y1='5' x2='8.5' y2='5'/><line x1='3.5' y1='7.5' x2='8.5' y2='7.5'/><line x1='3.5' y1='10' x2='6' y2='10'/></svg>";const _cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:42;const _fpLig=tr?"5 ülke · 10 lig":"5 countries · 10 leagues";$("protoFoot").innerHTML=`copa.life · ${_ico_ball} ${_fpLig} · ${_ico_person} <b>9.264</b> ${tr?"oyuncu":"players"} · ${_ico_club} <b>180</b> ${tr?"kulüp":"clubs"} · ${_ico_card} <b>${_cc}</b> ${tr?"kart":"cards"} · <b>6</b> ${tr?"tur":"rounds"} · <b>6</b> ${tr?"başkan":"chairs"}`;const ms=$("mechStats");if(ms)ms.innerHTML=`<span><b>9.264</b> ${tr?"oyuncu":"players"}</span><span>·</span><span><b>10</b> ${tr?"lig":"leagues"}</span><span>·</span><span><b>${_cc}</b> ${tr?"kart":"cards"}</span><span>·</span><span><b>6</b> ${tr?"tur":"rounds"}</span><span>·</span><span><b>6</b> ${tr?"başkan":"chairs"}</span>`;if($("shareBtnLbl"))$("shareBtnLbl").textContent=tr?"PAYLAŞ":"SHARE";$("rollHint").textContent=x.rollHint;$("rollBtn").innerHTML=x.roll;$("allBtn").innerHTML=x.allBtn;if($("undoBtn"))$("undoBtn").innerHTML=x.undo;if($("howtoToggle")){const _bookSvg=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>`;$("howtoToggle").innerHTML=_bookSvg+(tr?"Detaylı rehber":"Detailed guide");}_applyHowtoLang();$("ddLbl").innerHTML=x.ddTitle;
   if($("startBtn"))$("startBtn").textContent=x.startBtn;if($("quickStartBtn"))$("quickStartBtn").innerHTML=x.quickStartBtn;if($("allBtn"))$("allBtn").innerHTML=`<svg class="dice-ico" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="7" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="1" fill="currentColor" stroke="none"/></svg> ${tr?"Takımı Otomatik Kur":"Auto-fill XI"}`;if($("howtoToggle"))$("howtoToggle").innerHTML=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>${tr?"Nasıl Oynanır?":"How to Play?"}`;if($("cName"))$("cName").placeholder=x.cNamePh;if($("diceBtn"))$("diceBtn").title=tr?"Rastgele kulüp adı üret":"Generate a random club name";if($("countryhdr"))$("countryhdr").textContent=tr?"Ülkeni Seç":"Pick Your Country";
@@ -558,7 +558,7 @@ function _renderKasaTile(rootId,prefix){
   if(safe)safe.style.width=(Math.max(0,pos-zero)*100).toFixed(1)+"%";
   if(safe)safe.style.left=(zero*100).toFixed(1)+"%";
 }
-function beginDraft(){window._finalTacticDone=false;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=(($("cName")&&$("cName").value.trim())||teamName||rnd(NAMEP)+" FK").toUpperCase().slice(0,16);kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];kaosHalfReward=false;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
+function beginDraft(){window._finalTacticDone=false;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=(($("cName")&&$("cName").value.trim())||teamName||rnd(NAMEP)+" FK").toUpperCase().slice(0,16);kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
   shopBlocked=0;presidentBlocked=0;cardPriceMod=1.0;cardPriceModTurns=0;
   deferredBudgetPenalty=0;deferredPowerPenalty=0;oppPowerMod=0;draftFatigueTurns=0;draftDebtTurns=0;draftPendingInjury=0;
   shopVariantLock={};
@@ -953,6 +953,16 @@ function toggleMusic(){if(!_bgAudio){_bgAudio=new Audio("assets/audio/bgmusic.og
 /* ===== vocal pulse ===== */
 let _vocalAudio=null;
 function toggleVocal(){if(!_vocalAudio){_vocalAudio=new Audio("assets/audio/vocalpulse.wav");_vocalAudio.loop=true;_vocalAudio.volume=0.45;}if(_vocalAudio.paused){_vocalAudio.play().catch(()=>{});const b=$("vocalBtn");if(b){b.classList.add("playing");b.textContent=" ON";}}else{_vocalAudio.pause();const b=$("vocalBtn");if(b){b.classList.remove("playing");b.textContent=" Vocal Pulse";}}}
+
+/* ===== lightweight background music ===== */
+let _musicAudio=null,_musicEnabled=false;
+function _musicIcon(off){return off?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/><line x1="2" y1="2" x2="18" y2="18" stroke-width="2.2"/></svg>':'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/></svg>';}
+function _updateMusicButton(){const b=$("musicBtn");if(!b)return;const tr=LANG==="tr",on=_musicEnabled;b.classList.toggle("on",on);b.innerHTML=_musicIcon(!on)+`<span id="musicBtnLbl">${on?(tr?"M\u00dcZ\u0130K A\u00c7IK":"MUSIC ON"):(tr?"M\u00dcZ\u0130K A\u00c7":"MUSIC OFF")}</span>`;b.title=tr?"Arka plan m\u00fczi\u011fi":"Background music";b.setAttribute("aria-label",b.title);}
+function ensureMusicSetting(){const drop=$("settingsDrop");if(!drop||$("musicBtn"))return;const g=document.createElement("div");g.className="sd-group";g.innerHTML=`<div class="sd-hdr" id="sdHdrMusic">${LANG==="tr"?"M\u00dcZ\u0130K":"MUSIC"}</div><button class="sdbtn sd-full" id="musicBtn" type="button" onclick="toggleMusic()"></button>`;drop.appendChild(g);_updateMusicButton();}
+function _getMusic(){if(_musicAudio)return _musicAudio;const a=new Audio();a.preload="none";a.loop=true;a.volume=.16;a.src="assets/audio/ui/clockwork-boardroom-loop.ogg";a.onerror=()=>{_musicEnabled=false;_updateMusicButton();};_musicAudio=a;return a;}
+function toggleMusic(){_musicEnabled=!_musicEnabled;try{localStorage.setItem("copa_music",_musicEnabled?"1":"0");}catch(e){}const a=_getMusic();if(_musicEnabled){a.play().catch(()=>{ /* A browser can reject synthetic clicks; keep the user setting for the next real tap. */ _updateMusicButton();});}else a.pause();_updateMusicButton();}
+document.addEventListener("visibilitychange",()=>{if(!_musicAudio)return;if(document.hidden)_musicAudio.pause();else if(_musicEnabled)_musicAudio.play().catch(()=>{});});
+setTimeout(()=>{try{_musicEnabled=localStorage.getItem("copa_music")==="1";}catch(e){}_updateMusicButton();ensureMusicSetting();},0);
 
 /* ===== settings dropdown ===== */
 function toggleSettings(){const d=$("settingsDrop");if(!d)return;const opening=d.classList.contains("hidden");d.classList.toggle("hidden");if(opening){const _wrap=$("settingsWrap");const _close=e=>{if(_wrap&&!_wrap.contains(e.target)){d.classList.add("hidden");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);}};const _esc=e=>{if(e.key==="Escape"){d.classList.add("hidden");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);d.previousElementSibling&&d.previousElementSibling.focus();}};setTimeout(()=>{document.addEventListener("click",_close,true);document.addEventListener("keydown",_esc);},0);}}
@@ -2054,7 +2064,7 @@ function _saveState(){
     fixtures:fixtures.map(f=>f?Object.assign({},f):null),
     talkUsed,talkMod:Object.assign({},talkMod),injuredIdx,
     tempPrimePenalty,shortCampPenalty,installmentTurns,installmentAmt,primFreeze,lastCreditActive,
-    draftFatigueTurns,draftDebtTurns,draftPendingInjury,pintiSavings,sansMediaPressure,sansHeadlineRound,sansStarBonusRound,torpilDebtPenalty,chairTrust,chairSupportDebt,eventSeen:Object.assign({},eventSeen),usedRiskCards:[...(usedRiskCards||[])],telemetryRun:typeof balanceTelemetryRun!=="undefined"?balanceTelemetryRun:null
+    draftFatigueTurns,draftDebtTurns,draftPendingInjury,pintiSavings,sansMediaPressure,sansHeadlineRound,sansStarBonusRound,torpilDebtPenalty,chairTrust,chairSupportDebt,cardChemDebt,eventSeen:Object.assign({},eventSeen),usedRiskCards:[...(usedRiskCards||[])],telemetryRun:typeof balanceTelemetryRun!=="undefined"?balanceTelemetryRun:null
   }));}catch(e){}
 }
 function _clearState(){try{sessionStorage.removeItem("copa_run");}catch(e){}}
@@ -2076,7 +2086,7 @@ function _tryRestoreState(){
     tempPrimePenalty=st.tempPrimePenalty||0;shortCampPenalty=st.shortCampPenalty||0;
     installmentTurns=st.installmentTurns||0;installmentAmt=st.installmentAmt||0;primFreeze=st.primFreeze||0;lastCreditActive=st.lastCreditActive||0;
     draftFatigueTurns=st.draftFatigueTurns||0;draftDebtTurns=st.draftDebtTurns||0;draftPendingInjury=st.draftPendingInjury||0;
-    pintiSavings=st.pintiSavings||0;sansMediaPressure=st.sansMediaPressure||0;sansHeadlineRound=st.sansHeadlineRound||0;sansStarBonusRound=st.sansStarBonusRound||0;torpilDebtPenalty=st.torpilDebtPenalty||0;chairTrust=st.chairTrust??1;chairSupportDebt=st.chairSupportDebt||0;eventSeen=st.eventSeen||{};usedRiskCards=Array.isArray(st.usedRiskCards)?st.usedRiskCards:[];if(typeof balanceTelemetryRun!=="undefined")balanceTelemetryRun=st.telemetryRun||{chairman:chairman.id,cards:{},startedAt:Date.now()};
+    pintiSavings=st.pintiSavings||0;sansMediaPressure=st.sansMediaPressure||0;sansHeadlineRound=st.sansHeadlineRound||0;sansStarBonusRound=st.sansStarBonusRound||0;torpilDebtPenalty=st.torpilDebtPenalty||0;chairTrust=st.chairTrust??1;chairSupportDebt=st.chairSupportDebt||0;cardChemDebt=st.cardChemDebt||0;eventSeen=st.eventSeen||{};usedRiskCards=Array.isArray(st.usedRiskCards)?st.usedRiskCards:[];if(typeof balanceTelemetryRun!=="undefined")balanceTelemetryRun=st.telemetryRun||{chairman:chairman.id,cards:{},startedAt:Date.now()};
     runEnded=false;undoData=null;undoUsed=false;autoPlay=false;
     setBudget();enterHub();return true;
   }catch(e){_clearState();return false;}

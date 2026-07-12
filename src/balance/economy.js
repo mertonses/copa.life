@@ -12,7 +12,15 @@ function newShopOffers(){
    if(k==="kumarbaz"&&typeof kumarbazInstallmentTurns!=="undefined"&&kumarbazInstallmentTurns>0)return;
    if(k==="kurban_belli"&&round>=6)return; // Finalde kullanılamaz
    if(k==="kumarbaz"&&round>=6)return; // Finalde kullanılamaz
-   pool.push(k);
+   if(round>=6&&cardKind(k)!=="final")return;
+   const kind=cardKind(k);
+   let weight=1;
+   if(round<=2)weight=kind==="squad"||kind==="economy"||kind==="power"?4:(kind==="defense"?2:.35);
+   else if(round<=4)weight=kind==="squad"||kind==="power"||kind==="defense"?3:(kind==="economy"?2:1);
+   else if(round===5)weight=kind==="final"?5:(kind==="risk"||kind==="temporary"?2:1);
+   else weight=6;
+   if(typeof chairman!=="undefined"&&chairman&&chairman.id==="sansasyoncu"&&(k==="yildiz"||k==="buyuk_mac"||kind==="final"))weight*=1.8;
+   for(let i=0;i<Math.max(1,Math.round(weight));i++)pool.push(k);
  });
  const limit=2;
  while(shopOffers.length<limit&&pool.length){

@@ -32,6 +32,9 @@ function cardEff(k,s,r){
  if(!CARDDEFS[k])return 0;
  return CARDDEFS[k].eff(s,r)||0;
 }
+function chairmanCardBoost(k){
+ return typeof chairman!=="undefined"&&chairman&&chairman.id==="sansasyoncu"&&(k==="yildiz"||k==="buyuk_mac")?1:0;
+}
 
 /* Kumarbaz taksit sistemi */
 var kumarbazInstallmentTurns=0,kumarbazInstallmentAmt=0;
@@ -43,12 +46,46 @@ function applyCardCashPenalty(k,amount){
  spend(amount,"spent");
  if(typeof trackCardPenalty==="function")trackCardPenalty(k,0,0,amount);
 }
+function applyCardSecondaryCost(k,variant){
+ const meta=typeof cardCostMeta==="function"?cardCostMeta(k,variant):null;
+ if(!meta||!meta.chem)return;
+ cardChemDebt=Math.min(5,Math.max(0,(Number(cardChemDebt)||0)+meta.chem));
+ const tr=LANG==="tr";
+ pushFeed("<b>"+L().cards[k].n+"</b> "+(tr?"kimya bedeli: -":"chemistry cost: -")+meta.chem,"lose");
+}
 function applyDarkPurchaseRisk(k,variant){
  const risk=DARK_PURCHASE_RISKS[k];
  if(variant!==1||!risk||rand()>=risk.chance)return{triggered:false,cash:0};
  applyCardCashPenalty(k,risk.cash);
  pushFeed("<b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK ek masrafı: -€":"DARK extra cost: -€")+risk.cash+"M","lose");
  return{triggered:true,cash:risk.cash};
+}
+
+function resolveBlackMarketTrade(burnKey,variant){
+ const tr=LANG==="tr";
+ const oldName=(L().cards[burnKey]&&L().cards[burnKey].n)||burnKey;
+ cards=cards.filter(k=>k!==burnKey);cardInv[burnKey]=0;cardVariant[burnKey]=0;
+ const pool=CARDKEYS.filter(k=>k!=="kara_borsa"&&k!==burnKey&&invOf(k)<=0&&!isInstantCard(k));
+ let gained=0;
+ while(gained<2&&pool.length){
+  const next=pool.splice(ri(0,pool.length-1),1)[0];
+  addCard(next,variant===1?weightedVariant():0,{silent:true,freeSource:"kara_borsa"});
+  gained++;
+ }
+ if(variant===1&&rand()<0.35){applyCardCashPenalty("kara_borsa",10);pushFeed(tr?"Kara Borsa riski: -\u20ac10M":"Black Market risk: -\u20ac10M","lose");}
+ pushFeed("<b>"+((L().cards.kara_borsa&&L().cards.kara_borsa.n)||"Kara Borsa")+"</b> "+(tr?oldName+" yak\u0131ld\u0131, "+gained+" kart geldi.":oldName+" burned; "+gained+" cards arrived."),"buy");
+ closeModal();if(typeof renderHub==="function")renderHub();
+}
+function openBlackMarketTrade(variant){
+ const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k));
+ if(!choices.length){
+  const pool=CARDKEYS.filter(k=>k!=="kara_borsa"&&invOf(k)<=0&&!isInstantCard(k));
+  if(pool.length)addCard(rnd(pool),0,{silent:true,freeSource:"kara_borsa"});
+  pushFeed(tr?"Kara Borsa: yakacak kart yok, 1 COMMON kart geldi.":"Black Market: no card to burn; 1 COMMON card arrived.","buy");
+  return;
+ }
+ const list=choices.map(k=>`<button class="swap-card-btn" onclick="resolveBlackMarketTrade('${k}',${variant})"><span class="sc-name">${L().cards[k].n}</span><span class="sc-desc">${tr?"Bu kart\u0131 yak":"Burn this card"}</span></button>`).join("");
+ showModal(`<div class="bulletin"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="bhead"><span>${tr?"KARA BORSA":"BLACK MARKET"}</span></div><div class="bhl">${tr?"Bir kart\u0131 yak, iki kart al":"Burn one card, take two"}</div><div class="bbody">${tr?"Feda edece\u011fin kart\u0131 se\u00e7.":"Choose a card to sacrifice."}</div><div class="swap-list">${list}</div></div>`,{dismissOnOverlay:true});
 }
 
 /* ===== Kart satin alma etkileri ===== */
@@ -98,18 +135,18 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="buyuk_mac"){
-  const pow=v===1?10:6;
-  riskPowerMod+=pow;
-  pushFeed("🎯 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç":" power"),"pres");
+  const pow=v===1?10:6,chairBoost=chairmanCardBoost(k);
+  riskPowerMod+=pow+chairBoost;
+  pushFeed("🎯 <b>"+L().cards[k].n+"</b> +"+(pow+chairBoost)+(tr?" güç":" power"),"pres");
   if(v===1&&rand()<0.20){applyCardCashPenalty(k,12);pushFeed("🎯 "+(tr?"Büyük maç riski: -€12M":"Big game risk: -€12M"),"lose");}
   return;
  }
  if(k==="yildiz"){
   const s=picksBySlot.filter(Boolean);
   const maxOV=s.length?s.reduce((a,p)=>Math.max(a,p.ov||0),0):0;
-  const pow=v===1?(maxOV>=90?14:maxOV>=85?10:maxOV>=80?8:6):(maxOV>=90?10:maxOV>=85?8:maxOV>=80?6:4);
-  riskPowerMod+=pow;
-  pushFeed("🍰 <b>"+L().cards[k].n+"</b> OV"+maxOV+" → +"+pow+(tr?" güç":" power"),"pres");
+  const pow=v===1?(maxOV>=90?14:maxOV>=85?10:maxOV>=80?8:6):(maxOV>=90?10:maxOV>=85?8:maxOV>=80?6:4),chairBoost=chairmanCardBoost(k);
+  riskPowerMod+=pow+chairBoost;
+  pushFeed("🍰 <b>"+L().cards[k].n+"</b> OV"+maxOV+" → +"+(pow+chairBoost)+(tr?" güç":" power"),"pres");
   if(v===1&&rand()<0.25){applyCardCashPenalty(k,6);pushFeed("🍰 "+(tr?"Yıldız riski: -€6M":"Star risk: -€6M"),"lose");}
   return;
  }
@@ -150,6 +187,7 @@ function applyRiskCardGain(k){
 
  /* --- KARA BORSA (INSTANT) --- */
  if(k==="kara_borsa"){
+   openBlackMarketTrade(v);return;
    const count=v===1?2:1;
    const pool=CARDKEYS.filter(x=>x!==k&&invOf(x)<=0&&!isInstantCard(x));
    let added=0;
@@ -374,6 +412,7 @@ function addCard(k,v,opts){
    const debt=typeof addFinalPenalty==="function"?addFinalPenalty(pen,k):{added:pen,overflow:0,cash:0};
    if(!silent)pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(LANG==="tr"?"DARK — finalde -"+debt.added+" güç":"DARK — -"+debt.added+" in the final")+(debt.overflow?(LANG==="tr"?" · fazla risk -€"+debt.cash+"M":" · excess risk -€"+debt.cash+"M"):""),"lose");
   }
+ applyCardSecondaryCost(k,variant);
  applyDarkPurchaseRisk(k,variant);
  if(typeof trackCardAcquired==="function")trackCardAcquired(k,variant,opts);
  if(instant)applyRiskCardGain(k);

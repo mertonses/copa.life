@@ -43,6 +43,10 @@ function chairmanReactToSpend(cost,context,payload){
   chairTrust=Math.max(0,chairTrust-1);
   if(typeof pushFeed==="function")pushFeed("🪙 "+(tr?"Pahalı harcama: Pinti Başkan güveni -1":"Expensive spend: Miser trust -1"),"lose");
  }
+ if(chairman.id==="pinti"&&context==="card"&&((payload.variant||0)===1||cardKind(payload.card)==="risk")){
+  chairTrust=Math.max(0,chairTrust-1);
+  if(typeof pushFeed==="function")pushFeed(tr?"Pinti: riskli kart g\u00fcveni -1":"Miser: risky card costs 1 trust","lose");
+ }
  if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov>=85&&sansStarBonusRound!==round){
   sansStarBonusRound=round;
   const bonus=payload.ov>=90?3:2;

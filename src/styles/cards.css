@@ -347,6 +347,9 @@
 }
 .ct-foot-price-only{justify-content:flex-end}
 .ct-foot-price-only .ct-price{margin-left:auto}
+.ct-foot-cost{min-height:28px;justify-content:flex-end}
+.ct-cost-badge{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-muted);color:var(--color-slate);font-family:var(--mono);font-size:7px;font-weight:800;line-height:1.15;letter-spacing:.15px;white-space:nowrap}
+.cardtile.is-dark .ct-cost-badge{background:color-mix(in srgb,var(--color-ink) 7%,var(--surface-elevated));border-color:color-mix(in srgb,var(--color-ink) 24%,var(--border-subtle));color:var(--color-ink)}
 .ct-pw{font-family:var(--mono);font-size:8px;color:var(--color-primary);font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ct-price{
   font-family:var(--mono);font-weight:700;font-size:13px;

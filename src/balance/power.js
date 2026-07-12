@@ -29,6 +29,8 @@ function chemBonus(s){
   total-=1;
   parts.push(["VET",L().chem&&L().chem.leaderGap?L().chem.leaderGap:(LANG==="tr"?"Saha içi lider yok":"No on-pitch leader"),-1]);
  }
+ const spent=Math.max(0,Number(typeof cardChemDebt!=="undefined"?cardChemDebt:0)||0);
+ if(spent>0){total-=spent;parts.push(["CARD",LANG==="tr"?"Kart bedeli":"Card cost",-spent]);}
  return {total:Math.max(-5,Math.min(5,total)),parts};
 }
 function powerBreakdown(r){

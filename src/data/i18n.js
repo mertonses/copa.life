@@ -271,4 +271,14 @@ function _patchBackroomPressureCopy(){
  }
 }
 _patchBackroomPressureCopy();
+function _patchVisibleCardCostCopy(){
+ const tr=T.tr.cards,en=T.en.cards;
+ if(tr.yildiz_krizi)tr.yildiz_krizi.d="COMMON: Bu maç +3 güç; kimya -1. DARK: Bu maç +4 güç; kimya -2 ve %20 ihtimal -€4M medya cezası.";
+ if(en.yildiz_krizi)en.yildiz_krizi.d="COMMON: +3 power this match; chemistry -1. DARK: +4 power this match; chemistry -2 and a 20% chance of a €4M media fine.";
+ if(tr.kasiga_para)tr.kasiga_para.d="COMMON: Rakip -4 güç; kimya -1 ve sonraki açık pazarda fiyatlar +%25. DARK: Rakip -8 güç; kimya -1, güven -1, sonraki açık pazarda fiyatlar +%50.";
+ if(en.kasiga_para)en.kasiga_para.d="COMMON: Opponent -4 power; chemistry -1 and next open market prices +25%. DARK: Opponent -8 power; chemistry -1, trust -1, next open market prices +50%.";
+ if(tr.kara_borsa)tr.kara_borsa.d="COMMON: Bir kart yak; 2 kalıcı kart al. DARK: Bir kart yak; 2 kart al, %35 ihtimal -€10M ceza.";
+ if(en.kara_borsa)en.kara_borsa.d="COMMON: Burn one card; take 2 persistent cards. DARK: Burn one card; take 2 cards, 35% chance of a €10M fine.";
+}
+_patchVisibleCardCostCopy();
 var LANG="tr"; var L=()=>T[LANG];
