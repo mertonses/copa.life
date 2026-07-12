@@ -63,10 +63,10 @@ const checks = [
     pass: html.includes('_howtoTier("COMMON")') && html.includes('_howtoTier("DARK")'),
   },
   {
-    name: "DARK market cards keep the black-white identity and readable price",
+    name: "DARK market cards keep the softened black-white identity and readable price",
     pass:
-      /#hub \.cardtile\.is-dark\{[^}]*background:var\(--color-ink\)/s.test(cardCss) &&
-      /#hub \.cardtile\.is-dark \.ct-name,[\s\S]*color:#fff/s.test(cardCss) &&
+      /#hub \.cardtile\.is-dark\{[^}]*background:(?:var\(--color-ink\)|linear-gradient)/s.test(cardCss) &&
+      /#hub \.cardtile\.is-dark \.ct-name,[\s\S]*color:#(?:fff|f4f8f8)/s.test(cardCss) &&
       /#hub \.cardtile\.is-dark \.ct-head-price,[\s\S]*background:#fff;[\s\S]*color:var\(--color-ink\)/s.test(cardCss),
   },
   {

@@ -79,9 +79,7 @@ function resolveBlackMarketTrade(burnKey,variant){
 function openBlackMarketTrade(variant){
  const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k));
  if(!choices.length){
-  const pool=CARDKEYS.filter(k=>k!=="kara_borsa"&&invOf(k)<=0&&!isInstantCard(k));
-  if(pool.length)addCard(rnd(pool),0,{silent:true,freeSource:"kara_borsa"});
-  pushFeed(tr?"Kara Borsa: yakacak kart yok, 1 COMMON kart geldi.":"Black Market: no card to burn; 1 COMMON card arrived.","buy");
+  showModal(`<div class="bulletin"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="bhead"><span>${tr?"KARA BORSA":"BLACK MARKET"}</span></div><div class="bhl">${tr?"YAKACAK KART YOK":"NO CARD TO BURN"}</div><div class="bbody">${tr?"Bu hamle için en az bir aktif kalıcı kart gerekir.":"This move requires at least one active persistent card."}</div></div>`,{dismissOnOverlay:true});
   return;
  }
  const list=choices.map(k=>`<button class="swap-card-btn" onclick="resolveBlackMarketTrade('${k}',${variant})"><span class="sc-name">${L().cards[k].n}</span><span class="sc-desc">${tr?"Bu kart\u0131 yak":"Burn this card"}</span></button>`).join("");

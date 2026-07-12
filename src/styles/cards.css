@@ -347,7 +347,10 @@
 }
 .ct-foot-price-only{justify-content:flex-end}
 .ct-foot-price-only .ct-price{margin-left:auto}
-.ct-foot-cost{min-height:28px;justify-content:flex-end}
+.ct-foot-cost{min-height:42px;justify-content:flex-start;align-items:center}
+.ct-cost-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;width:100%;font-family:var(--mono);font-size:7.5px;font-weight:800;line-height:1.25;color:var(--color-slate)}
+.ct-cost-list li{display:flex;align-items:baseline;gap:4px;min-width:0}
+.ct-cost-list li::before{content:"-";color:var(--red,#ef4444);font-weight:900;flex:0 0 auto}
 .ct-cost-badge{display:inline-flex;align-items:center;max-width:100%;padding:2px 6px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-muted);color:var(--color-slate);font-family:var(--mono);font-size:7px;font-weight:800;line-height:1.15;letter-spacing:.15px;white-space:nowrap}
 .cardtile.is-dark .ct-cost-badge{background:color-mix(in srgb,var(--color-ink) 7%,var(--surface-elevated));border-color:color-mix(in srgb,var(--color-ink) 24%,var(--border-subtle));color:var(--color-ink)}
 .ct-pw{font-family:var(--mono);font-size:8px;color:var(--color-primary);font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -617,23 +620,23 @@
 
 /* DARK cards use one unambiguous black-and-white surface across the market. */
 #hub .cardtile.is-dark{
-  background:var(--color-ink);
-  color:#fff;
-  border-color:var(--color-ink);
-  box-shadow:0 0 0 1px var(--color-ink),0 3px 10px rgba(12,18,19,.24);
+  background:linear-gradient(180deg,#1a2426 0%,#162022 100%);
+  color:#f4f8f8;
+  border-color:#172022;
+  box-shadow:0 0 0 1px color-mix(in srgb,#172022 72%,var(--border-subtle)),0 3px 10px rgba(12,18,19,.18);
 }
 #hub .cardtile.is-dark:hover:not(.cant){
-  border-color:var(--color-ink);
-  box-shadow:0 0 0 2px var(--color-ink),0 8px 20px rgba(12,18,19,.30);
+  border-color:#172022;
+  box-shadow:0 0 0 2px color-mix(in srgb,#172022 76%,var(--border-subtle)),0 8px 20px rgba(12,18,19,.24);
 }
 #hub .cardtile.is-dark .ct-head{
-  background:var(--color-ink);
+  background:#11191a;
   color:#fff;
   border-left-color:var(--color-ink);
   border-bottom-color:rgba(255,255,255,.18);
 }
 #hub .cardtile.is-dark .ct-darkflag{
-  background:var(--color-ink);
+  background:#11191a;
   color:#fff;
   border-color:rgba(255,255,255,.52);
 }
@@ -655,6 +658,8 @@
 #hub .cardtile.is-dark .ct-foot{
   border-top-color:rgba(255,255,255,.16);
 }
+#hub .cardtile.is-dark .ct-cost-list{color:rgba(244,248,248,.84)}
+#hub .cardtile.is-dark .ct-cost-list li::before{color:#f0a469}
 #hub .cardtile.is-dark .ct-head-price,
 #hub .cardtile.is-dark .ct-head-price.ct-price-free{
   background:#fff;

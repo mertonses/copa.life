@@ -263,6 +263,13 @@ function starCardPowerForVariant(v){
   const pow=v===1?(maxOV>=90?14:maxOV>=85?10:maxOV>=80?8:6):(maxOV>=90?10:maxOV>=85?8:maxOV>=80?6:4);
   return {maxOV,pow};
 }
+function stripCardDrawbacks(text){
+ const tr=LANG==="tr";
+ const markers=tr?["kimya","g\u00fcven -","finalde -","ihtimal","sonraki ma\u00e7","gelecek pazar","sonraki a\u00e7\u0131k","fiyatlar","sakatl","kovulma","de\u011filse","kart yak"]:["chemistry","trust -","in the final -","chance","next match","next market","next open","prices","injur","sack limit","otherwise","burn one card"];
+ const parts=String(text||"").replace(/;/g,".").split(".").map(s=>s.trim()).filter(Boolean);
+ const kept=parts.filter(part=>{const low=part.toLocaleLowerCase();return !markers.some(m=>low.includes(m));});
+ return (kept.length?kept:parts.slice(0,1)).join(". ")+(kept.length?".":"");
+}
 function shopCardDesc(k,raw,variantOverride){
   const tr=LANG==="tr";
   const sv=typeof variantOverride==="number"?variantOverride:variantOf(k);
@@ -306,7 +313,7 @@ function shopCardDesc(k,raw,variantOverride){
   specific.yildiz_krizi=()=>sv===1?(tr?"Bu maç +4 güç. Kimya -2; %20 ihtimal -€4M medya cezası.":"+4 power this match. Chemistry -2; 20% chance of a €4M media fine."):(tr?"Bu maç +3 güç. Kimya -1.":"+3 power this match. Chemistry -1.");
   specific.kasiga_para=()=>sv===1?(tr?"Rakip -8 güç. Kimya -1, güven -1; sonraki açık pazarda fiyatlar +%50.":"Opponent -8 power. Chemistry -1, trust -1; next open market prices +50%."):(tr?"Rakip -4 güç. Kimya -1; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Chemistry -1; next open market prices +25%.");
   specific.kara_borsa=()=>sv===1?(tr?"Bir kart yak; 2 kart al. %35 ihtimal -€10M ceza.":"Burn one card; take 2 cards. 35% chance of a €10M fine."):(tr?"Bir kart yak; 2 kalıcı kart al.":"Burn one card; take 2 persistent cards.");
-  if(specific[k])return stripZeroRiskText(specific[k]());
+  if(specific[k])return stripCardDrawbacks(stripZeroRiskText(specific[k]()));
   const txt=(raw||shortCardText(k,picksBySlot.filter(Boolean))||"").replace(/\s+/g," ").trim();
   if(!txt)return"";
   return displayCardTerms(stripZeroRiskText(txt.replace(/; ?/g," · ")));
@@ -469,8 +476,10 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   if(loanPlayer){const lc=document.createElement("div");lc.className="card style loan-chip";const _turnsLeft=typeof loanPlayer.turnsLeft!=="undefined"?` · ${loanPlayer.turnsLeft} tur`:"";lc.innerHTML=`<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:1px"><path d="M2 10a6 6 0 0 0 10 2"/><path d="M14 6A6 6 0 0 0 4 4"/><path d="M12 8l2 2-2 2"/><path d="M4 2l-2 2 2 2"/></svg> <b>${surOf(loanPlayer)}</b> <span class="tier">KİRALIK · LOAN</span> <span class="v">OV${loanPlayer.ov}</span><span class="copy" style="color:var(--color-slate)">${loanPlayer.loanCost>0?"-€"+loanPlayer.loanCost+"M":""}${_turnsLeft}</span>`;cr.appendChild(lc);}
   cards.forEach(k=>{const d=document.createElement("div");const v=variantOf(k);d.className="card v"+v+" cat-"+(CATMAP[k]||"gorev");const cd=x.cards[k],cv=cardEff(k,s,round),stance=variantBadge(v);d.innerHTML=`<span class="card-ico">${CARD_SVGS[k]||cd.i}</span><b>${cd.n}</b><span class="tier">${kindLabel(k)}</span> <span class="v">${cv>=0?"+":""}${cv}</span><span class="copy active-stance stance-${v}">${stance}</span>`;cr.appendChild(d);});
   {const fp=$("finalPills");if(fp){const active=cards.filter(k=>cardEff(k,s,round)!==0);if(active.length){fp.innerHTML=active.slice(0,5).map(k=>{const cd=x.cards[k],v=cardEff(k,s,round),cls=v>0?"fp-bonus":"fp-risk";return `<span class="fpill ${cls}" onclick="showCardPopup('${k}')"><span class="fpico">${CARD_SVGS[k]||cd.i}</span> ${cd.n} <b>${v>=0?"+":""}${v}</b></span>`;}).join("")+(active.length>5?`<span class="fpill fp-none">+${active.length-5}</span>`:"");}else fp.innerHTML="";}}
-  function _flashInsufficient(el){
+  function _flashInsufficient(el,msg){
     if(!el)return;
+    const notice=el.querySelector(".insufficient-pop");
+    if(notice)notice.textContent=msg||(LANG==="tr"?"Kasa yetersiz":"Insufficient funds");
     el.classList.add("show-insufficient");
     clearTimeout(el._insufficientTimer);
     el._insufficientTimer=setTimeout(()=>el.classList.remove("show-insufficient"),1500);
@@ -485,9 +494,10 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
     const pr=_memDisc?(_basePr<=0?0:Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.ceil(_basePr*0.8))):_basePr;
     const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateShopPower(k);
+    const tradeReady=k!=="kara_borsa"||cards.some(owned=>owned!=="kara_borsa"&&!isInstantCard(owned));
     cardVariant[k]=oldV;
     const d=document.createElement("div");
-    d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"");
+    d.className="cardtile sv-"+sv+" cat-"+cat+(cant?" cant":"")+(!tradeReady?" trade-missing":"");
     d.title=cd.n+"\n"+cardContractType(k);
     const desc=formatCardDesc(shopCardDesc(k,variantDesc(cd.d,sv)||shortCardText(k,s),sv));
     const priceLabel=pr<=0?(LANG==="tr"?"ÜCRETSİZ":"FREE"):`€${pr}M`;
@@ -496,10 +506,10 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     if(sv===1)d.classList.add("is-dark");
     const _darkBadge=sv===1?`<span class="ct-darkflag" aria-hidden="true"><svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor"><path d="M6 1 1 10.5h10z"/><rect x="5.3" y="4.4" width="1.4" height="3" rx=".5" fill="#0C1213"/><rect x="5.3" y="8.2" width="1.4" height="1.4" rx=".5" fill="#0C1213"/></svg>DARK</span>`:`<span class="ct-rar var-badge var-${sv}">${variantBadge(sv)}</span>`;
     const _darkPenBadge=_darkPen?`<span class="ct-darkpen" title="${LANG==="tr"?"DARK: finalde güç cezası":"DARK: final power penalty"}">${LANG==="tr"?"FİNAL":"FINAL"} −${_darkPen}</span>`:"";
-    const _cost=typeof cardCostBadge==="function"?cardCostBadge(k,sv):"";
-    const _costBadge=_cost?`<span class="ct-cost-badge">${_cost}</span>`:"";
-    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}${_darkPenBadge}</div></div><div class="ct-foot ct-foot-cost">${_costBadge}</div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
-    d.onclick=()=>cant?_flashInsufficient(d):confirmBuyCard(k,pr);
+    const _costLines=typeof cardCostLines==="function"?cardCostLines(k,sv):[];
+    const _costList=_costLines.length?`<ul class="ct-cost-list">${_costLines.map(line=>`<li>${formatCardDesc(line)}</li>`).join("")}</ul>`:"";
+    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div></div><div class="ct-foot ct-foot-cost">${_costList}</div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
+    d.onclick=()=>!tradeReady?_flashInsufficient(d,LANG==="tr"?"Yakacak kart yok":"No card to burn"):cant?_flashInsufficient(d):confirmBuyCard(k,pr);
     sc.appendChild(d);
   });
   if(!shopOffers.length){const e=document.createElement("div");e.className="cardtile-empty";e.style="grid-column:1/-1";e.innerHTML=`<div style="font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:center;padding:16px">— ${x.owned} —</div>`;sc.appendChild(e);}

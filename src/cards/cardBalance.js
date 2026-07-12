@@ -45,6 +45,31 @@ function cardCostBadge(k,v){
  return "";
 }
 
+function cardCostLines(k,v){
+ const c=cardCostMeta(k,v),tr=typeof LANG!=="undefined"&&LANG==="tr",out=[];
+ const add=s=>{if(s&&!out.includes(s))out.push(s);};
+ if(c.chem)add(tr?"Kimya -"+c.chem:"Chemistry -"+c.chem);
+ if(c.trust)add(tr?"Güven -"+c.trust:"Trust -"+c.trust);
+ if(c.nextMarket)add(tr?"Sonraki pazar +%"+c.priceRise:"Next market +"+c.priceRise+"%");
+ if(c.nextTurn)add(tr?(c.turns||1)+" tur -€"+c.nextTurn+"M":"-€"+c.nextTurn+"M for "+(c.turns||1)+" round"+((c.turns||1)>1?"s":""));
+ if(c.trade)add(tr?"Kart yak: "+c.trade:"Burn card: "+c.trade);
+ if(c.risk)add(tr?"Risk %"+c.risk+(c.cash?": -€"+c.cash+"M":""):"Risk "+c.risk+"%"+(c.cash?": -€"+c.cash+"M":""));
+ const pen=typeof KARA_PEN!=="undefined"&&v===1?Number(KARA_PEN[k]||0):0;
+ if(pen)add(tr?"Finalde -"+pen+" güç":"Final -"+pen+" power");
+ const custom={
+   taraftar:{1:tr?"Risk %25: Güven -1":"Risk 25%: Trust -1"},
+   doping:{0:tr?"Risk %20: Güven -1; her tur %35 -€15M":"Risk 20%: Trust -1; each round 35% -€15M",1:tr?"Her tur %25: -€25M":"Each round 25%: -€25M"},
+   sahte_evrak:{0:tr?"Risk %18: Güven -1":"Risk 18%: Trust -1"},
+   kisa_kamp:{0:tr?"Sonraki maç -2 güç":"Next match -2 power",1:tr?"Sonraki maç -4 güç":"Next match -4 power"},
+   gecici_prim:{0:tr?"Maç sonu risk %30: sakatlık; sonraki maç -2":"Post-match risk 30%: injury; next match -2",1:tr?"Maç sonu risk %60: sakatlık; sonraki maç -2":"Post-match risk 60%: injury; next match -2"},
+   deplasman_kafilesi:{1:tr?"Rakip güçlü değilse %50: -4 güç":"If opponent is not stronger: 50% -4 power"},
+   kurban_belli:{0:tr?"Tur sonunda 1 oyuncu sakatlanır":"1 player injured after the round",1:tr?"Tur sonunda 2 oyuncu sakatlanır":"2 players injured after the round"},
+   son_kredi:{0:tr?"Kovulma eşiği €5M daralır":"Sack limit tightens by €5M",1:tr?"Kovulma eşiği €5M daralır":"Sack limit tightens by €5M"}
+ };
+ if(custom[k]&&custom[k][v])add(custom[k][v]);
+ return out;
+}
+
 function weightedVariant(){
  const chaos=typeof chairman!=="undefined"&&chairman&&chairman.id==="cilgin";
  return rand()<(chaos?0.42:0.64)?0:1; // DARK is meaningful, not every other offer
