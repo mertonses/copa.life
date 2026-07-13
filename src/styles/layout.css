@@ -6428,3 +6428,12 @@ body{
 .pen-modal.is-save .pen-keeper-svg .pen-gk-shirt{fill:#429a73}
 .pen-modal.is-save .pen-keeper-svg .pen-gk-glove{fill:#fff}
 @media(max-width:480px){.finalreport .final-heatmap{padding:8px}.finalreport .final-heatmap img{width:100%}}
+
+/* Settings controls share one compact grid language. */
+.sd-theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.sd-theme-grid .sdbtn{min-width:0;padding:7px 3px;font-size:8px;white-space:nowrap;justify-content:center;gap:3px}
+.sd-theme-grid .sdbtn svg{flex:0 0 auto}
+.sd-audio-row .sdbtn.on,#musicBtn.playing,#musicBtn.on{color:var(--text-on-primary)}
+
+html[data-theme="dark"] .settingsdrop,html[data-theme="dark"] .modal,html[data-theme="dark"] .modalbox{box-shadow:0 16px 44px rgba(0,0,0,.36)}
+html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:var(--color-primary);color:var(--text-on-primary)}

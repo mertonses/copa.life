@@ -1,5 +1,6 @@
 /* Ses efektleri: Kenney UI audio + Web Audio fallback, zar, alkis, duduk, kalabalik, mute. */
 let AC=null,crowdNodes=null;
+const UI_SFX_LAST=Object.create(null);
 const UI_SFX={
  click:"assets/audio/ui/click1.ogg",stamp:"assets/audio/ui/click3.ogg",
  select:"assets/audio/ui/mouseclick1.ogg",release:"assets/audio/ui/mouserelease1.ogg",
@@ -13,7 +14,7 @@ const UI_SFX={
  talk_gaz:"assets/audio/ui/atesle.ogg",talk_mantik:"assets/audio/ui/planihatirlat.ogg",
  talk_sert:"assets/audio/ui/disiplin.ogg"
 };
-function playUiSample(k,vol){if(typeof muted!=="undefined"&&muted)return false;const src=UI_SFX[k];if(!src)return false;try{const a=new Audio(src);a.volume=vol==null?.22:vol;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true;}catch(e){return false;}}
+function playUiSample(k,vol,cooldown){if(typeof muted!=="undefined"&&muted)return false;const src=UI_SFX[k];if(!src)return false;const now=performance.now(),wait=cooldown==null?65:cooldown;if(now-(UI_SFX_LAST[k]||0)<wait)return false;UI_SFX_LAST[k]=now;try{const a=new Audio(src);a.preload="none";a.volume=vol==null?.22:vol;a.onended=()=>{a.removeAttribute("src");a.load();};const p=a.play();if(p&&p.catch)p.catch(()=>{});return true;}catch(e){return false;}}
 function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
 function noiseBuf(c,dur){const n=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return b;}
 function click(c,t,f,v,du){const o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+du);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+du+0.01);}
@@ -27,6 +28,11 @@ function crowdStart(){if(muted||!ac())return;const c=AC;const src=c.createBuffer
 function crowdStop(){if(crowdNodes){try{crowdNodes.src.stop();}catch(e){}crowdNodes=null;}}
 function crowdSwell(){if(!crowdNodes)return;const c=AC,t=c.currentTime,g=crowdNodes.g.gain;g.cancelScheduledValues(t);g.setValueAtTime(0.014,t);g.linearRampToValueAtTime(0.06,t+0.1);g.exponentialRampToValueAtTime(0.014,t+1.2);}
 function toggleMute(){muted=!muted;const _on='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg>';const _off='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><line x1="14" y1="7" x2="19" y2="13"/><line x1="19" y1="7" x2="14" y2="13"/></svg>';const btn=$("muteBtn");if(btn)btn.innerHTML=(muted?_off:_on)+'<span id="muteBtnLbl">SES EFEKTLERİ</span>';if(muted)crowdStop();else{ac();playUiSample("release",.15);}}
+
+/* Effects are opt-in after the first interaction and the preference survives a refresh. */
+const _toggleMuteBase=toggleMute;
+toggleMute=function(){_toggleMuteBase();try{localStorage.setItem("copa_sfx",muted?"0":"1");}catch(e){}const b=$("muteBtn");if(b){b.classList.toggle("on",!muted);b.setAttribute("aria-pressed",String(!muted));}};
+setTimeout(()=>{try{muted=localStorage.getItem("copa_sfx")==="0";}catch(e){}const b=$("muteBtn");if(b){b.classList.toggle("on",!muted);b.setAttribute("aria-pressed",String(!muted));}},0);
 function sfxCoin(){if(playUiSample("buy",.21))return;if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;[988,1319,1760].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="triangle";o.frequency.setValueAtTime(f,t+i*0.05);g.gain.setValueAtTime(0.0001,t+i*0.05);g.gain.exponentialRampToValueAtTime(0.035,t+i*0.05+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.05+0.18);o.connect(g);g.connect(c.destination);o.start(t+i*0.05);o.stop(t+i*0.05+0.2);});}
 function sfxGrumble(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain(),lfo=c.createOscillator(),lg=c.createGain();o.type="sawtooth";o.frequency.value=82;lfo.type="sine";lfo.frequency.value=6.5;lg.gain.value=13;lfo.connect(lg);lg.connect(o.frequency);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.04,t+0.05);g.gain.setValueAtTime(0.03,t+0.35);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(c.destination);o.start(t);lfo.start(t);o.stop(t+0.62);lfo.stop(t+0.62);}
 function sfxJingle(){if(playUiSample("reward",.21))return;if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*0.08);g.gain.exponentialRampToValueAtTime(0.025,t+i*0.08+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.08+0.22);o.connect(g);g.connect(c.destination);o.start(t+i*0.08);o.stop(t+i*0.08+0.24);});}

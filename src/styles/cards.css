@@ -236,6 +236,11 @@
   border-color:#fff;
 }
 .cardtile.is-dark .ct-head-price.ct-price-free{background:#fff;color:var(--color-ink);border-color:#fff}
+
+/* In the app dark theme, DARK remains a tier signal without becoming a black slab. */
+html[data-theme="dark"] .cardtile.is-dark{background:var(--surface-raised);border-color:rgba(157,183,185,.34);box-shadow:0 0 0 1px rgba(157,183,185,.12),var(--shadow-sm)}
+html[data-theme="dark"] .cardtile.is-dark .ct-head{background:#0a1415;color:var(--text-primary);border-left-color:#0a1415;border-bottom-color:rgba(237,244,244,.13)}
+html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"] .cardtile.is-dark .ct-head-price.ct-price-free{background:var(--surface-elevated);color:var(--text-primary);border-color:var(--border-default)}
 /* DARK flag with warning triangle */
 .ct-darkflag{
   display:inline-flex;align-items:center;gap:4px;
