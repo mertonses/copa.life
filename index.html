@@ -42,9 +42,9 @@
 <link rel="manifest" href="manifest.json">
 <script>
 /* Apply the saved theme before styles paint so the page never flashes light. */
-(function(){try{var p=localStorage.getItem("copa_theme")||"system";var dark=p==="dark"||(p==="system"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#0b1517":"#e6eeef";}catch(e){}})();
+(function(){try{var p=localStorage.getItem("copa_theme")||"light";if(p!=="dark"&&p!=="light")p="light";var dark=p==="dark";document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#0b1517":"#e6eeef";}catch(e){}})();
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-theme-sound3").catch(()=>{});</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-theme-sound4").catch(()=>{});</script>
 
 <!-- Structured data -->
 <script type="application/ld+json">
@@ -78,7 +78,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260713-theme1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260713-theme2">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260713-darkfix1">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
@@ -966,18 +966,17 @@ function makeSeed(inp){const key=inp?inp.toUpperCase():"";if(key===_CHEAT_SEED){
 const BLK="▁▂▃▄▅▆▇█";function sparkPow(){const h=powerHist.filter(v=>v);if(h.length<2)return"";const mn=Math.min.apply(null,h),mx=Math.max.apply(null,h),rg=Math.max(1,mx-mn);return" "+h.map(v=>BLK[Math.min(7,Math.floor((v-mn)/rg*7))]).join("");}
 /* ===== lightweight background music ===== */
 const THEME_KEY="copa_theme";
-let _themePreference="system";
-const _themeMedia=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
-function _themeUsesDark(pref){return pref==="dark"||(pref==="system"&&!!(_themeMedia&&_themeMedia.matches));}
-function _themeLabel(pref){const tr=LANG==="tr";return pref==="light"?(tr?"A\u00c7IK":"LIGHT"):pref==="dark"?(tr?"KOYU":"DARK"):(tr?"S\u0130STEM":"SYSTEM");}
-function _themeIcon(pref){const icons={light:"<svg viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><circle cx='10' cy='10' r='3.2'/><path d='M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M4 4l1.5 1.5M14.5 14.5 16 16M16 4l-1.5 1.5M5.5 14.5 4 16'/></svg>",dark:"<svg viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><path d='M16.4 12.8A7.3 7.3 0 0 1 7.2 3.6 7.4 7.4 0 1 0 16.4 12.8Z'/></svg>",system:"<svg viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'><rect x='2.2' y='3' width='15.6' height='11.4' rx='1.8'/><path d='M7 17h6M10 14.4V17'/></svg>"};return icons[pref]||icons.system;}
+let _themePreference="light";
+function _themeUsesDark(pref){return pref==="dark";}
+function _themeLabel(pref){const tr=LANG==="tr";return pref==="light"?(tr?"A\u00c7IK":"LIGHT"):(tr?"KOYU":"DARK");}
+function _themeIcon(pref){const icons={light:"<svg viewBox='0 0 20 20' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><circle cx='10' cy='10' r='3.2'/><path d='M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M4 4l1.5 1.5M14.5 14.5 16 16M16 4l-1.5 1.5M5.5 14.5 4 16'/></svg>",dark:"<svg viewBox='0 0 20 20' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><path d='M16.4 12.8A7.3 7.3 0 0 1 7.2 3.6 7.4 7.4 0 1 0 16.4 12.8Z'/></svg>"};return icons[pref]||icons.light;}
 function refreshThemeSetting(){
   const group=$("themeSetting");if(!group)return;
   const tr=LANG==="tr",hdr=$("sdHdrTheme");if(hdr)hdr.textContent=tr?"TEMA":"THEME";
-  group.querySelectorAll("[data-theme-choice]").forEach(btn=>{const active=btn.dataset.themeChoice===_themePreference;btn.classList.toggle("on",active);btn.setAttribute("aria-pressed",String(active));btn.innerHTML=_themeIcon(btn.dataset.themeChoice)+"<span>"+_themeLabel(btn.dataset.themeChoice)+"</span>";});
+  group.querySelectorAll("[data-theme-choice]").forEach(btn=>{const pref=btn.dataset.themeChoice,active=pref===_themePreference,label=_themeLabel(pref);btn.classList.toggle("on",active);btn.setAttribute("aria-pressed",String(active));btn.setAttribute("aria-label",label);btn.title=label;btn.innerHTML=_themeIcon(pref);});
 }
 function applyTheme(pref,persist){
-  _themePreference=["light","dark","system"].includes(pref)?pref:"system";
+  _themePreference=["light","dark"].includes(pref)?pref:"light";
   const dark=_themeUsesDark(_themePreference);
   document.documentElement.dataset.theme=dark?"dark":"light";
   document.documentElement.dataset.themePreference=_themePreference;
@@ -989,13 +988,12 @@ function setTheme(pref){applyTheme(pref,true);}
 function ensureThemeSetting(){
   const drop=$("settingsDrop");if(!drop||$("themeSetting"))return;
   const group=document.createElement("div");group.className="sd-group";group.id="themeSetting";
-  group.innerHTML="<div class='sd-hdr' id='sdHdrTheme'></div><div class='sd-theme-grid' role='group'><button type='button' class='sdbtn' data-theme-choice='light' onclick=\"setTheme('light')\"></button><button type='button' class='sdbtn' data-theme-choice='dark' onclick=\"setTheme('dark')\"></button><button type='button' class='sdbtn' data-theme-choice='system' onclick=\"setTheme('system')\"></button></div>";
+  group.innerHTML="<div class='sd-hdr' id='sdHdrTheme'></div><div class='sd-theme-grid' role='group'><button type='button' class='sdbtn' data-theme-choice='light' onclick=\"setTheme('light')\"></button><button type='button' class='sdbtn' data-theme-choice='dark' onclick=\"setTheme('dark')\"></button></div>";
   drop.insertBefore(group,drop.children[1]||null);refreshThemeSetting();
 }
-if(_themeMedia&&_themeMedia.addEventListener)_themeMedia.addEventListener("change",()=>{if(_themePreference==="system")applyTheme("system",false);});
 let _musicAudio=null,_musicEnabled=false;
 function _musicIcon(off){return off?'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/><line x1="2" y1="2" x2="18" y2="18" stroke-width="2.2"/></svg>':'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="5.5" cy="15" r="2.5"/><circle cx="14.5" cy="13" r="2.5"/><line x1="8" y1="15" x2="8" y2="5"/><line x1="17" y1="13" x2="17" y2="3"/><line x1="8" y1="5" x2="17" y2="3"/></svg>';}
-function _updateMusicButton(){const b=$("musicBtn");if(!b)return;const tr=LANG==="tr",on=_musicEnabled;b.classList.toggle("on",on);b.innerHTML=_musicIcon(!on)+`<span id="musicBtnLbl">${on?(tr?"M\u00dcZ\u0130K A\u00c7IK":"MUSIC ON"):(tr?"M\u00dcZ\u0130K A\u00c7":"MUSIC OFF")}</span>`;b.title=tr?"Arka plan m\u00fczi\u011fi":"Background music";b.setAttribute("aria-label",b.title);}
+function _updateMusicButton(){const b=$("musicBtn");if(!b)return;const tr=LANG==="tr",on=_musicEnabled;b.classList.toggle("on",on);b.innerHTML=_musicIcon(!on)+`<span id="musicBtnLbl">${tr?"M\u00dcZ\u0130K":"MUSIC"}</span>`;b.title=tr?(on?"Müzik açık":"Müzik kapalı"):(on?"Music on":"Music off");b.setAttribute("aria-label",b.title);}
 function ensureMusicSetting(){
   const drop=$("settingsDrop"),soundBtn=$("muteBtn");
   if(!drop||!soundBtn)return;
@@ -1019,7 +1017,7 @@ function ensureMusicSetting(){
 function _getMusic(){if(_musicAudio)return _musicAudio;const a=new Audio();a.preload="none";a.loop=true;a.volume=.16;a.src="assets/audio/ui/clockwork-boardroom-loop.ogg";a.onerror=()=>{_musicEnabled=false;_updateMusicButton();};_musicAudio=a;return a;}
 function toggleMusic(){_musicEnabled=!_musicEnabled;try{localStorage.setItem("copa_music",_musicEnabled?"1":"0");}catch(e){}const a=_getMusic();if(_musicEnabled){a.play().catch(()=>{ /* A browser can reject synthetic clicks; keep the user setting for the next real tap. */ _updateMusicButton();});}else a.pause();_updateMusicButton();}
 document.addEventListener("visibilitychange",()=>{if(!_musicAudio)return;if(document.hidden)_musicAudio.pause();else if(_musicEnabled)_musicAudio.play().catch(()=>{});});
-setTimeout(()=>{try{_themePreference=localStorage.getItem(THEME_KEY)||"system";}catch(e){}_themePreference=document.documentElement.dataset.themePreference||_themePreference;applyTheme(_themePreference,false);try{_musicEnabled=localStorage.getItem("copa_music")==="1";}catch(e){}_updateMusicButton();ensureThemeSetting();ensureMusicSetting();},0);
+setTimeout(()=>{try{_themePreference=localStorage.getItem(THEME_KEY)||"light";}catch(e){}_themePreference=document.documentElement.dataset.themePreference||_themePreference;applyTheme(_themePreference,false);try{_musicEnabled=localStorage.getItem("copa_music")==="1";}catch(e){}_updateMusicButton();ensureThemeSetting();ensureMusicSetting();},0);
 
 /* ===== settings dropdown ===== */
 function toggleSettings(){const d=$("settingsDrop");if(!d)return;const opening=d.classList.contains("hidden");d.classList.toggle("hidden");if(opening){const _wrap=$("settingsWrap");const _close=e=>{if(_wrap&&!_wrap.contains(e.target)){d.classList.add("hidden");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);}};const _esc=e=>{if(e.key==="Escape"){d.classList.add("hidden");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);d.previousElementSibling&&d.previousElementSibling.focus();}};setTimeout(()=>{document.addEventListener("click",_close,true);document.addEventListener("keydown",_esc);},0);}}
