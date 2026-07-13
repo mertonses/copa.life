@@ -2138,3 +2138,164 @@ html[data-theme="dark"] #hub .feeditem .ft{
   background:var(--surface-muted)!important;
   color:var(--text-secondary)!important;
 }
+
+/* ===== Theme contrast contract =====
+   Older screens occasionally kept light surfaces while inheriting dark text
+   tokens. Keep interactive and summary surfaces inside the semantic palette. */
+.sd-audio-row #muteBtn.on{
+  background:var(--action-primary)!important;
+  border-color:var(--action-primary)!important;
+  color:var(--text-on-primary)!important;
+}
+.sd-audio-row #muteBtn,
+.sd-audio-row #muteBtn svg,
+.sd-audio-row #muteBtn span{
+  color:inherit;
+}
+
+html[data-theme="dark"] #hub .roundel:not(.empty),
+html[data-theme="dark"] #hubPitch .roundel:not(.empty){
+  background:linear-gradient(180deg,#173035,#091416)!important;
+  color:var(--text-primary)!important;
+  border-color:rgba(157,183,185,.38)!important;
+}
+html[data-theme="dark"] #hub .roundel:not(.empty) .rtop,
+html[data-theme="dark"] #hub .roundel:not(.empty) .rnm,
+html[data-theme="dark"] #hub .roundel:not(.empty) .rname,
+html[data-theme="dark"] #hub .roundel:not(.empty) .rpos,
+html[data-theme="dark"] #hubPitch .roundel:not(.empty) .rtop,
+html[data-theme="dark"] #hubPitch .roundel:not(.empty) .rnm,
+html[data-theme="dark"] #hubPitch .roundel:not(.empty) .rname,
+html[data-theme="dark"] #hubPitch .roundel:not(.empty) .rpos{
+  color:var(--text-primary)!important;
+  text-shadow:none!important;
+}
+
+html[data-theme="dark"] .cuproad,
+html[data-theme="dark"] .fix{
+  background:var(--surface-elevated)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .fix.trophy{
+  background:var(--surface-dark)!important;
+  border-color:var(--border-strong)!important;
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .fix.trophy.lit{
+  background:var(--action-primary)!important;
+  color:var(--text-on-primary)!important;
+  border-color:var(--action-primary)!important;
+}
+html[data-theme="dark"] .fix.trophy svg{stroke:currentColor!important}
+
+html[data-theme="dark"] .riskmodal{
+  background:var(--surface-default)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .riskmodal h4{
+  background:var(--surface-dark)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .riskmodal .riskitem,
+html[data-theme="dark"] .riskmodal .riskitem-inj{
+  background:var(--surface-raised)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+
+html[data-theme="dark"] .result .scoreboard{
+  background:var(--surface-dark)!important;
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .result .scoreboard #rRound,
+html[data-theme="dark"] .result .scoreboard .ln{color:var(--text-secondary)!important}
+
+html[data-theme="dark"] .result .storytile,
+html[data-theme="dark"] .result .econsum,
+html[data-theme="dark"] .result .xi{
+  background:var(--surface-elevated)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .result .storytile .sth,
+html[data-theme="dark"] .result .econsum .sth{
+  background:var(--surface-dark)!important;
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .result .storyevent{
+  border-color:var(--border-subtle)!important;
+}
+html[data-theme="dark"] .result .storyicon,
+html[data-theme="dark"] .result .storypath span,
+html[data-theme="dark"] .result .econ-hero,
+html[data-theme="dark"] .result .econwhy,
+html[data-theme="dark"] .result .seedbox,
+html[data-theme="dark"] .result .xi h4,
+html[data-theme="dark"] .result .xi .pr,
+html[data-theme="dark"] .result .xi .pr .pp{
+  background:var(--surface-raised)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .result .storyevent b,
+html[data-theme="dark"] .result .storytext mark,
+html[data-theme="dark"] .result .pbr b,
+html[data-theme="dark"] .result .xi .pr,
+html[data-theme="dark"] .result .xi .pr .pp{
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .result .storyevent p,
+html[data-theme="dark"] .result .storypath span,
+html[data-theme="dark"] .result .econ-hero span,
+html[data-theme="dark"] .result .econ-hero p,
+html[data-theme="dark"] .result .pbr span,
+html[data-theme="dark"] .result .xi h4 small{
+  color:var(--text-secondary)!important;
+}
+html[data-theme="dark"] .result .pr-rt,
+html[data-theme="dark"] .result .pr-rt.pr-pow{
+  background:var(--surface-dark)!important;
+  color:var(--text-primary)!important;
+}
+
+html[data-theme="dark"] .season-stats-modal{
+  background:var(--surface-default)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-head{
+  background:var(--surface-dark)!important;
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-head h3,
+html[data-theme="dark"] .season-stats-modal .ss-close{
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-body{
+  background:var(--surface-default)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-metric,
+html[data-theme="dark"] .season-stats-modal .ss-section,
+html[data-theme="dark"] .season-stats-modal .ss-empty,
+html[data-theme="dark"] .season-stats-modal .ss-foot{
+  background:var(--surface-raised)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-mvp-card,
+html[data-theme="dark"] .season-stats-modal .ss-section-mvp{
+  background:linear-gradient(135deg,var(--surface-raised),var(--surface-elevated))!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-section h4,
+html[data-theme="dark"] .season-stats-modal .ss-row span,
+html[data-theme="dark"] .season-stats-modal .ss-metric span,
+html[data-theme="dark"] .season-stats-modal .ss-metric em,
+html[data-theme="dark"] .season-stats-modal .ss-mvp-card span{
+  color:var(--text-secondary)!important;
+}
+html[data-theme="dark"] .season-stats-modal .ss-row b,
+html[data-theme="dark"] .season-stats-modal .ss-scorer b{
+  color:var(--text-primary)!important;
+}
