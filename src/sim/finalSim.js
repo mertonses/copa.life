@@ -1264,7 +1264,11 @@ function buildSim(myPow, oppPow) {
 
   /* build players from game data */
   const _fmA=(typeof slots!=="undefined")?slots:(typeof FORMATIONS!=="undefined"?FORMATIONS["4-4-2"]:[]);
-  const _fmB=(typeof FORMATIONS!=="undefined")?(FORMATIONS["4-3-3"]||FORMATIONS["4-4-2"]):_fmA;
+  // A Ghost Club supplies only a recorded squad/shape profile. The existing match
+  // engine still owns every decision, event, score and penalty outcome.
+  const _ghostProfile=(typeof opponent!=="undefined"&&opponent&&opponent.ghostProfile)?opponent.ghostProfile:null;
+  const _ghostFormation=_ghostProfile&&_ghostProfile.formation;
+  const _fmB=(typeof FORMATIONS!=="undefined")?(FORMATIONS[_ghostFormation]||FORMATIONS["4-3-3"]||FORMATIONS["4-4-2"]):_fmA;
   const _namesA=(typeof picksBySlot!=="undefined")?picksBySlot.map(p=>p?p.name:"?"):[];
   const _namesB=(typeof oppLineup!=="undefined"&&oppLineup.length)?oppLineup.map(o=>o.name):Array(11).fill("?");
   const _injA=(typeof picksBySlot!=="undefined")?picksBySlot.map(p=>p&&p.injured):[];
@@ -1284,7 +1288,14 @@ function buildSim(myPow, oppPow) {
     return base;
   }
   function mkStatsB(i,off,names){
-    const nm=names[i]||'?';let ov=65+off;const role=ROLE_MAP[i]||'CM';
+    const recorded=_ghostProfile&&Array.isArray(_ghostProfile.lineup)?_ghostProfile.lineup[i]:null;
+    const nm=(recorded&&recorded.name)||names[i]||'?';
+    const recordedPower=Number(recorded&&(recorded.ov==null?recorded.power:recorded.ov));
+    // Blend recorded player quality with the normal opponent power model so a
+    // ghost never bypasses the game's established power balancing.
+    let ov=65+off;
+    if(Number.isFinite(recordedPower))ov=ov*0.65+recordedPower*0.35;
+    const role=ROLE_MAP[i]||'CM';
     return{passing:ov,vision:ov,decisions:ov,dribbling:ov,shooting:role==='ST'?ov+8:ov-5,defending:role==='CB'||role==='DM'?ov+8:ov-5,positioning:ov,anticipation:ov,pace:role==='LW'||role==='RW'||role==='ST'?ov+6:ov,goalkeeping:role==='GK'?ov+15:20,name:nm,number:i+1};
   }
 
@@ -1356,6 +1367,7 @@ function buildSim(myPow, oppPow) {
       audit,
       hasWingCard:typeof hasCard==='function'&&hasCard('kanat_akini'),
       hasCounterCard:typeof hasCard==='function'&&hasCard('kontra'),
+      ghostTactics:tid===1&&_ghostProfile&&_ghostProfile.tactics?_ghostProfile.tactics:null,
       goldenActive:typeof goldenGoalMode!=="undefined"&&goldenGoalMode,
       isFinal:typeof round!=="undefined"&&round>=6,
       losing,leading
@@ -1375,8 +1387,18 @@ function buildSim(myPow, oppPow) {
     if(!carrier)return tacticalSeq;
     const tid=carrier.teamId;
     const ctx=sequenceContext(tid,carrier);
-    const {team,opp,losing,leading,goldenActive}=ctx;
+    const {team,opp,losing,leading,goldenActive,ghostTactics}=ctx;
     let type=nextPlannedSequence(tid,carrier);
+    // A ghost's saved style only gently nudges the existing sequence chooser.
+    // It does not alter probabilities outside this turn or create a second engine.
+    if(ghostTactics){
+      const wingBias=Number(ghostTactics.wing_bias)||0.52;
+      const pressBias=Number(ghostTactics.press_bias)||0.50;
+      const tempoBias=Number(ghostTactics.tempo_bias)||0.50;
+      if(wingBias>0.62&&rng.bool((wingBias-0.60)*0.32))type=rng.bool(0.5)?'WIDE_LEFT':'WIDE_RIGHT';
+      else if(pressBias>0.66&&rng.bool((pressBias-0.64)*0.24))type='PRESS_RECOVERY';
+      else if(tempoBias<0.40&&rng.bool((0.42-tempoBias)*0.24))type='LOW_TEMPO';
+    }
     if((carrier.role==='GK'||carrier.role==='CB')&&(tid===0?carrier.y<_PH*0.34:carrier.y>_PH*0.66)&&rng.bool(0.30))type=carrier.role==='GK'?'GK_SHORT_START':'BUILD_FROM_BACK';
     if((carrier.role==='LW'||carrier.role==='LB'||_isWideLeft(carrier.x))&&rng.bool(0.28))type='WIDE_LEFT';
     if((carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&rng.bool(0.28))type='WIDE_RIGHT';

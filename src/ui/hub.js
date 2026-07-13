@@ -29,6 +29,28 @@ function _fixHubVisibleText(){
   if(trustHint)trustHint.textContent=tv>=3?(tr?"güvende":"secure"):tv>=2?(tr?"dengede":"steady"):tv>=1?(tr?"kırılgan":"fragile"):(tr?"tehlikede":"at risk");
 }
 
+function _applyGhostOpponent(ghost,expectedRound,baseline){
+  if(!ghost||runEnded||round!==expectedRound||opponent!==baseline)return;
+  opponent=ghost;
+  if(Array.isArray(bracket))bracket[round-1]=ghost;
+  const profile=ghost.ghostProfile||{};
+  if(Array.isArray(profile.lineup)&&profile.lineup.length){
+    oppLineup=profile.lineup.slice(0,11).map((p,i)=>{
+      const pos=(p&&p.pos)||"OS";
+      return {name:(p&&p.name)||("Player "+(i+1)),ov:Number(p&&(p.ov==null?p.power:p.ov))||ghost.power,pos,grp:typeof groupOf==="function"?groupOf(pos):"CM",side:"C",injured:!!(p&&p.injured)};
+    });
+    oppXI=oppLineup.map(p=>p.name);
+  }
+  window._ghostSeenIds=(window._ghostSeenIds||[]).concat(ghost.ghostId).slice(-16);
+  if(Array.isArray(fixtures)&&fixtures[round-1])fixtures[round-1].opp=ghost.name;
+  renderFixtures();renderHub();
+}
+function _maybeGhostOpponent(){
+  const baseline=opponent,expectedRound=round;
+  if(!window.GhostClubs||!window.GhostClubs.enabled())return;
+  const own=typeof squadPower==="function"?squadPower(round):{power:70};
+  window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:Date.now(),excluded:window._ghostSeenIds||[]}).then(ghost=>_applyGhostOpponent(ghost,expectedRound,baseline)).catch(()=>{});
+}
 function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
   const _tcl=$("tcLines");if(_tcl)_tcl.innerHTML="";
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
@@ -45,7 +67,7 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   /* Sansasyoncu spotlight — her iki turda bir */
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
   if(chairman.id==="torpilci"&&round===3&&!eventSeen.torpil_guaranteed){eventSeen.torpil_guaranteed=1;setTimeout(_queueGuaranteedTorpil,760);}
-  newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
+  newShopOffers();_genFreeAgents();renderFixtures();renderHub();_maybeGhostOpponent();maybeDraftEvent();
   if(round===1&&captainIdx<0&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
   if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
 }
@@ -410,6 +432,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   {const el=$("oppPw");if(el){el.textContent=opponent.power;el.style.color=_pwCol(opponent.power);}}
   $("youLbl").textContent=x.youLbl;$("oppLbl").textContent=x.oppLbl;$("shopLbl").innerHTML=`<span style="display:flex;align-items:center;gap:6px"><span><svg viewBox="0 0 18 16" width="12" height="11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="5" width="11" height="10" rx="1.5"/><rect x="4" y="2.5" width="11" height="10" rx="1.5" fill="var(--paper2)"/><rect x="6" y="0" width="11" height="10" rx="1.5" fill="var(--paper2)"/></svg>${x.shopLbl}</span><button onclick="event.stopPropagation();shopReroll()" title="${LANG==="tr"?"Yenile":"Reroll"}" style="background:none;border:1px solid var(--border-subtle);border-radius:4px;padding:2px 4px;cursor:pointer;color:var(--color-slate);display:inline-flex;align-items:center;justify-content:center;line-height:1"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a6 6 0 1 0 1.5-4"/><path d="M2 4v4h4"/></svg></button></span>`;$("feedHdr").innerHTML=`<span class="tclive">●</span> <span>${x.feedHdr}</span>`;$("powHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5"/></svg>${x.powHdr}`;$("powV").textContent=sp.power;powerHist[round-1]=sp.power;
   {const rb=$("shopLbl")&&$("shopLbl").querySelector("button");if(rb)rb.innerHTML=`<svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7a6 6 0 0 0-10.5-2.5L4 6"/><path d="M4 3v3h3"/><path d="M4 13a6 6 0 0 0 10.5 2.5L16 14"/><path d="M16 17v-3h-3"/></svg>`;}
+  {const isGhost=!!(opponent&&opponent.ghost),nm=$("oppNm"),metaId="ghostMeta";let meta=$(metaId);if(!meta&&nm&&nm.parentElement){meta=document.createElement("div");meta.id=metaId;meta.className="ghost-meta";nm.parentElement.appendChild(meta);}if(meta){meta.classList.toggle("hidden",!isGhost);meta.textContent="";if(isGhost){const gm=opponent.ghostMeta||{},icon=document.createElement("span"),copy=document.createElement("span");icon.setAttribute("aria-hidden","true");icon.innerHTML=window.GhostClubs?window.GhostClubs.ghostIcon():"";copy.textContent=[LANG==="tr"?"Ger\u00e7ek oyuncu run'\u0131":"Real player run",gm.formation,gm.chairman,gm.country,gm.publicId].filter(Boolean).join(" \u00b7 ");meta.append(icon,copy);}}if(isGhost){$("oppLbl").textContent=LANG==="tr"?"HAYALET KUL\u00dcP":"GHOST CLUB";}}
   {$("powHint").textContent=x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
   {const cb=chemBonus(s);const cvClamped=Math.max(-5,Math.min(5,cb.total));$("chemV").textContent=(cvClamped>=0?"+":"")+cvClamped;$("chemList").innerHTML=x.powHint;const hp=$("hubPitch");if(hp){hp.classList.toggle("chem-high",cvClamped>=3);hp.classList.toggle("chem-low",cvClamped<0);}
    const ct=$("chemTile");if(ct){const cv=cvClamped;const cbg=cv<0?"#ef4444":cv===0?"#f97316":cv<=1?"#eab308":cv<=2?"#4ade80":"#16c96b";const cfg=cv<=1&&cv>=0?"var(--ink)":"#fff";ct.style.background=cbg;[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color=cfg;});}}

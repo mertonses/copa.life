@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260713-theme-sound4 */
-const CACHE = "copa-v20260713-theme-sound4";
+/* copa.life Service Worker - v20260713-ghost1 */
+const CACHE = "copa-v20260713-ghost1";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -31,6 +31,7 @@ const PRECACHE = [
   "/src/cards/cardBalance.js",
   "/src/cards/cardInventory.js",
   "/src/audio/sfx.js",
+  "/src/online/ghostClubs.js",
   "/src/state/saveLoad.js",
   "/src/state/metaState.js",
   "/src/state/gameState.js",
