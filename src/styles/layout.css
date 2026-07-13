@@ -680,6 +680,14 @@ a.footer-link{color:var(--color-slate)}
 .pc-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--color-slate);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
 .pc-eyebrow::before,.pc-eyebrow::after{content:"";display:block;height:1px;width:24px;background:var(--border-default)}
 .pc-band{background:var(--surface-muted);color:var(--color-slate);font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--border-subtle);text-align:center}
+.pc-club-edit{width:min(100%,290px);margin:8px auto 5px;text-align:left}
+.pc-club-label{display:block;margin:0 0 3px 2px;color:var(--color-slate);font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;line-height:1;text-transform:uppercase}
+.pc-club-row{display:flex;min-height:38px;overflow:hidden;border:1px solid var(--border-default);border-radius:var(--radius-sm);background:var(--surface-elevated);transition:border-color var(--tr-fast),box-shadow var(--tr-fast)}
+.pc-club-row:focus-within{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--focus-ring)}
+.pc-club-input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--color-ink);font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:.6px;line-height:1;padding:7px 9px;text-transform:uppercase}
+.pc-club-input::placeholder{color:var(--color-slate);font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;opacity:.6}
+.pc-club-rand{min-width:38px;padding:0;justify-content:center;background:var(--surface-muted)}
+.pc-club-rand:focus-visible{outline:2px solid var(--color-primary);outline-offset:-3px}
 .pc-team{font-family:var(--disp);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:1px;color:var(--color-ink);margin:4px 0 4px}
 .pc-sub{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--color-slate);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
 .pc-meta-chip{display:inline-flex;align-items:center;background:var(--surface-muted);border:1px solid var(--border-subtle);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--color-slate);font-family:var(--mono);letter-spacing:.5px}
