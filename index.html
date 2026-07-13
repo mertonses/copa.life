@@ -44,7 +44,7 @@
 /* Apply the saved theme before styles paint so the page never flashes light. */
 (function(){try{var p=localStorage.getItem("copa_theme")||"system";var dark=p==="dark"||(p==="system"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#0b1517":"#e6eeef";}catch(e){}})();
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-theme-sound2").catch(()=>{});</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260713-theme-sound3").catch(()=>{});</script>
 
 <!-- Structured data -->
 <script type="application/ld+json">
@@ -80,7 +80,7 @@
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/match.css?v=20260712f">
+<link rel="stylesheet" href="src/styles/match.css?v=20260713-darkfix1">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1a2e22);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
@@ -442,7 +442,7 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
   if($("sdHdrSound"))$("sdHdrSound").textContent=tr?"SES":"SOUND";
   if($("animBtnLbl"))$("animBtnLbl").textContent=tr?"ANİMASYONU AZALT":"REDUCE MOTION";
   if($("animBtn")){$("animBtn").title=tr?"Animasyonu azalt":"Reduce motion";$("animBtn").setAttribute("aria-label",tr?"Animasyonu azalt":"Reduce motion");}
-  if($("muteBtnLbl"))$("muteBtnLbl").textContent=tr?"SES EFEKTLERİ":"SOUND EFFECTS";
+  if($("muteBtnLbl"))$("muteBtnLbl").textContent=tr?"SES":"SFX";
   if($("muteBtn")){$("muteBtn").title=tr?"Ses efektleri":"Sound effects";$("muteBtn").setAttribute("aria-label",tr?"Ses efektleri":"Sound effects");}
   const tagline=document.querySelector(".v7-tagline");if(tagline)tagline.innerHTML=tr?"Zar at. Kadronu kur.<br><span class=\"v7-tagline-accent\">Kadere meydan oku.</span>":"Roll the dice. Build your squad.<br><span class=\"v7-tagline-accent\">Defy fate.</span>";
   const heroDesc=document.querySelector(".v7-hero-desc");if(heroDesc)heroDesc.textContent=tr?"Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.":"A roguelite football squad management game — every run is different, no final comes easy.";

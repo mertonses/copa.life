@@ -2090,3 +2090,51 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
     font-size:8px!important;
   }
 }
+
+/* Dark theme contrast repair: legacy hub pieces used hard-coded light surfaces. */
+html[data-theme="dark"] #hub .roundel.full,
+html[data-theme="dark"] #hubPitch .roundel.full{
+  background:linear-gradient(180deg,#173035,#091416)!important;
+  color:var(--text-primary)!important;
+  border-color:rgba(157,183,185,.38)!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.44),inset 0 1px 0 rgba(237,244,244,.08)!important;
+}
+html[data-theme="dark"] #hub .roundel.full .rname,
+html[data-theme="dark"] #hub .roundel.full .rpos,
+html[data-theme="dark"] #hubPitch .roundel.full .rname,
+html[data-theme="dark"] #hubPitch .roundel.full .rpos{color:var(--text-primary)!important}
+
+html[data-theme="dark"] #hub .pitch-overlay .overlay-chip,
+html[data-theme="dark"] #hub .pitch-overlay #cardrow .card{
+  background:var(--surface-raised)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+  box-shadow:0 2px 5px rgba(0,0,0,.3)!important;
+}
+html[data-theme="dark"] #hub .pitch-overlay #cardrow .card .tier,
+html[data-theme="dark"] #hub .pitch-overlay #cardrow .card .card-ico{color:var(--text-secondary)!important}
+html[data-theme="dark"] #hub .pitch-overlay #cardrow .card .v,
+html[data-theme="dark"] #hub .pitch-overlay #cardrow .card .copy.stance-1{color:var(--text-primary)!important}
+
+html[data-theme="dark"] #hub .bench-row{
+  background:var(--surface-raised)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] #hub .bench-row:hover{background:var(--surface-elevated)!important}
+
+html[data-theme="dark"] #hub .cardtile.is-dark .ct-head-price,
+html[data-theme="dark"] #hub .cardtile.is-dark .ct-head-price.ct-price-free{
+  background:#203438!important;
+  color:var(--text-primary)!important;
+  border-color:#6f9195!important;
+}
+
+html[data-theme="dark"] #hub .feeditem{
+  background:color-mix(in srgb,var(--surface-raised) 92%,var(--surface-muted))!important;
+  color:var(--text-primary)!important;
+}
+html[data-theme="dark"] #hub .feeditem .ft{
+  background:var(--surface-muted)!important;
+  color:var(--text-secondary)!important;
+}
