@@ -89,6 +89,19 @@ for (const [country, [file, variable]] of Object.entries(COUNTRIES)) {
   console.log(`${country}: ${rows.join(" | ")}`);
 }
 
+{
+  const pool = loadPool(...COUNTRIES.TR);
+  const context = makeContext("TR", pool);
+  for (const pos of POSITIONS) {
+    context.eliteBonus = true;
+    const elite = context.__draftOptions(pos).find(option => option.eliteDiscount);
+    if (!elite || elite.natG !== groupOf(pos)) {
+      console.error(`Elit bonus mevki filtresi başarısız: ${pos} slotuna ${elite?.name || "oyuncu gelmedi"}.`);
+      failed = true;
+    }
+  }
+}
+
 if (failed) {
   console.error("Türkiye dışındaki bir havuzda tamamen düşük üçlü üretildi.");
   process.exitCode = 1;
