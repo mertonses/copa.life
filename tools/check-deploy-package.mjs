@@ -42,8 +42,8 @@ if (/path:\s*'\.'|path:\s*\./.test(workflow)) fail("GitHub Pages must not upload
 if (/cardCombos\.js|mascot\.jpg/.test(sw)) fail("service worker precache contains removed files");
 if (/20260707/.test(sw) || /sw\.js\?v=20260707/.test(indexHtml)) fail("stale service worker cache version remains");
 if (!sw.includes("__COPA_BUILD_VERSION__") || !buildScript.includes("GITHUB_SHA")) fail("service worker must receive a unique version on every Pages build");
-if (!/clients\.matchAll[\s\S]*client\.navigate/.test(sw)) fail("activated service worker must refresh open stale clients");
-if (!/pagehide[\s\S]*_saveState/.test(indexHtml)) fail("page state must be saved before an automatic update reload");
+if (/client\.navigate|location\.reload/.test(sw+indexHtml)) fail("deploy updates must not reload an active run");
+if (!/new Request\(e\.request,\{cache:"no-store"\}\)/.test(sw)) fail("page and runtime assets must bypass stale HTTP caches on entry");
 
 const build = spawnSync(process.execPath, ["tools/build-pages.mjs"], {
   cwd: ROOT,

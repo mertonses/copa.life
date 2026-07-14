@@ -47,7 +47,6 @@
 </script>
 <script>
 if("serviceWorker"in navigator){
-  window.addEventListener("pagehide",()=>{try{if(typeof _saveState==="function")_saveState();}catch(_){}});
   navigator.serviceWorker.register("/sw.js?v=auto-refresh1").then(reg=>reg.update()).catch(()=>{});
 }
 </script>
