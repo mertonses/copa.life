@@ -13,4 +13,8 @@ for (const marker of [
 expect(hub.includes("function enterHub(restoring=false)"), "Hub restore modu eksik");
 expect(hub.includes("if(restoring){"), "Hub restore koruması eksik");
 expect(state.includes("runRngCalls++"), "Deterministik RNG çağrı sayacı eksik");
+expect(html.includes("st.picks.length!==restoreSlots.length||!st.picks.every(Boolean)"), "Eksik draft kaydı restore edilmemeli");
+expect(html.includes("function hasCompleteStartingXI()"), "Tam ilk 11 kontrolü eksik");
+expect(html.includes("if(!hasCompleteStartingXI()){showModal"), "Eksik ilk 11 ile maç başlatma engeli eksik");
+expect(html.includes("choose.locked")&&html.includes("||!p||filled[idx])return false"), "Draft çift seçim/reentry koruması eksik");
 console.log("Run persistence OK: save v4 tur/rakip/RNG/hub durumu korunuyor; v2-v3 geriye uyumlu.");
