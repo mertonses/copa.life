@@ -33,6 +33,7 @@ const packageJson = JSON.parse(read("package.json"));
 const workflow = read(".github/workflows/pages.yml");
 const sw = read("sw.js");
 const indexHtml = read("index.html");
+const buildScript = read("tools/build-pages.mjs");
 
 if (!packageJson.scripts?.["build:pages"]) fail("package.json must expose build:pages");
 if (!/npm run build:pages/.test(workflow)) fail("GitHub Pages workflow must build a clean artifact");
@@ -40,6 +41,9 @@ if (!/path:\s*'dist'|path:\s*dist/.test(workflow)) fail("GitHub Pages artifact m
 if (/path:\s*'\.'|path:\s*\./.test(workflow)) fail("GitHub Pages must not upload the repository root");
 if (/cardCombos\.js|mascot\.jpg/.test(sw)) fail("service worker precache contains removed files");
 if (/20260707/.test(sw) || /sw\.js\?v=20260707/.test(indexHtml)) fail("stale service worker cache version remains");
+if (!sw.includes("__COPA_BUILD_VERSION__") || !buildScript.includes("GITHUB_SHA")) fail("service worker must receive a unique version on every Pages build");
+if (!/clients\.matchAll[\s\S]*client\.navigate/.test(sw)) fail("activated service worker must refresh open stale clients");
+if (!/pagehide[\s\S]*_saveState/.test(indexHtml)) fail("page state must be saved before an automatic update reload");
 
 const build = spawnSync(process.execPath, ["tools/build-pages.mjs"], {
   cwd: ROOT,
@@ -52,6 +56,8 @@ if (build.status !== 0) {
 }
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
+const distServiceWorker = fs.readFileSync(path.join(DIST, "sw.js"), "utf8");
+if (distServiceWorker.includes("__COPA_BUILD_VERSION__")) fail("built service worker still contains the version placeholder");
 if (!distFiles.includes("assets/data/fm26/player_profiles.json")) fail("player profile data is missing from dist");
 const forbiddenDistPrefixes = ["node_modules/", "tools/", "playtest/", "outputs/", "assets/chairs/", ".git/"];
 for (const file of distFiles) {

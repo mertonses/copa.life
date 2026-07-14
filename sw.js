@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260715-ghost2-club-security1-lineup-sync1-elite-position1 */
-const CACHE = "copa-v20260715-ghost2-club-security1-lineup-sync1-elite-position1";
+/* copa.life Service Worker - ghost2 / automatic per-deploy refresh */
+const CACHE = "copa-ghost2-__COPA_BUILD_VERSION__";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -71,9 +71,13 @@ self.addEventListener("install", e => {
 });
 
 self.addEventListener("activate", e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ).then(() => self.clients.claim()));
+  e.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+    const windows=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    await Promise.all(windows.map(client=>client.navigate(client.url).catch(()=>null)));
+  })());
 });
 
 self.addEventListener("fetch", e => {

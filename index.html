@@ -45,7 +45,12 @@
 /* Apply the saved theme before styles paint so the page never flashes light. */
 (function(){try{var p=localStorage.getItem("copa_theme")||"light";if(p!=="dark"&&p!=="light")p="light";var dark=p==="dark";document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#0b1517":"#e6eeef";}catch(e){}})();
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js?v=20260714-ghost2-club-security1").catch(()=>{});</script>
+<script>
+if("serviceWorker"in navigator){
+  window.addEventListener("pagehide",()=>{try{if(typeof _saveState==="function")_saveState();}catch(_){}});
+  navigator.serviceWorker.register("/sw.js?v=auto-refresh1").then(reg=>reg.update()).catch(()=>{});
+}
+</script>
 
 <!-- Structured data -->
 <script type="application/ld+json">

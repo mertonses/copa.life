@@ -91,4 +91,11 @@ for (const dir of ROOT_DIRS) {
   copyDir(path.join(ROOT, dir), path.join(OUT, dir));
 }
 
-console.log("Pages artifact built: dist");
+const buildVersion=(process.env.GITHUB_SHA||Date.now().toString(36)).slice(0,12);
+const builtServiceWorker=path.join(OUT,"sw.js");
+if(fs.existsSync(builtServiceWorker)){
+  const source=fs.readFileSync(builtServiceWorker,"utf8");
+  fs.writeFileSync(builtServiceWorker,source.replaceAll("__COPA_BUILD_VERSION__",buildVersion));
+}
+
+console.log(`Pages artifact built: dist (${buildVersion})`);
