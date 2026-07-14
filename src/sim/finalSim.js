@@ -2441,6 +2441,10 @@ function buildSim(myPow, oppPow) {
     window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>xG</span><b>${stats.xg[0].toFixed(1)}-${stats.xg[1].toFixed(1)}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>`;
     window.finalSimAudit=audit; // audit kept for tuning/telemetry; no longer rendered in the report
     calcRatings();
+    if(typeof window._captureLastMatchReportSnapshot==="function")window._captureLastMatchReportSnapshot({
+      score:[score[0],score[1]],events:goalEvents.slice(),homeWon:won,homeRatings:window.lastMatchRatings,
+      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:window.motm
+    });
     _dom("simScore",sc);
     setTimeout(()=>endRun(won,sc),900);
   }
@@ -2515,6 +2519,10 @@ function buildSim(myPow, oppPow) {
     window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";
     window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.xgA=stats.xg[0];window.xgB=stats.xg[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
     calcRatings();
+    if(typeof window._captureLastMatchReportSnapshot==="function")window._captureLastMatchReportSnapshot({
+      score:[score[0],score[1]],events:goalEvents.slice(),homeWon:false,homeRatings:window.lastMatchRatings,
+      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:null
+    });
     _dom("simState",isTR?"PENALTILAR":"PENALTIES");
     const stateEl=document.getElementById("simState");if(stateEl)stateEl.classList.remove("is-golden");
     renderer.burst(isTR?"PENALTILAR":"PENALTIES");

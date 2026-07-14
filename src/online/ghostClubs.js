@@ -24,6 +24,8 @@
     return String((meta&&meta.content)||window.COPA_GHOST_API||"").trim().replace(/\/$/,"");
   };
   const cleanText=value=>String(value==null?"":value).replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,72);
+  const cleanProfileKey=value=>String(value==null?"":value).replace(/[<>\r\n]/g,"").trim().slice(0,180);
+  const cleanClubName=(value,fallback="")=>window.ClubNamePolicy?window.ClubNamePolicy.sanitize(value,fallback):cleanText(value).slice(0,29);
   const bounded=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
   const hash=value=>{let h=2166136261;for(const ch of String(value)){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(36);};
   const isTr=()=>typeof window.LANG==="undefined"||window.LANG==="tr";
@@ -60,21 +62,31 @@
     const now=Date.now();
     return saveStartedRun({
       id:"run-"+hash([safe.seed,safe.clubName,now].join("|")),
-      seed:String(safe.seed||""),clubName:cleanText(safe.clubName||""),
-      country:cleanText(safe.country||""),started_at:now
+      seed:String(safe.seed||""),clubName:cleanClubName(safe.clubName||""),
+      country:cleanText(safe.country||""),started_at:now,cheatRun:!!safe.cheatRun,ghostOpponentUsed:false
     });
   }
   function updateRun(context){
     const safe=context&&typeof context==="object"?context:{};
     const current=readStartedRun();
-    const clubName=cleanText(safe.clubName||safe.teamName||current.clubName||"");
+    const clubName=cleanClubName(safe.clubName||safe.teamName||current.clubName||"",current.clubName||"");
     const seed=String(safe.seed==null?(current.seed||""):safe.seed);
     const country=cleanText(safe.country||current.country||"");
     const startedAt=Number(current.started_at)||Date.now();
     return saveStartedRun({
       id:cleanText(current.id)||("run-"+hash([seed,clubName,startedAt].join("|"))),
-      seed,clubName,country,started_at:startedAt
+      seed,clubName,country,started_at:startedAt,
+      cheatRun:!!(current.cheatRun||safe.cheatRun),
+      ghostOpponentUsed:!!(current.ghostOpponentUsed||safe.ghostOpponentUsed),
+      ghostOpponentId:cleanText(safe.ghostOpponentId||current.ghostOpponentId||"")
     });
+  }
+  function hasOpponentUsed(){return !!readStartedRun().ghostOpponentUsed;}
+  function markOpponentUsed(ghostId){
+    const current=readStartedRun();
+    if(!current.id)return false;
+    updateRun({ghostOpponentUsed:true,ghostOpponentId:ghostId||current.ghostOpponentId||""});
+    return true;
   }
 
   function queue(){try{const q=JSON.parse(safeGet(QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return [];}}
@@ -83,8 +95,12 @@
     const p=player||{};
     return {
       id:cleanText(p.id||p.pid||""),
+      profile_key:cleanProfileKey(p.profileKey||p.profile_key||""),
       name:cleanText(p.name||p.n||("Player "+(index+1)))||("Player "+(index+1)),
       pos:cleanText(p.pos||p.position||"OS")||"OS",
+      nat_pos:cleanText(p.natPos||p.pos||p.position||"OS")||"OS",
+      club:cleanText(p.club||""),
+      age:Math.round(bounded(p.age,0,60)),
       power:Math.round(bounded(p.ov==null?p.power:p.ov,35,115)),
       injured:!!p.injured
     };
@@ -108,13 +124,33 @@
       source:"completed_run"
     };
   }
+  function matchEventSnapshot(event){
+    if(typeof event==="string"){
+      const name=cleanText(event);
+      return name&&name!=="[object Object]"?{minute:0,side:"",type:"note",name}:null;
+    }
+    if(!event||typeof event!=="object")return null;
+    const minute=Math.round(bounded(event.minute==null?event.m:event.minute,0,130));
+    const side=event.side==="home"||event.side==="away"?event.side:event.home===true?"home":event.home===false?"away":"";
+    const type=cleanText(event.type||"event").slice(0,20)||"event";
+    const name=cleanText(event.name||event.player||event.text||"");
+    return name||minute?{minute,side,type,name}:null;
+  }
+  function finalProfileSnapshot(context){
+    const report=context.finalReport&&typeof context.finalReport==="object"?context.finalReport:{};
+    const sourceEvents=Array.isArray(report.events)?report.events:Array.isArray(context.lastMatchEvents)?context.lastMatchEvents:[];
+    return {
+      final_penalty:Math.round(bounded(report.final_penalty==null?(report.finalPenalty==null?context.finalPenalty:report.finalPenalty):report.final_penalty,-40,40)),
+      events:sourceEvents.slice(-18).map(matchEventSnapshot).filter(Boolean)
+    };
+  }
   function normalizeCompletedRun(context){
     const startedRun=readStartedRun();
     const squad=Array.isArray(context.picksBySlot)?context.picksBySlot.filter(Boolean):Array.isArray(context.squad)?context.squad:[];
     const bench=Array.isArray(context.bench)?context.bench:[];
     const cards=(Array.isArray(context.cards)?context.cards:[]).map(key=>cardSnapshot(key,context));
     const createdAt=new Date().toISOString();
-    const clubName=cleanText(context.teamName||context.clubName||startedRun.clubName||"copa.life XI")||"copa.life XI";
+    const clubName=cleanClubName(context.teamName||context.clubName||startedRun.clubName||"copa.life XI","copa.life XI");
     const publicId=("G-"+hash([context.seed,clubName,createdAt].join("|")).slice(0,8)).toUpperCase();
     const formation=cleanText(context.formName||context.formation||"4-3-3")||"4-3-3";
     const result=context.run||context.lastResult||{};
@@ -144,7 +180,7 @@
       match_history:(Array.isArray(context.fixtures)?context.fixtures:[]).slice(0,6).map(match=>({opponent:cleanText(match.opp||match.name||""),result:cleanText(match.res||""),gf:Math.round(bounded(match.gf,0,20)),ga:Math.round(bounded(match.ga,0,20))})),
       reached_round:Math.round(bounded(result.round||context.round,1,6)),
       result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
-      final_profile:context.finalReport&&typeof context.finalReport==="object"?context.finalReport:{final_penalty:Math.round(bounded(context.finalPenalty,-40,40)),events:Array.isArray(context.lastMatchEvents)?context.lastMatchEvents.slice(-18).map(cleanText):[]},
+      final_profile:finalProfileSnapshot(context),
       mvp:cleanText(context.motm||context.mvp||""),
       scorers:Array.isArray(context.scorers)?context.scorers.slice(0,8).map(cleanText):[],
       created_at:createdAt,
@@ -165,16 +201,20 @@
     const lineup=snapshot.starting_xi.slice(0,11).map((player,index)=>({
       name:cleanText(player.name)||("Player "+(index+1)),
       pos:cleanText(player.pos)||"OS",
+      natPos:cleanText(player.nat_pos||player.pos)||"OS",
+      club:cleanText(player.club||""),
+      age:Number(player.age)>0?Math.round(bounded(player.age,0,60)):null,
+      profileKey:cleanProfileKey(player.profile_key||""),
       ov:Math.round(bounded(player.power,35,115)),
       injured:!!player.injured
     }));
     return {
-      name:cleanText(snapshot.club&&snapshot.club.name)||"Ghost Club",
+      name:cleanClubName(snapshot.club&&snapshot.club.name,"Ghost Club"),
       power:Math.round(bounded(snapshot.squad_power,35,115)),
       ghost:true,
       ghostId:snapshot.public_ghost_id,
       ghostMeta:{country:cleanText(snapshot.club&&snapshot.club.country),formation:cleanText(snapshot.formation),chairman:visibleChairmanName(snapshot.chairman),publicId:snapshot.public_ghost_id,reachedRound:snapshot.reached_round},
-      ghostProfile:{formation:cleanText(snapshot.formation),lineup,tactics:snapshot.tactics||{},chemistry:Math.round(bounded(snapshot.chemistry,-5,5)),cards:Array.isArray(snapshot.active_cards)?snapshot.active_cards:[],finalProfile:snapshot.final_profile||{}}
+      ghostProfile:{formation:cleanText(snapshot.formation),lineup,tactics:snapshot.tactics||{},chemistry:Math.round(bounded(snapshot.chemistry,-5,5)),cards:Array.isArray(snapshot.active_cards)?snapshot.active_cards:[],finalProfile:finalProfileSnapshot({finalReport:snapshot.final_profile||{}})}
     };
   }
   function enqueue(profile){
@@ -200,13 +240,15 @@
   function recordCompletedRun(context){
     try{
       const safe=context&&typeof context==="object"?context:{};
-      updateRun({seed:safe.seed,clubName:safe.teamName||safe.clubName,country:safe.selectedCountry||safe.country});
+      const run=updateRun({seed:safe.seed,clubName:safe.teamName||safe.clubName,country:safe.selectedCountry||safe.country,cheatRun:!!safe.cheatRun});
+      if(run.cheatRun)return null;
       const profile=normalizeCompletedRun(safe);enqueue(profile);setTimeout(()=>{flushQueue();},0);return profile.public_ghost_id;
     }catch(_){return null;}
   }
+  let matchPending=false;
   async function findOpponent(criteria){
     const base=apiBase();
-    if(!enabled()||!base||!navigator.onLine)return null;
+    if(!enabled()||!base||!navigator.onLine||hasOpponentUsed()||matchPending)return null;
     const round=Math.round(bounded(criteria&&criteria.round,1,6));
     const chance=CONFIG.matchChance[round]||.30;
     const roll=Math.random();
@@ -215,12 +257,13 @@
     const params=new URLSearchParams({power:String(power),round:String(round),game_version:CONFIG.gameVersion,data_version:CONFIG.dataVersion});
     const seen=Array.isArray(criteria&&criteria.excluded)?criteria.excluded.slice(-16):[];
     if(seen.length)params.set("exclude",seen.join(","));
+    matchPending=true;
     try{
       const res=await fetch(base+"/v1/ghosts/match?"+params.toString(),{headers:{accept:"application/json"},cache:"no-store"});
       if(!res.ok)return null;
       const body=await res.json();const snapshot=body&&body.ghost;
       return validRemote(snapshot)?toOpponent(snapshot):null;
-    }catch(_){return null;}
+    }catch(_){return null;}finally{matchPending=false;}
   }
   function ensureSetting(){
     const slot=document.getElementById("advancedGhostSettingSlot");if(!slot)return;
@@ -239,6 +282,6 @@
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
   window.addEventListener("online",()=>{flushQueue();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,ghostIcon,normalizeCompletedRun,canMatch:enabled});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,ghostIcon,normalizeCompletedRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled});
   setTimeout(()=>{ensureSetting();flushQueue();},0);
 })();

@@ -2,6 +2,7 @@ import fs from "node:fs";
 
 const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 const match = fs.readFileSync("src/styles/match.css", "utf8");
+const cards = fs.readFileSync("src/styles/cards.css", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
 
 const checks = [
@@ -30,6 +31,10 @@ const checks = [
     pass: /@media\(max-width:620px\)\{[\s\S]*#hub #freeAgentRow \.shopcards\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/s.test(layout),
   },
   {
+    name: "narrow card cost badges wrap without clipping",
+    pass: /\.ct-cost-list li\{[^}]*max-width:100%[^}]*white-space:normal[^}]*overflow-wrap:break-word[^}]*word-break:normal/s.test(cards),
+  },
+  {
     name: "mobile hub core blocks bound to viewport",
     pass: /#hub \.pitch-area,\s*\n\s*#hub #hubPitch,\s*\n\s*#hub #hubBenchSection,[\s\S]*#fixbar\.cuproad/s.test(layout),
   },
@@ -52,6 +57,14 @@ const checks = [
   {
     name: "final sim default speed uses visible 1x value",
     pass: /setSpeed\(10\)/.test(html),
+  },
+  {
+    name: "opponent scout report stays viewport bound on mobile",
+    pass: /@media\(max-width:620px\)\{[\s\S]*?\.scout-lineup-modal\.scout-report-modal\{[\s\S]*?width:calc\(100vw - 14px\)[\s\S]*?max-height:calc\(100svh - 14px\)/.test(match),
+  },
+  {
+    name: "opponent scout report collapses insights to one column",
+    pass: /@media\(max-width:620px\)\{[\s\S]*?\.scout-report-grid\{grid-template-columns:1fr\}/.test(match),
   },
 ];
 

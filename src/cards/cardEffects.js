@@ -76,14 +76,34 @@ function resolveBlackMarketTrade(burnKey,variant){
  pushFeed("<b>"+((L().cards.kara_borsa&&L().cards.kara_borsa.n)||"Kara Borsa")+"</b> "+(tr?oldName+" yak\u0131ld\u0131, "+gained+" kart geldi.":oldName+" burned; "+gained+" cards arrived."),"buy");
  closeModal();if(typeof renderHub==="function")renderHub();
 }
+var BLACK_MARKET_SELECTION=null;
+function selectBlackMarketCard(burnKey,variant){
+ BLACK_MARKET_SELECTION=burnKey;
+ const root=document.querySelector(".black-market-modal");if(!root)return;
+ root.querySelectorAll(".black-market-card").forEach(function(button){
+  const selected=button.dataset.card===burnKey;
+  button.classList.toggle("is-selected",selected);
+  button.setAttribute("aria-checked",selected?"true":"false");
+ });
+ const action=root.querySelector("[data-black-market-burn]");
+ if(action){action.hidden=false;action.onclick=function(){confirmBlackMarketTrade(burnKey,variant);};}
+ const status=root.querySelector("[data-black-market-status]");
+ const card=L().cards[burnKey];
+ if(status){status.textContent=((card&&card.n)||burnKey)+(LANG==="tr"?" seçildi.":" selected.");}
+}
+function confirmBlackMarketTrade(burnKey,variant){
+ const tr=LANG==="tr",card=L().cards[burnKey],name=(card&&card.n)||burnKey,v=variantOf(burnKey),tier=typeof variantBadge==="function"?variantBadge(v):(v===1?"DARK":"COMMON");
+ showModal(`<div class="black-market-modal black-market-confirm"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><div class="black-market-confirm-mark" aria-hidden="true">&#10005;</div><h2>${name} ${tr?"yakılacak.":"will be burned."}</h2><p>${tr?"Devam et?":"Continue?"}</p><div class="black-market-confirm-card"><span class="var-badge var-${v}">${tier}</span><strong>${name}</strong></div><div class="black-market-warning">${tr?"Bu seçim geri alınamaz.":"This choice cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" onclick="resolveBlackMarketTrade('${burnKey}',${variant})">${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kart yakma onayı":"Burn card confirmation"});
+}
 function openBlackMarketTrade(variant){
  const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k));
+ BLACK_MARKET_SELECTION=null;
  if(!choices.length){
-  showModal(`<div class="bulletin"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="bhead"><span>${tr?"KARA BORSA":"BLACK MARKET"}</span></div><div class="bhl">${tr?"YAKACAK KART YOK":"NO CARD TO BURN"}</div><div class="bbody">${tr?"Bu hamle için en az bir aktif kalıcı kart gerekir.":"This move requires at least one active persistent card."}</div></div>`,{dismissOnOverlay:true});
+  showModal(`<div class="black-market-modal black-market-empty"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2>${tr?"YAKACAK KART YOK":"NO CARD TO BURN"}</h2><p>${tr?"Bu hamle için en az bir aktif kalıcı kart gerekir.":"This move requires at least one active persistent card."}</p><div class="black-market-actions"><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"Kara Borsa":"Black Market"});
   return;
  }
- const list=choices.map(k=>`<button class="swap-card-btn" onclick="resolveBlackMarketTrade('${k}',${variant})"><span class="sc-name">${L().cards[k].n}</span><span class="sc-desc">${tr?"Bu kart\u0131 yak":"Burn this card"}</span></button>`).join("");
- showModal(`<div class="bulletin"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="bhead"><span>${tr?"KARA BORSA":"BLACK MARKET"}</span></div><div class="bhl">${tr?"Bir kart\u0131 yak, iki kart al":"Burn one card, take two"}</div><div class="bbody">${tr?"Feda edece\u011fin kart\u0131 se\u00e7.":"Choose a card to sacrifice."}</div><div class="swap-list">${list}</div></div>`,{dismissOnOverlay:true});
+ const list=choices.map(function(k){const card=L().cards[k],v=variantOf(k),tier=typeof variantBadge==="function"?variantBadge(v):(v===1?"DARK":"COMMON");return `<button type="button" class="black-market-card" role="radio" aria-checked="false" data-card="${k}" onclick="selectBlackMarketCard('${k}',${variant})"><span class="black-market-card-copy"><strong>${(card&&card.n)||k}</strong><small>${tr?"Bu kartı yak":"Burn this card"}</small></span><span class="var-badge var-${v}">${tier}</span><span class="black-market-card-mark" aria-hidden="true"></span></button>`;}).join("");
+ showModal(`<div class="black-market-modal"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><header class="black-market-head"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2><span>${tr?"BİR KARTI YAK,":"BURN ONE CARD,"}</span><span>${tr?"İKİ KART AL":"TAKE TWO"}</span></h2><p>${tr?"Feda edeceğin kartı seç.":"Choose a card to sacrifice."}</p></header><div class="black-market-list" role="radiogroup" aria-label="${tr?"Yakılacak kart":"Card to burn"}">${list}</div><div class="black-market-status" data-black-market-status aria-live="polite"></div><div class="black-market-warning">${tr?"Bu seçim geri alınamaz.":"This choice cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" data-black-market-burn hidden>${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"Kara Borsa kart yakma":"Black Market card burn"});
 }
 
 /* ===== Kart satin alma etkileri ===== */

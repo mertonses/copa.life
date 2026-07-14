@@ -7,7 +7,7 @@ const UI_SFX={
  hover:"assets/audio/ui/rollover2.ogg",switch:"assets/audio/ui/switch10.ogg",
  buy:"assets/audio/ui/switch23.ogg",reward:"assets/audio/ui/switch33.ogg",
  championship:"assets/audio/ui/championship.ogg",eliminated:"assets/audio/ui/eliminated.ogg?v=20260714-elendin1",
- kickedout:"assets/audio/ui/kickedout.ogg",
+ kickedout:"assets/audio/ui/kickedout.ogg",ghost:"assets/audio/ui/ghost.ogg?v=20260714-ghostsfx1",
  flag_TR:"assets/audio/ui/turkiye.ogg",flag_IT:"assets/audio/ui/switch33.ogg",
  flag_ENG:"assets/audio/ui/england.ogg",flag_ES:"assets/audio/ui/spain.ogg",
  flag_DE:"assets/audio/ui/germany.ogg",
@@ -27,7 +27,7 @@ function sfxKick(power){if(muted)return;const c=ac();if(!c)return;const t=c.curr
 function crowdStart(){if(muted||!ac())return;const c=AC;const src=c.createBufferSource();src.buffer=noiseBuf(c,2);src.loop=true;const f=c.createBiquadFilter();f.type="lowpass";f.frequency.value=520;const g=c.createGain();g.gain.value=0.014;src.connect(f);f.connect(g);g.connect(c.destination);src.start();crowdNodes={src,g};}
 function crowdStop(){if(crowdNodes){try{crowdNodes.src.stop();}catch(e){}crowdNodes=null;}}
 function crowdSwell(){if(!crowdNodes)return;const c=AC,t=c.currentTime,g=crowdNodes.g.gain;g.cancelScheduledValues(t);g.setValueAtTime(0.014,t);g.linearRampToValueAtTime(0.06,t+0.1);g.exponentialRampToValueAtTime(0.014,t+1.2);}
-function toggleMute(){muted=!muted;const _on='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg>';const _off='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><line x1="14" y1="7" x2="19" y2="13"/><line x1="19" y1="7" x2="14" y2="13"/></svg>';const btn=$("muteBtn"),label=typeof LANG!=="undefined"&&LANG==="en"?"SFX":"SES";if(btn)btn.innerHTML=(muted?_off:_on)+'<span id="muteBtnLbl">'+label+'</span>';if(muted)crowdStop();else{ac();playUiSample("release",.15);}}
+function toggleMute(){muted=!muted;const _on='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg>';const _off='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><line x1="14" y1="7" x2="19" y2="13"/><line x1="19" y1="7" x2="14" y2="13"/></svg>';const btn=$("muteBtn"),label=typeof LT==="function"?LT("SES","SFX","SONIDO","SOUND","AUDIO"):(typeof LANG!=="undefined"&&LANG==="tr"?"SES":"SFX");if(btn)btn.innerHTML=(muted?_off:_on)+'<span id="muteBtnLbl">'+label+'</span>';if(muted)crowdStop();else{ac();playUiSample("release",.15);}}
 
 /* Effects are opt-in after the first interaction and the preference survives a refresh. */
 const _toggleMuteBase=toggleMute;

@@ -2,6 +2,7 @@ import fs from "node:fs";
 
 const sim = fs.readFileSync("src/sim/finalSim.js", "utf8");
 const index = fs.readFileSync("index.html", "utf8");
+const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 
 const wideBiasMatch = sim.match(/hasWingCard\?0\.(\d+):0\.(\d+)/);
 const yellowRateMatch = sim.match(/roll<0\.(\d+)&&disciplineCooldown<=0/);
@@ -55,8 +56,15 @@ const checks = [
     pass: /goToFinalPenalties\(\)/.test(sim) && /goldenGoalMode=true/.test(sim),
   },
   {
-    name: "penalty modal has a concrete goalkeeper visual",
-    pass: /const _PEN_GK_SVG=/.test(index) && /class=\"pen-keeper-svg\"/.test(index),
+    name: "penalty modal uses the circular tactical goalkeeper token",
+    pass:
+      /const _PEN_GK_SVG=/.test(index) &&
+      /class=\"pen-gk-token-body\"/.test(index) &&
+      /class=\"pen-gk-token-gloves\"/.test(index) &&
+      !/pen-gk-(?:head|hair|shirt|arm|leg|boot)/.test(index) &&
+      /penKeeperTokenIdle/.test(layout) &&
+      /penKeeperTokenDiveL/.test(layout) &&
+      /penKeeperTokenSaveL/.test(layout),
   },
   {
     name: "final penalty transition requires a rendered modal",

@@ -14,23 +14,23 @@ function _breakdownRow(label,value,{icon="",tone="",total=false,neutral=false}={
   return `<div class="bd-row${cls}"><span class="bd-label">${icon?`<span class="bd-icon">${icon}</span>`:""}${label}</span><b class="bd-value ${toneCls}">${value}</b></div>`;
 }
 function _breakdownModal(title,meta,rows,{label=""}={}){
-  const close=LANG==="tr"?"Kapat":"Close";
+  const close=LT("Kapat","Close","Cerrar","Schließen","Chiudi");
   const html=`<div class="breakdown-modal"><div class="bd-head"><div class="bd-title">${title}</div><div class="bd-head-actions"><span class="bd-meta">${meta||""}</span><button class="bd-close" onclick="closeModal()" aria-label="${close}">&times;</button></div></div><div class="bd-list">${rows.join("")}</div></div>`;
   showModal(html,{dismissOnOverlay:true,label:label||title});
 }
 
 function _fixHubVisibleText(){
-  const tr=LANG==="tr";
   const fh=$("feedHdr");if(fh){const label=(typeof L==="function"&&L().feedHdr)||"GELİŞMELER";fh.innerHTML=`<span class="tclive">●</span> <span>${label}</span>`;}
-  const ph=$("powHdr");if(ph)ph.textContent=tr?"KADRO GÜCÜ":"SQUAD POWER";
+  const ph=$("powHdr");if(ph)ph.textContent=L().powHdr;
   const tv=typeof chairTrust!=="undefined"?chairTrust:3;
   const trustV=$("trustV"),trustHint=$("trustHint");
   if(trustV)trustV.textContent="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));
-  if(trustHint)trustHint.textContent=tv>=3?(tr?"güvende":"secure"):tv>=2?(tr?"dengede":"steady"):tv>=1?(tr?"kırılgan":"fragile"):(tr?"tehlikede":"at risk");
+  if(trustHint)trustHint.textContent=tv>=3?LT("güvende","secure","seguro","sicher","sicuro"):tv>=2?LT("dengede","steady","estable","stabil","stabile"):tv>=1?LT("kırılgan","fragile","frágil","fragil","fragile"):LT("tehlikede","at risk","en riesgo","gefährdet","a rischio");
 }
 
 function _applyGhostOpponent(ghost,expectedRound,baseline){
   if(!ghost||runEnded||round!==expectedRound||opponent!==baseline)return;
+  if(window._ghostOpponentUsed||(window.GhostClubs&&window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return;
   opponent=ghost;
   if(Array.isArray(bracket))bracket[round-1]=ghost;
   const profile=ghost.ghostProfile||{};
@@ -42,12 +42,15 @@ function _applyGhostOpponent(ghost,expectedRound,baseline){
     oppXI=oppLineup.map(p=>p.name);
   }
   window._ghostSeenIds=(window._ghostSeenIds||[]).concat(ghost.ghostId).slice(-16);
+  window._ghostOpponentUsed=true;
+  if(window.GhostClubs&&typeof window.GhostClubs.markOpponentUsed==="function")window.GhostClubs.markOpponentUsed(ghost.ghostId);
   if(Array.isArray(fixtures)&&fixtures[round-1])fixtures[round-1].opp=ghost.name;
   renderFixtures();renderHub();
+  if(typeof playUiSample==="function")playUiSample("ghost",.34,1500);
 }
 function _maybeGhostOpponent(){
   const baseline=opponent,expectedRound=round;
-  if(!window.GhostClubs||!window.GhostClubs.enabled())return;
+  if(!window.GhostClubs||!window.GhostClubs.enabled()||window._ghostOpponentUsed||(window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return;
   const own=typeof squadPower==="function"?squadPower(round):{power:70};
   window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:Date.now(),excluded:window._ghostSeenIds||[]}).then(ghost=>_applyGhostOpponent(ghost,expectedRound,baseline)).catch(()=>{});
 }
@@ -149,8 +152,8 @@ function updateUndoBtn(){const b=$("undoBtn");if(!b)return;const show=!!(undoDat
 function undoPick(){if(!undoData||undoUsed)return;const u=undoData;picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();}
 function toggleCardActive(k){if(invOf(k)<=0)return;if(hasCard(k)){cards=cards.filter(c=>c!==k);sfxStamp();renderHub();return;}if(cards.length>=activeCardSlots()){pushFeed((LANG==="tr"?"🃏 aktif kart slotu dolu":"🃏 active card slots full"),"ch");renderFeed();return;}cards.push(k);sfxStamp();renderHub();}
 function cardArt(k){return "assets/cards/"+k+".png";}
-function kindLabel(k){const tr=LANG==="tr",kind=cardKind(k),m={power:["GÜÇ","POWER"],economy:["EKONOMİ","ECONOMY"],risk:["ÖZEL","SPECIAL"],temporary:["ÖZEL","SPECIAL"],final:["FİNAL","FINAL"],defense:["SAVUNMA","DEFENSE"],squad:["KADRO","SQUAD"],injury:["SAKATLIK","INJURY"]}[kind]||["GÜÇ","POWER"];const lbl=tr?m[0]:m[1];if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
-function modeLabel(k){if(isInstantCard(k))return LANG==="tr"?"ANINDA ÇALIŞIR":"INSTANT";if(!isProgressCard(k))return LANG==="tr"?"SÖZLEŞME":"CONTRACT";return LANG==="tr"?"GELİŞEN":"SCALING";}
+function kindLabel(k){const kind=cardKind(k),m={power:LT("GÜÇ","POWER","POTENCIA","STÄRKE","FORZA"),economy:LT("EKONOMİ","ECONOMY","ECONOMÍA","FINANZEN","ECONOMIA"),risk:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),temporary:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),final:LT("FİNAL","FINAL","FINAL","FINALE","FINALE"),defense:LT("SAVUNMA","DEFENSE","DEFENSA","ABWEHR","DIFESA"),squad:LT("KADRO","SQUAD","PLANTILLA","KADER","ROSA"),injury:LT("SAKATLIK","INJURY","LESIÓN","VERLETZUNG","INFORTUNIO")};const lbl=m[kind]||m.power;if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
+function modeLabel(k){if(isInstantCard(k))return LT("ANINDA ÇALIŞIR","INSTANT","INSTANTÁNEA","SOFORT","IMMEDIATA");if(!isProgressCard(k))return LT("SÖZLEŞME","CONTRACT","CONTRATO","VERTRAG","CONTRATTO");return LT("GELİŞEN","SCALING","PROGRESIVA","SKALIEREND","PROGRESSIVA");}
 function cardBadgeHTML(k){return `<span class="kindtag kind-${cardKind(k)}">${kindLabel(k)}</span><span class="modetag">${modeLabel(k)}</span>`;}
 function variantBadge(v){const labels=["COMMON","DARK"];return labels[Math.min(v||0,1)]||labels[0];}
 function rarLabel(k){return variantBadge(variantOf(k));}
@@ -414,7 +417,7 @@ function cardContractText(k){
   };
   return map[k]||((tr?"Net güç ":"Net power ")+plus+".");
 }
-function renderCollectionFilters(){const el=$("collectionFilters");if(!el)return;const tr=LANG==="tr",items=[["all",tr?"Tümü":"All"],["open",tr?"Açık":"Open"],["active",tr?"Aktif":"Active"]];if(collFilter==="near")collFilter="all";el.innerHTML=items.map(([id,label])=>`<button class="${collFilter===id?"on":""}" onclick="collFilter='${id}';renderCollection()">${label}</button>`).join("");}
+function renderCollectionFilters(){const el=$("collectionFilters");if(!el)return;const items=[["all",LT("Tümü","All","Todas","Alle","Tutte")],["open",LT("Açık","Open","Disponibles","Offen","Disponibili")],["active",LT("Aktif","Active","Activas","Aktiv","Attive")]];if(collFilter==="near")collFilter="all";el.innerHTML=items.map(([id,label])=>`<button class="${collFilter===id?"on":""}" onclick="collFilter='${id}';renderCollection()">${label}</button>`).join("");}
 function collectionPass(k){const c=invOf(k),active=hasCard(k);if(collFilter==="open")return c>0;if(collFilter==="active")return active;return true;}
 function renderCollection(){const grid=$("collectionGrid");if(!grid)return;const x=L(),s=picksBySlot.filter(Boolean),cap=activeCardSlots();let owned=0,shown=0;grid.innerHTML="";renderCollectionFilters();allCardKeys().forEach(k=>{const cd=x.cards[k];if(!cd||isInstantCard(k))return;const c=invOf(k),open=c>0,active=hasCard(k),cat=CATMAP[k]||"gorev",v=variantOf(k);if(open)owned++;if(!collectionPass(k))return;shown++;const pv=open?simulateEquipPower(k):null,locked=!open;const equipLine=active?(LANG==="tr"?"✓ aktif — çıkarmak için tıkla":"✓ active — click to remove"):(open?(cards.length<cap?(x.ui.clickEquip):(x.ui.slotFull)):(x.ui.unlockFrom));const preview=open&&!active&&cards.length<cap?`<div class="powerpreview cc-preview">${LANG==="tr"?"Takarsan":"Equip"}: ${pv.before} → ${pv.after}</div>`:"";const desc=formatCardDesc(open?(variantDesc(cd.d,v)||shortCardText(k,s)):(LANG==="tr"?"Pazardan açılır":"Unlock in market"));const d=document.createElement("div");d.className="collcard v"+v+" cat-"+cat+(locked?" locked":"")+(active?" active":"");d.title=cd.n+" · "+kindLabel(k)+"\n"+cardContractType(k);d.innerHTML=`<div class="cc-head"><span class="cc-rar var-badge var-${v}">${open?variantBadge(v):(LANG==="tr"?"KİLİTLİ":"LOCKED")}</span><span class="cc-kind">${open?kindLabel(k):""}</span></div><div class="cc-art">${open?(CARD_SVGS[k]||cd.i):LOCK_SVG}</div><div class="cc-body"><div class="cc-name">${open?cd.n:(x.ui.lockedCard)}</div><div class="cc-desc">${desc}</div>${preview}</div><div class="cc-foot"><span class="cc-state">${equipLine}</span>${active?'<span class="cc-dot"></span>':""}</div>`;if(open)d.onclick=()=>toggleCardActive(k);grid.appendChild(d);});const cc=$("collCount");if(cc)cc.textContent=" "+owned+"/"+allCardKeys().filter(k=>!isInstantCard(k)).length+(shown!==allCardKeys().length?" · "+shown:"");}
 function renderDebtWarning(){const el=$("debtWarn");if(el){el.className="debtwarn hidden";el.textContent="";}const ps=$("pintiSavingsBar");if(ps)ps.remove();const clash=document.getElementById("cardClashWarn");if(clash)clash.remove();}
@@ -485,6 +488,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
   }}
   /* Başkan Güveni tile */
   {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"#429A73":tv>=2?"#eab308":tv>=1?"#f97316":"#ef4444";const tfg="var(--color-ink)";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.classList.add("context-metric");tt.style.setProperty("--metric-accent",tbg);tt.style.background="";const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tbg;trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"dengede":"steady"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
+  {const info=$("trustInfoBtn");if(info){const label=LT("Başkan güveni nasıl çalışır?","How does chairman trust work?","¿Cómo funciona la confianza del presidente?","Wie funktioniert das Vertrauen des Präsidenten?","Come funziona la fiducia del presidente?");info.title=label;info.setAttribute("aria-label",label);}}
   {const pv=sp.power,oppPv=opponent?opponent.power:0;const pt=$("powTile");if(pt){
     const pbg=pv>=90?"#15803d":pv>=80?"#4ade80":pv>=70?"#eab308":pv>=60?"#f97316":"#ef4444";
     const pfg="var(--color-ink)";

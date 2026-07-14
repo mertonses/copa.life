@@ -308,10 +308,10 @@ function _createLocale(base,patch){
 /* New locales inherit the complete English dictionary, then replace the primary UI copy.
    Card and event copy can safely fall back to English until a dedicated translation exists. */
 T.es=_createLocale(T.en,{
- tagline:"el juego de gestion de plantilla donde desafias al destino",
+ tagline:"el juego de gestión de plantilla donde desafías al destino",
  budget:"Caja",coverTitle:"copa.life",coverSub:"Copa de Turquia",
  coverBlurb:"Tira los dados. Forma tu equipo. Desafia al destino.",
- pickhdr:"ELIGE FORMACION Y PRESIDENTE",rollHint:"Tira el dado. Se abre una posicion al azar.",
+ pickhdr:"ELIGE FORMACIÓN Y PRESIDENTE",rollHint:"Tira el dado. Se abre una posición al azar.",
  roll:"TIRAR EL DADO",allBtn:"FORMAR EQUIPO AUTOMATICAMENTE",undo:"DESHACER",
  startBtn:"EMPEZAR",quickStartBtn:"INICIO ALEATORIO",cNamePh:"Nombre del club",
  youLbl:"TU EQUIPO",oppLbl:"RIVAL",shopLbl:"MERCADO DE CARTAS",talk:"HABLA AL EQUIPO",
@@ -320,10 +320,10 @@ T.es=_createLocale(T.en,{
 });
 T.de=_createLocale(T.en,{
  tagline:"das Kadermanagementspiel, in dem du das Schicksal herausforderst",
- budget:"Kasse",coverTitle:"copa.life",coverSub:"Turkischer Pokal",
- coverBlurb:"Wurfle die Wurfel. Baue dein Team. Fordere das Schicksal heraus.",
- pickhdr:"FORMATION UND PRASIDENT WAEHLEN",rollHint:"Wurfle. Eine zufallige Position wird freigeschaltet.",
- roll:"WURFELN",allBtn:"TEAM AUTOMATISCH FUELLEN",undo:"RUCKGANGIG",
+ budget:"Kasse",coverTitle:"copa.life",coverSub:"Türkischer Pokal",
+ coverBlurb:"Würfle. Baue dein Team. Fordere das Schicksal heraus.",
+ pickhdr:"FORMATION UND PRÄSIDENT WÄHLEN",rollHint:"Würfle. Eine zufällige Position wird freigeschaltet.",
+ roll:"WÜRFELN",allBtn:"TEAM AUTOMATISCH FÜLLEN",undo:"RÜCKGÄNGIG",
  startBtn:"STARTEN",quickStartBtn:"ZUFALLSSTART",cNamePh:"Vereinsname",
  youLbl:"DEIN TEAM",oppLbl:"GEGNER",shopLbl:"KARTENMARKT",talk:"ZUR MANNSCHAFT SPRECHEN",
  play:"SPIELEN",playFinal:"FINALE SPIELEN",cardsLbl:"AKTIVE EFFEKTE",
@@ -340,6 +340,95 @@ T.it=_createLocale(T.en,{
  play:"GIOCA LA PARTITA",playFinal:"GIOCA LA FINALE",cardsLbl:"EFFETTI ATTIVI",
  squad:"ROSA",free:"GRATIS",tooexp:"FONDI INSUFFICIENTI"
 });
+
+/* Keep the non-English editions as real locale packs.  These keys cover the
+   setup, draft, hub, match and result loop; specialist event copy can still
+   opt into the English fallback without turning the whole interface English. */
+T.es=_createLocale(T.es,{
+ artNote:"Pintado en 1953, 'Going to the Match' de L. S. Lowry muestra a aficionados camino de Burnden Park, el antiguo estadio del Bolton Wanderers.",
+ patreonText:"copa.life es un proyecto de una sola persona. Puedes apoyar la idea y su desarrollo en Patreon. Significaría mucho.",
+ proto:"prototipo de copa.life · 5 países · 10 ligas · 9.264 jugadores",
+ formSub:{"4-3-3":"clásico","4-4-2":"tradicional","4-2-3-1":"moderno","3-5-2":"bandas","5-3-2":"defensivo","3-4-3":"ataque","4-5-1":"cerrojo"},
+ rollPrompt:"TIRADA › posición",afford:"asequible",noAfford:"fondos bajos: aún puedes elegir al más barato",
+ pos:{GK:"Portero",LB:"Lateral izquierdo",RB:"Lateral derecho",CB:"Defensa central",CM:"Centrocampista",DM:"Mediocentro defensivo",LM:"Interior izquierdo",RM:"Interior derecho",LW:"Extremo izquierdo",RW:"Extremo derecho",AM:"Mediapunta",ST:"Delantero",WB:"Carrilero"},
+ grp:{GK:"Portería",DEF:"Defensa",MID:"Centrocampo",FWD:"Ataque"},
+ capRoll:"TIRANDO",youLbl:"Potencia",oppLbl:"Rival",shopLbl:"Mercado de cartas",
+ pres:T.en.pres.replace("Chairman","Presidente"),train:"Entrenamiento",scout:"Observar rival",owned:"en propiedad",autoOn:"Auto: SÍ",autoOff:"Auto: NO",ddTitle:"CIERRE DEL<br>MERCADO",squad:"plantilla",
+ rounds:["RONDA 1","RONDA 2","OCTAVOS","CUARTOS","SEMIFINAL","FINAL"],rabbr:["R1","R2","OCT","CF","SF","F"],vsword:"te enfrentas a",
+ matchWin:"AVANZAS",matchLose:"ELIMINADO",matchPen:"¡PASAS EN PENALTIS!",teleHead:"RESULTADO DEL PARTIDO",cont:"Continuar",toFinal:"¡A la final!",us:"NOSOTROS",champTitle:"CAMPEONES",champV:"levantaste la copa. Este equipo hizo historia.",outTitle:"ELIMINADO",
+ lblTur:"Ronda alcanzada",lblGuc:"Potencia",lblKart:"Cartas",copyfail:"no se pudo copiar",again:"NUEVA PARTIDA DE copa.life",presHead:"BOLETÍN DEL PRESIDENTE",presThink:"EL PRESIDENTE ESTÁ DECIDIENDO...",presClose:"VALE",
+ kitHdr:"Elige los colores de la equipación",kitSub:"jugarás con estos colores",spd:"VELOCIDAD",styleHdr:"Elige tu filosofía",styleSub:"aplica una pequeña bonificación de estilo",motm:"JUGADOR DEL PARTIDO",yourXi:"TU ONCE",oppXi:"ONCE RIVAL",scoutHead:"PLANTILLA RIVAL",
+ flanks:{L:"IZQUIERDA",C:"CENTRO",R:"DERECHA"},matchupMsg:"atacas su banda débil (+potencia)",injHead:"¡LESIÓN!",backupHead:"ELEGIR SUPLENTE",trainCant:"entrenamiento: sin fondos/usos",
+ rar:{bronze:"BRONCE",silver:"PLATA",gold:"ORO",ch:"RETO"},startHead:"DESBLOQUEADO: carta inicial",startSub:"empieza esta partida con una carta gratis",locked:"bloqueado",lockedHint:"gana copas para desbloquear formaciones",chLbl:"Retos",chUnlock:"Carta desbloqueada:",objHdr:"OBJETIVOS",
+ feedHdr:"NOVEDADES",feedEmpty:"todavía no hay noticias...",feedBuy:"fichado",feedUnlock:"desbloqueado",chairHdr:"PRESIDENTE",hiddenName:"Jugador misterioso",hiddenMeta:"??? · joya o fiasco",cevher:"¡Joya!",balon:"Fiasco:",reveal:"revelado:",
+ trait:{hizli:"Veloz",lider:"Líder",buyukmac:"Partidos grandes",sorunlu:"Conflictivo",cam:"Frágil",wonderkid:"Joven promesa"},panicHead:"¡FICHAJE DE PÁNICO!",panicFeed:"se agotó el plazo: fichaje forzado",mgrDefault:"SEMILLA",metaLine:(b,r)=>`mejor: <b>${b}</b> · partidas: <b>${r}</b>`,storyHdr:"HISTORIA DE LA TEMPORADA",
+ chem:{hdr:"QUÍMICA",young:"joven",tr:"local",vet:"líder",none:"ninguno",scattered:"Plantilla dispersa",localGap:"Sin núcleo local",leaderGap:"Sin líder en el campo"},fan:{hdr:"AFICIÓN",s:["Furiosa","Inquieta","Feliz","Eufórica"]},
+ talkSub:"Elige un efecto de moral para este partido:",talkUnder:"Son favoritos: motivar al equipo funcionó.",talkFav:"Sois favoritos: importan la concentración y la disciplina.",talkDelta:"Potencia",powHdr:"POTENCIA DE LA PLANTILLA",powHint:"detalle →",powHdr2:"DESGLOSE DE POTENCIA",quickAgain:"Repetir la misma configuración",presWord:"Presidente",cupTitle:"FINAL DE COPA",tcHdr:"CENTRO DE FICHAJES",assistLbl:"Asistencia:",stDraft:"Creado desde cero el día del cierre",
+ pbPlayers:"Jugadores",pbCards:"Estilo + Cartas",pbChem:"Química",pbFan:"Afición",pbTotal:"TOTAL",ctxHidden:"jugador misterioso: asume el riesgo",ctxWonder:"futura superestrella",ctxStar:"referente del equipo",ctxBig:"jugador de grandes partidos",ctxLead:"líder del vestuario",ctxYoung:"joven talento",ctxLocal:"orgullo local",ctxVet:"veterano experto",ctxForm:"en plena forma",ctxSolid:"nombre fiable",
+ ch:{c1:"gana por 3+ goles",c2:"gana sin encajar",c3:"vence a un rival más fuerte",c4:"llega a cuartos",c5:"llega a la final"},clubHdr:"Detalles del club",colP:"Color principal",colS:"Color secundario",clubGo:"Empezar la copa",
+ catName:{hucum:"Ataque",savunma:"Defensa",ekonomi:"Economía",taraftar:"Afición",baskan:"Presidente",risk:"Riesgo",gorev:"Reto"},fanLbl:["Furiosa","Inquieta","Feliz","Eufórica"],runNames:{youth:"Partida joven",fan:"Partida de afición",wall:"Partida muro de hierro",attack:"Partida ofensiva",economy:"Partida económica",risk:"Partida de riesgo"},
+ ui:{collectionHdr:"COLECCIÓN DE CARTAS",cardSlotFull:"🃏 espacios de cartas activas llenos",style:"Estilo",cards:"Cartas",matchup:"Emparejamiento",riskDebt:"Riesgo / deuda final",traitMorale:"Rasgos + moral",bonusEfficiency:"Eficiencia de bonificación",softCap:"Límite suave reducido",lockedCard:"Carta bloqueada",lockedCaps:"BLOQUEADA",activeRemove:"activa · clic para quitar",clickEquip:"clic para equipar",slotFull:"espacios llenos",unlockFrom:"desbloquear en el mercado",copies:"Copias",effect:"Efecto",seeChair:"VER PRESIDENTE",unlocksQf:"se desbloquea en cuartos",less:"− menos",deal:" · 🔥 oferta",cup:"LA COPA",shareLine:"¿puedes llegar a la final?",postBand:"copa.life · PLANTILLA LISTA",finalPower:"potencia",playFinalCta:"JUGAR LA FINAL 🏆"},
+ talkHead:"VESTUARIO",talkThink:"DANDO LA CHARLA..."
+});
+
+T.de=_createLocale(T.de,{
+ artNote:"Das 1953 entstandene Gemälde 'Going to the Match' von L. S. Lowry zeigt Fußballfans auf dem Weg zum Burnden Park, der damaligen Heimat der Bolton Wanderers.",
+ patreonText:"copa.life ist ein Ein-Personen-Projekt. Du kannst die Idee und ihre Entwicklung auf Patreon unterstützen. Das würde viel bedeuten.",
+ proto:"copa.life Prototyp · 5 Länder · 10 Ligen · 9.264 Spieler",
+ formSub:{"4-3-3":"klassisch","4-4-2":"traditionell","4-2-3-1":"modern","3-5-2":"Flügel","5-3-2":"defensiv","3-4-3":"Angriff","4-5-1":"Abwehrriegel"},
+ rollPrompt:"WURF › Position",afford:"bezahlbar",noAfford:"wenig Geld: der Günstigste ist noch verfügbar",
+ pos:{GK:"Torwart",LB:"Linksverteidiger",RB:"Rechtsverteidiger",CB:"Innenverteidiger",CM:"Mittelfeldspieler",DM:"Defensives Mittelfeld",LM:"Linkes Mittelfeld",RM:"Rechtes Mittelfeld",LW:"Linksaußen",RW:"Rechtsaußen",AM:"Offensives Mittelfeld",ST:"Stürmer",WB:"Flügelverteidiger"},
+ grp:{GK:"Tor",DEF:"Abwehr",MID:"Mittelfeld",FWD:"Angriff"},
+ capRoll:"WÜRFELT",youLbl:"Stärke",oppLbl:"Gegner",shopLbl:"Kartenmarkt",pres:T.en.pres.replace("Chairman","Präsident"),train:"Training",scout:"Gegner beobachten",owned:"im Besitz",autoOn:"Auto: AN",autoOff:"Auto: AUS",ddTitle:"TRANSFER-<br>SCHLUSS",squad:"Kader",
+ rounds:["RUNDE 1","RUNDE 2","ACHTELFINALE","VIERTELFINALE","HALBFINALE","FINALE"],rabbr:["R1","R2","AF","VF","HF","F"],vsword:"du triffst auf",
+ matchWin:"DU BIST WEITER",matchLose:"AUSGESCHIEDEN",matchPen:"WEITER IM ELFERSCHIESSEN!",teleHead:"SPIELERGEBNIS",cont:"Weiter",toFinal:"Ins Finale!",us:"WIR",champTitle:"MEISTER",champV:"Du hast den Pokal gewonnen. Dieser Kader schrieb Geschichte.",outTitle:"AUSGESCHIEDEN",
+ lblTur:"Erreichte Runde",lblGuc:"Stärke",lblKart:"Karten",copyfail:"Kopieren fehlgeschlagen",again:"NEUE copa.life PARTIE",presHead:"MITTEILUNG DES PRÄSIDENTEN",presThink:"DER PRÄSIDENT ENTSCHEIDET...",presClose:"OK",
+ kitHdr:"Trikotfarben wählen",kitSub:"in diesen Farben spielst du",spd:"TEMPO",styleHdr:"Philosophie wählen",styleSub:"gibt einen kleinen Stilbonus",motm:"SPIELER DES SPIELS",yourXi:"DEINE ELF",oppXi:"GEGNERISCHE ELF",scoutHead:"GEGNERISCHER KADER",
+ flanks:{L:"LINKS",C:"MITTE",R:"RECHTS"},matchupMsg:"du greifst ihre schwache Seite an (+Stärke)",injHead:"VERLETZUNG!",backupHead:"ERSATZ ZIEHEN",trainCant:"Training: kein Geld/keine Nutzung",
+ rar:{bronze:"BRONZE",silver:"SILBER",gold:"GOLD",ch:"AUFGABE"},startHead:"FREIGESCHALTET: Startkarte",startSub:"beginne diese Partie mit einer kostenlosen Karte",locked:"gesperrt",lockedHint:"gewinne Pokale, um Formationen freizuschalten",chLbl:"Aufgaben",chUnlock:"Karte freigeschaltet:",objHdr:"ZIELE",
+ feedHdr:"NEUIGKEITEN",feedEmpty:"noch keine Neuigkeiten...",feedBuy:"verpflichtet",feedUnlock:"freigeschaltet",chairHdr:"PRÄSIDENT",hiddenName:"Mystery-Spieler",hiddenMeta:"??? · Juwel oder Flop",cevher:"Juwel!",balon:"Flop:",reveal:"aufgedeckt:",
+ trait:{hizli:"Schnell",lider:"Führungsspieler",buyukmac:"Große Spiele",sorunlu:"Schwierig",cam:"Verletzungsanfällig",wonderkid:"Wundertalent"},panicHead:"PANIKKAUF!",panicFeed:"Frist abgelaufen, Zwangstransfer",mgrDefault:"SEED",metaLine:(b,r)=>`Bestwert: <b>${b}</b> · Partien: <b>${r}</b>`,storyHdr:"SAISONGESCHICHTE",
+ chem:{hdr:"CHEMIE",young:"jung",tr:"lokal",vet:"Führung",none:"keine",scattered:"Zerstreuter Kader",localGap:"Kein lokaler Kern",leaderGap:"Kein Anführer auf dem Platz"},fan:{hdr:"FANS",s:["Wütend","Unruhig","Zufrieden","Begeistert"]},
+ talkSub:"Wähle einen Moral-Effekt für dieses Spiel:",talkUnder:"Sie sind Favorit – die Ansprache hat gezündet.",talkFav:"Ihr seid Favorit – Fokus und Disziplin zählen.",talkDelta:"Stärke",powHdr:"KADERSTÄRKE",powHint:"Details →",powHdr2:"STÄRKE-AUFSCHLÜSSELUNG",quickAgain:"Gleiche Konfiguration wiederholen",presWord:"Präsident",cupTitle:"POKALFINALE",tcHdr:"TRANSFERZENTRALE",assistLbl:"Vorlage:",stDraft:"Am Deadline-Tag neu aufgebaut",
+ pbPlayers:"Spieler",pbCards:"Stil + Karten",pbChem:"Chemie",pbFan:"Fans",pbTotal:"GESAMT",ctxHidden:"Mystery-Spieler – riskiere es",ctxWonder:"künftiger Superstar",ctxStar:"Schlüsselspieler",ctxBig:"Spieler für große Spiele",ctxLead:"Kabinenchef",ctxYoung:"junges Talent",ctxLocal:"Lokalmatador",ctxVet:"erfahrener Kopf",ctxForm:"in Topform",ctxSolid:"verlässlicher Name",
+ ch:{c1:"mit 3+ Toren gewinnen",c2:"ohne Gegentor gewinnen",c3:"einen stärkeren Gegner schlagen",c4:"das Viertelfinale erreichen",c5:"das Finale erreichen"},clubHdr:"Vereinsdetails",colP:"Primärfarbe",colS:"Sekundärfarbe",clubGo:"Pokal starten",
+ catName:{hucum:"Angriff",savunma:"Abwehr",ekonomi:"Finanzen",taraftar:"Fans",baskan:"Präsident",risk:"Risiko",gorev:"Aufgabe"},fanLbl:["Wütend","Unruhig","Zufrieden","Begeistert"],runNames:{youth:"Jugendlauf",fan:"Fanlauf",wall:"Eiserne-Mauer-Lauf",attack:"Angriffslauf",economy:"Sparlauf",risk:"Risikolauf"},
+ ui:{collectionHdr:"KARTENSAMMLUNG",cardSlotFull:"🃏 aktive Kartenplätze voll",style:"Stil",cards:"Karten",matchup:"Duell",riskDebt:"Risiko / Finalschuld",traitMorale:"Eigenschaften + Moral",bonusEfficiency:"Bonuswirkung",softCap:"Soft Cap reduziert",lockedCard:"Gesperrte Karte",lockedCaps:"GESPERRT",activeRemove:"aktiv · zum Entfernen klicken",clickEquip:"zum Ausrüsten klicken",slotFull:"Plätze voll",unlockFrom:"im Markt freischalten",copies:"Exemplare",effect:"Effekt",seeChair:"PRÄSIDENT ANSEHEN",unlocksQf:"ab Viertelfinale",less:"− weniger",deal:" · 🔥 Angebot",cup:"DER POKAL",shareLine:"schaffst du es ins Finale?",postBand:"copa.life · KADER STEHT",finalPower:"Stärke",playFinalCta:"FINALE SPIELEN 🏆"},
+ talkHead:"KABINE",talkThink:"ANSPRACHE LÄUFT..."
+});
+
+T.it=_createLocale(T.it,{
+ artNote:"Dipinto nel 1953, 'Going to the Match' di L. S. Lowry mostra i tifosi diretti a Burnden Park, allora casa del Bolton Wanderers.",
+ patreonText:"copa.life è un progetto realizzato da una sola persona. Puoi sostenere l'idea e il suo sviluppo su Patreon. Significherebbe molto.",
+ proto:"prototipo copa.life · 5 paesi · 10 campionati · 9.264 giocatori",
+ formSub:{"4-3-3":"classico","4-4-2":"tradizionale","4-2-3-1":"moderno","3-5-2":"fasce","5-3-2":"difensivo","3-4-3":"attacco","4-5-1":"catenaccio"},
+ rollPrompt:"LANCIO › ruolo",afford:"accessibile",noAfford:"fondi bassi: il più economico è ancora disponibile",
+ pos:{GK:"Portiere",LB:"Terzino sinistro",RB:"Terzino destro",CB:"Difensore centrale",CM:"Centrocampista",DM:"Mediano",LM:"Esterno sinistro",RM:"Esterno destro",LW:"Ala sinistra",RW:"Ala destra",AM:"Trequartista",ST:"Attaccante",WB:"Quinto"},
+ grp:{GK:"Porta",DEF:"Difesa",MID:"Centrocampo",FWD:"Attacco"},
+ capRoll:"LANCIO",youLbl:"Forza",oppLbl:"Avversario",shopLbl:"Mercato carte",pres:T.en.pres.replace("Chairman","Presidente"),train:"Allenamento",scout:"Osserva avversario",owned:"posseduta",autoOn:"Auto: ON",autoOff:"Auto: OFF",ddTitle:"CHIUSURA<br>MERCATO",squad:"rosa",
+ rounds:["TURNO 1","TURNO 2","OTTAVI","QUARTI","SEMIFINALE","FINALE"],rabbr:["T1","T2","OTT","QF","SF","F"],vsword:"affronti",
+ matchWin:"PASSI IL TURNO",matchLose:"ELIMINATO",matchPen:"PASSI AI RIGORI!",teleHead:"RISULTATO PARTITA",cont:"Continua",toFinal:"In finale!",us:"NOI",champTitle:"CAMPIONI",champV:"Hai alzato la coppa. Questa rosa ha fatto la storia.",outTitle:"ELIMINATO",
+ lblTur:"Turno raggiunto",lblGuc:"Forza",lblKart:"Carte",copyfail:"copia non riuscita",again:"NUOVA PARTITA copa.life",presHead:"BOLLETTINO DEL PRESIDENTE",presThink:"IL PRESIDENTE STA DECIDENDO...",presClose:"OK",
+ kitHdr:"Scegli i colori della divisa",kitSub:"giocherai con questi colori",spd:"VELOCITÀ",styleHdr:"Scegli la filosofia",styleSub:"assegna un piccolo bonus stile",motm:"MIGLIORE IN CAMPO",yourXi:"IL TUO UNDICI",oppXi:"UNDICI AVVERSARIO",scoutHead:"ROSA AVVERSARIA",
+ flanks:{L:"SINISTRA",C:"CENTRO",R:"DESTRA"},matchupMsg:"attacchi la loro fascia debole (+forza)",injHead:"INFORTUNIO!",backupHead:"PESCA RISERVA",trainCant:"allenamento: fondi/utilizzi esauriti",
+ rar:{bronze:"BRONZO",silver:"ARGENTO",gold:"ORO",ch:"SFIDA"},startHead:"SBLOCCATA: carta iniziale",startSub:"inizia questa partita con una carta gratuita",locked:"bloccato",lockedHint:"vinci coppe per sbloccare i moduli",chLbl:"Sfide",chUnlock:"Carta sbloccata:",objHdr:"OBIETTIVI",
+ feedHdr:"NOTIZIE",feedEmpty:"ancora nessuna notizia...",feedBuy:"ingaggiato",feedUnlock:"sbloccato",chairHdr:"PRESIDENTE",hiddenName:"Giocatore misterioso",hiddenMeta:"??? · talento o bidone",cevher:"Talento!",balon:"Bidone:",reveal:"rivelato:",
+ trait:{hizli:"Veloce",lider:"Leader",buyukmac:"Grandi partite",sorunlu:"Difficile",cam:"Fragile",wonderkid:"Talento"},panicHead:"ACQUISTO DI PANICO!",panicFeed:"tempo scaduto, acquisto forzato",mgrDefault:"SEED",metaLine:(b,r)=>`migliore: <b>${b}</b> · partite: <b>${r}</b>`,storyHdr:"STORIA DELLA STAGIONE",
+ chem:{hdr:"INTESA",young:"giovane",tr:"locale",vet:"leader",none:"nessuna",scattered:"Rosa disunita",localGap:"Nessun nucleo locale",leaderGap:"Nessun leader in campo"},fan:{hdr:"TIFOSI",s:["Furiosi","Inquieti","Felici","Entusiasti"]},
+ talkSub:"Scegli un effetto morale per questa partita:",talkUnder:"Sono favoriti: la carica ha funzionato.",talkFav:"Siete favoriti: contano concentrazione e disciplina.",talkDelta:"Forza",powHdr:"FORZA DELLA ROSA",powHint:"dettagli →",powHdr2:"DETTAGLIO FORZA",quickAgain:"Ripeti la stessa configurazione",presWord:"Presidente",cupTitle:"FINALE DI COPPA",tcHdr:"CENTRO TRASFERIMENTI",assistLbl:"Assist:",stDraft:"Costruita da zero nell'ultimo giorno di mercato",
+ pbPlayers:"Giocatori",pbCards:"Stile + Carte",pbChem:"Intesa",pbFan:"Tifosi",pbTotal:"TOTALE",ctxHidden:"giocatore misterioso: accetta il rischio",ctxWonder:"futura superstar",ctxStar:"uomo simbolo",ctxBig:"giocatore da grandi partite",ctxLead:"leader dello spogliatoio",ctxYoung:"giovane talento",ctxLocal:"orgoglio locale",ctxVet:"veterano esperto",ctxForm:"in forma smagliante",ctxSolid:"nome affidabile",
+ ch:{c1:"vinci con 3+ gol",c2:"vinci senza subire gol",c3:"batti un avversario più forte",c4:"raggiungi i quarti",c5:"raggiungi la finale"},clubHdr:"Dettagli club",colP:"Colore primario",colS:"Colore secondario",clubGo:"Inizia la coppa",
+ catName:{hucum:"Attacco",savunma:"Difesa",ekonomi:"Economia",taraftar:"Tifosi",baskan:"Presidente",risk:"Rischio",gorev:"Sfida"},fanLbl:["Furiosi","Inquieti","Felici","Entusiasti"],runNames:{youth:"Partita giovani",fan:"Partita tifosi",wall:"Partita muro di ferro",attack:"Partita offensiva",economy:"Partita economica",risk:"Partita rischiosa"},
+ ui:{collectionHdr:"COLLEZIONE CARTE",cardSlotFull:"🃏 slot carte attive pieni",style:"Stile",cards:"Carte",matchup:"Duello",riskDebt:"Rischio / debito finale",traitMorale:"Tratti + morale",bonusEfficiency:"Efficienza bonus",softCap:"Soft cap ridotto",lockedCard:"Carta bloccata",lockedCaps:"BLOCCATA",activeRemove:"attiva · clicca per rimuovere",clickEquip:"clicca per equipaggiare",slotFull:"slot pieni",unlockFrom:"sblocca dal mercato",copies:"Copie",effect:"Effetto",seeChair:"VEDI PRESIDENTE",unlocksQf:"si sblocca ai quarti",less:"− meno",deal:" · 🔥 offerta",cup:"LA COPPA",shareLine:"riesci ad arrivare in finale?",postBand:"copa.life · ROSA PRONTA",finalPower:"forza",playFinalCta:"GIOCA LA FINALE 🏆"},
+ talkHead:"SPOGLIATOIO",talkThink:"DISCORSO IN CORSO..."
+});
+
+var _COPA_CHAIR_NAMES={
+ es:{babacan:["El Patrón","Gran Patrón"],leydi:["El Diplomático","Mano Justa"],pinti:["El Tacaño","Caja Fuerte"],sansasyoncu:["El Showman","Hora del espectáculo"],torpilci:["El Arreglador","Negocio familiar"],cilgin:["El Profesor","Comodín"]},
+ de:{babacan:["Der Patron","Großer Patron"],leydi:["Der Diplomat","Die faire Hand"],pinti:["Der Geizhals","Eiserne Kasse"],sansasyoncu:["Der Showman","Showtime"],torpilci:["Der Strippenzieher","Familienbetrieb"],cilgin:["Der Professor","Joker"]},
+ it:{babacan:["Il Patron","Grande Patron"],leydi:["Il Diplomatico","Mano giusta"],pinti:["Il Tirchio","Cassaforte"],sansasyoncu:["Lo Showman","Spettacolo"],torpilci:["Il Faccendiere","Affari di famiglia"],cilgin:["Il Professore","Jolly"]}
+};
+Object.keys(_COPA_CHAIR_NAMES).forEach(function(locale){Object.keys(_COPA_CHAIR_NAMES[locale]).forEach(function(id){var chair=T[locale].chair&&T[locale].chair[id],value=_COPA_CHAIR_NAMES[locale][id];if(chair){chair.n=value[0];chair.role=value[1];}});});
 
 function _detectCopaLocale(){
  try{
@@ -373,13 +462,21 @@ function _detectCopaLocale(){
 
 var LANG=_detectCopaLocale();
 var L=()=>T[LANG]||T.en;
+function LT(tr,en,es,de,it){
+ var values=tr&&typeof tr==="object"&&!Array.isArray(tr)?tr:{tr:tr,en:en,es:es,de:de,it:it};
+ var value=values[LANG];
+ if(value===undefined||value===null)value=values.en;
+ if(value===undefined||value===null)value=values.tr;
+ return value;
+}
+if(typeof window!=="undefined")window.LT=LT;
 
 var COPA_LOCALE_UI={
- tr:{label:"DİL",a11y:"ERİŞİLEBİLİRLİK",sound:"SES VE MÜZİK",guide:"NASIL OYNANIR?",anim:"ANİMASYONU AZALT",audio:"SES",music:"MÜZİK",advanced:"GELİŞMİŞ AYARLAR",country:"ÜLKENİ SEÇ",title:"copa.life — Roguelite futbol kadro yönetim oyunu",contact:"İLETİŞİM"},
- en:{label:"LANGUAGE",a11y:"ACCESSIBILITY",sound:"SOUND & MUSIC",guide:"HOW TO PLAY?",anim:"REDUCE MOTION",audio:"SOUND",music:"MUSIC",advanced:"ADVANCED SETTINGS",country:"PICK YOUR COUNTRY",title:"copa.life — Roguelite football squad management game",contact:"CONTACT"},
- es:{label:"IDIOMA",a11y:"ACCESIBILIDAD",sound:"SONIDO Y M\u00daSICA",guide:"\u00bfC\u00d3MO SE JUEGA?",anim:"REDUCIR ANIMACIONES",audio:"SONIDO",music:"M\u00daSICA",advanced:"AJUSTES AVANZADOS",country:"ELIGE TU PA\u00cdS",title:"copa.life — Gesti\u00f3n de plantilla de f\u00fatbol roguelite",contact:"CONTACTO"},
- de:{label:"SPRACHE",a11y:"BARRIEREFREIHEIT",sound:"SOUND UND MUSIK",guide:"WIE SPIELT MAN?",anim:"ANIMATIONEN REDUZIEREN",audio:"SOUND",music:"MUSIK",advanced:"ERWEITERTE EINSTELLUNGEN",country:"LAND AUSW\u00c4HLEN",title:"copa.life — Roguelite-Fu\u00dfball-Kaderverwaltung",contact:"KONTAKT"},
- it:{label:"LINGUA",a11y:"ACCESSIBILIT\u00c0",sound:"AUDIO E MUSICA",guide:"COME SI GIOCA?",anim:"RIDUCI ANIMAZIONI",audio:"AUDIO",music:"MUSICA",advanced:"IMPOSTAZIONI AVANZATE",country:"SCEGLI IL PAESE",title:"copa.life — Gestione rosa calcio roguelite",contact:"CONTATTI"}
+ tr:{label:"DİL",a11y:"ERİŞİLEBİLİRLİK",sound:"SES VE MÜZİK",guide:"NASIL OYNANIR?",anim:"ANİMASYONU AZALT",audio:"SES",music:"MÜZİK",advanced:"GELİŞMİŞ AYARLAR",country:"ÜLKENİ SEÇ",title:"copa.life — Roguelite futbol kadro yönetim oyunu",contact:"İLETİŞİM",settings:"Ayarlar",reduceMotion:"Animasyonu azalt",soundEffects:"Ses efektleri",heroTitle:"Zar at. Kadronu kur.<br><span class=\"v7-tagline-accent\">Kadere meydan oku.</span>",heroDesc:"Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.",newLabel:"YENİ",contactPrompt:"Soru, fikir, hata? · ",activeEffects:"AKTİF ETKİLER",noEvents:"Henüz olay yok"},
+ en:{label:"LANGUAGE",a11y:"ACCESSIBILITY",sound:"SOUND & MUSIC",guide:"HOW TO PLAY?",anim:"REDUCE MOTION",audio:"SOUND",music:"MUSIC",advanced:"ADVANCED SETTINGS",country:"PICK YOUR COUNTRY",title:"copa.life — Roguelite football squad management game",contact:"CONTACT",settings:"Settings",reduceMotion:"Reduce motion",soundEffects:"Sound effects",heroTitle:"Roll the dice. Build your squad.<br><span class=\"v7-tagline-accent\">Defy fate.</span>",heroDesc:"A roguelite football squad management game — every run is different, no final comes easy.",newLabel:"NEW",contactPrompt:"Question, idea, bug? · ",activeEffects:"ACTIVE EFFECTS",noEvents:"No events yet"},
+ es:{label:"IDIOMA",a11y:"ACCESIBILIDAD",sound:"SONIDO Y MÚSICA",guide:"¿CÓMO SE JUEGA?",anim:"REDUCIR ANIMACIONES",audio:"SONIDO",music:"MÚSICA",advanced:"AJUSTES AVANZADOS",country:"ELIGE TU PAÍS",title:"copa.life — Gestión de plantilla de fútbol roguelite",contact:"CONTACTO",settings:"Ajustes",reduceMotion:"Reducir animaciones",soundEffects:"Efectos de sonido",heroTitle:"Lanza el dado. Forma tu equipo.<br><span class=\"v7-tagline-accent\">Desafía al destino.</span>",heroDesc:"Un juego roguelite de gestión de plantilla: cada partida es distinta y ninguna final es fácil.",newLabel:"NUEVO",contactPrompt:"¿Pregunta, idea o error? · ",activeEffects:"EFECTOS ACTIVOS",noEvents:"Aún no hay eventos"},
+ de:{label:"SPRACHE",a11y:"BARRIEREFREIHEIT",sound:"SOUND UND MUSIK",guide:"WIE SPIELT MAN?",anim:"ANIMATIONEN REDUZIEREN",audio:"SOUND",music:"MUSIK",advanced:"ERWEITERTE EINSTELLUNGEN",country:"LAND AUSWÄHLEN",title:"copa.life — Roguelite-Fußball-Kaderverwaltung",contact:"KONTAKT",settings:"Einstellungen",reduceMotion:"Animationen reduzieren",soundEffects:"Soundeffekte",heroTitle:"Würfle. Baue deinen Kader.<br><span class=\"v7-tagline-accent\">Fordere das Schicksal heraus.</span>",heroDesc:"Ein Roguelite zur Fußball-Kaderverwaltung: Jede Partie ist anders und kein Finale ist leicht.",newLabel:"NEU",contactPrompt:"Frage, Idee oder Fehler? · ",activeEffects:"AKTIVE EFFEKTE",noEvents:"Noch keine Ereignisse"},
+ it:{label:"LINGUA",a11y:"ACCESSIBILITÀ",sound:"AUDIO E MUSICA",guide:"COME SI GIOCA?",anim:"RIDUCI ANIMAZIONI",audio:"AUDIO",music:"MUSICA",advanced:"IMPOSTAZIONI AVANZATE",country:"SCEGLI IL PAESE",title:"copa.life — Gestione rosa calcio roguelite",contact:"CONTATTI",settings:"Impostazioni",reduceMotion:"Riduci animazioni",soundEffects:"Effetti sonori",heroTitle:"Lancia il dado. Crea la rosa.<br><span class=\"v7-tagline-accent\">Sfida il destino.</span>",heroDesc:"Un gioco roguelite di gestione della rosa: ogni partita è diversa e nessuna finale è facile.",newLabel:"NUOVO",contactPrompt:"Domanda, idea o errore? · ",activeEffects:"EFFETTI ATTIVI",noEvents:"Nessun evento"}
 };
 
 var COPA_LOCALE_BUTTONS=[
@@ -424,6 +521,11 @@ function _setCopaText(id,value){
  if(node&&value)node.textContent=value;
 }
 
+function _setCopaSelectorText(selector,value){
+ var node=document.querySelector(selector);
+ if(node&&value)node.textContent=value;
+}
+
 function _syncCopaLanguageControls(){
  var grid=document.querySelector("#settingsDrop .sdgrid");
  if(!grid)return;
@@ -461,6 +563,21 @@ function _applyCopaLocaleUi(){
  _setCopaText("muteBtnLbl",copy.audio);
  _setCopaText("countryhdr",copy.country);
  _setCopaText("advancedToggle",copy.advanced);
+ var settings=document.getElementById("settingsBtn");
+ if(settings){settings.title=copy.settings;settings.setAttribute("aria-label",copy.settings);}
+ var anim=document.getElementById("animBtn");
+ if(anim){anim.title=copy.reduceMotion;anim.setAttribute("aria-label",copy.reduceMotion);}
+ var mute=document.getElementById("muteBtn");
+ if(mute){mute.title=copy.soundEffects;mute.setAttribute("aria-label",copy.soundEffects);}
+ var tagline=document.querySelector(".v7-tagline");if(tagline)tagline.innerHTML=copy.heroTitle;
+ var heroDesc=document.querySelector(".v7-hero-desc");if(heroDesc)heroDesc.textContent=copy.heroDesc;
+ _setCopaText("contactIntroLabel",copy.contact);
+ _setCopaText("contactIntroText",copy.contactPrompt);
+ var footerContact=document.querySelector(".footer-link[onclick*='openContactForm']");
+ if(footerContact){var footerIcon=footerContact.querySelector("svg");footerContact.replaceChildren();if(footerIcon)footerContact.appendChild(footerIcon);footerContact.appendChild(document.createTextNode(copy.contact));}
+ var ribbon=document.querySelector(".country-new-ribbon");if(ribbon){ribbon.textContent=copy.newLabel;ribbon.setAttribute("aria-label",copy.newLabel);}
+ document.documentElement.style.setProperty("--copa-active-effects",JSON.stringify(copy.activeEffects));
+ document.documentElement.style.setProperty("--copa-no-events",JSON.stringify(copy.noEvents));
  var guide=document.getElementById("howtoToggle");
  if(guide){
   var icon=guide.querySelector("svg");
@@ -484,9 +601,9 @@ function _installCopaHowtoModalRuntime(){
   var translation=COPA_HOWTO_TRANSLATIONS[LANG];
   if(!translation)return;
   window.requestAnimationFrame(function(){
-   _setCopaText(".howto-mhdr-title",translation.title);
-   _setCopaText(".howto-mhdr-sub",translation.subtitle);
-   _setCopaText(".howto-mfoot .btn",translation.back);
+   _setCopaSelectorText(".howto-mhdr-title",translation.title);
+   _setCopaSelectorText(".howto-mhdr-sub",translation.subtitle);
+   _setCopaSelectorText(".howto-mfoot .btn",translation.back);
    var close=document.querySelector(".howto-mhdr-close");
    if(close)close.setAttribute("aria-label",translation.close);
   });
@@ -508,6 +625,7 @@ function _installCopaLocaleRuntime(){
   originalSetLang(next);
   _syncCopaLanguageControls();
   _applyCopaLocaleUi();
+  if(window.PlayerProfiles&&typeof window.PlayerProfiles.refresh==="function")window.PlayerProfiles.refresh();
  };
  _installCopaHowtoModalRuntime();
  window.setLang(LANG);

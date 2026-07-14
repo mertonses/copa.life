@@ -63,8 +63,11 @@ function hasDefiniteMojibake(line) {
     const current = line.codePointAt(i);
     const next = line.codePointAt(i + 1);
 
-    // UTF-8 bytes decoded as Windows-125x often leave these leading markers.
-    if (current === 0x00c3 || current === 0x00c4 || current === 0x00c5 || current === 0xfffd) return true;
+    // UTF-8 bytes decoded as Windows-125x often leave these leading markers
+    // followed by another non-ASCII byte.  A marker on its own can be a valid
+    // German/Scandinavian letter (Ä/Å), so do not reject real translations.
+    if (current === 0xfffd) return true;
+    if ((current === 0x00c3 || current === 0x00c4 || current === 0x00c5) && next > 0x007f) return true;
 
     // Stray U+00C2 before punctuation or spacing is a classic UTF-8 mojibake failure.
     if (

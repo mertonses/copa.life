@@ -5,6 +5,16 @@ const HEADERS={"access-control-allow-origin":"*","access-control-allow-methods":
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{...HEADERS,"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=value=>String(value==null?"":value).replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,72);
 const range=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
+const validClubName=value=>{
+  const raw=String(value==null?"":value);
+  if(/[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Zl}\p{Zp}]/u.test(raw))return false;
+  const name=raw.normalize("NFKC").replace(/\u2019/g,"'").replace(/[ ]+/g," ").trim();
+  if(Array.from(name).length<2||Array.from(name).length>29)return false;
+  if(/[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Zl}\p{Zp}\p{M}]/u.test(name))return false;
+  if(!/^[\p{Script=Latin}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}\p{N} .&'\-\u30fb]+$/u.test(name))return false;
+  const alnum=/[\p{Script=Latin}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}\p{N}]/u,chars=Array.from(name);
+  return alnum.test(chars[0])&&alnum.test(chars[chars.length-1])&&chars.filter(char=>alnum.test(char)).length>=2;
+};
 function valid(snapshot){
   if(!snapshot||snapshot.schema_version!==1)return false;
   if(typeof snapshot.game_version!=="string"||typeof snapshot.data_version!=="string")return false;
@@ -13,6 +23,7 @@ function valid(snapshot){
   if(!Number.isFinite(Number(snapshot.squad_power))||snapshot.squad_power<35||snapshot.squad_power>115)return false;
   if(!Number.isFinite(Number(snapshot.cash))||snapshot.cash<-100||snapshot.cash>250)return false;
   if(!Array.isArray(snapshot.active_cards)||snapshot.active_cards.some(card=>card&&card.tier!=="COMMON"&&card.tier!=="DARK"))return false;
+  if(!validClubName(snapshot.club&&snapshot.club.name))return false;
   return true;
 }
 export default {

@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260714-ghost1-japan1-save4 */
-const CACHE = "copa-v20260714-ghost1-japan1-save4";
+/* copa.life Service Worker - v20260714-ghost2-club-security1 */
+const CACHE = "copa-v20260714-ghost2-club-security1";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -15,10 +15,12 @@ const PRECACHE = [
   "/src/data/players_italy.js",
   "/src/data/players_germany.js",
   "/src/data/players_japan.js",
+  "/assets/data/fm26/player_profiles.json",
   "/src/data/formations.js",
   "/src/data/opponents.js",
   "/src/data/logos.js",
   "/src/data/kits.js",
+  "/src/core/clubName.js",
   "/src/core/squad.js",
   "/src/game/generate.js",
   "/src/balance/config.js",
@@ -37,6 +39,8 @@ const PRECACHE = [
   "/src/state/metaState.js",
   "/src/state/gameState.js",
   "/src/ui/hub.js",
+  "/src/ui/playerProfiles.js",
+  "/src/ui/lastMatchReport.js",
   "/src/sim/finalSim.js",
   "/favicon.svg",
   "/favicon-16x16.png",
@@ -58,22 +62,40 @@ const PRECACHE = [
 ];
 
 const NETWORK_FIRST = [".html", ".js", ".css"];
+const PLAYER_PROFILE_PATH = "/assets/data/fm26/player_profiles.json";
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE).catch(() => {})));
-  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE)
+    .then(c => Promise.all(PRECACHE.map(url => c.add(url).catch(() => null))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(keys =>
     Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
+  ).then(() => self.clients.claim()));
 });
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = e.request.url;
+  const parsedUrl = new URL(url);
+  if (parsedUrl.pathname.endsWith(PLAYER_PROFILE_PATH)) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (!res || !res.ok) throw new Error("Player profile network response failed");
+        if (res.type !== "opaque") {
+          const clone = res.clone();
+          e.waitUntil(caches.open(CACHE).then(c => c.put(e.request, clone)));
+        }
+        return res;
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(cached => {
+        if (cached) return cached;
+        throw new Error("Player profile data unavailable");
+      }))
+    );
+    return;
+  }
   const isNetworkFirst = NETWORK_FIRST.some(ext => url.split("?")[0].endsWith(ext)) || url.endsWith("/");
 
   if (isNetworkFirst) {

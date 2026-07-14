@@ -52,6 +52,7 @@ if (build.status !== 0) {
 }
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
+if (!distFiles.includes("assets/data/fm26/player_profiles.json")) fail("player profile data is missing from dist");
 const forbiddenDistPrefixes = ["node_modules/", "tools/", "playtest/", "outputs/", "assets/chairs/", ".git/"];
 for (const file of distFiles) {
   if (forbiddenDistPrefixes.some((prefix) => file.startsWith(prefix))) {

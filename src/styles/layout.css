@@ -108,14 +108,31 @@
 @media(min-width:760px){#hub .roundtag{text-align:center}}
 .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;border-bottom:2px solid var(--border-subtle);padding-bottom:7px;margin-bottom:10px}
 .logo{font-family:var(--disp);font-weight:800;line-height:1;text-transform:none;color:var(--color-ink);text-align:center;justify-self:center;grid-column:2;grid-row:1}
-.brandmark{display:inline-flex;align-items:baseline;background:transparent;border:0;padding:0;font-size:30px;letter-spacing:-.5px}
+.brandmark{position:relative;display:inline-flex;align-items:baseline;background:transparent;border:0;padding:0;font-size:30px;letter-spacing:-.5px}
 .brandmark .copa{color:var(--color-ink)}
 .brandmark .dot{color:var(--color-slate);opacity:.55}
 .brandmark .brand-icon-dot{display:inline-flex;align-items:center;justify-content:center;width:.24em;height:.24em;margin:0 .01em 0 .025em;opacity:1;transform:translateY(.045em);flex:0 0 auto}
 .brandmark .brand-icon-dot img{display:block;width:100%;height:100%;object-fit:contain}
 .brandmark .life{color:var(--color-primary);background:transparent;padding:0;margin-left:.005em}
+.brandmark .logo-beta{
+  position:absolute;
+  top:-5px;
+  right:0;
+  padding:1px 3px;
+  border:1px solid rgba(121,88,20,.38);
+  border-radius:999px;
+  color:#795814;
+  background:rgba(214,168,74,.14);
+  font-family:var(--mono);
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.45px;
+  line-height:1;
+  pointer-events:none;
+}
 /* The header wordmark needs contrast against the dark application background. */
 html[data-theme="dark"] .brandmark .copa{color:#f4f8f8}
+html[data-theme="dark"] .brandmark .logo-beta{color:#e4be69;background:rgba(214,168,74,.09);border-color:rgba(228,190,105,.46)}
 .tools{display:flex;align-items:center;gap:6px;justify-self:end;grid-column:3}
 .langtog{display:flex;border:1px solid var(--border-default);border-radius:var(--radius-sm);overflow:hidden;font-family:var(--mono);font-size:10px;font-weight:700}
 .langtog button{display:flex;align-items:center;gap:4px;background:transparent;border:none;padding:4px 7px;cursor:pointer;color:var(--color-slate)}.langtog button.on{background:var(--color-ink);color:var(--color-background)}
@@ -688,11 +705,16 @@ html[data-theme="dark"] .country-new-ribbon{background:#c9973d;color:#10100c;bor
 .pc-eyebrow::before,.pc-eyebrow::after{content:"";display:block;height:1px;width:24px;background:var(--border-default)}
 .pc-band{background:var(--surface-muted);color:var(--color-slate);font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--border-subtle);text-align:center}
 .pc-club-edit{width:min(100%,290px);margin:8px auto 5px;text-align:left}
+.pc-club-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 3px}
 .pc-club-label{display:block;margin:0 0 3px 2px;color:var(--color-slate);font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;line-height:1;text-transform:uppercase}
+.pc-club-label-row .pc-club-label{margin:0}
+.pc-club-count{color:var(--color-slate);font-family:var(--mono);font-size:8px;font-variant-numeric:tabular-nums;letter-spacing:.3px}
 .pc-club-row{display:flex;min-height:38px;overflow:hidden;border:1px solid var(--border-default);border-radius:var(--radius-sm);background:var(--surface-elevated);transition:border-color var(--tr-fast),box-shadow var(--tr-fast)}
 .pc-club-row:focus-within{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--focus-ring)}
-.pc-club-input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--color-ink);font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:.6px;line-height:1;padding:7px 9px;text-transform:uppercase}
+.pc-club-row.invalid{border-color:var(--color-danger,#b0564a);box-shadow:0 0 0 2px color-mix(in srgb,var(--color-danger,#b0564a) 18%,transparent)}
+.pc-club-input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--color-ink);font-family:var(--disp);font-size:clamp(15px,4.8vw,21px);font-weight:800;letter-spacing:.35px;line-height:1;padding:7px 9px;text-transform:uppercase;text-overflow:ellipsis}
 .pc-club-input::placeholder{color:var(--color-slate);font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;opacity:.6}
+.pc-club-error{min-height:13px;margin:3px 2px 0;color:var(--color-danger,#b0564a);font-size:9px;line-height:1.3}
 .pc-club-rand{min-width:38px;padding:0;justify-content:center;background:var(--surface-muted)}
 .pc-club-rand:focus-visible{outline:2px solid var(--color-primary);outline-offset:-3px}
 .pc-team{font-family:var(--disp);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:1px;color:var(--color-ink);margin:4px 0 4px}
@@ -1852,10 +1874,16 @@ svg[stroke]{stroke-width:1.75}
   pointer-events:none;
 }
 
-/* Filled draft tokens keep a light surface in dark mode. */
+/* Filled draft tokens use the same ink card language as the dark interface. */
+html[data-theme="dark"] #pitch .roundel.full{
+  background:#0C1213!important;
+  color:#E6EEEF!important;
+  border-color:rgba(230,238,239,.24)!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.42),inset 0 1px 0 rgba(230,238,239,.07)!important;
+}
 html[data-theme="dark"] #pitch .roundel.full .rpos,
 html[data-theme="dark"] #pitch .roundel.full .rname{
-  color:#0C1213!important;
+  color:#E6EEEF!important;
   text-shadow:none!important;
 }
 
@@ -2124,7 +2152,7 @@ html[data-theme="dark"] #pitch .roundel.full .rname{
   max-width:min(260px,46%);
 }
 #hub .pitch-overlay::before{
-  content:"AKTİF ETKİLER";
+  content:var(--copa-active-effects,"AKTİF ETKİLER");
   display:block;
   width:max-content;
   max-width:100%;
@@ -5572,6 +5600,25 @@ html[data-theme="dark"] #hub .injbar button:hover{
 }
 .talk-choice:hover .ssi{transform:translateY(-1px);filter:saturate(1.05)}
 .talk-choice:active{transform:scale(.986);box-shadow:0 3px 10px rgba(12,18,19,.1)}
+html[data-theme="dark"] .talkmodal-simple .talk-choice{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--surface-raised) 90%,var(--talk-accent) 10%),
+      color-mix(in srgb,var(--surface-elevated) 97%,var(--talk-accent) 3%))!important;
+  color:var(--text-primary)!important;
+  border-color:color-mix(in srgb,var(--talk-accent) 34%,var(--border-default))!important;
+  box-shadow:0 5px 14px rgba(0,0,0,.24),inset 0 1px 0 rgba(237,244,244,.035);
+}
+html[data-theme="dark"] .talkmodal-simple .talk-choice .sst{color:var(--text-primary)!important}
+html[data-theme="dark"] .talkmodal-simple .talk-choice .talk-micro{color:var(--text-secondary)!important}
+html[data-theme="dark"] .talkmodal-simple .talk-choice:hover{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--surface-raised) 84%,var(--talk-accent) 16%),
+      color-mix(in srgb,var(--surface-elevated) 93%,var(--talk-accent) 7%))!important;
+  border-color:var(--talk-accent)!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
 .talk-foot{
   position:relative;
   padding:2px 16px 15px;
@@ -5858,7 +5905,39 @@ html[data-theme="dark"] #hub .injbar button:hover{
 #hub .hub-stat-row #trustTile.context-metric .ms{color:var(--color-ink)!important}
 #hub .hub-stat-row #powTile.context-metric .mv,
 #hub .hub-stat-row #trustTile.context-metric .mv{color:var(--metric-accent,#429A73)!important}
-#hub .hub-stat-row #powTile.context-metric .mtile-info{color:var(--color-ink)!important;border-color:var(--color-ink)!important}
+#hub .hub-stat-row #powTile.context-metric .mtile-info,
+#hub .hub-stat-row #trustTile.context-metric .mtile-info{color:var(--color-ink)!important;border-color:var(--color-ink)!important}
+
+/* Chairman trust help: same compact editorial language as the chemistry and
+   squad-power mechanic explainers, with the live trust tier highlighted. */
+.trust-info-modal{box-sizing:border-box;width:min(390px,calc(100vw - 32px));max-width:100%;padding:16px;color:var(--color-ink)}
+.trust-info-title{margin-bottom:10px;color:var(--color-ink);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;line-height:1.25;text-transform:uppercase}
+.trust-info-copy{font-size:12px;line-height:1.65}
+.trust-info-copy>p{margin:0 0 10px}
+.trust-info-current{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;padding:8px 10px;border:1px solid color-mix(in srgb,var(--color-primary) 34%,var(--border-subtle));border-radius:var(--radius-sm);background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-elevated))}
+.trust-info-current span{color:var(--color-slate);font-family:var(--mono);font-size:7px;font-weight:800;letter-spacing:1.2px}
+.trust-info-current b{color:var(--color-primary);font-family:var(--mono);font-size:10px;text-align:right;text-transform:uppercase}
+.trust-info-levels{display:grid;gap:5px;margin-bottom:11px}
+.trust-info-level{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--surface-elevated);opacity:.7}
+.trust-info-level.is-current{border-color:color-mix(in srgb,var(--color-primary) 42%,var(--border-subtle));background:color-mix(in srgb,var(--color-primary) 7%,var(--surface-elevated));opacity:1}
+.trust-info-level>b{color:var(--color-slate);font-family:var(--mono);font-size:10px;letter-spacing:2px;white-space:nowrap}
+.trust-info-level.is-current>b{color:var(--color-primary)}
+.trust-info-level span{display:grid;min-width:0}
+.trust-info-level strong{color:var(--color-ink);font-family:var(--mono);font-size:8px;text-transform:uppercase}
+.trust-info-level small{color:var(--color-slate);font-size:9px;line-height:1.35}
+.trust-info-rules{padding-top:2px;border-top:1px solid var(--border-subtle)}
+.trust-info-rules p{margin:7px 0 0;color:var(--color-slate);font-family:var(--mono);font-size:9px;line-height:1.45}
+.trust-info-rules b{color:var(--color-ink)}
+.trust-info-foot{margin-top:11px!important;padding:8px 9px;border-left:2px solid var(--color-primary);background:var(--surface-muted);color:var(--color-slate);font-size:10px;line-height:1.45}
+.trust-info-foot b{color:var(--color-ink)}
+.trust-info-close{width:100%;margin-top:3px}
+@media(max-width:430px){
+  .trust-info-modal{width:calc(100vw - 20px);padding:14px}
+  .trust-info-current{align-items:flex-start;flex-direction:column;gap:3px}
+  .trust-info-current b{text-align:left}
+  .trust-info-level{grid-template-columns:48px minmax(0,1fr);padding-inline:7px}
+  .trust-info-level>b{font-size:9px;letter-spacing:1.5px}
+}
 .pitch-overlay #cardrow{align-items:flex-start!important;width:max-content;max-width:min(290px,76%)}
 .pitch-overlay #cardrow .card{width:fit-content!important;max-width:100%;display:inline-flex;align-items:center;gap:6px}
 .pitch-overlay #cardrow .card b{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -6495,18 +6574,115 @@ body{
 .finalreport .final-heatmap img{display:block;width:min(100%,330px);margin:8px auto 0;border:1px solid var(--border-subtle);border-radius:6px}
 .finalreport .final-heatmap p{margin:7px 0 0;color:var(--color-slate);font-size:10px;line-height:1.4;text-align:center}
 
-/* Keeper SVG: a readable goalkeeper with face, shirt, arms and gloves. */
+/* Penalty goalkeeper: the pitch token language brought to life. */
+.pen-modal .pen-goal .pen-keeper{
+  --keeper-shift:clamp(72px,20vw,104px);
+  left:50%!important;
+  top:61px!important;
+  width:46px!important;
+  height:46px!important;
+  overflow:visible;
+  transform:translateX(-50%);
+  transform-origin:center;
+  filter:drop-shadow(0 4px 5px rgba(12,18,19,.34));
+  transition:transform .28s cubic-bezier(.2,.82,.25,1),filter .2s ease;
+  will-change:transform,filter;
+}
 .pen-modal .pen-goal .pen-keeper::before{display:none}
-.pen-modal .pen-goal .pen-keeper{overflow:visible;filter:drop-shadow(0 2px 3px rgba(12,18,19,.5))}
+.pen-modal .pen-goal .pen-keeper::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:1.5px solid rgba(230,238,239,.78);
+  border-radius:50%;
+  opacity:0;
+  pointer-events:none;
+}
 .pen-modal .pen-goal .pen-keeper-svg{display:block;width:100%;height:100%;overflow:visible}
-.pen-keeper-svg .pen-gk-head{fill:#f2c7a5;stroke:#0c1213;stroke-width:2}
-.pen-keeper-svg .pen-gk-hair{fill:#0c1213}
-.pen-keeper-svg .pen-gk-shirt{fill:#244b5a;stroke:#e6eeef;stroke-width:2}
-.pen-keeper-svg .pen-gk-arm,.pen-keeper-svg .pen-gk-leg,.pen-keeper-svg .pen-gk-boot{fill:none;stroke:#e6eeef;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-.pen-keeper-svg .pen-gk-glove{fill:#f8fafc;stroke:#0c1213;stroke-width:1.5}
-.pen-keeper-svg .pen-gk-shorts{fill:#0c1213;stroke:#e6eeef;stroke-width:1.5}
-.pen-modal.is-save .pen-keeper-svg .pen-gk-shirt{fill:#429a73}
-.pen-modal.is-save .pen-keeper-svg .pen-gk-glove{fill:#fff}
+.pen-keeper-svg .pen-gk-token-shadow{fill:rgba(12,18,19,.24)}
+.pen-keeper-svg .pen-gk-token-body{fill:#0c1213;stroke:#e6eeef;stroke-width:2.2}
+.pen-keeper-svg .pen-gk-token-ring{fill:rgba(230,238,239,.045);stroke:rgba(230,238,239,.22);stroke-width:1}
+.pen-keeper-svg .pen-gk-token-gloves{fill:none;stroke:#e6eeef;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transform-box:fill-box;transform-origin:center}
+.pen-keeper-svg .pen-gk-token-glove{fill:rgba(230,238,239,.08)}
+.pen-keeper-svg .pen-gk-token-detail{stroke:rgba(230,238,239,.72);stroke-width:1.3}
+.pen-keeper-svg .pen-gk-token-cuff{stroke:#57ad84;stroke-width:2.8}
+.pen-modal .pen-goal .pen-keeper.is-keeper-L{
+  left:50%!important;
+  transform:translateX(calc(-50% - var(--keeper-shift))) rotate(-4deg);
+}
+.pen-modal .pen-goal .pen-keeper.is-keeper-C{
+  left:50%!important;
+  transform:translateX(-50%) translateY(-3px);
+}
+.pen-modal .pen-goal .pen-keeper.is-keeper-R{
+  left:50%!important;
+  transform:translateX(calc(-50% + var(--keeper-shift))) rotate(4deg);
+}
+.pen-modal .pen-goal .pen-keeper.is-ready{animation:penKeeperTokenIdle 1.65s ease-in-out infinite}
+@keyframes penKeeperTokenIdle{
+  0%,100%{transform:translateX(-50%) translateY(0) scale(1)}
+  50%{transform:translateX(-50%) translateY(-2px) scale(1.015)}
+}
+.pen-goal.show-ball .pen-keeper.is-keeper-L{animation:penKeeperTokenDiveL .36s cubic-bezier(.2,.82,.24,1) both}
+.pen-goal.show-ball .pen-keeper.is-keeper-C{animation:penKeeperTokenDiveC .32s cubic-bezier(.2,.82,.24,1) both}
+.pen-goal.show-ball .pen-keeper.is-keeper-R{animation:penKeeperTokenDiveR .36s cubic-bezier(.2,.82,.24,1) both}
+@keyframes penKeeperTokenDiveL{
+  0%{transform:translateX(-50%) scale(1);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+  58%{transform:translateX(calc(-50% - var(--keeper-shift) - 3px)) rotate(-4deg) scaleX(1.055) scaleY(.96);filter:drop-shadow(5px 4px 6px rgba(12,18,19,.28)) blur(.28px)}
+  100%{transform:translateX(calc(-50% - var(--keeper-shift))) rotate(-4deg);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+@keyframes penKeeperTokenDiveC{
+  0%{transform:translateX(-50%) translateY(0) scale(1)}
+  58%{transform:translateX(-50%) translateY(-7px) scaleX(1.045) scaleY(.965);filter:blur(.22px) drop-shadow(0 5px 6px rgba(12,18,19,.3))}
+  100%{transform:translateX(-50%) translateY(-3px);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+@keyframes penKeeperTokenDiveR{
+  0%{transform:translateX(-50%) scale(1);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+  58%{transform:translateX(calc(-50% + var(--keeper-shift) + 3px)) rotate(4deg) scaleX(1.055) scaleY(.96);filter:drop-shadow(-5px 4px 6px rgba(12,18,19,.28)) blur(.28px)}
+  100%{transform:translateX(calc(-50% + var(--keeper-shift))) rotate(4deg);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+.pen-goal.show-ball.save .pen-keeper.is-keeper-L{animation-name:penKeeperTokenSaveL;animation-duration:.48s}
+.pen-goal.show-ball.save .pen-keeper.is-keeper-C{animation-name:penKeeperTokenSaveC;animation-duration:.44s}
+.pen-goal.show-ball.save .pen-keeper.is-keeper-R{animation-name:penKeeperTokenSaveR;animation-duration:.48s}
+@keyframes penKeeperTokenSaveL{
+  0%{transform:translateX(-50%) scale(1)}
+  58%{transform:translateX(calc(-50% - var(--keeper-shift) - 3px)) rotate(-4deg) scaleX(1.06) scaleY(.96);filter:blur(.25px) drop-shadow(4px 4px 6px rgba(12,18,19,.28))}
+  76%{transform:translateX(calc(-50% - var(--keeper-shift))) rotate(-4deg) scale(1.12);filter:drop-shadow(0 0 8px rgba(230,238,239,.62))}
+  100%{transform:translateX(calc(-50% - var(--keeper-shift))) rotate(-4deg) scale(1.02);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+@keyframes penKeeperTokenSaveC{
+  0%{transform:translateX(-50%) translateY(0) scale(1)}
+  56%{transform:translateX(-50%) translateY(-7px) scaleX(1.05) scaleY(.96);filter:blur(.22px)}
+  76%{transform:translateX(-50%) translateY(-3px) scale(1.12);filter:drop-shadow(0 0 8px rgba(230,238,239,.62))}
+  100%{transform:translateX(-50%) translateY(-3px) scale(1.02);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+@keyframes penKeeperTokenSaveR{
+  0%{transform:translateX(-50%) scale(1)}
+  58%{transform:translateX(calc(-50% + var(--keeper-shift) + 3px)) rotate(4deg) scaleX(1.06) scaleY(.96);filter:blur(.25px) drop-shadow(-4px 4px 6px rgba(12,18,19,.28))}
+  76%{transform:translateX(calc(-50% + var(--keeper-shift))) rotate(4deg) scale(1.12);filter:drop-shadow(0 0 8px rgba(230,238,239,.62))}
+  100%{transform:translateX(calc(-50% + var(--keeper-shift))) rotate(4deg) scale(1.02);filter:drop-shadow(0 4px 5px rgba(12,18,19,.34))}
+}
+.pen-goal.show-ball.save .pen-keeper::after{animation:penKeeperTokenRipple .44s .16s ease-out both}
+.pen-goal.show-ball.save .pen-gk-token-gloves{animation:penKeeperGloveFlash .42s .12s ease-out both}
+@keyframes penKeeperTokenRipple{
+  0%{opacity:.62;transform:scale(.76)}
+  100%{opacity:0;transform:scale(1.55)}
+}
+@keyframes penKeeperGloveFlash{
+  0%,100%{opacity:1;transform:scale(1);filter:none}
+  42%{opacity:1;transform:scale(1.09);filter:drop-shadow(0 0 3px #fff)}
+}
+@media(max-width:480px){
+  .pen-modal .pen-goal .pen-keeper{--keeper-shift:clamp(62px,19vw,76px);top:53px!important;width:39px!important;height:39px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .pen-modal .pen-goal .pen-keeper.is-ready,
+  .pen-goal.show-ball .pen-keeper.is-keeper-L,
+  .pen-goal.show-ball .pen-keeper.is-keeper-C,
+  .pen-goal.show-ball .pen-keeper.is-keeper-R,
+  .pen-goal.show-ball.save .pen-keeper::after,
+  .pen-goal.show-ball.save .pen-gk-token-gloves{animation:none!important}
+}
 @media(max-width:480px){.finalreport .final-heatmap{padding:8px}.finalreport .final-heatmap img{width:100%}}
 
 /* Settings controls share one compact grid language. */
