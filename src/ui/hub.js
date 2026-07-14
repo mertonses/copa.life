@@ -421,7 +421,7 @@ function renderCollectionFilters(){const el=$("collectionFilters");if(!el)return
 function collectionPass(k){const c=invOf(k),active=hasCard(k);if(collFilter==="open")return c>0;if(collFilter==="active")return active;return true;}
 function renderCollection(){const grid=$("collectionGrid");if(!grid)return;const x=L(),s=picksBySlot.filter(Boolean),cap=activeCardSlots();let owned=0,shown=0;grid.innerHTML="";renderCollectionFilters();allCardKeys().forEach(k=>{const cd=x.cards[k];if(!cd||isInstantCard(k))return;const c=invOf(k),open=c>0,active=hasCard(k),cat=CATMAP[k]||"gorev",v=variantOf(k);if(open)owned++;if(!collectionPass(k))return;shown++;const pv=open?simulateEquipPower(k):null,locked=!open;const equipLine=active?(LANG==="tr"?"✓ aktif — çıkarmak için tıkla":"✓ active — click to remove"):(open?(cards.length<cap?(x.ui.clickEquip):(x.ui.slotFull)):(x.ui.unlockFrom));const preview=open&&!active&&cards.length<cap?`<div class="powerpreview cc-preview">${LANG==="tr"?"Takarsan":"Equip"}: ${pv.before} → ${pv.after}</div>`:"";const desc=formatCardDesc(open?(variantDesc(cd.d,v)||shortCardText(k,s)):(LANG==="tr"?"Pazardan açılır":"Unlock in market"));const d=document.createElement("div");d.className="collcard v"+v+" cat-"+cat+(locked?" locked":"")+(active?" active":"");d.title=cd.n+" · "+kindLabel(k)+"\n"+cardContractType(k);d.innerHTML=`<div class="cc-head"><span class="cc-rar var-badge var-${v}">${open?variantBadge(v):(LANG==="tr"?"KİLİTLİ":"LOCKED")}</span><span class="cc-kind">${open?kindLabel(k):""}</span></div><div class="cc-art">${open?(CARD_SVGS[k]||cd.i):LOCK_SVG}</div><div class="cc-body"><div class="cc-name">${open?cd.n:(x.ui.lockedCard)}</div><div class="cc-desc">${desc}</div>${preview}</div><div class="cc-foot"><span class="cc-state">${equipLine}</span>${active?'<span class="cc-dot"></span>':""}</div>`;if(open)d.onclick=()=>toggleCardActive(k);grid.appendChild(d);});const cc=$("collCount");if(cc)cc.textContent=" "+owned+"/"+allCardKeys().filter(k=>!isInstantCard(k)).length+(shown!==allCardKeys().length?" · "+shown:"");}
 function renderDebtWarning(){const el=$("debtWarn");if(el){el.className="debtwarn hidden";el.textContent="";}const ps=$("pintiSavingsBar");if(ps)ps.remove();const clash=document.getElementById("cardClashWarn");if(clash)clash.remove();}
-function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e){}const x=L(),sp=squadPower(round),s=picksBySlot.filter(Boolean);
+function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptainPlayer();try{if(typeof _saveState==="function")_saveState();}catch(e){}const x=L(),sp=squadPower(round),s=picksBySlot.filter(Boolean);
   $("roundtag").textContent=x.rounds[round-1]+" · "+x.vsword+" "+opponent.name;
   {const wm=$("vsMid");if(wm){const we=currentWeather?currentWeather.e:"";const wn=currentWeather?(LANG==="tr"?currentWeather.tr:currentWeather.en):"";const bases=[8000,14000,22000,34000,52000,75000];const b=bases[Math.min(5,round-1)];const aud=Math.round(b*(0.65+Math.min(0.33,Math.max(0,(sp.power-(opponent?opponent.power:0))/100)))/1000)*1000;const _diff=sp.power-(opponent?opponent.power:0);const _sig=_diff>=10?{t:LANG==="tr"?"Favori":"Favourite",c:"#4ade80"}:_diff<=-10?{t:LANG==="tr"?"Dezavantajlı":"Underdog",c:"#f97316"}:{t:LANG==="tr"?"Dengeli":"Even",c:"#e6ad2e"};wm.innerHTML=`<div class="vs-vs">VS</div>${we?`<div class="vsweather">${we} ${wn}</div>`:"<div class='vsweather'></div>"}<div class="vs-sig" style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;color:${_sig.c};text-transform:uppercase;margin:2px 0">${_sig.t}</div><div class="vsaud"><svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="10"><circle cx="6" cy="4.5" r="2.8"/><circle cx="14" cy="4.5" r="2.8"/><path d="M1 13Q1 9 6 9Q11 9 11 13"/><path d="M13 9.5Q17 9 18.5 13" stroke-opacity=".5"/></svg> ${(aud/1000).toFixed(0)}K ${LANG==="tr"?"seyirci":"fans"}</div><div class="vsround">${x.rounds[round-1]}</div>`;}}
   {const mkShield=(bg,border,fg,lbl)=>{const sec=border||fg;return `<svg viewBox="0 0 44 52" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -590,7 +590,7 @@ function _initHubDragDrop(){
         else{const r=document.getElementById("h"+i);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";}}
         if(b){b.pos=slots[_src.idx][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+_src.idx,b);}
         else{const r=document.getElementById("h"+_src.idx);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[_src.idx][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[_src.idx][0]])+"</span>";}}
-        _initHubDragDrop();
+        renderHub();
       } else if(_src.type==="bench"){
         /* bench player → pitch slot */
         const bp=bench&&bench[_src.idx]; if(!bp)return;
@@ -644,7 +644,7 @@ function _initHubDragDrop(){
         picksBySlot[_tSrc.idx]=b;picksBySlot[i]=a;
         if(a){a.pos=slots[i][0];a.eff=typeof effOf==="function"?effOf(a):a.ov;renderRoundel("h"+i,a);}else{const r=document.getElementById("h"+i);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";}}
         if(b){b.pos=slots[_tSrc.idx][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+_tSrc.idx,b);}else{const r=document.getElementById("h"+_tSrc.idx);if(r){r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[_tSrc.idx][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[_tSrc.idx][0]])+"</span>";}}
-        _initHubDragDrop();
+        renderHub();
       } else if(_tSrc.type==="bench"){
         const bp=window.bench&&window.bench[_tSrc.idx];if(!bp)return;
         const old=picksBySlot[i];
@@ -817,7 +817,7 @@ function _tapPlaceOnSlot(i){
     if(a){a.pos=slots[i][0];a.eff=typeof effOf==="function"?effOf(a):a.ov;renderRoundel("h"+i,a);}else _renderEmptyHubSlot(i);
     if(b){b.pos=slots[src][0];b.eff=typeof effOf==="function"?effOf(b):b.ov;renderRoundel("h"+src,b);}else _renderEmptyHubSlot(src);
     _tapSel=null;_tapClearHighlights();
-    _initHubDragDrop();
+    renderHub();
     _tapToast(tr?"Oyuncular yer değiştirdi":"Players swapped");
     return true;
   }

@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260714-ghost2-club-security1 */
-const CACHE = "copa-v20260714-ghost2-club-security1";
+/* copa.life Service Worker - v20260714-ghost2-club-security1-lineup-sync1 */
+const CACHE = "copa-v20260714-ghost2-club-security1-lineup-sync1";
 const PRECACHE = [
   "/",
   "/index.html",

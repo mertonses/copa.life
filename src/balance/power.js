@@ -45,7 +45,7 @@ function powerBreakdown(r){
  let trait=0;s.forEach(p=>{if(p.trait&&TRAITS[p.trait])trait+=TRAITS[p.trait].pw();});
  const moral=talkMod.all+talkMod.def*Math.min(2,cnt(s,DEFP)/4)+talkMod.atk*Math.min(2,cnt(s,FWDP)/3);
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
- const cap=typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null;
+ const cap=typeof _currentCaptainPlayer==="function"?_currentCaptainPlayer():(typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null);
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
  const uncappedRaw=styleBonus+cardBonus+matchup+risk+trait;
  const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total));

@@ -79,7 +79,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260714-beta-badge2-trust-info1-club-security1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260714-beta-badge3-trust-info1-club-security1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260714-last-match-report1-scout-overflow3">
@@ -279,14 +279,14 @@
 <script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
 <script src="src/balance/telemetry.js?v=20260711-economy3"></script>
 <script src="src/cards/cardEffects.js?v=20260713-playback3"></script>
-<script src="src/balance/power.js?v=20260712e"></script>
+<script src="src/balance/power.js?v=20260714-lineup-sync1"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260711-stability1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260714-i18n1"></script>
 <script src="src/online/ghostClubs.js?v=20260714-ghost2-club-security1"></script>
 <script src="src/sim/finalSim.js?v=20260713-playback2"></script>
-<script src="src/ui/hub.js?v=20260714-i18n1-trust-info1-ghost2"></script>
+<script src="src/ui/hub.js?v=20260714-i18n1-trust-info1-ghost2-lineup-sync1"></script>
 <script src="src/ui/playerProfiles.js?v=20260714-profile-retry1"></script>
 <script src="src/ui/lastMatchReport.js?v=20260714-last-match-report1"></script>
 <script src="src/ui/scoutReport.js?v=20260714-scout-overflow1"></script>
@@ -778,7 +778,7 @@ function fillSlot(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effO
 function surOf(p){const w=(p.name||"").trim().split(" ");const last=w[w.length-1];if(/^\d+$/.test(last)&&w.length>1)return w[w.length-2];return last;}
 function _ovCol(ov){return ov>=70?"#429A73":ov>=55?"#496E71":"#0C1213";}
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?"#429A73":"rgba(12,18,19,.2)";const s=done?"rgba(66,154,115,.7)":"rgba(12,18,19,.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
-function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);const isCap=captainIdx>=0&&picksBySlot[captainIdx]===p;const boosted=!!((p.train||0)>0||(p.backupBoost||0)>0||(p.dev||0)>0||(p.tempBoost||0)>0);
+function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);const isCap=typeof _currentCaptainPlayer==="function"&&_currentCaptainPlayer()===p;const boosted=!!((p.train||0)>0||(p.backupBoost||0)>0||(p.dev||0)>0||(p.tempBoost||0)>0);
   r.className="roundel full pop"+(p.injured?" inj":"")+(p.suspended?" susp":"")+(isCap?" cap":"")+(boosted?" boosted":"");r.style.background="var(--color-ink)";r.style.color="var(--color-background)";r.style.borderColor=p.suspended?"#b0564a":(kit.sec||"rgba(255,255,255,.3)");const _fullTitle=p.name+" · "+ab+" "+eff+(isCap?(LANG==="tr"?" · KAPTAN":" · CAPTAIN"):"")+(p.injured?(LANG==="tr"?" · SAKAT":" · INJURED"):"")+(p.suspended?(LANG==="tr"?" · CEZALI":" · SUSPENDED"):"")+(boosted?(LANG==="tr"?" · ETKİLİ":" · BOOSTED"):"");r.title=_fullTitle;r.setAttribute("aria-label",_fullTitle);r.setAttribute("role","button");r.tabIndex=0;r.setAttribute("aria-selected","false");
   const sur=surOf(p);
   /* font scale: uzun soyadlar için küçük font */
@@ -1143,8 +1143,8 @@ const POUT=[
   {id:"management",eligible:()=>round>=4&&availableChairmanReplacements().length>0,run:changeChairman}
 ];
 function freeName(idx){const old=picksBySlot[idx];if(old&&!old.fab)usedNames.delete(old.name);}
-function upgradeSlot(lo,hi,fee){let idx=0,low=999;picksBySlot.forEach((p,i)=>{if(p&&effOf(p)<low){low=effOf(p);idx=i;}});const pos=slots[idx][0];freeName(idx);const np=takeUnique(pos,lo,hi);np.price=fee==="fee"?ri(3,8):0;spend(np.price||0,"president");picksBySlot[idx]=np;renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos],fee:np.price};}
-function downgradeSlot(lo,hi){const idx=rand()*picksBySlot.length|0,pos=slots[idx][0];freeName(idx);const np=fabPlayer(pos,lo,hi);np.price=0;np.pos=pos;picksBySlot[idx]=np;renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos]};}
+function upgradeSlot(lo,hi,fee){let idx=0,low=999;picksBySlot.forEach((p,i)=>{if(p&&effOf(p)<low){low=effOf(p);idx=i;}});const _cap=_currentCaptainPlayer(),pos=slots[idx][0];freeName(idx);const np=takeUnique(pos,lo,hi);np.price=fee==="fee"?ri(3,8):0;spend(np.price||0,"president");picksBySlot[idx]=np;_syncCaptainAfterLineupChange(_cap);renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos],fee:np.price};}
+function downgradeSlot(lo,hi){const _cap=_currentCaptainPlayer(),idx=rand()*picksBySlot.length|0,pos=slots[idx][0];freeName(idx);const np=fabPlayer(pos,lo,hi);np.price=0;np.pos=pos;picksBySlot[idx]=np;_syncCaptainAfterLineupChange(_cap);renderRoundel("h"+idx,np);return {name:np.name,ov:np.ov,pos:L().abbr[pos]};}
 function openPresident(){
   if(presidentBlocked>0){showModal('<div style="padding:16px;text-align:center">'+(LANG==="tr"?"Ba&#351;kan bu tur m&uuml;sait de&#287;il.":"President unavailable this turn.")+'</div>');return;}
   const x=L(),cd=x.chair&&x.chair[chairman.id],tr=LANG==="tr";
@@ -1680,8 +1680,14 @@ function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState(
 /* ===== v5: categories, identity, helpers ===== */
 let presCharges=1,objExpanded=false,feedExpanded=false,oppChar=null,lastMatchPerf=null,lastTalkResult=null,presBtnTimer=null;
 let currentWeather=null;
-let captainIdx=-1;
-function hasSelectedCaptain(){return Number.isInteger(captainIdx)&&!!picksBySlot[captainIdx];}
+let captainIdx=-1,captainPlayerRef=null;
+function _currentCaptainPlayer(){
+  if(captainPlayerRef){const idx=picksBySlot.indexOf(captainPlayerRef);if(idx>=0){captainIdx=idx;return captainPlayerRef;}captainPlayerRef=null;captainIdx=-1;return null;}
+  if(Number.isInteger(captainIdx)&&captainIdx>=0&&picksBySlot[captainIdx]){captainPlayerRef=picksBySlot[captainIdx];return captainPlayerRef;}
+  captainIdx=-1;return null;
+}
+function _syncCaptainAfterLineupChange(player){captainPlayerRef=player&&picksBySlot.includes(player)?player:null;captainIdx=captainPlayerRef?picksBySlot.indexOf(captainPlayerRef):-1;return captainIdx;}
+function hasSelectedCaptain(){return !!_currentCaptainPlayer();}
 let eliteBonus=false;
 const WEATHERS=[{id:'sun',e:'<svg viewBox="0 0 20 20" fill="none" stroke-linecap="round" width="14" height="14" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="3.5" fill="#e6ad2e" stroke="none"/><g><animateTransform attributeName="transform" type="rotate" values="0 10 10;360 10 10" dur="8s" repeatCount="indefinite"/><line x1="10" y1="1.5" x2="10" y2="4" stroke="#e6ad2e" stroke-width="1.5"/><line x1="10" y1="16" x2="10" y2="18.5" stroke="#e6ad2e" stroke-width="1.5"/><line x1="1.5" y1="10" x2="4" y2="10" stroke="#e6ad2e" stroke-width="1.5"/><line x1="16" y1="10" x2="18.5" y2="10" stroke="#e6ad2e" stroke-width="1.5"/><line x1="3.8" y1="3.8" x2="5.5" y2="5.5" stroke="#e6ad2e" stroke-width="1.5"/><line x1="14.5" y1="14.5" x2="16.2" y2="16.2" stroke="#e6ad2e" stroke-width="1.5"/><line x1="16.2" y1="3.8" x2="14.5" y2="5.5" stroke="#e6ad2e" stroke-width="1.5"/><line x1="5.5" y1="14.5" x2="3.8" y2="16.2" stroke="#e6ad2e" stroke-width="1.5"/></g></svg>',tr:'Güneş',en:'Sun'},{id:'rain',e:'<svg viewBox="0 0 20 20" fill="none" stroke-linecap="round" width="14" height="14" xmlns="http://www.w3.org/2000/svg"><path d="M4.5 11.5Q4.5 7.5 10 7.5Q15.5 7.5 15.5 11.5Q17 11.5 17.5 13Q17.5 15 15.5 15L4.5 15Q2.5 15 2.5 13Q3 11.5 4.5 11.5Z" stroke="#2f6f9e" stroke-width="1.5"/><line x1="8" y1="16.5" x2="7" y2="19.5" stroke="#2f6f9e" stroke-width="1.5"><animate attributeName="opacity" values="0;1;0" dur=".9s" begin="0s" repeatCount="indefinite"/></line><line x1="11" y1="16.5" x2="10" y2="19.5" stroke="#2f6f9e" stroke-width="1.5"><animate attributeName="opacity" values="0;1;0" dur=".9s" begin=".3s" repeatCount="indefinite"/></line><line x1="14" y1="16.5" x2="13" y2="19.5" stroke="#2f6f9e" stroke-width="1.5"><animate attributeName="opacity" values="0;1;0" dur=".9s" begin=".6s" repeatCount="indefinite"/></line></svg>',tr:'Yağmur',en:'Rain'},{id:'wind',e:'<svg viewBox="0 0 20 20" fill="none" stroke-linecap="round" width="14" height="14" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L12 6.5Q14 6.5 14 5Q14 3 12 3Q10 3 10 5" stroke="#7a9ab0" stroke-width="1.5"><animate attributeName="opacity" values=".3;1;.3" dur=".9s" begin="0s" repeatCount="indefinite"/></path><line x1="2" y1="10" x2="14" y2="10" stroke="#7a9ab0" stroke-width="1.5"><animate attributeName="opacity" values=".3;1;.3" dur=".9s" begin=".3s" repeatCount="indefinite"/></line><path d="M2 13.5L10 13.5Q12.5 13.5 12.5 15.5Q12.5 17 10 17Q8 17 8 15.5" stroke="#7a9ab0" stroke-width="1.5"><animate attributeName="opacity" values=".3;1;.3" dur=".9s" begin=".6s" repeatCount="indefinite"/></path></svg>',tr:'Rüzgar',en:'Wind'}];
 function pickWeather(){currentWeather=WEATHERS[rand()*WEATHERS.length|0];}
@@ -1730,7 +1736,7 @@ function pickCaptain(){
   </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
   if(window.PlayerProfiles)document.querySelectorAll(".cap-card[data-profile-player-index]").forEach(card=>{const p=picksBySlot[+card.dataset.profilePlayerIndex];if(p)PlayerProfiles.bind(card,p,{delayCoarseAction:true});});
 }
-function setCaptain(idx){captainIdx=idx;const p=picksBySlot[idx];if(p){pushFeed(" <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");showToast((LANG==="tr"?"⚽ "+surOf(p)+" kaptan seçildi":"⚽ "+surOf(p)+" named captain"),{type:"default"});}renderHub();}
+function setCaptain(idx){captainIdx=idx;captainPlayerRef=picksBySlot[idx]||null;const p=captainPlayerRef;if(p){pushFeed(" <b>"+surOf(p)+"</b> "+(LANG==="tr"?"kaptan seçildi":"named captain"),"form");showToast((LANG==="tr"?"⚽ "+surOf(p)+" kaptan seçildi":"⚽ "+surOf(p)+" named captain"),{type:"default"});}renderHub();}
 function presBtnLockedClick(){const btn=$("presBtn"),msg=LANG==="tr"?"ÇEYREK FİNALDE AÇILIR":"UNLOCKS IN Q-FINAL";if(!btn)return;const old=btn.innerHTML;btn.innerHTML=`<span>${msg}</span>`;clearTimeout(presBtnTimer);presBtnTimer=setTimeout(()=>{if(btn)btn.innerHTML=old;},2200);}
 const CATMAP={taraftar:"taraftar",genc:"ekonomi",ch_momentum:"hucum",kontra:"hucum",buyuk_mac:"hucum",yildiz:"hucum",otobus:"savunma",kaleci_kalesi:"savunma",anadolu:"ekonomi",altyapi_plani:"ekonomi",tecrubeli_omurga:"savunma",yerli_blok:"ekonomi",kanat_akini:"hucum",cift_forvet:"hucum",derbi:"risk",final_provasi:"risk",son_dans:"risk",taksit_transfer:"ekonomi",son_kredi:"ekonomi",kara_borsa:"risk",sahte_evrak:"risk",deplasman_kafilesi:"risk",kumarbaz:"risk",gecici_prim:"risk",kisa_kamp:"risk",doping:"risk",kriz:"risk",kurban_belli:"risk",primler_yatinca:"ekonomi",vur_igneyi:"risk",bu_adam:"hucum",gec_gec:"hucum",nasip_kismet:"risk",yildiz_krizi:"hucum",kasiga_para:"risk"};
 Object.assign(T.tr.cards,{
