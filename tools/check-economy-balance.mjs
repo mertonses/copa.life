@@ -10,10 +10,9 @@ const files={
  hub:read("src/ui/hub.js"),
  core:read("src/core/squad.js"),
  generate:read("src/game/generate.js"),
- effects:read("src/cards/cardEffects.js"),
- prices:read("src/cards/cardBalance.js"),
- telemetry:read("src/balance/telemetry.js"),
- legacy:read("src/legacy/v6-singlefile.html"),
+  effects:read("src/cards/cardEffects.js"),
+  prices:read("src/cards/cardBalance.js"),
+  telemetry:read("src/balance/telemetry.js"),
 };
 
 const failures=[];
