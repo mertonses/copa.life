@@ -1,5 +1,5 @@
-/* copa.life Service Worker - v20260713-ghost1 */
-const CACHE = "copa-v20260713-ghost1";
+/* copa.life Service Worker - v20260714-ghost1-japan1-save4 */
+const CACHE = "copa-v20260714-ghost1-japan1-save4";
 const PRECACHE = [
   "/",
   "/index.html",
@@ -14,6 +14,7 @@ const PRECACHE = [
   "/src/data/players_spain.js",
   "/src/data/players_italy.js",
   "/src/data/players_germany.js",
+  "/src/data/players_japan.js",
   "/src/data/formations.js",
   "/src/data/opponents.js",
   "/src/data/logos.js",
@@ -52,7 +53,8 @@ const PRECACHE = [
   "/assets/flags/IT.png",
   "/assets/flags/ENGLAND.png",
   "/assets/flags/ES.png",
-  "/assets/flags/DE.png"
+  "/assets/flags/DE.png",
+  "/assets/flags/JP.svg"
 ];
 
 const NETWORK_FIRST = [".html", ".js", ".css"];

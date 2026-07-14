@@ -51,16 +51,23 @@ function _maybeGhostOpponent(){
   const own=typeof squadPower==="function"?squadPower(round):{power:70};
   window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:Date.now(),excluded:window._ghostSeenIds||[]}).then(ghost=>_applyGhostOpponent(ghost,expectedRound,baseline)).catch(()=>{});
 }
-function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
+function enterHub(restoring=false){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
   const _tcl=$("tcLines");if(_tcl)_tcl.innerHTML="";
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
+  opponent=opponent||bracket[round-1]||bracket[0]||{name:"Opponent",power:60};
+  if(restoring){
+    if(!currentWeather&&typeof pickWeather==="function")pickWeather();
+    if(!oppChar&&typeof assignOppChar==="function")assignOppChar();
+    if((!Array.isArray(oppLineup)||!oppLineup.length)&&typeof genOppLineup==="function")genOppLineup();
+    renderFixtures();renderHub();return;
+  }
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
   /* Borç güven cezası */
   if(budget<-10&&chairTrust>0&&round>1){chairTrust--;pushFeed("📉 "+(LANG==="tr"?"Başkan güveni azaldı ("+chairTrust+"/3)":"Chairman confidence drops ("+chairTrust+"/3)"),"lose");}
   /* Adalet: oyuncu milliyetini ikinci kez saymak yerine toplam kimyayı ödüllendirir. */
-  if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Adalet: uyumlu kadro — bu maç +1 güç":"Adalet: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Adalet: dağınık kadro — bu maç -1 güç":"Adalet: disjointed squad — -1 power"),"lose");}}
+if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Diplomat: uyumlu kadro — bu maç +1 güç":"Diplomat: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Diplomat: dağınık kadro — bu maç -1 güç":"Diplomat: disjointed squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
   /* Kırmızı kart cezası: askıya alınan oyuncuyu bildir */
   {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");const _tr=LANG==="tr";setTimeout(()=>{showModal(`<div class="scoutmodal suspended-modal"><h4>🟥 ${_tr?"Cezalı Oyuncu":"Player Suspended"}</h4><p><b>${_sn}</b> ${_tr?"kırmızı kartı nedeniyle bu maçta oynayamaz. Kadrodan çıkarmanız gerekiyor.":"received a red card and cannot play this match. You must remove them from the lineup."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${_tr?"Anladım":"Got it"}</button></div></div>`);},400);}}
@@ -68,7 +75,7 @@ function enterHub(){if(window._wantFinal){window._wantFinal=false;round=6;oppone
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
   if(chairman.id==="torpilci"&&round===3&&!eventSeen.torpil_guaranteed){eventSeen.torpil_guaranteed=1;setTimeout(_queueGuaranteedTorpil,760);}
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();_maybeGhostOpponent();maybeDraftEvent();
-  if(round===1&&captainIdx<0&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
+  if(round===1&&!hasSelectedCaptain()&&typeof pickCaptain==="function")setTimeout(pickCaptain,500);
   if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
 }
 function _queueGuaranteedTorpil(){
@@ -104,6 +111,7 @@ function showSansSpotlightPicker(){
     </div>
     <div class="spot-grid" role="listbox" aria-label="${tr?"Spotlight oyuncusu se\u00e7imi":"Spotlight player selection"}">${cards}</div>
   </div>`);
+  if(window.PlayerProfiles)document.querySelectorAll(".spot-card").forEach((card,ci)=>{const item=choices[ci];if(item&&item.p)PlayerProfiles.bind(card,item.p,{delayCoarseAction:true});});
 }
 function _spotHover(el,ci){
   return;
@@ -425,7 +433,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
     <circle cx="35" cy="10" r="1.2" fill="${fg}" opacity="0.35"/>
     <text x="22" y="37" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="${fg}" letter-spacing="0.5">${lbl}</text>
   </svg>`;}
-  const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#C84B36","#a03025","#f5f0e8",lbl);}}}
+  const yc2=$("youCrest");if(yc2){const lbl=(teamName||"XI").replace(/\s+/g,"").slice(0,2).toUpperCase();yc2.innerHTML=mkShield(kit.bg,kit.sec||kit.fg,kit.fg,lbl);}const oc2=$("oppCrest");if(oc2&&opponent){const _lm={ENG:CLUB_LOGOS_EN,ES:CLUB_LOGOS_ES,IT:CLUB_LOGOS_IT,DE:CLUB_LOGOS_DE,JP:CLUB_LOGOS_JP};const _logoMap=_lm[selectedCountry]||CLUB_LOGOS;const logo=typeof _logoMap!=="undefined"&&_logoMap[opponent.name];if(logo){oc2.innerHTML=`<img src="${logo}" class="club-logo" alt="${opponent.name}">`;}else{const lbl=opponent.name.replace(/\s+/g,"").slice(0,2).toUpperCase();oc2.innerHTML=mkShield("#C84B36","#a03025","#f5f0e8",lbl);}}}
   const _pwCol=v=>v>=90?"#15803d":v>=80?"#4ade80":v>=70?"#eab308":v>=60?"#f97316":"#ef4444";
   {const el=$("youPw");if(el){el.textContent=sp.power;el.style.color=_pwCol(sp.power);}}
   $("youNm").textContent=teamName||"XI";$("oppNm").textContent=opponent.name;
@@ -550,6 +558,7 @@ function renderHub(){try{if(typeof _saveState==="function")_saveState();}catch(e
       const _dragHandle=`<svg viewBox="0 0 8 14" width="7" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><line x1="1" y1="2" x2="7" y2="2"/><line x1="1" y1="5" x2="7" y2="5"/><line x1="1" y1="8" x2="7" y2="8"/><line x1="1" y1="11" x2="7" y2="11"/></svg>`;
       const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=typeof ovCol==="function"?ovCol(_eff):(_eff>=90?"#15803d":_eff>=80?"#4ade80":_eff>=70?"#eab308":_eff>=60?"#f97316":"#ef4444");const _inj=p.injured?`<span style="display:inline-flex;align-items:center;font-size:7px;font-family:var(--mono);font-weight:700;padding:1px 3px;border-radius:2px;background:var(--red);color:#fff;margin-left:2px">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span style="color:var(--ink2);opacity:.45;flex-shrink:0">${_dragHandle}</span><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:24px;letter-spacing:.5px;flex-shrink:0">${_pos}</span><span style="flex:1;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span style="font-size:12px;font-weight:700;color:${_col};flex-shrink:0">${_eff}</span></div>`;}).join("");
       _benchEl.innerHTML=_benchHdr+`<div style="display:flex;flex-direction:column;gap:4px">${_benchCards}</div>`;
+      if(window.PlayerProfiles)_benchEl.querySelectorAll("[data-bench-idx]").forEach(card=>{const p=_benched[+card.dataset.benchIdx];if(p)PlayerProfiles.bind(card,p);});
     }else{if(_benchEl)_benchEl.innerHTML="";}
   }else if(_benchEl){_benchEl.innerHTML="";}}
   setBudget();_fixHubVisibleText();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();}
@@ -600,10 +609,12 @@ function _initHubDragDrop(){
   /* touch drag-drop for mobile */
   let _tEl=null,_tGhost=null,_tSrc=null,_tTimer=null;
   function _cleanupTouchDragGhosts(){
+    const _wasDragging=!!_tSrc;
     clearTimeout(_tTimer);
     document.querySelectorAll(".touch-drag-ghost").forEach(el=>el.remove());
     if(_tEl)_tEl.style.opacity="";
     _tEl=null;_tGhost=null;_tSrc=null;_clearOver();
+    if(_wasDragging&&window.PlayerProfiles)PlayerProfiles.setDragging(false);
   }
   window.cleanupTouchDragGhosts=_cleanupTouchDragGhosts;
   if(!window._touchDragCleanupHooksReady){
@@ -647,6 +658,7 @@ function _initHubDragDrop(){
     el.addEventListener("touchstart",e=>{
       _tTimer=setTimeout(()=>{
         _tSrc=src();if(!_tSrc)return;
+        if(window.PlayerProfiles)PlayerProfiles.setDragging(true);
         _tEl=el;
         const t=e.touches[0];
         _tGhost=el.cloneNode(true);
@@ -694,8 +706,8 @@ function _renderEmptyHubSlot(i){
   r.innerHTML=(typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(slots[i][0])]||""):"")+"<span class='rp'>"+(L().abbr[slots[i][0]])+"</span>";
 }
 function _tapClearHighlights(){
-  document.querySelectorAll(".tap-good,.tap-off,.tap-no,.tap-selected").forEach(e=>{
-    e.classList.remove("tap-good","tap-off","tap-no","tap-selected");
+  document.querySelectorAll(".tap-good,.tap-warn,.tap-off,.tap-no,.tap-selected").forEach(e=>{
+    e.classList.remove("tap-good","tap-warn","tap-off","tap-no","tap-selected");
     e.removeAttribute("aria-disabled");e.removeAttribute("aria-pressed");
   });
 }
@@ -722,20 +734,20 @@ function _tapHighlightTargets(){
     const bp=_benched[_tapSel.idx];if(!bp)return;
     const card=document.querySelector('[data-bench-idx="'+_tapSel.idx+'"]');
     if(card){card.classList.add("tap-selected");card.setAttribute("aria-pressed","true");}
-    const g=typeof groupOf==="function"?groupOf(bp.pos):null;
     slots.forEach((s,i)=>{
       const el=document.getElementById("h"+i);if(!el)return;
-      const sg=typeof groupOf==="function"?groupOf(s[0]):null;
-      const fit=s[0]===bp.pos||sg===g;
-      el.classList.add(fit?"tap-good":"tap-off");
-      el.setAttribute("aria-label",(L().abbr[s[0]]||s[0])+" · "+(fit?(tr?"yerleştir":"place"):(tr?"pozisyon dışı":"out of position")));
+      const pen=typeof positionPenaltyFor==="function"?positionPenaltyFor(bp,s[0]):(s[0]===bp.pos?0:9);
+      const fit=pen===0;
+      el.classList.add(fit?"tap-good":pen<=4?"tap-warn":"tap-off");
+      const fitLabel=fit?(tr?"doğal mevki":"natural role"):(pen<=4?(tr?"yakın mevki":"near role"):(tr?"pozisyon dışı":"out of position"));
+      el.setAttribute("aria-label",(L().abbr[s[0]]||s[0])+" · "+fitLabel);
     });
   } else if(_tapSel.type==="slot"){
     const src=_tapSel.idx;
     const sEl=document.getElementById("h"+src);
     if(sEl){sEl.classList.add("tap-selected");sEl.setAttribute("aria-pressed","true");}
     const srcIsGK=slots[src][0]==="GK";
-    const g=typeof groupOf==="function"?groupOf(slots[src][0]):null;
+    const player=picksBySlot[src];
     slots.forEach((s,i)=>{
       if(i===src)return;
       const el=document.getElementById("h"+i);if(!el)return;
@@ -744,8 +756,8 @@ function _tapHighlightTargets(){
         const _a=picksBySlot[src],_b=picksBySlot[i];
         if(!(_a&&_a.injured)&&!(_b&&_b.injured)){el.classList.add("tap-no");el.setAttribute("aria-disabled","true");return;}
       }
-      const sg=typeof groupOf==="function"?groupOf(s[0]):null;
-      el.classList.add(sg===g?"tap-good":"tap-off");
+      const pen=player&&typeof positionPenaltyFor==="function"?positionPenaltyFor(player,s[0]):(s[0]===slots[src][0]?0:9);
+      el.classList.add(pen===0?"tap-good":pen<=4?"tap-warn":"tap-off");
       el.setAttribute("aria-label",(L().abbr[s[0]]||s[0])+" · "+(tr?"yer değiştir":"swap"));
     });
   }

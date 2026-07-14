@@ -65,3 +65,12 @@ var OPP_POOL_DE=[
  "1. FC Kaiserslautern","Karlsruher SC","SpVgg Greuther Fürth","SG Dynamo Dresden"
 ];
 var OPP_BASES_DE=[62,67,73,79,87,95];
+
+/* Japan — J1 League (FM26 export ile aynı 20 kulüp) */
+var OPP_POOL_JP=[
+ "Kashima","Urawa","Kashiwa","FC Tokyo","Tokyo-V",
+ "FC Machida","Kawasaki-F","Yokohama F･M","Yokohama FC","Shonan",
+ "Niigata","Shimizu","Nagoya","Kyoto","G-Osaka",
+ "C-Osaka","Kobe","Okayama","Hiroshima","Fukuoka"
+];
+var OPP_BASES_JP=[61,66,72,78,87,95];

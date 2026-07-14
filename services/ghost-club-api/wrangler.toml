@@ -1,0 +1,8 @@
+name = "copa-life-ghost-clubs"
+main = "src/index.js"
+compatibility_date = "2026-07-13"
+
+[[d1_databases]]
+binding = "GHOSTS"
+database_name = "copa-life-ghosts"
+database_id = "30d2c67a-1760-4a80-ac4f-52d5d4e74de2"

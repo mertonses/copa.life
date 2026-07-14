@@ -3,7 +3,8 @@ var BUDGET=30,DEBT_LIMIT=-28,FINAL_DEBT_CAP=30,CARD_PRICE_FLOOR=2;
 /* İletişim formu — web3forms.com'dan ücretsiz key al, buraya yapıştır */
 var CONTACT_FORM_KEY="2eb11e4e-335a-401e-b2e7-104c07ecd4a6";
 function cnt(s,arr){return s.filter(p=>arr.includes(p.pos)).length;}
-function activeDebtLimit(){return round>=3?Math.max(DEBT_LIMIT,chairmanSackLimit()):DEBT_LIMIT;}
+/* Seçilen başkanın borç eşiği ilk turdan itibaren geçerlidir. */
+function activeDebtLimit(){return chairmanSackLimit();}
 function legacySpendable(){return Math.max(0,Math.round(legacyCash||0));}
 function budgetAfterCost(cost){cost=Math.max(0,Math.round(cost||0));return Math.round((budget||0)-Math.max(0,cost-legacySpendable()));}
 function canAffordCost(cost){return budgetAfterCost(cost)>=activeDebtLimit();}
@@ -54,7 +55,7 @@ function chairmanReactToSpend(cost,context,payload){
   if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Manşet transferi: +"+bonus+" güç":"Headline signing: +"+bonus+" power"),"buy");
  }else if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov&&payload.ov<72&&cost>=6){
   chairTrust=Math.max(0,chairTrust-1);
-  if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Sıkıcı transfer: Sansasyoncu güveni -1":"Boring signing: Showman trust -1"),"lose");
+ if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Sıkıcı transfer: Şovmen güveni -1":"Boring signing: Showman trust -1"),"lose");
  }
 }
 function opponentEdge(power,oppPower){const gap=(power||0)-(oppPower||0);return gap>=24?5:gap>=18?4:gap>=12?3:gap>=8?2:0;}

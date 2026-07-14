@@ -156,3 +156,7 @@ var CLUB_LOGOS_DE={
 };
 var CLUB_LOGOS_DE_SM={};
 Object.keys(CLUB_LOGOS_DE).forEach(k=>{CLUB_LOGOS_DE_SM[k]=CLUB_LOGOS_DE[k].replace("assets/clubs/","assets/clubs/small/");});
+
+/* Japon kulüpleri logo paketi olmadan jenerik arma kullanır; boş harita diğer ülke logolarına düşmeyi engeller. */
+var CLUB_LOGOS_JP={};
+var CLUB_LOGOS_JP_SM={};

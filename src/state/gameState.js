@@ -18,4 +18,4 @@ var kaynasmaDark=false;
 var pintiSavings=0,sansSpotlightIdx=-1,sansMediaPressure=0,sansHeadlineRound=0,sansStarBonusRound=0,torpilDebtPenalty=0,chairTrust=1,chairSupportDebt=0,kaosHalfReward=false,usedRiskCards=[],cardChemDebt=0;
 var NAMEP=["Anadolu","Demir","Yıldız","Kartal","Şimşek","Bordo","Gençlik","Deniz","Ankara","Toros","Çelik","Boğaz"],NAMES2=["spor","gücü FK","SK","Birliği","FK","United"];
 
-var nativeRandom=Math.random,runRng=nativeRandom;function rand(){return runRng();}
+var nativeRandom=Math.random,runRng=nativeRandom,runRngCalls=0;function rand(){runRngCalls++;return runRng();}

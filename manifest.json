@@ -1,7 +1,7 @@
 {
   "name": "copa.life",
   "short_name": "copa.life",
-  "description": "Zar at. Kadro kur. Kupayı kaldır. Roguelite futbol müdürü — 5 lig, 9000+ oyuncu.",
+  "description": "Zar at. Kadro kur. Kupayı kaldır. Roguelite futbol müdürü — 6 ülke, 9000+ oyuncu.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",

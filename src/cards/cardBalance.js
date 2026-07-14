@@ -63,7 +63,8 @@ function cardCostLines(k,v){
    doping:{0:tr?["Risk %20: Güven -1","Her tur %35: -€15M"]:["Risk 20%: Trust -1","Each round 35%: -€15M"],1:tr?["Güven -1","Her tur %25: -€25M"]:["Trust -1","Each round 25%: -€25M"]},
    sahte_evrak:{0:tr?"Risk %18: Güven -1":"Risk 18%: Trust -1"},
    kisa_kamp:{0:tr?"Sonraki maç -2 güç":"Next match -2 power",1:tr?"Sonraki maç -4 güç":"Next match -4 power"},
-   gecici_prim:{0:tr?["Maç sonu risk %30: sakatlık","Sonraki maç -2 güç"]:["Post-match risk 30%: injury","Next match -2 power"],1:tr?["Maç sonu risk %60: sakatlık","Sonraki maç -2 güç"]:["Post-match risk 60%: injury","Next match -2 power"]},
+   // Keep the post-match risk compact: this is rendered in a narrow card footer.
+   gecici_prim:{0:tr?["Maç sonu · %30 sakatlık","Sonraki maç -2 güç"]:["Post-match · 30% injury","Next match -2 power"],1:tr?["Maç sonu · %60 sakatlık","Sonraki maç -2 güç"]:["Post-match · 60% injury","Next match -2 power"]},
    deplasman_kafilesi:{1:tr?"Rakip güçlü değilse %50: -4 güç":"If opponent is not stronger: 50% -4 power"},
    kurban_belli:{0:tr?"Tur sonunda 1 oyuncu sakatlanır":"1 player injured after the round",1:tr?"Tur sonunda 2 oyuncu sakatlanır":"2 players injured after the round"},
    son_kredi:{0:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M",1:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M"}

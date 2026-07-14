@@ -1583,6 +1583,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 #againBtn .again-copa{color:var(--color-ink)}
 #againBtn .again-dot{color:var(--color-slate);opacity:.72;margin:0 1px}
 #againBtn .again-life{color:var(--color-primary)}
+html[data-theme="dark"] #againBtn .again-copa{color:#0C1213}
 #quickBtn{
   background:rgba(12,18,19,.92);
   color:#fff;
@@ -2253,10 +2254,65 @@ html[data-theme="dark"] .result .pbr span,
 html[data-theme="dark"] .result .xi h4 small{
   color:var(--text-secondary)!important;
 }
+
+/* Result actions need a clear hierarchy on the dark surface: inspect first,
+   restart second. These also override legacy light button fills. */
+html[data-theme="dark"] #result #shareCardBtn,
+html[data-theme="dark"] #result #statsBtn{
+  background:var(--surface-raised)!important;
+  color:var(--text-primary)!important;
+  border-color:var(--border-default)!important;
+}
+html[data-theme="dark"] #result #shareCardBtn:hover,
+html[data-theme="dark"] #result #statsBtn:hover{
+  background:var(--surface-elevated)!important;
+  border-color:var(--color-primary)!important;
+}
+html[data-theme="dark"] #result #quickBtn{
+  background:var(--surface-elevated)!important;
+  color:var(--text-primary)!important;
+  border:1px solid var(--border-strong)!important;
+}
+html[data-theme="dark"] #result #quickBtn:hover{
+  background:var(--surface-raised)!important;
+  border-color:var(--color-primary)!important;
+}
+
+/* The shared ink token becomes light in dark mode. Pitch player cards must use
+   a real dark surface instead, otherwise names and positions lose contrast. */
+html[data-theme="dark"] .scout-player-card{
+  background:linear-gradient(180deg,#173035,#091416)!important;
+  color:var(--text-primary)!important;
+  border-color:rgba(157,183,185,.42)!important;
+  box-shadow:0 3px 9px rgba(0,0,0,.42)!important;
+}
+html[data-theme="dark"] .scout-player-card .scout-pos,
+html[data-theme="dark"] .scout-nm{
+  color:var(--text-primary)!important;
+  text-shadow:none!important;
+}
 html[data-theme="dark"] .result .pr-rt,
 html[data-theme="dark"] .result .pr-rt.pr-pow{
   background:var(--surface-dark)!important;
   color:var(--text-primary)!important;
+}
+
+/* Opponent scout lineup: use the same stable dark player-token treatment in
+   both themes. The global ink token is intentionally light in dark mode, so
+   it must not be used as this card's background. */
+.scout-lineup-modal .scout-player-card{
+  background:linear-gradient(180deg,#172527 0%,#0c1213 100%)!important;
+  color:#f4f8f7!important;
+  border:1px solid rgba(230,238,239,.28)!important;
+  box-shadow:0 4px 10px rgba(0,0,0,.34)!important;
+}
+.scout-lineup-modal .scout-player-card .scout-pos{
+  color:rgba(244,248,247,.82)!important;
+  text-shadow:none!important;
+}
+.scout-lineup-modal .scout-nm{
+  color:#f4f8f7!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.9)!important;
 }
 
 html[data-theme="dark"] .season-stats-modal{

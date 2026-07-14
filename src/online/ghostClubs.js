@@ -28,14 +28,53 @@
   const hash=value=>{let h=2166136261;for(const ch of String(value)){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(36);};
   const isTr=()=>typeof window.LANG==="undefined"||window.LANG==="tr";
   const tr=(a,b)=>isTr()?a:b;
+  function visibleChairmanName(chairman){
+    const value=chairman&&typeof chairman==="object"?chairman:{};
+    const id=cleanText(value.id);
+    const current={
+      babacan:tr("Patron Ba\u015fkan","The Patron"),
+      leydi:tr("Diplomat Ba\u015fkan","The Diplomat"),
+      sansasyoncu:tr("\u015eovmen Ba\u015fkan","The Showman"),
+      cilgin:tr("Profes\u00f6r Ba\u015fkan","The Professor")
+    };
+    if(current[id])return current[id];
+    const name=cleanText(value.name);
+    const legacy={
+      "Babacan":"Patron","Babacan Ba\u015fkan":"Patron Ba\u015fkan","The Godfather":"The Patron",
+      "Adalet":"Diplomat","Adalet Ba\u015fkan":"Diplomat Ba\u015fkan",
+      "Sansasyoncu":"\u015eovmen","Sansasyoncu Ba\u015fkan":"\u015eovmen Ba\u015fkan",
+      "\u00c7\u0131lg\u0131n":"Profes\u00f6r","\u00c7\u0131lg\u0131n Ba\u015fkan":"Profes\u00f6r Ba\u015fkan","The Wild Card":"The Professor"
+    };
+    return legacy[name]||name||id;
+  }
 
+  function readStartedRun(){
+    try{
+      const stored=JSON.parse(safeGet(RUN_KEY,"{}"))||{};
+      return stored&&typeof stored==="object"?stored:{};
+    }catch(_){return {};}
+  }
+  function saveStartedRun(run){safeSet(RUN_KEY,JSON.stringify(run));return run;}
   function beginRun(context){
     const safe=context&&typeof context==="object"?context:{};
-    safeSet(RUN_KEY,JSON.stringify({
-      id:"run-"+hash([safe.seed,safe.clubName,Date.now()].join("|")),
+    const now=Date.now();
+    return saveStartedRun({
+      id:"run-"+hash([safe.seed,safe.clubName,now].join("|")),
       seed:String(safe.seed||""),clubName:cleanText(safe.clubName||""),
-      country:cleanText(safe.country||""),started_at:Date.now()
-    }));
+      country:cleanText(safe.country||""),started_at:now
+    });
+  }
+  function updateRun(context){
+    const safe=context&&typeof context==="object"?context:{};
+    const current=readStartedRun();
+    const clubName=cleanText(safe.clubName||safe.teamName||current.clubName||"");
+    const seed=String(safe.seed==null?(current.seed||""):safe.seed);
+    const country=cleanText(safe.country||current.country||"");
+    const startedAt=Number(current.started_at)||Date.now();
+    return saveStartedRun({
+      id:cleanText(current.id)||("run-"+hash([seed,clubName,startedAt].join("|"))),
+      seed,clubName,country,started_at:startedAt
+    });
   }
 
   function queue(){try{const q=JSON.parse(safeGet(QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return [];}}
@@ -70,13 +109,12 @@
     };
   }
   function normalizeCompletedRun(context){
-    let startedRun={};
-    try{startedRun=JSON.parse(safeGet(RUN_KEY,"{}"))||{};}catch(_){startedRun={};}
+    const startedRun=readStartedRun();
     const squad=Array.isArray(context.picksBySlot)?context.picksBySlot.filter(Boolean):Array.isArray(context.squad)?context.squad:[];
     const bench=Array.isArray(context.bench)?context.bench:[];
     const cards=(Array.isArray(context.cards)?context.cards:[]).map(key=>cardSnapshot(key,context));
     const createdAt=new Date().toISOString();
-    const clubName=cleanText(context.teamName||context.clubName||"copa.life XI")||"copa.life XI";
+    const clubName=cleanText(context.teamName||context.clubName||startedRun.clubName||"copa.life XI")||"copa.life XI";
     const publicId=("G-"+hash([context.seed,clubName,createdAt].join("|")).slice(0,8)).toUpperCase();
     const formation=cleanText(context.formName||context.formation||"4-3-3")||"4-3-3";
     const result=context.run||context.lastResult||{};
@@ -135,7 +173,7 @@
       power:Math.round(bounded(snapshot.squad_power,35,115)),
       ghost:true,
       ghostId:snapshot.public_ghost_id,
-      ghostMeta:{country:cleanText(snapshot.club&&snapshot.club.country),formation:cleanText(snapshot.formation),chairman:cleanText(snapshot.chairman&&snapshot.chairman.name||snapshot.chairman&&snapshot.chairman.id),publicId:snapshot.public_ghost_id,reachedRound:snapshot.reached_round},
+      ghostMeta:{country:cleanText(snapshot.club&&snapshot.club.country),formation:cleanText(snapshot.formation),chairman:visibleChairmanName(snapshot.chairman),publicId:snapshot.public_ghost_id,reachedRound:snapshot.reached_round},
       ghostProfile:{formation:cleanText(snapshot.formation),lineup,tactics:snapshot.tactics||{},chemistry:Math.round(bounded(snapshot.chemistry,-5,5)),cards:Array.isArray(snapshot.active_cards)?snapshot.active_cards:[],finalProfile:snapshot.final_profile||{}}
     };
   }
@@ -160,7 +198,11 @@
     return {sent,pending:items.length};
   }
   function recordCompletedRun(context){
-    try{const profile=normalizeCompletedRun(context||{});enqueue(profile);setTimeout(()=>{flushQueue();},0);return profile.public_ghost_id;}catch(_){return null;}
+    try{
+      const safe=context&&typeof context==="object"?context:{};
+      updateRun({seed:safe.seed,clubName:safe.teamName||safe.clubName,country:safe.selectedCountry||safe.country});
+      const profile=normalizeCompletedRun(safe);enqueue(profile);setTimeout(()=>{flushQueue();},0);return profile.public_ghost_id;
+    }catch(_){return null;}
   }
   async function findOpponent(criteria){
     const base=apiBase();
@@ -181,15 +223,15 @@
     }catch(_){return null;}
   }
   function ensureSetting(){
-    const drop=document.getElementById("settingsDrop");if(!drop)return;
+    const slot=document.getElementById("advancedGhostSettingSlot");if(!slot)return;
     let group=document.getElementById("ghostClubSetting");
     if(!group){
-      group=document.createElement("div");group.id="ghostClubSetting";group.className="sd-group ghost-setting";
-      const header=document.createElement("div");header.className="sd-hdr";header.id="ghostClubSettingHdr";group.appendChild(header);
+      group=document.createElement("div");group.id="ghostClubSetting";group.className="ghost-setting";
+      const header=document.createElement("div");header.className="ghost-setting-header";header.id="ghostClubSettingHdr";group.appendChild(header);
       const text=document.createElement("div");text.className="ghost-setting-copy";text.id="ghostClubSettingCopy";group.appendChild(text);
-      const button=document.createElement("button");button.type="button";button.id="ghostClubToggle";button.className="sdbtn sd-full";button.onclick=()=>setEnabled(!enabled());group.appendChild(button);
-      drop.appendChild(group);
+      const button=document.createElement("button");button.type="button";button.id="ghostClubToggle";button.className="ghost-setting-toggle";button.onclick=()=>setEnabled(!enabled());group.appendChild(button);
     }
+    if(group.parentElement!==slot)slot.appendChild(group);
     const on=enabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle");
     if(header)header.textContent=tr("HAYALET KUL\u00dcPLERE KAR\u015eI OYNA","PLAY AGAINST GHOST CLUBS");
     if(copy)copy.textContent=tr("Ger\u00e7ek oyuncular\u0131n tamamlad\u0131\u011f\u0131 run'lardan olu\u015fturulan kul\u00fcpler rakip olabilir.","Clubs created from completed player runs may appear as opponents.");
@@ -197,6 +239,6 @@
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
   window.addEventListener("online",()=>{flushQueue();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,beginRun,recordCompletedRun,findOpponent,flushQueue,ghostIcon,normalizeCompletedRun,canMatch:enabled});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,ghostIcon,normalizeCompletedRun,canMatch:enabled});
   setTimeout(()=>{ensureSetting();flushQueue();},0);
 })();

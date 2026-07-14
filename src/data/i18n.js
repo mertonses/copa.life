@@ -31,7 +31,7 @@ var T={
   rar:{bronze:"BRONZ",silver:"GÜMÜŞ",gold:"ALTIN",ch:"GÖREV"},mismatch:p=>`yan mevki -${p}`,
   metaLine:(b,r)=>`en iyi: <b>${b}</b> · run: <b>${r}</b>`,startHead:"AÇILDI: Başlangıç Kartı",startSub:"bu run'a ücretsiz bir kartla başla",
   locked:"kilitli",lockedHint:"kupa kazandıkça diziliş açılır",formUnlocked:f=>`?? Yeni diziliş açıldı: ${f}!`,
-  chLbl:"Görevler",chUnlock:"Kart açıldı:",objHdr:"?? HEDEFLER",feedHdr:"GELİŞMELER",feedEmpty:"henüz gelişme yok...",feedBuy:"alındı",feedUnlock:"açıldı",chairHdr:"BAŞKAN",hiddenName:"Gizli Oyuncu",hiddenMeta:"??? · cevher mi balon mu",cevher:"?? Cevher!",balon:"?? Balon:",reveal:"açıldı:",trait:{hizli:"Hızlı",lider:"Lider",buyukmac:"Büyük Maç",sorunlu:"Sorunlu",cam:"Cam Adam",wonderkid:"Wonderkid"},panicHead:"PANİK TRANSFER!",panicFeed:"deadline doldu, oyuncu dayatıldı",panicMsg:(n,o,p)=>`Menajer ${p} bulamadı. Kadroya ${o} güç ${n} dayatıldı.`,heads:["Galatasaray yeni stoper arıyor","Başkan bütçeyi sorguluyor","Taraftar forvet istiyor","Osimhen dedikoduları sürüyor","Menajer pazarda kulis yapıyor","Yıldız transfer heyecan yarattı","Rakip kulüpte kriz çıktı","Kart pazarı bu hafta hareketli","Kara borsa söylentileri arttı","Başkan prim bütçesini kapattı","Taraftar deplasman bileti peşinde","Kulüp doktoru yoğun mesai yapıyor","Genç oyuncular scout listesinde","Bir menajer gizli teklif getirdi","Sosyal medyada forma tartışması","Rakip savunmada sakatlık alarmı","Kupada sürpriz sonuçlar geceye damga vurdu","Bir yıldız maaşını indirmeye razı","Altyapıdan yeni isimler konuşuluyor","Basın toplantısında tansiyon yükseldi","Başkan locasında acil toplantı var","Taraftar grupları koreografi hazırlıyor","Rakip hoca kadroyu saklıyor","Son dakika sponsor görüşmesi başladı","Kasa açığı yönetimde gündem oldu","Transfer komitesi sabaha kadar çalıştı","Forvet piyasasında fiyatlar uçtu","Kaleci arayan kulüpler sıraya girdi","Kupa yayınında reyting rekoru bekleniyor","Şehirde final hayali konuşuluyor","Pazar raporu: risk kartları pahalı","Oyuncu temsilcileri tesis kapısında","Rakip kanatta zaaf iddiası","Başkan sabır istedi","Taraftar sabır değil zafer istiyor","Kulüp otobüsü tesislerden ayrıldı","Bir veteran liderlik konuşması yaptı","Genç yıldız antrenmanda parladı","Finans ekibi borç limitini uyardı","Tribünler biletleri tüketti","Kupa yolu yine kaosa gebe"],mgrDefault:"SEED",mgrPh:"",story:(mgr,team,chair,reached,motm,won,panic,wk,cid)=>{let p=`Transfer son gününde ${mgr} yönetiminde kurulan ${team}, `;p+=cid==="torpilci"?"başkanın torpilli yeğenlerine rağmen ":cid==="pinti"?"kısık bütçeye rağmen ":cid==="cilgin"?"kaos dolu bir yönetim altında ":cid==="babacan"?"başkanın açık çek desteğiyle ":cid==="leydi"?"dengeli bir yönetim desteğiyle ":cid==="sansasyoncu"?"sansasyoncu bir başkanlık döneminde ":"";p+=`${reached} turuna kadar yükseldi. `;if(panic>0)p+=`Deadline paniğinde ${panic} oyuncu zorla kadroya katıldı. `;if(wk)p+=`Genç ${wk} turnuva boyunca patladı. `;p+=won?`Ve ${team} kupayı kaldırdı! ?? `:`Ama yolculuk burada bitti. `;p+=`Turnuvanın yıldızı: ${motm}.`;return p;},storyHdr:"SEZONUN HİKÂYESİ",chair:{babacan:{n:"Babacan Başkan",role:"Büyük Patron",desc:"Kasa konusunda <b>cömert</b>, oyuncularına güvenen bir başkan. Finalde <b>eksi güç</b> bırakabilir ama <b>yolda yardımcıdır</b>.",hint:"?? Kasayı açık tutar · finalde küçük eksi güç"},leydi:{n:"Adalet Başkan",role:"Adil El",desc:"<b>Adaletli</b> ve öngörülü; <b>yerli oyunculara</b> önem verir. <b>Kimyayı ödüllendirir</b>, gereksiz israftan kaçınır.",hint:"???? Yerli oyuncu sever · kimya primleri artar"},pinti:{n:"Pinti Başkan",role:"Demir Kasa",desc:"<b>Her kuruşu sayan</b>, borcu sevmeyen, <b>pazar indirimlerine</b> bayılan bir başkan. Sert bir <b>borç limiti</b> uygular.",hint:"Ucuz pazar · sert borç sınırı"},sansasyoncu:{n:"Sansasyoncu Başkan",role:"Şov Zamanı",desc:"<b>Büyük isimler, büyük transferler.</b> Yıldız oyuncu peşinde koşar, <b>piyasayı ısıtır</b>. Basın toplantılarında şov yapar.",hint:"? Yıldız bonusu yüksek · pazar pahalı"},torpilci:{n:"Torpilci Başkan",role:"Yeğen Sezonu",desc:"<b>Yeğenlerini</b> ve çevresini kadroya sokmak için fırsat kollar. <b>Oyuncu kalitesi ikinci plandadır</b>.",hint:"????? Torpilli oyuncu dayatabilir"},cilgin:{n:"Çılgın Başkan",role:"Joker",desc:"Kimse ne yapacağını bilemez. Toplantılar <b>öngörülemez</b>, kararlar <b>tutarsız</b>, müdahaleler <b>sürpriz dolu</b>.",hint:"?? Kuralsız müdahale eder · her şey mümkün"}},chem:{hdr:"KİMYA",young:"genç",tr:"yerli",vet:"tecrübe",none:"yok"},fan:{hdr:"TARAFTAR",s:["??","??","??","??"]},talkSub:"Bu maçlık moral etkisini seç:",talkUnder:"Rakip favori — ateşli ton işe yaradı.",talkFav:"Favorisin — odak ve disiplin şart.",talkDelta:"Güç",powHdr:"KADRO GÜCÜ",powHint:"detay ›",powHdr2:"GÜÇ DÖKÜMÜ",quickAgain:"?? Aynı ayarla yeniden",seedLbl:"SEED",presWord:"Başkan",cupTitle:"TÜRKİYE KUPASI FİNALİ",tcHdr:"TRANSFER CENTRE",assistLbl:"Asist:",stDraft:"Son gün, sıfırdan kuruldu",stChair:n=>n+" başkanlık etti",stPanic:n=>"Deadline paniğinde "+n+" zorunlu transfer",stWk:n=>"Genç "+n+" turnuvada patladı",stWon:t=>t+" Türkiye Kupası'nı kaldırdı ??",stOut:r=>r+" turunda elendi",stMotm:n=>"Turnuvanın yıldızı: "+n,pbPlayers:"Oyuncular",pbCards:"Stil + Kart",pbChem:"Kimya",pbFan:"Taraftar",pbTotal:"TOPLAM",ctxHidden:"gizemli — risk al",ctxWonder:"geleceğin yıldızı ??",ctxStar:"takımın yıldızı",ctxBig:"büyük maç adamı",ctxLead:"soyunma odası lideri",ctxYoung:"genç yetenek",ctxLocal:"yerli gurur",ctxVet:"tecrübeli isim",ctxForm:"son maçlarda formda",ctxSolid:"güvenilir isim",talkOpt:{gaz:{i:"<svg viewBox='0 0 14 18' width='13' height='16' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M7 1Q4 5 4 9Q4 12 7 14Q10 12 10 9Q10 6 9 4Q9 8 7 10Q5 8 5 6Q5 3 7 1Z'><animate attributeName='stroke-width' values='1.4;2.2;1.4;1.8;1.4' dur='0.9s' repeatCount='indefinite'/></path><path d='M5 15Q3 18 7 18Q11 18 9 15'/></svg>",n:"Ateşle",d:"rakip favoriyse güçlü, sakatlık riski artırır"},mantik:{i:"<svg viewBox='0 0 24 24' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8'/><path d='M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8'/><path d='M17.5 16a3.5 3.5 0 0 0 0 -7h-.5'/><path d='M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0'/><path d='M6.5 16a3.5 3.5 0 0 1 0 -7h.5'/><path d='M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10'><animate attributeName='stroke-dasharray' values='0 30;30 0;30 0;0 30' dur='1.6s' repeatCount='indefinite'/></path></svg>",n:"Planı Hatırlat",d:"her durumda güvenli"},sert:{i:"<svg viewBox='0 0 14 16' width='12' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' class='si'><path d='M7 1L13 3.5V9Q13 13.5 7 15.5Q1 13.5 1 9V3.5Z'><animate attributeName='stroke-width' values='1.5;2.4;1.5' dur='1.2s' repeatCount='indefinite'/></path><polyline points='4.5,8 6.5,10 9.5,6'/></svg>",n:"Disiplin İste",d:"favoriyken iyi, genç kadroda riskli"}},
+ chLbl:"Görevler",chUnlock:"Kart açıldı:",objHdr:"?? HEDEFLER",feedHdr:"GELİŞMELER",feedEmpty:"henüz gelişme yok...",feedBuy:"alındı",feedUnlock:"açıldı",chairHdr:"BAŞKAN",hiddenName:"Gizli Oyuncu",hiddenMeta:"??? · cevher mi balon mu",cevher:"?? Cevher!",balon:"?? Balon:",reveal:"açıldı:",trait:{hizli:"Hızlı",lider:"Lider",buyukmac:"Büyük Maç",sorunlu:"Sorunlu",cam:"Cam Adam",wonderkid:"Wonderkid"},panicHead:"PANİK TRANSFER!",panicFeed:"deadline doldu, oyuncu dayatıldı",panicMsg:(n,o,p)=>`Menajer ${p} bulamadı. Kadroya ${o} güç ${n} dayatıldı.`,heads:["Galatasaray yeni stoper arıyor","Başkan bütçeyi sorguluyor","Taraftar forvet istiyor","Osimhen dedikoduları sürüyor","Menajer pazarda kulis yapıyor","Yıldız transfer heyecan yarattı","Rakip kulüpte kriz çıktı","Kart pazarı bu hafta hareketli","Kara borsa söylentileri arttı","Başkan prim bütçesini kapattı","Taraftar deplasman bileti peşinde","Kulüp doktoru yoğun mesai yapıyor","Genç oyuncular scout listesinde","Bir menajer gizli teklif getirdi","Sosyal medyada forma tartışması","Rakip savunmada sakatlık alarmı","Kupada sürpriz sonuçlar geceye damga vurdu","Bir yıldız maaşını indirmeye razı","Altyapıdan yeni isimler konuşuluyor","Basın toplantısında tansiyon yükseldi","Başkan locasında acil toplantı var","Taraftar grupları koreografi hazırlıyor","Rakip hoca kadroyu saklıyor","Son dakika sponsor görüşmesi başladı","Kasa açığı yönetimde gündem oldu","Transfer komitesi sabaha kadar çalıştı","Forvet piyasasında fiyatlar uçtu","Kaleci arayan kulüpler sıraya girdi","Kupa yayınında reyting rekoru bekleniyor","Şehirde final hayali konuşuluyor","Pazar raporu: risk kartları pahalı","Oyuncu temsilcileri tesis kapısında","Rakip kanatta zaaf iddiası","Başkan sabır istedi","Taraftar sabır değil zafer istiyor","Kulüp otobüsü tesislerden ayrıldı","Bir veteran liderlik konuşması yaptı","Genç yıldız antrenmanda parladı","Finans ekibi borç limitini uyardı","Tribünler biletleri tüketti","Kupa yolu yine kaosa gebe"],mgrDefault:"SEED",mgrPh:"",story:(mgr,team,chair,reached,motm,won,panic,wk,cid)=>{let p=`Transfer son gününde ${mgr} yönetiminde kurulan ${team}, `;p+=cid==="torpilci"?"başkanın torpilli yeğenlerine rağmen ":cid==="pinti"?"kısık bütçeye rağmen ":cid==="cilgin"?"kaos dolu bir yönetim altında ":cid==="babacan"?"başkanın açık çek desteğiyle ":cid==="leydi"?"dengeli bir yönetim desteğiyle ":cid==="sansasyoncu"?"şovmen bir başkanlık döneminde ":"";p+=`${reached} turuna kadar yükseldi. `;if(panic>0)p+=`Deadline paniğinde ${panic} oyuncu zorla kadroya katıldı. `;if(wk)p+=`Genç ${wk} turnuva boyunca patladı. `;p+=won?`Ve ${team} kupayı kaldırdı! ?? `:`Ama yolculuk burada bitti. `;p+=`Turnuvanın yıldızı: ${motm}.`;return p;},storyHdr:"SEZONUN HİKÂYESİ",chair:{babacan:{n:"Patron Başkan",role:"Büyük Patron",desc:"Kasa konusunda <b>cömert</b>, oyuncularına güvenen bir başkan. Finalde <b>eksi güç</b> bırakabilir ama <b>yolda yardımcıdır</b>.",hint:"?? Kasayı açık tutar · finalde küçük eksi güç"},leydi:{n:"Diplomat Başkan",role:"Adil El",desc:"<b>Adaletli</b> ve öngörülü; <b>yerli oyunculara</b> önem verir. <b>Kimyayı ödüllendirir</b>, gereksiz israftan kaçınır.",hint:"???? Yerli oyuncu sever · kimya primleri artar"},pinti:{n:"Pinti Başkan",role:"Demir Kasa",desc:"<b>Her kuruşu sayan</b>, borcu sevmeyen, <b>pazar indirimlerine</b> bayılan bir başkan. Sert bir <b>borç limiti</b> uygular.",hint:"Ucuz pazar · sert borç sınırı"},sansasyoncu:{n:"Şovmen Başkan",role:"Şov Zamanı",desc:"<b>Büyük isimler, büyük transferler.</b> Yıldız oyuncu peşinde koşar, <b>piyasayı ısıtır</b>. Basın toplantılarında şov yapar.",hint:"? Yıldız bonusu yüksek · pazar pahalı"},torpilci:{n:"Torpilci Başkan",role:"Yeğen Sezonu",desc:"<b>Yeğenlerini</b> ve çevresini kadroya sokmak için fırsat kollar. <b>Oyuncu kalitesi ikinci plandadır</b>.",hint:"????? Torpilli oyuncu dayatabilir"},cilgin:{n:"Profesör Başkan",role:"Joker",desc:"Kimse ne yapacağını bilemez. Toplantılar <b>öngörülemez</b>, kararlar <b>tutarsız</b>, müdahaleler <b>sürpriz dolu</b>.",hint:"?? Kuralsız müdahale eder · her şey mümkün"}},chem:{hdr:"KİMYA",young:"genç",tr:"yerli",vet:"tecrübe",none:"yok"},fan:{hdr:"TARAFTAR",s:["??","??","??","??"]},talkSub:"Bu maçlık moral etkisini seç:",talkUnder:"Rakip favori — ateşli ton işe yaradı.",talkFav:"Favorisin — odak ve disiplin şart.",talkDelta:"Güç",powHdr:"KADRO GÜCÜ",powHint:"detay ›",powHdr2:"GÜÇ DÖKÜMÜ",quickAgain:"?? Aynı ayarla yeniden",seedLbl:"SEED",presWord:"Başkan",cupTitle:"TÜRKİYE KUPASI FİNALİ",tcHdr:"TRANSFER CENTRE",assistLbl:"Asist:",stDraft:"Son gün, sıfırdan kuruldu",stChair:n=>n+" başkanlık etti",stPanic:n=>"Deadline paniğinde "+n+" zorunlu transfer",stWk:n=>"Genç "+n+" turnuvada patladı",stWon:t=>t+" Türkiye Kupası'nı kaldırdı ??",stOut:r=>r+" turunda elendi",stMotm:n=>"Turnuvanın yıldızı: "+n,pbPlayers:"Oyuncular",pbCards:"Stil + Kart",pbChem:"Kimya",pbFan:"Taraftar",pbTotal:"TOPLAM",ctxHidden:"gizemli — risk al",ctxWonder:"geleceğin yıldızı ??",ctxStar:"takımın yıldızı",ctxBig:"büyük maç adamı",ctxLead:"soyunma odası lideri",ctxYoung:"genç yetenek",ctxLocal:"yerli gurur",ctxVet:"tecrübeli isim",ctxForm:"son maçlarda formda",ctxSolid:"güvenilir isim",talkOpt:{gaz:{i:"<svg viewBox='0 0 14 18' width='13' height='16' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M7 1Q4 5 4 9Q4 12 7 14Q10 12 10 9Q10 6 9 4Q9 8 7 10Q5 8 5 6Q5 3 7 1Z'><animate attributeName='stroke-width' values='1.4;2.2;1.4;1.8;1.4' dur='0.9s' repeatCount='indefinite'/></path><path d='M5 15Q3 18 7 18Q11 18 9 15'/></svg>",n:"Ateşle",d:"rakip favoriyse güçlü, sakatlık riski artırır"},mantik:{i:"<svg viewBox='0 0 24 24' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8'/><path d='M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8'/><path d='M17.5 16a3.5 3.5 0 0 0 0 -7h-.5'/><path d='M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0'/><path d='M6.5 16a3.5 3.5 0 0 1 0 -7h.5'/><path d='M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10'><animate attributeName='stroke-dasharray' values='0 30;30 0;30 0;0 30' dur='1.6s' repeatCount='indefinite'/></path></svg>",n:"Planı Hatırlat",d:"her durumda güvenli"},sert:{i:"<svg viewBox='0 0 14 16' width='12' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' class='si'><path d='M7 1L13 3.5V9Q13 13.5 7 15.5Q1 13.5 1 9V3.5Z'><animate attributeName='stroke-width' values='1.5;2.4;1.5' dur='1.2s' repeatCount='indefinite'/></path><polyline points='4.5,8 6.5,10 9.5,6'/></svg>",n:"Disiplin İste",d:"favoriyken iyi, genç kadroda riskli"}},
   ch:{c1:"3+ farkla galibiyet",c2:"gol yemeden kazan",c3:"daha güçlü rakibi yen",c4:"çeyrek finale ulaş",c5:"finale ulaş"},
   clubHdr:"Kulüp Bilgileri",colP:"Birinci Renk",colS:"İkinci Renk",clubGo:"Kupaya Başla ??",
   catName:{hucum:"H\u00fccum",savunma:"Savunma",ekonomi:"Ekonomi",taraftar:"Taraftar",baskan:"Ba\u015fkan",risk:"Risk",gorev:"G\u00f6rev"},fanLbl:["\u00d6fkeli","Karars\u0131z","Memnun","Co\u015fkulu"],variantLbl:["COMMON","DARK"],runNames:{youth:"Gen\u00e7 Filizler Run\u0027\u0131",fan:"Taraftar Run\u0027\u0131",wall:"Demir Perde Run\u0027\u0131",attack:"H\u00fccum Run\u0027\u0131",economy:"Anadolu Run\u0027\u0131",risk:"Risk Run\u0027\u0131"},ui:{collectionHdr:"KART KOLEKS\u0130YONU",cardSlotFull:"\u{1F0CF} aktif kart slotu dolu",style:"Stil",cards:"Kartlar",matchup:"E\u015fle\u015fme",riskDebt:"Risk / final borcu",traitMorale:"\u00d6zellik + moral",bonusEfficiency:"Bonus verimi",softCap:"Yumu\u015fak tavan azaltt\u0131",lockedCard:"Kilitli Kart",lockedCaps:"K\u0130L\u0130TL\u0130",activeRemove:"aktif \u00b7 \u00e7\u0131karmak i\u00e7in t\u0131kla",clickEquip:"takmak i\u00e7in t\u0131kla",slotFull:"slot dolu",unlockFrom:"pazardan a\u00e7",copies:"Geli\u015fim",effect:"Etki",seeChair:"BA\u015eKANA G\u0130T",unlocksQf:"\u00e7eyrek finalde a\u00e7\u0131l\u0131r",less:"\u2212 daha az",all:n=>`+ t\u00fcm\u00fc (${n})`,deal:" \u00b7 \u{1F525} f\u0131rsat",cup:"KUPA",shareLine:"sen finali g\u00f6rebilir misin?",postBand:"copa.life \u00b7 KADRO KURULDU",startRun:`<svg viewBox='0 0 22 24' width='18' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.3em;margin-right:4px'><path d='M7 3H15Q15 13 11 16Q7 13 7 3Z'/><path d='M7 3Q3 4 3 8Q3 12 7 12'/><path d='M15 3Q19 4 19 8Q19 12 15 12'/><path d='M11 16V19'/><line x1='7' y1='22' x2='15' y2='22'/><path d='M9 19H13'/></svg> KUPAYA BA\u015eLA`,finalPower:"g\u00fc\u00e7",playFinalCta:"F\u0130NAL\u0130 OYNA \u{1F3C6}"},
@@ -81,7 +81,7 @@ var T={
   rar:{bronze:"BRONZE",silver:"SILVER",gold:"GOLD",ch:"QUEST"},mismatch:p=>`off-pos -${p}`,
   metaLine:(b,r)=>`best: <b>${b}</b> · runs: <b>${r}</b>`,startHead:"UNLOCKED: Starting Card",startSub:"begin this run with a free card",
   locked:"locked",lockedHint:"win cups to unlock formations",formUnlocked:f=>`?? New formation unlocked: ${f}!`,
-  chLbl:"Challenges",chUnlock:"Card unlocked:",objHdr:"?? OBJECTIVES",feedHdr:"FEED",feedEmpty:"no news yet...",feedBuy:"signed",feedUnlock:"unlocked",chairHdr:"CHAIRMAN",hiddenName:"Mystery Player",hiddenMeta:"??? · gem or dud",cevher:"?? Gem!",balon:"?? Dud:",reveal:"revealed:",trait:{hizli:"Pacey",lider:"Leader",buyukmac:"Big Game",sorunlu:"Difficult",cam:"Glass",wonderkid:"Wonderkid"},panicHead:"PANIC BUY!",panicFeed:"deadline hit, forced signing",panicMsg:(n,o,p)=>`Manager could not find a ${p}. A Power ${o} ${n} was forced in.`,heads:["Galatasaray hunting a new CB","Chairman questions the budget","Fans demand a striker","Osimhen rumours rumble on","Manager working the market","New star signing excites fans","Rival manager resigns"],mgrDefault:"SEED",mgrPh:"",story:(mgr,team,chair,reached,motm,won,panic,wk,cid)=>{let p=`Built from scratch on deadline day, ${team} `;p+=cid==="torpilci"?"survived boardroom favouritism and ":cid==="pinti"?"worked around a tight budget and ":cid==="cilgin"?"endured chaotic ownership and ":cid==="babacan"?"benefited from generous backing and ":cid==="leydi"?"thrived under balanced leadership and ":cid==="sansasyoncu"?"navigated a headline-hungry chairman and ":"";p+=`reached the ${reached}. `;if(panic>0)p+=`Deadline panic forced ${panic} emergency signing(s). `;if(wk)p+=`Young ${wk} broke out during the tournament. `;p+=won?`${team} lifted the cup. `:`The run ended there. `;p+=`Player of the tournament: ${motm}.`;return p;},storyHdr:"SEASON STORY",chair:{babacan:{n:"The Godfather",role:"Big Patron",desc:"<b>Generous</b> and trusting. Keeps the coffers open and backs his manager — but may add a <b>power penalty at the final</b>.",hint:"?? Generous with funds · small final power cost"},leydi:{n:"Adalet",role:"The Fair Hand",desc:"<b>Fair</b> and forward-thinking. Values <b>local players</b> and rewards <b>team chemistry</b>. Avoids wasteful spending.",hint:"???? Loves local players · boosts chemistry bonuses"},pinti:{n:"The Miser",role:"Iron Safe",desc:"<b>Counts every cent.</b> Hates debt, loves a <b>discount</b>. Enforces the <b>strictest debt limit</b> of any chairman.",hint:"Cheap market · harsh debt limit"},sansasyoncu:{n:"The Showman",role:"Showtime",desc:"<b>Big names, big transfers.</b> Chases <b>star players</b> and heats up the market. Always hunting the next headline.",hint:"? High star bonus · expensive market"},torpilci:{n:"The Fixer",role:"Family Business",desc:"Slots in <b>nephews and allies</b> at every opportunity. <b>Player quality comes second</b> to loyalty.",hint:"????? May force low-quality players"},cilgin:{n:"The Wild Card",role:"Wild Card",desc:"Nobody knows what comes next. Meetings are <b>unpredictable</b>, decisions <b>inconsistent</b>, interventions <b>always a surprise</b>.",hint:"?? Erratic interference · anything goes"}},chem:{hdr:"CHEMISTRY",young:"young",tr:"local",vet:"leader",none:"none"},fan:{hdr:"FANS",s:["Angry","Uneasy","Happy","Buzzing"]},talkSub:"Pick a one-match morale effect:",talkUnder:"They are favourites - the fire-up worked.",talkFav:"You are favourites - focus and discipline matter.",talkDelta:"Power",powHdr:"SQUAD POWER",powHint:"detail ->",powHdr2:"POWER BREAKDOWN",quickAgain:"Replay same setup",seedLbl:"SEED",presWord:"Chairman",cupTitle:"TURKISH CUP FINAL",tcHdr:"TRANSFER CENTRE",assistLbl:"Assist:",stDraft:"Built from scratch on deadline day",stChair:n=>n+" was in charge",stPanic:n=>n+" forced panic signing(s)",stWk:n=>"Young "+n+" broke out",stWon:t=>t+" lifted the Cup",stOut:r=>"Knocked out in the "+r,stMotm:n=>"Player of the tournament: "+n,pbPlayers:"Players",pbCards:"Style + Cards",pbChem:"Chemistry",pbFan:"Fans",pbTotal:"TOTAL",ctxHidden:"mystery player - take the risk",ctxWonder:"future superstar",ctxStar:"team talisman",ctxBig:"big-game player",ctxLead:"dressing-room leader",ctxYoung:"young talent",ctxLocal:"local pride",ctxVet:"experienced head",ctxForm:"in red-hot form",ctxSolid:"reliable name",talkOpt:{gaz:{i:"<svg viewBox='0 0 14 18' width='13' height='16' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M7 1Q4 5 4 9Q4 12 7 14Q10 12 10 9Q10 6 9 4Q9 8 7 10Q5 8 5 6Q5 3 7 1Z'><animate attributeName='stroke-width' values='1.4;2.2;1.4;1.8;1.4' dur='0.9s' repeatCount='indefinite'/></path><path d='M5 15Q3 18 7 18Q11 18 9 15'/></svg>",n:"Fire Up",d:"strong as underdog, raises injury risk"},mantik:{i:"<svg viewBox='0 0 24 24' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8'/><path d='M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8'/><path d='M17.5 16a3.5 3.5 0 0 0 0 -7h-.5'/><path d='M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0'/><path d='M6.5 16a3.5 3.5 0 0 1 0 -7h.5'/><path d='M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10'><animate attributeName='stroke-dasharray' values='0 30;30 0;30 0;0 30' dur='1.6s' repeatCount='indefinite'/></path></svg>",n:"Remind Plan",d:"safe in every match"},sert:{i:"<svg viewBox='0 0 14 16' width='12' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' class='si'><path d='M7 1L13 3.5V9Q13 13.5 7 15.5Q1 13.5 1 9V3.5Z'><animate attributeName='stroke-width' values='1.5;2.4;1.5' dur='1.2s' repeatCount='indefinite'/></path><polyline points='4.5,8 6.5,10 9.5,6'/></svg>",n:"Demand Discipline",d:"good as favourite, risky with youth"}},
+ chLbl:"Challenges",chUnlock:"Card unlocked:",objHdr:"?? OBJECTIVES",feedHdr:"FEED",feedEmpty:"no news yet...",feedBuy:"signed",feedUnlock:"unlocked",chairHdr:"CHAIRMAN",hiddenName:"Mystery Player",hiddenMeta:"??? · gem or dud",cevher:"?? Gem!",balon:"?? Dud:",reveal:"revealed:",trait:{hizli:"Pacey",lider:"Leader",buyukmac:"Big Game",sorunlu:"Difficult",cam:"Glass",wonderkid:"Wonderkid"},panicHead:"PANIC BUY!",panicFeed:"deadline hit, forced signing",panicMsg:(n,o,p)=>`Manager could not find a ${p}. A Power ${o} ${n} was forced in.`,heads:["Galatasaray hunting a new CB","Chairman questions the budget","Fans demand a striker","Osimhen rumours rumble on","Manager working the market","New star signing excites fans","Rival manager resigns"],mgrDefault:"SEED",mgrPh:"",story:(mgr,team,chair,reached,motm,won,panic,wk,cid)=>{let p=`Built from scratch on deadline day, ${team} `;p+=cid==="torpilci"?"survived boardroom favouritism and ":cid==="pinti"?"worked around a tight budget and ":cid==="cilgin"?"endured chaotic ownership and ":cid==="babacan"?"benefited from generous backing and ":cid==="leydi"?"thrived under balanced leadership and ":cid==="sansasyoncu"?"navigated a headline-hungry chairman and ":"";p+=`reached the ${reached}. `;if(panic>0)p+=`Deadline panic forced ${panic} emergency signing(s). `;if(wk)p+=`Young ${wk} broke out during the tournament. `;p+=won?`${team} lifted the cup. `:`The run ended there. `;p+=`Player of the tournament: ${motm}.`;return p;},storyHdr:"SEASON STORY",chair:{babacan:{n:"The Patron",role:"Big Patron",desc:"<b>Generous</b> and trusting. Keeps the coffers open and backs his manager — but may add a <b>power penalty at the final</b>.",hint:"?? Generous with funds · small final power cost"},leydi:{n:"The Diplomat",role:"The Fair Hand",desc:"<b>Fair</b> and forward-thinking. Values <b>local players</b> and rewards <b>team chemistry</b>. Avoids wasteful spending.",hint:"???? Loves local players · boosts chemistry bonuses"},pinti:{n:"The Miser",role:"Iron Safe",desc:"<b>Counts every cent.</b> Hates debt, loves a <b>discount</b>. Enforces the <b>strictest debt limit</b> of any chairman.",hint:"Cheap market · harsh debt limit"},sansasyoncu:{n:"The Showman",role:"Showtime",desc:"<b>Big names, big transfers.</b> Chases <b>star players</b> and heats up the market. Always hunting the next headline.",hint:"? High star bonus · expensive market"},torpilci:{n:"The Fixer",role:"Family Business",desc:"Slots in <b>nephews and allies</b> at every opportunity. <b>Player quality comes second</b> to loyalty.",hint:"????? May force low-quality players"},cilgin:{n:"The Professor",role:"Wild Card",desc:"Nobody knows what comes next. Meetings are <b>unpredictable</b>, decisions <b>inconsistent</b>, interventions <b>always a surprise</b>.",hint:"?? Erratic interference · anything goes"}},chem:{hdr:"CHEMISTRY",young:"young",tr:"local",vet:"leader",none:"none"},fan:{hdr:"FANS",s:["Angry","Uneasy","Happy","Buzzing"]},talkSub:"Pick a one-match morale effect:",talkUnder:"They are favourites - the fire-up worked.",talkFav:"You are favourites - focus and discipline matter.",talkDelta:"Power",powHdr:"SQUAD POWER",powHint:"detail ->",powHdr2:"POWER BREAKDOWN",quickAgain:"Replay same setup",seedLbl:"SEED",presWord:"Chairman",cupTitle:"TURKISH CUP FINAL",tcHdr:"TRANSFER CENTRE",assistLbl:"Assist:",stDraft:"Built from scratch on deadline day",stChair:n=>n+" was in charge",stPanic:n=>n+" forced panic signing(s)",stWk:n=>"Young "+n+" broke out",stWon:t=>t+" lifted the Cup",stOut:r=>"Knocked out in the "+r,stMotm:n=>"Player of the tournament: "+n,pbPlayers:"Players",pbCards:"Style + Cards",pbChem:"Chemistry",pbFan:"Fans",pbTotal:"TOTAL",ctxHidden:"mystery player - take the risk",ctxWonder:"future superstar",ctxStar:"team talisman",ctxBig:"big-game player",ctxLead:"dressing-room leader",ctxYoung:"young talent",ctxLocal:"local pride",ctxVet:"experienced head",ctxForm:"in red-hot form",ctxSolid:"reliable name",talkOpt:{gaz:{i:"<svg viewBox='0 0 14 18' width='13' height='16' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M7 1Q4 5 4 9Q4 12 7 14Q10 12 10 9Q10 6 9 4Q9 8 7 10Q5 8 5 6Q5 3 7 1Z'><animate attributeName='stroke-width' values='1.4;2.2;1.4;1.8;1.4' dur='0.9s' repeatCount='indefinite'/></path><path d='M5 15Q3 18 7 18Q11 18 9 15'/></svg>",n:"Fire Up",d:"strong as underdog, raises injury risk"},mantik:{i:"<svg viewBox='0 0 24 24' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' class='si'><path d='M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8'/><path d='M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8'/><path d='M17.5 16a3.5 3.5 0 0 0 0 -7h-.5'/><path d='M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0'/><path d='M6.5 16a3.5 3.5 0 0 1 0 -7h.5'/><path d='M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10'><animate attributeName='stroke-dasharray' values='0 30;30 0;30 0;0 30' dur='1.6s' repeatCount='indefinite'/></path></svg>",n:"Remind Plan",d:"safe in every match"},sert:{i:"<svg viewBox='0 0 14 16' width='12' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' class='si'><path d='M7 1L13 3.5V9Q13 13.5 7 15.5Q1 13.5 1 9V3.5Z'><animate attributeName='stroke-width' values='1.5;2.4;1.5' dur='1.2s' repeatCount='indefinite'/></path><polyline points='4.5,8 6.5,10 9.5,6'/></svg>",n:"Demand Discipline",d:"good as favourite, risky with youth"}},
   ch:{c1:"win by 3+ goals",c2:"win with a clean sheet",c3:"beat a stronger opponent",c4:"reach the quarter-final",c5:"reach the final"},
   clubHdr:"Club Details",colP:"Primary Colour",colS:"Secondary Colour",clubGo:"Start the Cup ??",
   catName:{hucum:"Attack",savunma:"Defense",ekonomi:"Economy",taraftar:"Fans",baskan:"Chairman",risk:"Risk",gorev:"Quest"},fanLbl:["Furious","Uneasy","Happy","Buzzing"],variantLbl:["COMMON","DARK"],runNames:{youth:"Youth Run",fan:"Fan Run",wall:"Iron Wall Run",attack:"Attack Run",economy:"Economy Run",risk:"Risk Run"},ui:{collectionHdr:"CARD COLLECTION",cardSlotFull:"\u{1F0CF} active card slots full",style:"Style",cards:"Cards",matchup:"Matchup",riskDebt:"Risk / final debt",traitMorale:"Traits + morale",bonusEfficiency:"Bonus efficiency",softCap:"Soft cap reduced",lockedCard:"Locked Card",lockedCaps:"LOCKED",activeRemove:"active \u00b7 click to remove",clickEquip:"click to equip",slotFull:"slots full",unlockFrom:"unlock from market",copies:"Copies",effect:"Effect",seeChair:"SEE CHAIRMAN",unlocksQf:"unlocks at QF",less:"\u2212 less",all:n=>`+ all (${n})`,deal:" \u00b7 \u{1F525} deal",cup:"THE CUP",shareLine:"can you reach the final?",postBand:"copa.life \u00b7 SQUAD SET",startRun:`<svg viewBox='0 0 22 24' width='18' height='20' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.3em;margin-right:4px'><path d='M7 3H15Q15 13 11 16Q7 13 7 3Z'/><path d='M7 3Q3 4 3 8Q3 12 7 12'/><path d='M15 3Q19 4 19 8Q19 12 15 12'/><path d='M11 16V19'/><line x1='7' y1='22' x2='15' y2='22'/><path d='M9 19H13'/></svg> START THE RUN`,finalPower:"power",playFinalCta:"PLAY THE FINAL \u{1F3C6}"},
@@ -281,4 +281,239 @@ function _patchVisibleCardCostCopy(){
  if(en.kara_borsa)en.kara_borsa.d="COMMON: Burn one card; take 2 persistent cards. DARK: Burn one card; take 2 cards, 35% chance of a €10M fine.";
 }
 _patchVisibleCardCostCopy();
-var LANG="tr"; var L=()=>T[LANG];
+
+var COPA_SUPPORTED_LANGS=["tr","en","es","de","it"];
+
+function _cloneLocaleValue(value){
+ if(Array.isArray(value))return value.map(_cloneLocaleValue);
+ if(value&&typeof value==="object"){
+  var copy={};
+  Object.keys(value).forEach(function(key){copy[key]=_cloneLocaleValue(value[key]);});
+  return copy;
+ }
+ return value;
+}
+
+function _createLocale(base,patch){
+ var locale=_cloneLocaleValue(base);
+ Object.keys(patch||{}).forEach(function(key){
+  var value=patch[key];
+  if(value&&typeof value==="object"&&!Array.isArray(value)&&locale[key]&&typeof locale[key]==="object"&&!Array.isArray(locale[key])){
+   Object.assign(locale[key],value);
+  }else locale[key]=value;
+ });
+ return locale;
+}
+
+/* New locales inherit the complete English dictionary, then replace the primary UI copy.
+   Card and event copy can safely fall back to English until a dedicated translation exists. */
+T.es=_createLocale(T.en,{
+ tagline:"el juego de gestion de plantilla donde desafias al destino",
+ budget:"Caja",coverTitle:"copa.life",coverSub:"Copa de Turquia",
+ coverBlurb:"Tira los dados. Forma tu equipo. Desafia al destino.",
+ pickhdr:"ELIGE FORMACION Y PRESIDENTE",rollHint:"Tira el dado. Se abre una posicion al azar.",
+ roll:"TIRAR EL DADO",allBtn:"FORMAR EQUIPO AUTOMATICAMENTE",undo:"DESHACER",
+ startBtn:"EMPEZAR",quickStartBtn:"INICIO ALEATORIO",cNamePh:"Nombre del club",
+ youLbl:"TU EQUIPO",oppLbl:"RIVAL",shopLbl:"MERCADO DE CARTAS",talk:"HABLA AL EQUIPO",
+ play:"JUGAR EL PARTIDO",playFinal:"JUGAR LA FINAL",cardsLbl:"EFECTOS ACTIVOS",
+ squad:"PLANTILLA",free:"GRATIS",tooexp:"FONDOS INSUFICIENTES"
+});
+T.de=_createLocale(T.en,{
+ tagline:"das Kadermanagementspiel, in dem du das Schicksal herausforderst",
+ budget:"Kasse",coverTitle:"copa.life",coverSub:"Turkischer Pokal",
+ coverBlurb:"Wurfle die Wurfel. Baue dein Team. Fordere das Schicksal heraus.",
+ pickhdr:"FORMATION UND PRASIDENT WAEHLEN",rollHint:"Wurfle. Eine zufallige Position wird freigeschaltet.",
+ roll:"WURFELN",allBtn:"TEAM AUTOMATISCH FUELLEN",undo:"RUCKGANGIG",
+ startBtn:"STARTEN",quickStartBtn:"ZUFALLSSTART",cNamePh:"Vereinsname",
+ youLbl:"DEIN TEAM",oppLbl:"GEGNER",shopLbl:"KARTENMARKT",talk:"ZUR MANNSCHAFT SPRECHEN",
+ play:"SPIELEN",playFinal:"FINALE SPIELEN",cardsLbl:"AKTIVE EFFEKTE",
+ squad:"KADER",free:"KOSTENLOS",tooexp:"NICHT GENUG GELD"
+});
+T.it=_createLocale(T.en,{
+ tagline:"il gioco di gestione rosa dove sfidi il destino",
+ budget:"Cassa",coverTitle:"copa.life",coverSub:"Coppa di Turchia",
+ coverBlurb:"Lancia i dadi. Costruisci la squadra. Sfida il destino.",
+ pickhdr:"SCEGLI MODULO E PRESIDENTE",rollHint:"Lancia il dado. Si apre un ruolo casuale.",
+ roll:"LANCIA IL DADO",allBtn:"CREA LA SQUADRA AUTOMATICAMENTE",undo:"ANNULLA",
+ startBtn:"INIZIA",quickStartBtn:"INIZIO CASUALE",cNamePh:"Nome del club",
+ youLbl:"LA TUA SQUADRA",oppLbl:"AVVERSARIO",shopLbl:"MERCATO CARTE",talk:"PARLA ALLA SQUADRA",
+ play:"GIOCA LA PARTITA",playFinal:"GIOCA LA FINALE",cardsLbl:"EFFETTI ATTIVI",
+ squad:"ROSA",free:"GRATIS",tooexp:"FONDI INSUFFICIENTI"
+});
+
+function _detectCopaLocale(){
+ try{
+  var saved=localStorage.getItem("copa.language");
+  if(COPA_SUPPORTED_LANGS.indexOf(saved)!==-1)return saved;
+ }catch(error){}
+
+ var locales=[];
+ try{
+  if(typeof navigator!=="undefined"){
+   if(Array.isArray(navigator.languages))locales=locales.concat(navigator.languages);
+   if(navigator.language)locales.push(navigator.language);
+  }
+  if(typeof Intl!=="undefined")locales.push(Intl.DateTimeFormat().resolvedOptions().locale);
+ }catch(error){}
+ for(var index=0;index<locales.length;index++){
+  var language=String(locales[index]||"").toLowerCase().split("-")[0];
+  if(COPA_SUPPORTED_LANGS.indexOf(language)!==-1)return language;
+ }
+
+ try{
+  var zone=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+  if(zone==="Europe/Istanbul")return "tr";
+  if(zone==="Europe/Madrid"||zone==="Atlantic/Canary")return "es";
+  if(zone==="Europe/Rome")return "it";
+  if(zone==="Europe/Berlin"||zone==="Europe/Vienna"||zone==="Europe/Zurich")return "de";
+  if(zone==="Europe/London")return "en";
+ }catch(error){}
+ return "en";
+}
+
+var LANG=_detectCopaLocale();
+var L=()=>T[LANG]||T.en;
+
+var COPA_LOCALE_UI={
+ tr:{label:"DİL",a11y:"ERİŞİLEBİLİRLİK",sound:"SES VE MÜZİK",guide:"NASIL OYNANIR?",anim:"ANİMASYONU AZALT",audio:"SES",music:"MÜZİK",advanced:"GELİŞMİŞ AYARLAR",country:"ÜLKENİ SEÇ",title:"copa.life — Roguelite futbol kadro yönetim oyunu",contact:"İLETİŞİM"},
+ en:{label:"LANGUAGE",a11y:"ACCESSIBILITY",sound:"SOUND & MUSIC",guide:"HOW TO PLAY?",anim:"REDUCE MOTION",audio:"SOUND",music:"MUSIC",advanced:"ADVANCED SETTINGS",country:"PICK YOUR COUNTRY",title:"copa.life — Roguelite football squad management game",contact:"CONTACT"},
+ es:{label:"IDIOMA",a11y:"ACCESIBILIDAD",sound:"SONIDO Y M\u00daSICA",guide:"\u00bfC\u00d3MO SE JUEGA?",anim:"REDUCIR ANIMACIONES",audio:"SONIDO",music:"M\u00daSICA",advanced:"AJUSTES AVANZADOS",country:"ELIGE TU PA\u00cdS",title:"copa.life — Gesti\u00f3n de plantilla de f\u00fatbol roguelite",contact:"CONTACTO"},
+ de:{label:"SPRACHE",a11y:"BARRIEREFREIHEIT",sound:"SOUND UND MUSIK",guide:"WIE SPIELT MAN?",anim:"ANIMATIONEN REDUZIEREN",audio:"SOUND",music:"MUSIK",advanced:"ERWEITERTE EINSTELLUNGEN",country:"LAND AUSW\u00c4HLEN",title:"copa.life — Roguelite-Fu\u00dfball-Kaderverwaltung",contact:"KONTAKT"},
+ it:{label:"LINGUA",a11y:"ACCESSIBILIT\u00c0",sound:"AUDIO E MUSICA",guide:"COME SI GIOCA?",anim:"RIDUCI ANIMAZIONI",audio:"AUDIO",music:"MUSICA",advanced:"IMPOSTAZIONI AVANZATE",country:"SCEGLI IL PAESE",title:"copa.life — Gestione rosa calcio roguelite",contact:"CONTATTI"}
+};
+
+var COPA_LOCALE_BUTTONS=[
+ {code:"tr",flag:"TR.png",short:"TR",name:"Türkçe"},
+ {code:"en",flag:"GB.png",short:"EN",name:"English"},
+ {code:"es",flag:"ES.png",short:"ES",name:"Espa\u00f1ol"},
+ {code:"de",flag:"DE.png",short:"DE",name:"Deutsch"},
+ {code:"it",flag:"IT.png",short:"IT",name:"Italiano"}
+];
+
+var COPA_HOWTO_TRANSLATIONS={
+ es:{title:"\u00bfC\u00d3MO SE JUEGA?",subtitle:"6 PASOS EN COPA",close:"Cerrar",back:"VOLVER AL JUEGO",steps:[
+  ["ELIGE FORMACI\u00d3N Y PRESIDENTE","La formaci\u00f3n define los puestos. El presidente modifica el presupuesto, bonificaciones y l\u00edmite de deuda."],
+  ["TIRA Y ELIGE JUGADORES","Cada puesto muestra tres candidatos. Elige con cuidado: presupuesto y qu\u00edmica importan."],
+  ["JUEGA SEIS RONDAS","Ganar mejora tus opciones, pero nunca garantiza el siguiente partido."],
+  ["EL PRESIDENTE INTERVIENE","Puede ayudarte o crear una crisis. Cada presidente tiene su propio estilo."],
+  ["GESTIONA LESIONES Y SUPLENTES","Las lesiones reducen la fuerza. Usa suplentes o paga un tratamiento."],
+  ["LAS CARTAS CAMBIAN EL PLAN","Compra efectos permanentes o de un uso. La carta correcta importa m\u00e1s que la suerte."]
+ ]},
+ de:{title:"WIE SPIELT MAN?",subtitle:"6 SCHRITTE IN COPA",close:"Schließen",back:"ZURÜCK ZUM SPIEL",steps:[
+  ["FORMATION UND PR\u00c4SIDENT W\u00c4HLEN","Die Formation bestimmt die ben\u00f6tigten Positionen. Der Pr\u00e4sident ver\u00e4ndert Budget, Boni und Schuldenlimit."],
+  ["W\u00dcRFELN UND SPIELER W\u00c4HLEN","Jede Position bietet drei Kandidaten. Budget und Chemie entscheiden mit."],
+  ["SECHS RUNDEN SPIELEN","Mehr Stärke verbessert die Chancen, garantiert aber keinen Sieg."],
+  ["DER PR\u00c4SIDENT GREIFT EIN","Er kann helfen oder eine Krise ausl\u00f6sen. Jeder Pr\u00e4sident spielt anders."],
+  ["VERLETZUNGEN UND BANK VERWALTEN","Verletzungen senken die Stärke. Nutze Ersatzspieler oder zahle für Behandlung."],
+  ["KARTEN VER\u00c4NDERN DEN PLAN","Kaufe dauerhafte oder einmalige Effekte. Der richtige Moment z\u00e4hlt."]
+ ]},
+ it:{title:"COME SI GIOCA?",subtitle:"6 PASSI IN COPA",close:"Chiudi",back:"TORNA AL GIOCO",steps:[
+  ["SCEGLI MODULO E PRESIDENTE","Il modulo definisce i ruoli necessari. Il presidente modifica budget, bonus e limite debiti."],
+  ["LANCIA E SCEGLI I GIOCATORI","Ogni ruolo offre tre candidati. Budget e chimica contano."],
+  ["GIOCA SEI TURNI","Pi\u00f9 forza migliora le possibilit\u00e0, ma non garantisce una vittoria."],
+  ["IL PRESIDENTE INTERVIENE","Pu\u00f2 aiutare o creare una crisi. Ogni presidente ha il suo stile."],
+  ["GESTISCI INFORTUNI E PANCHINA","Gli infortuni riducono la forza. Usa le riserve o paga una cura."],
+  ["LE CARTE CAMBIANO IL PIANO","Compra effetti permanenti o monouso. Il momento giusto conta."]
+ ]}
+};
+
+function _copaText(){return COPA_LOCALE_UI[LANG]||COPA_LOCALE_UI.en;}
+
+function _setCopaText(id,value){
+ var node=document.getElementById(id);
+ if(node&&value)node.textContent=value;
+}
+
+function _syncCopaLanguageControls(){
+ var grid=document.querySelector("#settingsDrop .sdgrid");
+ if(!grid)return;
+ grid.classList.add("langgrid");
+ grid.innerHTML=COPA_LOCALE_BUTTONS.map(function(item){
+  var active=item.code===LANG?" on":"";
+  return '<button id="lg'+item.code.toUpperCase()+'" class="sdbtn langbtn'+active+'" type="button" onclick="setLang(\''+item.code+'\')" aria-label="'+item.name+'" aria-pressed="'+(item.code===LANG)+'"><img src="assets/flags/'+item.flag+'" alt="" aria-hidden="true"><span>'+item.short+'</span></button>';
+ }).join("");
+}
+
+function _installCopaHowtoTranslations(){
+ if(typeof _HOWTO==="undefined")return;
+ ["es","de","it"].forEach(function(locale){
+  var translation=COPA_HOWTO_TRANSLATIONS[locale];
+  if(!translation)return;
+  var base=_cloneLocaleValue(_HOWTO.en||_HOWTO.tr||{});
+  base.title=translation.title;
+  base.subtitle=translation.subtitle;
+  base.close=translation.close;
+  base.back=translation.back;
+  base.toggle=translation.title;
+  if(Array.isArray(base.steps))base.steps=translation.steps.map(function(step){return [step[0],step[1]];});
+  _HOWTO[locale]=base;
+ });
+}
+
+function _applyCopaLocaleUi(){
+ var copy=_copaText();
+ document.documentElement.lang=LANG;
+ document.title=copy.title;
+ _setCopaText("sdHdrLang",copy.label);
+ _setCopaText("sdHdrA11y",copy.a11y);
+ _setCopaText("sdHdrSound",copy.sound);
+ _setCopaText("animBtnLbl",copy.anim);
+ _setCopaText("muteBtnLbl",copy.audio);
+ _setCopaText("countryhdr",copy.country);
+ _setCopaText("advancedToggle",copy.advanced);
+ var guide=document.getElementById("howtoToggle");
+ if(guide){
+  var icon=guide.querySelector("svg");
+  guide.replaceChildren();
+  if(icon)guide.appendChild(icon);
+  guide.appendChild(document.createTextNode(" "+copy.guide));
+  guide.setAttribute("aria-label",copy.guide);
+ }
+ var music=document.getElementById("musicBtnLbl");
+ if(music)music.textContent=copy.music;
+ _installCopaHowtoTranslations();
+ if(typeof _applyHowtoLang==="function")_applyHowtoLang();
+}
+
+function _installCopaHowtoModalRuntime(){
+ if(window.__copaHowtoModalRuntimeInstalled||typeof window.openHowtoModal!=="function")return;
+ window.__copaHowtoModalRuntimeInstalled=true;
+ var originalOpenHowtoModal=window.openHowtoModal;
+ window.openHowtoModal=function(){
+  originalOpenHowtoModal();
+  var translation=COPA_HOWTO_TRANSLATIONS[LANG];
+  if(!translation)return;
+  window.requestAnimationFrame(function(){
+   _setCopaText(".howto-mhdr-title",translation.title);
+   _setCopaText(".howto-mhdr-sub",translation.subtitle);
+   _setCopaText(".howto-mfoot .btn",translation.back);
+   var close=document.querySelector(".howto-mhdr-close");
+   if(close)close.setAttribute("aria-label",translation.close);
+  });
+ };
+}
+
+function _installCopaLocaleRuntime(){
+ if(window.__copaLocaleRuntimeInstalled)return;
+ if(typeof window.setLang!=="function"){
+  window.setTimeout(_installCopaLocaleRuntime,0);
+  return;
+ }
+ window.__copaLocaleRuntimeInstalled=true;
+ var originalSetLang=window.setLang;
+ window.setLang=function(locale){
+  var next=COPA_SUPPORTED_LANGS.indexOf(locale)!==-1?locale:"en";
+  LANG=next;
+  try{localStorage.setItem("copa.language",next);}catch(error){}
+  originalSetLang(next);
+  _syncCopaLanguageControls();
+  _applyCopaLocaleUi();
+ };
+ _installCopaHowtoModalRuntime();
+ window.setLang(LANG);
+}
+
+if(typeof document!=="undefined"){
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_installCopaLocaleRuntime,{once:true});
+ else _installCopaLocaleRuntime();
+}

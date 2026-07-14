@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const checks = [
-  ["ghost client", "src/online/ghostClubs.js", ["recordCompletedRun", "findOpponent", "flushQueue", "beginRun", "matchChance", "schemaVersion"]],
+  ["ghost client", "src/online/ghostClubs.js", ["recordCompletedRun", "updateRun", "findOpponent", "flushQueue", "beginRun", "matchChance", "schemaVersion"]],
   ["hub bridge", "src/ui/hub.js", ["_maybeGhostOpponent", "_applyGhostOpponent", "ghostMeta"]],
   ["match bridge", "src/sim/finalSim.js", ["_ghostProfile", "ghostTactics"]],
   ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "GhostClubs.recordCompletedRun"]],
