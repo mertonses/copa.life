@@ -116,17 +116,17 @@
 .brandmark .life{color:var(--color-primary);background:transparent;padding:0;margin-left:.005em}
 .brandmark .logo-beta{
   position:absolute;
-  top:-5px;
+  top:-3px;
   right:0;
-  padding:1px 3px;
+  padding:1px 2px;
   border:1px solid rgba(121,88,20,.38);
   border-radius:999px;
   color:#795814;
   background:rgba(214,168,74,.14);
   font-family:var(--mono);
-  font-size:7px;
+  font-size:5px;
   font-weight:700;
-  letter-spacing:.45px;
+  letter-spacing:.25px;
   line-height:1;
   pointer-events:none;
 }
