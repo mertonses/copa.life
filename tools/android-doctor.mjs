@@ -48,8 +48,8 @@ check("Disk", freeBytes >= 4 * 1024 ** 3, `${(freeBytes / 1024 ** 3).toFixed(1)}
 
 const gitBranch = spawnSync("git", ["branch", "--show-current"], { cwd: ROOT, encoding: "utf8", windowsHide: true });
 const branch = gitBranch.status === 0 ? gitBranch.stdout.trim() : "";
-if (release) check("Git branch", branch === "main", branch || "not detected");
-else if (branch !== "main") warnings.push(`Git branch: ${branch || "not detected"}`);
+if (release && !allowDirty) check("Git branch", branch === "main", branch || "not detected");
+else if (branch !== "main") warnings.push(`Git branch: ${branch || "not detected"}; output is a non-store candidate`);
 
 const gitStatus = spawnSync("git", ["status", "--porcelain"], { cwd: ROOT, encoding: "utf8", windowsHide: true });
 const dirty = gitStatus.status !== 0 || gitStatus.stdout.trim().length > 0;
