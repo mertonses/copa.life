@@ -21,6 +21,8 @@ godot-final-sim/
 *.import
 *.log
 test/
+!services/ghost-club-api/test/
+!services/ghost-club-api/test/**
 src/legacy/
 kupa_yolu_analiz_raporu.md
 tools/debug_team.html
