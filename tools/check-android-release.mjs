@@ -71,6 +71,7 @@ if (/tracks:\s*(?:production|alpha|beta)/.test(playWorkflow)) {
 const candidateWorkflow = read(".github/workflows/android-candidate.yml");
 if (!/schedule:[\s\S]*cron:/.test(candidateWorkflow)) fail("scheduled Android maintenance build is missing");
 if (!/CheckAndroidAab|check:android:aab/.test(candidateWorkflow)) fail("CI does not inspect the built AAB payload");
+if (!read("tools/shared-build-info.mjs").includes("cleanGitCommit")) fail("local clean release builds do not record their Git source commit");
 
 const legalWorkflow = read(".github/workflows/legal-pages.yml");
 if (!/project-name copa-life-legal/.test(legalWorkflow)) fail("stable legal Pages deployment is missing");

@@ -47,7 +47,7 @@ if (!/path:\s*'dist'|path:\s*dist/.test(workflow)) fail("GitHub Pages artifact m
 if (/path:\s*'\.'|path:\s*\./.test(workflow)) fail("GitHub Pages must not upload the repository root");
 if (/cardCombos\.js|mascot\.jpg/.test(sw)) fail("service worker precache contains removed files");
 if (/20260707/.test(sw) || /sw\.js\?v=20260707/.test(indexHtml)) fail("stale service worker cache version remains");
-if (!sw.includes("__COPA_BUILD_VERSION__") || !sharedBuildInfo.includes("GITHUB_SHA") || !sharedBuildInfo.includes("sourceFingerprint")) fail("service worker must receive a deterministic version for every source revision");
+if (!sw.includes("__COPA_BUILD_VERSION__") || !sharedBuildInfo.includes("GITHUB_SHA") || !sharedBuildInfo.includes("cleanGitCommit") || !sharedBuildInfo.includes("sourceFingerprint")) fail("service worker must receive a deterministic version and clean source revision");
 if (/client\.navigate|location\.reload/.test(sw+indexHtml)) fail("deploy updates must not reload an active run");
 if (!/new Request\(e\.request,\{cache:"no-store"\}\)/.test(sw)) fail("page and runtime assets must bypass stale HTTP caches on entry");
 

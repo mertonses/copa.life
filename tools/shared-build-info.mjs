@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const SHARED_ROOT_FILES = [
   "index.html",
@@ -60,6 +61,22 @@ function walk(directory, files = []) {
   return files;
 }
 
+function cleanGitCommit(root) {
+  const status = spawnSync("git", ["status", "--porcelain"], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  if (status.status !== 0 || status.stdout.trim()) return null;
+  const revision = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const value = revision.status === 0 ? revision.stdout.trim() : "";
+  return /^[a-f0-9]{40}$/i.test(value) ? value : null;
+}
+
 export function getSharedSourceFiles(root) {
   const files = SHARED_ROOT_FILES
     .map((relative) => path.join(root, relative))
@@ -107,7 +124,8 @@ export function getSharedBuildInfo(root) {
     buildHash.update("\0");
   }
   const buildFingerprint = buildHash.digest("hex");
-  const commit = (process.env.GITHUB_SHA || "").trim() || null;
+  const ciCommit = (process.env.GITHUB_SHA || "").trim();
+  const commit = (/^[a-f0-9]{40}$/i.test(ciCommit) ? ciCommit : null) || cleanGitCommit(root);
   return {
     sourceFingerprint,
     sourceFileCount: files.length,

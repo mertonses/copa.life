@@ -54,6 +54,8 @@ Sürüm artırıldıktan sonra `store/android/whatsnew/` altındaki Türkçe ve 
 
 `npm run android:release:local` yalnız `main` dalındaki temiz ve commit edilmiş bir çalışma ağacında mağaza adayı üretir. Devam eden geliştirme veya release dalında aynı hattı sınamak için `npm run android:candidate:local` kullanılabilir; bu çıktı doğrulansa ve imzalansa bile mağaza adayı sayılmaz ve Play'e yüklenmez. Candidate manifesti kaynak commit/fingerprint bilgisini kaydetse de final paket `main` üzerinde yeniden üretilir.
 
+CI build'leri `GITHUB_SHA`yı, yerel temiz build'ler ise doğrulanmış `git rev-parse HEAD` sonucunu manifestte saklar. Çalışma ağacı kirliyse commit alanı özellikle boş bırakılır; böyle bir çıktı yalnız yerel deneme adayıdır.
+
 ## Google Play otomasyonu
 
 `.github/workflows/android-play.yml` yalnız elle çalıştırılır ve yeni AAB'yi yalnız `internal` test kanalına yükler. Sürüm kodunun ayrıca yazılması gerekir; yanlış sürüm seçimi akışı durdurur. Alpha, beta veya production için yeni paket derlenmez ve aynı sürüm yeniden yüklenmez. Internal'da doğrulanmış sürüm Play Console üzerinden terfi ettirilir; production geçişinde `store/android/promotion-checklist.md` uygulanır.
