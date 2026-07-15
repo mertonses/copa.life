@@ -1,0 +1,38 @@
+{
+  "package_id": "life.copa.app",
+  "version_code": 1,
+  "version_name": "1.0.0",
+  "release_status": "candidate",
+  "source": {
+    "build_version": "c810d5180d15",
+    "build_fingerprint": "c810d5180d151cbc26c64de92b73e59f8840ad3b9465fc54497378c74a3dcb42",
+    "fingerprint": "2d5c440f95427875e8fffc7e670192ddde6b5171952b8f6888d104de3b7c21b0",
+    "commit": null
+  },
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "signed_aab": {
+    "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
+    "bytes": 8404893,
+    "sha256": "C339D676E9A2BEA743D80C9A4F070716C160D1A2265B5D3C654698AE44283502"
+  },
+  "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
+  "permissions": [
+    "android.permission.INTERNET"
+  ],
+  "verification": {
+    "main_test_suite": "passed",
+    "critical_browser_tests": "passed",
+    "ghost_worker_tests": "passed",
+    "web_android_parity": "passed",
+    "android_package_scan": "passed",
+    "signed_aab_signature": "passed",
+    "physical_device_smoke": "required before track promotion"
+  },
+  "external_prerequisites": [
+    "D-U-N-S and Google Play organization verification",
+    "organization-domain support email with working MX records",
+    "final legal entity name and contact details on privacy and takedown pages"
+  ]
+}

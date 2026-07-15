@@ -1,5 +1,9 @@
 node_modules/
+.wrangler/
+.wrangler-dry-run*/
 dist/
+dist-android/
+dist-legal/
 .npm-cache/
 .pw-browsers/
 .agents/
@@ -30,6 +34,7 @@ card-editor.html
 .codex_tmp_frames*/
 video_frames_tmp/
 playtest/playtest-output/
+playtest/runner/test-results/
 outputs/
 .tmp/
 .vscode/

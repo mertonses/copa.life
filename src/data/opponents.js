@@ -66,7 +66,7 @@ var OPP_POOL_DE=[
 ];
 var OPP_BASES_DE=[62,67,73,79,87,95];
 
-/* Japan — J1 League (FM26 export ile aynı 20 kulüp) */
+/* Japonya — copa.life kulüp havuzundaki 20 takım */
 var OPP_POOL_JP=[
  "Kashima","Urawa","Kashiwa","FC Tokyo","Tokyo-V",
  "FC Machida","Kawasaki-F","Yokohama F･M","Yokohama FC","Shonan",

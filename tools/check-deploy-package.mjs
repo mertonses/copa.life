@@ -34,14 +34,20 @@ const workflow = read(".github/workflows/pages.yml");
 const sw = read("sw.js");
 const indexHtml = read("index.html");
 const buildScript = read("tools/build-pages.mjs");
+const sharedBuildInfo = read("tools/shared-build-info.mjs");
+const rightsInventory = read("docs/data-rights-inventory.json");
 
 if (!packageJson.scripts?.["build:pages"]) fail("package.json must expose build:pages");
+if (!packageJson.scripts?.["check:rights:public"]) fail("package.json must expose the public-release rights gate");
+if (!/check:rights:public/.test(workflow)) fail("GitHub Pages workflow must enforce the rights gate");
+if (!/PUBLIC_RELEASE/.test(buildScript)) fail("Pages builder must enforce the rights gate independently");
+if (!/deny_public_release_until_cleared/.test(rightsInventory)) fail("rights inventory must deny public release by default");
 if (!/npm run build:pages/.test(workflow)) fail("GitHub Pages workflow must build a clean artifact");
 if (!/path:\s*'dist'|path:\s*dist/.test(workflow)) fail("GitHub Pages artifact must upload dist");
 if (/path:\s*'\.'|path:\s*\./.test(workflow)) fail("GitHub Pages must not upload the repository root");
 if (/cardCombos\.js|mascot\.jpg/.test(sw)) fail("service worker precache contains removed files");
 if (/20260707/.test(sw) || /sw\.js\?v=20260707/.test(indexHtml)) fail("stale service worker cache version remains");
-if (!sw.includes("__COPA_BUILD_VERSION__") || !buildScript.includes("GITHUB_SHA")) fail("service worker must receive a unique version on every Pages build");
+if (!sw.includes("__COPA_BUILD_VERSION__") || !sharedBuildInfo.includes("GITHUB_SHA") || !sharedBuildInfo.includes("sourceFingerprint")) fail("service worker must receive a deterministic version for every source revision");
 if (/client\.navigate|location\.reload/.test(sw+indexHtml)) fail("deploy updates must not reload an active run");
 if (!/new Request\(e\.request,\{cache:"no-store"\}\)/.test(sw)) fail("page and runtime assets must bypass stale HTTP caches on entry");
 
@@ -57,8 +63,11 @@ if (build.status !== 0) {
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
 const distServiceWorker = fs.readFileSync(path.join(DIST, "sw.js"), "utf8");
+const distIndex = fs.readFileSync(path.join(DIST, "index.html"), "utf8");
 if (distServiceWorker.includes("__COPA_BUILD_VERSION__")) fail("built service worker still contains the version placeholder");
-if (!distFiles.includes("assets/data/fm26/player_profiles.json")) fail("player profile data is missing from dist");
+if (distIndex.includes("__COPA_BUILD_VERSION__")) fail("built index still contains the version placeholder");
+if (!distFiles.includes("assets/data/copa/player_profiles.json")) fail("copa player profile data is missing from dist");
+if (!distFiles.includes("assets/data/copa/player_profiles.js")) fail("file-mode player profile fallback is missing from dist");
 const forbiddenDistPrefixes = ["node_modules/", "tools/", "playtest/", "outputs/", "assets/chairs/", ".git/"];
 for (const file of distFiles) {
   if (forbiddenDistPrefixes.some((prefix) => file.startsWith(prefix))) {

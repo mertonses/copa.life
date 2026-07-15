@@ -29,10 +29,10 @@ expect(opponents[0].length === 20 && opponents[1].length === 6, "Japonya rakip/f
 const clubs = new Set(pool.map(player => player[3]));
 expect(opponents[0].every(club => clubs.has(club)), "Rakip havuzunda oyuncu verisi olmayan Japon kulübü var");
 
-const profiles = JSON.parse(read("assets/data/fm26/player_profiles.json"));
+const profiles = JSON.parse(read("assets/data/copa/player_profiles.json"));
 const jpProfiles = Object.entries(profiles.records).filter(([key]) => key.startsWith("JP|"));
 expect(jpProfiles.length === pool.length, `Japonya profil kapsamı ${jpProfiles.length}/${pool.length}`);
-for (const field of ["preferred_foot", "strength", "pace", "passing", "decisions", "reflexes", "handling", "best_position", "positions"]) {
+for (const field of ["copa_impact", "copa_build_up", "copa_space_control", "copa_duels", "copa_engine", "copa_pressure_decision", "position_fit", "preferred_foot", "best_position", "positions"]) {
   expect(profiles.fields.includes(field), `Japonya profil alanı eksik: ${field}`);
 }
 const footIndex = profiles.fields.indexOf("preferred_foot");
@@ -41,15 +41,17 @@ expect(jpProfiles.every(([, values]) => String(values[footIndex] || "").trim()),
 const html = read("index.html");
 const css = read("src/styles/layout.css");
 const ghost = read("src/online/ghostClubs.js");
+const persistence = read("src/state/runPersistence.js");
 const sw = read("sw.js");
+expect(persistence.includes('[2,3,4,5].includes(version)'), "Legacy save migration is missing from runPersistence");
 for (const marker of [
   'data-country="JP"', 'class="country-new-ribbon"', 'assets/flags/JP.svg',
   'src/data/players_japan.js', 'JP:[POOL_JP,OPP_POOL_JP]', 'if(k==="JP")return[POOL_JP,OPP_POOL_JP,OPP_BASES_JP]',
   'src/data/opponents.js?v=20260714-japan1', 'src/data/logos.js?v=20260714-japan1',
   'src/game/generate.js?v=20260715-elite-position1', 'src/ui/hub.js?v=',
   'src/styles/layout.css?v=',
-  'country:selectedCountry', '![2,3,4].includes(st.v)', 'COUNTRY_CODES.includes(st.country)',
-  'JP:"JAPONYA KUPASI FİNALİ"', 'JP:"EMPEROR\'S CUP FINAL"',
+  'country:selectedCountry', 'COUNTRY_CODES.includes(st.country)',
+  'JP:"JAPONYA KUPASI FİNALİ"', 'JP:"JAPAN CUP FINAL"',
 ]) expect(html.includes(marker), `Japonya runtime bağlantısı eksik: ${marker}`);
 expect(html.indexOf("src/data/players_japan.js") < html.indexOf("src/game/generate.js"), "Japonya havuzu generate.js öncesinde yüklenmeli");
 expect(/COUNTRY_CODES\.filter[\s\S]{0,300}Math\.random/.test(html), "Rastgele Başla ülke havuzunu kullanmıyor");

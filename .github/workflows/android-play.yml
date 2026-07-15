@@ -1,0 +1,143 @@
+name: Upload Android to Google Play Internal
+
+on:
+  workflow_dispatch:
+    inputs:
+      status:
+        description: Internal release status
+        required: true
+        default: completed
+        type: choice
+        options:
+          - completed
+          - draft
+      confirm_version_code:
+        description: Type the versionCode you intend to upload
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: google-play-internal-upload
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    environment:
+      name: google-play-internal
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Enforce main branch
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [[ "$REF" != "refs/heads/main" ]]; then
+            echo "Google Play uploads must be dispatched from main."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup JDK
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Install Ghost API dependencies
+        run: npm ci --prefix services/ghost-club-api
+
+      - name: Install browser test dependencies
+        run: npm ci --prefix playtest/runner
+
+      - name: Install Chromium
+        run: npx --prefix playtest/runner playwright install --with-deps chromium
+
+      - name: Read and confirm release version
+        id: version
+        env:
+          CONFIRMED_CODE: ${{ inputs.confirm_version_code }}
+        run: |
+          VERSION_NAME=$(node -p "require('./release/android-version.json').versionName")
+          VERSION_CODE=$(node -p "require('./release/android-version.json').versionCode")
+          if [[ "$CONFIRMED_CODE" != "$VERSION_CODE" ]]; then
+            echo "Confirmation does not match versionCode $VERSION_CODE."
+            exit 1
+          fi
+          echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Validate release source and dependencies
+        run: |
+          npm run android:version:check
+          npm run check:android:release
+          npm run audit:security
+          npm test
+          npm run check --prefix services/ghost-club-api
+          npm run test:ci --prefix playtest/runner
+          npm run check:parity
+          npm run android:sync
+
+      - name: Restore upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/copa-life-upload.jks"
+
+      - name: Build signed App Bundle
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/copa-life-upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:bundleRelease --no-daemon
+          jarsigner -verify -verbose -certs app/build/outputs/bundle/release/app-release.aab > /dev/null
+
+      - name: Inspect signed candidate
+        run: |
+          java tools/CheckAndroidAab.java android/app/build/outputs/bundle/release/app-release.aab
+          node tools/check-android-signature.mjs android/app/build/outputs/bundle/release/app-release.aab
+          node tools/write-android-candidate-manifest.mjs android/app/build/outputs/bundle/release/app-release.aab --signed
+
+      - name: Archive signed release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: signed-android-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/bundle/release/candidate-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload to Google Play internal testing
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: life.copa.app
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          tracks: internal
+          status: ${{ inputs.status }}
+          releaseName: v${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+          whatsNewDirectory: store/android/whatsnew
+
+      - name: Remove restored keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/copa-life-upload.jks"

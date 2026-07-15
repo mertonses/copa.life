@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "policy": "deny_public_release_until_cleared",
+  "reviewed_at": "2026-07-15",
+  "notice": "This inventory is an engineering control, not legal advice.",
+  "records": [
+    {
+      "id": "club-crests",
+      "title": "Real club crests and mappings used by the web build",
+      "status": "blocked",
+      "risk": "high",
+      "paths": ["assets/clubs/**", "src/data/logos.js"],
+      "basis": "No redistribution licence or written permission is recorded. Android excludes these files and uses generic abbreviation crests.",
+      "distribution_decision": "Keep the real crests in the web source as requested, but do not mark the public web release as cleared until licence evidence is recorded. Android and the standalone legal-policy site exclude them.",
+      "evidence": null,
+      "owner": null
+    },
+    {
+      "id": "copa-player-model",
+      "title": "Project-owned player source and copa.life model output",
+      "status": "cleared",
+      "risk": "medium",
+      "paths": ["tools/data/player_profile_source.json", "assets/data/copa/**", "src/data/player_profile_store.js"],
+      "basis": "The project owner declares the source data is independently held. Public/mobile output contains only six independently weighted 0–100 copa.life game dimensions and no raw 1–20 attributes.",
+      "evidence": "Project owner provenance declaration recorded 2026-07-15; deterministic build: tools/build-copa-player-profiles.mjs",
+      "owner": "copa.life project owner",
+      "reviewed_at": "2026-07-15"
+    },
+    {
+      "id": "real-player-datasets",
+      "title": "Real player identity and public sporting facts",
+      "status": "cleared",
+      "risk": "medium",
+      "paths": ["src/data/players.js", "src/data/players_*.js"],
+      "basis": "The project owner states the underlying dataset is independently held. Names, age and positions are treated as public sporting facts; game evaluations are explicitly presented as copa.life model outputs.",
+      "evidence": "Project owner provenance declaration recorded 2026-07-15",
+      "owner": "copa.life project owner",
+      "reviewed_at": "2026-07-15"
+    },
+    {
+      "id": "country-flags",
+      "title": "Country flag artwork files",
+      "status": "review_required",
+      "risk": "medium",
+      "paths": ["assets/flags/**"],
+      "basis": "The designs are national flags, but the provenance of each bitmap/vector implementation is not recorded.",
+      "evidence": null,
+      "owner": null
+    }
+  ]
+}

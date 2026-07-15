@@ -1,5 +1,6 @@
-var PLAYER_PROFILE_URL="assets/data/fm26/player_profiles.json",PLAYER_PROFILE_VERSION="20260714-profile3",PLAYER_PROFILE_MAX_ATTEMPTS=2;
+var PLAYER_PROFILE_URL="assets/data/copa/player_profiles.json",PLAYER_PROFILE_FALLBACK_URL="assets/data/copa/player_profiles.js",PLAYER_PROFILE_VERSION="copa-model-v1",PLAYER_PROFILE_MAX_ATTEMPTS=2;
 var PLAYER_PROFILE_DATA=null,PLAYER_PROFILE_LOADING=null,PLAYER_PROFILE_LAST_ERROR=null,PLAYER_PROFILE_LOAD_ATTEMPTS=0,PLAYER_PROFILE_LOAD_GENERATION=0;
+var PLAYER_PROFILE_FALLBACK_LOADING=null;
 var PLAYER_PROFILE_CACHE=new Map(),PLAYER_PROFILE_IDENTITY_INDEX=null,PLAYER_PROFILE_NAME_CLUB_INDEX=null,PLAYER_PROFILE_COUNTRY_NAME_AGE_INDEX=null;
 function _playerProfileNorm(value){return String(value||"").toLocaleLowerCase("tr-TR").replaceAll("ı","i").replaceAll("ł","l").replaceAll("ø","o").replaceAll("ð","d").replaceAll("þ","th").replaceAll("đ","d").replaceAll("æ","ae").replaceAll("œ","oe").replaceAll("ß","ss").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");}
 function playerProfileKey(country,name,club,age){return[String(country||"TR").toUpperCase(),_playerProfileNorm(name),Number(age)||0,_playerProfileNorm(club)].join("|");}
@@ -18,27 +19,46 @@ function _buildPlayerProfileIdentityIndex(data){
   PLAYER_PROFILE_COUNTRY_NAME_AGE_INDEX=countryNameAgeIndex;
 }
 function _playerProfileValidate(data){
-  if(!data||!Array.isArray(data.fields)||!data.fields.length||!data.records||typeof data.records!=="object"||Array.isArray(data.records))throw new Error("FM26 profil veri dosyasi gecersiz.");
+  if(!data||data.schema_version!==1||data.model_version!=="copa-model-v1"||!Array.isArray(data.fields)||!data.fields.length||!data.records||typeof data.records!=="object"||Array.isArray(data.records))throw new Error("copa.life oyuncu modeli veri dosyasi gecersiz.");
   return data;
 }
 function _playerProfileLoadError(error){
-  const value=error instanceof Error?error:new Error(String(error||"FM26 profil verisi yuklenemedi."));
+  const value=error instanceof Error?error:new Error(String(error||"copa.life oyuncu modeli yuklenemedi."));
   value.code="PLAYER_PROFILE_LOAD_FAILED";value.attempts=PLAYER_PROFILE_LOAD_ATTEMPTS;return value;
+}
+function _playerProfileFallback(){
+  if(globalThis.__COPA_PLAYER_PROFILE_DATA__)return Promise.resolve(globalThis.__COPA_PLAYER_PROFILE_DATA__);
+  if(PLAYER_PROFILE_FALLBACK_LOADING)return PLAYER_PROFILE_FALLBACK_LOADING;
+  if(typeof document==="undefined"||!document.createElement)return Promise.reject(new Error("copa.life oyuncu modeli fallback yuklenemedi."));
+  PLAYER_PROFILE_FALLBACK_LOADING=new Promise(function(resolve,reject){
+    const script=document.createElement("script"),fileMode=globalThis.location&&globalThis.location.protocol==="file:";
+    script.async=true;script.src=PLAYER_PROFILE_FALLBACK_URL+(fileMode?"":"?v="+PLAYER_PROFILE_VERSION);
+    script.onload=function(){
+      PLAYER_PROFILE_FALLBACK_LOADING=null;
+      const data=globalThis.__COPA_PLAYER_PROFILE_DATA__;
+      if(data)resolve(data);else reject(new Error("copa.life oyuncu modeli fallback verisi bulunamadi."));
+      script.remove();
+    };
+    script.onerror=function(){PLAYER_PROFILE_FALLBACK_LOADING=null;script.remove();reject(new Error("copa.life oyuncu modeli fallback dosyasi yuklenemedi."));};
+    (document.head||document.documentElement).appendChild(script);
+  });
+  return PLAYER_PROFILE_FALLBACK_LOADING;
 }
 function _playerProfileFetch(attempt){
   PLAYER_PROFILE_LOAD_ATTEMPTS=attempt;
+  if(globalThis.location&&globalThis.location.protocol==="file:")return _playerProfileFallback().then(_playerProfileValidate).catch(function(error){throw _playerProfileLoadError(error);});
   const retry=attempt>1?"&retry="+Date.now():"";
   return fetch(PLAYER_PROFILE_URL+"?v="+PLAYER_PROFILE_VERSION+retry,{cache:attempt>1?"reload":"default"}).then(function(response){
-    if(!response||!response.ok)throw new Error("FM26 profil verisi yuklenemedi: "+(response&&response.status||"network"));
+    if(!response||!response.ok)throw new Error("copa.life oyuncu modeli yuklenemedi: "+(response&&response.status||"network"));
     return response.json();
   }).then(_playerProfileValidate).catch(function(error){
     if(attempt<PLAYER_PROFILE_MAX_ATTEMPTS)return new Promise(function(resolve){setTimeout(resolve,120);}).then(function(){return _playerProfileFetch(attempt+1);});
-    throw _playerProfileLoadError(error);
+    return _playerProfileFallback().then(_playerProfileValidate).catch(function(fallbackError){fallbackError.cause=error;throw _playerProfileLoadError(fallbackError);});
   });
 }
 function loadPlayerProfiles(options){
   const force=!!(options&&options.force);
-  if(force){PLAYER_PROFILE_LOAD_GENERATION++;PLAYER_PROFILE_DATA=null;PLAYER_PROFILE_LOADING=null;PLAYER_PROFILE_LAST_ERROR=null;PLAYER_PROFILE_CACHE.clear();PLAYER_PROFILE_IDENTITY_INDEX=null;PLAYER_PROFILE_NAME_CLUB_INDEX=null;PLAYER_PROFILE_COUNTRY_NAME_AGE_INDEX=null;}
+  if(force){PLAYER_PROFILE_LOAD_GENERATION++;PLAYER_PROFILE_DATA=null;PLAYER_PROFILE_LOADING=null;PLAYER_PROFILE_LAST_ERROR=null;PLAYER_PROFILE_FALLBACK_LOADING=null;PLAYER_PROFILE_CACHE.clear();PLAYER_PROFILE_IDENTITY_INDEX=null;PLAYER_PROFILE_NAME_CLUB_INDEX=null;PLAYER_PROFILE_COUNTRY_NAME_AGE_INDEX=null;}
   if(PLAYER_PROFILE_DATA)return Promise.resolve(PLAYER_PROFILE_DATA);
   if(!PLAYER_PROFILE_LOADING){
     const generation=PLAYER_PROFILE_LOAD_GENERATION;PLAYER_PROFILE_LAST_ERROR=null;PLAYER_PROFILE_LOAD_ATTEMPTS=0;
@@ -59,7 +79,7 @@ function playerProfileByKeyAsync(key){
   return loadPlayerProfiles().then(function(data){
     const values=data.records&&data.records[key];
     if(!values){PLAYER_PROFILE_CACHE.set(key,null);return null;}
-    const profile={source:data.source||"FM26",source_type:"full_record",profile_key:key,labels:data.labels_tr||{}};
+    const profile={source:data.source||"copa.life oyun modeli",source_type:"copa_model",model_version:data.model_version||"copa-model-v1",profile_key:key};
     (data.fields||[]).forEach(function(field,index){profile[field]=values[index];});
     PLAYER_PROFILE_CACHE.set(key,profile);return profile;
   });

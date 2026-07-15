@@ -32,14 +32,21 @@ if (/\d+\.\d{2,}/.test(fallbackHtml)) throw new Error("Scout raporunda uzun onda
 if (!fallbackHtml.includes('aria-valuenow="57"') || !fallbackHtml.includes('>59</b>')) throw new Error("Yuvarlanmış güç profili render edilmedi");
 
 const profiles = players.map((_, index) => ({
-  finishing: 10 + index % 3, off_the_ball: 11, dribbling: 12, long_shots: 10, heading: 11,
-  passing: 11, decisions: 12, composure: 11, work_rate: 12, tackling: 11, strength: 12,
-  pace: 12, acceleration: 11, stamina: 12, natural_fitness: 13, leadership: 10, bravery: 12,
-  crossing: 11,
+  copa_impact: 55 + index % 4,
+  copa_build_up: 61 + index % 3,
+  copa_space_control: 59 + index % 5,
+  copa_duels: 63 + index % 4,
+  copa_engine: 66 + index % 6,
+  copa_pressure_decision: 60 + index % 5,
 }));
 const profileModel = context.ScoutReport.model(players, profiles, "Gegenpressing", "merkez", labels);
 if (Object.values(profileModel.bars).some(value => value != null && (!Number.isInteger(value) || value < 0 || value > 100))) {
   throw new Error(`Profil tabanlı güç değerleri güvenli aralıkta değil: ${JSON.stringify(profileModel.bars)}`);
+}
+const profileHtml = context.ScoutReport.html(profileModel, labels);
+if (profileHtml.includes("NaN") || !profileHtml.includes("COPA PROFİLİ")) throw new Error("copa.life scout profili render edilmedi");
+for (const legacy of ["finishing", "composure", "natural_fitness", "value*5", "raw*5"]) {
+  if (read("src/ui/scoutReport.js").includes(legacy)) throw new Error(`Eski 1–20 scout alanı kaldı: ${legacy}`);
 }
 
 const css = read("src/styles/match.css");
@@ -53,4 +60,4 @@ for (const marker of [
   if (!css.includes(marker)) throw new Error(`Scout responsive taşma koruması eksik: ${marker}`);
 }
 
-console.log("Scout report checks passed: rounded metrics and desktop/mobile overflow guards verified.");
+console.log("Scout report checks passed: six copa dimensions, rounded metrics, and responsive guards verified.");
