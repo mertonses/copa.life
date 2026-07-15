@@ -4,18 +4,18 @@
   "version_name": "1.0.0",
   "release_status": "candidate",
   "source": {
-    "build_version": "c810d5180d15",
-    "build_fingerprint": "c810d5180d151cbc26c64de92b73e59f8840ad3b9465fc54497378c74a3dcb42",
-    "fingerprint": "2d5c440f95427875e8fffc7e670192ddde6b5171952b8f6888d104de3b7c21b0",
-    "commit": null
+    "build_version": "335a1f275ceb",
+    "build_fingerprint": "366e493b21e7a486668bdbea10947fdfc927fdb779c79a1c90c7d02ee3d4faa1",
+    "fingerprint": "a52c6f0b2d30630014d2ab8dfff21f0a8a79fd482644685114a85ace9e127b50",
+    "commit": "335a1f275ceb2db256360ce054c0653751d7865f"
   },
   "min_sdk": 24,
   "target_sdk": 36,
   "compile_sdk": 36,
   "signed_aab": {
     "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
-    "bytes": 8404893,
-    "sha256": "C339D676E9A2BEA743D80C9A4F070716C160D1A2265B5D3C654698AE44283502"
+    "bytes": 8700741,
+    "sha256": "B9EE14DC270B4F204C72570D8706D40FE172A3E8E2DCCAF6DCC13628E1EC8B3E"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "permissions": [
