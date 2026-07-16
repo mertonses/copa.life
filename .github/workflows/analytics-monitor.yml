@@ -1,0 +1,42 @@
+name: Analytics error monitor
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: analytics-error-monitor
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check profile and Worker error rates
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_ANALYTICS_TOKEN }}
+          PROFILE_ERROR_MIN_COUNT: ${{ vars.PROFILE_ERROR_MIN_COUNT }}
+          PROFILE_ERROR_RATE: ${{ vars.PROFILE_ERROR_RATE }}
+          WORKER_5XX_MIN_COUNT: ${{ vars.WORKER_5XX_MIN_COUNT }}
+          WORKER_5XX_RATE: ${{ vars.WORKER_5XX_RATE }}
+          ANALYTICS_MONITOR_OUTPUT: outputs/analytics/monitor.json
+        run: node services/ghost-club-api/scripts/analytics-monitor.mjs
+      - name: Upload monitor snapshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: copa-life-analytics-monitor
+          path: outputs/analytics/monitor.json
+          if-no-files-found: ignore
+          retention-days: 14

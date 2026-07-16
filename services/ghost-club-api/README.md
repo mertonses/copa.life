@@ -16,7 +16,7 @@ npm run check:deploy
 ## Environments
 
 - `wrangler.jsonc`: production Worker and production D1 binding.
-- `wrangler.staging.jsonc`: isolated staging Worker. Its D1 database intentionally has no committed ID so Wrangler provisions/links the staging resource independently.
+- `wrangler.staging.jsonc`: isolated staging Worker bound to the dedicated `copa-life-ghosts-staging` D1 database.
 - Production allows only `https://copa.life` and `https://www.copa.life` browser origins.
 
 Before the first staging deployment:
@@ -26,6 +26,8 @@ npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.staging.jsonc
 npx wrangler deploy --config wrangler.staging.jsonc
 ```
 
+The Cloudflare account must have Analytics Engine enabled before either Worker can deploy with its analytics bindings. D1 migrations can be applied independently and are safe to rerun.
+
 Production deployment:
 
 ```powershell
@@ -33,7 +35,7 @@ npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.jsonc
 npx wrangler deploy --config wrangler.jsonc
 ```
 
-GitHub Actions performs tests and dry-run builds on pull requests. `main` deploys production after migrations; staging is an explicit manual workflow choice. Required GitHub environment secrets are `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+GitHub Actions performs tests and dry-run builds on pull requests. `main` deploys production after migrations; staging is an explicit manual workflow choice. Deployments require `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Reports use a separate read-only `CLOUDFLARE_ANALYTICS_TOKEN`.
 
 ## Health and observability
 
@@ -41,7 +43,9 @@ GitHub Actions performs tests and dry-run builds on pull requests. `main` deploy
 - `ghost-health.yml` probes production every 30 minutes and fails visibly in GitHub Actions.
 - Set the repository/environment variable `GHOST_API_HEALTH_URL` to the canonical production `/v1/health` URL; the script's workers.dev URL is only a fallback.
 - Workers Logs sample 10% and traces sample 1% in production; staging uses higher sampling.
-- Errors are emitted as structured JSON with event, path, and message.
+- Errors are emitted as structured JSON with event, fixed route bucket, and message.
+- `copa_life_worker_health` stores privacy-safe aggregate route, status, request-count and latency metrics; staging uses `copa_life_worker_health_staging`.
+- `analytics-report.yml` writes a weekly seven-day KPI artifact; `analytics-monitor.yml` checks profile-open and Worker 5xx rates every 30 minutes.
 
 Manual health check:
 

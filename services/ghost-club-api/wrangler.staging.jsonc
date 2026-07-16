@@ -18,9 +18,10 @@
     {"name": "PRODUCT_ANALYTICS_LIMITER", "namespace_id": "41013", "simple": {"limit": 180, "period": 60}}
   ],
   "analytics_engine_datasets": [
-    {"binding": "PRODUCT_ANALYTICS", "dataset": "copa_life_product_events_staging"}
+    {"binding": "PRODUCT_ANALYTICS", "dataset": "copa_life_product_events_staging"},
+    {"binding": "WORKER_ANALYTICS", "dataset": "copa_life_worker_health_staging"}
   ],
   "d1_databases": [
-    {"binding": "GHOSTS", "database_name": "copa-life-ghosts-staging", "migrations_dir": "migrations"}
+    {"binding": "GHOSTS", "database_name": "copa-life-ghosts-staging", "database_id": "c88124d1-e206-41fe-b7f8-d37b515ab0a4", "migrations_dir": "migrations"}
   ]
 }

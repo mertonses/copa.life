@@ -1,6 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, purgeExpired } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, purgeExpired, routeBucket } from "../src/index.js";
 
 const origin="https://copa.life";
 const snapshot=(id="G-CLIENT123")=>({
@@ -12,6 +12,12 @@ const authHeaders=(client="GCL-CLIENT123",token="GDT-DELETE1234567890")=>({origi
 const post=(body,client,token)=>exports.default.fetch(new Request("https://ghost.test/v1/ghosts",{method:"POST",headers:authHeaders(client,token),body:JSON.stringify(body)}));
 
 describe("Ghost Club Worker",()=>{
+  it("uses fixed privacy-safe route buckets for worker metrics",()=>{
+    expect(routeBucket("/v1/health")).toBe("health");
+    expect(routeBucket("/v1/ghosts/G-ABCDEF123456/report")).toBe("ghost_report");
+    expect(routeBucket("/private/user@example.com")).toBe("not_found");
+  });
+
   it("reports D1 health",async()=>{
     const response=await exports.default.fetch(new Request("https://ghost.test/v1/health",{headers:{origin}}));
     expect(response.status).toBe(200);

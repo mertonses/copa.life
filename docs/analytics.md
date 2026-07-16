@@ -49,6 +49,29 @@ Analytics Engine dataset'i: `copa_life_product_events`
 
 Dataset ilk üretim olayında otomatik oluşur. Resmî kurulum: <https://developers.cloudflare.com/analytics/analytics-engine/get-started/>.
 
+## 3. Worker sağlık metrikleri
+
+Worker her isteği `copa_life_worker_health` dataset'ine toplu bir sağlık noktası olarak yazar. Ham URL, Ghost kimliği, IP, kullanıcı/oturum/kurulum kimliği ve Analytics Engine index'i yazılmaz. URL yalnızca sabit bir rota grubuna çevrilir.
+
+| Alan | Anlam |
+| --- | --- |
+| `blob1` | sabit rota grubu (`health`, `ghost_write`, `ghost_match`, `ghost_report`, `ghost_delete`, `ghost_delete_all`, `analytics_events`, `not_found`) |
+| `blob2` | HTTP metodu |
+| `blob3` | durum sınıfı (`2xx`, `4xx`, `5xx`) |
+| `double1` | istek sayısı, her zaman 1 |
+| `double2` | Worker gecikmesi, milisaniye |
+| `double3` | HTTP durum kodu |
+
+Staging dataset'leri `copa_life_product_events_staging` ve `copa_life_worker_health_staging` adlarıyla üretimden tamamen ayrıdır.
+
+## Otomatik rapor ve alarm
+
+- `Weekly analytics report` her pazartesi son yedi günün anonim huni oranlarını, ülke dağılımını, profil açma hatalarını ve Worker sağlığını GitHub Actions özetine ve JSON artifact'ine yazar.
+- `Analytics error monitor` her 30 dakikada son bir saati kontrol eder. En az 5 olaydan sonra profil açma hata oranı %5'i veya Worker 5xx oranı %2'yi aşarsa workflow başarısız olur ve GitHub bildirimi üretir.
+- Eşikler production environment variable'larıyla `PROFILE_ERROR_MIN_COUNT`, `PROFILE_ERROR_RATE`, `WORKER_5XX_MIN_COUNT` ve `WORKER_5XX_RATE` olarak değiştirilebilir.
+- Her iki workflow için production environment'a `CLOUDFLARE_ACCOUNT_ID` ve yalnız `Account Analytics: Read` yetkili `CLOUDFLARE_ANALYTICS_TOKEN` secret'ı eklenir. Deploy token'ı raporlama için kullanılmaz.
+- Token henüz yoksa raporlar `not_configured`, dataset ilk veriyle oluşmadıysa `waiting_for_first_data` durumuyla güvenli şekilde bekler.
+
 ## Örnek sorgular
 
 Yedi günlük huni:
@@ -90,4 +113,5 @@ SQL API için yalnız `Account Analytics: Read` yetkili ayrı bir okuma token'ı
 - `npm run check:analytics`: web ölçümünü ve Android dışlamasını doğrular.
 - `npm run check:android`: Android paketinde beacon, endpoint veya web analitik runtime'ı bulunmasını engeller.
 - Staging ve production farklı Analytics Engine dataset'leri kullanır.
+- Haftalık rapor ve 30 dakikalık hata alarmı kimliksiz, örnekleme-düzeltilmiş (`_sample_interval`) toplamlardan üretilir.
 - Mobil analitik ileride açılırsa ayrı karar, kullanıcı bilgilendirmesi ve Play Data Safety güncellemesi gerekir.

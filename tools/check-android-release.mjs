@@ -71,6 +71,12 @@ if (/tracks:\s*(?:production|alpha|beta)/.test(playWorkflow)) {
 const candidateWorkflow = read(".github/workflows/android-candidate.yml");
 if (!/schedule:[\s\S]*cron:/.test(candidateWorkflow)) fail("scheduled Android maintenance build is missing");
 if (!/CheckAndroidAab|check:android:aab/.test(candidateWorkflow)) fail("CI does not inspect the built AAB payload");
+if (!/ReactiveCircus\/android-emulator-runner@[a-f0-9]{40}/.test(candidateWorkflow)) fail("native Android emulator action must be pinned to a full commit SHA");
+if (!candidateWorkflow.includes("tools/android-native-smoke.sh")) fail("native Android emulator smoke is missing from candidate CI");
+const nativeSmoke = read("tools/android-native-smoke.sh");
+if (!nativeSmoke.includes("connectedDebugAndroidTest") || !nativeSmoke.includes('PACKAGE="life.copa.app"') || !nativeSmoke.includes('ACTIVITY="$PACKAGE/.MainActivity"')) fail("native smoke must run instrumentation and launch the real app id");
+const instrumentationTest = read("android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java");
+if (!instrumentationTest.includes('assertEquals("life.copa.app"')) fail("instrumentation test package assertion drift");
 if (!read("tools/shared-build-info.mjs").includes("cleanGitCommit")) fail("local clean release builds do not record their Git source commit");
 
 const legalWorkflow = read(".github/workflows/legal-pages.yml");

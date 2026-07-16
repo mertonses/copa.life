@@ -115,6 +115,32 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:bundleRelease --no-daemon
 
+      - name: Enable KVM for native emulator smoke
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Native Android emulator smoke
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_3a
+          disable-animations: true
+          emulator-boot-timeout: 600
+          script: bash tools/android-native-smoke.sh
+
+      - name: Upload native smoke diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-native-smoke-failure
+          path: outputs/native-smoke
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Inspect AAB payload and write candidate manifest
         run: |
           npm run check:android:aab
@@ -127,5 +153,8 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/bundle/release/candidate-manifest.json
+            outputs/native-smoke/launch.png
+            outputs/native-smoke/logcat.txt
+            outputs/native-smoke/result.txt
           if-no-files-found: error
           retention-days: 14

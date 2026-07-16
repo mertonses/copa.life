@@ -136,9 +136,44 @@ async function handleDelete(request,env,publicIdValue=""){
 }
 async function purgeExpired(env,now=new Date()){const cutoff=now.toISOString(),reportCutoff=new Date(now.getTime()-90*24*60*60*1000).toISOString();const expired=await env.GHOSTS.prepare("DELETE FROM ghost_runs WHERE eligible_until <= ?").bind(cutoff).run();await env.GHOSTS.prepare("DELETE FROM ghost_reports WHERE created_at <= ? OR public_id NOT IN (SELECT public_id FROM ghost_runs)").bind(reportCutoff).run();console.log(JSON.stringify({event:"ghost_retention_purge",deleted:Number(expired.meta&&expired.meta.changes)||0,at:cutoff}));return Number(expired.meta&&expired.meta.changes)||0;}
 
+function routeBucket(pathname){
+  if(pathname==="/v1/health")return "health";
+  if(pathname==="/v1/analytics/events")return "analytics_events";
+  if(pathname==="/v1/ghosts")return "ghost_write";
+  if(pathname==="/v1/ghosts/match")return "ghost_match";
+  if(/^\/v1\/ghosts\/G-[A-Z0-9]{8,32}\/report$/.test(pathname))return "ghost_report";
+  if(/^\/v1\/ghosts\/G-[A-Z0-9]{8,32}$/.test(pathname))return "ghost_delete";
+  if(pathname==="/v1/me/ghosts")return "ghost_delete_all";
+  return "not_found";
+}
+
+function recordWorkerMetric(env,request,url,response,startedAt){
+  if(!env.WORKER_ANALYTICS)return;
+  const method=["GET","POST","DELETE","OPTIONS"].includes(request.method)?request.method:"OTHER";
+  const status=Math.max(100,Math.min(599,Number(response&&response.status)||500));
+  const statusClass=`${Math.floor(status/100)}xx`;
+  const latencyMs=Math.max(0,Date.now()-startedAt);
+  /* copa_life_worker_health: blob1=route bucket, blob2=method, blob3=status class; double1=count, double2=latency_ms, double3=status. */
+  try{env.WORKER_ANALYTICS.writeDataPoint({blobs:[routeBucket(url.pathname),method,statusClass],doubles:[1,latencyMs,status]});}
+  catch(error){console.error(JSON.stringify({event:"worker_metric_error",route:routeBucket(url.pathname),message:error instanceof Error?error.message:String(error)}));}
+}
+
+async function routeRequest(request,env,url){
+  if(!originAllowed(request,env))return json(request,env,{error:"origin_not_allowed"},403);
+  if(request.method==="OPTIONS")return new Response(null,{status:204,headers:headers(request,env)});
+  if(request.method==="GET"&&url.pathname==="/v1/health"){const db=await env.GHOSTS.prepare("SELECT 1 AS ok").first();return json(request,env,{ok:!!(db&&db.ok===1),service:"ghost-club-api",schema_version:2,consent_version:CONSENT_VERSION},db&&db.ok===1?200:503);}
+  if(request.method==="POST"&&url.pathname==="/v1/analytics/events")return await handleAnalytics(request,env);
+  if(request.method==="POST"&&url.pathname==="/v1/ghosts")return await handlePost(request,env);
+  if(request.method==="GET"&&url.pathname==="/v1/ghosts/match")return await handleMatch(request,env,url);
+  const reportMatch=url.pathname.match(/^\/v1\/ghosts\/(G-[A-Z0-9]{8,32})\/report$/);if(request.method==="POST"&&reportMatch)return await handleReport(request,env,reportMatch[1]);
+  const deleteMatch=url.pathname.match(/^\/v1\/ghosts\/(G-[A-Z0-9]{8,32})$/);if(request.method==="DELETE"&&deleteMatch)return await handleDelete(request,env,deleteMatch[1]);
+  if(request.method==="DELETE"&&url.pathname==="/v1/me/ghosts")return await handleDelete(request,env);
+  return json(request,env,{error:"not_found"},404);
+}
+
 export default {
-  async fetch(request,env){const url=new URL(request.url);try{if(!originAllowed(request,env))return json(request,env,{error:"origin_not_allowed"},403);if(request.method==="OPTIONS")return new Response(null,{status:204,headers:headers(request,env)});if(request.method==="GET"&&url.pathname==="/v1/health"){const db=await env.GHOSTS.prepare("SELECT 1 AS ok").first();return json(request,env,{ok:!!(db&&db.ok===1),service:"ghost-club-api",schema_version:2,consent_version:CONSENT_VERSION},db&&db.ok===1?200:503);}if(request.method==="POST"&&url.pathname==="/v1/analytics/events")return await handleAnalytics(request,env);if(request.method==="POST"&&url.pathname==="/v1/ghosts")return await handlePost(request,env);if(request.method==="GET"&&url.pathname==="/v1/ghosts/match")return await handleMatch(request,env,url);const reportMatch=url.pathname.match(/^\/v1\/ghosts\/(G-[A-Z0-9]{8,32})\/report$/);if(request.method==="POST"&&reportMatch)return await handleReport(request,env,reportMatch[1]);const deleteMatch=url.pathname.match(/^\/v1\/ghosts\/(G-[A-Z0-9]{8,32})$/);if(request.method==="DELETE"&&deleteMatch)return await handleDelete(request,env,deleteMatch[1]);if(request.method==="DELETE"&&url.pathname==="/v1/me/ghosts")return await handleDelete(request,env);return json(request,env,{error:"not_found"},404);}catch(error){console.error(JSON.stringify({event:"ghost_api_error",path:url.pathname,message:error instanceof Error?error.message:String(error)}));return json(request,env,{error:"internal_error"},500);}},
+  async fetch(request,env){const startedAt=Date.now(),url=new URL(request.url);let response;try{response=await routeRequest(request,env,url);}catch(error){console.error(JSON.stringify({event:"ghost_api_error",path:routeBucket(url.pathname),message:error instanceof Error?error.message:String(error)}));response=json(request,env,{error:"internal_error"},500);}recordWorkerMetric(env,request,url,response,startedAt);return response;},
   async scheduled(controller,env){await purgeExpired(env,new Date(controller.scheduledTime));}
 };
 
-export {MAX_BODY_BYTES,CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validClubName,moderateClubName,normalizeAnalyticsEvent,integrityFor,purgeExpired};
+export {MAX_BODY_BYTES,CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validClubName,moderateClubName,normalizeAnalyticsEvent,integrityFor,purgeExpired,routeBucket};

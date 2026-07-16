@@ -21,7 +21,8 @@
     {"name": "PRODUCT_ANALYTICS_LIMITER", "namespace_id": "41003", "simple": {"limit": 120, "period": 60}}
   ],
   "analytics_engine_datasets": [
-    {"binding": "PRODUCT_ANALYTICS", "dataset": "copa_life_product_events"}
+    {"binding": "PRODUCT_ANALYTICS", "dataset": "copa_life_product_events"},
+    {"binding": "WORKER_ANALYTICS", "dataset": "copa_life_worker_health"}
   ],
   "d1_databases": [
     {

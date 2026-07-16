@@ -48,6 +48,8 @@
     "check:clubnames": "node tools/check-club-name-security.mjs",
     "check:ghosts": "node tools/check-ghost-clubs.mjs",
     "check:analytics": "npm run build:pages && npm run build:android && node tools/check-analytics.mjs",
+    "analytics:report": "node services/ghost-club-api/scripts/analytics-report.mjs",
+    "analytics:monitor": "node services/ghost-club-api/scripts/analytics-monitor.mjs",
     "check:rights": "node tools/check-publishing-rights.mjs",
     "check:rights:public": "node tools/check-publishing-rights.mjs --public",
     "test:worker": "npm test --prefix services/ghost-club-api",
