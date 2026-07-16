@@ -9,6 +9,12 @@ PACKAGE="life.copa.app"
 ACTIVITY="$PACKAGE/.MainActivity"
 
 mkdir -p "$OUTPUT_DIR"
+capture_diagnostics() {
+  adb exec-out screencap -p > "$OUTPUT_DIR/launch.png" 2>/dev/null || true
+  adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt" 2>/dev/null || true
+}
+trap capture_diagnostics EXIT
+
 cd "$ANDROID_DIR"
 chmod +x gradlew
 
@@ -27,12 +33,14 @@ sleep 8
 pid="$(adb shell pidof "$PACKAGE" | tr -d '\r')"
 test -n "$pid"
 
-focus="$(adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp' || true)"
+focus="$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity|ResumedActivity' || true)"
+if ! grep -q "$PACKAGE" <<<"$focus"; then
+  focus="$(adb shell dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' || true)"
+fi
 printf '%s\n' "$focus"
 grep -q "$PACKAGE" <<<"$focus"
 
-adb exec-out screencap -p > "$OUTPUT_DIR/launch.png"
-adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt"
+capture_diagnostics
 
 if grep -E "FATAL EXCEPTION|ANR in ${PACKAGE}|Process: ${PACKAGE}.*has died" "$OUTPUT_DIR/logcat.txt"; then
   echo "Native Android smoke test detected a crash or ANR" >&2
@@ -40,4 +48,5 @@ if grep -E "FATAL EXCEPTION|ANR in ${PACKAGE}|Process: ${PACKAGE}.*has died" "$O
 fi
 
 printf 'package=%s\npid=%s\nactivity=%s\n' "$PACKAGE" "$pid" "$ACTIVITY" > "$OUTPUT_DIR/result.txt"
+trap - EXIT
 echo "Native Android smoke test passed for $PACKAGE (pid $pid)"
