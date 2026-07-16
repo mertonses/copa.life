@@ -23,13 +23,13 @@ const [funnel,countries,profileErrors,worker,workerRoutes]=await Promise.all([qu
 `),queryAnalytics(`
   SELECT
     SUM(_sample_interval * double1) AS requests,
-    SUM(IF(blob3 = '5xx', _sample_interval * double1, 0)) AS server_errors,
-    SUM(_sample_interval * double2) / NULLIF(SUM(_sample_interval * double1), 0) AS avg_latency_ms
+    sumIf(_sample_interval * double1, blob3 = '5xx') AS server_errors,
+    SUM(_sample_interval * double2) / SUM(_sample_interval * double1) AS avg_latency_ms
   FROM copa_life_worker_health
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
 `),queryAnalytics(`
   SELECT blob1 AS route, SUM(_sample_interval * double1) AS requests,
-    SUM(IF(blob3 = '5xx', _sample_interval * double1, 0)) AS server_errors
+    sumIf(_sample_interval * double1, blob3 = '5xx') AS server_errors
   FROM copa_life_worker_health
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
   GROUP BY route ORDER BY requests DESC

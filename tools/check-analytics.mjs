@@ -41,6 +41,8 @@ expect(stagingConfig.includes('"dataset": "copa_life_worker_health_staging"'),"s
 expect(worker.includes("routeBucket(url.pathname)")&&worker.includes('return "not_found"'),"Worker metrics do not use a fixed privacy-safe route bucket");
 expect(!worker.includes("writeDataPoint({indexes"),"Analytics Engine metrics must not write an identifier index");
 expect(reportWorkflow.includes("CLOUDFLARE_ANALYTICS_TOKEN")&&reportScript.includes("_sample_interval"),"weekly sampled KPI report is missing");
+expect(reportScript.includes("sumIf(")&&monitorScript.includes("sumIf("),"Analytics Engine conditional aggregates must use supported sumIf syntax");
+expect(!reportScript.includes("NULLIF(")&&!reportScript.includes("SUM(IF(")&&!monitorScript.includes("SUM(IF("),"Analytics Engine queries contain unsupported SQL functions or mixed numeric IF branches");
 expect(monitorWorkflow.includes("PROFILE_ERROR_RATE")&&monitorWorkflow.includes("WORKER_5XX_RATE"),"analytics error monitor thresholds are missing");
 expect(monitorScript.includes('blob1 = \'profile_open_error\'')&&monitorScript.includes("blob3 = '5xx'"),"profile and Worker error monitor queries are incomplete");
 expect(pagesBuilder.includes("CF_WEB_ANALYTICS_TOKEN")&&pagesBuilder.includes("static.cloudflareinsights.com/beacon.min.js"),"Cloudflare Web Analytics build injection is missing");

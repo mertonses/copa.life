@@ -9,14 +9,14 @@ const thresholds={
 };
 const [product,worker]=await Promise.all([queryAnalytics(`
   SELECT
-    SUM(IF(blob1 = 'session_started', _sample_interval * double1, 0)) AS sessions,
-    SUM(IF(blob1 = 'profile_open_error', _sample_interval * double1, 0)) AS profile_errors
+    sumIf(_sample_interval * double1, blob1 = 'session_started') AS sessions,
+    sumIf(_sample_interval * double1, blob1 = 'profile_open_error') AS profile_errors
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '1' HOUR
 `),queryAnalytics(`
   SELECT
     SUM(_sample_interval * double1) AS requests,
-    SUM(IF(blob3 = '5xx', _sample_interval * double1, 0)) AS server_errors
+    sumIf(_sample_interval * double1, blob3 = '5xx') AS server_errors
   FROM copa_life_worker_health
   WHERE timestamp >= NOW() - INTERVAL '1' HOUR
 `)]);
