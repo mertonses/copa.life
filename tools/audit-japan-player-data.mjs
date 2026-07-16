@@ -9,7 +9,7 @@ vm.createContext(context);
 vm.runInContext(`${read("src/data/players_japan.js")}\nthis.pool=POOL_JP;`, context);
 
 const pool = context.pool;
-const profileStore = JSON.parse(read("assets/data/fm26/player_profiles.json"));
+const profileStore = JSON.parse(read("assets/data/copa/player_profiles.json"));
 const jpProfiles = Object.entries(profileStore.records).filter(([key]) => key.startsWith("JP|"));
 const byRole = Object.fromEntries(["GK", "DEF", "MID", "FWD"].map(role => [role, pool.filter(player => player[2] === role).length]));
 const byClub = [...pool.reduce((map, player) => map.set(player[3], (map.get(player[3]) || 0) + 1), new Map())]
@@ -41,7 +41,7 @@ assert(pool.every(player => player[5] === 0 || player[5] === 1), "Yerli/milli ba
 const localFlagCount = pool.filter(player => player[5]).length;
 console.log(JSON.stringify({
   status: failures.length ? "FAIL" : "PASS",
-  snapshot: "FM26 export 2026-07-14",
+  snapshot: "copa.life independent player pool 2026-07-15",
   scope: "J1, 20 kulüp",
   players: pool.length,
   clubs: byClub.length,

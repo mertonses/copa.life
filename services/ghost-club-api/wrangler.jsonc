@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "copa-life-ghost-clubs",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {"enabled": true, "head_sampling_rate": 0.1, "invocation_logs": true},
+    "traces": {"enabled": true, "head_sampling_rate": 0.01}
+  },
+  "triggers": {
+    "crons": ["17 3 * * *"]
+  },
+  "ratelimits": [
+    {"name": "GHOST_WRITE_LIMITER", "namespace_id": "41001", "simple": {"limit": 20, "period": 60}},
+    {"name": "GHOST_READ_LIMITER", "namespace_id": "41002", "simple": {"limit": 120, "period": 60}},
+    {"name": "PRODUCT_ANALYTICS_LIMITER", "namespace_id": "41003", "simple": {"limit": 120, "period": 60}}
+  ],
+  "analytics_engine_datasets": [
+    {"binding": "PRODUCT_ANALYTICS", "dataset": "copa_life_product_events"},
+    {"binding": "WORKER_ANALYTICS", "dataset": "copa_life_worker_health"}
+  ],
+  "d1_databases": [
+    {
+      "binding": "GHOSTS",
+      "database_name": "copa-life-ghosts",
+      "database_id": "30d2c67a-1760-4a80-ac4f-52d5d4e74de2",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

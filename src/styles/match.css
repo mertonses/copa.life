@@ -2437,6 +2437,7 @@ html[data-theme="dark"] .season-stats-modal .ss-scorer b{
   line-height:1.3;
 }
 .ghost-meta svg{display:block;flex:0 0 auto;color:var(--color-primary)}
+.ghost-report-btn{margin-left:4px;padding:2px 5px;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;font:700 7px/1 var(--mono);opacity:.72;cursor:pointer}.ghost-report-btn:hover{opacity:1;color:var(--profile-negative,#c66)}
 .ghost-meta.hidden{display:none}
 .ghost-setting-copy{margin:0 0 7px;color:var(--color-slate);font-size:10px;line-height:1.4}
 html[data-theme="dark"] .ghost-setting-copy{color:var(--color-muted)}

@@ -15,7 +15,7 @@ const PRECACHE = [
   "/src/data/players_italy.js",
   "/src/data/players_germany.js",
   "/src/data/players_japan.js",
-  "/assets/data/fm26/player_profiles.json",
+  "/assets/data/copa/player_profiles.json",
   "/src/data/formations.js",
   "/src/data/opponents.js",
   "/src/data/logos.js",
@@ -38,6 +38,10 @@ const PRECACHE = [
   "/src/state/saveLoad.js",
   "/src/state/metaState.js",
   "/src/state/gameState.js",
+  "/src/state/runPersistence.js",
+  "/src/state/runLifecycle.js",
+  "/src/state/diagnostics.js",
+  "/src/runtime/lazyAssets.js",
   "/src/ui/hub.js",
   "/src/ui/playerProfiles.js",
   "/src/ui/lastMatchReport.js",
@@ -62,7 +66,7 @@ const PRECACHE = [
 ];
 
 const NETWORK_FIRST = [".html", ".js", ".css"];
-const PLAYER_PROFILE_PATH = "/assets/data/fm26/player_profiles.json";
+const PLAYER_PROFILE_PATH = "/assets/data/copa/player_profiles.json";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE)
@@ -106,19 +110,23 @@ self.addEventListener("fetch", e => {
       fetch(freshRequest).then(res => {
         if (res && res.status === 200 && res.type !== "opaque") {
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          e.waitUntil(caches.open(CACHE).then(c => c.put(e.request, clone)));
         }
         return res;
-      }).catch(() => caches.match(e.request))
+      }).catch(async() => {
+        const cached=await caches.match(e.request,{ignoreSearch:true});
+        if(cached)return cached;
+        return new Response("Offline",{status:503,headers:{"content-type":"text/plain; charset=utf-8"}});
+      })
     );
   } else {
     e.respondWith(
-      caches.match(e.request).then(cached => {
+      caches.match(e.request,{ignoreSearch:true}).then(cached => {
         if (cached) return cached;
         return fetch(e.request).then(res => {
           if (res && res.status === 200 && res.type !== "opaque") {
             const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
+            e.waitUntil(caches.open(CACHE).then(c => c.put(e.request, clone)));
           }
           return res;
         });

@@ -1,0 +1,84 @@
+{
+  "assets": [
+    {
+      "file": "graphics/app-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "mime": "image/png",
+      "bytes": 21226,
+      "sha256": "e5d2d70e10da4e19e825653159465315068825aef3e6f3150010575ea9cc28ec"
+    },
+    {
+      "file": "graphics/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 76186,
+      "sha256": "6388e5d5578095f2ace2210ef09fe8f53adc26f95156d5dc19f3b5f193bc73a4"
+    },
+    {
+      "file": "graphics/phone/01-her-kosuda-yeni-kadro.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 218630,
+      "sha256": "b8176ab10b61fea6590be7300080d9272a9d986b8ad8d9c96a72ba82348144bc"
+    },
+    {
+      "file": "graphics/phone/02-zar-at-oyuncunu-sec.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 216742,
+      "sha256": "7f1a529d74f8132d45aa69f4d6e7609dec16c8fcb0369fa152b8e2b07b35996d"
+    },
+    {
+      "file": "graphics/phone/03-taktigini-kur.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 225220,
+      "sha256": "aa9747855b8ad91386a6a985e5b85ba7c1114ada399ff0968f18b3add8bf5520"
+    },
+    {
+      "file": "graphics/phone/04-copa-oyuncu-profili.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 156430,
+      "sha256": "4d6a1f535bb1780e4e86c18a26d584219b4f28ebf92a8bf093e4aa506b805074"
+    },
+    {
+      "file": "graphics/tablet/01-her-kosuda-yeni-kadro.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 217977,
+      "sha256": "d30ea1193ae532e5aa577c746cdbbaa9d7792afaadd571d338809dd105ddbc2e"
+    },
+    {
+      "file": "graphics/tablet/02-zar-at-oyuncunu-sec.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 167816,
+      "sha256": "e2cff3c79ca979d11ee0e6d2f4b04ffe07052b5bad9eb59ed243309b5ec7e041"
+    },
+    {
+      "file": "graphics/tablet/03-taktigini-kur.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 258142,
+      "sha256": "23d54a91edbda3fe3512d0d81e0b57b3e5afad7d08ab50362639d9cc905a608f"
+    },
+    {
+      "file": "graphics/tablet/04-rakibini-analiz-et.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 164167,
+      "sha256": "a23abc596567adf236d7ad1c208842cd1914eb23beea84784f77b339c690e19a"
+    }
+  ]
+}

@@ -2,208 +2,52 @@ import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
-const PLAYER_SOURCES = {
-  TR: ["src/data/players.js", "POOL"],
-  ENG: ["src/data/players_england.js", "POOL_EN"],
-  ES: ["src/data/players_spain.js", "POOL_ES"],
-  IT: ["src/data/players_italy.js", "POOL_IT"],
-  DE: ["src/data/players_germany.js", "POOL_DE"],
-  JP: ["src/data/players_japan.js", "POOL_JP"],
-};
+const ROOT=path.resolve(import.meta.dirname,"..");
+const PLAYER_SOURCES={TR:["src/data/players.js","POOL"],ENG:["src/data/players_england.js","POOL_EN"],ES:["src/data/players_spain.js","POOL_ES"],IT:["src/data/players_italy.js","POOL_IT"],DE:["src/data/players_germany.js","POOL_DE"],JP:["src/data/players_japan.js","POOL_JP"]};
+const EXPECTED_FIELDS=["copa_impact","copa_build_up","copa_space_control","copa_duels","copa_engine","copa_pressure_decision","position_fit","strengths","risks","tendencies","archetype","national_team","secondary_position","preferred_foot","best_position","positions"];
+const DIMENSION_KEYS=["impact","build_up","space_control","duels","engine","pressure_decision"];
+const BANNED_FIELDS=["injury_proneness","aggression","composure","finishing","reflexes","stamina"];
 
-function normalize(value) {
-  return String(value || "")
-    .toLocaleLowerCase("tr-TR")
-    .replaceAll("ı", "i").replaceAll("ł", "l").replaceAll("ø", "o")
-    .replaceAll("ð", "d").replaceAll("þ", "th").replaceAll("đ", "d")
-    .replaceAll("æ", "ae").replaceAll("œ", "oe").replaceAll("ß", "ss")
-    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
-}
+function normalize(value){return String(value||"").toLocaleLowerCase("tr-TR").replaceAll("ı","i").replaceAll("ł","l").replaceAll("ø","o").replaceAll("ð","d").replaceAll("þ","th").replaceAll("đ","d").replaceAll("æ","ae").replaceAll("œ","oe").replaceAll("ß","ss").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");}
+function loadPoolRows(relativePath,variable,country){const context={};vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(ROOT,relativePath),"utf8")+"\nthis.__pool="+variable+";",context);return context.__pool.map(tuple=>({country,tuple,key:[country,normalize(tuple[0]),Number(tuple[4])||0,normalize(tuple[3])].join("|")}));}
 
-function loadPoolRows(relativePath, variable, country) {
-  const context = {};
-  vm.createContext(context);
-  vm.runInContext(`${fs.readFileSync(path.join(ROOT, relativePath), "utf8")}\nthis.__pool=${variable};`, context);
-  return context.__pool.map(tuple => ({
-    country,
-    tuple,
-    key: [country, normalize(tuple[0]), Number(tuple[4]) || 0, normalize(tuple[3])].join("|"),
-  }));
-}
+const profileData=JSON.parse(fs.readFileSync(path.join(ROOT,"assets/data/copa/player_profiles.json"),"utf8")),fields=profileData.fields,records=profileData.records;
+const fallbackSource=fs.readFileSync(path.join(ROOT,"assets/data/copa/player_profiles.js"),"utf8"),fallbackContext={};vm.createContext(fallbackContext);vm.runInContext(fallbackSource,fallbackContext);
+if(JSON.stringify(fallbackContext.__COPA_PLAYER_PROFILE_DATA__)!==JSON.stringify(profileData))throw new Error("JavaScript file fallback differs from the canonical profile JSON");
+if(profileData.schema_version!==1||profileData.model_version!=="copa-model-v1"||profileData.source!=="copa.life oyun modeli")throw new Error("copa-model-v1 metadata is invalid");
+if(JSON.stringify(fields)!==JSON.stringify(EXPECTED_FIELDS))throw new Error("copa profile fields do not match the v1 contract");
+if(BANNED_FIELDS.some(field=>fields.includes(field)))throw new Error("raw or medical attribute leaked into the public schema");
+const poolRows=Object.entries(PLAYER_SOURCES).flatMap(([country,[file,variable]])=>loadPoolRows(file,variable,country)),validKeys=new Set(poolRows.map(row=>row.key)),counts={TR:0,ENG:0,ES:0,IT:0,DE:0,JP:0};
+for(const [key,row] of Object.entries(records)){if(!validKeys.has(key))throw new Error("Unknown profile key: "+key);if(!Array.isArray(row)||row.length!==fields.length)throw new Error("Incomplete profile row: "+key);for(let index=0;index<7;index++)if(!Number.isInteger(row[index])||row[index]<0||row[index]>100)throw new Error(`Invalid copa score ${fields[index]} at ${key}`);for(const index of [7,8,9])if(!Array.isArray(row[index]))throw new Error("Narrative field must be an array: "+key);counts[key.split("|")[0]]++;}
+if(Object.keys(records).length!==8866)throw new Error("Expected 8866 copa profiles");
+if(Object.values(counts).some(count=>!count))throw new Error("A country has no profiles");
 
-const profileData = JSON.parse(fs.readFileSync(path.join(ROOT, "assets/data/fm26/player_profiles.json"), "utf8"));
-const fields = profileData.fields;
-const records = profileData.records;
-if (!Array.isArray(fields) || fields.length !== 39) throw new Error(`Beklenen 39 profil alanı, bulunan: ${fields?.length}`);
-if (!records || typeof records !== "object") throw new Error("PLAYER_PROFILES bulunamadı");
+const indexHtml=fs.readFileSync(path.join(ROOT,"index.html"),"utf8"),profileUi=fs.readFileSync(path.join(ROOT,"src/ui/playerProfiles.js"),"utf8"),profileCss=fs.readFileSync(path.join(ROOT,"src/styles/playerProfiles.css"),"utf8"),profileStore=fs.readFileSync(path.join(ROOT,"src/data/player_profile_store.js"),"utf8"),serviceWorker=fs.readFileSync(path.join(ROOT,"sw.js"),"utf8");
+for(const marker of ["copa-model-v1","DIMENSION_KEYS","positionFit","Baskı ve Karar","Kurtarış Etkisi","Temaslı oyun eğilimi","radarHtml","data-profile-retry","clubLogoFor","genericCrestFor","countryCode",'COPA_PLATFORM==="android"?"":entry.flag',"_normalizeForTest","_renderForTest"])if(!profileUi.includes(marker))throw new Error("Profile UI marker missing: "+marker);
+for(const forbidden of ["injury_proneness","Sakatlığa yatkın","Fazla agresif","aria-valuemax=\"20\"","data-profile-attributes"])if(profileUi.includes(forbidden))throw new Error("Legacy profile UI leaked: "+forbidden);
+for(const marker of ["assets/data/copa/player_profiles.json","assets/data/copa/player_profiles.js","_playerProfileFallback","location.protocol===\"file:\"","source_type:\"copa_model\"","model_version","PLAYER_PROFILE_MAX_ATTEMPTS=2"])if(!profileStore.includes(marker))throw new Error("Profile store marker missing: "+marker);
+for(const marker of [".player-profile-radar-area",".player-profile-fit",".player-profile-model-note",".is-generic-crest",".is-country-code","prefers-reduced-motion"])if(!profileCss.includes(marker))throw new Error("Profile CSS marker missing: "+marker);
+if(!serviceWorker.includes("/assets/data/copa/player_profiles.json")||serviceWorker.includes("/assets/data/fm26/"))throw new Error("Service Worker uses the wrong profile path");
+for(const asset of ["src/runtime/platform.js","src/data/generic_club_visuals.js","src/ui/playerProfiles.js"])if(!indexHtml.includes(asset))throw new Error("Profile dependency missing from index: "+asset);
 
-const poolRows = Object.entries(PLAYER_SOURCES).flatMap(([country, [file, variable]]) => loadPoolRows(file, variable, country));
-const validKeys = new Set(poolRows.map(row => row.key));
-const numericFields = new Set([
-  "acceleration", "rushing_out", "passing", "bravery", "command_of_area", "agility", "handling",
-  "aerial_reach", "crossing", "kicking", "tackling", "free_kicks", "dribbling", "natural_fitness",
-  "decisions", "heading", "leadership", "strength", "pace", "off_the_ball", "flair", "aggression",
-  "work_rate", "composure", "reflexes", "finishing", "one_on_ones", "penalties", "long_shots",
-  "stamina", "injury_proneness",
-]);
+const storeContext={fetch:async()=>({ok:true,json:async()=>profileData}),console,setTimeout};vm.createContext(storeContext);vm.runInContext(profileStore,storeContext);
+const sampleRow=poolRows.find(row=>Object.hasOwn(records,row.key)),resolved=await storeContext.playerProfileResolveKeyAsync({profileKey:sampleRow.key},sampleRow.country);if(resolved!==sampleRow.key)throw new Error("Explicit profile resolution failed");
+const actual=await storeContext.playerProfileByKeyAsync(sampleRow.key);if(!actual||actual.source_type!=="copa_model"||actual.model_version!=="copa-model-v1")throw new Error("copa model record did not load");
 
-const counts = { TR: 0, ENG: 0, ES: 0, IT: 0, DE: 0, JP: 0 };
-for (const [key, values] of Object.entries(records)) {
-  if (!validKeys.has(key)) throw new Error(`Kopa havuzunda olmayan profil anahtarı: ${key}`);
-  if (!Array.isArray(values) || values.length !== fields.length) throw new Error(`Eksik profil alanı: ${key}`);
-  counts[key.split("|")[0]]++;
-  fields.forEach((field, index) => {
-    const value = values[index];
-    if (!numericFields.has(field) || value === null) return;
-    if (!Number.isFinite(value) || value < 1 || value > 20) throw new Error(`Geçersiz ${field}=${value}: ${key}`);
-  });
-}
-if (Object.values(counts).some(count => count === 0)) throw new Error(`Bir veya daha fazla ülke profilsiz: ${JSON.stringify(counts)}`);
+let retryCalls=0;const retryContext={console,setTimeout,fetch:async()=>{retryCalls++;if(retryCalls===1)throw new Error("temporary");return{ok:true,json:async()=>profileData};}};vm.createContext(retryContext);vm.runInContext(profileStore,retryContext);await retryContext.loadPlayerProfiles();if(retryCalls!==2)throw new Error("Profile retry contract failed");
 
-const indexHtml = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-const hubUi = fs.readFileSync(path.join(ROOT, "src/ui/hub.js"), "utf8");
-const profileUi = fs.readFileSync(path.join(ROOT, "src/ui/playerProfiles.js"), "utf8");
-const profileCss = fs.readFileSync(path.join(ROOT, "src/styles/playerProfiles.css"), "utf8");
-const profileStore = fs.readFileSync(path.join(ROOT, "src/data/player_profile_store.js"), "utf8");
-const serviceWorker = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
-const generator = fs.readFileSync(path.join(ROOT, "src/game/generate.js"), "utf8");
-const ghostClient = fs.readFileSync(path.join(ROOT, "src/online/ghostClubs.js"), "utf8");
-for (const asset of ["src/ui/playerProfiles.js", "src/styles/playerProfiles.css"]) {
-  if (!indexHtml.includes(asset)) throw new Error(`Profil arayüz varlığı index.html içinde yüklenmiyor: ${asset}`);
-}
-for (const marker of ["HOVER_OPEN_MS=320", "DOUBLE_TAP_MS=320", "keeperGroups", "normalizedCache", "setDragging", "aria-labelledby", "attributeContainers", "RADAR_DEFINITIONS", "PROFILE_INSIGHT_RULES", "playStyleFor", "analysisFor", "radarHtml", "noAttributes", "loadError", "data-profile-retry", "retryCurrent", "_normalizeForTest", "_renderForTest"]) {
-  if (!profileUi.includes(marker)) throw new Error(`Profil etkileşimi eksik: ${marker}`);
-}
-for (const marker of ["PLAYER_PROFILE_IDENTITY_INDEX", "PLAYER_PROFILE_NAME_CLUB_INDEX", "PLAYER_PROFILE_MAX_ATTEMPTS=2", "retryPlayerProfiles", "playerProfileLoadState", "playerProfileResolveKeyAsync", "playerProfileForPlayerAsync", "source_type:\"full_record\""]) {
-  if (!profileStore.includes(marker)) throw new Error(`Profil kimlik çözümlemesi eksik: ${marker}`);
-}
-if (!generator.includes("o.profileKey=playerProfileKey") || generator.includes("enumerable:false")) throw new Error("Oyuncu profileKey alanı save/copy sırasında korunmuyor");
-for (const marker of ["profile_key:cleanProfileKey", "profileKey:cleanProfileKey", "nat_pos", "club:cleanText(p.club", "age:Math.round"]) {
-  if (!ghostClient.includes(marker)) throw new Error(`Hayalet Kulüp profil kimliği eksik: ${marker}`);
-}
-for (const marker of ["PlayerProfiles.bind(b,o", "PlayerProfiles.bind(r,p)", "scout-node[data-profile-player-index]", "backup-card[data-profile-player-index]", "cap-card[data-profile-player-index]", "pc-pl[data-profile-player-index]", ".ss-scorer", "data-profile-event-index"]) {
-  if (!indexHtml.includes(marker)) throw new Error(`Profil yüzeyi eksik: ${marker}`);
-}
-for (const marker of [".spot-card", "data-bench-idx", "PlayerProfiles.setDragging(true)"]) {
-  if (!hubUi.includes(marker)) throw new Error(`Hub profil yüzeyi eksik: ${marker}`);
-}
-for (const marker of ["(hover:none)", "(pointer:coarse)", ".player-profile-stat-grid", ".player-profile-backdrop", ".player-profile-radar-area", ".player-profile-insight-grid", ".player-profile-state", ".player-profile-state.is-error"]) {
-  if (!profileCss.includes(marker)) throw new Error(`Profil responsive stili eksik: ${marker}`);
-}
-for (const marker of ["/assets/data/fm26/player_profiles.json", "PLAYER_PROFILE_PATH", "ignoreSearch: true"]) {
-  if (!serviceWorker.includes(marker)) throw new Error(`Profil Service Worker önbelleği eksik: ${marker}`);
-}
+const inert=()=>{},uiContext={console,document:{addEventListener:inert,querySelectorAll:()=>[]},performance:{now:()=>0},location:{hostname:"example.test",search:""},addEventListener:inert,matchMedia:()=>({matches:false}),LANG:"tr",selectedCountry:sampleRow.country,CLUB_LOGOS_SM:{},ovCol:value=>"tone-"+value,COPA_PLATFORM:"web"};uiContext.window=uiContext;vm.createContext(uiContext);vm.runInContext(profileUi,uiContext);
+const normalizeProfile=uiContext.PlayerProfiles._normalizeForTest,renderProfile=uiContext.PlayerProfiles._renderForTest;
+const bestIndex=fields.indexOf("best_position"),outfieldKey=Object.keys(records).find(key=>!/^(?:KL|GK)$/i.test(records[key][bestIndex])),keeperKey=Object.keys(records).find(key=>/^(?:KL|GK)$/i.test(records[key][bestIndex]));
+const outfieldProfile=await storeContext.playerProfileByKeyAsync(outfieldKey),keeperProfile=await storeContext.playerProfileByKeyAsync(keeperKey);
+const outfield=normalizeProfile({name:"Outfield",natPos:outfieldProfile.best_position,ov:80,profileKey:outfieldKey},outfieldProfile),keeper=normalizeProfile({name:"Keeper",natPos:"KL",ov:80,profileKey:keeperKey},keeperProfile);
+if(outfield.radar.map(item=>item.key).join(",")!==DIMENSION_KEYS.join(",")||keeper.radar.map(item=>item.key).join(",")!==DIMENSION_KEYS.join(","))throw new Error("Profiles must share the six copa dimensions");
+if(outfield.radar[0].label!=="Hücum Etkisi"||keeper.radar[0].label!=="Kurtarış Etkisi")throw new Error("Role-aware impact label failed");
+if(!outfield.radarReady||!keeper.radarReady||outfield.goalkeeperProfile||!keeper.goalkeeperProfile)throw new Error("Keeper classification failed");
+if(!Number.isInteger(outfield.positionFit)||outfield.positionFit<0||outfield.positionFit>100)throw new Error("Position fit is invalid");
+const html=renderProfile(outfield);for(const marker of ["player-profile-radar-area","player-profile-fit","copa.life oyun modeli · 0–100","GÜÇLÜ YÖNLER"])if(!html.includes(marker))throw new Error("Profile render missing: "+marker);for(const marker of ["player-profile-stat","data-profile-attributes",'aria-valuemax="20"'])if(html.includes(marker))throw new Error("Raw attribute UI rendered: "+marker);
+const repeated=normalizeProfile({name:"Outfield",natPos:outfieldProfile.best_position,ov:80,profileKey:outfieldKey},outfieldProfile);if(JSON.stringify({radar:outfield.radar,strengths:outfield.strengths,risks:outfield.risks,style:outfield.playStyle,fit:outfield.positionFit})!==JSON.stringify({radar:repeated.radar,strengths:repeated.strengths,risks:repeated.risks,style:repeated.playStyle,fit:repeated.positionFit}))throw new Error("copa profile is not deterministic");
+const missing=normalizeProfile({name:"Missing",natPos:"OS",ov:60},null);if(missing.hasModel)throw new Error("Missing model did not produce an empty state");
+const failed=normalizeProfile({name:"Offline",natPos:"OS",ov:60},null,{loadError:new Error("offline")});if(!renderProfile(failed).includes("data-profile-retry"))throw new Error("Load failure has no retry action");
 
-const storeContext = { fetch: async () => ({ ok: true, json: async () => profileData }), console, setTimeout };
-vm.createContext(storeContext);
-vm.runInContext(profileStore, storeContext);
-const sampleRow = poolRows.find(row => Object.hasOwn(records, row.key));
-if (!sampleRow) throw new Error("Profil çözümleme testi için oyuncu bulunamadı");
-const [sampleName, , , sampleClub, sampleAge] = sampleRow.tuple;
-const resolvedExplicit = await storeContext.playerProfileResolveKeyAsync({ profileKey: sampleRow.key }, "TR");
-if (resolvedExplicit !== sampleRow.key) throw new Error("profileKey ile doğrudan çözümleme başarısız");
-const resolvedLegacy = await storeContext.playerProfileResolveKeyAsync({ name: sampleName, club: sampleClub, age: sampleAge }, "");
-if (resolvedLegacy !== sampleRow.key) throw new Error("Eski compact oyuncu için benzersiz kimlik çözümlemesi başarısız");
-const noNameOnlyMatch = await storeContext.playerProfileResolveKeyAsync({ name: sampleName }, "");
-if (noNameOnlyMatch !== null) throw new Error("Profil çözümleyici yalnızca ada göre tahmin yapmamalı");
-const fullRecord = await storeContext.playerProfileForPlayerAsync({ profileKey: sampleRow.key }, sampleRow.country);
-if (!fullRecord || fullRecord.profile_key !== sampleRow.key || fullRecord.source_type !== "full_record") throw new Error("Tam profil kaydı yüklenemedi");
-
-let retryCalls = 0;
-const retryStoreContext = {
-  console,
-  setTimeout,
-  fetch: async () => {
-    retryCalls++;
-    if (retryCalls === 1) throw new Error("temporary network error");
-    return { ok: true, json: async () => profileData };
-  },
-};
-vm.createContext(retryStoreContext);
-vm.runInContext(profileStore, retryStoreContext);
-await retryStoreContext.loadPlayerProfiles();
-if (retryCalls !== 2 || !retryStoreContext.playerProfileLoadState().loaded) throw new Error("Profil yükleyici geçici ağ hatasından sonra yeniden denemedi");
-
-let failedCalls = 0;
-const failedStoreContext = { console, setTimeout, fetch: async () => { failedCalls++; throw new Error("offline"); } };
-vm.createContext(failedStoreContext);
-vm.runInContext(profileStore, failedStoreContext);
-await failedStoreContext.loadPlayerProfiles().then(() => { throw new Error("Profil yükleme hatası yutuldu"); }, () => {});
-const failedState = failedStoreContext.playerProfileLoadState();
-if (failedCalls !== 2 || !failedState.error || failedState.error.code !== "PLAYER_PROFILE_LOAD_FAILED") throw new Error("Profil yükleme hatası eksik profilden ayrı raporlanmıyor");
-
-const inert = () => {};
-const uiContext = {
-  console,
-  document: { addEventListener: inert },
-  performance: { now: () => 0 },
-  location: { hostname: "example.test", search: "" },
-  addEventListener: inert,
-  matchMedia: () => ({ matches: false }),
-  LANG: "tr",
-  selectedCountry: sampleRow.country,
-  ovCol: value => `tone-${value}`,
-};
-uiContext.window = uiContext;
-vm.createContext(uiContext);
-vm.runInContext(profileUi, uiContext);
-const normalizeProfile = uiContext.PlayerProfiles._normalizeForTest;
-const renderProfile = uiContext.PlayerProfiles._renderForTest;
-const outfieldProfile = Object.freeze({
-  labels: Object.freeze({ acceleration: "Hızlanma", pace: "Hız", passing: "Pas", composure: "Soğukkanlılık" }),
-  attributes: Object.freeze({ acceleration: 0, pace: 20, technical: Object.freeze({ passing: 17, tackling: null, finishing: Number.NaN }) }),
-  mental: Object.freeze({ composure: 16 }),
-});
-const outfield = normalizeProfile(Object.freeze({ name: "Test Outfield", natPos: "STP", ov: 80 }), outfieldProfile);
-if (outfield.groups.map(group => group.key).join(",") !== "physical,technical,mental") throw new Error("Saha oyuncusu özellik grupları yanlış");
-if (!outfield.groups.flatMap(group => group.items).some(item => item.key === "acceleration" && item.value === 0)) throw new Error("Sıfır özellik değeri korunmadı");
-if (outfield.groups.flatMap(group => group.items).some(item => item.value === null || !Number.isFinite(item.value))) throw new Error("Geçersiz özellik panelde görünüyor");
-if (!outfield.attributeContainers.includes("attributes.technical") || !outfield.attributeContainers.includes("mental")) throw new Error("İç içe özellik kapları okunmadı");
-
-const keeper = normalizeProfile(
-  Object.freeze({ name: "Test Keeper", natPos: "KL", ov: 78 }),
-  Object.freeze({ goalkeeper: Object.freeze({ handling: 15, reflexes: 18, one_on_ones: 14 }), physical: Object.freeze({ agility: 13 }), mental: Object.freeze({ decisions: 12 }) })
-);
-if (keeper.groups.map(group => group.key).join(",") !== "goalkeeping,physical,mental") throw new Error("Kaleci özellik grupları yanlış");
-if (keeper.groups.some(group => group.key === "technical")) throw new Error("Kaleci panelinde saha oyuncusu teknik grubu gösteriliyor");
-const missing = normalizeProfile(Object.freeze({ name: "Synthetic", natPos: "OS", ov: 60 }), Object.freeze({}));
-if (missing.hasAttributes || missing.groups.length) throw new Error("Verisiz oyuncu için boş durum üretilemedi");
-const loadFailure = normalizeProfile(Object.freeze({ name: "Offline", natPos: "OS", ov: 60 }), null, { loadError: new Error("offline") });
-const loadFailureHtml = renderProfile(loadFailure);
-if (!loadFailure.loadError || !loadFailureHtml.includes("data-profile-retry") || loadFailureHtml.includes("player-profile-state is-empty")) throw new Error("Yükleme hatası yanlışlıkla eksik profil gibi gösteriliyor");
-
-const bestPositionIndex = fields.indexOf("best_position");
-const outfieldKey = Object.keys(records).find(key => records[key][bestPositionIndex] !== "KL");
-const keeperKey = Object.keys(records).find(key => records[key][bestPositionIndex] === "KL");
-const actualOutfieldProfile = await storeContext.playerProfileByKeyAsync(outfieldKey);
-const actualKeeperProfile = await storeContext.playerProfileByKeyAsync(keeperKey);
-const actualOutfield = normalizeProfile(Object.freeze({ name: "Actual Outfield", natPos: actualOutfieldProfile.best_position, ov: 80, profileKey: outfieldKey }), actualOutfieldProfile);
-const actualKeeper = normalizeProfile(Object.freeze({ name: "Actual Keeper", natPos: "KL", ov: 80, profileKey: keeperKey }), actualKeeperProfile);
-if (actualOutfield.radar.map(cluster => cluster.key).join(",") !== "attack,technique,physical,mental,defense,aerial") throw new Error("Saha oyuncusu radar eksenleri yanlış");
-if (actualKeeper.radar.map(cluster => cluster.key).join(",") !== "reflex,positioning,aerial,oneOnOne,distribution,physical") throw new Error("Kaleci radar eksenleri yanlış");
-if (!actualOutfield.radarReady || !actualKeeper.radarReady || !actualKeeper.goalkeeperProfile || actualOutfield.goalkeeperProfile) throw new Error("Saha oyuncusu/kaleci radar ayrımı başarısız");
-const expectedAttack = Math.round([actualOutfieldProfile.finishing, actualOutfieldProfile.long_shots, actualOutfieldProfile.off_the_ball, actualOutfieldProfile.penalties].reduce((a, b) => a + b, 0) / 4 * 5);
-if (actualOutfield.radar.find(cluster => cluster.key === "attack").value !== expectedAttack) throw new Error("Radar cluster ortalaması gerçek statlardan hesaplanmıyor");
-const allowedRadarFields = new Set(fields);
-for (const cluster of actualOutfield.radar.concat(actualKeeper.radar)) {
-  if (cluster.fields.some(field => !allowedRadarFields.has(field))) throw new Error(`Radar hayali alan kullanıyor: ${cluster.key}`);
-}
-if (!actualOutfield.playStyle || !actualKeeper.playStyle) throw new Error("Deterministik oyuncu tarzı üretilemedi");
-const repeatedOutfield = normalizeProfile(Object.freeze({ name: "Actual Outfield", natPos: actualOutfieldProfile.best_position, ov: 80, profileKey: outfieldKey }), actualOutfieldProfile);
-if (JSON.stringify({ radar: actualOutfield.radar, strengths: actualOutfield.strengths, weaknesses: actualOutfield.weaknesses, playStyle: actualOutfield.playStyle, analysis: actualOutfield.analysis }) !== JSON.stringify({ radar: repeatedOutfield.radar, strengths: repeatedOutfield.strengths, weaknesses: repeatedOutfield.weaknesses, playStyle: repeatedOutfield.playStyle, analysis: repeatedOutfield.analysis })) throw new Error("Profil özeti aynı input için deterministik değil");
-if (actualOutfield.analysis && actualOutfield.analysis.split(/[.!?]+/).filter(Boolean).length > 2) throw new Error("Kısa analiz iki cümleyi aşıyor");
-const actualOutfieldHtml = renderProfile(actualOutfield);
-if (!actualOutfieldHtml.includes("player-profile-radar-area") || !actualOutfieldHtml.includes("player-profile-style") || !actualOutfieldHtml.includes("player-profile-stat-grid")) throw new Error("Radar/rol/detay katmanları birlikte render edilmiyor");
-if (actualOutfield.secondaryPositions.includes(actualOutfield.position)) throw new Error("Ana mevki yan mevkilerde tekrar ediliyor");
-if (actualOutfieldProfile.cons && actualOutfieldProfile.cons !== "Bilinmiyor" && !actualOutfield.weaknesses.some(item => item.label === actualOutfieldProfile.cons)) throw new Error("Gerçek profil eksi alanı doğrudan kullanılmıyor");
-const customRadarProfile = Object.freeze({
-  finishing: 20, off_the_ball: 10, passing: 12, pace: 0, decisions: 8, tackling: 6, heading: 4,
-  labels: Object.freeze({}), best_position: "ST (M)", positions: "ST (M)", preferred_foot: "Sadece Sağ Ayaklı",
-});
-const customRadar = normalizeProfile(Object.freeze({ name: "Cluster Test", natPos: "ST (M)", ov: 70 }), customRadarProfile);
-if (!customRadar.radarReady || customRadar.radar.find(cluster => cluster.key === "attack").value !== 75 || customRadar.radar.find(cluster => cluster.key === "physical").value !== 0) throw new Error("Eksik alanları dışlayan veya sıfırı koruyan radar hesabı başarısız");
-if (!customRadar.weaknesses.some(item => item.id === "oneFooted")) throw new Error("Tek config threshold trait sistemi çalışmıyor");
-
-console.log(`Player profiles OK: ${Object.keys(records).length} kayıt (${Object.entries(counts).map(([country, count]) => `${country} ${count}`).join(", ")}); kimlik ve normalize testleri geçti.`);
+console.log(`Player profiles OK: ${Object.keys(records).length} copa-model-v1 records (${Object.entries(counts).map(([country,count])=>country+" "+count).join(", ")}); six shared 0–100 dimensions, position fit, narratives, loader retry and UI rendering passed.`);

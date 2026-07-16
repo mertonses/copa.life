@@ -41,19 +41,20 @@ const allFiles = [
   ...walk(path.join(ROOT, "assets")),
 ].filter((file) => fs.existsSync(file));
 
-const criticalFiles = allFiles.filter((file) => {
-  const relative = path.relative(ROOT, file).replace(/\\/g, "/");
-  const ext = path.extname(file).toLowerCase();
-  return relative === "index.html" || (relative.startsWith("src/") && TEXT_EXTENSIONS.has(ext));
-});
+const indexFile = path.join(ROOT, "index.html");
+const indexHtml = fs.readFileSync(indexFile, "utf8");
+const initialRuntimePaths = new Set([
+  ...[...indexHtml.matchAll(/<script[^>]+src=["']([^"']+)["']/gi)].map(match => match[1].split("?")[0]),
+  ...[...indexHtml.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["']/gi)].map(match => match[1].split("?")[0]),
+]);
+const criticalFiles = [indexFile, ...[...initialRuntimePaths].map(relative => path.join(ROOT, relative.replace(/^\//, ""))).filter(file => fs.existsSync(file))];
 
 const assetFiles = allFiles.filter((file) => {
   const relative = path.relative(ROOT, file).replace(/\\/g, "/");
   return relative.startsWith("assets/") && ASSET_EXTENSIONS.has(path.extname(file).toLowerCase());
 });
 
-const indexFile = path.join(ROOT, "index.html");
-const sourceText = criticalFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
+const sourceText = allFiles.filter(file=>TEXT_EXTENSIONS.has(path.extname(file).toLowerCase())).map((file) => fs.readFileSync(file, "utf8")).join("\n");
 const referenced = new Set();
 for (const match of sourceText.matchAll(/assets\/[A-Za-z0-9_.\-/%]+\.(?:png|jpg|jpeg|webp|svg|ogg|wav)/g)) {
   referenced.add(match[0].replace(/\\/g, "/"));
@@ -88,12 +89,15 @@ if (/assets\/chairs\/[^`"' )]+\.png/.test(sourceText) || /assets\/chairs\/\$\{/.
   failed = true;
   console.error("performance budget failed: runtime must not reference full-size chair PNG files");
 }
-const indexHtml = fs.readFileSync(indexFile, "utf8");
 const hubSource = fs.readFileSync(path.join(ROOT, "src", "ui", "hub.js"), "utf8");
 const layoutSource = fs.readFileSync(path.join(ROOT, "src", "styles", "layout.css"), "utf8");
 if (/<script[^>]+html2canvas/i.test(indexHtml)) {
   failed = true;
   console.error("performance budget failed: html2canvas must be lazy-loaded only when sharing");
+}
+if (/<script[^>]+src=["'][^"']*finalSim\.js/i.test(indexHtml)||!fs.readFileSync(path.join(ROOT,"src","runtime","lazyAssets.js"),"utf8").includes("ensureFinalSim")) {
+  failed = true;
+  console.error("performance budget failed: final simulation must load lazily");
 }
 if (
   !/cleanupTouchDragGhosts/.test(hubSource) ||

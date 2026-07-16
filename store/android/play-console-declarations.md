@@ -1,0 +1,123 @@
+# Play Console beyan cevapları
+
+Son teknik kontrol: 15 Temmuz 2026. Bu dosya, Console açıldığında cevapların doğrudan girilebilmesi için hazırlanmıştır. Köşeli parantezli kuruluş alanları D‑U‑N‑S ve kurumsal iletişim bilgileri kesinleşince doldurulacaktır.
+
+## Uygulama oluşturma
+
+| Alan | Girilecek değer |
+| --- | --- |
+| Varsayılan dil | Türkçe — tr-TR |
+| Ad | copa.life |
+| Uygulama veya oyun | Oyun |
+| Ücretsiz veya ücretli | Ücretsiz |
+| Kategori | Spor |
+| Paket adı | `life.copa.app` |
+| Reklam içeriyor | Hayır |
+| Uygulama içi satın alma | Hayır |
+| Destek e-postası | `[KURUMSAL DESTEK E-POSTASI]` |
+| Destek web sitesi | `https://copa.life/` |
+| Gizlilik politikası | `https://copa-life-legal.pages.dev/privacy.html` |
+
+Play App Signing etkinleştirilecek. Mevcut gizli yükleme anahtarı yalnız AAB yüklemek için kullanılacak.
+
+## App content cevapları
+
+### App access
+
+- Uygulamanın tamamı özel erişim olmadan kullanılabilir: **Evet**.
+- Giriş, hesap, üyelik, konum veya özel erişim talimatı: **Yok**.
+
+### Ads
+
+- Uygulama reklam içeriyor mu: **Hayır**.
+- Reklam SDK'sı veya reklam kimliği kullanımı: **Yok**.
+
+### Target audience and content
+
+- Seçilecek yaş grupları: **13–15, 16–17 ve 18+**.
+- 13 yaş altı: **Seçilmeyecek**.
+- Uygulama özellikle çocuklara yönelik mi: **Hayır**.
+- Gerekçe: strateji/kadro yönetimi odağı ve isteğe bağlı kullanıcı üretimli kulüp adları.
+
+### Content rating / IARC hazırlığı
+
+- Kategori: **Game**.
+- Kullanıcıların çevrim içi içerik paylaşması veya birbirlerinin oluşturduğu içeriği görmesi: **Evet** — yalnız Ghost kulüp adı ve tamamlanmış oyun/kadro anlık görüntüsü.
+- Serbest sohbet, özel mesaj, fotoğraf, ses veya video yükleme: **Hayır**.
+- Kullanıcı konumu paylaşımı: **Hayır**.
+- Kumar/bahis, gerçek para veya satın alınabilir rastgele ödül: **Hayır**.
+- Grafik şiddet, cinsel içerik, uyuşturucu, nefret söylemi veya küfür: **Hayır**.
+- Metinsel, grafik olmayan spor sakatlığı ve rastgele maç olayları bulunabilir.
+- Son IARC derecesi yalnız Console anketinin gerçek soruları görülerek kabul edilecek; tahmini derece mağaza metnine yazılmayacak.
+
+### User-generated content
+
+- UGC var mı: **Evet** — kullanıcının oluşturduğu Ghost Club adı.
+- İçerik oluşturmadan önce şartların kabulü: **Evet**.
+- Yasak içerik kuralları: **Evet** — hakaret/nefret, müstehcenlik, siyasi içerik, kişi taklidi, gerçek kulüp ve şirket markaları.
+- Uygulama içi bildir: **Evet**.
+- Uygulama içi engelle/gizle: **Evet** — bildirilen Ghost bir daha gösterilmez.
+- Sunucu moderasyonu: **Evet** — `review` ve `blocked` durumları, tekrar eden ihlallerde istemci engeli.
+- Takedown kanalı: **Evet**, ancak yayımdan önce kurumsal destek e-postasıyla son doğrulama yapılacak.
+
+### Account creation and deletion
+
+- Uygulama kullanıcı hesabı oluşturuyor mu: **Hayır**.
+- Kullanıcı hesabı ile giriş var mı: **Hayır**.
+- Play hesap silme URL'si gereksinimi: **Uygulanamaz**.
+- Buna rağmen isteğe bağlı Ghost verisi uygulama içindeki **Verilerimi sil** işlemiyle silinebilir.
+
+### Diğer politika beyanları
+
+| Soru | Cevap |
+| --- | --- |
+| News / magazine app | Hayır |
+| Government app | Hayır |
+| Financial features | Hayır |
+| Health features | Hayır |
+| VPN service | Hayır |
+| Dating | Hayır |
+| Real-money gambling/games/contests | Hayır |
+| Ads ID | Hayır |
+
+## Data Safety cevap haritası
+
+### Üst seviye cevaplar
+
+- Uygulama kullanıcı verisi topluyor veya paylaşıyor mu: **Evet**.
+- Tüm aktarılan veriler aktarım sırasında şifreleniyor mu: **Evet — HTTPS**.
+- Kullanıcı veri silme talebinde bulunabilir mi: **Evet — uygulama içinden**.
+- Veri üçüncü taraflarla "shared" olarak beyan edilecek mi: **Hayır**. Cloudflare geliştirici adına çalışan hizmet sağlayıcıdır; Ghost paylaşımı ayrıca açıkça açıklanan ve kullanıcının başlattığı bir eylemdir. Console metni bu politika istisnasından farklılaşırsa bu cevap yeniden değerlendirilecek.
+- Veri satışı, reklam, pazarlama veya kişiselleştirilmiş reklam: **Yok**.
+
+### Toplanan veri türleri
+
+| Play veri türü | Örnek | Zorunlu mu | Amaç | Saklama |
+| --- | --- | --- | --- | --- |
+| Other user-generated content | Ghost kulüp adı | İsteğe bağlı | App functionality | En çok 45 gün |
+| App activity → Other actions / App interactions | Kadro, ülke, diziliş, başkan, sonuç ve oyun sürümü | İsteğe bağlı | App functionality | En çok 45 gün |
+| Device or other IDs | Uygulamanın ürettiği rastgele kurulum kimliği | İsteğe bağlı | App functionality; Fraud prevention, security and compliance | Aktif Ghost/güvenlik kaydı süresince |
+| Other user-generated content | Bildirilen Ghost ve bildirim nedeni | İsteğe bağlı | Fraud prevention, security and compliance | En çok 90 gün |
+
+Notlar:
+
+- Kurulum kimliği donanım, Android veya reklam kimliği değildir.
+- Ghost varsayılan kapalıdır; şart kabulü ve ayrı açık paylaşım rızası gerekir.
+- Süresi dolan Ghost kayıtları D1'den günlük görevle fiziksel olarak silinir.
+- IP adresi uygulama veritabanında saklanmaz; altyapı sağlayıcısının geçici güvenlik/ağ işlemesi gizlilik politikasındaki hizmet sağlayıcı kapsamındadır.
+- Yerel oyun kaydı cihazdan çıkmadığı sürece Data Safety'de "collected" değildir.
+- Android paketi ad/e-posta/mesaj toplayan gömülü iletişim formu içermez. Destek bağlantısı açık web sitesine çıkar.
+
+## Privacy policy kontrolü
+
+Politika yayından önce şu üç kuruluş alanıyla güncellenecek:
+
+1. D‑U‑N‑S kaydıyla birebir aynı yasal geliştirici adı.
+2. Kurumsal destek ve gizlilik e-postası.
+3. Kamuya açık geliştirici telefon numarası gerekiyorsa yayımlanacak numara.
+
+Politika URL'si herkese açık HTTPS sayfası olmalı; PDF olmamalı, coğrafi engel veya giriş istememelidir.
+
+## Console'a girerken son doğrulama
+
+Bu cevaplar, yüklenecek son AAB'nin tarama raporu ve üretim Ghost Worker davranışıyla bir kez daha karşılaştırılacak. Play Console'un soru metni bu dosyadaki sınıflandırmadan farklıysa daha geniş/şeffaf beyan seçilecek ve bu dosya güncellenecek.

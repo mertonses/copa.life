@@ -1,0 +1,25 @@
+{
+  "appId": "life.copa.app",
+  "appName": "copa.life",
+  "webDir": "dist-android",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#f5f0e8",
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#f5f0e8",
+      "showSpinner": false,
+      "launchFadeOutDuration": 220
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#f5f0e8",
+      "overlaysWebView": false
+    }
+  }
+}

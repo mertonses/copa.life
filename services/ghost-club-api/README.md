@@ -1,13 +1,82 @@
 # copa.life Ghost Club API
 
-This Worker stores completed run snapshots and returns a compatible Ghost Club for a future run. It is deliberately separate from the static GitHub Pages client: the game always falls back to AI when this API is unreachable.
+Cloudflare Worker + D1 service for opt-in anonymous completed-run opponents, plus a privacy-minimised aggregate product-event endpoint. The game always falls back to AI and analytics calls fail silently when this service is unavailable.
 
-## Deploy
+## Local validation
 
-1. Create a Cloudflare D1 database named `copa-life-ghosts`.
-2. Run `wrangler d1 execute copa-life-ghosts --file=schema.sql` from this folder.
-3. Copy `wrangler.toml.example` to `wrangler.toml` and fill in the D1 database id.
-4. Deploy with `wrangler deploy`.
-5. Add the resulting Worker URL to `<meta name="copa-ghost-api" content="...">` in `index.html`.
+```powershell
+npm ci
+npm test
+npm run types
+npm run check:deploy
+```
 
-The browser queues every completed run locally when offline or before an API URL is configured. The **Play Against Ghost Clubs** setting only controls opponent matching; it never disables run capture.
+`migrations/` is the schema source of truth. `schema.sql` remains a readable bootstrap snapshot; new changes must be added as a numbered migration.
+
+## Environments
+
+- `wrangler.jsonc`: production Worker and production D1 binding.
+- `wrangler.staging.jsonc`: isolated staging Worker bound to the dedicated `copa-life-ghosts-staging` D1 database.
+- Production allows only `https://copa.life` and `https://www.copa.life` browser origins.
+
+Before the first staging deployment:
+
+```powershell
+npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.staging.jsonc
+npx wrangler deploy --config wrangler.staging.jsonc
+```
+
+The Cloudflare account must have Analytics Engine enabled before either Worker can deploy with its analytics bindings. D1 migrations can be applied independently and are safe to rerun.
+
+Production deployment:
+
+```powershell
+npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.jsonc
+npx wrangler deploy --config wrangler.jsonc
+```
+
+GitHub Actions performs tests and dry-run builds on pull requests. `main` deploys production after migrations; staging is an explicit manual workflow choice. Deployments require `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Reports use a separate read-only `CLOUDFLARE_ANALYTICS_TOKEN`.
+
+## Health and observability
+
+- `GET /v1/health` checks Worker execution and a real D1 query.
+- `ghost-health.yml` probes production every 30 minutes and fails visibly in GitHub Actions.
+- Set the repository/environment variable `GHOST_API_HEALTH_URL` to the canonical production `/v1/health` URL; the script's workers.dev URL is only a fallback.
+- Workers Logs sample 10% and traces sample 1% in production; staging uses higher sampling.
+- Errors are emitted as structured JSON with event, fixed route bucket, and message.
+- `copa_life_worker_health` stores privacy-safe aggregate route, status, request-count and latency metrics; staging uses `copa_life_worker_health_staging`.
+- `analytics-report.yml` writes a weekly seven-day KPI artifact; `analytics-monitor.yml` checks profile-open and Worker 5xx rates every 30 minutes.
+
+Manual health check:
+
+```powershell
+node scripts/check-health.mjs
+```
+
+## Aggregate product analytics
+
+- `POST /v1/analytics/events` accepts only the fixed event and dimension allowlists in `src/index.js`.
+- The production Analytics Engine dataset is `copa_life_product_events`; staging writes to `copa_life_product_events_staging`.
+- No user ID, session ID, install ID, player name, club name, email, free text or Analytics Engine index is stored.
+- `blob1..8` and `double1..2` are documented in `docs/analytics.md`.
+- The dataset is created automatically on the first production write after deployment.
+- Android does not ship the analytics client; the endpoint currently receives web events only.
+
+## Rollback
+
+1. Inspect versions: `npx wrangler versions list --config wrangler.jsonc`.
+2. Roll back Worker code: `npx wrangler rollback --config wrangler.jsonc`.
+3. Do not reverse an applied D1 migration destructively. Add a forward corrective migration and deploy it.
+4. Verify `/v1/health`, then inspect Workers Logs for `ghost_api_error`.
+
+## Security model
+
+- Server-generated cryptographic public IDs; submitted IDs never overwrite rows.
+- Actual streamed request bodies are capped at 64 KB.
+- Rate limits are keyed by Cloudflare's connecting IP, with anonymous client ID only as a non-edge fallback.
+- Stored snapshots receive a server-computed SHA-256 integrity value.
+- CORS is an origin boundary, not authentication; schema checks and rate limiting remain mandatory.
+- Uploads require the current explicit-consent version and a client-held deletion token.
+- D1 stores only one-way hashes of installation and deletion identifiers.
+- Reports immediately move a Ghost to review; three unique reports block it and repeat violations can block the submitting client.
+- A daily scheduled handler physically deletes expired Ghost rows after 45 days and prunes reports after 90 days.

@@ -32,10 +32,31 @@
     return {ok:true,value:normalized,length,code:"",maxLength:MAX_LENGTH};
   }
 
+  function moderationText(value){
+    return normalize(value).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("en-US").replace(/[013457@$]/g,ch=>({0:"o",1:"i",3:"e",4:"a",5:"s",7:"t","@":"a","$":"s"})[ch]||ch).replace(/[^a-z0-9\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+/gu," ").trim();
+  }
+
+  function reservedNames(){
+    const names=[];
+    ["OPP_POOL","OPP_POOL_EN","OPP_POOL_ES","OPP_POOL_IT","OPP_POOL_DE","OPP_POOL_JP"].forEach(key=>{if(Array.isArray(root[key]))names.push(...root[key]);});
+    ["CLUB_LOGOS","CLUB_LOGOS_EN","CLUB_LOGOS_ES","CLUB_LOGOS_IT","CLUB_LOGOS_DE","CLUB_LOGOS_JP"].forEach(key=>{if(root[key]&&typeof root[key]==="object")names.push(...Object.keys(root[key]));});
+    return new Set(names.map(name=>moderationText(name).replace(/\s+/g,"")).filter(Boolean));
+  }
+
+  function inspectUser(value){
+    const base=inspect(value);if(!base.ok)return base;
+    const text=moderationText(base.value),compact=text.replace(/\s+/g,"");
+    const prohibited=[/\b(?:hitler|nazi|isis|kkk)\b/,/\b(?:porn|porno|sex|seks|xxx|hentai)\b/,/\b(?:kill all|oldurun|nefret)\b/];
+    if(prohibited.some(pattern=>pattern.test(text)))return {...base,ok:false,code:"restricted_name"};
+    if(/\b(?:official|resmi|gercek hesap|real account|president|prime minister|cumhurbaskani|basbakan|party|partisi|senator|minister|bakan)\b/.test(text))return {...base,ok:false,code:"review_required"};
+    if(reservedNames().has(compact))return {...base,ok:false,code:"reserved_brand"};
+    return base;
+  }
+
   function sanitize(value,fallback=""){
     const result=inspect(value);
     return result.ok?result.value:fallback;
   }
 
-  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,inspect,normalize,sanitize});
+  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,inspect,inspectUser,normalize,sanitize});
 })(typeof window!=="undefined"?window:globalThis);

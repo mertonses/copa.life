@@ -1,0 +1,38 @@
+{
+  "package_id": "life.copa.app",
+  "version_code": 1,
+  "version_name": "1.0.0",
+  "release_status": "candidate",
+  "source": {
+    "build_version": "335a1f275ceb",
+    "build_fingerprint": "366e493b21e7a486668bdbea10947fdfc927fdb779c79a1c90c7d02ee3d4faa1",
+    "fingerprint": "a52c6f0b2d30630014d2ab8dfff21f0a8a79fd482644685114a85ace9e127b50",
+    "commit": "335a1f275ceb2db256360ce054c0653751d7865f"
+  },
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "compile_sdk": 36,
+  "signed_aab": {
+    "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
+    "bytes": 8700741,
+    "sha256": "B9EE14DC270B4F204C72570D8706D40FE172A3E8E2DCCAF6DCC13628E1EC8B3E"
+  },
+  "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
+  "permissions": [
+    "android.permission.INTERNET"
+  ],
+  "verification": {
+    "main_test_suite": "passed",
+    "critical_browser_tests": "passed",
+    "ghost_worker_tests": "passed",
+    "web_android_parity": "passed",
+    "android_package_scan": "passed",
+    "signed_aab_signature": "passed",
+    "physical_device_smoke": "required before track promotion"
+  },
+  "external_prerequisites": [
+    "D-U-N-S and Google Play organization verification",
+    "organization-domain support email with working MX records",
+    "final legal entity name and contact details on privacy and takedown pages"
+  ]
+}

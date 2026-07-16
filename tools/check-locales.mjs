@@ -38,7 +38,7 @@ for(const language of ["es","de","it"]){
 
 const profileSource=fs.readFileSync(new URL("../src/ui/playerProfiles.js",import.meta.url),"utf8");
 for(const language of ["es","de","it"]){
-  for(const key of ["overview","playStyle","strengths","weaknesses","analysis","loading","noAttributes"]){
+  for(const key of ["overview","playStyle","strengths","risks","tendencies","analysis","loading","noModel","positionFit","modelNote"]){
     const marker=new RegExp(`${language}:\\{[^\\n]*${key}:`);
     if(!marker.test(profileSource))errors.push(`player profile ${language}.${key} missing`);
   }

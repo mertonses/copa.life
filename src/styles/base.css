@@ -29,3 +29,5 @@ html[data-theme="dark"]{
 }
 html[data-theme="dark"] body::before{background:radial-gradient(rgba(157,183,185,.1) 1px,transparent 1px)}
 html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{color:var(--text-primary);background:var(--surface-elevated)}
+html[data-copa-platform="android"] body{box-sizing:border-box;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+html[data-copa-platform="android"] .global-footer-bar{padding-bottom:max(4px,env(safe-area-inset-bottom))}

@@ -1,0 +1,20 @@
+{
+  "name": "copa-life-ghost-club-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "types": "wrangler types --config wrangler.jsonc worker-configuration.d.ts",
+    "check:types": "wrangler types --config wrangler.jsonc --check worker-configuration.d.ts",
+    "check:deploy": "wrangler deploy --config wrangler.jsonc --dry-run --outdir .wrangler-dry-run",
+    "check:migrations": "node scripts/check-migrations.mjs",
+    "check": "npm test && npm run check:migrations && npm run check:types && npm run check:deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "latest",
+    "@cloudflare/workers-types": "latest",
+    "vitest": "latest",
+    "wrangler": "latest"
+  }
+}

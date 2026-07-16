@@ -1,0 +1,89 @@
+name: Ghost API
+
+on:
+  pull_request:
+    paths:
+      - 'services/ghost-club-api/**'
+      - '.github/workflows/ghost-api.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/ghost-club-api/**'
+      - '.github/workflows/ghost-api.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Worker environment to deploy
+        required: true
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ghost-api-${{ github.event.inputs.target || 'production' }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: services/ghost-club-api
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/ghost-club-api/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - name: Verify compatibility with shipped web and Android clients
+        working-directory: ${{ github.workspace }}
+        run: node tools/check-ghost-clubs.mjs
+
+  deploy-production:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target == 'production')
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.jsonc
+      - run: npx wrangler deploy --config wrangler.jsonc
+      - name: Production health smoke test
+        run: node scripts/check-health.mjs "${{ vars.GHOST_API_HEALTH_URL }}"
+
+  deploy-staging:
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'staging'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.staging.jsonc
+      - run: npx wrangler deploy --config wrangler.staging.jsonc
+      - name: Staging health smoke test
+        if: vars.GHOST_API_STAGING_HEALTH_URL != ''
+        run: node scripts/check-health.mjs "${{ vars.GHOST_API_STAGING_HEALTH_URL }}"
