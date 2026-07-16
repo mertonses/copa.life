@@ -19,11 +19,12 @@ Sakatlık yatkınlığı kaldırılmıştır. Oyuncu fotoğrafı kullanılmaz. T
 
 ## Platform ayrımı
 
-Web sürümü mevcut gerçek kulüp armalarını korur; bu dosyaların lisans durumu ayrı ve açık bir risk olarak envanterde bloke kalır.
+Web sürümü mevcut gerçek kulüp armalarını ve bayrak görsellerini korur. Lisans/provenans durumu çözülmüş sayılmaz; proje sahibinin 16 Temmuz 2026 tarihli açık web-only risk istisnasıyla dağıtılır.
 
 Android sürümü:
 
 - Gerçek arma klasörünü ve logo haritalarını paketlemez.
+- Bayrak bitmap/SVG dosyalarını paketlemez; ülke ve dil seçiminde jenerik metin kodları kullanır.
 - Tutarlı jenerik kalkanlar ve 2–3 harflik kısaltmalar kullanır.
 - Patreon bağlantısı ve ikonunu paketlemez.
 - Resmî kupa adları yerine ülke temelli jenerik adlar kullanır.
@@ -49,4 +50,4 @@ Android sürümü:
 
 ## Yayın kapısı
 
-Yerel hak denetimi envanter kapsamını doğrular. Web için gerçek armalar ve kaynağı belgelenmemiş bayrak dosyaları temizlenmeden genel yayın denetimi geçmez. Android ise ayrı paket denetiminden geçer; webdeki gerçek armaları Android'e taşımaz.
+Yerel hak denetimi envanter kapsamını doğrular. Web için gerçek armalar ve kaynağı belgelenmemiş bayrak dosyaları yalnız açık `owner_accepted_web_only` kaydı bulunduğu sürece yayınlanabilir; bu kayıt hukuki temizlik değildir. Android ayrı ve daha katı paket denetiminden geçer; webdeki arma veya bayrak görsellerini Android'e taşımaz.

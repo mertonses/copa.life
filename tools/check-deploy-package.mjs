@@ -42,6 +42,7 @@ if (!packageJson.scripts?.["check:rights:public"]) fail("package.json must expos
 if (!/check:rights:public/.test(workflow)) fail("GitHub Pages workflow must enforce the rights gate");
 if (!/PUBLIC_RELEASE/.test(buildScript)) fail("Pages builder must enforce the rights gate independently");
 if (!/deny_public_release_until_cleared/.test(rightsInventory)) fail("rights inventory must deny public release by default");
+if (!/explicit_owner_risk_acceptance_does_not_equal_clearance/.test(rightsInventory)) fail("web-only owner exceptions must remain explicitly uncleared");
 if (!/npm run build:pages/.test(workflow)) fail("GitHub Pages workflow must build a clean artifact");
 if (!/path:\s*'dist'|path:\s*dist/.test(workflow)) fail("GitHub Pages artifact must upload dist");
 if (/path:\s*'\.'|path:\s*\./.test(workflow)) fail("GitHub Pages must not upload the repository root");

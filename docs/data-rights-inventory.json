@@ -1,19 +1,23 @@
 {
   "schema_version": 1,
   "policy": "deny_public_release_until_cleared",
-  "reviewed_at": "2026-07-15",
+  "web_only_exception_policy": "explicit_owner_risk_acceptance_does_not_equal_clearance",
+  "reviewed_at": "2026-07-16",
   "notice": "This inventory is an engineering control, not legal advice.",
   "records": [
     {
       "id": "club-crests",
       "title": "Real club crests and mappings used by the web build",
-      "status": "blocked",
+      "status": "owner_accepted_web_only",
       "risk": "high",
       "paths": ["assets/clubs/**", "src/data/logos.js"],
       "basis": "No redistribution licence or written permission is recorded. Android excludes these files and uses generic abbreviation crests.",
-      "distribution_decision": "Keep the real crests in the web source as requested, but do not mark the public web release as cleared until licence evidence is recorded. Android and the standalone legal-policy site exclude them.",
-      "evidence": null,
-      "owner": null
+      "distribution_decision": "Keep the real crests in the web build under an explicit project-owner web-only risk exception. Android and the standalone legal-policy site exclude them.",
+      "distribution_scope": "web_only",
+      "risk_acknowledgement": "The project owner explicitly accepts the unresolved copyright and trademark risk for web distribution. This exception is not a licence, permission or legal clearance.",
+      "evidence": "Explicit project-owner direction recorded 2026-07-16: keep real crests on web and exclude them from Android.",
+      "owner": "copa.life project owner",
+      "reviewed_at": "2026-07-16"
     },
     {
       "id": "copa-player-model",
@@ -40,12 +44,16 @@
     {
       "id": "country-flags",
       "title": "Country flag artwork files",
-      "status": "review_required",
+      "status": "owner_accepted_web_only",
       "risk": "medium",
       "paths": ["assets/flags/**"],
       "basis": "The designs are national flags, but the provenance of each bitmap/vector implementation is not recorded.",
-      "evidence": null,
-      "owner": null
+      "distribution_decision": "Keep the existing flag artwork in the web build under an explicit project-owner web-only risk exception. Android uses text country codes and excludes these files.",
+      "distribution_scope": "web_only",
+      "risk_acknowledgement": "The project owner accepts the unresolved artwork-provenance risk for web distribution. This exception is not a licence, permission or legal clearance.",
+      "evidence": "Explicit project-owner direction recorded 2026-07-16: keep web visuals while removing rights-sensitive artwork from Android.",
+      "owner": "copa.life project owner",
+      "reviewed_at": "2026-07-16"
     }
   ]
 }

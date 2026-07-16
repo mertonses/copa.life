@@ -15,6 +15,7 @@ Android paket kontrolü gerçek kulüp armalarını, Patreon varlık ve bağlant
 ## İçerik ve marka ayrımı
 
 - Android'de gerçek kulüp armaları paketlenmez.
+- Web'de kullanılan bayrak bitmap/SVG dosyaları Android'e paketlenmez; ülke ve dil seçimleri jenerik metin kodlarıyla gösterilir.
 - Takımlar, ad veya kısaltmayla üretilen jenerik copa.life armalarıyla gösterilir.
 - Oyuncu fotoğrafı bulunmaz.
 - Oyuncu profilleri altı adet 0–100 copa.life oyun boyutundan oluşur; ham üçüncü taraf nitelikleri ve bireysel sakatlık yatkınlığı bulunmaz.

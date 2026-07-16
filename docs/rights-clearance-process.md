@@ -4,7 +4,7 @@ Bu süreç teknik bir yayın kontrolüdür; hukuki görüş değildir. Hak sahib
 
 ## Kural
 
-`docs/data-rights-inventory.json` içindeki her kayıt `cleared` olmadıkça genel web paketi halka açık dağıtıma hazır sayılmaz. Android paketi ayrıca gerçek kulüp armalarını dışarıda bırakan bağımsız paket kontrolünden geçer.
+`docs/data-rights-inventory.json` varsayılan olarak temizlenmemiş her kaydı engeller. Yalnız proje sahibinin açıkça kabul ettiği `owner_accepted_web_only` kaydı web dağıtımına istisna olabilir. Bu durum lisans, izin veya hukuki temizlik anlamına gelmez; kapsam, risk kabulü, kanıt, sorumlu ve inceleme tarihi zorunludur. Android paketi bu istisnaları devralmaz ve ilgili görsel dosyaları katı biçimde dışarıda bırakır.
 
 Bir kaydı `cleared` yapmak için aynı kayda şu alanlar eklenmelidir:
 
@@ -19,7 +19,7 @@ Satın alma makbuzu, kaynak adı veya “fan projesi” ibaresi tek başına yen
 
 1. `npm run check:rights` ile envanter yapısını doğrula.
 2. Android için `npm run build:android && npm run check:android` çalıştır; bu paket gerçek armaları ve riskli marka/ödeme varlıklarını içermemelidir.
-3. Genel web yayını için `npm run check:rights:public` ile bütün web varlıklarının kanıtlı biçimde temizlendiğini doğrula.
+3. Genel web yayını için `npm run check:rights:public` çalıştır; temiz kayıtları ve açık web-only istisnalarını doğrula, başka bir durum varsa yayını durdur.
 4. Paket içeriğini ve kanıt kayıtlarını sürüm etiketiyle arşivle.
 5. İtiraz/silme talebi gelirse ilgili kaydı `blocked` durumuna döndür, yeni yayını durdur ve varlığı kaldır.
 
@@ -27,6 +27,5 @@ Satın alma makbuzu, kaynak adı veya “fan projesi” ibaresi tek başına yen
 
 - Oyuncu kaynak verisinin üçüncü taraf bir futbol oyunundan geldiği varsayılmaz. Proje sahibinin bağımsız kaynak beyanı kaydedilmiştir.
 - Yayınlanan oyuncu profilleri copa.life'a ait altı adet 0–100 oyun boyutudur; ham 1–20 alanlar ve bireysel sakatlık yatkınlığı yayımlanmaz.
-- Android gerçek kulüp armalarını içermez ve jenerik kısaltma armaları kullanır.
-- Web paketindeki gerçek kulüp armaları için yeniden dağıtım kanıtı kayıtlı değildir; genel web yayını bu nedenle ayrıca engellidir.
-- Bayrak dosyalarının uygulama biçimi için kaynak/lisans kaydı tamamlanmalıdır.
+- Android gerçek kulüp armalarını veya bayrak görsel dosyalarını içermez; jenerik kulüp kısaltmaları ve metin ülke kodları kullanır.
+- Web paketindeki gerçek kulüp armaları ve bayrak dosyaları için yeniden dağıtım kanıtı kayıtlı değildir. Proje sahibi 16 Temmuz 2026 tarihinde yalnız web dağıtımı için açık risk istisnası vermiştir; kayıtlar hukuken temizlenmiş sayılmaz.

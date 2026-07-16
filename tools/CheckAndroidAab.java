@@ -26,6 +26,7 @@ public final class CheckAndroidAab {
 
     private static final List<String> FORBIDDEN_PATHS = List.of(
         PUBLIC + "assets/clubs/",
+        PUBLIC + "assets/flags/",
         PUBLIC + "assets/icons/patreon.svg",
         PUBLIC + "src/data/logos.js",
         PUBLIC + "src/state/diagnostics.js",
@@ -140,6 +141,9 @@ public final class CheckAndroidAab {
             String buildVersion = jsonString(packagedBuild, "build_version");
             if (packagedIndex == null || !packagedIndex.contains("src/runtime/nativeApp.js?v=" + buildVersion)) {
                 failures.add("native runtime cache key does not match packaged build version");
+            }
+            if (packagedIndex == null || !packagedIndex.contains("class=\"generic-country-code\"")) {
+                failures.add("generic Android country-code visuals are missing");
             }
             String visibleVersion = "v" + jsonString(expectedVersion, "versionName") + " (" + jsonInt(expectedVersion, "versionCode") + ")";
             if (packagedIndex == null || !packagedIndex.contains(visibleVersion)) failures.add("visible Android version label is missing");
