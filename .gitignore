@@ -3,6 +3,7 @@ node_modules/
 .wrangler-dry-run*/
 dist/
 dist-android/
+dist-ios/
 dist-legal/
 .npm-cache/
 .pw-browsers/

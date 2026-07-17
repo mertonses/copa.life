@@ -122,9 +122,9 @@ if (/\.player-profile-layer\.is-sheet \.player-profile-backdrop\{[^}]*backdrop-f
   failed = true;
   console.error("performance budget failed: mobile player profile must not blur the full WebView backdrop");
 }
-if (!/html\[data-copa-platform="android"\] body::before\{display:none\}/.test(baseSource)) {
+if (!/html\[data-copa-platform="android"\] body::before,\s*html\[data-copa-platform="ios"\] body::before\{display:none\}/.test(baseSource)) {
   failed = true;
-  console.error("performance budget failed: Android must not allocate the decorative fixed-page texture layer");
+  console.error("performance budget failed: native stores must not allocate the decorative fixed-page texture layer");
 }
 for (const [name, value, limit] of budgets) {
   console.log(`${name}: ${kb(value)} / ${kb(limit)}`);

@@ -166,6 +166,59 @@
     return"WIDE";
   }
 
+  function passProbabilities(input){
+    const data=input&&typeof input==="object"?input:{};
+    const passing=clamp(data.passing==null?65:data.passing,20,110);
+    const vision=clamp(data.vision==null?passing:data.vision,20,110);
+    const decisions=clamp(data.decisions==null?passing:data.decisions,20,110);
+    const anticipation=clamp(data.anticipation==null?passing:data.anticipation,20,110);
+    const opponentPress=clamp(data.opponentPress==null?65:data.opponentPress,20,110);
+    const distance=clamp(data.distance==null?16:data.distance,2,55);
+    const kind=String(data.kind||data.sequence||"SHORT_PASS");
+    const quality=(passing*0.40+vision*0.25+decisions*0.20+anticipation*0.15)/100;
+    const pressure=(opponentPress-60)/100;
+    const kindRisk=kind==="THROUGH_BALL"?0.075:kind==="LONG_PASS"||kind==="LONG_BALL"?0.095:
+      kind==="CROSS"?0.065:kind==="BACK_PASS"?-0.035:0;
+    const distanceRisk=Math.max(0,distance-12)*0.0032;
+    const interception=clamp(0.055+pressure*0.12+kindRisk+distanceRisk-(quality-0.60)*0.18,0.025,0.29);
+    const loose=clamp(0.025+kindRisk*0.28+distanceRisk*0.34-(quality-0.60)*0.055,0.012,0.095);
+    const success=clamp(1-interception-loose,0.64,0.96);
+    const errorRadius=clamp((1-quality)*5.2+distanceRisk*9+(kind==="THROUGH_BALL"?0.6:0),0.35,4.8);
+    return{success:round(success),interception:round(interception),loose:round(loose),errorRadius:round(errorRadius,2)};
+  }
+
+  function resolvePass(input,rng){
+    const probabilities=passProbabilities(input);
+    const roll=rng.next();
+    const outcome=roll<probabilities.success?"SUCCESS":
+      roll<probabilities.success+probabilities.interception?"INTERCEPTION":"LOOSE";
+    return{outcome,...probabilities};
+  }
+
+  function disciplineProbabilities(input){
+    const data=input&&typeof input==="object"?input:{};
+    const tactic=normalizeTactic(data.tactic);
+    const visual=data.phase==="visual";
+    const cardRisk=clamp(data.cardRisk||0,-0.08,0.20);
+    const minute=clamp(data.minute||0,0,120);
+    const tacticRisk=tactic==="push"?0.012:tactic==="more"?0.005:tactic==="calm"?-0.008:tactic==="hold"?-0.004:0;
+    const lateRisk=minute>75?0.006:minute>45?0.002:0;
+    const base=visual?0.011:0.036;
+    const yellow=clamp(base+tacticRisk+cardRisk*0.12+lateRisk,visual?0.008:0.018,visual?0.022:0.082);
+    const directRed=clamp(0.0015+Math.max(0,cardRisk)*0.012+(tactic==="push"?0.0015:0),0.001,0.007);
+    const secondYellow=clamp(0.018+lateRisk*1.8+(tactic==="push"?0.010:0),0.012,0.055);
+    return{yellow:round(yellow,5),directRed:round(directRed,5),secondYellow:round(secondYellow,5)};
+  }
+
+  function resolveDiscipline(input,rng){
+    const probabilities=disciplineProbabilities(input);
+    const roll=rng.next();
+    if(roll>=probabilities.yellow)return{outcome:"NONE",...probabilities};
+    if(rng.bool(probabilities.directRed))return{outcome:"RED",...probabilities};
+    if(input&&input.alreadyBooked&&rng.bool(probabilities.secondYellow))return{outcome:"SECOND_YELLOW",...probabilities};
+    return{outcome:"YELLOW",...probabilities};
+  }
+
   function tacticEffects(tactic){
     switch(normalizeTactic(tactic)){
       case"more":return{attack:0.10,shot:0.065,xg:0.030,defence:-0.075,tempo:0.12,card:0.008,possession:0.015};
@@ -181,7 +234,7 @@
     for(const key of SEQUENCES)sequenceCounts[key]=0;
     return{
       sequenceCounts,wide:0,central:0,recycle:0,longBall:0,counter:0,setPieces:0,
-      shots:0,goals:0,pressWins:0,discipline:0,plannedSequences:0
+      shots:0,goals:0,pressWins:0,discipline:0,passes:0,interceptions:0,plannedSequences:0
     };
   }
 
@@ -214,6 +267,28 @@
       else if(type==="LONG_BALL")audit.longBall++;
       else if(type==="COUNTER"||type==="PRESS_RECOVERY")audit.counter++;
       else if(type==="SET_PIECE")audit.setPieces++;
+    }
+
+    function applyDiscipline(side,tactic,cardRisk){
+      const resolution=resolveDiscipline({
+        tactic,cardRisk,minute,alreadyBooked:yellowed[side]>0,phase:"core"
+      },rng);
+      if(resolution.outcome==="NONE")return false;
+      audit.discipline++;
+      if(resolution.outcome==="RED"){
+        stats.red[side]++;
+        powers[side]-=4.5;
+        events.push({minute:Math.floor(minute),type:"red",side});
+        return true;
+      }
+      stats.yellow[side]++;yellowed[side]++;
+      events.push({minute:Math.floor(minute),type:"yellow",side});
+      if(resolution.outcome==="SECOND_YELLOW"&&stats.red[0]+stats.red[1]<3){
+        stats.red[side]++;
+        powers[side]-=4.5;
+        events.push({minute:Math.floor(minute),type:"red",side});
+      }
+      return true;
     }
 
     function playPeriod(endMinute,isGolden){
@@ -253,22 +328,36 @@
         }
         if(sequence==="SET_PIECE"||rng.bool(0.060)){stats.corners[side]++;}
 
+        if(sequence!=="SET_PIECE"){
+          const passKind=sequence==="LONG_BALL"?"LONG_PASS":
+            sequence==="WIDE_LEFT"||sequence==="WIDE_RIGHT"?"CROSS":
+            sequence==="COUNTER"||sequence==="PRESS_RECOVERY"?"THROUGH_BALL":
+            sequence==="RECYCLE"||sequence==="LOW_TEMPO"?"BACK_PASS":"SHORT_PASS";
+          const pass=resolvePass({
+            passing:powers[side],vision:powers[side],decisions:powers[side],
+            anticipation:powers[side],opponentPress:powers[other]+(oppEffect.press||0)*100,
+            distance:passKind==="LONG_PASS"?30:passKind==="CROSS"?22:passKind==="THROUGH_BALL"?24:13,
+            kind:passKind
+          },rng);
+          audit.passes++;
+          if(pass.outcome!=="SUCCESS"){
+            if(pass.outcome==="INTERCEPTION"){
+              audit.interceptions++;
+              stats.pressWins[other]++;
+              audit.pressWins++;
+            }
+            applyDiscipline(side,tactic,ownEffect.card);
+            continue;
+          }
+        }
+
         const attackEdge=(powers[side]-powers[other])/300;
         let shotChance=0.43+attackEdge+ownEffect.attack+ownEffect.shot-oppEffect.defence;
         if(sequence==="COUNTER"||sequence==="PRESS_RECOVERY")shotChance+=0.055;
         if(sequence==="RECYCLE"||sequence==="LOW_TEMPO")shotChance-=0.085;
         if(sequence==="SET_PIECE")shotChance+=0.035;
         if(!rng.bool(clamp(shotChance,0.18,0.72))){
-          if(rng.bool(clamp(0.030+ownEffect.card,0.012,0.075))){
-            stats.yellow[side]++;yellowed[side]++;audit.discipline++;
-            events.push({minute:Math.floor(minute),type:"yellow",side});
-            const redChance=yellowed[side]>1?0.022:0.004;
-            if(rng.bool(redChance)&&stats.red[0]+stats.red[1]<3){
-              stats.red[side]++;audit.discipline++;
-              powers[side]-=4.5;
-              events.push({minute:Math.floor(minute),type:"red",side});
-            }
-          }
+          applyDiscipline(side,tactic,ownEffect.card);
           continue;
         }
 
@@ -296,16 +385,7 @@
           stats.blocked[other]++;
         }
 
-        if(rng.bool(clamp(0.052+ownEffect.card+(isGolden?0.01:0),0.012,0.085))){
-          stats.yellow[side]++;yellowed[side]++;audit.discipline++;
-          events.push({minute:Math.floor(minute),type:"yellow",side});
-          const redChance=yellowed[side]>1?0.026:0.004;
-          if(rng.bool(redChance)&&stats.red[0]+stats.red[1]<3){
-            stats.red[side]++;audit.discipline++;
-            powers[side]-=4.5;
-            events.push({minute:Math.floor(minute),type:"red",side});
-          }
-        }
+        applyDiscipline(side,tactic,ownEffect.card+(isGolden?0.01:0));
       }
     }
 
@@ -399,7 +479,8 @@
 
   return{
     MODEL_VERSION,REPLAY_VERSION,RNG,SEQUENCES:Object.freeze(SEQUENCES.slice()),
-    normalizeConfig,chooseSequence,expectedGoalsForShot,resolveShot,simulateMatch,
+    normalizeConfig,chooseSequence,expectedGoalsForShot,resolveShot,
+    passProbabilities,resolvePass,disciplineProbabilities,resolveDiscipline,simulateMatch,
     createReplayCode,parseReplayCode,replay
   };
 });

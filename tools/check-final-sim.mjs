@@ -4,13 +4,14 @@ const sim = fs.readFileSync("src/sim/finalSim.js", "utf8");
 const core = fs.readFileSync("src/sim/finalSimCore.js", "utf8");
 const replay = fs.readFileSync("src/runtime/finalReplay.js", "utf8");
 const persistence = fs.readFileSync("src/state/finalSimPersistence.js", "utf8");
+const penaltyPersistence = fs.readFileSync("src/state/penaltyPersistence.js", "utf8");
+const calibration = fs.readFileSync("src/balance/finalCalibration.js", "utf8");
 const lazy = fs.readFileSync("src/runtime/lazyAssets.js", "utf8");
 const index = fs.readFileSync("index.html", "utf8");
 const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 
 const wideBiasMatch = sim.match(/hasWingCard\?0\.(\d+):0\.(\d+)/);
 const yellowRateMatch = sim.match(/roll<0\.(\d+)&&disciplineCooldown<=0/);
-const secondYellowMatch = sim.match(/rng\.bool\(0\.(\d+)\)&&stats\.reds\[0\]\+stats\.reds\[1\]<1/);
 const toRate = (match) => (match ? Number(`0.${match[1]}`) : NaN);
 
 const checks = [
@@ -37,7 +38,10 @@ const checks = [
   },
   {
     name: "second yellow red cards are rare",
-    pass: Number.isFinite(toRate(secondYellowMatch)) && toRate(secondYellowMatch) <= 0.004,
+    pass:
+      /secondYellow:round\(secondYellow,5\)/.test(core) &&
+      /secondYellow=clamp\([^;]+0\.055\)/.test(core) &&
+      /disciplineModel\.secondYellow/.test(sim),
   },
   {
     name: "sterile matches can force real attacks",
@@ -107,6 +111,15 @@ const checks = [
       /finalSimCore\.js/.test(lazy),
   },
   {
+    name: "visual and Monte Carlo engines share pass and discipline resolution",
+    pass:
+      /function passProbabilities/.test(core) &&
+      /function resolvePass/.test(core) &&
+      /function disciplineProbabilities/.test(core) &&
+      /sharedCore\.passProbabilities/.test(sim) &&
+      /sharedCore\.disciplineProbabilities/.test(sim),
+  },
+  {
     name: "final checkpoint preserves minute, RNG, players and ball",
     pass:
       /rngState/.test(sim) &&
@@ -115,12 +128,39 @@ const checks = [
       /MAX_AGE_MS/.test(persistence),
   },
   {
+    name: "penalty checkpoint preserves attempts, order and RNG position",
+    pass:
+      /copa_penalty_checkpoint_v1/.test(penaltyPersistence) &&
+      /rngCalls/.test(penaltyPersistence) &&
+      /homeShots/.test(penaltyPersistence) &&
+      /homeShooters/.test(penaltyPersistence) &&
+      /_tryResumePenaltyCheckpoint/.test(index),
+  },
+  {
     name: "shareable replay code is versioned and contains no names",
     pass:
       /CFS\$\{REPLAY_VERSION\}/.test(core) &&
       /parseReplayCode/.test(core) &&
       /copyFinalReplayCode/.test(replay) &&
       !/playerName|clubName|teamName/.test(replay),
+  },
+  {
+    name: "real replay viewer is read-only, seekable and accessible",
+    pass:
+      /openViewer/.test(replay) &&
+      /finalReplayRange/.test(replay) &&
+      /speechSynthesis/.test(replay) &&
+      /aria-live="polite"/.test(replay) &&
+      /timeline:cleanEvents/.test(replay),
+  },
+  {
+    name: "weekly calibration stores only anonymous aggregate buckets",
+    pass:
+      /copa_final_calibration_v1/.test(calibration) &&
+      /powerBands/.test(calibration) &&
+      /endTypes/.test(calibration) &&
+      /tactics/.test(calibration) &&
+      !/seedNum|teamName|playerName|deviceId/.test(calibration),
   },
   {
     name: "final audit is user-visible and replay telemetry is seed-free",

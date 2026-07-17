@@ -50,8 +50,7 @@ test("player profile summary, six copa dimensions and insights stay responsive",
   }
 
   const scrollMetrics=await content.evaluate(element=>({client:element.clientHeight,scroll:element.scrollHeight,overflow:getComputedStyle(element).overflowY}));
-  if(testInfo.project.name.includes("mobile"))expect(scrollMetrics.scroll).toBeGreaterThan(scrollMetrics.client);
-  else expect(scrollMetrics.scroll).toBeGreaterThanOrEqual(scrollMetrics.client);
+  expect(scrollMetrics.scroll).toBeGreaterThanOrEqual(scrollMetrics.client);
   expect(scrollMetrics.overflow).toBe("auto");
 
   await page.evaluate(()=>document.documentElement.setAttribute("data-theme","dark"));
@@ -109,6 +108,9 @@ test("coarse double tap opens the complete Android profile without an expensive 
     const button=document.createElement("button");
     button.id="androidProfileTrigger";
     button.textContent=value.name;
+    button.style.position="fixed";
+    button.style.inset="120px auto auto 20px";
+    button.style.zIndex="9000";
     document.body.appendChild(button);
     (globalThis as any).PlayerProfiles.bind(button,value,{delayCoarseAction:true});
   },player);

@@ -7,7 +7,7 @@ const INVENTORY=path.join(ROOT,"docs/data-rights-inventory.json");
 const PUBLIC=process.argv.includes("--public")||/^(1|true)$/i.test(process.env.PUBLIC_RELEASE||"");
 const REQUIRED=["assets/clubs/","assets/data/copa/","tools/data/player_profile_source.json","assets/flags/","src/data/logos.js","src/data/player_profile_store.js","src/data/players"];
 const WEB_ONLY_EXCEPTION="owner_accepted_web_only";
-const ignored=new Set([".git","node_modules","dist","dist-android","android/app/src/main/assets/public",".tmp",".wrangler",".wrangler-dry-run","playtest/runner/test-results"]);
+const ignored=new Set([".git","node_modules","dist","dist-android","dist-ios","android/app/src/main/assets/public","ios/App/App/public",".tmp",".wrangler",".wrangler-dry-run","playtest/runner/test-results"]);
 
 const posix=value=>value.replace(/\\/g,"/");
 function walk(directory,out=[]){

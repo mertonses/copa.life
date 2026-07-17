@@ -46,6 +46,7 @@ export async function waitForBridge(page: Page, timeoutMs = 10_000): Promise<boo
     await page.waitForFunction(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       () => typeof (globalThis as any).CopaTestBridge !== "undefined",
+      undefined,
       { timeout: timeoutMs }
     );
     return true;

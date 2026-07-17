@@ -51,6 +51,14 @@ describe("Ghost Club Worker",()=>{
     expect(response.headers.get("access-control-allow-origin")).toBeNull();
   });
 
+  it("accepts the fixed Android and iOS WebView origins",async()=>{
+    for(const nativeOrigin of ["https://localhost","capacitor://localhost"]){
+      const response=await exports.default.fetch(new Request("https://ghost.test/v1/health",{headers:{origin:nativeOrigin}}));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("access-control-allow-origin")).toBe(nativeOrigin);
+    }
+  });
+
   it("uses the Cloudflare connecting IP before the spoofable client header",()=>{
     const request=new Request("https://ghost.test",{headers:{"cf-connecting-ip":"203.0.113.9","x-copa-client":"GCL-CHANGEME1"}});
     expect(requestKey(request)).toBe("ip:203.0.113.9");
@@ -68,6 +76,7 @@ describe("Ghost Club Worker",()=>{
     expect(response.status).toBe(204);
     expect(await response.text()).toBe("");
     expect(normalizeAnalyticsEvent({...raw,event:"arbitrary_event"})).toBeNull();
+    expect(normalizeAnalyticsEvent({...raw,platform:"ios"})).toMatchObject({platform:"ios"});
     expect(normalizeAnalyticsEvent({...raw,page_path:"/?email=user@example.com"})).toBeNull();
     const finalEvent={...raw,schema_version:2,event:"final_sim_completed",round:6,outcome:"win",model_version:"copa-final-core-v2",power_gap:"home_4_11",end_type:"golden_goal",tactic:"push"};
     expect(normalizeAnalyticsEvent(finalEvent)).toMatchObject({event:"final_sim_completed",schemaVersion:2,modelVersion:"copa-final-core-v2",powerGap:"home_4_11",endType:"golden_goal",tactic:"push"});

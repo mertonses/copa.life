@@ -1,0 +1,96 @@
+name: iOS validation
+
+on:
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'assets/**'
+      - 'src/**'
+      - 'store/ios/**'
+      - 'release/ios-version.json'
+      - 'capacitor.config.*'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'privacy.html'
+      - 'terms.html'
+      - 'takedown.html'
+      - 'tools/**'
+      - '.github/workflows/ios-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'assets/**'
+      - 'src/**'
+      - 'store/ios/**'
+      - 'release/ios-version.json'
+      - 'capacitor.config.*'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'privacy.html'
+      - 'terms.html'
+      - 'takedown.html'
+      - 'tools/**'
+      - '.github/workflows/ios-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Select Xcode 26
+        shell: bash
+        run: |
+          CURRENT_MAJOR="$(xcodebuild -version | awk 'NR==1 {split($2,v,"."); print v[1]}')"
+          if [[ "$CURRENT_MAJOR" != "26" ]]; then
+            XCODE_APP="$(find /Applications -maxdepth 1 -type d -name 'Xcode_26*.app' | sort | tail -1)"
+            test -n "$XCODE_APP"
+            sudo xcode-select --switch "$XCODE_APP/Contents/Developer"
+          fi
+          xcodebuild -version | grep '^Xcode 26'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix services/ghost-club-api
+
+      - name: Validate shared game and Ghost API
+        run: |
+          npm test
+          npm run check --prefix services/ghost-club-api
+
+      - name: Sync and validate iOS project
+        run: |
+          npm run ios:sync
+          npm run check:parity
+          npm run check:ios:readiness
+
+      - name: Build iPhone and iPad simulator app
+        run: bash tools/build-ios-simulator.sh
+
+      - name: Upload simulator candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-simulator-${{ github.sha }}
+          path: outputs/ios-derived/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+          retention-days: 14
