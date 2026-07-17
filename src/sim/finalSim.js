@@ -31,9 +31,12 @@ const UI_COLORS = {
 function setSpeed(s) {
   speedMul = s;
   try { localStorage.setItem("copa_spd", s); } catch (e) {}
-  document.querySelectorAll(".spd").forEach(b => b.classList.toggle("on", parseFloat(b.dataset.s) === s));
+  document.querySelectorAll(".spd[data-s]").forEach(b => {
+    const active=parseFloat(b.dataset.s)===s;
+    b.classList.toggle("on",active);
+    b.setAttribute("aria-pressed",active?"true":"false");
+  });
 }
-function simPause() { if (sim && sim.pause) sim.pause(); }
 function simSkip()  {
   if (window._finalPenaltyPending && typeof window.openCopaFinalPenalties === "function") {
     window.openCopaFinalPenalties(true);
@@ -1960,6 +1963,15 @@ function buildSim(myPow, oppPow) {
       _dom("simState",isTR?"DEVRE ARASI":"HALF TIME");
       _html("simComm","🔔 "+(isTR?"DEVRE ARASI":"HALF TIME")+" · "+score[0]+"–"+score[1]);
       reposition();kickoff(1);
+      setTimeout(()=>{
+        if(gameEnded||etMode)return;
+        const liveState=score[0]===score[1]
+          ?(isTR?"Dengeli final":"Even game")
+          :score[0]>score[1]
+            ?myName.slice(0,8)+" "+(isTR?"önde":"leads")
+            :oppName.slice(0,8)+" "+(isTR?"önde":"leads");
+        _dom("simState",liveState);
+      },900);
     }
   }
   function checkFT(){

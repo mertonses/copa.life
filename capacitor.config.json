@@ -10,6 +10,11 @@
     "allowMixedContent": false
   },
   "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "LIGHT",
+      "hidden": false
+    },
     "SplashScreen": {
       "launchAutoHide": false,
       "backgroundColor": "#f5f0e8",

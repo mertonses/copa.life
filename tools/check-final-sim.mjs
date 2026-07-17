@@ -82,6 +82,18 @@ const checks = [
     name: "Turkish sudden-death copy uses ANİ ÖLÜM",
     pass: /ANİ ÖLÜM/.test(index) && !/ANI ÖLÜM/.test(index),
   },
+  {
+    name: "final test seed creates a final-ready hub",
+    pass: /const _jumpToFinal=!!window\._wantFinal/.test(index) && /round=6;opponent=bracket\[5\]/.test(index),
+  },
+  {
+    name: "pause state synchronizes visual and accessible controls",
+    pass: /function _setFinalPauseUi\(paused\)/.test(index) && /aria-pressed/.test(index) && /_simAutoPaused/.test(index),
+  },
+  {
+    name: "speed controls expose their selected state",
+    pass: /querySelectorAll\("\.spd\[data-s\]"\)/.test(sim) && /setAttribute\("aria-pressed",active\?"true":"false"\)/.test(sim),
+  },
 ];
 
 let failed = false;

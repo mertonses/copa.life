@@ -1,0 +1,11 @@
+{
+  "source": "Android 14 API 34 emulator, signed release candidate",
+  "captured_at": "2026-07-17",
+  "images": [
+    {"file": "draft-philosophy.png", "label": "Felsefe ve oyun planı seçimi"},
+    {"file": "squad-hub.png", "label": "Takım merkezi ve ilk 11"},
+    {"file": "player-profile.png", "label": "Oyuncu profili ve COPA puanları"},
+    {"file": "player-profile-details.png", "label": "Oyuncu profili güçlü yönler ve riskler"},
+    {"file": "final-simulation.png", "label": "Final maç simülasyonu"}
+  ]
+}

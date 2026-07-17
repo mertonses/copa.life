@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const checks = [
-  ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "hasConsent", "requestConsent", "deleteMyData", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent"]],
+  ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "hasConsent", "requestConsent", "deleteMyData", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent", "flushReportQueue", "clearLocalGhostData"]],
   ["hub bridge", "src/ui/hub.js", ["_maybeGhostOpponent", "_applyGhostOpponent", "ghostMeta", "ghost-report-btn", "reportGhost"]],
   ["match bridge", "src/sim/finalSim.js", ["_ghostProfile", "ghostTactics"]],
   ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "GhostClubs.recordCompletedRun"]],
@@ -115,6 +115,25 @@ assert.deepEqual(queued[0].final_profile.events, [{ minute: 56, side: "home", ty
 
 assert.equal(ghosts.blockGhost("G-BLOCK123"), true);
 assert.deepEqual(ghosts.blockedIds(), ["G-BLOCK123"]);
+storage.delete("copa_ghost_report_queue_v1");
+sandbox.navigator.onLine = false;
+const offlineReport = await ghosts.reportGhost("G-OFFLINE12", "impersonation");
+assert.deepEqual(JSON.parse(JSON.stringify(offlineReport)), { ok: true, hidden: true, pending: true, sent: 0 });
+assert.equal(JSON.parse(storage.get("copa_ghost_report_queue_v1") || "[]").length, 1, "offline reports must be queued");
+sandbox.navigator.onLine = true;
+assert.deepEqual(JSON.parse(JSON.stringify(await ghosts.flushReports())), { sent: 1, pending: 0 });
+assert.deepEqual(JSON.parse(storage.get("copa_ghost_report_queue_v1") || "[]"), [], "queued reports must flush online");
+
+storage.set("copa_ghost_client_id_v1", "GCL-DELETECLIENT");
+storage.set("copa_ghost_delete_token_v1", "GDT-DELETE1234567890");
+sandbox.fetch = async (_url, options) => options?.method === "DELETE"
+  ? { ok: true, json: async () => ({ ok: true, deleted: 1 }) }
+  : { ok: true, json: async () => ({ ghost: snapshot }) };
+assert.deepEqual(JSON.parse(JSON.stringify(await ghosts.deleteMyData())), { ok: true, deleted: 1 });
+for (const key of ["copa_ghost_consent_v1", "copa_ghost_client_id_v1", "copa_ghost_delete_token_v1", "copa_ghost_current_run_v1"]) {
+  assert.equal(storage.has(key), false, `successful deletion must clear local ${key}`);
+}
+assert.deepEqual(ghosts.blockedIds(), ["G-BLOCK123", "G-OFFLINE12"], "data deletion must preserve the never-show-again block list");
 ghosts.withdrawConsent();
 assert.equal(ghosts.enabled(), false);
 assert.deepEqual(JSON.parse(storage.get("copa_ghost_upload_queue_v1") || "[]"), [], "withdrawing consent must clear queued uploads");

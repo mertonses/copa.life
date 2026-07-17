@@ -5,6 +5,7 @@
     "node": ">=22 <23"
   },
   "scripts": {
+    "postinstall": "node tools/patch-capacitor-safe-area.mjs",
     "favicons": "node tools/generate-favicons.mjs favicon.svg",
     "fix:encoding": "node tools/fix-mojibake.mjs",
     "build:pages": "node tools/build-pages.mjs",

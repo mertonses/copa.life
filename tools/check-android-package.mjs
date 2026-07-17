@@ -22,7 +22,11 @@ if(!index.includes('class="generic-country-code"'))fail("Android index is missin
 if(/<img\s+[^>]*src=["']assets\/flags\//i.test(index))fail("Android index still renders flag artwork");
 const androidI18n=path.join(OUT,"src/data/i18n.js"),androidProfiles=path.join(OUT,"src/ui/playerProfiles.js");
 if(!fs.existsSync(androidI18n)||!fs.readFileSync(androidI18n,"utf8").includes('COPA_PLATFORM==="android"'))fail("Android language controls do not switch to generic country codes");
-if(!fs.existsSync(androidProfiles)||!fs.readFileSync(androidProfiles,"utf8").includes('flag:global.COPA_PLATFORM==="android"?"":entry.flag'))fail("Android player profiles do not suppress flag artwork");
+if(!fs.existsSync(androidProfiles))fail("Android player profiles are missing");
+else{
+  const profileSource=fs.readFileSync(androidProfiles,"utf8");
+  if(!/function nationalTeamInfo\([^)]*\)\{[^}]*flag:""/s.test(profileSource)||!profileSource.includes("countryFlag:nationalTeam.flag"))fail("Android player profiles do not suppress flag artwork");
+}
 const nativeRuntime=path.join(OUT,"src/runtime/nativeApp.js");
 if(fs.existsSync(nativeRuntime)){const source=fs.readFileSync(nativeRuntime,"utf8");if(!source.includes("capacitor.Plugins"))fail("native runtime does not support Capacitor 8 plugin globals");}
 if(!index.includes("Capacitor.Plugins.Browser")||!index.includes('plugin.open({url:"https://copa.life/"'))fail("Android support link is not routed through the native Browser plugin");

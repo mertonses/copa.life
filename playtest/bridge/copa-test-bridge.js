@@ -192,9 +192,11 @@
       return { ok: false, reason: `shout ${type} not available` };
     },
 
-    /** Speed up sim: multiplier = 0.5 | 1 | 2 | 5 */
+    /** Speed up sim: multiplier = 0.5 | 1 | 2 | 4 | 8 (raw engine values 5..80 are also accepted) */
     set_sim_speed(mult = 2) {
-      if (typeof _g("setSpeed") === "function") { _g("setSpeed")(mult); return { ok: true }; }
+      const requested=Number(mult);
+      const engineSpeed=requested>0&&requested<=8?requested*10:requested;
+      if (typeof _g("setSpeed") === "function"&&[5,10,20,40,80].includes(engineSpeed)) { _g("setSpeed")(engineSpeed); return { ok: true, engineSpeed }; }
       return { ok: false, reason: "setSpeed not available" };
     },
 
