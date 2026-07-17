@@ -6,6 +6,8 @@ const hub=fs.readFileSync(new URL("../src/ui/hub.js",import.meta.url),"utf8");
 const state=fs.readFileSync(new URL("../src/state/gameState.js",import.meta.url),"utf8");
 const lifecycle=fs.readFileSync(new URL("../src/state/runLifecycle.js",import.meta.url),"utf8");
 const persistence=fs.readFileSync(new URL("../src/state/runPersistence.js",import.meta.url),"utf8");
+const finalPersistence=fs.readFileSync(new URL("../src/state/finalSimPersistence.js",import.meta.url),"utf8");
+const finalSim=fs.readFileSync(new URL("../src/sim/finalSim.js",import.meta.url),"utf8");
 const expect=(condition,message)=>{if(!condition)throw new Error(message);};
 
 for(const marker of [
@@ -23,6 +25,8 @@ expect(html.includes("function hasCompleteStartingXI()"),"Tam ilk 11 kontrolü e
 expect(html.includes("if(!hasCompleteStartingXI()){showModal"),"Eksik ilk 11 ile maç başlatma engeli eksik");
 expect(html.includes("choose.locked")&&html.includes("||!p||filled[idx])return false"),"Draft çift seçim/reentry koruması eksik");
 expect(lifecycle.includes("illegal_transition")&&lifecycle.includes("incomplete_starting_xi"),"Merkezi state/invariant koruması eksik");
+expect(html.includes("CopaFinalSimPersistence")&&html.includes("_tryResumeFinalCheckpoint"),"Final süreç-kapanması geri yükleme köprüsü eksik");
+expect(finalSim.includes("getCheckpointState")&&finalSim.includes("restoreCheckpoint")&&finalSim.includes("rngState"),"Final motoru checkpoint/restore API'si eksik");
 
 const makeStorage=()=>{const values=new Map();return{getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key),values};};
 const sandbox={window:null,localStorage:makeStorage(),sessionStorage:makeStorage(),Date,JSON,Object,Array,Number,Math,Set};
@@ -42,4 +46,21 @@ expect(api.persist(migrated).ok,"Doğrulanmış kayıt yazılamadı");
 sandbox.localStorage.setItem(api.KEYS.primary,"{broken");
 expect(api.read().source==="session","Bozuk primary kaydında geçerli session fallback seçilmedi");
 
-console.log("Run persistence OK: save v5 schema, draft/hub validation, v2-v4 migration, fallback, backup and state invariants verified.");
+vm.runInNewContext(finalPersistence,sandbox,{filename:"finalSimPersistence.js"});
+const finalApi=sandbox.CopaFinalSimPersistence;
+const checkpoint={
+  modelVersion:"copa-final-core-v2",runSeed:42,round:6,homePower:76,awayPower:74,
+  match:{
+    rngState:12345,matchTime:1234,score:[1,0],stats:{shots:[4,3]},
+    teams:[Array.from({length:11},()=>({x:1,y:1})),Array.from({length:11},()=>({x:1,y:1}))],
+    ball:{x:52.5,y:34},goalEvents:[]
+  }
+};
+expect(finalApi.persist(checkpoint),"Final checkpoint yazılamadı");
+const restoredFinal=finalApi.read().state;
+expect(restoredFinal&&restoredFinal.match.matchTime===1234&&restoredFinal.match.rngState===12345,"Final aynı dakika/RNG durumuyla okunamadı");
+const stale={...restoredFinal,savedAt:Date.now()-49*60*60*1000};
+expect(!finalApi.validate(stale),"48 saatten eski final checkpoint kabul edildi");
+expect(!finalApi.validate({...restoredFinal,match:{...restoredFinal.match,score:[99,0]}}),"Geçersiz final skoru kabul edildi");
+
+console.log("Run persistence OK: save v5 plus versioned final minute/RNG checkpoint, migration, fallback, backup and state invariants verified.");

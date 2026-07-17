@@ -172,6 +172,7 @@ if("serviceWorker"in navigator){
             <input id="seedInput" maxlength="14" placeholder="auto">
             <span class="seed-hint">Aynı seed, aynı başlangıç koşullarını üretir.</span>
           </div>
+          <button class="btn btn-ghost final-replay-import-btn" id="finalReplayImportBtn" type="button" onclick="openFinalReplayImport()">FİNAL TEKRAR KODU</button>
           <div id="advancedGhostSettingSlot" class="advanced-ghost-slot"></div>
         </div>
       </div>
@@ -284,9 +285,11 @@ if("serviceWorker"in navigator){
 <script src="src/state/gameState.js?v=20260714-save4"></script>
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/state/runPersistence.js?v=20260715-persistence1"></script>
+<script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260715-lazy1"></script>
+<script src="src/runtime/finalReplay.js?v=20260717-replay2"></script>
 <script src="src/cards/cardDefs.js?v=20260712c"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
@@ -471,6 +474,7 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
   if($("advancedToggle"))$("advancedToggle").textContent=tr?"Gelişmiş Ayarlar":"Advanced Settings";
   const seedLbl=document.querySelector(".advanced-body .seedwrap label");if(seedLbl)seedLbl.textContent=tr?"Seed":"Seed";
   const seedHint=document.querySelector(".seed-hint");if(seedHint)seedHint.textContent=tr?"Aynı seed, aynı başlangıç koşullarını üretir.":"Same seed creates the same starting conditions.";
+  const replayImportBtn=$("finalReplayImportBtn");if(replayImportBtn)replayImportBtn.textContent=tr?"FİNAL TEKRAR KODU":"FINAL REPLAY CODE";
   document.querySelectorAll(".kasa-lbl").forEach(el=>el.textContent=tr?"KASA":"CASH");
   document.querySelectorAll(".kasa-metric-lbl").forEach(el=>{if(/BOR|DEBT/i.test(el.textContent))el.textContent=tr?"BORÇ LİMİTİ":"DEBT LIMIT";else if(/HARC|SPENT/i.test(el.textContent))el.textContent=tr?"HARCANAN":"SPENT";});
   document.querySelectorAll(".kasa-bar-labels").forEach(el=>{const spans=el.querySelectorAll("span");if(spans[0])spans[0].textContent=tr?"Limit":"Limit";if(spans[1])spans[1].textContent="0";if(spans[2])spans[2].textContent=tr?"Kasa":"Cash";});
@@ -2109,8 +2113,12 @@ function _setFinalPauseUi(paused){
   button.setAttribute("aria-pressed",_simPaused?"true":"false");
   button.setAttribute("aria-label",_simPaused?(LANG==="tr"?"Simülasyona devam et":"Resume simulation"):(LANG==="tr"?"Simülasyonu duraklat":"Pause simulation"));
 }
-function _launchFinalSim(myPow){
+function _launchFinalSim(myPow,resumeCheckpoint){
   const oppPow=opponent?opponent.power:50;
+  if(!resumeCheckpoint){
+    _saveState();
+    if(window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();
+  }
   window.CopaRunState&&window.CopaRunState.transition("match",{reason:"final_kickoff"});
   if(typeof trackBalanceMatchTelemetry==="function")trackBalanceMatchTelemetry(6);
   if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();
@@ -2121,12 +2129,15 @@ function _launchFinalSim(myPow){
   ["hub","draft","result"].forEach(id=>{const el=$(id);if(el)el.classList.add("hidden");});
   const simEl=$("sim");if(simEl){simEl.classList.remove("hidden");setTimeout(()=>simEl.scrollIntoView({behavior:"smooth",block:"start"}),80);}
   buildSim(myPow,oppPow);
+  if(resumeCheckpoint&&sim&&typeof sim.restore==="function"){
+    if(!sim.restore(resumeCheckpoint.match)&&window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();
+  }
 }
-function startFinalSim(myPow){
-  if(typeof buildSim==="function"){_launchFinalSim(myPow);return;}
+function startFinalSim(myPow,resumeCheckpoint){
+  if(typeof buildSim==="function"){_launchFinalSim(myPow,resumeCheckpoint);return;}
   const tr=LANG==="tr";if(typeof showToast==="function")showToast(tr?"Final motoru yükleniyor…":"Loading final engine…");
   const loader=window.CopaLazy&&window.CopaLazy.ensureFinalSim?window.CopaLazy.ensureFinalSim():Promise.reject(new Error("lazy loader unavailable"));
-  loader.then(()=>_launchFinalSim(myPow)).catch(error=>{window.CopaDiagnostics&&window.CopaDiagnostics.capture("final_load",error&&error.message,error&&error.stack);showModal(`<div class="scoutmodal"><h4>${tr?"Final yüklenemedi":"Final could not load"}</h4><p>${tr?"Bağlantıyı kontrol edip tekrar dene.":"Check your connection and try again."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal();startFinalSim2()">${tr?"TEKRAR DENE":"TRY AGAIN"}</button></div></div>`);});
+  loader.then(()=>_launchFinalSim(myPow,resumeCheckpoint)).catch(error=>{window.CopaDiagnostics&&window.CopaDiagnostics.capture("final_load",error&&error.message,error&&error.stack);showModal(`<div class="scoutmodal"><h4>${tr?"Final yüklenemedi":"Final could not load"}</h4><p>${tr?"Bağlantıyı kontrol edip tekrar dene.":"Check your connection and try again."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal();startFinalSim2()">${tr?"TEKRAR DENE":"TRY AGAIN"}</button></div></div>`);});
 }
 function startFinalSim2(){startFinalSim(squadPower(round).power||squadPower(round));}
 function radioLine(poss,sA,sB,mn){const home=poss==="A",lead=sA>sB?"A":sB>sA?"B":"",diff=Math.abs(sA-sB),tr=LANG==="tr";const pool=[];if(tr){pool.push(home?"top bizde, çizgiye iniyoruz":"top rakipte, blok daralıyor");pool.push("orta sahada ikinci toplar çok değerli");pool.push("kaleciler oyunun içinde kalmak zorunda");if(diff>=2)pool.push("skor farkı açıldı, tempo kontrol ediliyor");if(lead==="A")pool.push("öndeyiz, acele etmeye gerek yok");if(lead==="B")pool.push("kritik an, bir gol oyunu yeniden açar");pool.push(mn>=75?"son dakikalar, tribün ayakta":"final kontrollü ama her top tehlike");}else{pool.push(home?"we have it, attacking the channel":"they have it, block narrows");pool.push("second balls matter now");pool.push("keepers have to stay sharp");if(diff>=2)pool.push("gap opened, tempo is managed");if(lead==="A")pool.push("we lead, no need to rush");if(lead==="B")pool.push("one goal changes everything");pool.push(mn>=75?"final minutes, crowd on feet":"controlled final, every touch matters");}return " "+rnd(pool);}
@@ -2305,7 +2316,18 @@ function _saveState(){
     draft:{remaining,currentSlot,currentOpts:(currentOpts||[]).map(p=>p?Object.assign({},p):null),rerollsLeft:draftRerollsLeft,deadlineH,usedNames:[...usedNames]}
   });}catch(e){}
 }
-function _clearState(){if(window.CopaRunPersistence)window.CopaRunPersistence.clear();}
+function _clearState(){if(window.CopaRunPersistence)window.CopaRunPersistence.clear();if(window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();}
+function _tryResumeFinalCheckpoint(){
+  if(!window.CopaFinalSimPersistence||round<6)return false;
+  const saved=window.CopaFinalSimPersistence.read().state;if(!saved)return false;
+  const core=window.CopaFinalSimCore;
+  if(Number(saved.runSeed)!==Number(seedNum)||Number(saved.round)!==Number(round)||Math.abs(Number(saved.awayPower)-(opponent?Number(opponent.power):50))>0.01){
+    window.CopaFinalSimPersistence.clear();return false;
+  }
+  if(core&&saved.modelVersion!==core.MODEL_VERSION){window.CopaFinalSimPersistence.clear();return false;}
+  startFinalSim(Number(saved.homePower),saved);
+  return true;
+}
 function _tryRestoreState(){
   try{
     const st=_readRunState();if(!st)return false;
@@ -2344,7 +2366,9 @@ function _tryRestoreState(){
       window.CopaRunState&&window.CopaRunState.transition("draft",{force:true,reason:"restore"});
       $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("ddbanner").classList.remove("hidden");$("budgetBox").classList.add("introhide");_ensureDraftKasa();buildPitch($("pitch"));picksBySlot.forEach((p,i)=>{if(p)renderRoundel("r"+i,p);});setBudget();applyStatic();updateDeadline();renderDraftExtra();if(hasCompleteStartingXI()){buildBench();$("ddbanner").classList.add("hidden");showPostcard(enterHub);}else if(currentSlot>=0&&currentOpts.length){renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");}else loadRollStage();return true;
     }
-    window.CopaRunState&&window.CopaRunState.transition("hub",{force:true,reason:"restore"});setBudget();enterHub(true);_saveState();return true;
+    window.CopaRunState&&window.CopaRunState.transition("hub",{force:true,reason:"restore"});setBudget();enterHub(true);_saveState();
+    if(!_tryResumeFinalCheckpoint()&&window.CopaFinalSimPersistence&&round<6)window.CopaFinalSimPersistence.clear();
+    return true;
   }catch(e){
     const message=e&&e.message?e.message:String(e);
     console.error("[copa] run restore failed",e);
@@ -2656,6 +2680,8 @@ function _finishPenaltyShootout(homeWon){
     window.keyMoment=window.penaltyNote;
     const xgA=Number(window.xgA||0).toFixed(1),xgB=Number(window.xgB||0).toFixed(1);
     window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${tr?"Kırılma anı":"Key moment"}</span><b>${window.penaltyNote}</b></div><div class="frrow"><span>${tr?"Penaltılar":"Penalties"}</span><b>${shootout}</b></div><div class="frrow"><span>xG</span><b>${xgA}-${xgB}</b></div><div class="frrow"><span>${tr?"Final yorumu":"Final note"}</span><b>${homeWon?(tr?"Altın gol çıkmadı, seri penaltılarla kupa geldi.":"No golden goal, the shootout delivered the cup."):(tr?"Altın gol çıkmadı, seri penaltılarda final kaçtı.":"No golden goal, the final slipped away in the shootout.")}</b></div>${window._finalAuditHTML||""}`;
+    if(window.CopaAnalytics&&window._finalTelemetryContext)window.CopaAnalytics.track("final_sim_completed",{...window._finalTelemetryContext,outcome:homeWon?"win":"loss"});
+    window._finalTelemetryContext=null;
     closeModal();
     endRun(!!homeWon,base+" p "+shootout);
     return;

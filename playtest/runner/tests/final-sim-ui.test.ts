@@ -108,3 +108,63 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   expect(audit.xg.every((value:any)=>Number.isFinite(Number(value)))).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("final resumes from a process-death checkpoint at the same match state",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"process-death final regression runs once");
+  await openFinalReadyHub(page);
+  await page.evaluate(()=>{(globalThis as any).startFinalSim2();});
+  await expect(page.locator("#sim")).toBeVisible();
+  await page.locator('.spd[data-s="80"]').click();
+  await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(20);
+  await page.locator("#shPush").click();
+  const before=await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.sim.pause();global.sim.checkpoint();
+    const state=global.sim.getState();
+    return{minute:state.matchTime,score:state.score,rngState:state.rngState,decisionLog:state.decisionLog};
+  });
+  expect(before.decisionLog.at(-1)?.tactic).toBe("push");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator("#sim")).toBeVisible({timeout:15_000});
+  const after=await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.sim.pause();
+    const state=global.sim.getState();
+    const saved=global.CopaFinalSimPersistence.read().state;
+    return{
+      phase:global.CopaRunState.phase,
+      minute:state.matchTime,score:state.score,decisionLog:state.decisionLog,
+      savedMinute:saved&&saved.match.matchTime,
+      model:saved&&saved.modelVersion
+    };
+  });
+  expect(after.phase).toBe("match");
+  expect(after.minute).toBeGreaterThanOrEqual(before.minute);
+  expect(after.minute-before.minute).toBeLessThan(20);
+  expect(after.score).toEqual(before.score);
+  expect(after.decisionLog.at(-1)?.tactic).toBe("push");
+  expect(after.savedMinute).toBeGreaterThanOrEqual(before.minute);
+  expect(after.model).toBe("copa-final-core-v2");
+});
+
+test("shareable final code can be imported and deterministically verified",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"replay import regression runs once");
+  await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).openFinalReplayImport();});
+  await expect(page.locator("#finalReplayImportValue")).toBeVisible();
+  const code=await page.evaluate(()=>{
+    const core=(globalThis as any).CopaFinalSimCore;
+    return core.createReplayCode({seed:20260717,homePower:78,awayPower:74,tactic:"push",cards:["kontra"],decisions:[{minute:60,tactic:"hold"}]});
+  });
+  await page.locator("#finalReplayImportValue").fill(code);
+  await page.getByRole("button",{name:/TEKRARI DOĞRULA|VERIFY REPLAY/}).click();
+  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v2");
+  await expect(page.locator(".scoutmodal")).toContainText(/Skor|Score/);
+  const replayed=await page.evaluate((value)=>{
+    const replay=(globalThis as any).CopaFinalReplay.inspect(value);
+    return{score:replay.score,winner:replay.winner,code:replay.replayCode};
+  },code);
+  expect(replayed.score.every((value:number)=>Number.isInteger(value))).toBe(true);
+  expect([0,1]).toContain(replayed.winner);
+  expect(replayed.code).toBe(code);
+});

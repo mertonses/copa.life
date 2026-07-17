@@ -531,6 +531,24 @@ function _chooseSequenceArchetype(ctx,rng){
   const rightReady=(ctx.team||[]).some(p=>!p.sentOff&&(p.role==='RW'||p.role==='RB')&&p.x>_PW*0.50);
   const wideNeed=widePct<0.34&&((ctx.matchTime||0)>12*60);
   const wideRunNeed=((audit.overlapRuns||0)<Math.max(1,Math.floor((audit.wide||0)*0.12)))&&((ctx.matchTime||0)>18*60);
+  const core=typeof globalThis!=="undefined"?globalThis.CopaFinalSimCore:null;
+  if(core&&typeof core.chooseSequence==="function"){
+    return core.chooseSequence({
+      minute:(ctx.matchTime||0)/60,
+      tactic:shout||"balanced",
+      isFinal:!!ctx.isFinal,
+      goldenActive:!!golden,
+      ownHalf,finalThird,
+      profilePass:profile.pass,
+      canWide,leftReady,rightReady,
+      wideUsage:widePct,wideRunNeed,
+      hasWingCard,hasCounterCard,
+      losing:!!ctx.losing,leading:!!ctx.leading,
+      carrierRole:carrier.role,
+      forceLeft:(carrier.role==='LW'||carrier.role==='LB'||_isWideLeft(carrier.x))&&(finalThird||midThird),
+      forceRight:(carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&(finalThird||midThird)
+    },rng);
+  }
   const weights=[
     {v:'BUILD_FROM_BACK',w:(ownHalf?16:4)+(carrier.role==='GK'?18:0)+(finalEarly?8:0)+(shout==='calm'?8:0)},
     {v:'GK_SHORT_START',w:carrier.role==='GK'?34+(shout==='calm'?10:0):0},
@@ -816,6 +834,17 @@ function _decide(carrier,ball,teammates,opponents,score,matchTime,totalSec,shape
 function _resolveShot(shooter,gk,rng){
   const dGoal=shooter?shooter.dist(_PW/2,shooter.teamId===0?_PH:0):25;
   const shootQ=shooter?(shooter.shooting*0.5+shooter.decisions*0.3+shooter.vision*0.2)/100:0.5;
+  const core=typeof globalThis!=="undefined"?globalThis.CopaFinalSimCore:null;
+  if(core&&typeof core.resolveShot==="function"){
+    return core.resolveShot({
+      distance:dGoal,
+      shooting:shooter?shooter.shooting:shootQ*100,
+      decisions:shooter?shooter.decisions:shootQ*100,
+      vision:shooter?shooter.vision:shootQ*100,
+      goalkeeping:gk?gk.goalkeeping:55,
+      keeperAnticipation:gk?gk.anticipation:55
+    },rng);
+  }
   const distF=Math.max(0,1-dGoal/30);
   const shotP=Math.min(0.56,Math.max(0.05,shootQ*0.35+distF*0.25));
   if(!rng.bool(shotP))return rng.bool(0.55)?'WIDE':'KEEPER_CLAIM';
@@ -1263,7 +1292,8 @@ function buildSim(myPow, oppPow) {
   /* RNG */
   const seedBase=typeof seedNum!=="undefined"?seedNum:(Date.now()&0xffffff);
   const _r=typeof round!=="undefined"?round:1;
-  const rng=new _RNG(((seedBase*1000003)^(_r*2654435761))>>>0||1);
+  const matchSeed=((seedBase*1000003)^(_r*2654435761))>>>0||1;
+  const rng=new _RNG(matchSeed);
 
   /* build players from game data */
   const _fmA=(typeof slots!=="undefined")?slots:(typeof FORMATIONS!=="undefined"?FORMATIONS["4-4-2"]:[]);
@@ -1350,6 +1380,7 @@ function buildSim(myPow, oppPow) {
   const fullTimeSec=(90+stoppage)*60;
   let gameEnded=false,goldenGoalLocked=false,animId=null;
   let momDisplay=50,shoutMode=null;
+  const decisionLog=[];
   const liveScore=[0,0];
   let lastCarrier=null,lastAssist=null;
   let lastDangerTime=-999;
@@ -2430,6 +2461,34 @@ function buildSim(myPow, oppPow) {
     drawHeatmap(rawCtx,W,H,heatGrid,HGW,HGH);
     try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e){}
   }
+  function finalReplayRecord(result){
+    if(!window.CopaFinalReplay)return null;
+    const activeCards=[];
+    if(typeof hasCard==="function"){
+      if(hasCard("kanat_akini"))activeCards.push("kanat_akini");
+      if(hasCard("kontra"))activeCards.push("kontra");
+      if(hasCard("sogukkanli_penaltici"))activeCards.push("sogukkanli_penaltici");
+    }
+    return window.CopaFinalReplay.record({
+      config:{seed:matchSeed,homePower:myPow,awayPower:oppPow,cards:activeCards,decisions:decisionLog},
+      result,score:[...score],stats,audit,events:goalEvents
+    });
+  }
+  function finalAuditDetailsHTML(includeReplay){
+    const replay=includeReplay?`<button type="button" class="btn btn-ghost final-replay-copy" onclick="copyFinalReplayCode()">${isTR?"TEKRAR KODUNU KOPYALA":"COPY REPLAY CODE"}</button>`:"";
+    const summary=isTR?"SİMÜLASYON DENETİMİ":"SIMULATION AUDIT";
+    return replay+`<details class="final-audit-details"><summary>${summary}</summary><div class="final-audit-body">${auditReportHTML()}</div></details>`;
+  }
+  function finalTelemetryProperties(endType,outcome){
+    const gap=myPow-oppPow;
+    const powerGap=gap<=-12?"away_12_plus":gap<=-4?"away_4_11":gap<=3?"even":gap<=11?"home_4_11":"home_12_plus";
+    return {
+      country:typeof selectedCountry!=="undefined"?selectedCountry:"",
+      round:6,outcome,
+      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v2",
+      power_gap:powerGap,end_type:endType,tactic:shoutMode||"balanced"
+    };
+  }
 
   function endMatch(){
     if(gameEnded)return;gameEnded=true;goldenGoalLocked=false;
@@ -2443,15 +2502,19 @@ function buildSim(myPow, oppPow) {
     const won=score[0]>score[1];const sc=score[0]+"–"+score[1];
     const aScorers=goalEvents.filter(e=>e.side==='A').map(e=>e.scorer).filter(Boolean);
     window.motm=aScorers.length?aScorers.reduce((a,b,_,arr)=>arr.filter(x=>x===b).length>=arr.filter(x=>x===a).length?b:a):null;
-    if(!window.motm&&typeof picksBySlot!=="undefined"&&picksBySlot){const out=(picksBySlot).filter(p=>p&&p.pos!=='GK');const pp=out[Math.floor(Math.random()*out.length)];window.motm=pp?pp.name.split(' ').pop():'?';}
+    if(!window.motm&&typeof picksBySlot!=="undefined"&&picksBySlot){const out=(picksBySlot).filter(p=>p&&p.pos!=='GK');const pp=out.length?out[rng.int(out.length)]:null;window.motm=pp?pp.name.split(' ').pop():'?';}
     if(!window.motm)window.motm='?';
     window.keyMoment=goalEvents[0]?.scorer?(goalEvents[0].scorer+" "+goalEvents[0].minute+"'"):sc;
     window.penaltyNote='';window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.xgA=stats.xg[0];window.xgB=stats.xg[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
     const isTR2=isTR;const kM=window.keyMoment||"-";
     const fw=["Kupa sandığa girdi.","Rüya sezon!","Son düdüğe kadar didindi.","Bu takım birlikte büyüdü."];const lw=["Finale geldi, yetmedi.","Son adımda tökezledi.","Sıfırdan başla.","Bir sonraki run."];
-    const ni=Math.floor(Math.random()*fw.length);
-    window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>xG</span><b>${stats.xg[0].toFixed(1)}-${stats.xg[1].toFixed(1)}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>`;
-    window.finalSimAudit=audit; // audit kept for tuning/telemetry; no longer rendered in the report
+    const ni=rng.int(fw.length);
+    const replay=finalReplayRecord(won?"win":"loss");
+    if(window.CopaAnalytics)window.CopaAnalytics.track("final_sim_completed",finalTelemetryProperties(goldenGoalMode?"golden_goal":"regulation",won?"win":"loss"));
+    window._finalTelemetryContext=null;
+    window._finalAuditHTML=finalAuditDetailsHTML(!!replay);
+    window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>xG</span><b>${stats.xg[0].toFixed(1)}-${stats.xg[1].toFixed(1)}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>${window._finalAuditHTML}`;
+    window.finalSimAudit=audit;
     calcRatings();
     if(typeof window._captureLastMatchReportSnapshot==="function")window._captureLastMatchReportSnapshot({
       score:[score[0],score[1]],events:goalEvents.slice(),homeWon:won,homeRatings:window.lastMatchRatings,
@@ -2526,7 +2589,9 @@ function buildSim(myPow, oppPow) {
     window.openCopaFinalPenalties=(manual)=>{openFinalPenaltyShootout(sc,0,!!manual);return true;};
     window._finalPenaltyScore=sc;
     window.finalSimAudit=audit;
-    window._finalAuditHTML="";
+    const replay=finalReplayRecord("penalties");
+    window._finalAuditHTML=finalAuditDetailsHTML(!!replay);
+    window._finalTelemetryContext=finalTelemetryProperties("penalties","");
     window.keyMoment=isTR?"Altın golde gol çıkmadı":"No golden goal";
     window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";
     window.shotsA=stats.shots[0];window.shotsB=stats.shots[1];window.xgA=stats.xg[0];window.xgB=stats.xg[1];window.keeperA=stats.saves[1];window.keeperB=stats.saves[0];window.goals=goalEvents;
@@ -2548,6 +2613,7 @@ function buildSim(myPow, oppPow) {
   const FIXED_STEP=_FIXED_STEP;
   let accumulator=0,prevTime=null,frameCount=0;
   let statUpdateTimer=0;
+  let lastCheckpointBlock=-1;
 
   function tick(now){
     if(gameEnded||goldenGoalLocked)return;
@@ -2567,7 +2633,11 @@ function buildSim(myPow, oppPow) {
     }
     if(accumulator>spd*0.5)accumulator=spd*0.5; // never bank more than 0.5s of backlog
     statUpdateTimer+=frameMs;
-    if(statUpdateTimer>0.35){statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));}
+    if(statUpdateTimer>0.35){
+      statUpdateTimer=0;_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));
+      const checkpointBlock=Math.floor(matchTime/300);
+      if(checkpointBlock!==lastCheckpointBlock){lastCheckpointBlock=checkpointBlock;persistCheckpoint();}
+    }
     if(!gameEnded&&!goldenGoalLocked)animId=requestAnimationFrame(tick);
   }
 
@@ -2586,6 +2656,123 @@ function buildSim(myPow, oppPow) {
   reposition();kickoff(0);
   audio.ambience&&audio.ambience(); // low stadium bed; silent if SFX muted
 
+  const _PLAYER_CHECKPOINT_FIELDS=[
+    "x","y","hx","hy","targetX","targetY","vx","vy","hasBall","roleCommitUntil",
+    "facingX","facingY","yellowCards","sentOff","injured"
+  ];
+  const _clone=value=>JSON.parse(JSON.stringify(value));
+  function _playerRef(player){return player?{teamId:player.teamId,id:player.id}:null;}
+  function _playerFromRef(ref){
+    if(!ref||!Number.isInteger(Number(ref.id)))return null;
+    return (Number(ref.teamId)===0?teamA:teamB).find(player=>player.id===Number(ref.id))||null;
+  }
+  function _snapshotPlayer(player){
+    const value={};
+    _PLAYER_CHECKPOINT_FIELDS.forEach(field=>{value[field]=player[field];});
+    return value;
+  }
+  function _restorePlayer(player,value){
+    if(!player||!value)return;
+    _PLAYER_CHECKPOINT_FIELDS.forEach(field=>{if(Object.prototype.hasOwnProperty.call(value,field))player[field]=value[field];});
+  }
+  function getCheckpointState(){
+    return {
+      rngState:rng.s>>>0,matchTime,score:[...score],liveScore:[...liveScore],
+      stats:_clone(stats),goalEvents:_clone(goalEvents),audit:_clone(audit),
+      decisionLog:_clone(decisionLog),
+      momDisplay,shoutMode,lastCarrier,lastAssist,lastDangerTime,lastForcedAttackTime,lastSeqCommTime,
+      shapeCfg:_clone(shapeCfg),tacticalSeq:_clone(tacticalSeq),plannedSequenceQueue:_clone(plannedSequenceQueue),
+      timers:{
+        decTimer,heatSampleTimer,slotTimer,shotCooldown:[...shotCooldown],stuckTimer,outTimer,
+        halfTimePause,etMode,goldenGoalMode,inHalfTime,halfDone,etStarted,atmTimer,
+        disciplineCooldown,comboCount,lastPressureAudit
+      },
+      teams:[teamA.map(_snapshotPlayer),teamB.map(_snapshotPlayer)],
+      ball:{
+        x:ball.x,y:ball.y,vx:ball.vx,vy:ball.vy,state:ball.state,height:ball.height,vz:ball.vz,
+        trail:_clone(ball.trail),target:_clone(ball._target),lastTeam:ball._lastTeam,
+        deliveryType:ball._deliveryType,shotResult:ball._shotResult,
+        owner:_playerRef(ball.owner),shooter:_playerRef(ball._shooter),passTarget:_playerRef(ball._passTarget)
+      },
+      heatGrid:Array.from(heatGrid)
+    };
+  }
+  function persistCheckpoint(){
+    if(gameEnded||!window.CopaFinalSimPersistence)return false;
+    const core=window.CopaFinalSimCore;
+    return window.CopaFinalSimPersistence.persist({
+      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v2",
+      runSeed:seedBase,round:_r,homePower:myPow,awayPower:oppPow,
+      match:getCheckpointState()
+    });
+  }
+  function restoreCheckpoint(value){
+    if(!value||gameEnded)return false;
+    if(animId){cancelAnimationFrame(animId);animId=null;}
+    try{
+      rng.s=(Number(value.rngState)>>>0)||1;
+      matchTime=Math.max(0,Math.min((90+stoppage+30)*60,Number(value.matchTime)||0));
+      score[0]=Number(value.score&&value.score[0])||0;score[1]=Number(value.score&&value.score[1])||0;
+      liveScore[0]=Number(value.liveScore&&value.liveScore[0])||score[0];liveScore[1]=Number(value.liveScore&&value.liveScore[1])||score[1];
+      Object.keys(stats).forEach(key=>{
+        if(Array.isArray(stats[key])&&value.stats&&Array.isArray(value.stats[key]))stats[key].splice(0,stats[key].length,...value.stats[key].map(Number));
+      });
+      goalEvents.splice(0,goalEvents.length,...(Array.isArray(value.goalEvents)?_clone(value.goalEvents):[]));
+      decisionLog.splice(0,decisionLog.length,...(Array.isArray(value.decisionLog)?_clone(value.decisionLog):[]));
+      if(value.audit)Object.keys(audit).forEach(key=>{
+        if(Object.prototype.hasOwnProperty.call(value.audit,key))audit[key]=_clone(value.audit[key]);
+      });
+      momDisplay=Number(value.momDisplay)||50;shoutMode=value.shoutMode||null;
+      lastCarrier=value.lastCarrier||null;lastAssist=value.lastAssist||null;
+      lastDangerTime=Number(value.lastDangerTime)||-999;lastForcedAttackTime=Number(value.lastForcedAttackTime)||-999;lastSeqCommTime=Number(value.lastSeqCommTime)||-999;
+      if(value.shapeCfg)Object.assign(shapeCfg,_clone(value.shapeCfg));
+      if(value.tacticalSeq)Object.assign(tacticalSeq,_clone(value.tacticalSeq));
+      if(Array.isArray(value.plannedSequenceQueue)){
+        plannedSequenceQueue[0]=Array.isArray(value.plannedSequenceQueue[0])?[...value.plannedSequenceQueue[0]]:[];
+        plannedSequenceQueue[1]=Array.isArray(value.plannedSequenceQueue[1])?[...value.plannedSequenceQueue[1]]:[];
+      }
+      const timers=value.timers||{};
+      decTimer=Number(timers.decTimer)||0;heatSampleTimer=Number(timers.heatSampleTimer)||0;slotTimer=Number(timers.slotTimer)||0;
+      if(Array.isArray(timers.shotCooldown)){shotCooldown[0]=Number(timers.shotCooldown[0])||0;shotCooldown[1]=Number(timers.shotCooldown[1])||0;}
+      stuckTimer=Number(timers.stuckTimer)||0;outTimer=Number(timers.outTimer)||0;
+      halfTimePause=!!timers.halfTimePause;etMode=!!timers.etMode;goldenGoalMode=!!timers.goldenGoalMode;
+      inHalfTime=!!timers.inHalfTime;halfDone=!!timers.halfDone;etStarted=!!timers.etStarted;
+      atmTimer=Number(timers.atmTimer)||0;disciplineCooldown=Number(timers.disciplineCooldown)||0;
+      comboCount=Number(timers.comboCount)||0;lastPressureAudit=Number(timers.lastPressureAudit)||-999;
+      if(Array.isArray(value.teams)){
+        (value.teams[0]||[]).forEach((player,index)=>_restorePlayer(teamA[index],player));
+        (value.teams[1]||[]).forEach((player,index)=>_restorePlayer(teamB[index],player));
+      }
+      [...teamA,...teamB].forEach(player=>{player.hasBall=false;});
+      const savedBall=value.ball||{};
+      ["x","y","vx","vy","state","height","vz"].forEach(field=>{if(Number.isFinite(Number(savedBall[field])))ball[field]=Number(savedBall[field]);});
+      ball.trail=Array.isArray(savedBall.trail)?_clone(savedBall.trail):[];
+      ball._target=savedBall.target?_clone(savedBall.target):null;ball._lastTeam=Number(savedBall.lastTeam)||0;
+      ball._deliveryType=savedBall.deliveryType||null;ball._shotResult=savedBall.shotResult||null;
+      ball.owner=_playerFromRef(savedBall.owner);ball._shooter=_playerFromRef(savedBall.shooter);ball._passTarget=_playerFromRef(savedBall.passTarget);
+      if(ball.owner)ball.owner.hasBall=true;
+      if(Array.isArray(value.heatGrid))for(let index=0;index<heatGrid.length;index++)heatGrid[index]=Number(value.heatGrid[index])||0;
+      gameEnded=false;goldenGoalLocked=false;accumulator=0;prevTime=null;
+      _dom("simScore",score[0]+"–"+score[1]);
+      _dom("simClk",Math.min(120,Math.floor(matchTime/60))+"'");
+      _dom("simState",goldenGoalMode?(isTR?"ALTIN GOL":"GOLDEN GOAL"):(isTR?"Final devam ediyor":"Final resumed"));
+      const stateEl=document.getElementById("simState");if(stateEl)stateEl.classList.toggle("is-golden",goldenGoalMode);
+      const goalsEl=document.getElementById("simGoals");if(goalsEl)goalsEl.innerHTML="";
+      goalEvents.forEach(event=>{
+        const teamId=event.side==="A"?0:1;
+        _addRow(teamId,"<b>"+event.minute+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+(event.scorer||"?")+"</b></span>",true);
+        _addTimelineMarker(event.minute,"goal",teamId,(isTR?"Gol — ":"Goal — ")+(event.scorer||"?"));
+      });
+      _updateStats();_updateTimelineCursor(Math.floor(matchTime/60));
+      persistCheckpoint();
+      animId=requestAnimationFrame(tick);
+      return true;
+    }catch(error){
+      if(window.CopaDiagnostics)window.CopaDiagnostics.capture("final_restore_failed",error&&error.message,error&&error.stack);
+      return false;
+    }
+  }
+
   /* sim object */
   sim={
     pause(){if(animId){cancelAnimationFrame(animId);animId=null;}},
@@ -2603,6 +2790,8 @@ function buildSim(myPow, oppPow) {
     shout(t){
       if(gameEnded)return;
       shoutMode=t;shapeCfg.shout=t;
+      decisionLog.push({minute:Math.min(120,Math.floor(matchTime/60)),tactic:t});
+      if(decisionLog.length>16)decisionLog.shift();
       plannedSequenceQueue[0]=[];
       plannedSequenceQueue[1]=[];
       audit.reweightedSequences++;
@@ -2615,8 +2804,12 @@ function buildSim(myPow, oppPow) {
       _addRow(0,"<b>"+tMin+"'</b><span><b>📋 "+(isTR?"TAKTİK":"TACTIC")+" · "+(labels[t]||"")+"</b><small>"+myName+" · "+msg.replace(/^[^ ]+ /,'')+"</small></span>");
       _flashEventMap('tactic',0,0.5,0.32,{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName+" · "+(labels[t]||"")});
       audio.shoutCue&&audio.shoutCue();
-    }
+    },
+    checkpoint:persistCheckpoint,
+    getState:getCheckpointState,
+    restore:restoreCheckpoint
   };
 
   animId=requestAnimationFrame(tick);
+  persistCheckpoint();
 }

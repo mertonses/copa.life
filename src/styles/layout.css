@@ -1071,6 +1071,7 @@ html[data-theme="dark"] .country-new-ribbon{background:#c9973d;color:#10100c;bor
 .advanced-body .seedwrap input{width:100%;border:none;background:transparent;font-family:var(--mono);font-size:13px;color:var(--color-slate);padding:2px 0;outline:none}
 .advanced-body .seedwrap input::placeholder{color:var(--color-slate);opacity:.7}
 .seed-hint{font-size:8px;color:var(--color-slate);opacity:.65;letter-spacing:0;text-transform:none;font-family:var(--mono);display:block;margin-top:3px}
+.final-replay-import-btn{width:100%;margin-top:8px;font-size:9px;letter-spacing:1px}
 .advanced-ghost-slot{margin-top:8px;padding-top:7px;border-top:1px solid var(--border-subtle)}
 .ghost-setting-header{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--color-slate);margin-bottom:3px}
 .ghost-setting-copy{margin:0 0 6px;color:var(--color-slate);font-size:10px;line-height:1.4}
@@ -6579,6 +6580,12 @@ body{
 .finalreport .final-heatmap-title{color:var(--color-slate);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.4px;text-align:center}
 .finalreport .final-heatmap img{display:block;width:min(100%,330px);margin:8px auto 0;border:1px solid var(--border-subtle);border-radius:6px}
 .finalreport .final-heatmap p{margin:7px 0 0;color:var(--color-slate);font-size:10px;line-height:1.4;text-align:center}
+.finalreport .final-replay-copy{display:block;width:calc(100% - 18px);margin:9px;font-size:9px;letter-spacing:1px}
+.finalreport .final-audit-details{border-top:1px solid var(--border-subtle);background:color-mix(in srgb,var(--surface-muted) 50%,var(--surface-elevated))}
+.finalreport .final-audit-details>summary{padding:9px;color:var(--color-slate);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.2px;text-align:center;cursor:pointer;list-style-position:inside}
+.finalreport .final-audit-details[open]>summary{border-bottom:1px solid var(--border-subtle)}
+.finalreport .final-audit-body h4{background:transparent;color:var(--color-slate);border:0;padding:8px 9px 4px}
+.finalreport .final-audit-body .frrow{font-size:9px;padding:5px 9px}
 
 /* Penalty goalkeeper: the pitch token language brought to life. */
 .pen-modal .pen-goal .pen-keeper{

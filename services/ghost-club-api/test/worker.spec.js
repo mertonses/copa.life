@@ -69,6 +69,9 @@ describe("Ghost Club Worker",()=>{
     expect(await response.text()).toBe("");
     expect(normalizeAnalyticsEvent({...raw,event:"arbitrary_event"})).toBeNull();
     expect(normalizeAnalyticsEvent({...raw,page_path:"/?email=user@example.com"})).toBeNull();
+    const finalEvent={...raw,schema_version:2,event:"final_sim_completed",round:6,outcome:"win",model_version:"copa-final-core-v2",power_gap:"home_4_11",end_type:"golden_goal",tactic:"push"};
+    expect(normalizeAnalyticsEvent(finalEvent)).toMatchObject({event:"final_sim_completed",schemaVersion:2,modelVersion:"copa-final-core-v2",powerGap:"home_4_11",endType:"golden_goal",tactic:"push"});
+    expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });
 
   it("moderates prohibited and brand-like club names",async()=>{

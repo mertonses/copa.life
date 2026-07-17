@@ -4,11 +4,14 @@ const DEFAULT_ORIGINS=["https://copa.life","https://www.copa.life"];
 const METHODS="GET, POST, DELETE, OPTIONS";
 const CONSENT_VERSION="ghost-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
-const ANALYTICS_EVENTS=new Set(["session_started","country_selected","draft_started","xi_completed","round_completed","run_finished","ghost_opt_in","profile_open_error"]);
+const ANALYTICS_EVENTS=new Set(["session_started","country_selected","draft_started","xi_completed","round_completed","run_finished","ghost_opt_in","profile_open_error","final_sim_completed"]);
 const ANALYTICS_PLATFORMS=new Set(["web","android"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
 const ANALYTICS_OUTCOMES=new Set(["","win","loss","sacked"]);
 const ANALYTICS_DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
+const ANALYTICS_POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
+const ANALYTICS_END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
+const ANALYTICS_TACTICS=new Set(["","balanced","more","push","calm","hold"]);
 
 const clean=value=>String(value==null?"":value).replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,400);
 const range=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
@@ -34,8 +37,10 @@ async function readJsonLimited(request,limit=MAX_BODY_BYTES){
 }
 
 function normalizeAnalyticsEvent(value){
-  if(!object(value)||Number(value.schema_version)!==1)return null;
+  if(!object(value)||![1,2].includes(Number(value.schema_version)))return null;
+  const schemaVersion=Number(value.schema_version);
   const event=String(value.event||"");if(!ANALYTICS_EVENTS.has(event))return null;
+  if(event==="final_sim_completed"&&schemaVersion!==2)return null;
   const platform=String(value.platform||"");if(!ANALYTICS_PLATFORMS.has(platform))return null;
   const locale=String(value.locale||"").toLowerCase();if(!/^[a-z]{2}(?:-[a-z]{2})?$/.test(locale))return null;
   const gameCountry=String(value.game_country||"").toUpperCase();if(!ANALYTICS_COUNTRIES.has(gameCountry))return null;
@@ -44,7 +49,13 @@ function normalizeAnalyticsEvent(value){
   const round=Math.max(0,Math.min(6,Math.round(Number(value.round)||0)));
   const pagePath=String(value.page_path||"/");if(!/^\/[A-Za-z0-9._/-]{0,63}$/.test(pagePath))return null;
   const appVersion=String(value.app_version||"");if(appVersion&&!/^[A-Za-z0-9._-]{1,64}$/.test(appVersion))return null;
-  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion};
+  if(schemaVersion===1)return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion};
+  const modelVersion=String(value.model_version||"");if(modelVersion&&!/^copa-final-core-v[0-9]{1,3}$/.test(modelVersion))return null;
+  const powerGap=String(value.power_gap||"");if(!ANALYTICS_POWER_GAPS.has(powerGap))return null;
+  const endType=String(value.end_type||"");if(!ANALYTICS_END_TYPES.has(endType))return null;
+  const tactic=String(value.tactic||"");if(!ANALYTICS_TACTICS.has(tactic))return null;
+  if(event==="final_sim_completed"&&(!modelVersion||!powerGap||!endType||!tactic))return null;
+  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic};
 }
 
 async function handleAnalytics(request,env){
@@ -52,10 +63,14 @@ async function handleAnalytics(request,env){
   let body;try{body=await readJsonLimited(request,4096);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
   const event=normalizeAnalyticsEvent(body);if(!event)return json(request,env,{error:"invalid_analytics_event"},422);
   if(!env.PRODUCT_ANALYTICS)return json(request,env,{error:"analytics_unavailable"},503);
-  /* copa_life_product_events: blob1..8 below; double1=count, double2=round. No user/session index is written. */
+  /* copa_life_product_events: blob1..13 below; double1=count, double2=round,
+     double3=schema version. No user/session index is written. */
   env.PRODUCT_ANALYTICS.writeDataPoint({
-    blobs:[event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion],
-    doubles:[1,event.round]
+    blobs:[
+      event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion,
+      event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1)
+    ],
+    doubles:[1,event.round,event.schemaVersion||1]
   });
   const responseHeaders=headers(request,env);delete responseHeaders["content-type"];
   return new Response(null,{status:204,headers:responseHeaders});
