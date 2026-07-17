@@ -1,6 +1,10 @@
 import fs from "node:fs";
 
 const sim = fs.readFileSync("src/sim/finalSim.js", "utf8");
+const core = fs.readFileSync("src/sim/finalSimCore.js", "utf8");
+const replay = fs.readFileSync("src/runtime/finalReplay.js", "utf8");
+const persistence = fs.readFileSync("src/state/finalSimPersistence.js", "utf8");
+const lazy = fs.readFileSync("src/runtime/lazyAssets.js", "utf8");
 const index = fs.readFileSync("index.html", "utf8");
 const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 
@@ -93,6 +97,38 @@ const checks = [
   {
     name: "speed controls expose their selected state",
     pass: /querySelectorAll\("\.spd\[data-s\]"\)/.test(sim) && /setAttribute\("aria-pressed",active\?"true":"false"\)/.test(sim),
+  },
+  {
+    name: "DOM-free deterministic core drives browser sequence and shot resolution",
+    pass:
+      /copa-final-core-v2/.test(core) &&
+      /core\.chooseSequence/.test(sim) &&
+      /core\.resolveShot/.test(sim) &&
+      /finalSimCore\.js/.test(lazy),
+  },
+  {
+    name: "final checkpoint preserves minute, RNG, players and ball",
+    pass:
+      /rngState/.test(sim) &&
+      /teams:\[teamA\.map\(_snapshotPlayer\),teamB\.map\(_snapshotPlayer\)\]/.test(sim) &&
+      /restoreCheckpoint/.test(sim) &&
+      /MAX_AGE_MS/.test(persistence),
+  },
+  {
+    name: "shareable replay code is versioned and contains no names",
+    pass:
+      /CFS\$\{REPLAY_VERSION\}/.test(core) &&
+      /parseReplayCode/.test(core) &&
+      /copyFinalReplayCode/.test(replay) &&
+      !/playerName|clubName|teamName/.test(replay),
+  },
+  {
+    name: "final audit is user-visible and replay telemetry is seed-free",
+    pass:
+      /final-audit-details/.test(sim) &&
+      /final_sim_completed/.test(sim) &&
+      /power_gap/.test(sim) &&
+      !/CopaAnalytics\.track\([\s\S]{0,300}seed/.test(sim),
   },
 ];
 

@@ -6,7 +6,10 @@
   const App=resolvePlugin("App"),StatusBar=resolvePlugin("StatusBar"),SplashScreen=resolvePlugin("SplashScreen");
   if(!App||!StatusBar||!SplashScreen)return;
   function addNativeListener(name,handler){try{const result=App.addListener(name,handler);if(result&&typeof result.catch==="function")result.catch(()=>{});}catch(_){}}
-  function checkpoint(){try{if(typeof root._saveState==="function")root._saveState();}catch(_){}}
+  function checkpoint(){
+    try{if(typeof root._saveState==="function")root._saveState();}catch(_){}
+    try{if(root.sim&&typeof root.sim.checkpoint==="function")root.sim.checkpoint();}catch(_){}
+  }
   function closeOverlay(){
     if(root.PlayerProfiles&&root.PlayerProfiles.isOpen()){root.PlayerProfiles.close();return true;}
     const consent=document.getElementById("ghostConsentDialog");if(consent){consent.remove();return true;}

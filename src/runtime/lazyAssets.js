@@ -13,7 +13,8 @@
     pending.set(key,promise);return promise;
   }
   function ensureFinalSim(){
-    return loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260715-lazy1",()=>typeof global.buildSim==="function").then(()=>{
+    return loadScriptOnce("final-sim-core","src/sim/finalSimCore.js?v=20260717-core2",()=>!!(global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION))
+      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260717-core2",()=>typeof global.buildSim==="function")).then(()=>{
       if(typeof global._copaSimPauseUi==="function")global.simPause=global._copaSimPauseUi;
     });
   }

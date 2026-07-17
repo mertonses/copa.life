@@ -79,5 +79,6 @@ Mevcut güvenlik katmanları:
 - Ayrı staging D1 veritabanı oluşturuldu; `0001`/`0002` migration'ları uygulandı ve staging Analytics Engine dataset'leri veri alıyor.
 - Haftalık anonim KPI raporu ile 30 dakikalık `profile_open_error` ve Worker 5xx alarmı hazırlandı. Salt-okunur `CLOUDFLARE_ANALYTICS_TOKEN` production ortamına eklendi.
 - İmzalı AAB, bundletool ile gerçek cihaz split APK'larına dönüştürülüp Android 14 / API 34 emülatörüne temiz kuruldu. Soğuk açılış, tam kurulum akışı, hub, çift dokunmalı altı boyutlu oyuncu profili ve çevrimdışı kayıt geri yükleme geçti; safe-area/crash/ANR/OOM gözlenmedi.
+- Devam eden final; dakika, skor, RNG, taktik kararları, oyuncu/top konumu ve olay istatistikleriyle yerel checkpoint'e alınır. Mobil Chromium süreç-kapanma senaryosunda 20. dakikadan sonra yenileme ve aynı final durumuna dönüş otomatik testten geçti. Fiziksel düşük seviye cihaz testi hâlâ manuel yayın kapısıdır.
 - Play Console oturumu açıldı ancak Google hesabında geliştirici hesabı henüz oluşturulmamış. Uygulama kaydı, Data Safety ve kapalı test yüklemesi; hesap türü seçimi, kayıt ücreti, sözleşme ve kimlik doğrulaması tamamlandıktan sonra uygulanabilir.
 - Gerçek web armaları proje sahibinin kararıyla web kaynaklarında kalır; lisans kanıtı olmadığı için genel web yayını teknik hak kapısından geçmez. Android ve hukuki sayfa paketi gerçek armaları içermez.

@@ -1,160 +1,112 @@
 import fs from "node:fs";
+import {createRequire} from "node:module";
 
-const source = fs.readFileSync("src/sim/finalSim.js", "utf8");
-const checkMode = process.argv.includes("--check");
+const require=createRequire(import.meta.url);
+const core=require("../src/sim/finalSimCore.js");
+const checkMode=process.argv.includes("--check");
+const MATCHES=10_000;
+const GAP_PATTERN=[-24,-18,-13,-9,-5,-2,0,2,5,9,13,18,24];
 
-function xorshift(seed) {
-  let state = seed >>> 0;
-  return () => {
-    state ^= state << 13;
-    state ^= state >>> 17;
-    state ^= state << 5;
-    return ((state >>> 0) / 4294967296);
-  };
-}
-
-function extractNumber(pattern, fallback) {
-  const match = source.match(pattern);
-  return match ? Number(match[1]) : fallback;
-}
-
-const yellowRate = extractNumber(/yellowRisk\s*\*=\s*([0-9.]+)/, 0.018);
-const secondYellowRate = extractNumber(/secondYellowRisk\s*\*=\s*([0-9.]+)/, 0.003);
-
-const staticGuards = [
-  ["wide sequence bias exists", /wideBase\s*=\s*hasWingCard\s*\?\s*0\.60\s*:\s*0\.46/.test(source)],
-  ["wide ready flank support exists", /leftReady/.test(source) && /rightReady/.test(source)],
-  ["red card sent-off behaviour exists", /sentOff/.test(source) && /redWidthBoost/.test(source)],
-  ["golden goal fallback exists", /goldenGoalMode/.test(source) && /penalty transition failed/.test(source)],
-  ["penalty open bridge exists", /openCopaFinalPenalties/.test(source)],
-];
-
-const totals = {
-  matches: 900,
-  wideAttacks: 0,
-  centerAttacks: 0,
-  overlaps: 0,
-  underlaps: 0,
-  cutbacks: 0,
-  crosses: 0,
-  buildOuts: 0,
-  gkShortStarts: 0,
-  backPasses: 0,
-  setPieces: 0,
-  yellowCards: 0,
-  redCards: 0,
-  matchesWithThreePlusReds: 0,
-  penaltyTransitions: 0,
-  goldenGoalPhases: 0,
-  tempoResets: 0,
-  pressureWins: 0,
+const blank=()=>({
+  matches:0,homeWins:0,extraTime:0,penalties:0,goals:0,shots:0,xg:0,
+  yellows:0,reds:0,saves:0,corners:0,wide:0,sequences:0
+});
+const totals=blank();
+const buckets={
+  away_strong:blank(),
+  away_edge:blank(),
+  even:blank(),
+  home_edge:blank(),
+  home_strong:blank()
+};
+const bucketFor=gap=>gap<=-12?"away_strong":gap<=-4?"away_edge":gap<=3?"even":gap<=11?"home_edge":"home_strong";
+const add=(target,match)=>{
+  target.matches++;
+  target.homeWins+=match.winner===0?1:0;
+  target.extraTime+=match.extraTime?1:0;
+  target.penalties+=match.penalties?1:0;
+  target.goals+=match.score[0]+match.score[1];
+  target.shots+=match.stats.shots[0]+match.stats.shots[1];
+  target.xg+=match.stats.xg[0]+match.stats.xg[1];
+  target.yellows+=match.stats.yellow[0]+match.stats.yellow[1];
+  target.reds+=match.stats.red[0]+match.stats.red[1];
+  target.saves+=match.stats.saves[0]+match.stats.saves[1];
+  target.corners+=match.stats.corners[0]+match.stats.corners[1];
+  target.wide+=match.audit.wide;
+  target.sequences+=match.audit.plannedSequences;
 };
 
-for (let match = 1; match <= totals.matches; match += 1) {
-  const rng = xorshift(0xC0A + match * 2654435761);
-  const homePower = 58 + Math.floor(rng() * 33);
-  const awayPower = 58 + Math.floor(rng() * 33);
-  const powerGap = Math.abs(homePower - awayPower);
-  const hasWingPlan = rng() < 0.42;
-  const hasBuildPlan = rng() < 0.36;
-  const minutes = rng() < 0.18 ? 120 : 90;
-  const beats = minutes === 120 ? 144 : 108;
-  let matchReds = 0;
-  let isDrawLate = Math.abs(homePower - awayPower) < 7 && rng() < 0.32;
-
-  if (minutes === 120) totals.goldenGoalPhases += 1;
-  if (minutes === 120 && isDrawLate) totals.penaltyTransitions += 1;
-
-  for (let beat = 0; beat < beats; beat += 1) {
-    const late = beat / beats > 0.72;
-    const fatigue = beat / beats;
-    const wideWeight = 0.21 + (hasWingPlan ? 0.07 : 0) + (late ? 0.02 : 0) - Math.min(0.05, powerGap / 760);
-    const buildWeight = 0.2 + (hasBuildPlan ? 0.08 : 0) - (late ? 0.04 : 0);
-    const resetWeight = 0.08 + fatigue * 0.05;
-    const pressureWeight = 0.08 + Math.min(0.05, powerGap / 700);
-    const roll = rng();
-
-    if (roll < wideWeight) {
-      totals.wideAttacks += 1;
-      if (rng() < 0.56) totals.overlaps += 1;
-      if (rng() < 0.26) totals.underlaps += 1;
-      if (rng() < 0.42) totals.crosses += 1;
-      else totals.cutbacks += 1;
-    } else if (roll < wideWeight + buildWeight) {
-      totals.centerAttacks += 1;
-      totals.buildOuts += 1;
-      if (rng() < 0.32) totals.gkShortStarts += 1;
-      if (rng() < 0.38) totals.backPasses += 1;
-    } else if (roll < wideWeight + buildWeight + resetWeight) {
-      totals.tempoResets += 1;
-      totals.backPasses += 1;
-    } else if (roll < wideWeight + buildWeight + resetWeight + pressureWeight) {
-      totals.pressureWins += 1;
-    }
-
-    if (rng() < 0.035) totals.setPieces += 1;
-    if (rng() < yellowRate * 0.62) {
-      totals.yellowCards += 1;
-      if (rng() < secondYellowRate * 5.5) {
-        totals.redCards += 1;
-        matchReds += 1;
-      }
-    }
+let deterministic=true;
+for(let index=0;index<MATCHES;index++){
+  const gap=GAP_PATTERN[index%GAP_PATTERN.length];
+  const seed=(Math.imul(index+1,2654435761)^0xC0FA2026)>>>0;
+  const config={seed,homePower:72+gap/2,awayPower:72-gap/2};
+  const match=core.simulateMatch(config);
+  if(index<64){
+    const repeat=core.simulateMatch(config);
+    if(JSON.stringify(match)!==JSON.stringify(repeat))deterministic=false;
+    const replay=core.replay(match.replayCode);
+    if(!replay||JSON.stringify(replay.score)!==JSON.stringify(match.score)||replay.winner!==match.winner)deterministic=false;
   }
-
-  if (matchReds >= 3) totals.matchesWithThreePlusReds += 1;
+  add(totals,match);
+  add(buckets[bucketFor(gap)],match);
 }
 
-const attacks = totals.wideAttacks + totals.centerAttacks;
-const report = {
-  matches: totals.matches,
-  wideUsage: attacks ? totals.wideAttacks / attacks : 0,
-  overlapPerMatch: totals.overlaps / totals.matches,
-  cutbackCrossRatio: `${totals.cutbacks}/${totals.crosses}`,
-  buildOutPerMatch: totals.buildOuts / totals.matches,
-  gkShortPerMatch: totals.gkShortStarts / totals.matches,
-  backPassPerMatch: totals.backPasses / totals.matches,
-  setPiecePerMatch: totals.setPieces / totals.matches,
-  yellowPerMatch: totals.yellowCards / totals.matches,
-  redPerMatch: totals.redCards / totals.matches,
-  threePlusRedMatchRate: totals.matchesWithThreePlusReds / totals.matches,
-  penaltyTransitions: totals.penaltyTransitions,
-  goldenGoalPhases: totals.goldenGoalPhases,
-  tempoResetPerMatch: totals.tempoResets / totals.matches,
-  pressureWinPerMatch: totals.pressureWins / totals.matches,
+const summarize=value=>({
+  matches:value.matches,
+  homeWinRate:value.homeWins/value.matches,
+  extraTimeRate:value.extraTime/value.matches,
+  penaltyRate:value.penalties/value.matches,
+  goalsPerMatch:value.goals/value.matches,
+  shotsPerMatch:value.shots/value.matches,
+  xgPerMatch:value.xg/value.matches,
+  yellowPerMatch:value.yellows/value.matches,
+  redPerMatch:value.reds/value.matches,
+  savesPerMatch:value.saves/value.matches,
+  cornersPerMatch:value.corners/value.matches,
+  wideUsage:value.wide/Math.max(1,value.sequences)
+});
+const report={
+  modelVersion:core.MODEL_VERSION,
+  sampleSize:MATCHES,
+  deterministic,
+  overall:summarize(totals),
+  powerGapBuckets:Object.fromEntries(Object.entries(buckets).map(([name,value])=>[name,summarize(value)]))
 };
-
-const thresholds = [
-  ["wide usage", report.wideUsage >= 0.26 && report.wideUsage <= 0.52, report.wideUsage],
-  ["overlap volume", report.overlapPerMatch >= 6, report.overlapPerMatch],
-  ["build-out volume", report.buildOutPerMatch >= 18, report.buildOutPerMatch],
-  ["goalkeeper short starts", report.gkShortPerMatch >= 5, report.gkShortPerMatch],
-  ["back-pass resets", report.backPassPerMatch >= 8, report.backPassPerMatch],
-  ["set-piece variety", report.setPiecePerMatch >= 3, report.setPiecePerMatch],
-  ["yellow cards per match", report.yellowPerMatch >= 1.0 && report.yellowPerMatch <= 4.8, report.yellowPerMatch],
-  ["red cards per match", report.redPerMatch <= 0.28, report.redPerMatch],
-  ["three-plus red outliers", report.threePlusRedMatchRate <= 0.015, report.threePlusRedMatchRate],
-  ["penalty transition coverage", report.penaltyTransitions > 0, report.penaltyTransitions],
-  ["tempo reset volume", report.tempoResetPerMatch >= 6, report.tempoResetPerMatch],
+const b=report.powerGapBuckets,o=report.overall;
+const checks=[
+  ["shared model version",report.modelVersion==="copa-final-core-v2",report.modelVersion],
+  ["10k real-core sample",report.sampleSize===10_000,report.sampleSize],
+  ["same seed and replay are deterministic",deterministic,deterministic],
+  ["power gap produces monotonic win rates",
+    b.away_strong.homeWinRate<b.away_edge.homeWinRate&&
+    b.away_edge.homeWinRate<b.even.homeWinRate&&
+    b.even.homeWinRate<b.home_edge.homeWinRate&&
+    b.home_edge.homeWinRate<b.home_strong.homeWinRate,
+    Object.values(b).map(value=>value.homeWinRate.toFixed(3)).join(" < ")],
+  ["strong-away home win band",b.away_strong.homeWinRate>=0.12&&b.away_strong.homeWinRate<=0.30,b.away_strong.homeWinRate],
+  ["even-match home win band",b.even.homeWinRate>=0.46&&b.even.homeWinRate<=0.55,b.even.homeWinRate],
+  ["strong-home win band",b.home_strong.homeWinRate>=0.70&&b.home_strong.homeWinRate<=0.88,b.home_strong.homeWinRate],
+  ["goals per match",o.goalsPerMatch>=2.30&&o.goalsPerMatch<=3.30,o.goalsPerMatch],
+  ["shots per match",o.shotsPerMatch>=14&&o.shotsPerMatch<=24,o.shotsPerMatch],
+  ["xG per match",o.xgPerMatch>=2.40&&o.xgPerMatch<=3.50,o.xgPerMatch],
+  ["saves per match",o.savesPerMatch>=4&&o.savesPerMatch<=11,o.savesPerMatch],
+  ["yellow cards per match",o.yellowPerMatch>=0.8&&o.yellowPerMatch<=4,o.yellowPerMatch],
+  ["red cards per match",o.redPerMatch<=0.20,o.redPerMatch],
+  ["extra-time rate",o.extraTimeRate>=0.16&&o.extraTimeRate<=0.34,o.extraTimeRate],
+  ["penalty rate",o.penaltyRate>=0.05&&o.penaltyRate<=0.18,o.penaltyRate],
+  ["wide usage",o.wideUsage>=0.22&&o.wideUsage<=0.48,o.wideUsage]
 ];
 
-let failed = false;
-for (const [name, ok, value] of staticGuards) {
-  console.log(`${ok ? "OK" : "FAIL"} static: ${name}`);
-  if (!ok) failed = true;
+let failed=false;
+for(const [name,ok,value] of checks){
+  const printable=typeof value==="number"?value.toFixed(3):String(value);
+  console.log(`${ok?"OK":"FAIL"} final-core: ${name} = ${printable}`);
+  if(!ok)failed=true;
 }
-
-for (const [name, ok, value] of thresholds) {
-  const printable = typeof value === "number" ? value.toFixed(3) : value;
-  console.log(`${ok ? "OK" : "FAIL"} stat: ${name} = ${printable}`);
-  if (!ok) failed = true;
+console.log(JSON.stringify(report,null,2));
+if(!checkMode){
+  fs.mkdirSync("outputs",{recursive:true});
+  fs.writeFileSync("outputs/final-sim-quality.json",`${JSON.stringify(report,null,2)}\n`);
 }
-
-console.log(JSON.stringify(report, null, 2));
-
-if (!checkMode) {
-  fs.mkdirSync("outputs", { recursive: true });
-  fs.writeFileSync("outputs/final-sim-quality.json", `${JSON.stringify(report, null, 2)}\n`);
-}
-
-if (failed) process.exit(1);
+if(failed)process.exit(1);

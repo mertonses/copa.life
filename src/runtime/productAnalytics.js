@@ -10,11 +10,15 @@
     "round_completed",
     "run_finished",
     "ghost_opt_in",
-    "profile_open_error"
+    "profile_open_error",
+    "final_sim_completed"
   ]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
   const OUTCOMES=new Set(["","win","loss","sacked"]);
   const DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
+  const POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
+  const END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
+  const TACTICS=new Set(["","balanced","more","push","calm","hold"]);
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
@@ -40,9 +44,13 @@
     const country=COUNTRIES.has(String(props.country||global.selectedCountry||"").toUpperCase())?String(props.country||global.selectedCountry).toUpperCase():"";
     const outcome=OUTCOMES.has(String(props.outcome||""))?String(props.outcome||""):"";
     const detail=DETAILS.has(String(props.detail||""))?String(props.detail||""):"";
+    const modelVersion=/^copa-final-core-v[0-9]{1,3}$/.test(String(props.model_version||""))?String(props.model_version):"";
+    const powerGap=POWER_GAPS.has(String(props.power_gap||""))?String(props.power_gap||""):"";
+    const endType=END_TYPES.has(String(props.end_type||""))?String(props.end_type||""):"";
+    const tactic=TACTICS.has(String(props.tactic||""))?String(props.tactic||""):"";
     const round=Math.max(0,Math.min(6,Math.round(Number(props.round)||0)));
     return {
-      schema_version:1,
+      schema_version:2,
       event:eventName,
       platform:"web",
       locale:locale(),
@@ -51,7 +59,11 @@
       outcome,
       detail,
       page_path:clean(global.location.pathname||"/")||"/",
-      app_version:clean(metaContent(BUILD_META))
+      app_version:clean(metaContent(BUILD_META)),
+      model_version:modelVersion,
+      power_gap:powerGap,
+      end_type:endType,
+      tactic
     };
   }
 
