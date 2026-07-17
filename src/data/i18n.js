@@ -532,7 +532,7 @@ function _syncCopaLanguageControls(){
  grid.classList.add("langgrid");
  grid.innerHTML=COPA_LOCALE_BUTTONS.map(function(item){
   var active=item.code===LANG?" on":"";
-  var visual=window.COPA_PLATFORM==="android"?'<span class="generic-country-code" aria-hidden="true">'+item.short+'</span>':'<img src="assets/flags/'+item.flag+'" alt="" aria-hidden="true"><span>'+item.short+'</span>';
+  var visual=window.COPA_IS_NATIVE?'<span class="generic-country-code" aria-hidden="true">'+item.short+'</span>':'<img src="assets/flags/'+item.flag+'" alt="" aria-hidden="true"><span>'+item.short+'</span>';
   return '<button id="lg'+item.code.toUpperCase()+'" class="sdbtn langbtn'+active+'" type="button" onclick="setLang(\''+item.code+'\')" aria-label="'+item.name+'" aria-pressed="'+(item.code===LANG)+'">'+visual+'</button>';
  }).join("");
 }

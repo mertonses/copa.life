@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const checks = [
-  ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "hasConsent", "requestConsent", "deleteMyData", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent", "flushReportQueue", "clearLocalGhostData"]],
+  ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "hasConsent", "sharingEnabled", "requestConsent", "deleteMyData", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent", "flushReportQueue", "clearLocalGhostData"]],
   ["hub bridge", "src/ui/hub.js", ["_maybeGhostOpponent", "_applyGhostOpponent", "ghostMeta", "ghost-report-btn", "reportGhost"]],
   ["match bridge", "src/sim/finalSim.js", ["_ghostProfile", "ghostTactics"]],
   ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "GhostClubs.recordCompletedRun"]],
@@ -76,14 +76,24 @@ vm.runInContext(fs.readFileSync(path.join(root, "src/core/clubName.js"), "utf8")
 vm.runInContext(fs.readFileSync(path.join(root, "src/online/ghostClubs.js"), "utf8"), sandbox);
 
 const ghosts = sandbox.GhostClubs;
-assert.equal(ghosts.enabled(), false, "Ghost Club sharing must be off by default");
+assert.equal(ghosts.enabled(), true, "Ghost opponents must be on by default on the web");
+assert.equal(ghosts.sharingEnabled(), false, "Ghost sharing must stay off without explicit consent");
 ghosts.beginRun({ seed: 1, clubName: "No Consent FC", country: "TR", cheatRun: false });
 assert.equal(ghosts.recordCompletedRun({ seed: 1, teamName: "No Consent FC", run: { power: 70, round: 2 } }), null, "no run may be queued without explicit consent");
-assert.equal(storage.has("copa_ghost_upload_queue_v1"), false, "default-off mode must not create an upload queue");
+assert.equal(storage.has("copa_ghost_upload_queue_v1"), false, "default-on matching must not create an upload queue");
+const anonymousMatch = await ghosts.findOpponent({ round: 3, power: 74 });
+assert.equal(anonymousMatch?.ghostId, "G-TEST1234", "web matching should work without sharing consent");
+assert.equal(storage.has("copa_ghost_client_id_v1"), false, "read-only matching must not create an installation ID");
+assert.equal(fetchCount, 1);
+storage.delete("copa_ghost_current_run_v1");
+storage.delete("copa_ghost_clubs_enabled");
+sandbox.COPA_IS_NATIVE = true;
+assert.equal(ghosts.enabled(), false, "native Ghost matching must stay off by default");
+sandbox.COPA_IS_NATIVE = false;
 
 storage.set("copa_ghost_consent_v1", JSON.stringify({ version: "ghost-terms-v1", terms: true, sharing: true, accepted_at: new Date().toISOString() }));
-storage.set("copa_ghost_clubs_enabled", "1");
-assert.equal(ghosts.enabled(), true, "versioned explicit consent should enable Ghost Clubs");
+storage.set("copa_ghost_sharing_enabled", "1");
+assert.equal(ghosts.sharingEnabled(), true, "versioned explicit consent should enable Ghost sharing");
 
 ghosts.beginRun({ seed: 42, clubName: "Test United", country: "ENG", cheatRun: false });
 const [first, simultaneous] = await Promise.all([
@@ -92,10 +102,10 @@ const [first, simultaneous] = await Promise.all([
 ]);
 assert.equal(first?.ghostId, "G-TEST1234");
 assert.equal(simultaneous, null, "a concurrent second lookup must be gated");
-assert.equal(fetchCount, 1);
+assert.equal(fetchCount, 2);
 assert.equal(ghosts.markOpponentUsed(first.ghostId), true);
 assert.equal(await ghosts.findOpponent({ round: 4, power: 76 }), null, "a second ghost in the same run must be rejected");
-assert.equal(fetchCount, 1);
+assert.equal(fetchCount, 2);
 
 storage.delete("copa_ghost_upload_queue_v1");
 ghosts.beginRun({ seed: 99, clubName: "Cheat Athletic", country: "TR", cheatRun: true });
@@ -130,12 +140,13 @@ sandbox.fetch = async (_url, options) => options?.method === "DELETE"
   ? { ok: true, json: async () => ({ ok: true, deleted: 1 }) }
   : { ok: true, json: async () => ({ ghost: snapshot }) };
 assert.deepEqual(JSON.parse(JSON.stringify(await ghosts.deleteMyData())), { ok: true, deleted: 1 });
-for (const key of ["copa_ghost_consent_v1", "copa_ghost_client_id_v1", "copa_ghost_delete_token_v1", "copa_ghost_current_run_v1"]) {
+for (const key of ["copa_ghost_sharing_enabled", "copa_ghost_consent_v1", "copa_ghost_client_id_v1", "copa_ghost_delete_token_v1", "copa_ghost_current_run_v1"]) {
   assert.equal(storage.has(key), false, `successful deletion must clear local ${key}`);
 }
 assert.deepEqual(ghosts.blockedIds(), ["G-BLOCK123", "G-OFFLINE12"], "data deletion must preserve the never-show-again block list");
 ghosts.withdrawConsent();
-assert.equal(ghosts.enabled(), false);
+assert.equal(ghosts.enabled(), true, "withdrawing sharing consent must not disable read-only web opponents");
+assert.equal(ghosts.sharingEnabled(), false);
 assert.deepEqual(JSON.parse(storage.get("copa_ghost_upload_queue_v1") || "[]"), [], "withdrawing consent must clear queued uploads");
 
-console.log("[ghosts] default-off consent, retention/deletion/reporting, one-opponent gate, cheat exclusion, and structured snapshots passed.");
+console.log("[ghosts] default-on web opponents, explicit sharing consent, native default-off, retention/deletion/reporting, one-opponent gate, cheat exclusion, and structured snapshots passed.");

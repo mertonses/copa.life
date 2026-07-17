@@ -90,7 +90,9 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260714-last-match-report1-scout-overflow3">
+<link rel="stylesheet" href="src/styles/finalReplay.css?v=20260717-replay-viewer1">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
+<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260717-mobile-ux2">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1a2e22);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -286,14 +288,16 @@ if("serviceWorker"in navigator){
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/state/runPersistence.js?v=20260715-persistence1"></script>
 <script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
+<script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260715-lazy1"></script>
-<script src="src/runtime/finalReplay.js?v=20260717-replay2"></script>
+<script src="src/runtime/finalReplay.js?v=20260717-replay-viewer1"></script>
 <script src="src/cards/cardDefs.js?v=20260712c"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
 <script src="src/balance/telemetry.js?v=20260711-economy3"></script>
+<script src="src/balance/finalCalibration.js?v=20260717-weekly-calibration1"></script>
 <script src="src/runtime/productAnalytics.js?v=20260716-analytics1"></script>
 <script src="src/cards/cardEffects.js?v=20260713-playback3"></script>
 <script src="src/balance/power.js?v=20260714-lineup-sync1"></script>
@@ -302,8 +306,9 @@ if("serviceWorker"in navigator){
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260714-i18n1"></script>
 <script src="src/online/ghostClubs.js?v=20260714-ghost2-club-security1"></script>
-<script src="src/ui/hub.js?v=20260714-i18n1-trust-info1-ghost2-lineup-sync1"></script>
+<script src="src/ui/hub.js?v=20260717-mobile-ux2"></script>
 <script src="src/ui/playerProfiles.js?v=20260715-copa-model1"></script>
+<script src="src/ui/mobileExperience.js?v=20260717-mobile-ux2"></script>
 <script src="src/ui/lastMatchReport.js?v=20260714-last-match-report1"></script>
 <script src="src/ui/scoutReport.js?v=20260714-scout-overflow1"></script>
 <script>
@@ -841,7 +846,7 @@ let _kp=0,_ks=6;
 
 /* ===== power ===== */
 /* ===== fixtures ===== */
-function renderFixtures(){const x=L(),fb=$("fixbar"),rl=LANG==="tr"?["1. Tur","2. Tur","Son 16","Çeyrek","Yarı","Final"]:["Round 1","Round 2","Last 16","Quarter","Semi","Final"];fb.innerHTML="";fb.classList.remove("hidden");fixtures.forEach((f,i)=>{const d=document.createElement("div");let cls="fix";if(f.res==="W")cls+=" win";else if(f.res==="L")cls+=" lose";else if(f.res==="D")cls+=" draw";else if(i===round-1)cls+=" cur";d.className=cls;const hidden=!f.res&&i>round-1;const pw=(!hidden&&!f.res&&bracket[i]&&bracket[i].power)?bracket[i].power:null;const _smm={ENG:CLUB_LOGOS_EN_SM,ES:CLUB_LOGOS_ES_SM,IT:CLUB_LOGOS_IT_SM,DE:CLUB_LOGOS_DE_SM,JP:CLUB_LOGOS_JP_SM};const _smMap=_smm[selectedCountry]||CLUB_LOGOS_SM;const smLogo=window.COPA_PLATFORM!=="android"&&!hidden&&typeof _smMap!=="undefined"&&_smMap[f.opp];const foHTML=hidden?"???":smLogo?`<img class="fix-logo" src="${smLogo}" alt="${f.opp}" title="${f.opp}" loading="lazy" decoding="async">`:window.CopaClubVisuals.svgFor(f.opp,24,29);d.innerHTML=`<div class="fr">${rl[i]}</div><div class="fo" title="${f.opp}">${foHTML}</div><div class="fs">${f.res?f.gf+"-"+f.ga:(hidden?"?":"")}</div>`;fb.appendChild(d);});const tn=document.createElement("div");const champ=fixtures[5]&&fixtures[5].res==="W";tn.className="fix trophy"+(champ?" lit":"");tn.style.cssText="background:var(--color-ink);border-color:var(--color-ink);color:var(--color-background)";tn.innerHTML=`<svg viewBox="0 0 28 32" width="22" height="25" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15"/><path d="M20 7h4Q24 17 20 15"/><line x1="14" y1="20" x2="14" y2="26"/><path d="M9 26h10"/><path d="M7 30h14" stroke-width="2"/></svg>`;fb.appendChild(tn);}
+function renderFixtures(){const x=L(),fb=$("fixbar"),rl=LANG==="tr"?["1. Tur","2. Tur","Son 16","Çeyrek","Yarı","Final"]:["Round 1","Round 2","Last 16","Quarter","Semi","Final"];fb.innerHTML="";fb.classList.remove("hidden");fixtures.forEach((f,i)=>{const d=document.createElement("div");let cls="fix";if(f.res==="W")cls+=" win";else if(f.res==="L")cls+=" lose";else if(f.res==="D")cls+=" draw";else if(i===round-1)cls+=" cur";d.className=cls;const hidden=!f.res&&i>round-1;const pw=(!hidden&&!f.res&&bracket[i]&&bracket[i].power)?bracket[i].power:null;const _smm={ENG:CLUB_LOGOS_EN_SM,ES:CLUB_LOGOS_ES_SM,IT:CLUB_LOGOS_IT_SM,DE:CLUB_LOGOS_DE_SM,JP:CLUB_LOGOS_JP_SM};const _smMap=_smm[selectedCountry]||CLUB_LOGOS_SM;const smLogo=!window.COPA_IS_NATIVE&&!hidden&&typeof _smMap!=="undefined"&&_smMap[f.opp];const foHTML=hidden?"???":smLogo?`<img class="fix-logo" src="${smLogo}" alt="${f.opp}" title="${f.opp}" loading="lazy" decoding="async">`:window.CopaClubVisuals.svgFor(f.opp,24,29);d.innerHTML=`<div class="fr">${rl[i]}</div><div class="fo" title="${f.opp}">${foHTML}</div><div class="fs">${f.res?f.gf+"-"+f.ga:(hidden?"?":"")}</div>`;fb.appendChild(d);});const tn=document.createElement("div");const champ=fixtures[5]&&fixtures[5].res==="W";tn.className="fix trophy"+(champ?" lit":"");tn.style.cssText="background:var(--color-ink);border-color:var(--color-ink);color:var(--color-background)";tn.innerHTML=`<svg viewBox="0 0 28 32" width="22" height="25" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15"/><path d="M20 7h4Q24 17 20 15"/><line x1="14" y1="20" x2="14" y2="26"/><path d="M9 26h10"/><path d="M7 30h14" stroke-width="2"/></svg>`;fb.appendChild(tn);}
 
 /* ===== opponent scouting ===== */
 function genOppLineup(){const base=opponent.power,f433=FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=f433.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const source=oppPick(g),nm=source[0],item={name:nm,ov,pos:s[0],natPos:s[0],grp:g,side,club:source[3]||"",age:source[4]||0};if(typeof playerProfileKey==="function")item.profileKey=playerProfileKey(selectedCountry,nm,item.club,item.age);return item;});oppXI=oppLineup.map(o=>o.name);
@@ -2018,7 +2023,7 @@ function showFinalCard(sp){
   /* Opponent logo */
   const _lm={ENG:typeof CLUB_LOGOS_EN!=="undefined"?CLUB_LOGOS_EN:{},ES:typeof CLUB_LOGOS_ES!=="undefined"?CLUB_LOGOS_ES:{},IT:typeof CLUB_LOGOS_IT!=="undefined"?CLUB_LOGOS_IT:{},DE:typeof CLUB_LOGOS_DE!=="undefined"?CLUB_LOGOS_DE:{},JP:typeof CLUB_LOGOS_JP!=="undefined"?CLUB_LOGOS_JP:{}};
   const _logoMap=(typeof selectedCountry!=="undefined"&&_lm[selectedCountry])||CLUB_LOGOS||{};
-  const oppLogo=window.COPA_PLATFORM!=="android"&&_logoMap[opponent.name];
+  const oppLogo=!window.COPA_IS_NATIVE&&_logoMap[opponent.name];
   const oppCrest=oppLogo
     ?`<img src="${oppLogo}" style="width:62px;height:72px;object-fit:contain;display:block;margin:0 auto">`
     :window.CopaClubVisuals.svgFor(opponent.name,62,72);
@@ -2316,7 +2321,7 @@ function _saveState(){
     draft:{remaining,currentSlot,currentOpts:(currentOpts||[]).map(p=>p?Object.assign({},p):null),rerollsLeft:draftRerollsLeft,deadlineH,usedNames:[...usedNames]}
   });}catch(e){}
 }
-function _clearState(){if(window.CopaRunPersistence)window.CopaRunPersistence.clear();if(window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();}
+function _clearState(){if(window.CopaRunPersistence)window.CopaRunPersistence.clear();if(window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();}
 function _tryResumeFinalCheckpoint(){
   if(!window.CopaFinalSimPersistence||round<6)return false;
   const saved=window.CopaFinalSimPersistence.read().state;if(!saved)return false;
@@ -2367,7 +2372,7 @@ function _tryRestoreState(){
       $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("ddbanner").classList.remove("hidden");$("budgetBox").classList.add("introhide");_ensureDraftKasa();buildPitch($("pitch"));picksBySlot.forEach((p,i)=>{if(p)renderRoundel("r"+i,p);});setBudget();applyStatic();updateDeadline();renderDraftExtra();if(hasCompleteStartingXI()){buildBench();$("ddbanner").classList.add("hidden");showPostcard(enterHub);}else if(currentSlot>=0&&currentOpts.length){renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");}else loadRollStage();return true;
     }
     window.CopaRunState&&window.CopaRunState.transition("hub",{force:true,reason:"restore"});setBudget();enterHub(true);_saveState();
-    if(!_tryResumeFinalCheckpoint()&&window.CopaFinalSimPersistence&&round<6)window.CopaFinalSimPersistence.clear();
+    if(!_tryResumePenaltyCheckpoint()&&!_tryResumeFinalCheckpoint()&&window.CopaFinalSimPersistence&&round<6)window.CopaFinalSimPersistence.clear();
     return true;
   }catch(e){
     const message=e&&e.message?e.message:String(e);
@@ -2422,9 +2427,72 @@ const _PEN_GK_SVG=`<svg class="pen-keeper-svg" viewBox="0 0 64 64" aria-hidden="
     <path class="pen-gk-token-cuff" d="m18.2 37.4 6.6 4.4M45.8 37.4l-6.6 4.4"/>
   </g>
 </svg>`;
+function _penClone(value){return JSON.parse(JSON.stringify(value));}
+function _penCheckpointContext(){
+  return {
+    finalPenaltyScore:window._finalPenaltyScore||"",
+    finalPenPower:window._finalPenPower?_penClone(window._finalPenPower):null,
+    finalAuditHTML:window._finalAuditHTML||"",
+    finalTelemetryContext:window._finalTelemetryContext?_penClone(window._finalTelemetryContext):null,
+    keyMoment:window.keyMoment||"",penaltyNote:window.penaltyNote||"",
+    shotsA:Number(window.shotsA)||0,shotsB:Number(window.shotsB)||0,
+    xgA:Number(window.xgA)||0,xgB:Number(window.xgB)||0,
+    keeperA:Number(window.keeperA)||0,keeperB:Number(window.keeperB)||0,
+    goals:Array.isArray(window.goals)?_penClone(window.goals):[],
+    lastMatchPerf:typeof lastMatchPerf!=="undefined"&&lastMatchPerf?_penClone(lastMatchPerf):null
+  };
+}
+function _savePenaltyCheckpoint(){
+  const store=window.CopaPenaltyPersistence,s=window._penState;
+  if(!store||!s)return false;
+  return store.persist({
+    runSeed:Number(seedNum)||0,runRound:Number(round)||0,rngCalls:Number(runRngCalls)||0,
+    state:_penClone(s),context:_penCheckpointContext()
+  });
+}
+function _restorePenaltyCheckpoint(saved){
+  const store=window.CopaPenaltyPersistence;
+  if(!saved||!store||Number(saved.runSeed)!==Number(seedNum)||Number(saved.runRound)!==Number(round)){
+    if(store)store.clear();
+    return false;
+  }
+  try{
+    runRng=mulberry32((Math.imul(Number(seedNum)||0,2654435761)>>>0)||1);
+    runRngCalls=Math.max(0,Number(saved.rngCalls)||0);
+    for(let index=0;index<runRngCalls;index++)runRng();
+    window._penState=_penClone(saved.state);
+    const context=saved.context||{};
+    window._finalPenaltyScore=context.finalPenaltyScore||"";
+    window._finalPenPower=context.finalPenPower?_penClone(context.finalPenPower):window._finalPenPower;
+    window._finalAuditHTML=context.finalAuditHTML||"";
+    window._finalTelemetryContext=context.finalTelemetryContext?_penClone(context.finalTelemetryContext):null;
+    window.keyMoment=context.keyMoment||"";window.penaltyNote=context.penaltyNote||"";
+    window.shotsA=Number(context.shotsA)||0;window.shotsB=Number(context.shotsB)||0;
+    window.xgA=Number(context.xgA)||0;window.xgB=Number(context.xgB)||0;
+    window.keeperA=Number(context.keeperA)||0;window.keeperB=Number(context.keeperB)||0;
+    window.goals=Array.isArray(context.goals)?_penClone(context.goals):[];
+    if(context.lastMatchPerf&&typeof lastMatchPerf!=="undefined")lastMatchPerf=_penClone(context.lastMatchPerf);
+    window._penHistoryExpanded=false;
+    _renderPenaltyModal();
+    window._penaltyModalReady=true;
+    return true;
+  }catch(error){
+    store.clear();
+    if(window.CopaDiagnostics)window.CopaDiagnostics.capture("penalty_restore_failed",error&&error.message,error&&error.stack);
+    return false;
+  }
+}
+function _tryResumePenaltyCheckpoint(){
+  const store=window.CopaPenaltyPersistence;
+  if(!store)return false;
+  const saved=store.read().state;
+  return saved?_restorePenaltyCheckpoint(saved):false;
+}
 function showPenaltyShootout(mode){
   try{closeModal();}catch(e){}
+  if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();
   window._penaltyModalReady=false;
+  window._penHistoryExpanded=false;
   const fp=window._finalPenPower||{};
   const home=teamName||"COPA",away=opponent&&opponent.name?opponent.name:"Rakip";
   const homePlayers=_penNormalizePlayers((typeof picksBySlot!=="undefined"?picksBySlot:[]),home,fp.home||(lastMatchPerf&&lastMatchPerf.power)||75);
@@ -2438,6 +2506,8 @@ function showPenaltyShootout(mode){
   try{
     _renderPenaltyModal();
     window._penaltyModalReady=true;
+    if((mode||"round")==="final"&&window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();
+    _savePenaltyCheckpoint();
     return true;
   }catch(err){
     window._penaltyModalReady=false;
@@ -2597,6 +2667,11 @@ function _renderPenaltyModal(){
          +dirBtn("C",tr?"ORTADA KAL":"STAY CENTER",tr?"Ortada kal":"Stay center")
          +dirBtn("R",(tr?"SAĞA ATLA":"DIVE RIGHT")+" →",tr?"Sağa atla":"Dive right"))
       +"</div>";
+  const actionDock="<div class=\"pen-action-dock\">"+actionBtns+"</div>";
+  const historyOpen=!!window._penHistoryExpanded;
+  const historyHtml=log
+    ?"<button type=\"button\" class=\"pen-log-toggle\" aria-expanded=\""+(historyOpen?"true":"false")+"\" onclick=\"_togglePenaltyHistory(this)\">"+(historyOpen?(tr?"PENALTI GEÇMİŞİNİ GİZLE":"HIDE PENALTY HISTORY"):(tr?"PENALTI GEÇMİŞİNİ GÖSTER":"SHOW PENALTY HISTORY"))+"</button><div class=\"pen-log"+(historyOpen?"":" is-collapsed")+"\">"+log+"</div>"
+    :"";
   const activeHome=!done&&shootPhase,activeAway=!done&&!shootPhase;
   /* Streak badge: your scoring streak (shoot) or your keeper's save streak (keep) */
   let homeStreakBadge="",awayStreakBadge="";
@@ -2611,8 +2686,17 @@ function _renderPenaltyModal(){
   /* Crowd reaction sweep on a fresh result */
   const crowdHtml=reveal?"<div class=\"pen-crowd "+reveal.type+"\" aria-hidden=\"true\"></div>":"";
   const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save")+((sudden||s.sudden)?" is-sudden":"");
-  showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+actionBtns+(log?"<div class=\"pen-log\">"+log+"</div>":"")+"</div>");
+  showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+historyHtml+actionDock+"</div>");
 }
+window._togglePenaltyHistory=function(button){
+  const log=document.querySelector(".pen-modal .pen-log");if(!log)return;
+  window._penHistoryExpanded=!window._penHistoryExpanded;
+  log.classList.toggle("is-collapsed",!window._penHistoryExpanded);
+  if(button){
+    button.setAttribute("aria-expanded",window._penHistoryExpanded?"true":"false");
+    button.textContent=window._penHistoryExpanded?(LANG==="tr"?"PENALTI GEÇMİŞİNİ GİZLE":"HIDE PENALTY HISTORY"):(LANG==="tr"?"PENALTI GEÇMİŞİNİ GÖSTER":"SHOW PENALTY HISTORY");
+  }
+};
 /* Hover a direction button → highlight the matching goal zone (preview) */
 window._penHoverZone=function(d){const g=document.querySelector(".pen-modal .pen-goal");if(!g)return;g.classList.remove("hover-L","hover-C","hover-R");if(d)g.classList.add("hover-"+d);};
 /* Deterministic "reading" hint for the opposing shooter (spoiler-free) */
@@ -2668,10 +2752,12 @@ function _takePenalty(dir){
   s.round=Math.max(s.homeShots.length,s.awayShots.length)+1;
   if(_penIsDone(s)){s.phase="done";setTimeout(function(){_penSfx(_penWinner(s)?"shootout_won":"shootout_lost");},reduce?0:420);}
   _renderPenaltyModal();
+  _savePenaltyCheckpoint();
 }
 function _finishPenaltyShootout(homeWon){
   const s=window._penState||{};
   const shootout=(s.homeGoals||0)+"-"+(s.awayGoals||0);
+  if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();
   if(window.LastMatchReport)LastMatchReport.setPenalty(s.mode==="final"?(window._finalPenaltyScore||"0-0"):(lastMatchPerf?lastMatchPerf.gf+"-"+lastMatchPerf.ga:"0-0"),shootout,!!homeWon);
   if(s.mode==="final"){
     const tr=LANG==="tr";
@@ -2680,7 +2766,9 @@ function _finishPenaltyShootout(homeWon){
     window.keyMoment=window.penaltyNote;
     const xgA=Number(window.xgA||0).toFixed(1),xgB=Number(window.xgB||0).toFixed(1);
     window.finalReportHTML=`<h4>${tr?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${tr?"Kırılma anı":"Key moment"}</span><b>${window.penaltyNote}</b></div><div class="frrow"><span>${tr?"Penaltılar":"Penalties"}</span><b>${shootout}</b></div><div class="frrow"><span>xG</span><b>${xgA}-${xgB}</b></div><div class="frrow"><span>${tr?"Final yorumu":"Final note"}</span><b>${homeWon?(tr?"Altın gol çıkmadı, seri penaltılarla kupa geldi.":"No golden goal, the shootout delivered the cup."):(tr?"Altın gol çıkmadı, seri penaltılarda final kaçtı.":"No golden goal, the final slipped away in the shootout.")}</b></div>${window._finalAuditHTML||""}`;
-    if(window.CopaAnalytics&&window._finalTelemetryContext)window.CopaAnalytics.track("final_sim_completed",{...window._finalTelemetryContext,outcome:homeWon?"win":"loss"});
+    const telemetry=window._finalTelemetryContext?{...window._finalTelemetryContext,outcome:homeWon?"win":"loss"}:null;
+    if(window.CopaAnalytics&&telemetry)window.CopaAnalytics.track("final_sim_completed",telemetry);
+    if(window.CopaFinalCalibration&&telemetry)window.CopaFinalCalibration.record(telemetry);
     window._finalTelemetryContext=null;
     closeModal();
     endRun(!!homeWon,base+" p "+shootout);

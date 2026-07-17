@@ -5,7 +5,7 @@
   "compatibility_date": "2026-07-15",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life"
+    "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life,https://localhost,capacitor://localhost"
   },
   "observability": {
     "enabled": true,

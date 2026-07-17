@@ -1,6 +1,6 @@
 (function(root){
   "use strict";
-  if(root.COPA_PLATFORM!=="android"||!root.Capacitor)return;
+  if(!root.COPA_IS_NATIVE||!root.Capacitor)return;
   const capacitor=root.Capacitor,plugins=capacitor.Plugins||{};
   const resolvePlugin=name=>plugins[name]||(typeof capacitor.registerPlugin==="function"?capacitor.registerPlugin(name):null);
   const App=resolvePlugin("App"),StatusBar=resolvePlugin("StatusBar"),SplashScreen=resolvePlugin("SplashScreen");
@@ -19,7 +19,15 @@
   }
   addNativeListener("appStateChange",state=>{if(!state.isActive)checkpoint();root.dispatchEvent(new CustomEvent("copa:native-state",{detail:{active:!!state.isActive}}));});
   addNativeListener("pause",checkpoint);
-  addNativeListener("backButton",event=>{if(closeOverlay())return;checkpoint();if(event&&event.canGoBack){root.history.back();return;}App.minimizeApp().catch(()=>App.exitApp().catch(()=>{}));});
+  if(root.COPA_PLATFORM==="android")addNativeListener("backButton",event=>{
+      if(root.CopaMobileExperience&&typeof root.CopaMobileExperience.handleBack==="function"&&root.CopaMobileExperience.handleBack())return;
+      if(closeOverlay())return;
+      checkpoint();
+      if(event&&event.canGoBack){root.history.back();return;}
+      App.minimizeApp().catch(()=>App.exitApp().catch(()=>{}));
+    });
   root.addEventListener("pagehide",checkpoint,{passive:true});
-  Promise.allSettled([StatusBar.setStyle({style:"LIGHT"}),StatusBar.setOverlaysWebView({overlay:false}),StatusBar.setBackgroundColor({color:"#f5f0e8"})]).finally(()=>SplashScreen.hide().catch(()=>{}));
+  const statusTasks=[StatusBar.setStyle({style:"LIGHT"}),StatusBar.setOverlaysWebView({overlay:false})];
+  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#f5f0e8"}));
+  Promise.allSettled(statusTasks).finally(()=>SplashScreen.hide().catch(()=>{}));
 })(window);

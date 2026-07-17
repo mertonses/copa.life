@@ -22,6 +22,7 @@ const monitorScript=read("services/ghost-club-api/scripts/analytics-monitor.mjs"
 const privacy=read("privacy.html");
 const webIndex=read("dist/index.html");
 const androidIndex=read("dist-android/index.html");
+const iosIndex=read("dist-ios/index.html");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
@@ -55,8 +56,10 @@ expect(webIndex.includes("src/runtime/productAnalytics.js"),"web artifact is mis
 
 for(const forbidden of ["src/runtime/productAnalytics.js","copa-analytics-api","static.cloudflareinsights.com","cloudflareinsights.com","/v1/analytics/events"]){
   expect(!androidIndex.includes(forbidden),`Android index contains web-only analytics marker: ${forbidden}`);
+  expect(!iosIndex.includes(forbidden),`iOS index contains web-only analytics marker: ${forbidden}`);
 }
 expect(!fs.existsSync(path.join(ROOT,"dist-android/src/runtime/productAnalytics.js")),"Android artifact contains the web-only analytics runtime");
+expect(!fs.existsSync(path.join(ROOT,"dist-ios/src/runtime/productAnalytics.js")),"iOS artifact contains the web-only analytics runtime");
 
 if(failures.length){for(const failure of failures)console.error(`[analytics] ${failure}`);process.exit(1);}
-console.log("[analytics] privacy-minimised funnel, Worker health reports and alarms passed; Android artifact is clean");
+console.log("[analytics] privacy-minimised funnel, Worker health reports and alarms passed; Android and iOS artifacts are clean");

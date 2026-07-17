@@ -9,6 +9,13 @@
     "backgroundColor": "#f5f0e8",
     "allowMixedContent": false
   },
+  "ios": {
+    "backgroundColor": "#f5f0e8",
+    "contentInset": "never",
+    "zoomEnabled": false,
+    "allowsLinkPreview": false,
+    "preferredContentMode": "mobile"
+  },
   "plugins": {
     "SystemBars": {
       "insetsHandling": "css",

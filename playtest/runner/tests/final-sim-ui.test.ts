@@ -57,6 +57,11 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   await expect(page.locator("#sim")).toBeVisible();
   await expect(page.locator("#simEventMap svg")).toBeVisible();
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","false");
+  await expect(page.locator("#mobileSkipBtn")).toBeVisible();
+  await page.locator("#mobileSkipBtn").click();
+  await expect(page.locator(".mobile-skip-confirm")).toBeVisible();
+  await page.locator(".mobile-skip-confirm .btn-ghost").click();
+  await expect(page.locator("#modal")).toBeHidden();
 
   await page.locator("#pauseBtn").click();
   await expect.poll(()=>page.locator("#pauseBtn").evaluate(element=>element.classList.contains("pause"))).toBe(true);
@@ -75,7 +80,23 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   await expect(page.locator('.spd[data-s="10"]')).toHaveAttribute("aria-pressed","false");
   await page.locator("#shPush").click();
   await expect(page.locator("#shPush")).toHaveAttribute("aria-pressed","true");
+  await expect(page.locator("#mobileTacticStatus")).toContainText(/Önde bas|Press high/i);
   await expect(page.locator("#simGoals")).toContainText(/TACTIC.*HIGH PRESS/is);
+  await expect(page.locator("#simGoals .event-tactic")).toHaveAttribute("data-event-type","tactic");
+  await expect(page.locator('[data-sim-view="events"] .mobile-tab-badge')).toBeVisible();
+  const mobileControls=await page.locator("#sim .speedrow button").evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();
+    return{width:rect.width,height:rect.height};
+  }));
+  expect(mobileControls.every(control=>control.width>=44&&control.height>=44)).toBe(true);
+  await page.evaluate(()=>{(globalThis as any).CopaMobileExperience.setSimView("events");});
+  await expect(page.locator("#sim .eventpanel")).toBeVisible();
+  const eventHeight=await page.locator("#simGoals .event-tactic").evaluate(element=>element.getBoundingClientRect().height);
+  expect(eventHeight).toBeGreaterThanOrEqual(48);
+  const runningClock=await page.locator("#simClk").textContent();
+  await expect.poll(()=>page.locator("#simClk").textContent()).not.toBe(runningClock);
+  await page.evaluate(()=>{(globalThis as any).CopaMobileExperience.setSimView("field");});
+  await expect(page.locator("#sim .fieldframe")).toBeVisible();
 
   const statText=await page.locator("#simStats").innerText();
   expect(statText).not.toMatch(/NaN|undefined|null/);
@@ -84,7 +105,9 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   await page.waitForTimeout(1_000);
   await expect(page.locator("#simState")).not.toHaveText(/HALF TIME|DEVRE ARASI/i);
   await page.locator('.spd[data-s="80"]').click();
-  await page.locator("#sim .speedrow .btn-mini").click();
+  await page.locator("#mobileSkipBtn").click();
+  await expect(page.locator(".mobile-skip-confirm")).toBeVisible();
+  await page.locator(".mobile-skip-confirm .btn-primary").click();
   await expect.poll(()=>page.evaluate(()=>{
     const global=globalThis as any;
     const resultVisible=!document.querySelector("#result")?.classList.contains("hidden");
@@ -107,6 +130,32 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   expect(audit.shots).toBeGreaterThan(0);
   expect(audit.xg.every((value:any)=>Number.isFinite(Number(value)))).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test("mobile penalty decisions keep status and actions visible while history stays collapsible",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"mobile penalty presentation regression");
+  await openFinalReadyHub(page);
+  await page.evaluate(()=>{(globalThis as any).showPenaltyShootout("final");});
+  await expect(page.locator(".pen-modal")).toBeVisible();
+  await expect(page.locator(".mobile-penalty-coach")).toBeVisible();
+  await expect(page.locator(".pen-dir-btn")).toHaveCount(3);
+  const controls=await page.locator(".pen-dir-btn").evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();
+    return{width:rect.width,height:rect.height};
+  }));
+  expect(controls.every(control=>control.width>=44&&control.height>=48)).toBe(true);
+  expect(await page.locator(".pen-head").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
+  expect(await page.locator(".pen-action-dock").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
+
+  await page.locator('.pen-dir-btn[data-dir="L"]').click();
+  const history=page.locator(".pen-log");
+  const toggle=page.locator(".pen-log-toggle");
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded","false");
+  await expect(history).toBeHidden();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded","true");
+  await expect(history).toBeVisible();
 });
 
 test("final resumes from a process-death checkpoint at the same match state",async({page},testInfo)=>{

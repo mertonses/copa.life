@@ -1,11 +1,11 @@
 /* Cloudflare Worker + D1 API for opt-in copa.life Ghost Clubs. */
 const MAX_BODY_BYTES=64*1024;
-const DEFAULT_ORIGINS=["https://copa.life","https://www.copa.life"];
+const DEFAULT_ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","capacitor://localhost"];
 const METHODS="GET, POST, DELETE, OPTIONS";
 const CONSENT_VERSION="ghost-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
 const ANALYTICS_EVENTS=new Set(["session_started","country_selected","draft_started","xi_completed","round_completed","run_finished","ghost_opt_in","profile_open_error","final_sim_completed"]);
-const ANALYTICS_PLATFORMS=new Set(["web","android"]);
+const ANALYTICS_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
 const ANALYTICS_OUTCOMES=new Set(["","win","loss","sacked"]);
 const ANALYTICS_DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);

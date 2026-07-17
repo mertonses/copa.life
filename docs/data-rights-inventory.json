@@ -11,8 +11,8 @@
       "status": "owner_accepted_web_only",
       "risk": "high",
       "paths": ["assets/clubs/**", "src/data/logos.js"],
-      "basis": "No redistribution licence or written permission is recorded. Android excludes these files and uses generic abbreviation crests.",
-      "distribution_decision": "Keep the real crests in the web build under an explicit project-owner web-only risk exception. Android and the standalone legal-policy site exclude them.",
+      "basis": "No redistribution licence or written permission is recorded. Android and iOS exclude these files and use generic abbreviation crests.",
+      "distribution_decision": "Keep the real crests in the web build under an explicit project-owner web-only risk exception. Android, iOS and the standalone legal-policy site exclude them.",
       "distribution_scope": "web_only",
       "risk_acknowledgement": "The project owner explicitly accepts the unresolved copyright and trademark risk for web distribution. This exception is not a licence, permission or legal clearance.",
       "evidence": "Explicit project-owner direction recorded 2026-07-16: keep real crests on web and exclude them from Android.",
@@ -48,10 +48,10 @@
       "risk": "medium",
       "paths": ["assets/flags/**"],
       "basis": "The designs are national flags, but the provenance of each bitmap/vector implementation is not recorded.",
-      "distribution_decision": "Keep the existing flag artwork in the web build under an explicit project-owner web-only risk exception. Android uses text country codes and excludes these files.",
+      "distribution_decision": "Keep the existing flag artwork in the web build under an explicit project-owner web-only risk exception. Android and iOS use text country codes and exclude these files.",
       "distribution_scope": "web_only",
       "risk_acknowledgement": "The project owner accepts the unresolved artwork-provenance risk for web distribution. This exception is not a licence, permission or legal clearance.",
-      "evidence": "Explicit project-owner direction recorded 2026-07-16: keep web visuals while removing rights-sensitive artwork from Android.",
+      "evidence": "Explicit project-owner direction recorded 2026-07-16: keep web visuals while removing rights-sensitive artwork from native store builds.",
       "owner": "copa.life project owner",
       "reviewed_at": "2026-07-16"
     }

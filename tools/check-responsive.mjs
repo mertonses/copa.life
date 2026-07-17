@@ -3,6 +3,8 @@ import fs from "node:fs";
 const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 const match = fs.readFileSync("src/styles/match.css", "utf8");
 const cards = fs.readFileSync("src/styles/cards.css", "utf8");
+const mobile = fs.readFileSync("src/styles/mobileExperience.css", "utf8");
+const mobileScript = fs.readFileSync("src/ui/mobileExperience.js", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
 
 const checks = [
@@ -19,16 +21,48 @@ const checks = [
     pass: /@media\(max-width:900px\)\{[\s\S]*#app,[\s\S]*#result\{[\s\S]*max-width:100%!important;[\s\S]*overflow-x:hidden!important/s.test(layout),
   },
   {
-    name: "mobile hub stat row keeps four compact metrics",
-    pass: /@media\(max-width:620px\)\{[\s\S]*#hub \.hub-stat-row\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/s.test(layout),
+    name: "mobile metrics use a compact scroll-safe row",
+    pass: /#hub \.hub-stat-row\{[\s\S]*display:flex!important;[\s\S]*overflow-x:auto!important;[\s\S]*scroll-snap-type:x proximity/s.test(mobile),
   },
   {
-    name: "mobile hub action buttons stay in a compact three-up row",
-    pass: /@media\(max-width:620px\)\{[\s\S]*#hub \.hub-action-panel \.actionbtns\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/s.test(layout),
+    name: "mobile hub actions use the safe-area dock",
+    pass: /\.mobile-action-dock\[data-dock-kind="hub"\] \.actionbtns\{[\s\S]*grid-template-columns:\.8fr \.8fr 1\.2fr!important/s.test(mobile),
   },
   {
     name: "mobile hub play button remains the rightmost action",
-    pass: /#hub \.hub-action-panel \.actionbar #playBtn\{[\s\S]*order:3!important/s.test(layout),
+    pass: /\.mobile-action-dock\[data-dock-kind="hub"\] \.actionbar #playBtn\{order:3!important\}/.test(mobile),
+  },
+  {
+    name: "mobile action dock accounts for the bottom safe area",
+    pass: /\.mobile-action-dock\{[\s\S]*padding:[^;]*var\(--copa-safe-bottom\)/s.test(mobile),
+  },
+  {
+    name: "mobile player sheet uses the dynamic viewport",
+    pass: /\.player-profile-layer\.is-sheet \.player-profile-card\{[\s\S]*height:calc\(100dvh - var\(--copa-safe-top\)\)!important/s.test(mobile),
+  },
+  {
+    name: "mobile final simulation has three presentation segments",
+    pass: /\.mobile-sim-tabs\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/s.test(mobile)&&/data-sim-view="field"/.test(mobileScript),
+  },
+  {
+    name: "mobile enhancements remain explicit preferences",
+    pass: /mobileHapticBtn/.test(mobileScript)&&/mobileBatteryBtn/.test(mobileScript)&&/mobileSmartSpeedBtn/.test(mobileScript)&&/mobileConfirmPickBtn/.test(mobileScript),
+  },
+  {
+    name: "mobile draft surfaces cash and squad impact before confirmation",
+    pass: /mobile-candidate-impact/.test(mobile)&&/cashAfter/.test(mobileScript)&&/squadAverage/.test(mobileScript),
+  },
+  {
+    name: "mobile final events expose an unread badge",
+    pass: /mobile-tab-badge/.test(mobile)&&/updateEventBadge/.test(mobileScript),
+  },
+  {
+    name: "mobile result detail remains progressively disclosed",
+    pass: /#result \.mobile-result-disclosure\{[\s\S]*display:block/s.test(mobile)&&/wrapResultDisclosure/.test(mobileScript),
+  },
+  {
+    name: "mobile connection loss has a non-blocking state",
+    pass: /\.mobile-network-banner\{[\s\S]*position:fixed/s.test(mobile)&&/addEventListener\("offline"/.test(mobileScript),
   },
   {
     name: "mobile free transfer cards stay two-up",

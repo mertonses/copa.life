@@ -1,0 +1,953 @@
+:root{
+  --copa-safe-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));
+  --copa-safe-right:max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px));
+  --copa-safe-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px));
+  --copa-safe-left:max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px));
+  --mobile-dock-height:0px;
+}
+
+.mobile-action-dock,
+.mobile-sim-tabs,
+.mobile-network-banner,
+.mobile-mechanics-toggle,
+.mobile-draft-context,
+.mobile-draft-confirm,
+.mobile-round-digest,
+.mobile-feed-toggle,
+.mobile-profile-nav,
+.mobile-tactic-status,
+.mobile-penalty-coach{display:none}
+
+.mobile-result-disclosure{display:contents}
+.mobile-result-disclosure>summary{display:none}
+
+@media (max-width:760px) and (hover:none),(max-width:760px) and (pointer:coarse){
+  body{
+    padding-top:var(--copa-safe-top);
+    padding-right:var(--copa-safe-right);
+    padding-left:var(--copa-safe-left);
+  }
+
+  html.mobile-dock-active #app{
+    padding-bottom:calc(var(--mobile-dock-height) + 10px);
+  }
+
+  .mobile-action-dock{
+    position:fixed;
+    z-index:8500;
+    right:0;
+    bottom:0;
+    left:0;
+    display:block;
+    padding:7px max(10px,var(--copa-safe-right)) calc(7px + var(--copa-safe-bottom)) max(10px,var(--copa-safe-left));
+    border-top:1px solid var(--border-default);
+    background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
+    box-shadow:0 -5px 18px rgba(7,16,17,.14);
+  }
+
+  .mobile-action-dock.hidden,
+  html.mobile-keyboard-open .mobile-action-dock{display:none!important}
+
+  .mobile-action-dock-inner{
+    width:min(100%,620px);
+    margin:0 auto;
+  }
+
+  .mobile-action-dock[data-dock-kind="intro"] #startBtn,
+  .mobile-action-dock[data-dock-kind="result"] #againBtn,
+  .mobile-action-dock[data-dock-kind="penalty"] .final-penalty-btn{
+    width:100%!important;
+    min-height:50px!important;
+    margin:0!important;
+    padding:11px 14px!important;
+    font-size:14px!important;
+    white-space:nowrap;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .hub-action-panel{
+    position:static!important;
+    inset:auto!important;
+    z-index:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar{
+    display:block!important;
+    width:100%!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0!important;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns{
+    display:grid!important;
+    grid-template-columns:.8fr .8fr 1.2fr!important;
+    grid-template-rows:48px!important;
+    gap:6px!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns:has(#talkBtn.hidden){
+    grid-template-columns:.8fr 1.2fr!important;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn,
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn,
+  .mobile-action-dock[data-dock-kind="hub"] .btn-pres{
+    position:static!important;
+    width:100%!important;
+    min-width:0!important;
+    height:48px!important;
+    min-height:48px!important;
+    margin:0!important;
+    padding:8px 6px!important;
+    overflow:hidden!important;
+    border-radius:8px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+    letter-spacing:.65px!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn{order:3!important}
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn{order:2!important}
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp{
+    order:1!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    height:48px!important;
+    min-height:48px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns:has(#talkBtn.hidden) #playBtn{order:2!important}
+  .mobile-action-dock[data-dock-kind="hub"] .presbtnlabel{display:none!important}
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn.hidden{display:none!important}
+
+  /* Compact pre-match hierarchy: information remains present while the pitch
+     reaches the first viewport substantially earlier. */
+  #hub .vsbar{
+    min-height:0!important;
+    margin-bottom:5px!important;
+    border-radius:8px!important;
+  }
+  #hub .vsbar .side{min-width:0!important;padding:4px 6px!important}
+  #hub .vsbar .mid{flex:0 0 68px!important;padding:5px 3px!important}
+  #hub .vs-crest{width:28px!important;height:32px!important}
+  #hub .vsbar .you .vs-crest-col{padding-right:5px!important;margin-right:5px!important}
+  #hub .vsbar .opp .vs-crest-col{padding-left:5px!important;margin-left:5px!important}
+  #hub .vs-nm{
+    max-width:100%!important;
+    overflow:hidden!important;
+    font-size:clamp(8px,2.45vw,12px)!important;
+    line-height:1.05!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #hub .vs-pw{font-size:12px!important}
+  #hub .vs-vs{font-size:17px!important;line-height:1!important}
+  #hub .vsweather,#hub .vsaud{font-size:9px!important;line-height:1.15!important}
+  #hub .vsround{font-size:9px!important;line-height:1.15!important}
+
+  #hub .hub-stat-row{
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:5px!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin-bottom:5px!important;
+    padding:0 0 2px!important;
+    overflow-x:auto!important;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  #hub .hub-stat-row::-webkit-scrollbar{display:none}
+  #hub .hub-stat-row>.mtile,
+  #hub .hub-stat-row>.kasa-card,
+  #hub .hub-stat-row #kasaTile{
+    flex:1 0 clamp(96px,25vw,116px)!important;
+    width:auto!important;
+    max-width:116px!important;
+    min-width:96px!important;
+    height:66px!important;
+    min-height:66px!important;
+    padding:7px 8px!important;
+    overflow:hidden!important;
+    border-radius:8px!important;
+    scroll-snap-align:start;
+    box-shadow:none!important;
+  }
+  #hub .hub-stat-row .mtile{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    gap:2px!important;
+  }
+  #hub .hub-stat-row .mtile .mh,
+  #hub .hub-stat-row .kasa-metric-lbl{
+    font-size:9px!important;
+    line-height:1.1!important;
+    letter-spacing:.45px!important;
+  }
+  #hub .hub-stat-row .mtile .mv,
+  #hub .hub-stat-row .kasa-main-val{
+    font-size:15px!important;
+    line-height:1!important;
+  }
+  #hub .hub-stat-row .mtile .ms,
+  #hub .hub-stat-row .kasa-metric-val{
+    max-width:100%!important;
+    overflow:hidden!important;
+    font-size:9px!important;
+    line-height:1.1!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #hub .hub-stat-row .mtile-info{
+    top:0!important;
+    right:0!important;
+    width:44px!important;
+    height:44px!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:flex-end!important;
+    padding:6px!important;
+    border:0!important;
+    background:transparent!important;
+    font-size:8px!important;
+  }
+  #hub .hub-stat-row #kasaTile{gap:1px!important}
+  #hub .hub-stat-row #kasaTile .kasa-top-row{min-height:0!important;margin:0!important}
+  #hub .hub-stat-row #kasaTile .kasa-status-badge{
+    max-width:100%!important;
+    overflow:hidden!important;
+    padding:1px 3px!important;
+    font-size:8px!important;
+    line-height:1!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #hub .hub-stat-row #kasaTile .kasa-main-val{margin:0!important}
+  #hub .hub-stat-row #kasaTile .kasa-sub,
+  #hub .hub-stat-row #kasaTile .kasa-metrics,
+  #hub .hub-stat-row #kasaTile .kasa-bar-wrap{display:none!important}
+
+  #hub #hubPitch{aspect-ratio:68/58!important}
+
+  /* Near-full-height profile sheet. The close control sits outside the scrolling
+     content while the identity header remains pinned inside it. */
+  .player-profile-layer.is-sheet{
+    padding-top:var(--copa-safe-top);
+    padding-right:var(--copa-safe-right);
+    padding-left:var(--copa-safe-left);
+  }
+  .player-profile-layer.is-sheet .player-profile-card{
+    width:100%!important;
+    height:calc(100dvh - var(--copa-safe-top))!important;
+    max-height:calc(100dvh - var(--copa-safe-top))!important;
+    border-radius:14px 14px 0 0!important;
+  }
+  .player-profile-layer.is-sheet .player-profile-content{
+    min-height:0;
+    padding-bottom:var(--copa-safe-bottom);
+  }
+  .player-profile-layer.is-sheet .player-profile-head{
+    position:sticky;
+    top:0;
+    z-index:3;
+    padding-top:18px;
+    padding-right:56px;
+  }
+  .player-profile-layer.is-sheet .player-profile-close{
+    top:8px;
+    right:max(8px,var(--copa-safe-right));
+    z-index:6;
+    width:48px!important;
+    height:48px!important;
+  }
+  .player-profile-layer.is-sheet .player-profile-radar svg{width:min(286px,76vw)}
+  .player-profile-layer.is-sheet .player-profile-analysis p,
+  .player-profile-layer.is-sheet .player-profile-insights li{font-size:10px;line-height:1.45}
+
+  #modal{
+    padding-top:var(--copa-safe-top);
+    padding-right:var(--copa-safe-right);
+    padding-bottom:var(--copa-safe-bottom);
+    padding-left:var(--copa-safe-left);
+  }
+  #modal>.sheet{
+    max-height:calc(100dvh - var(--copa-safe-top) - var(--copa-safe-bottom) - 12px)!important;
+    overscroll-behavior:contain;
+  }
+  #modal .bact,
+  #modal .tele-footer,
+  #modal .black-market-actions,
+  #modal .backup-actions{
+    position:sticky;
+    z-index:8;
+    bottom:calc(-1px - var(--copa-safe-bottom));
+    padding-bottom:max(10px,var(--copa-safe-bottom));
+    background:var(--surface-bg);
+  }
+
+  .mobile-sim-tabs{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+    margin:0 0 7px;
+    padding:3px;
+    border:1px solid var(--border-subtle);
+    border-radius:9px;
+    background:var(--surface-muted);
+  }
+  .mobile-sim-tabs button{
+    min-width:44px;
+    min-height:44px;
+    padding:8px 5px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:transparent;
+    color:var(--color-slate);
+    font:800 8px/1 var(--mono);
+    letter-spacing:.7px;
+  }
+  .mobile-sim-tabs button[aria-selected="true"]{
+    border-color:var(--border-default);
+    background:var(--surface-elevated);
+    color:var(--color-ink);
+    box-shadow:0 1px 4px rgba(7,16,17,.08);
+  }
+
+  #sim[data-mobile-view="field"] .simstats,
+  #sim[data-mobile-view="field"] .eventpanel{display:none!important}
+  #sim[data-mobile-view="field"] .simstage{display:block!important}
+  #sim[data-mobile-view="field"] .fieldframe{display:block!important}
+  #sim[data-mobile-view="events"] .simstats,
+  #sim[data-mobile-view="events"] .fieldframe{display:none!important}
+  #sim[data-mobile-view="events"] .simstage{display:block!important}
+  #sim[data-mobile-view="events"] .eventpanel{display:block!important;min-height:220px}
+  #sim[data-mobile-view="events"] .simgoals{max-height:min(43dvh,390px)!important}
+  #sim[data-mobile-view="stats"] .simstage{display:none!important}
+  #sim[data-mobile-view="stats"] .simstats{display:grid!important}
+
+  .simgoals>.event-row{
+    position:relative;
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr);
+    align-items:center!important;
+    gap:8px!important;
+    min-height:48px!important;
+    padding:7px 9px!important;
+    border-top:1px solid var(--border-subtle)!important;
+    border-left:3px solid var(--event-accent,var(--border-default));
+    opacity:1!important;
+  }
+  .simgoals>.event-row:first-child{border-top:0!important}
+  .simgoals>.event-row>b:first-child{
+    min-width:0!important;
+    color:var(--event-accent,var(--color-ink))!important;
+    font-size:15px;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .simgoals>.event-row>span{min-width:0;font-size:9px;line-height:1.3}
+  .simgoals>.event-row>span>b{
+    display:block;
+    min-width:0!important;
+    overflow:hidden;
+    color:var(--color-ink)!important;
+    font-size:9px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .simgoals>.event-row small{
+    display:block;
+    margin-top:2px;
+    overflow:hidden;
+    color:var(--color-slate);
+    font-size:8px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .simgoals>.event-goal{--event-accent:#429A73}
+  .simgoals>.event-save{--event-accent:#496E71}
+  .simgoals>.event-yellow-card{--event-accent:#c9973f}
+  .simgoals>.event-red-card{--event-accent:#a75555}
+  .simgoals>.event-danger,.simgoals>.event-post{--event-accent:#b66f37}
+  .simgoals>.event-tactic{--event-accent:#657989}
+  .simgoals>.is-marker-linked{cursor:pointer}
+  .simgoals>.is-marker-linked:focus-visible{
+    outline:2px solid var(--color-primary);
+    outline-offset:-2px;
+  }
+
+  .speedrow{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px!important;
+    width:100%;
+    margin-bottom:calc(8px + var(--copa-safe-bottom))!important;
+  }
+  .speedrow .sl{
+    grid-column:1/-1;
+    min-height:0;
+    padding-top:2px;
+    text-align:left;
+  }
+  .speedrow .spd,
+  .speedrow .btn-mini{
+    width:100%!important;
+    min-width:44px!important;
+    min-height:48px!important;
+    height:48px!important;
+    padding:7px 4px!important;
+    white-space:nowrap;
+  }
+  .speedrow .spd-sep{display:none}
+
+  .shoutrow .shoutbtn{min-width:44px!important;min-height:48px!important}
+
+  .pen-modal .pen-head{
+    position:sticky;
+    z-index:10;
+    top:0;
+    margin-inline:-14px;
+    padding:9px 14px;
+    border-bottom:1px solid rgba(230,238,239,.14);
+    background:var(--color-ink);
+  }
+  .pen-modal .pen-dir-grid{gap:6px}
+  .pen-modal .pen-dir-btn{min-width:0!important;min-height:56px!important;padding:9px 4px!important}
+  .pen-modal .pen-action-dock{
+    position:sticky;
+    z-index:9;
+    bottom:calc(-14px - var(--copa-safe-bottom));
+    margin:8px -14px -14px;
+    padding:8px 14px calc(8px + var(--copa-safe-bottom));
+    border-top:1px solid var(--border-subtle);
+    background:var(--surface-bg);
+  }
+  .pen-modal .pen-continue{width:100%;min-height:50px}
+  .pen-modal .pen-log-toggle{
+    width:100%;
+    min-height:48px;
+    margin-top:10px;
+    border:1px solid var(--border-default);
+    border-radius:8px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:800 8px/1 var(--mono);
+    letter-spacing:.8px;
+  }
+  .pen-modal .pen-log{max-height:30dvh!important;overscroll-behavior:contain}
+  .pen-modal .pen-log.is-collapsed{display:none}
+
+  .tap-helper{
+    right:max(8px,var(--copa-safe-right));
+    bottom:calc(var(--mobile-dock-height) + 8px + var(--copa-safe-bottom));
+    left:max(8px,var(--copa-safe-left));
+    width:auto;
+    max-width:none;
+    min-height:54px;
+    transform:none;
+    padding:7px 8px 7px 11px;
+    border-radius:10px;
+  }
+  .tap-helper-copy{display:grid;min-width:0;flex:1;gap:2px}
+  .tap-helper-copy>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tap-helper-meta{color:rgba(230,238,239,.68);font-size:8px}
+  .tap-detail,.tap-cancel{
+    min-width:48px;
+    min-height:44px;
+    padding:6px 9px;
+  }
+  .tap-detail{
+    flex-shrink:0;
+    border:1px solid var(--color-primary);
+    border-radius:6px;
+    background:var(--color-primary);
+    color:var(--color-ink);
+    font:800 9px/1 var(--mono);
+  }
+
+  button,
+  select,
+  [role="button"],
+  [role="option"],
+  [role="radio"]{
+    min-width:44px;
+    min-height:44px!important;
+  }
+  a[href]{
+    min-width:44px;
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+  }
+  .iconbtn,
+  .modal-x,
+  .player-profile-close,
+  .mtile-info,
+  .spd-pause{
+    min-width:44px!important;
+  }
+
+  /* Coarse devices benefit more from simple surfaces than expensive blur and
+     persistent ambient animation. */
+  .mobile-action-dock,
+  .player-profile-card{backdrop-filter:none!important}
+  .player-profile-card{box-shadow:0 -10px 28px rgba(7,16,17,.24)!important}
+
+  /* Connection and asynchronous states stay informative without blocking a
+     saved run. */
+  .mobile-network-banner{
+    position:fixed;
+    z-index:12000;
+    top:calc(6px + var(--copa-safe-top));
+    right:max(8px,var(--copa-safe-right));
+    left:max(8px,var(--copa-safe-left));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:44px;
+    padding:7px 8px 7px 12px;
+    border:1px solid rgba(230,238,239,.16);
+    border-radius:10px;
+    background:var(--color-ink);
+    color:#fff;
+    box-shadow:0 8px 24px rgba(7,16,17,.2);
+    font:800 10px/1.25 var(--mono);
+  }
+  .mobile-network-banner.hidden{display:none}
+  .mobile-network-banner.is-online{background:var(--color-primary);color:var(--color-ink)}
+  .mobile-network-banner button{
+    flex:0 0 auto;
+    min-width:88px;
+    min-height:36px!important;
+    padding:6px 9px;
+    border:1px solid currentColor;
+    border-radius:7px;
+    background:transparent;
+    color:inherit;
+    font:800 9px/1 var(--mono);
+  }
+  [data-state-message].is-loading,
+  [data-state-message].is-empty,
+  [data-state-message].is-error,
+  [data-state-message].is-offline{position:relative;min-height:72px}
+  [data-state-message].is-loading::after,
+  [data-state-message].is-empty::after,
+  [data-state-message].is-error::after,
+  [data-state-message].is-offline::after{
+    content:attr(data-state-message);
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    padding:12px;
+    background:var(--surface-bg);
+    color:var(--color-slate);
+    text-align:center;
+    font:800 10px/1.4 var(--mono);
+  }
+
+  .mobile-pref-group{display:block}
+  #settingsDrop{
+    max-height:calc(100dvh - var(--copa-safe-top) - 64px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .mobile-pref-btn{
+    display:flex!important;
+    justify-content:space-between!important;
+    gap:10px;
+    min-height:44px!important;
+    text-align:left;
+  }
+  .mobile-pref-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-pref-state{
+    flex:0 0 auto;
+    padding:2px 5px;
+    border:1px solid var(--border-default);
+    border-radius:999px;
+    color:var(--color-slate);
+    font-size:8px;
+  }
+  .mobile-pref-btn.on .mobile-pref-state{
+    border-color:var(--color-primary);
+    background:var(--surface-primary-soft);
+    color:var(--color-ink);
+  }
+
+  /* Returning players can collapse the long mechanics explanation while the
+     full first-run version remains intact. */
+  .mobile-mechanics-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;
+    margin:8px auto 0;
+    padding:7px 12px;
+    border:1px solid var(--border-default);
+    border-radius:999px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:800 9px/1 var(--mono);
+    letter-spacing:.5px;
+  }
+  #mechSection.mobile-collapsed{display:none!important}
+
+  .mobile-draft-context{
+    position:sticky;
+    z-index:20;
+    top:calc(4px + var(--copa-safe-top));
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin:0 0 8px;
+    padding:8px 9px;
+    border:1px solid var(--border-default);
+    border-radius:9px;
+    background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
+    box-shadow:0 3px 10px rgba(7,16,17,.08);
+  }
+  .mobile-draft-kicker{
+    flex:0 0 auto;
+    color:var(--color-slate);
+    font:900 9px/1 var(--mono);
+    letter-spacing:.8px;
+  }
+  .mobile-draft-context>div{display:flex;min-width:0;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .mobile-draft-context>div::-webkit-scrollbar{display:none}
+  .mobile-draft-context b{
+    flex:0 0 auto;
+    padding:5px 7px;
+    border-radius:6px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:800 9px/1 var(--mono);
+    white-space:nowrap;
+  }
+  .mobile-candidate-impact{
+    display:block;
+    margin-top:4px;
+    color:var(--color-primary);
+    font:800 9px/1.25 var(--mono);
+  }
+  .mobile-autofill-presets{
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    width:100%;
+    margin-top:7px;
+  }
+  .mobile-autofill-presets button{
+    min-width:0;
+    min-height:40px!important;
+    padding:5px 3px;
+    border:1px solid var(--border-default);
+    border-radius:6px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:800 8px/1 var(--mono);
+  }
+  .mobile-draft-confirm{
+    position:fixed;
+    z-index:9000;
+    right:0;
+    bottom:0;
+    left:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    align-items:center;
+    gap:6px;
+    padding:8px max(10px,var(--copa-safe-right)) calc(8px + var(--copa-safe-bottom)) max(10px,var(--copa-safe-left));
+    border-top:1px solid var(--border-default);
+    background:var(--surface-bg);
+    box-shadow:0 -8px 24px rgba(7,16,17,.16);
+  }
+  .mobile-draft-confirm-copy{display:grid;min-width:0;gap:3px}
+  .mobile-draft-confirm-copy strong,
+  .mobile-draft-confirm-copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-draft-confirm-copy strong{font-size:12px}
+  .mobile-draft-confirm-copy span{color:var(--color-slate);font:700 9px/1.2 var(--mono)}
+  .mobile-draft-confirm button{
+    min-width:76px;
+    min-height:48px!important;
+    padding:7px 9px;
+    border:1px solid var(--border-default);
+    border-radius:8px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:900 9px/1.1 var(--mono);
+  }
+  .mobile-draft-confirm [data-draft-confirm]{border-color:var(--color-primary);background:var(--color-primary)}
+
+  /* Fades describe overflow without adding permanent instructional chrome. */
+  .mobile-scroll-affordance{
+    --scroll-mask-left:transparent;
+    --scroll-mask-right:transparent;
+    mask-image:linear-gradient(90deg,var(--scroll-mask-left),#000 18px,#000 calc(100% - 18px),var(--scroll-mask-right));
+    -webkit-mask-image:linear-gradient(90deg,var(--scroll-mask-left),#000 18px,#000 calc(100% - 18px),var(--scroll-mask-right));
+  }
+  .mobile-scroll-affordance.is-scroll-start{--scroll-mask-left:#000}
+  .mobile-scroll-affordance.is-scroll-end{--scroll-mask-right:#000}
+
+  .mobile-round-digest{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0 0 7px;
+    padding:8px 8px 8px 10px;
+    border:1px solid color-mix(in srgb,var(--color-primary) 45%,var(--border-default));
+    border-radius:9px;
+    background:var(--surface-primary-soft);
+  }
+  .mobile-round-digest.hidden{display:none}
+  .mobile-round-digest>div{display:grid;flex:0 0 auto;gap:2px}
+  .mobile-digest-kicker{color:var(--color-slate);font:900 8px/1 var(--mono);letter-spacing:.8px}
+  .mobile-digest-round{font-size:10px}
+  .mobile-round-digest p{
+    min-width:0;
+    flex:1;
+    margin:0;
+    overflow:hidden;
+    color:var(--color-ink);
+    font:800 9px/1.3 var(--mono);
+    text-overflow:ellipsis;
+  }
+  .mobile-round-digest button{
+    flex:0 0 44px;
+    width:44px;
+    min-width:44px;
+    height:44px;
+    border:0;
+    background:transparent;
+    color:var(--color-slate);
+    font-size:20px;
+  }
+  #feed:not(.mobile-feed-expanded)>:nth-child(n+4){display:none!important}
+  .mobile-feed-toggle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:44px;
+    margin-top:5px;
+    border:1px solid var(--border-default);
+    border-radius:7px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:900 9px/1 var(--mono);
+    letter-spacing:.6px;
+  }
+  .mobile-feed-toggle.hidden{display:none}
+  .mobile-feed-unread{
+    margin-left:auto;
+    padding:3px 6px;
+    border-radius:999px;
+    background:var(--color-primary);
+    color:var(--color-ink);
+    font:900 8px/1 var(--mono);
+    letter-spacing:.4px;
+  }
+  .mobile-feed-unread.hidden{display:none}
+  #playBtn.mobile-has-warning{
+    box-shadow:inset 0 0 0 2px #c9973f!important;
+  }
+
+  .mobile-profile-nav{
+    position:sticky;
+    z-index:4;
+    top:81px;
+    display:flex;
+    gap:4px;
+    padding:5px 8px;
+    overflow-x:auto;
+    border-bottom:1px solid var(--border-subtle);
+    background:var(--surface-bg);
+    scrollbar-width:none;
+  }
+  .mobile-profile-nav::-webkit-scrollbar{display:none}
+  .mobile-profile-nav .mobile-profile-jump{
+    flex:1 0 auto;
+    min-width:92px;
+    min-height:40px!important;
+    padding:6px 8px;
+    border:1px solid var(--border-default);
+    border-radius:999px;
+    background:var(--surface-muted);
+    color:var(--color-ink);
+    font:900 8px/1 var(--mono);
+    letter-spacing:.5px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .player-profile-layer.is-sheet .player-profile-radar,
+  .player-profile-layer.is-sheet .player-profile-insight-grid,
+  .player-profile-layer.is-sheet .player-profile-analysis{scroll-margin-top:134px}
+  .player-profile-layer.is-sheet .player-profile-detail>b,
+  .player-profile-layer.is-sheet .player-profile-radar-scores i,
+  .player-profile-layer.is-sheet .player-profile-model-note{font-size:9px}
+  .player-profile-layer.is-sheet .player-profile-fit{font-size:10px}
+
+  #sim .board{
+    position:sticky;
+    z-index:18;
+    top:calc(3px + var(--copa-safe-top));
+    box-shadow:0 4px 12px rgba(7,16,17,.12);
+  }
+  .mobile-sim-tabs button{position:relative}
+  .mobile-tab-badge{
+    position:absolute;
+    top:3px;
+    right:4px;
+    min-width:18px;
+    height:18px;
+    display:grid;
+    place-items:center;
+    padding:0 4px;
+    border-radius:999px;
+    background:#a75555;
+    color:#fff;
+    font:900 8px/1 var(--mono);
+  }
+  .mobile-tab-badge.hidden{display:none}
+  .mobile-tactic-status{
+    display:block;
+    min-height:34px;
+    margin:-2px 0 6px;
+    padding:6px 9px;
+    border:1px solid var(--border-subtle);
+    border-radius:7px;
+    background:var(--surface-muted);
+    color:var(--color-slate);
+    font:700 9px/1.35 var(--mono);
+  }
+  #shoutrow.is-cooling{opacity:.72}
+  #shoutrow.is-cooling .shoutbtn{cursor:wait}
+  .mobile-skip-confirm p{margin:9px 0 14px;color:var(--color-slate);font-size:11px;line-height:1.5}
+
+  .mobile-penalty-coach{
+    display:block;
+    margin:8px 0;
+    padding:7px 9px;
+    border:1px solid rgba(230,238,239,.14);
+    border-radius:7px;
+    background:rgba(230,238,239,.07);
+    color:rgba(230,238,239,.82);
+    font:700 9px/1.4 var(--mono);
+  }
+
+  #result .mobile-result-disclosure{
+    display:block;
+    margin:7px 0;
+    overflow:hidden;
+    border:1px solid var(--border-default);
+    border-radius:9px;
+    background:var(--surface-bg);
+  }
+  #result .mobile-result-disclosure.hidden{display:none}
+  #result .mobile-result-disclosure>summary{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height:48px;
+    padding:9px 12px;
+    cursor:pointer;
+    color:var(--color-ink);
+    font:900 10px/1 var(--mono);
+    letter-spacing:.7px;
+    list-style:none;
+  }
+  #result .mobile-result-disclosure>summary::-webkit-details-marker{display:none}
+  #result .mobile-result-disclosure>summary::after{content:"+";font-size:18px;color:var(--color-slate)}
+  #result .mobile-result-disclosure[open]>summary{
+    border-bottom:1px solid var(--border-default);
+    background:var(--surface-muted);
+  }
+  #result .mobile-result-disclosure[open]>summary::after{content:"−"}
+  #result .mobile-result-disclosure>#finalReport,
+  #result .mobile-result-disclosure>#storyTile,
+  #result .mobile-result-disclosure>#econTile,
+  #result .mobile-result-disclosure>#lineups{
+    width:100%;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+  }
+  #result .result-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #result .result-row .btn{width:100%!important;min-width:0!important;font-size:9px!important}
+  .share-actions .mobile-native-share{order:-1}
+
+  .scout-report-modal .scout-head-stats em,
+  .scout-report-modal .scout-summary-chips span{font-size:9px!important}
+  .scout-report-modal .scout-nm{font-size:9px!important}
+
+  html.copa-battery-saver *,
+  html.copa-battery-saver *::before,
+  html.copa-battery-saver *::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+  html.copa-battery-saver .result-fx,
+  html.copa-battery-saver .confetti,
+  html.copa-battery-saver .ambient,
+  html.copa-battery-saver .pitch-weather{display:none!important}
+  html.copa-battery-saver svg animate,
+  html.copa-battery-saver svg animateTransform{display:none}
+}
+
+@media (max-width:760px) and (hover:none) and (orientation:landscape),
+       (max-width:760px) and (pointer:coarse) and (orientation:landscape){
+  .mobile-action-dock{padding-top:5px;padding-bottom:calc(5px + var(--copa-safe-bottom))}
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns{grid-template-rows:44px!important}
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn,
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn,
+  .mobile-action-dock[data-dock-kind="hub"] .btn-pres,
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp{height:44px!important;min-height:44px!important}
+  .speedrow{grid-template-columns:repeat(7,minmax(44px,1fr))}
+  .speedrow .sl{display:none}
+  .player-profile-layer.is-sheet .player-profile-card{border-radius:0!important}
+  html.copa-field-focus body:has(#sim:not(.hidden)) .top,
+  html.copa-field-focus #sim:not(.hidden) .simstate,
+  html.copa-field-focus #sim:not(.hidden) .momentum,
+  html.copa-field-focus #sim:not(.hidden) .sim-timeline,
+  html.copa-field-focus #sim:not(.hidden) .radioband{display:none!important}
+  html.copa-field-focus #sim:not(.hidden){
+    width:min(100%,980px);
+    margin-inline:auto;
+  }
+  html.copa-field-focus #sim[data-mobile-view="field"] .fieldframe{min-height:min(47dvh,300px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mobile-action-dock,
+  .mobile-sim-tabs button{transition:none!important}
+}

@@ -5,7 +5,7 @@ Yürürlük: 15 Temmuz 2026
 
 ## Varsayılan durum ve rıza
 
-Ghost Club veri paylaşımı varsayılan olarak kapalıdır. Kullanıcı hem kullanım şartlarını kabul etmeden hem de oyun verisinin paylaşımına ayrı açık rıza vermeden kayıt oluşturulmaz, kuyruğa veri eklenmez ve eşleştirme isteği yapılmaz.
+Web sürümünde salt-okuma Ghost rakip eşleştirmesi varsayılan olarak açıktır; bu istek oyuncunun kadrosunu veya anonim kurulum kimliğini göndermez. Android ve iOS mağaza uygulamalarında Ghost eşleştirmesi varsayılan olarak kapalıdır. Kendi kulübünü Ghost olarak paylaşma tüm platformlarda varsayılan kapalıdır: kullanıcı hem kullanım şartlarını kabul etmeden hem de oyun verisinin paylaşımına ayrı açık rıza vermeden kayıt oluşturulmaz veya yükleme kuyruğuna veri eklenmez.
 
 Rıza geri çekildiğinde paylaşım kapanır ve gönderilmemiş yerel kuyruk silinir. Sunucudaki kayıtların silinmesi için uygulamadaki “Verilerimi sil” işlemi kullanılır.
 
