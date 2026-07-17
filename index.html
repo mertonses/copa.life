@@ -643,8 +643,15 @@ function beginDraft(){window._finalTacticDone=false;window.lastMatchReportData=n
   kurbanScheduled={count:0,turns:0};
   {const _pc=countryGameData(selectedCountry);POOL=_pc[0];const _pool=[..._pc[1]];bracket=_pc[2].map(base=>{if(!_pool.length)return{name:"Opponent",power:base+ri(-2,3)};const _i=rand()*_pool.length|0;return{name:_pool.splice(_i,1)[0],power:base+ri(-2,3)};});}fixtures=bracket.map(b=>({opp:b.name,res:null,gf:null,ga:null}));
   if(window._wantPenalties){_cheatPenaltyLaunch();return;}
+  const _jumpToFinal=!!window._wantFinal;if(_jumpToFinal)window._wantFinal=false;
   $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("budgetBox").classList.add("introhide");_ensureDraftKasa();
-  $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();renderDraftExtra();_saveState();}
+  $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();renderDraftExtra();_saveState();
+  if(_jumpToFinal){
+    round=6;opponent=bracket[5]||bracket[bracket.length-1]||{name:"Final Rakibi",power:80};
+    fixtures.forEach((fixture,index)=>{if(index<5){fixture.res="W";fixture.gf=String(2+(index%2));fixture.ga=String(index%2);}});
+    setTimeout(()=>quickAll(),0);
+  }
+}
 function updateDeadline(){const cl=$("ddClock");if(cl)cl.textContent=String(deadlineH).padStart(2,"0")+":00";const sub=$("ddSub");if(sub)sub.textContent=L().squad+" "+(slots.length-remaining)+"/"+slots.length;const bb=$("ddbanner");if(bb){bb.classList.toggle("urgent",deadlineH<=8);bb.classList.toggle("alarm",deadlineH<=5);}if(cl)cl.style.color=deadlineH<=5?"#ff5a4a":"";_updateSquadSils();}
 function _drawConnectors(p){
   const old=p.querySelector(".pclines");if(old)old.remove();
@@ -2092,13 +2099,24 @@ function showFinalCard(sp){
       <button class="btn bigbtn" onclick="closeModal();startFinalSim2()" style="width:100%;background:var(--color-ink);color:var(--color-background);border:none;font-size:15px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:0;padding:13px 20px;border-radius:7px;cursor:pointer;text-transform:uppercase">${_kicker}${tr?"FİNALİ OYNA":"PLAY THE FINAL"}</button>
     </div>
   </div>`);
-}function _launchFinalSim(myPow){
+}
+function _setFinalPauseUi(paused){
+  _simPaused=!!paused;
+  const button=$("pauseBtn");
+  if(!button)return;
+  button.innerHTML=_simPaused?_PLAY_ICO:_PAUSE_ICO;
+  button.classList.toggle("pause",_simPaused);
+  button.setAttribute("aria-pressed",_simPaused?"true":"false");
+  button.setAttribute("aria-label",_simPaused?(LANG==="tr"?"Simülasyona devam et":"Resume simulation"):(LANG==="tr"?"Simülasyonu duraklat":"Pause simulation"));
+}
+function _launchFinalSim(myPow){
   const oppPow=opponent?opponent.power:50;
   window.CopaRunState&&window.CopaRunState.transition("match",{reason:"final_kickoff"});
   if(typeof trackBalanceMatchTelemetry==="function")trackBalanceMatchTelemetry(6);
   if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();
   if(typeof setSpeed==="function")setSpeed(10);else window.speedMul=10;
-  _simPaused=false;const _pb=$("pauseBtn");if(_pb){_pb.innerHTML=_PAUSE_ICO;_pb.classList.remove("pause");}
+  window._simAutoPaused=false;_setFinalPauseUi(false);
+  document.querySelectorAll(".shoutbtn").forEach(button=>button.setAttribute("aria-pressed","false"));
   window._finalPenPower={home:myPow,away:oppPow};
   ["hub","draft","result"].forEach(id=>{const el=$(id);if(el)el.classList.add("hidden");});
   const simEl=$("sim");if(simEl){simEl.classList.remove("hidden");setTimeout(()=>simEl.scrollIntoView({behavior:"smooth",block:"start"}),80);}
@@ -2115,8 +2133,17 @@ function radioLine(poss,sA,sB,mn){const home=poss==="A",lead=sA>sB?"A":sB>sA?"B"
 function simShout(t){if(sim&&sim.shout){sim.shout(t);const id={more:"shMore",push:"shPush",calm:"shCalm",hold:"shHold"}[t];document.querySelectorAll(".shoutbtn").forEach(b=>{b.classList.remove("lit");b.setAttribute("aria-pressed","false");});const el=$(id);if(el){el.classList.add("lit");el.setAttribute("aria-pressed","true");}try{sfxStamp();}catch(e){}}}
 const _PAUSE_ICO='<svg viewBox="0 0 14 14" width="12" height="12" fill="currentColor" aria-hidden="true"><rect x="2.5" y="1.5" width="3.4" height="11" rx="1"/><rect x="8.1" y="1.5" width="3.4" height="11" rx="1"/></svg>';
 const _PLAY_ICO='<svg viewBox="0 0 14 14" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M3.2 1.8L12 7L3.2 12.2Z"/></svg>';
-function simPause(){if(!sim)return;const b=$("pauseBtn");if(_simPaused){_simPaused=false;if(b){b.innerHTML=_PAUSE_ICO;b.classList.remove("pause");}sim.resume&&sim.resume();}else{_simPaused=true;if(b){b.innerHTML=_PLAY_ICO;b.classList.add("pause");}sim.pause&&sim.pause();}}
+function simPause(){if(!sim)return;if(_simPaused){_setFinalPauseUi(false);sim.resume&&sim.resume();}else{_setFinalPauseUi(true);sim.pause&&sim.pause();}}
 window._copaSimPauseUi=simPause;
+document.addEventListener("visibilitychange",()=>{
+  const active=sim&&$("sim")&&!$("sim").classList.contains("hidden");
+  if(!active)return;
+  if(document.hidden&&!_simPaused){
+    window._simAutoPaused=true;_setFinalPauseUi(true);sim.pause&&sim.pause();
+  }else if(!document.hidden&&window._simAutoPaused){
+    window._simAutoPaused=false;_setFinalPauseUi(false);sim.resume&&sim.resume();
+  }
+});
 /* ===== geo default ===== */
 function geoDefaultCountry(){const lang=(navigator.language||"").toLowerCase();const saved=localStorage.getItem("copa_country");if(saved&&COUNTRY_CODES.includes(saved)){pickCountry(saved);return;}if(lang.startsWith("tr"))return;pickCountry("ENG");}
 

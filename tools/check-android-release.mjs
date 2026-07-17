@@ -55,6 +55,17 @@ const capacitor = JSON.parse(read("capacitor.config.json"));
 if (capacitor.appId !== "life.copa.app") fail("Capacitor application id drift");
 if (Object.hasOwn(capacitor.server || {}, "url")) fail("remote runtime URL is forbidden in the native app");
 if (capacitor.android?.allowMixedContent !== false) fail("mixed content must remain disabled");
+if (capacitor.plugins?.SystemBars?.insetsHandling !== "css") fail("SystemBars CSS inset handling must remain explicit");
+const safeAreaPatch = read("tools/patch-capacitor-safe-area.mjs");
+if (!safeAreaPatch.includes("const root = document.documentElement;") || !safeAreaPatch.includes("if (root)")) {
+  fail("Capacitor safe-area DOM guard is missing");
+}
+const baseCss = read("src/styles/base.css");
+for (const inset of ["top", "right", "bottom", "left"]) {
+  if (!baseCss.includes(`var(--safe-area-inset-${inset},env(safe-area-inset-${inset},0px))`)) {
+    fail(`Android safe-area CSS fallback is missing ${inset}`);
+  }
+}
 
 const certificate = read("release/android-upload-certificate.sha256").trim();
 if (!/^(?:[0-9A-F]{2}:){31}[0-9A-F]{2}$/i.test(certificate)) fail("invalid upload certificate pin");
@@ -109,6 +120,14 @@ for (const required of [
   "tools/write-android-candidate-manifest.mjs",
 ]) {
   if (!exists(required)) fail(`missing release safeguard: ${required}`);
+}
+const releaseManifestWriter = read("tools/write-android-release-manifest.mjs");
+if (
+  !releaseManifestWriter.includes("exact_release_emulator_smoke:") ||
+  !releaseManifestWriter.includes('"required after candidate build"') ||
+  !releaseManifestWriter.includes("--emulator-smoke-passed")
+) {
+  fail("release manifest does not reset exact-release emulator verification after each build");
 }
 
 if (failures.length) {

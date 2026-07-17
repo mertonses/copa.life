@@ -7,8 +7,10 @@
   const DELETE_TOKEN_KEY="copa_ghost_delete_token_v1";
   const BLOCKED_KEY="copa_ghost_blocked_ids_v1";
   const QUEUE_KEY="copa_ghost_upload_queue_v1";
+  const REPORT_QUEUE_KEY="copa_ghost_report_queue_v1";
   const RUN_KEY="copa_ghost_current_run_v1";
   const API_META="meta[name='copa-ghost-api']";
+  const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
   const CONFIG=Object.freeze({
     schemaVersion:1,
     consentVersion:"ghost-terms-v1",
@@ -108,6 +110,9 @@
 
   function queue(){try{const q=JSON.parse(safeGet(QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return [];}}
   function saveQueue(items){safeSet(QUEUE_KEY,JSON.stringify(items.slice(-CONFIG.queueMax)));}
+  function reportQueue(){try{const q=JSON.parse(safeGet(REPORT_QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return [];}}
+  function saveReportQueue(items){safeSet(REPORT_QUEUE_KEY,JSON.stringify(items.slice(-32)));}
+  function enqueueReport(id,reason){const items=reportQueue(),key=id+"|"+reason;if(!items.some(item=>item.id+"|"+item.reason===key))items.push({id,reason,created_at:new Date().toISOString()});saveReportQueue(items);}
   function playerSnapshot(player,index){
     const p=player||{};
     return {
@@ -254,6 +259,21 @@
     saveQueue(items);
     return {sent,pending:items.length};
   }
+  async function flushReportQueue(){
+    const base=apiBase();
+    if(!base||!navigator.onLine)return {sent:0,pending:reportQueue().length};
+    const items=reportQueue();let sent=0;
+    while(items.length){
+      const current=items[0];
+      try{
+        const response=await fetchWithTimeout(base+"/v1/ghosts/"+encodeURIComponent(current.id)+"/report",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId()},body:JSON.stringify({reason:current.reason})});
+        if(!response.ok&&response.status!==404&&response.status!==410)break;
+        items.shift();sent++;
+      }catch(_){break;}
+    }
+    saveReportQueue(items);
+    return {sent,pending:items.length};
+  }
   function recordCompletedRun(context){
     try{
       if(!enabled())return null;
@@ -289,9 +309,10 @@
     layer.innerHTML=`<section class="ghost-consent-card" role="dialog" aria-modal="true" aria-labelledby="ghostConsentTitle"><h3 id="ghostConsentTitle">${tr("HAYALET KULÜP PAYLAŞIMI","GHOST CLUB SHARING")}</h3><p>${tr("Tamamlanan kadronuz, kulüp adınız ve anonim kurulum kimliğiniz Ghost rakibi üretmek için 45 gün saklanır. Paylaşım isteğe bağlıdır ve varsayılan olarak kapalıdır.","Your completed squad, club name and anonymous install ID are retained for 45 days to create Ghost opponents. Sharing is optional and off by default.")}</p><label><input type="checkbox" data-ghost-terms> <span>${tr("Kullanım şartlarını okudum ve kabul ediyorum.","I have read and accept the Terms of Use.")}</span></label><label><input type="checkbox" data-ghost-sharing> <span>${tr("Bu oyun verilerinin paylaşılmasına açıkça izin veriyorum.","I explicitly consent to sharing this game data.")}</span></label><div class="ghost-consent-links"><a href="terms.html" target="_blank" rel="noopener">${tr("Kullanım şartları","Terms")}</a><a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a></div><div class="ghost-consent-actions"><button type="button" data-ghost-cancel>${tr("VAZGEÇ","CANCEL")}</button><button type="button" data-ghost-accept disabled>${tr("KABUL ET VE AÇ","ACCEPT AND ENABLE")}</button></div></section>`;
     document.body.appendChild(layer);const terms=layer.querySelector("[data-ghost-terms]"),sharing=layer.querySelector("[data-ghost-sharing]"),accept=layer.querySelector("[data-ghost-accept]"),refresh=()=>{accept.disabled=!(terms.checked&&sharing.checked);};terms.addEventListener("change",refresh);sharing.addEventListener("change",refresh);layer.querySelector("[data-ghost-cancel]").addEventListener("click",()=>layer.remove());accept.addEventListener("click",()=>{safeSet(CONSENT_KEY,JSON.stringify({version:CONFIG.consentVersion,terms:true,sharing:true,accepted_at:new Date().toISOString()}));safeSet(SETTINGS_KEY,"1");if(window.CopaAnalytics)window.CopaAnalytics.track("ghost_opt_in");deleteToken();layer.remove();ensureSetting();flushQueue();});
   }
-  async function deleteMyData(){const base=apiBase();saveQueue([]);safeSet(SETTINGS_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});return response.ok?await response.json():{ok:false,status:response.status};}catch(_){return {ok:false};}}
+  function clearLocalGhostData(){for(const key of [CONSENT_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);safeSet(SETTINGS_KEY,"0");ensureSetting();}
+  async function deleteMyData(){const base=apiBase();saveQueue([]);safeSet(SETTINGS_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});if(!response.ok)return {ok:false,status:response.status};const result=await response.json();if(result&&result.ok)clearLocalGhostData();return result;}catch(_){return {ok:false};}}
   function withdrawConsent(){safeSet(SETTINGS_KEY,"0");safeRemove(CONSENT_KEY);saveQueue([]);ensureSetting();}
-  async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!blockGhost(value))return {ok:false,error:"invalid_id"};const base=apiBase();if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}if(!base||!navigator.onLine)return {ok:true,hidden:true,pending:false};try{const response=await fetchWithTimeout(base+"/v1/ghosts/"+encodeURIComponent(value)+"/report",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId()},body:JSON.stringify({reason})});return response.ok?Object.assign({hidden:true},await response.json()):{ok:false,hidden:true,status:response.status};}catch(_){return {ok:false,hidden:true};}}
+  async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!/^G-[A-Z0-9]{8,32}$/.test(value))return {ok:false,error:"invalid_id"};if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}blockGhost(value);const requested=cleanText(reason).toLowerCase().slice(0,32),cleanReason=REPORT_REASONS.has(requested)?requested:"other";enqueueReport(value,cleanReason);const result=await flushReportQueue();return {ok:true,hidden:true,pending:result.pending>0,sent:result.sent};}
   function ensureSetting(){
     const slot=document.getElementById("advancedGhostSettingSlot");if(!slot)return;
     let group=document.getElementById("ghostClubSetting");
@@ -309,7 +330,7 @@
     if(button){button.classList.toggle("on",on);button.setAttribute("aria-pressed",String(on));button.innerHTML=`<span aria-hidden="true">${ghostIcon()}</span><span>${on?tr("A\u00c7IK","ON"):tr("KAPALI","OFF")}</span>`;button.title=tr("Hayalet Kul\u00fcplere Kar\u015f\u0131 Oyna","Play Against Ghost Clubs");}
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
-  window.addEventListener("online",()=>{flushQueue();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,requestConsent,hasConsent,withdrawConsent,deleteMyData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,ghostIcon,normalizeCompletedRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled});
-  setTimeout(()=>{ensureSetting();flushQueue();},0);
+  window.addEventListener("online",()=>{flushQueue();flushReportQueue();});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,ensureSetting,requestConsent,hasConsent,withdrawConsent,deleteMyData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,flushReports:flushReportQueue,ghostIcon,normalizeCompletedRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled});
+  setTimeout(()=>{ensureSetting();flushQueue();flushReportQueue();},0);
 })();

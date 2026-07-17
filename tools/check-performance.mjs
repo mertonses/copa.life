@@ -91,6 +91,8 @@ if (/assets\/chairs\/[^`"' )]+\.png/.test(sourceText) || /assets\/chairs\/\$\{/.
 }
 const hubSource = fs.readFileSync(path.join(ROOT, "src", "ui", "hub.js"), "utf8");
 const layoutSource = fs.readFileSync(path.join(ROOT, "src", "styles", "layout.css"), "utf8");
+const profileSource = fs.readFileSync(path.join(ROOT, "src", "styles", "playerProfiles.css"), "utf8");
+const baseSource = fs.readFileSync(path.join(ROOT, "src", "styles", "base.css"), "utf8");
 if (/<script[^>]+html2canvas/i.test(indexHtml)) {
   failed = true;
   console.error("performance budget failed: html2canvas must be lazy-loaded only when sharing");
@@ -111,6 +113,18 @@ if (
 if (!/\.touch-drag-ghost\{[^}]*contain:layout paint style/.test(layoutSource)) {
   failed = true;
   console.error("performance budget failed: touch drag ghost must be paint-contained");
+}
+if (!/\.player-profile-card\{[^}]*contain:layout paint style/.test(profileSource) || !/\.player-profile-content\{[^}]*contain:layout paint style/.test(profileSource)) {
+  failed = true;
+  console.error("performance budget failed: player profile sheet must be layout and paint contained");
+}
+if (/\.player-profile-layer\.is-sheet \.player-profile-backdrop\{[^}]*backdrop-filter/.test(profileSource)) {
+  failed = true;
+  console.error("performance budget failed: mobile player profile must not blur the full WebView backdrop");
+}
+if (!/html\[data-copa-platform="android"\] body::before\{display:none\}/.test(baseSource)) {
+  failed = true;
+  console.error("performance budget failed: Android must not allocate the decorative fixed-page texture layer");
 }
 for (const [name, value, limit] of budgets) {
   console.log(`${name}: ${kb(value)} / ${kb(limit)}`);

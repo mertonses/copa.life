@@ -64,7 +64,7 @@ Mevcut güvenlik katmanları:
 - Üretim AAB'sini ayrı ve gizli bir yükleme anahtarıyla imzala; anahtarı depoya ekleme.
 - Kapalı test kanalında geri tuşu, yaşam döngüsü kaydı, çevrimdışı açılış, Ghost rızası/silmesi ve farklı ekran oranlarını test et.
 
-## 15 Temmuz 2026 uygulama durumu
+## 17 Temmuz 2026 uygulama durumu
 
 - Ghost Club D1 veritabanı üretimden yedeklendi; `0001` ve `0002` migration'ları uygulandı. Üretim Worker'ı `https://copa-life-ghost-clubs.mertonses-copa.workers.dev` adresinde şema sürümü 2 ile çalışıyor; günlük fiziksel silme görevi `17 3 * * *` zamanlamasına bağlı.
 - Gizlilik, kullanım şartları ve takedown sayfaları ana web paketindeki logo hakları engeline karışmadan ayrı Cloudflare Pages paketine dağıtıldı. Kalıcı gizlilik politikası URL'si: `https://copa-life-legal.pages.dev/privacy.html`.
@@ -73,10 +73,11 @@ Mevcut güvenlik katmanları:
 - Android paketindeki Web3Forms iletişim formu ve erişim anahtarı kaldırıldı. Android'deki destek düğmeleri açık web sitesine çıkar; ad, e-posta ve destek mesajı native paket tarafından toplanmaz.
 - Destek URL'si resmi Capacitor Browser bileşeniyle Chrome/Custom Tab akışında açılır. Pixel 3a API 34 emülatöründe eklenti kaydı, destek işlevinin eklenti yolunu kullanması ve `https://copa.life/` VIEW intent'i doğrulandı.
 - Türkçe/İngilizce mağaza metinleri, Play Console beyan cevapları, 512×512 ikon, 1024×500 feature graphic, dört telefon ve dört tablet ekran görüntüsü `store/android/` altında hazırlandı.
-- `copa.life` alan adında henüz MX kaydı yoktur. Kurumsal destek e-postası oluşturulup politika/takedown sayfalarına eklenmeden iletişim hazırlığı tamamlanmış sayılmaz.
+- Destek e-postasının özel alan adı taşıması zorunlu değildir. Play Console'a girilecek Gmail veya özel alan adı adresinin doğrulanmış, düzenli izlenen ve destek/takedown taleplerine cevap verebilir olması gerekir; kesin adres henüz beyan dosyasına girilmedi.
 - Android 14 / API 34 Pixel 3a emülatöründe temiz kurulum, splash, çevrimdışı açılış, arka plan-devam, geri tuşuyla küçültme ve Ghost'un varsayılan kapalı/çift rızalı olması doğrulandı. Bu test Capacitor 8 global eklenti uyumsuzluğunu ortaya çıkardı; `src/runtime/nativeApp.js` düzeltilip temiz kurulumda yeniden doğrulandı.
 - Android candidate workflow'u artık her adayda API 34 emülatörü açar, instrumentation testini çalıştırır, gerçek `life.copa.app` paketini başlatır ve crash/ANR, çalışan süreç, odaklanan Activity ve ekran görüntüsünü otomatik doğrular.
-- Ayrı staging D1 veritabanı oluşturuldu ve `0001`/`0002` migration'ları uygulandı. Staging Worker kodu hazırdır; ilk deploy için Cloudflare hesabında Analytics Engine'in etkinleştirilmesi gerekir.
-- Haftalık anonim KPI raporu ile 30 dakikalık `profile_open_error` ve Worker 5xx alarmı hazırlandı. Raporların veri okuyabilmesi için production GitHub environment'a ayrı, salt-okunur `CLOUDFLARE_ANALYTICS_TOKEN` eklenmesi gerekir.
+- Ayrı staging D1 veritabanı oluşturuldu; `0001`/`0002` migration'ları uygulandı ve staging Analytics Engine dataset'leri veri alıyor.
+- Haftalık anonim KPI raporu ile 30 dakikalık `profile_open_error` ve Worker 5xx alarmı hazırlandı. Salt-okunur `CLOUDFLARE_ANALYTICS_TOKEN` production ortamına eklendi.
+- İmzalı AAB, bundletool ile gerçek cihaz split APK'larına dönüştürülüp Android 14 / API 34 emülatörüne temiz kuruldu. Soğuk açılış, tam kurulum akışı, hub, çift dokunmalı altı boyutlu oyuncu profili ve çevrimdışı kayıt geri yükleme geçti; safe-area/crash/ANR/OOM gözlenmedi.
 - Play Console oturumu açıldı ancak Google hesabında geliştirici hesabı henüz oluşturulmamış. Uygulama kaydı, Data Safety ve kapalı test yüklemesi; hesap türü seçimi, kayıt ücreti, sözleşme ve kimlik doğrulaması tamamlandıktan sonra uygulanabilir.
 - Gerçek web armaları proje sahibinin kararıyla web kaynaklarında kalır; lisans kanıtı olmadığı için genel web yayını teknik hak kapısından geçmez. Android ve hukuki sayfa paketi gerçek armaları içermez.

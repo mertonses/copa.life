@@ -97,3 +97,72 @@ test("player profile data falls back when the JSON request fails",async({page})=
   expect(result.scores).toEqual([76,85,81,72,82,88]);
   expect(result.state).toMatchObject({loaded:true,loading:false,error:null,attempts:2});
 });
+
+test("coarse double tap opens the complete Android profile without an expensive backdrop",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"coarse-pointer Android regression");
+  const errors:string[]=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  await page.goto("/?android-profile-regression=1",{waitUntil:"domcontentloaded"});
+  const trigger=page.locator("#androidProfileTrigger");
+  await page.evaluate(value=>{
+    document.documentElement.dataset.copaPlatform="android";
+    const button=document.createElement("button");
+    button.id="androidProfileTrigger";
+    button.textContent=value.name;
+    document.body.appendChild(button);
+    (globalThis as any).PlayerProfiles.bind(button,value,{delayCoarseAction:true});
+  },player);
+
+  await trigger.click({clickCount:2,delay:80});
+  const layer=page.locator(".player-profile-layer");
+  await expect(layer).toHaveAttribute("aria-hidden","false");
+  await expect(page.locator(".player-profile-radar-scores span")).toHaveCount(6);
+  await expect(page.locator(".player-profile-fit")).toContainText("75%");
+  await expect(page.locator(".player-profile-style")).toBeVisible();
+  await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
+  await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
+  await expect(page.locator(".player-profile-analysis")).toBeVisible();
+  await expect(page.locator("body")).toHaveClass(/player-profile-open/);
+  await expect(page.locator(".player-profile-close")).toBeFocused();
+  expect(await page.locator("body").evaluate(element=>getComputedStyle(element).overflow)).toBe("hidden");
+  await page.keyboard.press("Tab");
+  await expect(page.locator(".player-profile-close")).toBeFocused();
+
+  const rendering=await page.evaluate(()=>{
+    const card=document.querySelector(".player-profile-card") as HTMLElement;
+    const content=document.querySelector(".player-profile-content") as HTMLElement;
+    const backdrop=document.querySelector(".player-profile-backdrop") as HTMLElement;
+    return{
+      cardContain:getComputedStyle(card).contain,
+      contentContain:getComputedStyle(content).contain,
+      backdropFilter:getComputedStyle(backdrop).backdropFilter,
+      pageTexture:getComputedStyle(document.body,"::before").display,
+    };
+  });
+  expect(rendering.cardContain).toBe("content");
+  expect(rendering.contentContain).toBe("content");
+  expect(rendering.backdropFilter).toBe("none");
+  expect(rendering.pageTexture).toBe("none");
+  await page.locator(".player-profile-close").click();
+  await expect(layer).toHaveAttribute("aria-hidden","true");
+  await expect(page.locator("body")).not.toHaveClass(/player-profile-open/);
+  await expect(trigger).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test("national team level copy never leaks the raw Ana value",async({page})=>{
+  await page.goto("/?profile-national-level=1",{waitUntil:"domcontentloaded"});
+  const levels=await page.evaluate(()=>{
+    const global=globalThis as any;
+    const profile={
+      copa_impact:70,copa_build_up:70,copa_space_control:70,copa_duels:70,copa_engine:70,copa_pressure_decision:70,
+      national_team:"Ana",position_fit:80,strengths:[],risks:[],tendencies:[],archetype:"balanced_midfielder",
+    };
+    global.LANG="tr";
+    const tr=global.PlayerProfiles._normalizeForTest({name:"Test Kaleci",pos:"GK"},profile);
+    global.LANG="en";
+    const en=global.PlayerProfiles._normalizeForTest({name:"Test Keeper",pos:"GK"},profile);
+    return{tr:tr.country,trCode:tr.countryCode,en:en.country,enCode:en.countryCode};
+  });
+  expect(levels).toEqual({tr:"A Milli",trCode:"A",en:"Senior",enCode:"A"});
+});

@@ -7,6 +7,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const input = process.argv.find((argument) => argument.endsWith(".aab")) ||
   "android/app/build/outputs/bundle/release/app-release-signed.aab";
 const verified = process.argv.includes("--verified");
+const emulatorSmokePassed = process.argv.includes("--emulator-smoke-passed");
 const aabPath = path.resolve(ROOT, input);
 const manifestPath = path.join(ROOT, "store", "android", "release-manifest.json");
 
@@ -55,6 +56,9 @@ const manifest = {
         web_android_parity: "passed",
         android_package_scan: "passed",
         signed_aab_signature: "passed",
+        exact_release_emulator_smoke: emulatorSmokePassed
+          ? "passed"
+          : "required after candidate build",
         physical_device_smoke: "required before track promotion",
       }
     : {

@@ -4,18 +4,18 @@
   "version_name": "1.0.0",
   "release_status": "candidate",
   "source": {
-    "build_version": "335a1f275ceb",
-    "build_fingerprint": "366e493b21e7a486668bdbea10947fdfc927fdb779c79a1c90c7d02ee3d4faa1",
-    "fingerprint": "a52c6f0b2d30630014d2ab8dfff21f0a8a79fd482644685114a85ace9e127b50",
-    "commit": "335a1f275ceb2db256360ce054c0653751d7865f"
+    "build_version": "4fd3eb0b3597",
+    "build_fingerprint": "4fd3eb0b3597218e3f0b7446a18b0cb1a46fa1c29cd85ca0bf69b5b27b76b60a",
+    "fingerprint": "addbc142c497e8ddd785d3243ae1c1deafb0923e410215212e70bd338d5dd940",
+    "commit": null
   },
   "min_sdk": 24,
   "target_sdk": 36,
   "compile_sdk": 36,
   "signed_aab": {
     "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
-    "bytes": 8700741,
-    "sha256": "B9EE14DC270B4F204C72570D8706D40FE172A3E8E2DCCAF6DCC13628E1EC8B3E"
+    "bytes": 10432509,
+    "sha256": "1A8813D7A406EEC839C6502B797393FC9CB3791E2C570235338EAED6BBFD6502"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "permissions": [
@@ -28,11 +28,12 @@
     "web_android_parity": "passed",
     "android_package_scan": "passed",
     "signed_aab_signature": "passed",
+    "exact_release_emulator_smoke": "passed",
     "physical_device_smoke": "required before track promotion"
   },
   "external_prerequisites": [
     "D-U-N-S and Google Play organization verification",
-    "organization-domain support email with working MX records",
+    "verified reachable support email (Gmail or custom domain)",
     "final legal entity name and contact details on privacy and takedown pages"
   ]
 }
