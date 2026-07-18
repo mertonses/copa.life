@@ -94,6 +94,10 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
     renderFixtures();renderHub();return;
   }
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
+  /* Hub is already visible here. Persist its safe checkpoint before an async
+     Ghost lookup can delay renderHub(), otherwise an immediate reload may
+     recover the last completed-draft checkpoint instead of the hub. */
+  if(typeof _saveState==="function")_saveState();
   if(!ghostLocked&&_lockGhostOpponent())return;
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
