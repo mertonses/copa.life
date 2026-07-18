@@ -17,8 +17,10 @@
   }
   function ensureMarkup(body){
     if(!body||body.dataset.ready==="1")return;
+    const seedValue=input()&&input().value||"";
     body.dataset.ready="1";
     body.innerHTML=`<section class="advanced-section" aria-labelledby="advancedRunTitle"><h3 class="advanced-section-title" id="advancedRunTitle"></h3><div class="advanced-card advanced-seed-card"><div class="seedwrap"><label for="seedInput">Seed</label><div class="seed-control-row"><input id="seedInput" maxlength="14" autocomplete="off" autocapitalize="characters"><button class="seed-helper-btn" id="seedRandomBtn" type="button" onclick="CopaAdvancedSettings.randomizeSeedInput()"></button><button class="seed-helper-btn" id="seedPasteBtn" type="button" onclick="CopaAdvancedSettings.pasteSeedInput()"></button></div><span class="seed-hint" id="seedHint"></span></div></div><div class="advanced-run-tools"><button class="btn btn-ghost final-replay-import-btn" id="finalReplayImportBtn" type="button" onclick="openFinalReplayImport()"></button><button class="btn btn-ghost final-replay-import-btn" id="metaProgressBtn" type="button" onclick="CopaLazy.openMetaProgression()"></button></div></section><section class="advanced-section" aria-labelledby="advancedGhostTitle"><h3 class="advanced-section-title" id="advancedGhostTitle"></h3><div id="advancedGhostSettingSlot" class="advanced-card advanced-ghost-slot"></div></section><section class="advanced-section" aria-labelledby="advancedPrivacyTitle"><h3 class="advanced-section-title" id="advancedPrivacyTitle"></h3><div id="advancedPrivacySlot" class="advanced-card advanced-privacy-slot"></div></section>`;
+    input().value=seedValue;
     refreshCopy();if(global.GhostClubs&&typeof global.GhostClubs.ensureSetting==="function")global.GhostClubs.ensureSetting();
   }
   function randomizeSeedInput(){
