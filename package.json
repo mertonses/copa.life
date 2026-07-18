@@ -54,12 +54,14 @@
     "check:finalsim": "node tools/check-final-sim.mjs",
     "check:finalsim:stats": "node tools/final-sim-quality-report.mjs --check",
     "check:finalsim:ab": "node tools/final-sim-ab-report.mjs --check",
+    "check:normalmatch": "node tools/check-normal-match-balance.mjs",
     "check:performance": "node tools/check-performance.mjs",
     "check:deploy": "node tools/check-deploy-package.mjs",
     "check:cardbalance": "node tools/card-economy-audit.mjs --check",
     "check:economy": "node tools/check-economy-balance.mjs",
     "check:chairmen": "node tools/check-chairman-events.mjs",
     "check:trust": "node tools/check-chairman-trust-info.mjs",
+    "check:meta": "node tools/check-meta-progression.mjs",
     "check:lineupsync": "node tools/check-lineup-power-sync.mjs",
     "check:clubnames": "node tools/check-club-name-security.mjs",
     "check:ghosts": "node tools/check-ghost-clubs.mjs",
@@ -78,7 +80,7 @@
     "check:japan": "node tools/check-japan-country.mjs",
     "audit:japan-data": "node tools/audit-japan-player-data.mjs",
     "check:persistence": "node tools/check-run-persistence.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:cardbalance && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

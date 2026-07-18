@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const checks = [
   ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "hasConsent", "sharingEnabled", "requestConsent", "deleteMyData", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent", "flushReportQueue", "clearLocalGhostData"]],
-  ["hub bridge", "src/ui/hub.js", ["_maybeGhostOpponent", "_applyGhostOpponent", "ghostMeta", "ghost-report-btn", "reportGhost"]],
+  ["hub bridge", "src/ui/hub.js", ["_lockGhostOpponent", "_applyGhostOpponent", "_ghostHubContextActive", "phase===\"hub\"", "ghostCheckedRounds", "ghostMeta", "ghost-report-btn", "reportGhost"]],
   ["match bridge", "src/sim/finalSim.js", ["_ghostProfile", "ghostTactics"]],
   ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "GhostClubs.recordCompletedRun"]],
   ["privacy policy", "privacy.html", ["45 gün", "90 gün", "Verilerimi sil"]],
@@ -49,6 +49,7 @@ const storage = new Map();
 let fetchCount = 0;
 const snapshot = {
   schema_version: 1, game_version: "2026.07.13", data_version: "2026.07.15-copa1",
+  simulation_version: "copa-final-core-v3", card_schema_version: "2026.07",
   public_ghost_id: "G-TEST1234", squad_power: 74, chemistry: 2, formation: "4-3-3", reached_round: 3,
   club: { name: "Tokyo Athletic", country: "JP" }, chairman: { id: "babacan" }, active_cards: [],
   starting_xi: Array.from({ length: 11 }, (_, index) => ({ name: `Player ${index + 1}`, pos: index ? "OS" : "KL", power: 72 + index % 4 })),
@@ -78,10 +79,10 @@ vm.runInContext(fs.readFileSync(path.join(root, "src/online/ghostClubs.js"), "ut
 const ghosts = sandbox.GhostClubs;
 assert.equal(ghosts.enabled(), true, "Ghost opponents must be on by default on the web");
 assert.equal(ghosts.sharingEnabled(), false, "Ghost sharing must stay off without explicit consent");
-ghosts.beginRun({ seed: 1, clubName: "No Consent FC", country: "TR", cheatRun: false });
-assert.equal(ghosts.recordCompletedRun({ seed: 1, teamName: "No Consent FC", run: { power: 70, round: 2 } }), null, "no run may be queued without explicit consent");
+ghosts.beginRun({ seed: 3, clubName: "No Consent FC", country: "TR", cheatRun: false });
+assert.equal(ghosts.recordCompletedRun({ seed: 3, teamName: "No Consent FC", run: { power: 70, round: 2 } }), null, "no run may be queued without explicit consent");
 assert.equal(storage.has("copa_ghost_upload_queue_v1"), false, "default-on matching must not create an upload queue");
-const anonymousMatch = await ghosts.findOpponent({ round: 3, power: 74 });
+const anonymousMatch = await ghosts.findOpponent({ round: 3, power: 74, seed: 3 });
 assert.equal(anonymousMatch?.ghostId, "G-TEST1234", "web matching should work without sharing consent");
 assert.equal(storage.has("copa_ghost_client_id_v1"), false, "read-only matching must not create an installation ID");
 assert.equal(fetchCount, 1);
@@ -95,10 +96,10 @@ storage.set("copa_ghost_consent_v1", JSON.stringify({ version: "ghost-terms-v1",
 storage.set("copa_ghost_sharing_enabled", "1");
 assert.equal(ghosts.sharingEnabled(), true, "versioned explicit consent should enable Ghost sharing");
 
-ghosts.beginRun({ seed: 42, clubName: "Test United", country: "ENG", cheatRun: false });
+ghosts.beginRun({ seed: 7, clubName: "Test United", country: "ENG", cheatRun: false });
 const [first, simultaneous] = await Promise.all([
-  ghosts.findOpponent({ round: 3, power: 74 }),
-  ghosts.findOpponent({ round: 3, power: 74 }),
+  ghosts.findOpponent({ round: 3, power: 74, seed: 7 }),
+  ghosts.findOpponent({ round: 3, power: 74, seed: 7 }),
 ]);
 assert.equal(first?.ghostId, "G-TEST1234");
 assert.equal(simultaneous, null, "a concurrent second lookup must be gated");

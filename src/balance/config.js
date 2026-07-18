@@ -32,7 +32,11 @@ function addFinalPenalty(amount,source){
 }
 function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
 function baseChairmanSackLimit(id){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};return m[id||(chairman&&chairman.id)]||DEBT_LIMIT;}
-function chairmanSackLimit(){let lim=baseChairmanSackLimit();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
+function chairmanTrustDebtAdjustment(value){
+ const trust=Math.max(0,Math.min(3,Math.round(value==null?(typeof chairTrust==="number"?chairTrust:1):value)));
+ return trust===3?-4:trust===2?-2:trust===0?3:0;
+}
+function chairmanSackLimit(){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -1;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanTransferMultiplier(){return chairman&&chairman.id==="pinti"?0.90:1;}

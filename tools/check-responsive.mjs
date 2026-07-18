@@ -21,8 +21,8 @@ const checks = [
     pass: /@media\(max-width:900px\)\{[\s\S]*#app,[\s\S]*#result\{[\s\S]*max-width:100%!important;[\s\S]*overflow-x:hidden!important/s.test(layout),
   },
   {
-    name: "mobile metrics use a compact scroll-safe row",
-    pass: /#hub \.hub-stat-row\{[\s\S]*display:flex!important;[\s\S]*overflow-x:auto!important;[\s\S]*scroll-snap-type:x proximity/s.test(mobile),
+    name: "mobile metrics fit in one four-column row",
+    pass: /#hub \.hub-stat-row\{[\s\S]*display:grid!important;[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important;[\s\S]*overflow:visible!important/s.test(mobile),
   },
   {
     name: "mobile hub actions use the safe-area dock",
@@ -31,6 +31,15 @@ const checks = [
   {
     name: "mobile hub play button remains the rightmost action",
     pass: /\.mobile-action-dock\[data-dock-kind="hub"\] \.actionbar #playBtn\{order:3!important\}/.test(mobile),
+  },
+  {
+    name: "mobile team talk aligns icon above its fitted label",
+    pass: /\.mobile-action-dock\[data-dock-kind="hub"\] \.actionbar #talkBtn\{[\s\S]*flex-direction:column!important;[\s\S]*gap:2px!important/s.test(mobile)
+      && /#talkBtn span\{[\s\S]*font-size:8\.5px!important;[\s\S]*text-align:center!important/s.test(mobile),
+  },
+  {
+    name: "mobile result secondary actions stay in one three-column row",
+    pass: /#result \.result-row\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/s.test(mobile),
   },
   {
     name: "mobile action dock accounts for the bottom safe area",
@@ -61,6 +70,10 @@ const checks = [
     pass: /#result \.mobile-result-disclosure\{[\s\S]*display:block/s.test(mobile)&&/wrapResultDisclosure/.test(mobileScript),
   },
   {
+    name: "mobile landing summary stays visible and uses compact equal rows",
+    pass: !/button\.id="mobileMechanicsToggle"/.test(mobileScript)&&/#introLand \.mechanics\{[\s\S]*grid-auto-rows:minmax\(32px,auto\)/s.test(mobile),
+  },
+  {
     name: "mobile connection loss has a non-blocking state",
     pass: /\.mobile-network-banner\{[\s\S]*position:fixed/s.test(mobile)&&/addEventListener\("offline"/.test(mobileScript),
   },
@@ -75,6 +88,16 @@ const checks = [
   {
     name: "mobile hub core blocks bound to viewport",
     pass: /#hub \.pitch-area,\s*\n\s*#hub #hubPitch,\s*\n\s*#hub #hubBenchSection,[\s\S]*#fixbar\.cuproad/s.test(layout),
+  },
+  {
+    name: "mobile card market reroll stays visually minimal",
+    pass: /#hub #shopLbl button\[onclick\*="shopReroll"\]\{[\s\S]*width:24px!important;[\s\S]*min-height:24px!important/s.test(mobile)
+      && /button\[onclick\*="shopReroll"\]::after\{[\s\S]*inset:-10px/s.test(mobile),
+  },
+  {
+    name: "mobile global footer stays on one compact row",
+    pass: /\.global-footer-bar\{[\s\S]*flex-wrap:nowrap!important;[\s\S]*gap:3px!important;[\s\S]*overflow-x:auto/s.test(mobile)
+      && /\.global-footer-bar \.footer-link\{[\s\S]*min-height:28px!important;[\s\S]*font-size:7px!important/s.test(mobile),
   },
   {
     name: "draft desktop columns stay equal and centered",

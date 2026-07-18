@@ -85,7 +85,7 @@
 
   function importDialog(){
     const tr=global.LANG==="tr";
-    global.showModal(`<div class="scoutmodal final-replay-import"><h4>${tr?"Final tekrar kodu":"Final replay code"}</h4><p>${tr?"Paylaşılan CFS2 kodunu yapıştır. Kod yalnız simülasyon girdilerini içerir.":"Paste a shared CFS2 code. It contains simulation inputs only."}</p><textarea id="finalReplayImportValue" maxlength="2300" spellcheck="false"></textarea><div class="bact"><button class="btn btn-primary" type="button" onclick="inspectFinalReplayInput()">${tr?"TEKRARI DOĞRULA":"VERIFY REPLAY"}</button><button class="btn btn-ghost" type="button" onclick="closeModal()">${tr?"KAPAT":"CLOSE"}</button></div></div>`,{label:tr?"Final tekrar kodu":"Final replay code"});
+    global.showModal(`<div class="scoutmodal final-replay-import"><h4>${tr?"Final tekrar kodu":"Final replay code"}</h4><p>${tr?"Paylaşılan CFS3 kodunu yapıştır. Kod yalnız simülasyon girdilerini içerir.":"Paste a shared CFS3 code. It contains simulation inputs only."}</p><textarea id="finalReplayImportValue" maxlength="2300" spellcheck="false"></textarea><div class="bact"><button class="btn btn-primary" type="button" onclick="inspectFinalReplayInput()">${tr?"TEKRARI DOĞRULA":"VERIFY REPLAY"}</button><button class="btn btn-ghost" type="button" onclick="closeModal()">${tr?"KAPAT":"CLOSE"}</button></div></div>`,{label:tr?"Final tekrar kodu":"Final replay code"});
     setTimeout(()=>document.getElementById("finalReplayImportValue")?.focus(),30);
   }
 

@@ -4,14 +4,20 @@ const DEFAULT_ORIGINS=["https://copa.life","https://www.copa.life","https://loca
 const METHODS="GET, POST, DELETE, OPTIONS";
 const CONSENT_VERSION="ghost-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
-const ANALYTICS_EVENTS=new Set(["session_started","country_selected","draft_started","xi_completed","round_completed","run_finished","ghost_opt_in","profile_open_error","final_sim_completed"]);
+const ANALYTICS_EVENTS=new Set(["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed"]);
 const ANALYTICS_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
-const ANALYTICS_OUTCOMES=new Set(["","win","loss","sacked"]);
+const ANALYTICS_OUTCOMES=new Set(["","win","draw","loss","sacked"]);
 const ANALYTICS_DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
 const ANALYTICS_POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
 const ANALYTICS_END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
 const ANALYTICS_TACTICS=new Set(["","balanced","more","push","calm","hold"]);
+const ANALYTICS_CHAIRMEN=new Set(["","babacan","leydi","pinti","sansasyoncu","torpilci","cilgin"]);
+const ANALYTICS_FORMATIONS=new Set(["","4-4-2","4-3-3","4-2-3-1","3-5-2","5-3-2","3-4-3","4-5-1","4-3-2-1","4-1-4-1","3-4-1-2"]);
+const ANALYTICS_STYLES=new Set(["","gegen","kontra","tiki","uzun","blok"]);
+const ANALYTICS_REWARDS=new Set(["","cash","loan","swap","care"]);
+const ANALYTICS_CARD_KINDS=new Set(["","power","final","risk","instant","contract","other"]);
+const ANALYTICS_ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9","cash_0_9","cash_10_plus"]);
 
 const clean=value=>String(value==null?"":value).replace(/[<>]/g,"").replace(/\s+/g," ").trim().slice(0,400);
 const range=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
@@ -37,10 +43,10 @@ async function readJsonLimited(request,limit=MAX_BODY_BYTES){
 }
 
 function normalizeAnalyticsEvent(value){
-  if(!object(value)||![1,2].includes(Number(value.schema_version)))return null;
+  if(!object(value)||![1,2,3].includes(Number(value.schema_version)))return null;
   const schemaVersion=Number(value.schema_version);
   const event=String(value.event||"");if(!ANALYTICS_EVENTS.has(event))return null;
-  if(event==="final_sim_completed"&&schemaVersion!==2)return null;
+  if(event==="final_sim_completed"&&schemaVersion<2)return null;
   const platform=String(value.platform||"");if(!ANALYTICS_PLATFORMS.has(platform))return null;
   const locale=String(value.locale||"").toLowerCase();if(!/^[a-z]{2}(?:-[a-z]{2})?$/.test(locale))return null;
   const gameCountry=String(value.game_country||"").toUpperCase();if(!ANALYTICS_COUNTRIES.has(gameCountry))return null;
@@ -55,7 +61,14 @@ function normalizeAnalyticsEvent(value){
   const endType=String(value.end_type||"");if(!ANALYTICS_END_TYPES.has(endType))return null;
   const tactic=String(value.tactic||"");if(!ANALYTICS_TACTICS.has(tactic))return null;
   if(event==="final_sim_completed"&&(!modelVersion||!powerGap||!endType||!tactic))return null;
-  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic};
+  if(schemaVersion===2)return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic};
+  const chairman=String(value.chairman||"");if(!ANALYTICS_CHAIRMEN.has(chairman))return null;
+  const formation=String(value.formation||"");if(!ANALYTICS_FORMATIONS.has(formation))return null;
+  const style=String(value.style||"");if(!ANALYTICS_STYLES.has(style))return null;
+  const reward=String(value.reward||"");if(!ANALYTICS_REWARDS.has(reward))return null;
+  const cardKind=String(value.card_kind||"");if(!ANALYTICS_CARD_KINDS.has(cardKind))return null;
+  const economyBand=String(value.economy_band||"");if(!ANALYTICS_ECONOMY_BANDS.has(economyBand))return null;
+  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand};
 }
 
 async function handleAnalytics(request,env){
@@ -63,12 +76,13 @@ async function handleAnalytics(request,env){
   let body;try{body=await readJsonLimited(request,4096);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
   const event=normalizeAnalyticsEvent(body);if(!event)return json(request,env,{error:"invalid_analytics_event"},422);
   if(!env.PRODUCT_ANALYTICS)return json(request,env,{error:"analytics_unavailable"},503);
-  /* copa_life_product_events: blob1..13 below; double1=count, double2=round,
+  /* copa_life_product_events: blob1..19 below; double1=count, double2=round,
      double3=schema version. No user/session index is written. */
   env.PRODUCT_ANALYTICS.writeDataPoint({
     blobs:[
       event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion,
-      event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1)
+      event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1),
+      event.chairman||"",event.formation||"",event.style||"",event.reward||"",event.cardKind||"",event.economyBand||""
     ],
     doubles:[1,event.round,event.schemaVersion||1]
   });
@@ -98,6 +112,7 @@ function moderateClubName(value){
 const validPlayer=player=>object(player)&&typeof player.name==="string"&&player.name.trim().length>0&&player.name.length<=72&&typeof player.pos==="string"&&player.pos.length<=12&&Number(player.power)>=35&&Number(player.power)<=115;
 function valid(snapshot,{requirePublicId=false}={}){
   if(!object(snapshot)||snapshot.schema_version!==1)return false;if(typeof snapshot.game_version!=="string"||!snapshot.game_version||snapshot.game_version.length>32)return false;if(typeof snapshot.data_version!=="string"||!snapshot.data_version||snapshot.data_version.length>32)return false;
+  if(typeof snapshot.simulation_version!=="string"||!/^copa-final-core-v[0-9]{1,3}$/.test(snapshot.simulation_version))return false;if(typeof snapshot.card_schema_version!=="string"||!snapshot.card_schema_version||snapshot.card_schema_version.length>32)return false;
   if(requirePublicId&&!/^G-[A-Z0-9]{8,32}$/.test(String(snapshot.public_ghost_id||"")))return false;if(!Array.isArray(snapshot.starting_xi)||snapshot.starting_xi.length!==11||snapshot.starting_xi.some(player=>!validPlayer(player)))return false;
   if(snapshot.squad!=null&&(!Array.isArray(snapshot.squad)||snapshot.squad.length<11||snapshot.squad.length>18||snapshot.squad.some(player=>!validPlayer(player))))return false;if(snapshot.bench!=null&&(!Array.isArray(snapshot.bench)||snapshot.bench.length>7||snapshot.bench.some(player=>!validPlayer(player))))return false;
   if(!Number.isFinite(Number(snapshot.squad_power))||snapshot.squad_power<35||snapshot.squad_power>115)return false;if(!Number.isFinite(Number(snapshot.cash))||snapshot.cash<-100||snapshot.cash>250)return false;if(!Number.isInteger(Number(snapshot.reached_round))||snapshot.reached_round<1||snapshot.reached_round>6)return false;
@@ -128,10 +143,16 @@ async function handlePost(request,env){
 
 async function handleMatch(request,env,url){
   if(env.GHOST_READ_LIMITER){const outcome=await env.GHOST_READ_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
-  const power=Math.round(range(url.searchParams.get("power"),35,115)),round=Math.round(range(url.searchParams.get("round"),1,6)),gameVersion=clean(url.searchParams.get("game_version")),dataVersion=clean(url.searchParams.get("data_version"));if(!gameVersion||!dataVersion)return json(request,env,{ghost:null},400);
-  const rows=await env.GHOSTS.prepare("SELECT public_id, snapshot FROM ghost_runs WHERE status='eligible' AND eligible_until > ? AND game_version=? AND data_version=? AND reached_round BETWEEN ? AND ? AND squad_power BETWEEN ? AND ? ORDER BY ABS(squad_power-?) ASC, created_at DESC LIMIT 30").bind(new Date().toISOString(),gameVersion,dataVersion,Math.max(1,round-1),Math.min(6,round+1),Math.max(35,power-13),Math.min(115,power+13),power).all();
-  const excluded=new Set((url.searchParams.get("exclude")||"").split(",").filter(id=>/^G-[A-Z0-9]{8,32}$/.test(id)).slice(0,64)),candidates=(rows.results||[]).filter(row=>!excluded.has(row.public_id));if(!candidates.length)return json(request,env,{ghost:null});
-  const bytes=new Uint32Array(1);crypto.getRandomValues(bytes);const chosen=candidates[bytes[0]%candidates.length];let ghost;try{ghost=JSON.parse(chosen.snapshot);}catch(_){ghost=null;}return json(request,env,{ghost:valid(ghost,{requirePublicId:true})?ghost:null});
+  const power=Math.round(range(url.searchParams.get("power"),35,115)),round=Math.round(range(url.searchParams.get("round"),1,6)),simulationVersion=clean(url.searchParams.get("simulation_version")),cardSchemaVersion=clean(url.searchParams.get("card_schema_version"));
+  if(!/^copa-final-core-v[0-9]{1,3}$/.test(simulationVersion)||!cardSchemaVersion)return json(request,env,{ghost:null},400);
+  const rows=await env.GHOSTS.prepare("SELECT public_id, snapshot FROM ghost_runs WHERE status='eligible' AND eligible_until > ? AND reached_round BETWEEN ? AND ? AND squad_power BETWEEN ? AND ? ORDER BY ABS(squad_power-?) ASC, created_at DESC LIMIT 60").bind(new Date().toISOString(),Math.max(1,round-1),Math.min(6,round+1),Math.max(35,power-8),Math.min(115,power+8),power).all();
+  const excluded=new Set((url.searchParams.get("exclude")||"").split(",").filter(id=>/^G-[A-Z0-9]{8,32}$/.test(id)).slice(0,64));
+  const candidates=(rows.results||[]).flatMap(row=>{
+    if(excluded.has(row.public_id))return [];
+    try{const ghost=JSON.parse(row.snapshot);return valid(ghost,{requirePublicId:true})&&ghost.simulation_version===simulationVersion&&ghost.card_schema_version===cardSchemaVersion?[ghost]:[];}catch(_){return[];}
+  });
+  if(!candidates.length)return json(request,env,{ghost:null});
+  const bytes=new Uint32Array(1);crypto.getRandomValues(bytes);return json(request,env,{ghost:candidates[bytes[0]%candidates.length]});
 }
 
 async function handleReport(request,env,publicIdValue){

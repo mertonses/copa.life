@@ -28,8 +28,20 @@ function _fixHubVisibleText(){
   if(trustHint)trustHint.textContent=tv>=3?LT("güvende","secure","seguro","sicher","sicuro"):tv>=2?LT("dengede","steady","estable","stabil","stabile"):tv>=1?LT("kırılgan","fragile","frágil","fragil","fragile"):LT("tehlikede","at risk","en riesgo","gefährdet","a rischio");
 }
 
-function _applyGhostOpponent(ghost,expectedRound,baseline){
-  if(!ghost||runEnded||round!==expectedRound||opponent!==baseline)return;
+function _setGhostMatchLock(locked){
+  const button=$("playBtn");if(!button)return;
+  button.disabled=!!locked;
+  button.setAttribute("aria-busy",locked?"true":"false");
+  button.textContent=locked?LT("Rakip eşleşiyor…","Matching opponent…","Buscando rival…","Gegner wird gesucht…","Ricerca avversario…"):LT("Maça çık","Play match","Jugar partido","Spiel starten","Gioca");
+}
+function _ghostHubContextActive(expectedRound,baseline){
+  const phase=window.CopaRunState&&window.CopaRunState.phase;
+  const hub=$("hub");
+  const onHub=phase?phase==="hub":!!(hub&&!hub.classList.contains("hidden"));
+  return !runEnded&&onHub&&round===expectedRound&&opponent===baseline;
+}
+function _applyGhostOpponent(ghost,expectedRound,baseline,options={}){
+  if(!ghost||!_ghostHubContextActive(expectedRound,baseline))return;
   if(window._ghostOpponentUsed||(window.GhostClubs&&window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return;
   opponent=ghost;
   if(Array.isArray(bracket))bracket[round-1]=ghost;
@@ -43,18 +55,35 @@ function _applyGhostOpponent(ghost,expectedRound,baseline){
   }
   window._ghostSeenIds=(window._ghostSeenIds||[]).concat(ghost.ghostId).slice(-16);
   window._ghostOpponentUsed=true;
+  window._ghostOpponentId=ghost.ghostId||"";
   if(window.GhostClubs&&typeof window.GhostClubs.markOpponentUsed==="function")window.GhostClubs.markOpponentUsed(ghost.ghostId);
   if(Array.isArray(fixtures)&&fixtures[round-1])fixtures[round-1].opp=ghost.name;
-  renderFixtures();renderHub();
+  if(window.CopaAnalytics&&typeof analyticsBalanceProps==="function"){
+    const own=typeof squadPower==="function"?squadPower(round):{power:70};
+    window.CopaAnalytics.track("ghost_encountered",analyticsBalanceProps({round:expectedRound,power_gap:typeof analyticsPowerGap==="function"?analyticsPowerGap(own.power,ghost.power):""}));
+  }
+  if(!options.deferRender){renderFixtures();renderHub();}
   if(typeof playUiSample==="function")playUiSample("ghost",.34,1500);
 }
-function _maybeGhostOpponent(){
+function _lockGhostOpponent(){
   const baseline=opponent,expectedRound=round;
-  if(!window.GhostClubs||!window.GhostClubs.enabled()||window._ghostOpponentUsed||(window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return;
+  window._ghostCheckedRounds=Array.isArray(window._ghostCheckedRounds)?window._ghostCheckedRounds:[];
+  if(window._ghostCheckedRounds.includes(expectedRound))return false;
+  if(!window.GhostClubs||!window.GhostClubs.enabled()||window._ghostOpponentUsed||(window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return false;
+  window._ghostCheckedRounds.push(expectedRound);
   const own=typeof squadPower==="function"?squadPower(round):{power:70};
-  window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:Date.now(),excluded:window._ghostSeenIds||[]}).then(ghost=>_applyGhostOpponent(ghost,expectedRound,baseline)).catch(()=>{});
+  _setGhostMatchLock(true);
+  window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:"",excluded:window._ghostSeenIds||[]})
+    .then(ghost=>_applyGhostOpponent(ghost,expectedRound,baseline,{deferRender:true}))
+    .catch(()=>{})
+    .finally(()=>{
+      _setGhostMatchLock(false);
+      const currentBaseline=opponent&&opponent.ghost?opponent:baseline;
+      if(_ghostHubContextActive(expectedRound,currentBaseline))enterHub(false,true);
+    });
+  return true;
 }
-function enterHub(restoring=false){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}if(window.CopaRunState){const moved=window.CopaRunState.transition("hub",{reason:restoring?"restore":"draft_or_reward_complete"});if(!moved.ok){window.CopaDiagnostics&&window.CopaDiagnostics.capture("state_guard",moved.errors.join(","),"");return;}}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
+function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}if(window.CopaRunState&&!ghostLocked){const moved=window.CopaRunState.transition("hub",{reason:restoring?"restore":"draft_or_reward_complete"});if(!moved.ok){window.CopaDiagnostics&&window.CopaDiagnostics.capture("state_guard",moved.errors.join(","),"");return;}}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
   const _tcl=$("tcLines");if(_tcl)_tcl.innerHTML="";
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
   opponent=opponent||bracket[round-1]||bracket[0]||{name:"Opponent",power:60};
@@ -65,6 +94,7 @@ function enterHub(restoring=false){if(window._wantFinal){window._wantFinal=false
     renderFixtures();renderHub();return;
   }
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
+  if(!ghostLocked&&_lockGhostOpponent())return;
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
   /* Borç güven cezası */
@@ -77,7 +107,7 @@ if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Bool
   /* Sansasyoncu spotlight — her iki turda bir */
   if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
   if(chairman.id==="torpilci"&&round===3&&!eventSeen.torpil_guaranteed){eventSeen.torpil_guaranteed=1;setTimeout(_queueGuaranteedTorpil,760);}
-  newShopOffers();_genFreeAgents();renderFixtures();renderHub();_maybeGhostOpponent();maybeDraftEvent();
+  newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&!hasSelectedCaptain()&&typeof pickCaptain==="function"){
     setTimeout(()=>{if(!hasSelectedCaptain())pickCaptain();},500);
   }
@@ -893,6 +923,7 @@ function buyCard(k,overridePrice){
   recordDebt();
   cardsBoughtThisTurn++;
   addCard(k,sv,{silent:true,source:"market",price:pr});
+  if(window.CopaAnalytics)window.CopaAnalytics.track("card_acquired",analyticsBalanceProps({card_kind:analyticsCardKind(k)}));
   shopOffers=shopOffers.filter(o=>o!==k);
   delete shopVariants[k];
   sfxStamp();sfxCoin();

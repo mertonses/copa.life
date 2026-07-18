@@ -18,7 +18,7 @@
     gameVersion:"2026.07.13",
     dataVersion:"2026.07.15-copa1",
     cardSchemaVersion:"2026.07",
-    simulationVersion:"finalsim-v3",
+    simulationVersion:"copa-final-core-v3",
     queueMax:24,
     matchChance:{1:.20,2:.24,3:.29,4:.34,5:.38,6:.40}
   });
@@ -49,6 +49,7 @@
   const cleanClubName=(value,fallback="")=>window.ClubNamePolicy?window.ClubNamePolicy.sanitize(value,fallback):cleanText(value).slice(0,29);
   const bounded=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
   const hash=value=>{let h=2166136261;for(const ch of String(value)){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(36);};
+  const deterministicRoll=value=>parseInt(hash(value),36)/4294967296;
   const clientId=()=>{const stored=safeGet(CLIENT_KEY,"");if(/^GCL-[A-Z0-9]{8,40}$/.test(stored))return stored;const uuid=globalThis.crypto&&typeof globalThis.crypto.randomUUID==="function"?globalThis.crypto.randomUUID():hash(Date.now()+"|"+Math.random());const value="GCL-"+String(uuid).replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,32).padEnd(8,"0");safeSet(CLIENT_KEY,value);return value;};
   const deleteToken=()=>{const stored=safeGet(DELETE_TOKEN_KEY,"");if(/^GDT-[A-Z0-9]{16,80}$/.test(stored))return stored;const uuid=globalThis.crypto&&typeof globalThis.crypto.randomUUID==="function"?globalThis.crypto.randomUUID():hash(Date.now()+"|delete|"+Math.random());const value="GDT-"+String(uuid).replace(/[^a-z0-9]/gi,"").toUpperCase().padEnd(16,"0");safeSet(DELETE_TOKEN_KEY,value);return value;};
   function blockedIds(){try{const value=JSON.parse(safeGet(BLOCKED_KEY,"[]"));return Array.isArray(value)?value.filter(id=>/^G-[A-Z0-9]{8,32}$/.test(id)).slice(-64):[];}catch(_){return[];}}
@@ -224,7 +225,7 @@
   }
   function validRemote(snapshot){
     if(!snapshot||snapshot.schema_version!==CONFIG.schemaVersion)return false;
-    if(snapshot.game_version!==CONFIG.gameVersion||snapshot.data_version!==CONFIG.dataVersion)return false;
+    if(snapshot.simulation_version!==CONFIG.simulationVersion||snapshot.card_schema_version!==CONFIG.cardSchemaVersion)return false;
     if(!/^G-[A-Z0-9]{8,32}$/.test(String(snapshot.public_ghost_id||"")))return false;
     if(!Array.isArray(snapshot.starting_xi)||snapshot.starting_xi.length!==11)return false;
     if(!Number.isFinite(Number(snapshot.squad_power))||Number(snapshot.squad_power)<35||Number(snapshot.squad_power)>115)return false;
@@ -300,10 +301,17 @@
     if(!enabled()||!base||!navigator.onLine||hasOpponentUsed()||matchPending)return null;
     const round=Math.round(bounded(criteria&&criteria.round,1,6));
     const chance=CONFIG.matchChance[round]||.30;
-    const roll=Math.random();
+    const run=readStartedRun();
+    const seed=String(criteria&&criteria.seed==null?(run.seed||""):criteria.seed);
+    const roll=deterministicRoll(["ghost-match",seed,round].join("|"));
     if(roll>chance)return null;
     const power=Math.round(bounded(criteria&&criteria.power,35,115));
-    const params=new URLSearchParams({power:String(power),round:String(round),game_version:CONFIG.gameVersion,data_version:CONFIG.dataVersion});
+    const params=new URLSearchParams({
+      power:String(power),
+      round:String(round),
+      simulation_version:CONFIG.simulationVersion,
+      card_schema_version:CONFIG.cardSchemaVersion
+    });
     const seen=Array.from(new Set((Array.isArray(criteria&&criteria.excluded)?criteria.excluded:[]).concat(blockedIds()))).slice(-64);
     if(seen.length)params.set("exclude",seen.join(","));
     matchPending=true;

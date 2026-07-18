@@ -93,7 +93,7 @@
     const tr=global.LANG==="tr";
     const value=load(),keys=Object.keys(value.weeks).sort().reverse();
     const key=keys[0]||weekKey(),week=value.weeks[key]||emptyWeek();
-    const currentModel=global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v2";
+    const currentModel=global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v3";
     const result=evaluate(week,currentModel);
     const status=!result.enough
       ?(tr?"En az 20 finalden sonra eşik değerlendirmesi güvenilir olur.":"Threshold evaluation becomes reliable after at least 20 finals.")

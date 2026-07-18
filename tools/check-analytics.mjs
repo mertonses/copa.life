@@ -26,7 +26,7 @@ const iosIndex=read("dist-ios/index.html");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
-for(const event of ["session_started","country_selected","draft_started","xi_completed","round_completed","run_finished","ghost_opt_in","profile_open_error","final_sim_completed"]){
+for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed"]){
   expect(runtime.includes(`"${event}"`),`product event is missing: ${event}`);
   expect(worker.includes(`"${event}"`),`Worker allowlist is missing: ${event}`);
 }
@@ -34,8 +34,11 @@ for(const forbidden of ["localStorage","sessionStorage","document.cookie","sessi
   expect(!runtime.includes(forbidden),`analytics runtime contains forbidden identifier/storage marker: ${forbidden}`);
 }
 expect(runtime.includes("globalPrivacyControl")&&runtime.includes("doNotTrack"),"browser privacy signals are not respected");
-expect(runtime.includes("schema_version:2")&&worker.includes("[1,2].includes"),"versioned analytics schema compatibility is missing");
+expect(runtime.includes("schema_version:3")&&worker.includes("[1,2,3].includes"),"versioned analytics schema compatibility is missing");
 expect(runtime.includes("power_gap")&&runtime.includes("end_type")&&runtime.includes("model_version"),"coarse final simulation telemetry is missing");
+for(const dimension of ["chairman","formation","style","reward","card_kind","economy_band"]){
+  expect(runtime.includes(dimension),`balance telemetry dimension is missing: ${dimension}`);
+}
 expect(!runtime.includes("seed")&&!runtime.includes("replay"),"final analytics must not transmit a seed or replay code");
 expect(worker.includes("No user/session index is written"),"Analytics Engine privacy schema is not documented in code");
 expect(workerConfig.includes('"binding": "PRODUCT_ANALYTICS"')&&workerConfig.includes('"dataset": "copa_life_product_events"'),"production Analytics Engine binding is missing");
@@ -45,6 +48,7 @@ expect(stagingConfig.includes('"dataset": "copa_life_worker_health_staging"'),"s
 expect(worker.includes("routeBucket(url.pathname)")&&worker.includes('return "not_found"'),"Worker metrics do not use a fixed privacy-safe route bucket");
 expect(!worker.includes("writeDataPoint({indexes"),"Analytics Engine metrics must not write an identifier index");
 expect(reportWorkflow.includes("CLOUDFLARE_ANALYTICS_TOKEN")&&reportScript.includes("_sample_interval"),"weekly sampled KPI report is missing");
+expect(reportScript.includes("blob14 AS chairman")&&reportScript.includes("blob17 AS reward"),"weekly balance decision report is missing");
 expect(reportScript.includes("sumIf(")&&monitorScript.includes("sumIf("),"Analytics Engine conditional aggregates must use supported sumIf syntax");
 expect(!reportScript.includes("NULLIF(")&&!reportScript.includes("SUM(IF(")&&!monitorScript.includes("SUM(IF("),"Analytics Engine queries contain unsupported SQL functions or mixed numeric IF branches");
 expect(monitorWorkflow.includes("PROFILE_ERROR_RATE")&&monitorWorkflow.includes("WORKER_5XX_RATE"),"analytics error monitor thresholds are missing");

@@ -39,7 +39,7 @@
       haptics:"DOKUNUŞ TİTREŞİMİ",battery:"PİL TASARRUFU",
       smartSpeed:"AKILLI MAÇ HIZI",confirmPick:"OYUNCU SEÇİMİNİ ONAYLA",
       fieldFocus:"YATAYDA SAHA ODAĞI",
-      on:"AÇIK",off:"KAPALI",showGuide:"Oyun özeti",hideGuide:"Özeti gizle",
+      on:"AÇIK",off:"KAPALI",
       draft:"DRAFT DURUMU",remaining:"Kadro",budget:"Kasa",deadline:"Süre",
       candidates:"Aday seçimi",squadAverage:"Kadro ort.",cashAfter:"Kasa sonra",
       economical:"Bütçe",balanced:"Dengeli",strong:"Güçlü",elite:"Elit",
@@ -66,7 +66,7 @@
       haptics:"TOUCH HAPTICS",battery:"BATTERY SAVER",
       smartSpeed:"SMART MATCH SPEED",confirmPick:"CONFIRM PLAYER PICKS",
       fieldFocus:"LANDSCAPE PITCH FOCUS",
-      on:"ON",off:"OFF",showGuide:"Game summary",hideGuide:"Hide summary",
+      on:"ON",off:"OFF",
       draft:"DRAFT STATUS",remaining:"Squad",budget:"Cash",deadline:"Time",
       candidates:"Candidate choice",squadAverage:"Squad avg.",cashAfter:"Cash after",
       economical:"Budget",balanced:"Balanced",strong:"Strong",elite:"Elite",
@@ -398,31 +398,9 @@
 
   function ensureIntroGuide(){
     const mechanics=document.getElementById("mechSection");
-    const head=document.querySelector("#introLand .v7-hero-head");
-    if(!mechanics||!head)return;
-    let button=document.getElementById("mobileMechanicsToggle");
-    if(!button){
-      button=document.createElement("button");
-      button.id="mobileMechanicsToggle";
-      button.type="button";
-      button.className="mobile-mechanics-toggle";
-      button.setAttribute("aria-controls","mechSection");
-      button.addEventListener("click",()=>{
-        const collapsed=mechanics.classList.toggle("mobile-collapsed");
-        button.setAttribute("aria-expanded",collapsed?"false":"true");
-        button.textContent=collapsed?copy().showGuide:copy().hideGuide;
-      });
-      head.appendChild(button);
-    }
-    let returning=false;
-    try{returning=localStorage.getItem("copa_mobile_seen")==="1";}catch(_){}
-    if(!button.dataset.initialized){
-      mechanics.classList.toggle("mobile-collapsed",returning);
-      button.dataset.initialized="1";
-    }
-    const collapsed=mechanics.classList.contains("mobile-collapsed");
-    button.setAttribute("aria-expanded",collapsed?"false":"true");
-    button.textContent=collapsed?copy().showGuide:copy().hideGuide;
+    if(!mechanics)return;
+    mechanics.classList.remove("mobile-collapsed");
+    document.getElementById("mobileMechanicsToggle")?.remove();
   }
 
   function ensureDraftContext(){
@@ -835,6 +813,18 @@
     return false;
   }
 
+  function pauseForSkipPrompt(){
+    const simElement=document.getElementById("sim");
+    const pauseButton=document.getElementById("pauseBtn");
+    if(isVisible(simElement)&&pauseButton&&!pauseButton.classList.contains("pause")&&typeof global.simPause==="function"){
+      global.simPause();
+    }
+  }
+
+  function cancelSkip(){
+    if(typeof global.closeModal==="function")global.closeModal();
+  }
+
   function confirmSkip(){
     try{localStorage.setItem("copa_mobile_skip_confirmed","1");}catch(_){}
     if(typeof global.closeModal==="function")global.closeModal();
@@ -960,7 +950,8 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         const c=copy();
-        global.showModal('<div class="mobile-skip-confirm"><div class="kithdr">'+c.skipTitle+'</div><p>'+c.skipBody+'</p><div class="bact"><button class="btn btn-primary" onclick="CopaMobileExperience.confirmSkip()">'+c.skipConfirm+'</button><button class="btn btn-ghost" onclick="closeModal()">'+c.cancel+'</button></div></div>',{dismissOnOverlay:true,label:c.skipTitle});
+        pauseForSkipPrompt();
+        global.showModal('<div class="mobile-skip-confirm"><div class="kithdr">'+c.skipTitle+'</div><p>'+c.skipBody+'</p><div class="bact"><button class="btn btn-primary" onclick="CopaMobileExperience.confirmSkip()">'+c.skipConfirm+'</button><button class="btn btn-ghost" onclick="CopaMobileExperience.cancelSkip()">'+c.cancel+'</button></div></div>',{dismissOnOverlay:true,label:c.skipTitle});
       }
     }
   }
@@ -974,18 +965,11 @@
     }
     const shout=target.closest(".shoutbtn");
     if(shout){
+      const result=global._lastShoutResult;
+      if(!result||!result.ok)return;
       const map={shMore:"tacticMore",shPush:"tacticPush",shCalm:"tacticCalm",shHold:"tacticHold"};
       const key=map[shout.id],status=document.getElementById("mobileTacticStatus"),c=copy();
-      if(key&&status)status.textContent=c[key]+" "+c.tacticApplied+".";
-      const row=document.getElementById("shoutrow");
-      if(row){
-        row.classList.add("is-cooling");
-        row.querySelectorAll(".shoutbtn").forEach(button=>button.disabled=true);
-        setTimeout(()=>{
-          row.classList.remove("is-cooling");
-          row.querySelectorAll(".shoutbtn").forEach(button=>button.disabled=false);
-        },650);
-      }
+      if(key&&status)status.textContent=c[key]+" "+c.tacticApplied+" · "+result.usesLeft+" / 3.";
       haptic(14);
     }
     const speed=target.closest(".spd[data-s]");
@@ -1044,6 +1028,7 @@
     setSimView,
     isPhoneInteraction,
     handleBack,
+    cancelSkip,
     confirmSkip,
     setAsyncState,
     haptic,

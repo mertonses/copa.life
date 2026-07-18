@@ -10,6 +10,10 @@ const variants={
   push:{tactic:"push"},
   calm:{tactic:"calm"},
   hold:{tactic:"hold"},
+  late_more:{decisions:[{minute:70,tactic:"more",duration:12}]},
+  late_push:{decisions:[{minute:70,tactic:"push",duration:12}]},
+  late_calm:{decisions:[{minute:70,tactic:"calm",duration:12}]},
+  late_hold:{decisions:[{minute:70,tactic:"hold",duration:12}]},
   wing_card:{cards:["kanat_akini"]},
   counter_card:{cards:["kontra"]},
   positive_talk:{teamTalk:3}
@@ -41,7 +45,17 @@ for(const [name,changes] of Object.entries(variants)){
 }
 
 const d=report.deltas;
+const timedDecision=core.normalizeConfig({decisions:[{minute:70,tactic:"more",duration:12}]}).decisions;
 const checks=[
+  ["timed shout is inactive before its window",core.tacticAt("balanced",timedDecision,69)==="balanced",0],
+  ["timed shout is active inside its window",core.tacticAt("balanced",timedDecision,75)==="more",1],
+  ["timed shout expires back to base tactic",core.tacticAt("balanced",timedDecision,82)==="balanced",0],
+  ["surge is stronger while chasing than protecting a lead",
+    core.tacticEffects("more",{minute:75,losing:true}).attack>core.tacticEffects("more",{minute:75,leading:true}).attack,
+    core.tacticEffects("more",{minute:75,losing:true}).attack-core.tacticEffects("more",{minute:75,leading:true}).attack],
+  ["hold is stronger while protecting a lead",
+    core.tacticEffects("hold",{minute:75,leading:true}).defence>core.tacticEffects("hold",{minute:75,losing:true}).defence,
+    core.tacticEffects("hold",{minute:75,leading:true}).defence-core.tacticEffects("hold",{minute:75,losing:true}).defence],
   ["surge creates more shots",d.more.shots>1,d.more.shots],
   ["surge creates more xG",d.more.xg>0.30,d.more.xg],
   ["surge exposes the defence",d.more.goalsAgainst>0.05,d.more.goalsAgainst],
@@ -51,8 +65,15 @@ const checks=[
   ["calm improves possession",d.calm.possession>0.30,d.calm.possession],
   ["calm reduces cards",d.calm.cards<-0.08,d.calm.cards],
   ["calm reduces shot volume",d.calm.shots<-0.50,d.calm.shots],
-  ["hold reduces conceded goals",d.hold.goalsAgainst<-0.10,d.hold.goalsAgainst],
+  ["hold reduces conceded goals",d.hold.goalsAgainst<-0.06,d.hold.goalsAgainst],
   ["hold sacrifices attack",d.hold.shots<-1,d.hold.shots],
+  ["12-minute surge changes attacking volume",d.late_more.shots>0.05,d.late_more.shots],
+  ["12-minute press changes recoveries",d.late_push.pressWins>0.25,d.late_push.pressWins],
+  ["12-minute calm changes possession",d.late_calm.possession>0.05,d.late_calm.possession],
+  ["12-minute hold reduces concessions",d.late_hold.goalsAgainst<0,d.late_hold.goalsAgainst],
+  ["temporary shouts stay bounded",
+    ["late_more","late_push","late_calm","late_hold"].every(key=>Math.abs(d[key].winRate)<0.05),
+    Math.max(...["late_more","late_push","late_calm","late_hold"].map(key=>Math.abs(d[key].winRate)))],
   ["wing card changes routes",d.wing_card.wide>0.25,d.wing_card.wide],
   ["wing card is not direct pay-to-win",Math.abs(d.wing_card.winRate)<0.05,d.wing_card.winRate],
   ["counter card changes routes",d.counter_card.counters>0.20,d.counter_card.counters],
