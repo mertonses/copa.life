@@ -133,7 +133,7 @@
     if(!active)return;
     requestAnimationFrame(()=>{
       const left=active.offsetLeft-(track.clientWidth-active.clientWidth)/2;
-      track.scrollTo({left:Math.max(0,left),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+      track.scrollTo({left:Math.max(0,left),behavior:"auto"});
     });
   }
 
