@@ -30,6 +30,7 @@ test.describe("run lifecycle and recovery",()=>{
 
   test("reload during reward returns to the last safe hub checkpoint",async({page})=>{
     await setupHub(page);
+    expect(await page.evaluate(()=>JSON.parse(localStorage.getItem("copa_run_v5")||"null")?.phase)).toBe("hub");
     await page.evaluate(()=>{const w=globalThis as any;w.CopaRunState.transition("match",{reason:"reload_test"});w.showRewardChoice();});
     await expect(page.locator("#modal")).toBeVisible();
     await page.reload({waitUntil:"domcontentloaded"});
