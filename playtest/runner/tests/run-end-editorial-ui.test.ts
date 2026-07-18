@@ -152,6 +152,10 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator(".tactical-board")).toBeVisible();
+  await expect(page.locator(".tactical-board .tactical-player")).toHaveCount(5);
+  await expect(page.locator(".tactical-board .tactical-ball-carrier")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-final-arrow")).toHaveCount(1);
+  await expect(page.locator(".tactical-board svg gradient,.tactical-board svg filter")).toHaveCount(0);
   await expect(page.locator(".v7-hero-side > #howtoWrap #howtoToggle")).toBeVisible();
   await expect(page.locator(".tactical-board #howtoToggle")).toHaveCount(0);
   await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
@@ -172,6 +176,9 @@ test("landing hero places the guide left of the tactical board and keeps the tim
       };
     });
     const board=(document.querySelector(".tactical-board") as HTMLElement).getBoundingClientRect();
+    const diagram=document.querySelector(".tactical-diagram") as SVGElement;
+    const secondaryLink=getComputedStyle(document.querySelector(".tactical-link-secondary") as SVGElement);
+    const pitchDetail=getComputedStyle(document.querySelector(".tactical-pitch-detail") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
     const connector=document.querySelector("#mechSection .mstep") as HTMLElement;
@@ -187,6 +194,8 @@ test("landing hero places the guide left of the tactical board and keeps the tim
       opacity:Number(layer.opacity),
       numbers,
       boardWidth:board.width,
+      diagramRatio:diagram.getBoundingClientRect().width/diagram.getBoundingClientRect().height,
+      mobileDetailHidden:secondaryLink.display==="none"&&pitchDetail.display==="none",
       guideLeftOutside:guide.right<=board.left-6,
       guideCenterDelta:Math.abs((guide.top+guide.bottom)/2-(board.top+board.bottom)/2),
       connectorCenterDelta,
@@ -202,6 +211,8 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
   if(!testInfo.project.name.includes("mobile"))expect(layout.connectorCenterDelta).toBeLessThanOrEqual(.1);
   expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
+  expect(layout.diagramRatio).toBeCloseTo(238/138,1);
+  expect(layout.mobileDetailHidden).toBe(testInfo.project.name.includes("mobile"));
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
   await expect(page.locator(".v7-hero-desc")).toHaveText("Schreibe mit jeder Entscheidung eine neue Fußballgeschichte.");

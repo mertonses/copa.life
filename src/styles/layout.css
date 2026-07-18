@@ -6793,7 +6793,6 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   min-width:0;
 }
 .tactical-board{
-  position:relative;
   width:238px;
   height:138px;
   border:1px solid color-mix(in srgb,var(--color-slate) 42%,transparent);
@@ -6801,65 +6800,36 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   color:var(--color-primary);
   overflow:hidden;
 }
-.tactical-board::before{
-  content:"";
-  position:absolute;
-  inset:8px;
-  border:1px solid color-mix(in srgb,var(--color-slate) 26%,transparent);
-  border-radius:50%;
+.tactical-diagram{display:block;width:100%;height:100%}
+.tactical-pitch{
+  stroke:color-mix(in srgb,var(--color-slate) 38%,transparent);
+  stroke-width:1;
+  vector-effect:non-scaling-stroke;
 }
-.tactical-midline{
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:50%;
-  border-left:1px solid color-mix(in srgb,var(--color-slate) 30%,transparent);
+.tactical-pitch-detail{opacity:.62}
+.tactical-links,.tactical-final-arrow{
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
-.tactical-box{
-  position:absolute;
-  top:28%;
-  width:13%;
-  height:44%;
-  border:1px solid color-mix(in srgb,var(--color-slate) 30%,transparent);
+.tactical-links{stroke-width:1;opacity:.48}
+.tactical-link-secondary{opacity:.48}
+.tactical-final-arrow{stroke-width:1.15;opacity:.88}
+.tactical-player{
+  fill:var(--surface-default);
+  stroke:currentColor;
+  stroke-width:1.25;
+  vector-effect:non-scaling-stroke;
 }
-.tactical-box-a{left:-1px;border-left:0}
-.tactical-box-b{right:-1px;border-right:0}
-.tactical-token{
-  position:absolute;
-  z-index:2;
-  width:8px;
-  height:8px;
-  border:1.5px solid currentColor;
-  border-radius:50%;
-  background:var(--surface-default);
+.tactical-carrier-halo{
+  fill:color-mix(in srgb,var(--color-primary) 12%,transparent);
+  stroke:currentColor;
+  stroke-width:1;
+  opacity:.7;
+  vector-effect:non-scaling-stroke;
 }
-.tactical-token-1{left:10%;top:44%}
-.tactical-token-2{left:33%;top:19%}
-.tactical-token-3{left:36%;bottom:18%}
-.tactical-token-4{right:33%;top:40%}
-.tactical-token-5{right:11%;top:22%}
-.tactical-pass{
-  position:absolute;
-  z-index:1;
-  height:1px;
-  background:currentColor;
-  opacity:.55;
-  transform-origin:left center;
-}
-.tactical-pass::after{
-  content:"";
-  position:absolute;
-  right:-1px;
-  top:-2px;
-  width:4px;
-  height:4px;
-  border-top:1px solid currentColor;
-  border-right:1px solid currentColor;
-  transform:rotate(45deg);
-}
-.tactical-pass-1{left:13%;top:47%;width:24%;transform:rotate(-37deg)}
-.tactical-pass-2{left:36%;top:24%;width:30%;transform:rotate(24deg)}
-.tactical-pass-3{left:39%;bottom:23%;width:34%;transform:rotate(-21deg)}
+.tactical-ball{fill:currentColor;stroke:var(--surface-default);stroke-width:.8;vector-effect:non-scaling-stroke}
 .v7-hero-head .howto-wrap{
   position:relative!important;
   z-index:4;
@@ -6969,7 +6939,6 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   }
   .v7-hero-side{gap:8px}
   .tactical-board{width:170px;height:104px}
-  .tactical-board::before{inset:6px}
   .v7-hero-head .howto-wrap{
     position:relative!important;
     inset:auto!important;
@@ -6983,6 +6952,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   .v7-hero-head{grid-template-columns:1fr;gap:10px}
   .v7-hero-side{width:100%;align-items:center;justify-content:flex-end}
   .tactical-board{display:block;width:min(55vw,220px);height:auto;aspect-ratio:238/138}
+  .tactical-link-secondary,.tactical-pitch-detail{display:none}
 }
 @media(max-width:360px){
   .v7-hero-side{gap:6px}
