@@ -31,6 +31,64 @@ test("mobile primary actions use one safe-area aware dock without cloning contro
   await expect(dock).toBeHidden();
 });
 
+test("narrow hub keeps the action dock at the viewport bottom and clickable after modal cycles",async({page},testInfo)=>{
+  test.skip(!["desktop-chromium","webkit-mobile"].includes(testInfo.project.name),"narrow viewport and iOS contract");
+  if(testInfo.project.name==="desktop-chromium")await page.setViewportSize({width:430,height:932});
+  await page.goto("/?mobile-hub-dock=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await expect(page.locator("#postClubName")).toBeVisible();
+  await page.locator("#postClubName").fill("Dock Test FK");
+  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await expect(page.locator("#hub")).toBeVisible();
+  await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
+
+  const dock=page.locator("#mobileActionDock");
+  await expect(dock).toBeVisible();
+  await expect(dock).toHaveAttribute("data-dock-kind","hub");
+  const dockMetrics=await dock.evaluate(element=>{
+    const rect=element.getBoundingClientRect();
+    const talk=document.getElementById("talkBtn") as HTMLElement;
+    const talkRect=talk.getBoundingClientRect();
+    const hit=document.elementFromPoint(talkRect.left+talkRect.width/2,talkRect.top+talkRect.height/2);
+    return{
+      position:getComputedStyle(element).position,
+      viewportBottom:Math.round(innerHeight-rect.bottom),
+      pointerEvents:getComputedStyle(element).pointerEvents,
+      hitId:(hit&&hit.closest("button") as HTMLElement|null)?.id||"",
+    };
+  });
+  expect(dockMetrics).toEqual({
+    position:"fixed",
+    viewportBottom:0,
+    pointerEvents:"auto",
+    hitId:"talkBtn",
+  });
+
+  await page.locator("#talkBtn").click();
+  await expect(page.locator("#modal")).toBeVisible();
+  await page.evaluate(()=>{(globalThis as any).closeModal();});
+  await expect(dock).toBeVisible();
+  await expect(dock).toHaveAttribute("data-dock-kind","hub");
+  const remountHit=await page.locator("#presBtn").evaluate(element=>{
+    const rect=element.getBoundingClientRect();
+    const centerHit=(value:DOMRect)=>{
+      const hit=document.elementFromPoint(value.left+value.width/2,value.top+value.height/2);
+      return(hit&&hit.closest("button") as HTMLElement|null)?.id||"";
+    };
+    const playRect=document.getElementById("playBtn")!.getBoundingClientRect();
+    const talkRect=document.getElementById("talkBtn")!.getBoundingClientRect();
+    return{
+      hitIds:[centerHit(rect),centerHit(talkRect),centerHit(playRect)],
+      pres:[rect.left,rect.top,rect.right,rect.bottom].map(Math.round),
+      play:[playRect.left,playRect.top,playRect.right,playRect.bottom].map(Math.round),
+      talk:[talkRect.left,talkRect.top,talkRect.right,talkRect.bottom].map(Math.round),
+    };
+  });
+  expect(remountHit.hitIds,JSON.stringify(remountHit)).toEqual(["presBtn","talkBtn","playBtn"]);
+  await page.locator("#talkBtn").click();
+  await expect(page.locator("#modal")).toBeVisible();
+});
+
 test("mobile preferences stay opt-in and draft choices expose decision context",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-preferences=1",{waitUntil:"domcontentloaded"});

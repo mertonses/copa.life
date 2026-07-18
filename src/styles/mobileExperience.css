@@ -19,7 +19,7 @@
 .mobile-result-disclosure{display:contents}
 .mobile-result-disclosure>summary{display:none}
 
-@media (max-width:760px) and (hover:none),(max-width:760px) and (pointer:coarse){
+@media (max-width:760px){
   body{
     padding-top:var(--copa-safe-top);
     padding-right:var(--copa-safe-right);
@@ -41,6 +41,11 @@
     border-top:1px solid var(--border-default);
     background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
     box-shadow:0 -5px 18px rgba(7,16,17,.14);
+    isolation:isolate;
+    pointer-events:auto;
+    touch-action:manipulation;
+    transform:translateZ(0);
+    -webkit-transform:translateZ(0);
   }
 
   .mobile-action-dock.hidden,
@@ -49,6 +54,27 @@
   .mobile-action-dock-inner{
     width:min(100%,620px);
     margin:0 auto;
+    pointer-events:auto;
+  }
+
+  /* The dock script portals this panel into body. Keep a fixed-bottom
+     fallback so a delayed WebView/Safari media update can never leave the
+     primary match actions stuck at the top of the hub. */
+  #hub:not(.hidden) .hub-action-panel{
+    position:fixed!important;
+    top:auto!important;
+    right:max(8px,var(--copa-safe-right))!important;
+    bottom:0!important;
+    left:max(8px,var(--copa-safe-left))!important;
+    z-index:8400!important;
+    width:auto!important;
+    max-width:none!important;
+    pointer-events:auto!important;
+    touch-action:manipulation;
+  }
+  html.mobile-modal-open #hub .hub-action-panel{
+    visibility:hidden!important;
+    pointer-events:none!important;
   }
 
   .mobile-action-dock[data-dock-kind="intro"] #startBtn,
@@ -103,7 +129,7 @@
   .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn,
   .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn,
   .mobile-action-dock[data-dock-kind="hub"] .btn-pres{
-    position:static!important;
+    position:relative!important;
     width:100%!important;
     min-width:0!important;
     height:48px!important;
@@ -117,6 +143,11 @@
     letter-spacing:.65px!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
+    pointer-events:auto!important;
+    touch-action:manipulation;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .btn-go::after{
+    pointer-events:none!important;
   }
 
   .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn{order:3!important}
@@ -1053,8 +1084,7 @@
   html.copa-battery-saver svg animateTransform{display:none}
 }
 
-@media (max-width:760px) and (hover:none) and (orientation:landscape),
-       (max-width:760px) and (pointer:coarse) and (orientation:landscape){
+@media (max-width:760px) and (orientation:landscape){
   .mobile-action-dock{padding-top:5px;padding-bottom:calc(5px + var(--copa-safe-bottom))}
   .mobile-action-dock[data-dock-kind="hub"] .actionbtns{grid-template-rows:44px!important}
   .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn,
