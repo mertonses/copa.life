@@ -1020,7 +1020,6 @@ html[data-theme="dark"] .country-new-ribbon{background:#c9973d;color:#10100c;bor
 .result-actions{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .result-row{display:flex;gap:8px}
 .result-row .btn{flex:1;margin:0}
-#quickBtn{background:var(--color-ink);color:var(--surface-default);border-color:var(--color-ink)}
 #againBtn{background:var(--color-ink);color:var(--color-background);border-color:var(--color-ink);font-size:16px;padding:14px;font-weight:700;letter-spacing:1px}
 
 /* ===== budget wider ===== */
@@ -6753,4 +6752,242 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
     max-width:100%!important;
     margin:0!important;
   }
+}
+
+/* ===== Editorial landing hero + tactical timeline ===== */
+#introLand{
+  isolation:isolate;
+  overflow:hidden;
+}
+#introLand::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  pointer-events:none;
+  opacity:.045;
+  background:
+    radial-gradient(circle at 12% 24%,currentColor 0 2px,transparent 2.5px),
+    radial-gradient(circle at 37% 68%,currentColor 0 2px,transparent 2.5px),
+    radial-gradient(circle at 68% 31%,currentColor 0 2px,transparent 2.5px),
+    linear-gradient(31deg,transparent 20%,currentColor 20.4% 20.8%,transparent 21.2% 100%),
+    linear-gradient(151deg,transparent 58%,currentColor 58.4% 58.8%,transparent 59.2% 100%);
+  background-size:260px 150px;
+  color:var(--color-ink);
+}
+.v7-hero-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 188px;
+  gap:32px;
+  align-items:center;
+  min-height:154px;
+  padding:18px 0 17px!important;
+}
+.v7-hero-copy{min-width:0}
+.hero-title-line{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+}
+.hero-die-icon{
+  flex:0 0 auto;
+  width:.55em;
+  height:.55em;
+  color:var(--color-primary);
+  opacity:.9;
+}
+.v7-hero-side{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  min-width:0;
+}
+.tactical-board{
+  position:relative;
+  width:164px;
+  height:94px;
+  border:1px solid color-mix(in srgb,var(--color-slate) 42%,transparent);
+  border-radius:7px;
+  color:var(--color-primary);
+}
+.tactical-board::before{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid color-mix(in srgb,var(--color-slate) 26%,transparent);
+  border-radius:50%;
+}
+.tactical-midline{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  border-left:1px solid color-mix(in srgb,var(--color-slate) 30%,transparent);
+}
+.tactical-box{
+  position:absolute;
+  top:27px;
+  width:21px;
+  height:38px;
+  border:1px solid color-mix(in srgb,var(--color-slate) 30%,transparent);
+}
+.tactical-box-a{left:-1px;border-left:0}
+.tactical-box-b{right:-1px;border-right:0}
+.tactical-token{
+  position:absolute;
+  z-index:2;
+  width:8px;
+  height:8px;
+  border:1.5px solid currentColor;
+  border-radius:50%;
+  background:var(--surface-default);
+}
+.tactical-token-1{left:18px;top:43px}
+.tactical-token-2{left:53px;top:18px}
+.tactical-token-3{left:58px;bottom:17px}
+.tactical-token-4{right:48px;top:40px}
+.tactical-token-5{right:17px;top:25px}
+.tactical-pass{
+  position:absolute;
+  z-index:1;
+  height:1px;
+  background:currentColor;
+  opacity:.55;
+  transform-origin:left center;
+}
+.tactical-pass::after{
+  content:"";
+  position:absolute;
+  right:-1px;
+  top:-2px;
+  width:4px;
+  height:4px;
+  border-top:1px solid currentColor;
+  border-right:1px solid currentColor;
+  transform:rotate(45deg);
+}
+.tactical-pass-1{left:26px;top:45px;width:36px;transform:rotate(-37deg)}
+.tactical-pass-2{left:61px;top:25px;width:49px;transform:rotate(24deg)}
+.tactical-pass-3{left:66px;bottom:22px;width:58px;transform:rotate(-21deg)}
+.v7-hero-head .howto-wrap{
+  position:static!important;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  margin:0!important;
+  text-align:right;
+}
+.howto-prompt{
+  color:var(--color-slate);
+  font:650 9px/1.25 var(--mono);
+  white-space:nowrap;
+}
+#howtoToggle{
+  min-height:32px;
+  height:auto!important;
+  white-space:nowrap;
+}
+.v7-hero-head .howto-body{
+  position:absolute;
+  right:0;
+  top:100%;
+}
+#introLand .mechanics{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:18px;
+  padding:15px 0 17px;
+  border-top:1px solid color-mix(in srgb,var(--color-slate) 20%,transparent);
+  border-bottom:1px solid color-mix(in srgb,var(--color-slate) 24%,transparent);
+}
+#introLand .mstep{
+  position:relative;
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr);
+  gap:8px;
+  align-items:start;
+  padding:0 6px 0 0;
+  border:0;
+}
+#introLand .mstep:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  top:13px;
+  right:-14px;
+  width:11px;
+  height:1px;
+  background:color-mix(in srgb,var(--color-slate) 42%,transparent);
+}
+#introLand .mstep:not(:last-child)::before{
+  content:"";
+  position:absolute;
+  top:10px;
+  right:-14px;
+  width:5px;
+  height:5px;
+  border-top:1px solid color-mix(in srgb,var(--color-slate) 55%,transparent);
+  border-right:1px solid color-mix(in srgb,var(--color-slate) 55%,transparent);
+  transform:rotate(45deg);
+}
+#introLand .mn{
+  display:grid;
+  place-items:center;
+  width:26px;
+  height:26px;
+  min-width:26px;
+  padding:0;
+  border:1px solid color-mix(in srgb,var(--color-primary) 58%,transparent);
+  border-radius:50%;
+  color:var(--color-primary);
+  font:850 9px/1 var(--mono);
+  letter-spacing:0;
+}
+#introLand .mt{
+  margin:1px 0 0;
+  color:var(--color-ink);
+  font:800 10px/1.25 var(--mono);
+  letter-spacing:.015em;
+}
+#introLand .mt small{
+  display:block;
+  margin-top:4px;
+  color:var(--color-slate);
+  font:500 9px/1.4 var(--mono);
+  letter-spacing:0;
+}
+@media(max-width:720px){
+  .v7-hero-head{
+    grid-template-columns:minmax(0,1fr) 116px;
+    gap:14px;
+    min-height:130px;
+  }
+  .tactical-board{width:112px;height:68px}
+  .tactical-board::before{inset:6px}
+  .tactical-box{top:19px;height:28px;width:16px}
+  .tactical-token-1{left:12px;top:30px}
+  .tactical-token-2{left:35px;top:12px}
+  .tactical-token-3{left:39px;bottom:11px}
+  .tactical-token-4{right:31px;top:28px}
+  .tactical-token-5{right:11px;top:17px}
+  .tactical-pass-1{left:20px;top:33px;width:25px}
+  .tactical-pass-2{left:42px;top:19px;width:34px}
+  .tactical-pass-3{left:47px;bottom:16px;width:37px}
+  .v7-hero-head .howto-wrap{
+    flex-direction:column;
+    align-items:flex-end;
+    gap:4px;
+  }
+  .howto-prompt{font-size:8px}
+  #introLand .mechanics{grid-template-columns:1fr}
+  #introLand .mstep:not(:last-child)::after,
+  #introLand .mstep:not(:last-child)::before{display:none}
+}
+@media(max-width:420px){
+  .v7-hero-head{grid-template-columns:1fr;gap:10px}
+  .v7-hero-side{align-items:flex-start}
+  .tactical-board{display:none}
+  .v7-hero-head .howto-wrap{align-items:flex-start;flex-direction:row}
 }

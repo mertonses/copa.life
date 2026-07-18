@@ -931,7 +931,7 @@
     }
     const speed=target.closest(".spd[data-s]");
     if(speed)requestedSmartSpeed=Number(speed.dataset.s)||10;
-    if(target.closest("#opts .opt,.shopcard,.pen-dir-btn,#playBtn,#againBtn,#quickBtn"))haptic(12);
+    if(target.closest("#opts .opt,.shopcard,.pen-dir-btn,#playBtn,#againBtn"))haptic(12);
   }
 
   function checkpoint(){

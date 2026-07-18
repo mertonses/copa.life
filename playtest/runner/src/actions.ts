@@ -94,10 +94,6 @@ export class ActionLayer {
     return this.doAction("pick_reward", index);
   }
 
-  async quickRestart(): Promise<boolean> {
-    return this.doAction("quick_restart");
-  }
-
   async dismissModal(): Promise<boolean> {
     return this.doAction("dismiss_modal");
   }

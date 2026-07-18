@@ -57,7 +57,7 @@ test.describe("Copa Test Bridge", () => {
     );
 
     const expected = [
-      "start_new_game", "quick_restart", "select_formation", "pick_draft_option",
+      "start_new_game", "select_formation", "pick_draft_option",
       "open_card", "confirm_modal", "dismiss_modal", "play_match", "shout",
       "select_chair", "pick_reward", "read_shop", "read_deck",
     ];

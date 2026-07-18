@@ -294,13 +294,6 @@
       return { ok: false, reason: "no dismiss button" };
     },
 
-    /** Result: restart with same settings */
-    quick_restart() {
-      if (typeof _g("quickRestart") === "function") { _g("quickRestart")(); return { ok: true }; }
-      const b = _el("quickBtn"); if (b) { b.click(); return { ok: true }; }
-      return { ok: false, reason: "quickRestart not available" };
-    },
-
     /** Result: completely new run */
     new_run() {
       if (typeof _g("restart") === "function") { _g("restart")(); return { ok: true }; }

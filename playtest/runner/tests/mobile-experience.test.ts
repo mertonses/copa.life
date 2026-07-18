@@ -170,7 +170,7 @@ test("hub context and result details stay compact without hiding information",as
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
   const resultActions=page.locator("#result .result-row .btn");
-  await expect(resultActions).toHaveCount(3);
+  await expect(resultActions).toHaveCount(2);
   const resultActionLayout=await resultActions.evaluateAll(elements=>elements.map(element=>{
     const rect=element.getBoundingClientRect();
     const label=element.querySelector(".result-action-label") as HTMLElement;
