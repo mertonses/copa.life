@@ -105,32 +105,54 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(zeroEconomy).not.toContainText("En düşük kasa");
 });
 
-test("landing hero uses a tactical board, helper CTA, vector die and responsive timeline",async({page},testInfo)=>{
+test("landing hero nests the guide in a larger tactical board and keeps the timeline aligned",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
-  await expect(page.locator(".hero-die-icon")).toHaveCount(1);
+  await expect(page.locator(".hero-die-icon")).toHaveCount(0);
+  await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator(".tactical-board")).toBeVisible();
-  await expect(page.locator("#howtoPrompt")).toHaveText("İlk kez mi oynuyorsun?");
+  await expect(page.locator(".tactical-board #howtoToggle")).toBeVisible();
   await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
   await expect(page.locator("#mechSection .mn")).toHaveText(["1","2","3","4"]);
   await expect(page.locator("#mechSection .mt small")).toHaveCount(4);
   const layout=await page.evaluate(()=>{
     const steps=Array.from(document.querySelectorAll("#mechSection .mstep")).map(node=>(node as HTMLElement).getBoundingClientRect());
+    const numbers=Array.from(document.querySelectorAll("#mechSection .mn")).map(node=>{
+      const element=node as HTMLElement;
+      const rect=element.getBoundingClientRect();
+      return{
+        scrollWidth:element.scrollWidth,
+        clientWidth:element.clientWidth,
+        scrollHeight:element.scrollHeight,
+        clientHeight:element.clientHeight,
+        alignItems:getComputedStyle(element).alignItems,
+        justifyContent:getComputedStyle(element).justifyContent,
+      };
+    });
+    const board=(document.querySelector(".tactical-board") as HTMLElement).getBoundingClientRect();
+    const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
     return{
       uniqueTops:new Set(steps.map(rect=>Math.round(rect.top))).size,
       overflow:document.getElementById("introLand")!.scrollWidth-document.getElementById("introLand")!.clientWidth,
       opacity:Number(layer.opacity),
+      numbers,
+      boardWidth:board.width,
+      guideInside:guide.left>=board.left&&guide.right<=board.right-5&&guide.bottom<=board.bottom-5,
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.opacity).toBeGreaterThanOrEqual(.03);
   expect(layout.opacity).toBeLessThanOrEqual(.05);
   expect(layout.uniqueTops).toBe(testInfo.project.name.includes("mobile")?4:1);
+  expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
+  expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
+  expect(layout.guideInside).toBe(true);
+  expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
-  await expect(page.locator(".hero-die-icon")).toHaveCount(1);
-  await expect(page.locator("#howtoPrompt")).toHaveText("Zum ersten Mal dabei?");
+  await expect(page.locator(".hero-die-icon")).toHaveCount(0);
+  await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator("#mechSection .mt").first()).toContainText("Formation & Präsident");
 });
 
