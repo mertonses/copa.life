@@ -43,6 +43,8 @@ async function prepareCompletedRun(page:Page,path:string){
 
 async function assertSharedLayout(page:Page){
   const modal=page.locator(".season-stats-modal");
+  await page.waitForTimeout(900);
+  await expect(modal).toBeVisible();
   await expect(modal.locator(".ss-kpi")).toHaveCount(4);
   await expect(modal.locator(".ss-journey-node")).toHaveCount(6);
   await expect(modal.locator(".ss-flow-step")).toHaveCount(5);
