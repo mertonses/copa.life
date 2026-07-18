@@ -86,7 +86,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260718-tactical-board2">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260718-advanced-settings1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260718-result-narrative2">
@@ -198,17 +198,8 @@ if("serviceWorker"in navigator){
         <button class="btn btn-quick btn-quick-inline" id="quickStartBtn" onclick="quickStart()"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="9,1 2,9 8,9 7,15 14,7 8,7"/></svg> RASTGELE BAŞLA</button>
       </div>
       <div class="advanced-wrap">
-        <button class="advanced-toggle" id="advancedToggle" type="button" aria-expanded="false" onclick="const _ab=this.nextElementSibling;_ab.classList.toggle('hidden');this.classList.toggle('open');this.setAttribute('aria-expanded',!_ab.classList.contains('hidden'))">Gelişmiş Ayarlar</button>
-        <div class="advanced-body hidden">
-          <div class="seedwrap">
-            <label for="seedInput">Seed</label>
-            <input id="seedInput" maxlength="14" placeholder="auto">
-            <span class="seed-hint">Aynı seed, aynı başlangıç koşullarını üretir.</span>
-          </div>
-          <button class="btn btn-ghost final-replay-import-btn" id="finalReplayImportBtn" type="button" onclick="openFinalReplayImport()">FİNAL TEKRAR KODU</button>
-          <button class="btn btn-ghost final-replay-import-btn" id="metaProgressBtn" type="button" onclick="CopaLazy.openMetaProgression()">KULÜP KARİYERİ VE KAYIT</button>
-          <div id="advancedGhostSettingSlot" class="advanced-ghost-slot"></div>
-        </div>
+        <button class="advanced-toggle" id="advancedToggle" type="button" aria-expanded="false" onclick="CopaLazy.toggleAdvancedSettings(this)">Gelişmiş Ayarlar</button>
+        <div class="advanced-body hidden" data-advanced-settings></div>
       </div>
     </div>
     <div class="cover" style="display:none"><picture><source srcset="assets/mascot.webp" type="image/webp"><img class="mascot" alt="copa.life mascot" src="assets/mascot.webp" loading="lazy" decoding="async"></picture><div class="est">EST · 1974</div><div class="crest"></div><h1 id="coverTitle">copa.life</h1><div class="sub2" id="coverSub">Türkiye Ulusal Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
@@ -326,7 +317,7 @@ if("serviceWorker"in navigator){
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260715-lazy1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260718-advanced-settings1"></script>
 <script src="src/runtime/finalReplay.js?v=20260717-replay-viewer1"></script>
 <script src="src/cards/cardDefs.js?v=20260718-contracts1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
@@ -340,7 +331,7 @@ if("serviceWorker"in navigator){
 <script src="src/balance/difficulty.js?v=20260711-stability1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260714-i18n1"></script>
-<script src="src/online/ghostClubs.js?v=20260718-ghost-result2"></script>
+<script src="src/online/ghostClubs.js?v=20260718-advanced-settings1"></script>
 <script src="src/ui/hub.js?v=20260718-contracts1"></script>
 <script src="src/ui/playerProfiles.js?v=20260715-copa-model1"></script>
 <script src="src/ui/mobileExperience.js?v=20260717-mobile-ux2"></script>
@@ -530,7 +521,7 @@ function setCopaHeroTitle(html){
   tagline.innerHTML=String(html||"");
 }
 window.setCopaHeroTitle=setCopaHeroTitle;
-function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
+function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(window.CopaAdvancedSettings)window.CopaAdvancedSettings.refreshCopy();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
   if(!$("hub").classList.contains("hidden"))renderHub();if(!$("draft").classList.contains("hidden"))refreshDraft();if(!$("result").classList.contains("hidden")&&lastResult)renderResult();if(!$("fixbar").classList.contains("hidden"))renderFixtures();}
 function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.life — Roguelite futbol. Şans + strateji.":"copa.life — Roguelite football. Luck + strategy.";$("lblBudget").innerHTML=x.budget;$("coverTitle").textContent=x.coverTitle;const cupLocale=_cups[LANG]||_cups.en;$("coverSub").textContent=cupLocale[selectedCountry]||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;const _patHtml=x.patreonText.replace("copa.life","<span style='font-family:var(--mono);font-weight:900'>copa<span style='opacity:.38'>.</span>life</span>");if($("patreonIntroText"))$("patreonIntroText").innerHTML=_patHtml;if($("patreonResultText"))$("patreonResultText").innerHTML=_patHtml;if($("contactIntroLabel"))$("contactIntroLabel").textContent=tr?"İletişim":"Contact";if($("contactIntroText"))$("contactIntroText").textContent=tr?"Soru, fikir, hata? · ":"Question, idea, bug? · ";$("pickhdr").textContent=x.pickhdr;const _ico_ball="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='7' cy='7' r='5.5'/><polygon points='7,4.5 8.8,5.8 8.1,7.8 5.9,7.8 5.2,5.8' fill='currentColor' opacity='.25' stroke-width='.8'/></svg>";const _ico_person="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' style='vertical-align:-.15em'><circle cx='6' cy='4' r='2.5'/><path d='M1 13Q1 9 6 9Q11 9 11 13'/></svg>";const _ico_club="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><path d='M7 1L13 4V8Q13 12 7 13Q1 12 1 8V4Z'/></svg>";const _ico_card="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' style='vertical-align:-.1em'><rect x='1' y='1' width='10' height='12' rx='1.5'/><line x1='3.5' y1='5' x2='8.5' y2='5'/><line x1='3.5' y1='7.5' x2='8.5' y2='7.5'/><line x1='3.5' y1='10' x2='6' y2='10'/></svg>";const _cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:42;const _fpLig=tr?"5 ülke · 10 lig":"5 countries · 10 leagues";$("protoFoot").innerHTML=`copa.life · ${_ico_ball} ${_fpLig} · ${_ico_person} <b>9.264</b> ${tr?"oyuncu":"players"} · ${_ico_club} <b>180</b> ${tr?"kulüp":"clubs"} · ${_ico_card} <b>${_cc}</b> ${tr?"kart":"cards"} · <b>6</b> ${tr?"tur":"rounds"} · <b>6</b> ${tr?"başkan":"chairs"}`;const ms=$("mechStats");if(ms)ms.innerHTML=`<span><b>9.264</b> ${tr?"oyuncu":"players"}</span><span>·</span><span><b>10</b> ${tr?"lig":"leagues"}</span><span>·</span><span><b>${_cc}</b> ${tr?"kart":"cards"}</span><span>·</span><span><b>6</b> ${tr?"tur":"rounds"}</span><span>·</span><span><b>6</b> ${tr?"başkan":"chairs"}</span>`;if($("shareBtnLbl"))$("shareBtnLbl").textContent=tr?"PAYLAŞ":"SHARE";$("rollHint").textContent=x.rollHint;$("rollBtn").innerHTML=x.roll;$("allBtn").innerHTML=x.allBtn;if($("undoBtn"))$("undoBtn").innerHTML=x.undo;if($("howtoToggle")){const _bookSvg=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>`;$("howtoToggle").innerHTML=_bookSvg+(tr?"Detaylı rehber":"Detailed guide");}_applyHowtoLang();$("ddLbl").innerHTML=x.ddTitle;
   if($("startBtn"))$("startBtn").textContent=x.startBtn;if($("quickStartBtn"))$("quickStartBtn").innerHTML=x.quickStartBtn;if($("allBtn"))$("allBtn").innerHTML=`<svg class="dice-ico" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="7" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="1" fill="currentColor" stroke="none"/></svg> ${tr?"Takımı Otomatik Kur":"Auto-fill XI"}`;if($("howtoToggle"))$("howtoToggle").innerHTML=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>${tr?"Nasıl Oynanır?":"How to Play?"}`;if($("countryhdr"))$("countryhdr").textContent=tr?"Ülkeni Seç":"Pick Your Country";
@@ -545,11 +536,7 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
   if($("muteBtn")){$("muteBtn").title=tr?"Ses efektleri":"Sound effects";$("muteBtn").setAttribute("aria-label",tr?"Ses efektleri":"Sound effects");}
   const tagline=document.querySelector(".v7-tagline");if(tagline)tagline.innerHTML=tr?"Zar at. Kadronu kur.<br><span class=\"v7-tagline-accent\">Kadere meydan oku.</span>":"Roll the dice. Build your squad.<br><span class=\"v7-tagline-accent\">Defy fate.</span>";
   const heroDesc=document.querySelector(".v7-hero-desc");if(heroDesc)heroDesc.textContent=tr?"Her seçiminle yeni bir futbol hikâyesi yaz.":"Write a new football story with every choice.";
-  if($("advancedToggle"))$("advancedToggle").textContent=tr?"Gelişmiş Ayarlar":"Advanced Settings";
-  const seedLbl=document.querySelector(".advanced-body .seedwrap label");if(seedLbl)seedLbl.textContent=tr?"Seed":"Seed";
-  const seedHint=document.querySelector(".seed-hint");if(seedHint)seedHint.textContent=tr?"Aynı seed, aynı başlangıç koşullarını üretir.":"Same seed creates the same starting conditions.";
-  const replayImportBtn=$("finalReplayImportBtn");if(replayImportBtn)replayImportBtn.textContent=tr?"FİNAL TEKRAR KODU":"FINAL REPLAY CODE";
-  const metaProgressBtn=$("metaProgressBtn");if(metaProgressBtn)metaProgressBtn.textContent=tr?"KULÜP KARİYERİ VE KAYIT":"CLUB CAREER & SAVE";
+  if($("advancedToggle"))$("advancedToggle").textContent=LT("Gelişmiş Ayarlar","Advanced Settings","Ajustes avanzados","Erweiterte Einstellungen","Impostazioni avanzate");
   document.querySelectorAll(".kasa-lbl").forEach(el=>el.textContent=tr?"KASA":"CASH");
   document.querySelectorAll(".kasa-metric-lbl").forEach(el=>{if(/BOR|DEBT/i.test(el.textContent))el.textContent=tr?"BORÇ LİMİTİ":"DEBT LIMIT";else if(/HARC|SPENT/i.test(el.textContent))el.textContent=tr?"HARCANAN":"SPENT";});
   document.querySelectorAll(".kasa-bar-labels").forEach(el=>{const spans=el.querySelectorAll("span");if(spans[0])spans[0].textContent=tr?"Limit":"Limit";if(spans[1])spans[1].textContent="0";if(spans[2])spans[2].textContent=tr?"Kasa":"Cash";});

@@ -41,6 +41,17 @@
       loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260718-grid1",()=>!!global.CopaChairPicker)
     ]).then(()=>global.CopaChairPicker);
   }
+  function ensureAdvancedSettings(){
+    return Promise.all([
+      loadStyleOnce("advanced-settings-style","src/styles/advancedSettings.css?v=20260718-layout1",'link[href*="advancedSettings.css"]'),
+      loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260718-layout1",()=>!!global.CopaAdvancedSettings)
+    ]).then(()=>global.CopaAdvancedSettings);
+  }
+  function toggleAdvancedSettings(button){
+    const body=button&&button.nextElementSibling;if(!body)return Promise.resolve();
+    const open=body.classList.contains("hidden"),apply=()=>{body.classList.toggle("hidden",!open);button.classList.toggle("open",open);button.setAttribute("aria-expanded",String(open));};
+    if(!open){apply();return Promise.resolve();}return ensureAdvancedSettings().then(api=>{api.ensureMarkup(body);apply();}).catch(apply);
+  }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,openMetaProgression});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,toggleAdvancedSettings,openMetaProgression});
 })(window);

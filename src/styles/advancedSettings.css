@@ -1,0 +1,35 @@
+.advanced-body{margin-top:8px;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--surface-elevated);text-align:left}
+.advanced-section+.advanced-section{margin-top:18px}
+.advanced-section-title{margin:0 0 7px;color:var(--color-slate);font:800 9px/1.2 var(--mono);letter-spacing:1.4px;text-transform:uppercase}
+.advanced-card{min-width:0;padding:11px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg)}
+.advanced-body .seedwrap{display:flex;flex-direction:column;justify-content:center}
+.advanced-body .seedwrap label{margin-bottom:5px;color:var(--color-slate);font:500 8px/1 var(--mono);letter-spacing:1.5px;text-transform:uppercase}
+.seed-control-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center}
+.advanced-body .seedwrap input{width:100%;min-width:0;min-height:32px;box-sizing:border-box;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-elevated);padding:6px 8px;outline:none;color:var(--color-ink);font:500 12px/1 var(--mono)}
+.advanced-body .seedwrap input:focus{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--focus-ring)}
+.advanced-body .seedwrap input::placeholder{color:var(--color-slate);opacity:.7}
+.seed-helper-btn{min-height:32px;padding:6px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg);color:var(--color-slate);font:700 8px/1 var(--mono);cursor:pointer;white-space:nowrap}
+.seed-helper-btn:hover,.seed-helper-btn:focus-visible{border-color:var(--color-primary);color:var(--color-ink)}
+.seed-hint{display:block;margin-top:6px;color:var(--color-slate);font:500 8.5px/1.35 var(--mono);white-space:nowrap}
+.advanced-run-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.advanced-run-tools .final-replay-import-btn{width:100%;min-height:42px;margin:0;padding:8px;font-size:9px;line-height:1.25;letter-spacing:.8px}
+.advanced-ghost-slot{padding:10px}
+.ghost-setting{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ghost-setting-option{display:flex;min-width:0;flex-direction:column;padding:9px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-elevated)}
+.ghost-setting-header{margin-bottom:3px;color:var(--color-slate);font:700 8px/1 var(--mono);letter-spacing:1.2px;text-transform:uppercase}
+.ghost-setting-copy{margin:6px 0 0;color:var(--color-slate);font-size:9px;line-height:1.4}
+.ghost-setting-toggle{width:100%;min-height:30px;padding:6px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font:700 9px/1 var(--mono);letter-spacing:.5px;text-transform:uppercase;transition:border-color var(--tr-fast),background var(--tr-fast),color var(--tr-fast)}
+.ghost-setting-toggle:hover{border-color:var(--color-primary);background:var(--surface-muted)}
+.ghost-setting-toggle.on{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-background)}
+.advanced-privacy-slot{padding:8px}
+.ghost-setting-privacy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;color:var(--color-slate);font:700 8px/1.2 var(--mono)}
+.ghost-setting-privacy a,.ghost-setting-privacy button{display:flex;min-height:32px;align-items:center;justify-content:center;box-sizing:border-box;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-elevated);padding:6px;color:inherit;font:inherit;text-align:center;text-decoration:none;cursor:pointer}
+.ghost-setting-privacy a:hover,.ghost-setting-privacy button:hover{border-color:var(--color-primary);color:var(--color-ink)}
+html[data-theme="dark"] .ghost-setting-copy{color:var(--color-muted)}
+@media(max-width:620px){
+  .advanced-body{padding:10px}
+  .advanced-run-tools,.ghost-setting{grid-template-columns:1fr}
+  .seed-control-row{grid-template-columns:1fr 1fr}
+  .seed-control-row input{grid-column:1/-1}
+  .ghost-setting-privacy{grid-template-columns:1fr}
+}

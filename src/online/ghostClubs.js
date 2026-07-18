@@ -339,25 +339,32 @@
   function withdrawConsent(){safeSet(SHARING_KEY,"0");safeRemove(CONSENT_KEY);saveQueue([]);ensureSetting();}
   async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!/^G-[A-Z0-9]{8,32}$/.test(value))return {ok:false,error:"invalid_id"};if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}blockGhost(value);const requested=cleanText(reason).toLowerCase().slice(0,32),cleanReason=REPORT_REASONS.has(requested)?requested:"other";enqueueReport(value,cleanReason);const result=await flushReportQueue();return {ok:true,hidden:true,pending:result.pending>0,sent:result.sent};}
   function ensureSetting(){
-    const slot=document.getElementById("advancedGhostSettingSlot");if(!slot)return;
+    const slot=document.getElementById("advancedGhostSettingSlot"),privacySlot=document.getElementById("advancedPrivacySlot");if(!slot)return;
     let group=document.getElementById("ghostClubSetting");
     if(!group){
       group=document.createElement("div");group.id="ghostClubSetting";group.className="ghost-setting";
-      const header=document.createElement("div");header.className="ghost-setting-header";header.id="ghostClubSettingHdr";group.appendChild(header);
-      const text=document.createElement("div");text.className="ghost-setting-copy";text.id="ghostClubSettingCopy";group.appendChild(text);
-      const button=document.createElement("button");button.type="button";button.id="ghostClubToggle";button.className="ghost-setting-toggle";button.onclick=()=>setEnabled(!enabled());group.appendChild(button);
-      const shareHeader=document.createElement("div");shareHeader.className="ghost-setting-header";shareHeader.id="ghostShareSettingHdr";group.appendChild(shareHeader);
-      const shareText=document.createElement("div");shareText.className="ghost-setting-copy";shareText.id="ghostShareSettingCopy";group.appendChild(shareText);
-      const shareButton=document.createElement("button");shareButton.type="button";shareButton.id="ghostShareToggle";shareButton.className="ghost-setting-toggle";shareButton.onclick=()=>setSharingEnabled(!sharingEnabled());group.appendChild(shareButton);
-      const privacy=document.createElement("div");privacy.className="ghost-setting-privacy";privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><span>·</span><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><span>·</span><button type="button" data-ghost-delete>${tr("Verilerimi sil","Delete my data")}</button>`;privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan tüm Ghost verileriniz kalıcı olarak silinsin mi?","Permanently delete all of your shared Ghost data?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Ghost verileri silindi.","Ghost data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};group.appendChild(privacy);
+      const option=document.createElement("div");option.className="ghost-setting-option";
+      const header=document.createElement("div");header.className="ghost-setting-header";header.id="ghostClubSettingHdr";option.appendChild(header);
+      const button=document.createElement("button");button.type="button";button.id="ghostClubToggle";button.className="ghost-setting-toggle";button.onclick=()=>setEnabled(!enabled());option.appendChild(button);
+      const text=document.createElement("div");text.className="ghost-setting-copy";text.id="ghostClubSettingCopy";option.appendChild(text);group.appendChild(option);
+      const shareOption=document.createElement("div");shareOption.className="ghost-setting-option";
+      const shareHeader=document.createElement("div");shareHeader.className="ghost-setting-header";shareHeader.id="ghostShareSettingHdr";shareOption.appendChild(shareHeader);
+      const shareButton=document.createElement("button");shareButton.type="button";shareButton.id="ghostShareToggle";shareButton.className="ghost-setting-toggle";shareButton.onclick=()=>setSharingEnabled(!sharingEnabled());shareOption.appendChild(shareButton);
+      const shareText=document.createElement("div");shareText.className="ghost-setting-copy";shareText.id="ghostShareSettingCopy";shareOption.appendChild(shareText);group.appendChild(shareOption);
     }
     if(group.parentElement!==slot)slot.appendChild(group);
+    if(privacySlot){
+      let privacy=document.getElementById("ghostSettingPrivacy");if(!privacy){privacy=document.createElement("div");privacy.id="ghostSettingPrivacy";privacy.className="ghost-setting-privacy";}
+      if(privacy.parentElement!==privacySlot)privacySlot.appendChild(privacy);
+      privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><button type="button" data-ghost-delete>${tr("Verilerimi sil","Delete my data")}</button>`;
+      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan tüm Ghost verileriniz kalıcı olarak silinsin mi?","Permanently delete all of your shared Ghost data?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Ghost verileri silindi.","Ghost data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
+    }
     const on=enabled(),sharing=sharingEnabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle"),shareHeader=document.getElementById("ghostShareSettingHdr"),shareCopy=document.getElementById("ghostShareSettingCopy"),shareButton=document.getElementById("ghostShareToggle");
     if(header)header.textContent=tr("GHOST RAKİPLERİ","GHOST OPPONENTS");
-    if(copy)copy.textContent=window.COPA_IS_NATIVE?tr("Mağaza uygulamasında varsayılan kapalıdır. Açmak yalnızca uygun Ghost rakiplerini indirir.","Off by default in the store app. Enabling only downloads eligible Ghost opponents."):tr("Web'de varsayılan açık. Eşleşme, kendi kadronuzu veya kurulum kimliğinizi yüklemez.","On by default on the web. Matching does not upload your squad or installation ID.");
+    if(copy)copy.textContent=on?tr("Bu run uygun bir Ghost rakiple eşleşebilir.","This run can match an eligible Ghost opponent."):tr("Bu run yalnızca standart rakipleri kullanır.","This run uses standard opponents only.");
     if(button){button.classList.toggle("on",on);button.setAttribute("aria-pressed",String(on));button.innerHTML=`<span aria-hidden="true">${ghostIcon()}</span><span>${on?tr("A\u00c7IK","ON"):tr("KAPALI","OFF")}</span>`;button.title=tr("Hayalet Kul\u00fcplere Kar\u015f\u0131 Oyna","Play Against Ghost Clubs");}
     if(shareHeader)shareHeader.textContent=tr("KULÜBÜMÜ GHOST OLARAK PAYLAŞ","SHARE MY CLUB AS A GHOST");
-    if(shareCopy)shareCopy.textContent=tr("Ayrı ve isteğe bağlıdır. Açık onaydan sonra tamamlanan kadro, kulüp adı ve anonim kurulum kimliği en çok 45 gün saklanır.","Separate and optional. After explicit consent, the completed squad, club name and anonymous install ID are retained for up to 45 days.");
+    if(shareCopy)shareCopy.textContent=sharing?tr("Tamamlanan kulübün Ghost havuzuyla paylaşılıyor.","Your completed club is shared with the Ghost pool."):tr("Tamamlanan kulübün Ghost havuzuna gönderilmiyor.","Your completed club is not sent to the Ghost pool.");
     if(shareButton){shareButton.classList.toggle("on",sharing);shareButton.setAttribute("aria-pressed",String(sharing));shareButton.innerHTML=`<span aria-hidden="true">${ghostIcon()}</span><span>${sharing?tr("PAYLAŞILIYOR","SHARING"):tr("PAYLAŞILMIYOR","NOT SHARING")}</span>`;shareButton.title=tr("Kulübümü Ghost olarak paylaş","Share my club as a Ghost");}
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
