@@ -2,13 +2,13 @@
 var BALANCE_TELEMETRY_KEY="copa_balance_telemetry_v1";
 var balanceTelemetryRun=null;
 
-function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},updatedAt:0};}
+function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},updatedAt:0};}
 function _btLoad(){
  try{
   const raw=localStorage.getItem(BALANCE_TELEMETRY_KEY);
   const data=raw?JSON.parse(raw):_btBlank();
   if(!data||data.version!==1)return _btBlank();
-  data.cards=data.cards||{};data.chairmen=data.chairmen||{};
+  data.cards=data.cards||{};data.chairmen=data.chairmen||{};data.rewards=data.rewards||{};
   return data;
  }catch(e){return _btBlank();}
 }
@@ -60,6 +60,12 @@ function trackBalanceMatchTelemetry(roundNo){
   if(!run.cards[key])run.cards[key]={penaltyPower:0,penaltyCash:0};
  });
  _btSave(data);
+}
+function trackRewardChoice(kind,roundNo){
+ const key=String(kind||"");if(!["cash","loan","swap","care"].includes(key))return;
+ const data=_btLoad(),roundKey=String(Math.max(1,Math.min(5,Math.round(Number(roundNo)||1))));
+ if(!data.rewards[roundKey])data.rewards[roundKey]={cash:0,loan:0,swap:0,care:0};
+ data.rewards[roundKey][key]++;_btSave(data);
 }
 function trackCardPenalty(k,power,overflow,cash){
  if(!k||k==="system")return;

@@ -9,7 +9,6 @@
 .mobile-action-dock,
 .mobile-sim-tabs,
 .mobile-network-banner,
-.mobile-mechanics-toggle,
 .mobile-draft-context,
 .mobile-draft-confirm,
 .mobile-round-digest,
@@ -122,7 +121,36 @@
   }
 
   .mobile-action-dock[data-dock-kind="hub"] .actionbar #playBtn{order:3!important}
-  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn{order:2!important}
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn{
+    order:2!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:2px!important;
+    padding:5px 3px 4px!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn .talk-ico{
+    display:block!important;
+    flex:0 0 auto!important;
+    width:15px!important;
+    height:12px!important;
+    max-width:15px!important;
+    margin:0!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .actionbar #talkBtn span{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    overflow:visible!important;
+    font-size:8.5px!important;
+    line-height:1!important;
+    letter-spacing:.35px!important;
+    text-align:center!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+  }
   .mobile-action-dock[data-dock-kind="hub"] .presbtngp{
     order:1!important;
     display:block!important;
@@ -167,33 +195,29 @@
   #hub .vsround{font-size:9px!important;line-height:1.15!important}
 
   #hub .hub-stat-row{
-    display:flex!important;
-    grid-template-columns:none!important;
-    gap:5px!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:4px!important;
     width:100%!important;
     max-width:100%!important;
     margin-bottom:5px!important;
-    padding:0 0 2px!important;
-    overflow-x:auto!important;
-    overscroll-behavior-x:contain;
-    scroll-snap-type:x proximity;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
+    padding:0!important;
+    overflow:visible!important;
+    scroll-snap-type:none!important;
   }
-  #hub .hub-stat-row::-webkit-scrollbar{display:none}
   #hub .hub-stat-row>.mtile,
   #hub .hub-stat-row>.kasa-card,
   #hub .hub-stat-row #kasaTile{
-    flex:1 0 clamp(96px,25vw,116px)!important;
-    width:auto!important;
-    max-width:116px!important;
-    min-width:96px!important;
+    flex:none!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
     height:66px!important;
     min-height:66px!important;
-    padding:7px 8px!important;
+    padding:6px 5px!important;
     overflow:hidden!important;
     border-radius:8px!important;
-    scroll-snap-align:start;
+    scroll-snap-align:none!important;
     box-shadow:none!important;
   }
   #hub .hub-stat-row .mtile{
@@ -204,9 +228,13 @@
   }
   #hub .hub-stat-row .mtile .mh,
   #hub .hub-stat-row .kasa-metric-lbl{
-    font-size:9px!important;
+    padding-right:7px!important;
+    overflow:hidden!important;
+    font-size:clamp(6.5px,2vw,8px)!important;
     line-height:1.1!important;
-    letter-spacing:.45px!important;
+    letter-spacing:.3px!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
   }
   #hub .hub-stat-row .mtile .mv,
   #hub .hub-stat-row .kasa-main-val{
@@ -217,11 +245,12 @@
   #hub .hub-stat-row .kasa-metric-val{
     max-width:100%!important;
     overflow:hidden!important;
-    font-size:9px!important;
+    font-size:clamp(7px,2vw,8px)!important;
     line-height:1.1!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
   }
+  #hub .hub-stat-row #trustV{letter-spacing:1px!important}
   #hub .hub-stat-row .mtile-info{
     top:0!important;
     right:0!important;
@@ -497,11 +526,66 @@
     min-width:44px;
     min-height:44px!important;
   }
+  #hub #shopLbl button[onclick*="shopReroll"]{
+    position:relative!important;
+    width:24px!important;
+    min-width:24px!important;
+    height:24px!important;
+    min-height:24px!important;
+    padding:0!important;
+    border-radius:5px!important;
+    flex:0 0 24px!important;
+  }
+  #hub #shopLbl button[onclick*="shopReroll"]::after{
+    content:"";
+    position:absolute;
+    inset:-10px;
+  }
+  #hub #shopLbl button[onclick*="shopReroll"] svg{
+    width:10px!important;
+    height:10px!important;
+  }
   a[href]{
     min-width:44px;
     min-height:44px;
     display:inline-flex;
     align-items:center;
+  }
+  .global-footer-bar{
+    flex-wrap:nowrap!important;
+    gap:3px!important;
+    width:100%!important;
+    padding:8px 4px calc(8px + var(--copa-safe-bottom))!important;
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    scrollbar-width:none;
+  }
+  .global-footer-bar::-webkit-scrollbar{display:none}
+  .global-footer-bar .footer-link{
+    flex:0 1 auto;
+    min-width:0!important;
+    min-height:28px!important;
+    padding:3px 5px!important;
+    gap:2px!important;
+    font-size:7px!important;
+    line-height:1!important;
+    letter-spacing:.25px!important;
+    white-space:nowrap!important;
+  }
+  .global-footer-bar .footer-link svg{
+    width:10px!important;
+    height:9px!important;
+    margin-right:1px!important;
+  }
+  .global-footer-bar .patreonicon-sm{
+    width:10px!important;
+    height:10px!important;
+    margin-right:0!important;
+  }
+  .global-footer-bar .footer-sep{
+    flex:0 0 auto;
+    font-size:8px!important;
+    line-height:1!important;
   }
   .iconbtn,
   .modal-x,
@@ -599,23 +683,25 @@
     color:var(--color-ink);
   }
 
-  /* Returning players can collapse the long mechanics explanation while the
-     full first-run version remains intact. */
-  .mobile-mechanics-toggle{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:44px;
-    margin:8px auto 0;
-    padding:7px 12px;
-    border:1px solid var(--border-default);
-    border-radius:999px;
-    background:var(--surface-muted);
-    color:var(--color-ink);
-    font:800 9px/1 var(--mono);
-    letter-spacing:.5px;
+  #introLand .mechanics{
+    grid-template-columns:1fr!important;
+    grid-auto-rows:minmax(32px,auto);
+    gap:0!important;
+    margin-top:6px!important;
+    padding:4px 0!important;
   }
-  #mechSection.mobile-collapsed{display:none!important}
+  #introLand .mstep{
+    grid-template-columns:28px minmax(0,1fr)!important;
+    align-items:center!important;
+    min-height:32px;
+    padding:4px 0!important;
+    column-gap:8px!important;
+    box-sizing:border-box;
+  }
+  #introLand .mstep:nth-last-child(-n+2){border-bottom:1px solid color-mix(in srgb,var(--color-slate) 14%,transparent)!important}
+  #introLand .mstep:last-child{border-bottom:none!important}
+  #introLand .mn{min-width:0!important;padding:0!important;line-height:1!important}
+  #introLand .mt{margin:0!important;font-size:11px!important;line-height:1.25!important}
 
   .mobile-draft-context{
     position:sticky;
@@ -900,8 +986,26 @@
     border:0!important;
     border-radius:0!important;
   }
-  #result .result-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  #result .result-row .btn{width:100%!important;min-width:0!important;font-size:9px!important}
+  #result .result-row{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  #result .result-row .btn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:56px!important;
+    padding:7px 4px!important;
+    flex-direction:column!important;
+    gap:3px!important;
+    font-size:8px!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+    text-align:center!important;
+  }
+  #result .result-row .btn svg{
+    flex:0 0 auto;
+    margin:0!important;
+  }
   .share-actions .mobile-native-share{order:-1}
 
   .scout-report-modal .scout-head-stats em,

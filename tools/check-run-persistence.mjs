@@ -13,9 +13,10 @@ const expect=(condition,message)=>{if(!condition)throw new Error(message);};
 for(const marker of [
   "v:5","phase","savedAt","seedNum","seedStr","rngCalls","bracket","fixtures","opponent",
   "currentWeather","oppChar","oppLineup","shopOffers","freeAgents","powerHist",
+  "ghostOpponentId","ghostCheckedRounds","ghostSeenIds",
   "enterHub(true)","CopaRunPersistence","applyStorageMigrations"
 ])expect(html.includes(marker),`Save v5 alanı/geri yükleme işareti eksik: ${marker}`);
-expect(hub.includes("function enterHub(restoring=false)"),"Hub restore modu eksik");
+expect(hub.includes("function enterHub(restoring=false,ghostLocked=false)"),"Hub restore/Ghost kilit modu eksik");
 expect(hub.includes("if(restoring){"),"Hub restore koruması eksik");
 expect(state.includes("runRngCalls++"),"Deterministik RNG çağrı sayacı eksik");
 expect(html.includes('restorePhase=st.phase==="draft"'),"Draft aşaması geri yüklenebilmeli");

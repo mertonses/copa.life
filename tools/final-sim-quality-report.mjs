@@ -75,7 +75,7 @@ const report={
 };
 const b=report.powerGapBuckets,o=report.overall;
 const checks=[
-  ["shared model version",report.modelVersion==="copa-final-core-v2",report.modelVersion],
+  ["shared model version",report.modelVersion==="copa-final-core-v3",report.modelVersion],
   ["10k real-core sample",report.sampleSize===10_000,report.sampleSize],
   ["same seed and replay are deterministic",deterministic,deterministic],
   ["power gap produces monotonic win rates",

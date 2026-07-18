@@ -99,13 +99,22 @@ const checks = [
     pass: /function _setFinalPauseUi\(paused\)/.test(index) && /aria-pressed/.test(index) && /_simAutoPaused/.test(index),
   },
   {
+    name: "final shouts are temporary, capped and checkpointed",
+    pass:
+      /SHOUT_DURATION_MIN=12,SHOUT_COOLDOWN_MIN=12,MAX_SHOUTS=3/.test(sim) &&
+      /duration:SHOUT_DURATION_MIN/.test(sim) &&
+      /shoutUses,lastShoutMinute,shoutEndsMinute/.test(sim) &&
+      /reason:"cooldown"/.test(sim) &&
+      /updateShoutWindow\(\)/.test(sim),
+  },
+  {
     name: "speed controls expose their selected state",
     pass: /querySelectorAll\("\.spd\[data-s\]"\)/.test(sim) && /setAttribute\("aria-pressed",active\?"true":"false"\)/.test(sim),
   },
   {
     name: "DOM-free deterministic core drives browser sequence and shot resolution",
     pass:
-      /copa-final-core-v2/.test(core) &&
+      /copa-final-core-v3/.test(core) &&
       /core\.chooseSequence/.test(sim) &&
       /core\.resolveShot/.test(sim) &&
       /finalSimCore\.js/.test(lazy),

@@ -8,8 +8,8 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const MODEL_VERSION="copa-final-core-v2";
-  const REPLAY_VERSION=2;
+  const MODEL_VERSION="copa-final-core-v3";
+  const REPLAY_VERSION=3;
   const TACTICS=new Set(["balanced","more","push","calm","hold"]);
   const CARDS=new Set(["kanat_akini","kontra","sogukkanli_penaltici"]);
   const SEQUENCES=[
@@ -52,15 +52,17 @@
   }
   function normalizeTimeline(value){
     if(!Array.isArray(value))return[];
-    return value.slice(0,16).map(item=>({
+    return value.slice(0,6).map(item=>({
       minute:Math.round(clamp(item&&item.minute,0,120)),
-      tactic:normalizeTactic(item&&item.tactic)
+      tactic:normalizeTactic(item&&item.tactic),
+      duration:Math.round(clamp(item&&item.duration==null?12:item.duration,4,24))
     })).sort((a,b)=>a.minute-b.minute);
   }
   function normalizeConfig(value){
     const input=value&&typeof value==="object"?value:{};
     return {
       model_version:MODEL_VERSION,
+      resolution:input.resolution==="regulation"?"regulation":"full",
       seed:uint(input.seed),
       homePower:round(clamp(input.homePower,35,115),2),
       awayPower:round(clamp(input.awayPower,35,115),2),
@@ -76,12 +78,13 @@
   }
 
   function tacticAt(base,timeline,minute){
-    let tactic=base;
+    let active=null;
     for(const decision of timeline){
       if(decision.minute>minute)break;
-      tactic=decision.tactic;
+      if(minute<decision.minute+decision.duration)active=decision;
+      else active=null;
     }
-    return tactic;
+    return active?active.tactic:base;
   }
 
   function chooseSequence(input,rng){
@@ -219,14 +222,24 @@
     return{outcome:"YELLOW",...probabilities};
   }
 
-  function tacticEffects(tactic){
+  function tacticEffects(tactic,context){
+    const state=context&&typeof context==="object"?context:{};
+    const late=Number(state.minute)>70,leading=!!state.leading,losing=!!state.losing;
+    let effect;
     switch(normalizeTactic(tactic)){
-      case"more":return{attack:0.10,shot:0.065,xg:0.030,defence:-0.075,tempo:0.12,card:0.008,possession:0.015};
-      case"push":return{attack:0.075,shot:0.035,xg:0.020,defence:-0.025,tempo:0.10,card:0.022,possession:0.045,press:0.12};
-      case"calm":return{attack:-0.035,shot:-0.040,xg:-0.010,defence:0.045,tempo:-0.10,card:-0.012,possession:0.060};
-      case"hold":return{attack:-0.095,shot:-0.075,xg:-0.020,defence:0.095,tempo:-0.12,card:-0.008,possession:-0.015};
-      default:return{attack:0,shot:0,xg:0,defence:0,tempo:0,card:0,possession:0,press:0};
+      case"more":effect={attack:0.045,shot:0.025,xg:0.012,defence:-0.045,tempo:0.07,card:0.004,possession:-0.005,press:0.015};break;
+      case"push":effect={attack:0.025,shot:0.010,xg:0.006,defence:-0.015,tempo:0.06,card:0.012,possession:0.025,press:0.065};break;
+      case"calm":effect={attack:-0.015,shot:-0.018,xg:-0.004,defence:0.025,tempo:-0.06,card:-0.008,possession:0.035,press:-0.010};break;
+      case"hold":effect={attack:-0.040,shot:-0.035,xg:-0.010,defence:leading?0.070:0.025,tempo:-0.08,card:-0.006,possession:-0.005,press:-0.015};break;
+      default:effect={attack:0,shot:0,xg:0,defence:0,tempo:0,card:0,possession:0,press:0};
     }
+    if(losing&&(tactic==="more"||tactic==="push")){
+      effect.attack*=1.18;effect.shot*=1.15;effect.defence*=1.12;
+    }
+    if(leading&&tactic==="more"){effect.attack*=0.55;effect.shot*=0.65;effect.defence*=1.20;}
+    if(late&&(tactic==="more"||tactic==="push"))effect.defence-=0.012;
+    if(!leading&&tactic==="hold"){effect.attack-=0.015;effect.shot-=0.010;}
+    return effect;
   }
 
   function makeAudit(){
@@ -295,7 +308,10 @@
       while(minute<endMinute&&winner==null){
         const homeTactic=tacticAt(baseTactics[0],timelines[0],minute);
         const awayTactic=tacticAt(baseTactics[1],timelines[1],minute);
-        const effects=[tacticEffects(homeTactic),tacticEffects(awayTactic)];
+        const effects=[
+          tacticEffects(homeTactic,{minute,leading:score[0]>score[1],losing:score[0]<score[1]}),
+          tacticEffects(awayTactic,{minute,leading:score[1]>score[0],losing:score[1]<score[0]})
+        ];
         const pace=1+(effects[0].tempo+effects[1].tempo)*0.28;
         minute+=rng.rng(1.45,3.35)/clamp(pace,0.80,1.22);
         if(minute>endMinute)break;
@@ -375,6 +391,7 @@
           expectedGoals:xg,distance,shooting:powers[side],decisions:powers[side],
           vision:powers[side],goalkeeping:powers[other]+3,keeperAnticipation:powers[other]
         },rng);
+        events.push({minute:Math.floor(minute),type:"shot",side,result,xg:round(xg),sequence});
         if(result==="GOAL"){
           score[side]++;audit.goals++;
           events.push({minute:Math.floor(minute),type:"goal",side,xg:round(xg),sequence});
@@ -392,7 +409,7 @@
     playPeriod(regulationEnd,false);
     regulationScore[0]=score[0];regulationScore[1]=score[1];
     if(score[0]!==score[1])winner=score[0]>score[1]?0:1;
-    else{
+    else if(config.resolution!=="regulation"){
       extraTime=true;
       playPeriod(regulationEnd+30,true);
       if(winner==null&&score[0]!==score[1])winner=score[0]>score[1]?0:1;
@@ -419,7 +436,7 @@
     stats.xg=stats.xg.map(value=>round(value));
     const result={
       model_version:MODEL_VERSION,config,score,regulationScore,winner,
-      outcome:winner===0?"home":"away",extraTime,penalties,goldenGoal,
+      outcome:winner===0?"home":winner===1?"away":"draw",extraTime,penalties,goldenGoal,
       fullTimeMinute:Math.min(120,Math.floor(minute)),stoppage,stats,audit,events,
       rngState:rng.getState()
     };
@@ -448,7 +465,7 @@
   function replayPayload(rawConfig){
     const config=normalizeConfig(rawConfig);
     return{
-      v:REPLAY_VERSION,m:MODEL_VERSION,s:config.seed,h:config.homePower,a:config.awayPower,
+      v:REPLAY_VERSION,m:MODEL_VERSION,r:config.resolution,s:config.seed,h:config.homePower,a:config.awayPower,
       t:config.tactic,at:config.awayTactic,c:config.cards,ac:config.awayCards,
       tt:config.teamTalk,att:config.awayTeamTalk,d:config.decisions,ad:config.awayDecisions
     };
@@ -466,7 +483,7 @@
       const payload=JSON.parse(json);
       if(!payload||payload.v!==REPLAY_VERSION||payload.m!==MODEL_VERSION)return null;
       return normalizeConfig({
-        seed:payload.s,homePower:payload.h,awayPower:payload.a,tactic:payload.t,
+        resolution:payload.r,seed:payload.s,homePower:payload.h,awayPower:payload.a,tactic:payload.t,
         awayTactic:payload.at,cards:payload.c,awayCards:payload.ac,teamTalk:payload.tt,
         awayTeamTalk:payload.att,decisions:payload.d,awayDecisions:payload.ad
       });
@@ -479,7 +496,7 @@
 
   return{
     MODEL_VERSION,REPLAY_VERSION,RNG,SEQUENCES:Object.freeze(SEQUENCES.slice()),
-    normalizeConfig,chooseSequence,expectedGoalsForShot,resolveShot,
+    normalizeConfig,tacticAt,tacticEffects,chooseSequence,expectedGoalsForShot,resolveShot,
     passProbabilities,resolvePass,disciplineProbabilities,resolveDiscipline,simulateMatch,
     createReplayCode,parseReplayCode,replay
   };

@@ -9,7 +9,7 @@ Uygulama klasik tarayıcı betikleriyle çalışır; yeni sistem sorumlulukları
 - `src/state/runLifecycle.js`: `intro → draft → hub → match → reward → result` geçişleri ve faz invariantları
 - `src/state/diagnostics.js`: kişisel bilgi eklemeyen yerel hata halkası ve kullanıcı tarafından kopyalanabilir rapor
 - `src/runtime/lazyAssets.js`: ağır/görsel varlıkların ihtiyaç anında yüklenmesi
-- `src/sim/finalSimCore.js`: DOM'suz deterministik final çekirdeği, kalibrasyon, aynı-seed A/B ve CFS2 tekrar kodu
+- `src/sim/finalSimCore.js`: DOM'suz deterministik maç çekirdeği, kalibrasyon, aynı-seed A/B ve CFS3 tekrar kodu
 - `src/runtime/finalReplay.js`: kişisel isim içermeyen yerel final denetim kaydı, kod kopyalama ve kod doğrulama arayüzü
 - `services/ghost-club-api/`: ayrı Worker, D1 migration, rate-limit, test ve dağıtım yaşam döngüsü
 

@@ -60,10 +60,12 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   await expect(page.locator("#mobileSkipBtn")).toBeVisible();
   await page.locator("#mobileSkipBtn").click();
   await expect(page.locator(".mobile-skip-confirm")).toBeVisible();
+  await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
   await page.locator(".mobile-skip-confirm .btn-ghost").click();
   await expect(page.locator("#modal")).toBeHidden();
+  await page.locator('[data-sim-view="stats"]').click();
+  await expect(page.locator("#pauseBtn")).toBeVisible();
 
-  await page.locator("#pauseBtn").click();
   await expect.poll(()=>page.locator("#pauseBtn").evaluate(element=>element.classList.contains("pause"))).toBe(true);
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
   const pausedClock=await page.locator("#simClk").textContent();
@@ -101,6 +103,7 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   const statText=await page.locator("#simStats").innerText();
   expect(statText).not.toMatch(/NaN|undefined|null/);
   await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(50);
+  await page.evaluate(()=>{(globalThis as any).CopaMobileExperience.setSimView("stats");});
   await page.locator('.spd[data-s="20"]').click();
   await page.waitForTimeout(1_000);
   await expect(page.locator("#simState")).not.toHaveText(/HALF TIME|DEVRE ARASI/i);
@@ -163,9 +166,14 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   await openFinalReadyHub(page);
   await page.evaluate(()=>{(globalThis as any).startFinalSim2();});
   await expect(page.locator("#sim")).toBeVisible();
+  await page.locator('[data-sim-view="stats"]').click();
+  await page.locator("#pauseBtn").click();
+  await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
   await page.locator('.spd[data-s="80"]').click();
-  await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(20);
   await page.locator("#shPush").click();
+  await page.locator("#pauseBtn").click();
+  await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(20);
+  await page.locator("#pauseBtn").click();
   const before=await page.evaluate(()=>{
     const global=globalThis as any;
     global.sim.pause();global.sim.checkpoint();
@@ -193,7 +201,7 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   expect(after.score).toEqual(before.score);
   expect(after.decisionLog.at(-1)?.tactic).toBe("push");
   expect(after.savedMinute).toBeGreaterThanOrEqual(before.minute);
-  expect(after.model).toBe("copa-final-core-v2");
+  expect(after.model).toBe("copa-final-core-v3");
 });
 
 test("shareable final code can be imported and deterministically verified",async({page},testInfo)=>{
@@ -207,7 +215,7 @@ test("shareable final code can be imported and deterministically verified",async
   });
   await page.locator("#finalReplayImportValue").fill(code);
   await page.getByRole("button",{name:/TEKRARI DOĞRULA|VERIFY REPLAY/}).click();
-  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v2");
+  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v3");
   await expect(page.locator(".scoutmodal")).toContainText(/Skor|Score/);
   const replayed=await page.evaluate((value)=>{
     const replay=(globalThis as any).CopaFinalReplay.inspect(value);

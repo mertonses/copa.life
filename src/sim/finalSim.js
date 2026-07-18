@@ -1383,13 +1383,48 @@ function buildSim(myPow, oppPow) {
   const stoppage=Math.floor(rng.rng(2,6));
   const fullTimeSec=(90+stoppage)*60;
   let gameEnded=false,goldenGoalLocked=false,animId=null;
-  let momDisplay=50,shoutMode=null;
+  const SHOUT_DURATION_MIN=12,SHOUT_COOLDOWN_MIN=12,MAX_SHOUTS=3;
+  let momDisplay=50,shoutMode=null,shoutUses=0,lastShoutMinute=-999,shoutEndsMinute=-1,lastShoutUiMinute=-1;
   const decisionLog=[];
   const liveScore=[0,0];
   let lastCarrier=null,lastAssist=null;
   let lastDangerTime=-999;
   let lastForcedAttackTime=-999;
   let lastSeqCommTime=-999;
+
+  function shoutState(){
+    const minute=Math.min(120,Math.floor(matchTime/60));
+    const cooldown=Math.max(0,SHOUT_COOLDOWN_MIN-(minute-lastShoutMinute));
+    return{minute,uses:shoutUses,usesLeft:Math.max(0,MAX_SHOUTS-shoutUses),cooldown,active:shoutMode,endsMinute:shoutEndsMinute};
+  }
+  function syncShoutButtons(){
+    const state=shoutState(),locked=gameEnded||state.usesLeft<=0||state.cooldown>0;
+    lastShoutUiMinute=state.minute;
+    const ids={more:"shMore",push:"shPush",calm:"shCalm",hold:"shHold"};
+    Object.entries(ids).forEach(([tactic,id])=>{
+      const button=document.getElementById(id);if(!button)return;
+      button.disabled=locked;
+      button.classList.toggle("lit",state.active===tactic);
+      button.setAttribute("aria-pressed",state.active===tactic?"true":"false");
+      const status=state.usesLeft<=0
+        ?(isTR?"Hamle hakkı bitti":"No moves left")
+        :state.cooldown>0
+          ?(isTR?`${state.cooldown} dakika sonra · ${state.usesLeft} hak`:`${state.cooldown} minutes · ${state.usesLeft} left`)
+          :(isTR?`${state.usesLeft} hamle kaldı`:`${state.usesLeft} moves left`);
+      button.title=status;
+      button.setAttribute("aria-label",`${button.textContent.trim()} · ${status}`);
+    });
+    const row=document.getElementById("shoutrow");if(row)row.dataset.usesLeft=String(state.usesLeft);
+    return state;
+  }
+  function updateShoutWindow(){
+    const minute=Math.min(120,Math.floor(matchTime/60));
+    let changed=false;
+    if(shoutMode&&minute>=shoutEndsMinute){
+      shoutMode=null;shapeCfg.shout=null;plannedSequenceQueue[0]=[];plannedSequenceQueue[1]=[];changed=true;
+    }
+    if(changed||minute!==lastShoutUiMinute)syncShoutButtons();
+  }
 
   const shapeCfg={shout:null};
   const tacticalSeq={team:0,type:'BUILD_CENTER',mode:'support',phase:'preparation',profile:null,beat:0,until:0,lastCarrierId:-1,countedOverlap:false,countedReset:false};
@@ -2339,6 +2374,7 @@ function buildSim(myPow, oppPow) {
   function simStep(dt){
     if(gameEnded||goldenGoalLocked||halfTimePause)return;
     matchTime+=dt;
+    updateShoutWindow();
     checkHalftime();checkFT();if(gameEnded)return;
 
     // out of play
@@ -2538,7 +2574,7 @@ function buildSim(myPow, oppPow) {
     return {
       country:typeof selectedCountry!=="undefined"?selectedCountry:"",
       round:6,outcome,
-      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v2",
+      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v3",
       power_gap:powerGap,end_type:endType,tactic:shoutMode||"balanced"
     };
   }
@@ -2735,7 +2771,7 @@ function buildSim(myPow, oppPow) {
       rngState:rng.s>>>0,matchTime,score:[...score],liveScore:[...liveScore],
       stats:_clone(stats),goalEvents:_clone(goalEvents),replayEvents:_clone(replayEvents),audit:_clone(audit),
       decisionLog:_clone(decisionLog),
-      momDisplay,shoutMode,lastCarrier,lastAssist,lastDangerTime,lastForcedAttackTime,lastSeqCommTime,
+      momDisplay,shoutMode,shoutUses,lastShoutMinute,shoutEndsMinute,lastCarrier,lastAssist,lastDangerTime,lastForcedAttackTime,lastSeqCommTime,
       shapeCfg:_clone(shapeCfg),tacticalSeq:_clone(tacticalSeq),plannedSequenceQueue:_clone(plannedSequenceQueue),
       timers:{
         decTimer,heatSampleTimer,slotTimer,shotCooldown:[...shotCooldown],stuckTimer,outTimer,
@@ -2756,7 +2792,7 @@ function buildSim(myPow, oppPow) {
     if(gameEnded||!window.CopaFinalSimPersistence)return false;
     const core=window.CopaFinalSimCore;
     return window.CopaFinalSimPersistence.persist({
-      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v2",
+      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v3",
       runSeed:seedBase,round:_r,homePower:myPow,awayPower:oppPow,
       match:getCheckpointState()
     });
@@ -2779,6 +2815,9 @@ function buildSim(myPow, oppPow) {
         if(Object.prototype.hasOwnProperty.call(value.audit,key))audit[key]=_clone(value.audit[key]);
       });
       momDisplay=Number(value.momDisplay)||50;shoutMode=value.shoutMode||null;
+      shoutUses=Math.max(0,Math.min(MAX_SHOUTS,Number(value.shoutUses)||0));
+      lastShoutMinute=Number.isFinite(Number(value.lastShoutMinute))?Number(value.lastShoutMinute):-999;
+      shoutEndsMinute=Number.isFinite(Number(value.shoutEndsMinute))?Number(value.shoutEndsMinute):-1;
       lastCarrier=value.lastCarrier||null;lastAssist=value.lastAssist||null;
       lastDangerTime=Number(value.lastDangerTime)||-999;lastForcedAttackTime=Number(value.lastForcedAttackTime)||-999;lastSeqCommTime=Number(value.lastSeqCommTime)||-999;
       if(value.shapeCfg)Object.assign(shapeCfg,_clone(value.shapeCfg));
@@ -2820,7 +2859,7 @@ function buildSim(myPow, oppPow) {
         _addRow(teamId,"<b>"+event.minute+"'</b><span><b>⚽ "+(isTR?"GOL":"GOAL")+" · "+(event.scorer||"?")+"</b></span>",true,"goal",null,false);
         _addTimelineMarker(event.minute,"goal",teamId,(isTR?"Gol — ":"Goal — ")+(event.scorer||"?"));
       });
-      _updateStats();_updateTimelineCursor(Math.floor(matchTime/60));
+      updateShoutWindow();_updateStats();_updateTimelineCursor(Math.floor(matchTime/60));
       persistCheckpoint();
       animId=requestAnimationFrame(tick);
       return true;
@@ -2845,10 +2884,15 @@ function buildSim(myPow, oppPow) {
       if(!gameEnded)endMatch();
     },
     shout(t){
-      if(gameEnded)return;
+      const allowed=new Set(["more","push","calm","hold"]),state=shoutState();
+      if(gameEnded)return{ok:false,reason:"ended",...state};
+      if(!allowed.has(t))return{ok:false,reason:"invalid",...state};
+      if(state.usesLeft<=0){syncShoutButtons();return{ok:false,reason:"limit",...state};}
+      if(state.cooldown>0){syncShoutButtons();return{ok:false,reason:"cooldown",...state};}
       shoutMode=t;shapeCfg.shout=t;
-      decisionLog.push({minute:Math.min(120,Math.floor(matchTime/60)),tactic:t});
-      if(decisionLog.length>16)decisionLog.shift();
+      shoutUses++;lastShoutMinute=state.minute;shoutEndsMinute=Math.min(120,state.minute+SHOUT_DURATION_MIN);
+      decisionLog.push({minute:state.minute,tactic:t,duration:SHOUT_DURATION_MIN});
+      if(decisionLog.length>MAX_SHOUTS)decisionLog.shift();
       plannedSequenceQueue[0]=[];
       plannedSequenceQueue[1]=[];
       audit.reweightedSequences++;
@@ -2861,12 +2905,16 @@ function buildSim(myPow, oppPow) {
       _addRow(0,"<b>"+tMin+"'</b><span><b>📋 "+(isTR?"TAKTİK":"TACTIC")+" · "+(labels[t]||"")+"</b><small>"+myName+" · "+msg.replace(/^[^ ]+ /,'')+"</small></span>",false,"tactic",{kind:"tactic",x:.5,y:.32,card:{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName+" · "+(labels[t]||"")}});
       _flashEventMap('tactic',0,0.5,0.32,{meta:tMin+"' · "+(isTR?"TAKTİK":"TACTIC"),main:myName+" · "+(labels[t]||"")});
       audio.shoutCue&&audio.shoutCue();
+      const next=syncShoutButtons();persistCheckpoint();
+      return{ok:true,...next,duration:SHOUT_DURATION_MIN};
     },
+    shoutState,
     checkpoint:persistCheckpoint,
     getState:getCheckpointState,
     restore:restoreCheckpoint
   };
 
   animId=requestAnimationFrame(tick);
+  syncShoutButtons();
   persistCheckpoint();
 }

@@ -6,3 +6,4 @@ var metaRuns=0,metaBest=0;
 var CHAIR_ORDER=["babacan","leydi","pinti","sansasyoncu","torpilci","cilgin"];
 var unlockedChairs=["babacan"];
 var selectedChairId="babacan";
+var pendingChairChoices=[];

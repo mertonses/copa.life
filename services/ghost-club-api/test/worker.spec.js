@@ -5,6 +5,7 @@ import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, 
 const origin="https://copa.life";
 const snapshot=(id="G-CLIENT123")=>({
   schema_version:1,game_version:"2026.07.13",data_version:"2026.07.13",public_ghost_id:id,
+  simulation_version:"copa-final-core-v3",card_schema_version:"2026.07",
   reached_round:3,squad_power:74,cash:12,club:{name:"Test Athletic",country:"TR"},active_cards:[],
   starting_xi:Array.from({length:11},(_,index)=>({name:`Player ${index+1}`,pos:index?"OS":"KL",power:70+index%4}))
 });
@@ -80,6 +81,10 @@ describe("Ghost Club Worker",()=>{
     expect(normalizeAnalyticsEvent({...raw,page_path:"/?email=user@example.com"})).toBeNull();
     const finalEvent={...raw,schema_version:2,event:"final_sim_completed",round:6,outcome:"win",model_version:"copa-final-core-v2",power_gap:"home_4_11",end_type:"golden_goal",tactic:"push"};
     expect(normalizeAnalyticsEvent(finalEvent)).toMatchObject({event:"final_sim_completed",schemaVersion:2,modelVersion:"copa-final-core-v2",powerGap:"home_4_11",endType:"golden_goal",tactic:"push"});
+    const balanceEvent={...raw,schema_version:3,event:"reward_selected",outcome:"draw",chairman:"babacan",formation:"4-3-3",style:"gegen",reward:"cash",card_kind:"power",economy_band:"cash_0_9"};
+    expect(normalizeAnalyticsEvent(balanceEvent)).toMatchObject({event:"reward_selected",schemaVersion:3,outcome:"draw",chairman:"babacan",formation:"4-3-3",style:"gegen",reward:"cash",cardKind:"power",economyBand:"cash_0_9"});
+    expect(normalizeAnalyticsEvent({...balanceEvent,chairman:"unknown"})).toBeNull();
+    expect(normalizeAnalyticsEvent({...finalEvent,schema_version:3,chairman:"babacan"})).toMatchObject({event:"final_sim_completed",schemaVersion:3,chairman:"babacan"});
     expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });
 
@@ -88,6 +93,20 @@ describe("Ghost Club Worker",()=>{
     expect(moderateClubName("Galatasaray FC")).toMatchObject({status:"review"});
     expect(moderateClubName("Tokyo Athletic")).toMatchObject({status:"eligible"});
     const blocked=snapshot();blocked.club.name="Nazi Club";const response=await post(blocked,"GCL-BADCLIENT1","GDT-BADDELETE1234567");expect(response.status).toBe(422);
+  });
+
+  it("matches only compatible simulation and card schemas in the tight power band",async()=>{
+    const compatibleSnapshot=snapshot();compatibleSnapshot.squad_power=104;compatibleSnapshot.reached_round=6;
+    const compatible=await post(compatibleSnapshot,"GCL-MATCHOWNER1","GDT-MATCHDELETE12345"),compatibleId=(await compatible.json()).id;
+    const legacy=snapshot();legacy.squad_power=104;legacy.reached_round=6;legacy.simulation_version="copa-final-core-v2";
+    const legacyCreated=await post(legacy,"GCL-MATCHOWNER2","GDT-MATCHDELETE56789");expect(legacyCreated.status).toBe(201);
+    const legacyId=(await legacyCreated.json()).id;
+    const response=await exports.default.fetch(new Request("https://ghost.test/v1/ghosts/match?power=104&round=6&simulation_version=copa-final-core-v3&card_schema_version=2026.07",{headers:{origin}}));
+    expect(response.status).toBe(200);
+    const matched=(await response.json()).ghost;
+    expect(matched).toMatchObject({simulation_version:"copa-final-core-v3",card_schema_version:"2026.07"});
+    expect(matched.public_ghost_id).not.toBe(legacyId);
+    expect(matched.public_ghost_id).toBe(compatibleId);
   });
 
   it("reports hide a Ghost from matching and repeated reports block it",async()=>{

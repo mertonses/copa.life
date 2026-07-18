@@ -5,20 +5,34 @@
   const EVENTS=new Set([
     "session_started",
     "country_selected",
+    "formation_selected",
+    "chairman_selected",
+    "style_selected",
     "draft_started",
     "xi_completed",
+    "match_completed",
     "round_completed",
+    "reward_selected",
+    "card_acquired",
     "run_finished",
+    "ghost_encountered",
     "ghost_opt_in",
+    "meta_unlocked",
     "profile_open_error",
     "final_sim_completed"
   ]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
-  const OUTCOMES=new Set(["","win","loss","sacked"]);
+  const OUTCOMES=new Set(["","win","draw","loss","sacked"]);
   const DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
   const POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
   const END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
   const TACTICS=new Set(["","balanced","more","push","calm","hold"]);
+  const CHAIRMEN=new Set(["","babacan","leydi","pinti","sansasyoncu","torpilci","cilgin"]);
+  const FORMATIONS=new Set(["","4-4-2","4-3-3","4-2-3-1","3-5-2","5-3-2","3-4-3","4-5-1","4-3-2-1","4-1-4-1","3-4-1-2"]);
+  const STYLES=new Set(["","gegen","kontra","tiki","uzun","blok"]);
+  const REWARDS=new Set(["","cash","loan","swap","care"]);
+  const CARD_KINDS=new Set(["","power","final","risk","instant","contract","other"]);
+  const ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9","cash_0_9","cash_10_plus"]);
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
@@ -48,9 +62,15 @@
     const powerGap=POWER_GAPS.has(String(props.power_gap||""))?String(props.power_gap||""):"";
     const endType=END_TYPES.has(String(props.end_type||""))?String(props.end_type||""):"";
     const tactic=TACTICS.has(String(props.tactic||""))?String(props.tactic||""):"";
+    const chairman=CHAIRMEN.has(String(props.chairman||""))?String(props.chairman||""):"";
+    const formation=FORMATIONS.has(String(props.formation||""))?String(props.formation||""):"";
+    const style=STYLES.has(String(props.style||""))?String(props.style||""):"";
+    const reward=REWARDS.has(String(props.reward||""))?String(props.reward||""):"";
+    const cardKind=CARD_KINDS.has(String(props.card_kind||""))?String(props.card_kind||""):"";
+    const economyBand=ECONOMY_BANDS.has(String(props.economy_band||""))?String(props.economy_band||""):"";
     const round=Math.max(0,Math.min(6,Math.round(Number(props.round)||0)));
     return {
-      schema_version:2,
+      schema_version:3,
       event:eventName,
       platform:"web",
       locale:locale(),
@@ -63,7 +83,13 @@
       model_version:modelVersion,
       power_gap:powerGap,
       end_type:endType,
-      tactic
+      tactic,
+      chairman,
+      formation,
+      style,
+      reward,
+      card_kind:cardKind,
+      economy_band:economyBand
     };
   }
 

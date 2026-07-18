@@ -1,0 +1,12 @@
+.meta-progress-modal,.meta-transfer-modal{min-width:min(560px,90vw)}
+.meta-progress-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.meta-progress-grid section,.meta-archive{padding:11px;border:1px solid var(--border-default);border-radius:8px;background:var(--surface-bg)}
+.meta-progress-modal h4{margin:0 0 9px;font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--color-slate)}
+.meta-mastery-row,.meta-run-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--border-subtle);font-size:11px}
+.meta-mastery-row:first-of-type,.meta-run-row:first-of-type{border-top:0}
+.meta-mastery-row span{text-transform:uppercase}.meta-mastery-row b{font-family:var(--mono);font-size:9px;color:var(--color-primary)}
+.meta-badges{display:flex;flex-wrap:wrap;gap:6px}.meta-badge{padding:5px 7px;border:1px solid color-mix(in srgb,var(--color-primary) 40%,transparent);border-radius:999px;background:color-mix(in srgb,var(--color-primary) 10%,transparent);font-family:var(--mono);font-size:8px}
+.meta-archive{max-height:260px;overflow:auto}.meta-run-row span{display:flex;min-width:0;flex-direction:column}.meta-run-row span:last-child{text-align:right;align-items:flex-end}.meta-run-row b{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta-run-row small{margin-top:2px;color:var(--color-slate);font-family:var(--mono);font-size:8px}
+.meta-progress-actions{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:12px}
+.meta-transfer-modal textarea{width:100%;min-height:160px;box-sizing:border-box;margin:12px 0;padding:10px;resize:vertical;border:1px solid var(--border-default);border-radius:7px;background:var(--surface-bg);color:var(--color-ink);font:9px/1.45 var(--mono);word-break:break-all}
+@media(max-width:620px){.meta-progress-grid{grid-template-columns:1fr}.meta-progress-modal,.meta-transfer-modal{min-width:0}.meta-progress-actions{grid-template-columns:1fr}.meta-archive{max-height:34dvh}}
