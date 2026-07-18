@@ -7,7 +7,7 @@ const context={
   localStorage:{getItem(){return null;},setItem(){}}
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.__locales=T;this.__localeUi=COPA_LOCALE_UI;`,context);
+vm.runInContext(`${source}\nthis.__locales=T;this.__localeUi=COPA_LOCALE_UI;this.__howto=COPA_HOWTO_TRANSLATIONS;`,context);
 
 const required=["tr","en","es","de","it"];
 const critical=[
@@ -34,14 +34,24 @@ for(const language of ["es","de","it"]){
     const value=context.__localeUi[language][key],english=context.__localeUi.en[key];
     if(!value||value===english)errors.push(`${language} UI key ${key} is missing or English`);
   }
+  const guide=context.__howto[language];
+  if(!guide||!guide.title||!guide.subtitle||!guide.close||!guide.back)errors.push(`${language} How to Play chrome is incomplete`);
+  if(!guide||!Array.isArray(guide.steps)||guide.steps.length!==6)errors.push(`${language} How to Play must contain six translated steps`);
+  else guide.steps.forEach((step,index)=>{
+    if(!Array.isArray(step)||!step[0]||!step[1])errors.push(`${language} How to Play step ${index+1} is incomplete`);
+  });
 }
 
 const profileSource=fs.readFileSync(new URL("../src/ui/playerProfiles.js",import.meta.url),"utf8");
+const seasonSource=fs.readFileSync(new URL("../src/ui/seasonStats.js",import.meta.url),"utf8");
 for(const language of ["es","de","it"]){
   for(const key of ["overview","playStyle","strengths","risks","tendencies","analysis","loading","noModel","positionFit","modelNote"]){
     const marker=new RegExp(`${language}:\\{[^\\n]*${key}:`);
     if(!marker.test(profileSource))errors.push(`player profile ${language}.${key} missing`);
   }
+}
+for(const marker of ["SEZON İSTATİSTİKLERİ","SEASON STATISTICS","ESTADÍSTICAS DE TEMPORADA","SAISONSTATISTIK","STATISTICHE STAGIONALI"]){
+  if(!seasonSource.includes(marker))errors.push(`season statistics locale marker missing: ${marker}`);
 }
 
 if(errors.length){
