@@ -174,6 +174,13 @@ test("landing hero places the guide left of the tactical board and keeps the tim
     const board=(document.querySelector(".tactical-board") as HTMLElement).getBoundingClientRect();
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
+    const connector=document.querySelector("#mechSection .mstep") as HTMLElement;
+    const connectorLine=getComputedStyle(connector,"::after");
+    const connectorHead=getComputedStyle(connector,"::before");
+    const connectorCenterDelta=Math.abs(
+      (Number.parseFloat(connectorLine.top)+Number.parseFloat(connectorLine.height)/2)
+      -(Number.parseFloat(connectorHead.top)+Number.parseFloat(connectorHead.height)/2)
+    );
     return{
       uniqueTops:new Set(steps.map(rect=>Math.round(rect.top))).size,
       overflow:document.getElementById("introLand")!.scrollWidth-document.getElementById("introLand")!.clientWidth,
@@ -182,6 +189,7 @@ test("landing hero places the guide left of the tactical board and keeps the tim
       boardWidth:board.width,
       guideLeftOutside:guide.right<=board.left-6,
       guideCenterDelta:Math.abs((guide.top+guide.bottom)/2-(board.top+board.bottom)/2),
+      connectorCenterDelta,
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
@@ -192,6 +200,7 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
   expect(layout.guideLeftOutside).toBe(true);
   expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
+  if(!testInfo.project.name.includes("mobile"))expect(layout.connectorCenterDelta).toBeLessThanOrEqual(.1);
   expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
