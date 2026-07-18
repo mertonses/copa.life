@@ -169,6 +169,8 @@
 .scout-nm{font-size:6px;max-width:48px}
 .scoutmodal .bact{padding:10px 16px 14px!important}
 .scoutmodal .bact .btn{max-width:180px;margin-inline:auto}
+.backup-modal.scoutmodal .backup-actions.bact{padding:12px 18px 16px!important}
+.backup-modal.scoutmodal .backup-actions .btn{max-width:none!important;margin-inline:0!important}
 .simwrap{text-align:center}
 .simwrap canvas{max-width:100%;margin:0 auto 8px}
 .board{background:var(--color-ink);color:#fff;border-radius:4px;padding:6px 10px;font-family:var(--mono);display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;box-shadow:0 3px 0 rgba(0,0,0,.18);gap:8px}.board .bt{flex:1;min-width:0}.board .bt.aw{text-align:right}.board .bn{font-family:var(--disp);font-weight:700;font-size:clamp(11px,2.4vw,15px);text-transform:uppercase;line-height:1.05;white-space:normal;overflow-wrap:anywhere}.board .bsc{font-weight:700;font-size:22px;min-width:72px;text-align:center}.board .bclk{font-size:9px;opacity:.75}

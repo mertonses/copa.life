@@ -95,8 +95,9 @@ const checks = [
       && /button\[onclick\*="shopReroll"\]::after\{[\s\S]*inset:-10px/s.test(mobile),
   },
   {
-    name: "mobile global footer stays on one compact row",
-    pass: /\.global-footer-bar\{[\s\S]*flex-wrap:nowrap!important;[\s\S]*gap:3px!important;[\s\S]*overflow-x:auto/s.test(mobile)
+    name: "mobile footer keeps links on one row and note separate",
+    pass: /\.global-footer-bar \.footer-links-row\{[\s\S]*flex-wrap:nowrap;[\s\S]*overflow-x:auto/s.test(mobile)
+      && /\.global-footer-bar \.rights-note\{[\s\S]*width:100%;[\s\S]*white-space:normal!important/s.test(mobile)
       && /\.global-footer-bar \.footer-link\{[\s\S]*min-height:28px!important;[\s\S]*font-size:7px!important/s.test(mobile),
   },
   {

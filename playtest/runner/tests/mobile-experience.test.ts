@@ -169,6 +169,27 @@ test("hub context and result details stay compact without hiding information",as
   await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();(globalThis as any).endRun(false);});
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
+  const resultActions=page.locator("#result .result-row .btn");
+  await expect(resultActions).toHaveCount(3);
+  const resultActionLayout=await resultActions.evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();
+    const label=element.querySelector(".result-action-label") as HTMLElement;
+    const labelRect=label.getBoundingClientRect();
+    const style=getComputedStyle(element);
+    return{
+      top:Math.round(rect.top),
+      height:Math.round(rect.height),
+      width:Math.round(rect.width),
+      alignItems:style.alignItems,
+      justifyContent:style.justifyContent,
+      labelCenter:Math.round(labelRect.top+labelRect.height/2),
+      buttonCenter:Math.round(rect.top+rect.height/2),
+    };
+  }));
+  expect(new Set(resultActionLayout.map(item=>item.top)).size).toBe(1);
+  expect(new Set(resultActionLayout.map(item=>item.height)).size).toBe(1);
+  expect(resultActionLayout.every(item=>item.width>0&&item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
+  expect(resultActionLayout.every(item=>Math.abs(item.labelCenter-item.buttonCenter)<=12)).toBe(true);
   const disclosures=page.locator("#result .mobile-result-disclosure:not(.hidden)");
   expect(await disclosures.count()).toBeGreaterThanOrEqual(2);
   const story=page.locator("#storyTile");
@@ -177,6 +198,86 @@ test("hub context and result details stay compact without hiding information",as
   await expect(story).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("footer keeps its link rail separate from the independent-project note",async({page})=>{
+  await page.goto("/?footer-layout=1",{waitUntil:"domcontentloaded"});
+  const layout=await page.evaluate(()=>{
+    const row=document.querySelector(".footer-links-row") as HTMLElement;
+    const note=document.querySelector(".rights-note") as HTMLElement;
+    const rowRect=row.getBoundingClientRect();
+    const noteRect=note.getBoundingClientRect();
+    return{
+      rowBottom:Math.round(rowRect.bottom),
+      noteTop:Math.round(noteRect.top),
+      rowScrollWidth:row.scrollWidth,
+      rowClientWidth:row.clientWidth,
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+      noteText:note.textContent?.trim(),
+    };
+  });
+  expect(layout.noteText).toBe("copa.life, bağımsız bir futbol yönetim oyunudur.");
+  expect(layout.noteTop).toBeGreaterThanOrEqual(layout.rowBottom);
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  expect(layout.rowScrollWidth).toBeGreaterThanOrEqual(layout.rowClientWidth);
+});
+
+test("backup picker stays readable and bounded on desktop and mobile",async({page},testInfo)=>{
+  await page.goto("/?backup-picker-layout=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await expect(page.locator("#postClubName")).toBeVisible();
+  await page.locator("#postClubName").fill("Backup Test FK");
+  await page.evaluate(()=>{(globalThis as any).pcGo();(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
+  await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.injuredIdx=0;
+    global.picksBySlot[0].injured=true;
+    global.picksBySlot[0].injuryLevel=2;
+    global.renderInjbar();
+    global.openBackup(0);
+  });
+  await expect(page.locator(".backup-modal")).toBeVisible();
+  await expect(page.locator(".backup-titleblock")).toContainText(/YEDEK SEÇ|CHOOSE A REPLACEMENT/);
+  await expect(page.locator(".backup-card")).toHaveCount(4);
+
+  const layout=await page.evaluate(()=>{
+    const modal=document.querySelector(".backup-modal") as HTMLElement;
+    const sheet=modal.parentElement as HTMLElement;
+    const grid=document.querySelector(".backup-grid") as HTMLElement;
+    const actions=document.querySelector(".backup-actions") as HTMLElement;
+    const modalRect=modal.getBoundingClientRect();
+    const sheetRect=sheet.getBoundingClientRect();
+    const cards=[...document.querySelectorAll(".backup-card")].map(element=>{
+      const rect=element.getBoundingClientRect();
+      return{width:rect.width,height:rect.height};
+    });
+    const buttons=[...actions.querySelectorAll("button")].map(element=>{
+      const rect=element.getBoundingClientRect();
+      return{width:rect.width,height:rect.height};
+    });
+    return{
+      modalLeft:modalRect.left,
+      modalRight:modalRect.right,
+      sheetLeft:sheetRect.left,
+      sheetRight:sheetRect.right,
+      columns:getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length,
+      cards,
+      buttons,
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+    };
+  });
+  expect(layout.modalLeft).toBeGreaterThanOrEqual(layout.sheetLeft-1);
+  expect(layout.modalRight).toBeLessThanOrEqual(layout.sheetRight+1);
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  expect(layout.buttons).toHaveLength(2);
+  expect(layout.buttons.every(button=>button.height>=44&&button.width>0)).toBe(true);
+  expect(layout.columns).toBe(mobileOnly(testInfo.project.name)?1:2);
+
+  const firstCard=page.locator(".backup-card").first();
+  await firstCard.click();
+  await expect(firstCard).toHaveAttribute("aria-pressed","true");
+  await expect(page.locator("#backupApplyBtn")).toBeEnabled();
+  await expect(page.locator("#backupApplyBtn")).toContainText(/SEÇİLİ YEDEĞİ AL|CONFIRM REPLACEMENT/);
 });
 
 test("phone portrait and landscape matrices stay inside the viewport with usable hit areas",async({page},testInfo)=>{
