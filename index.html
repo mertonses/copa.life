@@ -126,7 +126,7 @@ if("serviceWorker"in navigator){
     <div class="v7-hero-head">
       <div class="v7-hero-copy">
         <h2 class="v7-tagline">Zar at. Kadronu kur.<br><span class="v7-tagline-accent">Kadere meydan oku.</span></h2>
-        <p class="v7-hero-desc">Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.</p>
+        <p class="v7-hero-desc">Her seçiminle yeni bir futbol hikâyesi yaz.</p>
       </div>
       <aside class="v7-hero-side">
         <div class="howto-wrap" id="howtoWrap">
@@ -291,7 +291,7 @@ if("serviceWorker"in navigator){
 <script src="src/data/players_japan.js?v=20260714-japan1"></script>
 <script src="src/data/player_profile_store.js?v=20260715-copa-model1"></script>
 <script src="src/data/kits.js?v=20260711-stability1"></script>
-<script src="src/data/i18n.js?v=20260718-hero-copy2"></script>
+<script src="src/data/i18n.js?v=20260718-hero-copy3"></script>
 <script src="src/core/clubName.js?v=20260714-club-security1"></script>
 <script src="src/core/squad.js?v=20260711-economy3"></script>
 <script src="src/game/generate.js?v=20260715-elite-position1"></script>
@@ -522,7 +522,7 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
   if($("muteBtnLbl"))$("muteBtnLbl").textContent=tr?"SES":"SFX";
   if($("muteBtn")){$("muteBtn").title=tr?"Ses efektleri":"Sound effects";$("muteBtn").setAttribute("aria-label",tr?"Ses efektleri":"Sound effects");}
   const tagline=document.querySelector(".v7-tagline");if(tagline)tagline.innerHTML=tr?"Zar at. Kadronu kur.<br><span class=\"v7-tagline-accent\">Kadere meydan oku.</span>":"Roll the dice. Build your squad.<br><span class=\"v7-tagline-accent\">Defy fate.</span>";
-  const heroDesc=document.querySelector(".v7-hero-desc");if(heroDesc)heroDesc.textContent=tr?"Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.":"A roguelite football squad management game — every run is different, no final comes easy.";
+  const heroDesc=document.querySelector(".v7-hero-desc");if(heroDesc)heroDesc.textContent=tr?"Her seçiminle yeni bir futbol hikâyesi yaz.":"Write a new football story with every choice.";
   if($("advancedToggle"))$("advancedToggle").textContent=tr?"Gelişmiş Ayarlar":"Advanced Settings";
   const seedLbl=document.querySelector(".advanced-body .seedwrap label");if(seedLbl)seedLbl.textContent=tr?"Seed":"Seed";
   const seedHint=document.querySelector(".seed-hint");if(seedHint)seedHint.textContent=tr?"Aynı seed, aynı başlangıç koşullarını üretir.":"Same seed creates the same starting conditions.";

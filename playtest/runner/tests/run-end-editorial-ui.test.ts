@@ -148,6 +148,7 @@ test("season story keeps four meaningful chronological beats and economy hides z
 test("landing hero places the guide left of the tactical board and keeps the timeline aligned",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
+  await expect(page.locator(".v7-hero-desc")).toHaveText("Her seçiminle yeni bir futbol hikâyesi yaz.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator(".tactical-board")).toBeVisible();
@@ -194,6 +195,7 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
+  await expect(page.locator(".v7-hero-desc")).toHaveText("Schreibe mit jeder Entscheidung eine neue Fußballgeschichte.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator("#mechSection .mt").first()).toContainText("Formation & Präsident");
