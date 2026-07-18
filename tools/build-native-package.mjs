@@ -97,8 +97,8 @@ export function buildNativePackage({
     .replace(/onclick="openContactForm\(\)"/g, 'onclick="openNativeSupport()"')
     .replace(/onclick="openBugReport\(\)"/g, 'onclick="openNativeSupport()"')
     .replace(
-      '<span class="rights-note">',
-      `<span class="footer-link ${platform}-version" aria-label="${versionAriaLabel}">${versionLabel}</span><span class="footer-sep" style="display:inline">·</span><span class="rights-note">`,
+      '<span class="native-version-slot" aria-hidden="true"></span>',
+      `<span class="footer-sep" style="display:inline">·</span><span class="footer-link ${platform}-version" aria-label="${versionAriaLabel}">${versionLabel}</span>`,
     )
     .replace("</body>", `<script src="src/runtime/nativeApp.js?v=${buildInfo.buildVersion}"></script></body>`)
     .replaceAll("__COPA_BUILD_VERSION__", buildInfo.buildVersion);
