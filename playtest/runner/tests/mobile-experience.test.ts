@@ -234,8 +234,44 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
     global.picksBySlot[0].injured=true;
     global.picksBySlot[0].injuryLevel=2;
     global.renderInjbar();
-    global.openBackup(0);
   });
+  await expect(page.locator("#injbar")).toBeVisible();
+  await expect(page.locator("#injbar")).toContainText(/sakatlandı|injured/);
+  const injuryLayout=await page.evaluate(()=>{
+    const injury=document.querySelector("#injbar") as HTMLElement;
+    const bench=document.querySelector("#hubBenchSection") as HTMLElement;
+    const stack=document.querySelector("#hubBenchStack") as HTMLElement;
+    const shop=document.querySelector("#shopLbl") as HTMLElement;
+    const injuryRect=injury.getBoundingClientRect();
+    const benchRect=bench.getBoundingClientRect();
+    const shopRect=shop.getBoundingClientRect();
+    return{
+      parentId:injury.parentElement?.id,
+      nextId:injury.nextElementSibling?.id,
+      height:injuryRect.height,
+      beforeBench:injuryRect.bottom<=benchRect.top,
+      beforeShop:injuryRect.top<shopRect.top,
+      stackOrder:getComputedStyle(stack).order,
+      actions:[...injury.querySelectorAll("button")].map(button=>{
+        const rect=button.getBoundingClientRect();
+        return{width:rect.width,height:rect.height};
+      }),
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+    };
+  });
+  expect(injuryLayout.parentId).toBe("hubBenchStack");
+  expect(injuryLayout.nextId).toBe("hubBenchSection");
+  expect(injuryLayout.beforeBench).toBe(true);
+  expect(injuryLayout.height).toBeLessThanOrEqual(58);
+  expect(injuryLayout.actions).toHaveLength(2);
+  expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=30)).toBe(true);
+  expect(injuryLayout.pageOverflow).toBeLessThanOrEqual(1);
+  if(mobileOnly(testInfo.project.name)){
+    expect(injuryLayout.beforeShop).toBe(true);
+    expect(injuryLayout.stackOrder).toBe("5");
+  }
+
+  await page.evaluate(()=>{(globalThis as any).openBackup(0);});
   await expect(page.locator(".backup-modal")).toBeVisible();
   await expect(page.locator(".backup-titleblock")).toContainText(/YEDEK SEÇ|CHOOSE A REPLACEMENT/);
   await expect(page.locator(".backup-card")).toHaveCount(4);

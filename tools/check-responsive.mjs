@@ -87,7 +87,13 @@ const checks = [
   },
   {
     name: "mobile hub core blocks bound to viewport",
-    pass: /#hub \.pitch-area,\s*\n\s*#hub #hubPitch,\s*\n\s*#hub #hubBenchSection,[\s\S]*#fixbar\.cuproad/s.test(layout),
+    pass: /#hub \.pitch-area,\s*\n\s*#hub #hubPitch,\s*\n\s*#hub #hubBenchSection,[\s\S]*#fixbar\.cuproad/s.test(layout)
+      && /#hub \.hub-bench-stack\{[\s\S]*max-width:100%!important;[\s\S]*margin:0!important/s.test(layout),
+  },
+  {
+    name: "injury notice stays compact directly above the bench",
+    pass: /<div class="hub-bench-stack" id="hubBenchStack">\s*<div class="injbar hidden" id="injbar"[\s\S]*<div id="hubBenchSection"><\/div>/s.test(html)
+      && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:18px minmax\(0,1fr\) auto;[\s\S]*min-height:44px;[\s\S]*box-shadow:none!important/s.test(layout),
   },
   {
     name: "mobile card market reroll stays visually minimal",
