@@ -200,13 +200,17 @@ test("hub context and result details stay compact without hiding information",as
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
-test("footer keeps its link rail separate from the independent-project note",async({page})=>{
+test("footer keeps its link rail separate from the independent-project note",async({page},testInfo)=>{
   await page.goto("/?footer-layout=1",{waitUntil:"domcontentloaded"});
   const layout=await page.evaluate(()=>{
     const row=document.querySelector(".footer-links-row") as HTMLElement;
     const note=document.querySelector(".rights-note") as HTMLElement;
     const rowRect=row.getBoundingClientRect();
     const noteRect=note.getBoundingClientRect();
+    const links=[...row.querySelectorAll(".footer-link")].map(link=>{
+      const rect=link.getBoundingClientRect();
+      return{width:Math.round(rect.width),height:Math.round(rect.height)};
+    });
     return{
       rowBottom:Math.round(rowRect.bottom),
       noteTop:Math.round(noteRect.top),
@@ -214,11 +218,13 @@ test("footer keeps its link rail separate from the independent-project note",asy
       rowClientWidth:row.clientWidth,
       pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
       noteText:note.textContent?.trim(),
+      links,
     };
   });
   expect(layout.noteText).toBe("copa.life, bağımsız bir futbol yönetim oyunudur.");
   expect(layout.noteTop).toBeGreaterThanOrEqual(layout.rowBottom);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  if(mobileOnly(testInfo.project.name))expect(layout.links.every(link=>link.width>=44&&link.height>=44)).toBe(true);
   expect(layout.rowScrollWidth).toBeGreaterThanOrEqual(layout.rowClientWidth);
 });
 
