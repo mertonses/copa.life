@@ -126,19 +126,24 @@ function render(){
   journeyNodes.forEach(node=>node.addEventListener("click",()=>selectJourney(node)));
   const initialJourney=journeyNodes[Math.max(0,played-1)]||journeyNodes[0];if(initialJourney)selectJourney(initialJourney);
   const reduced=matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches||document.body.classList.contains("reduced-motion");
+  let visualFallback=0;
   const setVisuals=()=>{
+    if(visualFallback){clearTimeout(visualFallback);visualFallback=0;}
     document.querySelectorAll("[data-ss-width]").forEach(node=>node.style.width=(node.dataset.ssWidth||0)+"%");
     const ring=document.getElementById("ssRateRing");if(ring)ring.style.setProperty("--ss-rate",winPct);
     if(modal)modal.classList.add("is-ready");
   };
   if(reduced){setVisuals();document.getElementById("ss_p").textContent=winPct+"%";document.getElementById("ss_g").textContent=goals;document.getElementById("ss_c").textContent=conceded;}
-  else requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    setVisuals();
-    [["ss_p",winPct,"%"],["ss_g",goals,""],["ss_c",conceded,""],["ss_power",power,""],["ss_gd",gd,gd>0?"+":""]].forEach(([id,value,suffix])=>{
-      const node=document.getElementById(id);if(!node)return;let start=null;
-      (function tick(ts){if(start===null)start=ts;const progress=Math.min((ts-start)/760,1),ease=1-Math.pow(1-progress,3),shown=Math.round(Math.abs(value)*ease);node.textContent=(value<0?"-":suffix==="+"?"+":"")+shown+(suffix==="%"?"%":"");if(progress<1)requestAnimationFrame(tick);})(performance.now());
-    });
-  }));
+  else{
+    visualFallback=setTimeout(setVisuals,250);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      setVisuals();
+      [["ss_p",winPct,"%"],["ss_g",goals,""],["ss_c",conceded,""],["ss_power",power,""],["ss_gd",gd,gd>0?"+":""]].forEach(([id,value,suffix])=>{
+        const node=document.getElementById(id);if(!node)return;let start=null;
+        (function tick(ts){if(start===null)start=ts;const progress=Math.min((ts-start)/760,1),ease=1-Math.pow(1-progress,3),shown=Math.round(Math.abs(value)*ease);node.textContent=(value<0?"-":suffix==="+"?"+":"")+shown+(suffix==="%"?"%":"");if(progress<1)requestAnimationFrame(tick);})(performance.now());
+      });
+    }));
+  }
 }
 
 global.CopaSeasonStats={render};
