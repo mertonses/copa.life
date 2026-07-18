@@ -200,6 +200,49 @@ test("hub context and result details stay compact without hiding information",as
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
+test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop result contract");
+  await page.goto("/?desktop-result-sections=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await expect(page.locator("#postClubName")).toBeVisible();
+  await page.locator("#postClubName").fill("Desktop Result FK");
+  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await expect(page.locator("#hub")).toBeVisible();
+  await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.setCaptain(0);
+    global.closeModal();
+    const home=global.picksBySlot.filter(Boolean).slice(0,11);
+    const away=home.map((player:any,index:number)=>({...player,name:`Rakip Oyuncu ${index+1}`}));
+    global.LastMatchReport.capture({
+      round:5,
+      homeName:"Desktop Result FK",
+      awayName:"Rakip FK",
+      homeFormation:global.formName,
+      awayFormation:"4-3-3",
+      homeSlots:global.slots,
+      awaySlots:global.FORMATIONS["4-3-3"],
+      homePlayers:home,
+      awayPlayers:away,
+      homePower:80,
+      awayPower:81,
+      score:[1,2],
+      homeWon:false,
+      seed:32713,
+    });
+    global.endRun(false);
+  });
+
+  await expect(page.locator("#result")).toBeVisible();
+  await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(0);
+  await expect(page.locator("#storyTile")).toBeVisible();
+  await expect(page.locator("#rStory")).not.toHaveText("—");
+  await expect(page.locator("#econTile")).toBeVisible();
+  await expect(page.locator("#econTile .econsum")).toBeVisible();
+  await expect(page.locator("#lineups")).toBeVisible();
+  await expect(page.locator("#lineups .last-match-report")).toBeVisible();
+});
+
 test("footer keeps its link rail separate from the independent-project note",async({page},testInfo)=>{
   await page.goto("/?footer-layout=1",{waitUntil:"domcontentloaded"});
   const layout=await page.evaluate(()=>{
