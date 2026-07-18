@@ -6777,8 +6777,8 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 .v7-hero-head{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 248px;
-  gap:36px;
+  grid-template-columns:minmax(0,1fr) 410px;
+  gap:32px;
   align-items:center;
   min-height:168px;
   padding:18px 0 17px!important;
@@ -6786,9 +6786,10 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 .v7-hero-copy{min-width:0}
 .v7-hero-side{
   display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:10px;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
   min-width:0;
 }
 .tactical-board{
@@ -6860,11 +6861,10 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 .tactical-pass-2{left:36%;top:24%;width:30%;transform:rotate(24deg)}
 .tactical-pass-3{left:39%;bottom:23%;width:34%;transform:rotate(-21deg)}
 .v7-hero-head .howto-wrap{
-  position:absolute!important;
+  position:relative!important;
   z-index:4;
-  top:auto!important;
-  right:10px;
-  bottom:9px;
+  inset:auto!important;
+  flex:0 0 auto;
   display:flex;
   align-items:center;
   justify-content:flex-end;
@@ -6881,7 +6881,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 .v7-hero-head .howto-body{
   position:absolute;
-  right:0;
+  left:0;
   top:100%;
 }
 #introLand .mechanics{
@@ -6953,25 +6953,39 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   font:500 9px/1.4 var(--mono);
   letter-spacing:0;
 }
+@media(max-width:900px){
+  .v7-hero-head{
+    grid-template-columns:minmax(0,1fr) 350px;
+    gap:22px;
+  }
+  .tactical-board{width:205px;height:119px}
+  #howtoToggle{padding-inline:9px;font-size:8.5px}
+}
 @media(max-width:720px){
   .v7-hero-head{
-    grid-template-columns:minmax(0,1fr) 176px;
+    grid-template-columns:minmax(0,1fr) 300px;
     gap:14px;
     min-height:142px;
   }
+  .v7-hero-side{gap:8px}
   .tactical-board{width:170px;height:104px}
   .tactical-board::before{inset:6px}
   .v7-hero-head .howto-wrap{
-    right:7px;
-    bottom:7px;
+    position:relative!important;
+    inset:auto!important;
   }
   #howtoToggle{min-height:27px;padding-inline:8px;font-size:8px}
   #introLand .mechanics{grid-template-columns:1fr}
   #introLand .mstep:not(:last-child)::after,
   #introLand .mstep:not(:last-child)::before{display:none}
 }
-@media(max-width:420px){
+@media(max-width:620px){
   .v7-hero-head{grid-template-columns:1fr;gap:10px}
-  .v7-hero-side{align-items:flex-end}
-  .tactical-board{display:block;width:min(100%,260px);height:118px}
+  .v7-hero-side{width:100%;align-items:center;justify-content:flex-end}
+  .tactical-board{display:block;width:min(55vw,220px);height:auto;aspect-ratio:238/138}
+}
+@media(max-width:360px){
+  .v7-hero-side{gap:6px}
+  .tactical-board{width:50vw}
+  #howtoToggle{padding-inline:6px;font-size:7.5px}
 }
