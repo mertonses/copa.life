@@ -58,6 +58,7 @@
     "check:performance": "node tools/check-performance.mjs",
     "check:deploy": "node tools/check-deploy-package.mjs",
     "check:cardbalance": "node tools/card-economy-audit.mjs --check",
+    "check:freeagents": "node tools/check-free-agent-pricing.mjs",
     "check:economy": "node tools/check-economy-balance.mjs",
     "check:chairmen": "node tools/check-chairman-events.mjs",
     "check:trust": "node tools/check-chairman-trust-info.mjs",
@@ -80,7 +81,7 @@
     "check:japan": "node tools/check-japan-country.mjs",
     "audit:japan-data": "node tools/audit-japan-player-data.mjs",
     "check:persistence": "node tools/check-run-persistence.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

@@ -1,0 +1,60 @@
+#fixbar.fixture-road-v2{display:block!important;width:100%;padding:7px!important;overflow:visible!important;background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:10px;box-shadow:none}
+.fixture-track{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) 46px;gap:6px;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:5px 2px 7px}
+.fixture-track::before,.fixture-track::after{content:"";position:absolute;left:4%;right:4%;top:35px;height:2px;pointer-events:none}
+.fixture-track::before{background:var(--border-subtle)}
+.fixture-track::after{right:auto;width:92%;background:var(--color-primary);transform:scaleX(var(--fixture-ratio,0));transform-origin:left center;transition:transform .6s ease}
+#fixbar .fixture-node{position:relative;z-index:1;min-width:0;min-height:60px!important;display:grid!important;grid-template-columns:26px minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;align-items:center!important;column-gap:6px!important;padding:7px!important;border:1px solid var(--border-subtle)!important;border-radius:8px!important;background:var(--surface-elevated)!important;color:var(--color-ink)!important;box-shadow:none!important;cursor:pointer;scroll-snap-align:center}
+#fixbar .fixture-node .fr{grid-column:1/-1;font:800 7px/1 var(--mono)!important;letter-spacing:.8px;color:var(--color-slate)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixture-visual{width:26px;height:29px;display:grid;place-items:center;line-height:0}
+.fixture-visual .club-logo,.fixture-club-logo{max-width:22px!important;max-height:26px!important;object-fit:contain}
+.fixture-monogram{width:23px;height:25px;display:grid;place-items:center;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-muted);font:900 7px/1 var(--mono)}
+.fixture-node-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+#fixbar .fixture-node .fs{font:900 14px/1 var(--mono)!important;color:var(--color-ink)!important}
+.fixture-result{max-width:100%;font:900 7px/1.2 var(--mono);font-style:normal;letter-spacing:.25px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixture-result.result-w{color:var(--color-primary)}
+.fixture-result.result-d{color:#b7791f}
+.fixture-result.result-l{color:#d84a42}
+.fixture-result.is-current{color:var(--color-primary)}
+.fixture-opponent{max-width:100%;font:900 8px/1.15 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fixbar .fixture-node.is-played{min-height:52px!important;background:var(--surface-bg)!important}
+#fixbar .fixture-node.is-active{min-height:76px!important;transform:translateY(-1px);border:2px solid var(--color-primary)!important;background:color-mix(in srgb,var(--color-primary) 9%,var(--surface-elevated))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-primary) 11%,transparent)!important}
+#fixbar .fixture-node.is-locked{grid-template-columns:22px minmax(0,1fr)!important;opacity:.72;background:var(--surface-muted)!important}
+.fixture-lock{width:22px;height:24px;display:grid;place-items:center;border:1px solid var(--border-subtle);border-radius:6px;background:var(--surface-elevated);color:var(--color-slate)}
+.fixture-lock svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.fixture-reveal{font:800 7px/1.25 var(--mono);color:var(--color-slate)}
+#fixbar .fixture-trophy{position:relative;z-index:1;min-width:42px!important;min-height:60px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:3px!important;border:0!important;background:transparent!important;color:var(--color-slate)!important;cursor:pointer;scroll-snap-align:center}
+.fixture-trophy-ring{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--color-primary) var(--trophy-progress,0%),var(--border-subtle) 0);position:relative}
+.fixture-trophy-ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--color-ink)}
+.fixture-trophy svg{position:relative;z-index:1;width:17px;height:20px;fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.fixture-trophy small{font:900 6px/1 var(--mono);letter-spacing:.5px;text-transform:uppercase}
+.fixture-trophy.is-near .fixture-trophy-ring{animation:fixtureTrophyPulse 1.8s ease-in-out infinite}
+.fixture-trophy.is-champion .fixture-trophy-ring{background:var(--color-primary);box-shadow:0 0 0 5px color-mix(in srgb,var(--color-primary) 18%,transparent)}
+.fixture-trophy.is-champion svg{stroke:var(--color-ink)}
+.fixture-trophy.is-champion .fixture-trophy-ring::before{background:var(--color-primary)}
+.fixture-trophy.is-champion small{color:var(--color-primary)}
+.fixture-detail{position:relative;margin-top:4px;padding:10px 36px 10px 12px;border-top:1px dashed var(--border-subtle);background:var(--surface-bg);border-radius:7px}
+.fixture-detail-copy>span{display:block;color:var(--color-primary);font:900 7px/1 var(--mono);letter-spacing:1px;text-transform:uppercase}
+.fixture-detail-copy>b{display:block;margin-top:4px;color:var(--color-ink);font:900 11px/1.2 var(--mono)}
+.fixture-detail-copy>p{margin:5px 0 0;color:var(--color-slate);font:700 9px/1.35 var(--mono)}
+.fixture-detail-stats{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;margin-top:8px}
+.fixture-detail-stats>div{min-width:65px;padding:7px 8px;border:1px solid var(--border-subtle);border-radius:6px;background:var(--surface-elevated)}
+.fixture-detail-stats small{display:block;margin-bottom:3px;color:var(--color-slate);font:800 7px/1 var(--mono);letter-spacing:.5px;text-transform:uppercase}
+.fixture-detail-stats strong{display:block;color:var(--color-ink);font:900 10px/1.25 var(--mono)}
+.fixture-key-event{min-width:0!important}
+.fixture-detail-close{position:absolute;right:7px;top:7px;width:26px;height:26px;border:1px solid var(--border-subtle);border-radius:6px;background:var(--surface-elevated);color:var(--color-slate);font-size:16px;cursor:pointer}
+@keyframes fixtureTrophyPulse{50%{transform:scale(1.08);box-shadow:0 0 0 5px color-mix(in srgb,var(--color-primary) 14%,transparent)}}
+@media(max-width:700px){
+  #fixbar.fixture-road-v2{padding:5px!important}
+  .fixture-track{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:96px;gap:5px;padding:7px calc(50% - 60px) 9px}
+  .fixture-track::before,.fixture-track::after{left:calc(50% - 48px);right:auto;top:37px;width:calc(6 * 101px)}
+  .fixture-track::after{width:606px}
+  #fixbar .fixture-node{min-width:96px!important}
+  #fixbar .fixture-node.is-active{min-width:120px!important}
+  #fixbar .fixture-trophy{min-width:58px!important}
+  .fixture-detail-stats{grid-template-columns:1fr 1fr}
+  .fixture-key-event{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+  .fixture-track::after{transition:none}
+  .fixture-trophy.is-near .fixture-trophy-ring{animation:none}
+}

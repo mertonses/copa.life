@@ -54,10 +54,31 @@ function _valueCurve(ov){
  }
  return anchors[anchors.length-1][1];
 }
+function freeAgentRoundFloor(roundNo){
+ const floors=[2,3,4,5,6];
+ const index=Math.max(0,Math.min(floors.length-1,(Number(roundNo)||1)-1));
+ return floors[index];
+}
+function freeAgentPriceBand(ov){
+ const power=Number(ov)||60;
+ if(power<=66)return[2,4];
+ if(power<=72)return[4,7];
+ if(power<=78)return[7,12];
+ if(power<=84)return[12,18];
+ return[18,24];
+}
+function clampFreeAgentFee(ov,roundNo,value){
+ const band=freeAgentPriceBand(ov);
+ const floor=Math.max(band[0],freeAgentRoundFloor(roundNo));
+ return Math.min(24,band[1],Math.max(floor,Math.round(Number(value)||0)));
+}
 function playerMarketValue(ov,channel,roundNo){
- const mult={draft:1,free_agent:0.62,bench:0.45,loan:0}[channel||"draft"]??1;
+ const mult={draft:1,free_agent:0.90,bench:0.45,loan:0}[channel||"draft"]??1;
  let v=_valueCurve(ov)*mult;
- if(channel==="free_agent")v*=1+Math.max(0,(roundNo||1)-1)*0.04;
+ if(channel==="free_agent"){
+  v*=1+Math.max(0,(roundNo||1)-1)*0.10;
+  v=Math.max(v,freeAgentRoundFloor(roundNo));
+ }
  if(v<1)return Math.max(channel==="draft"?0.3:1,Math.round(v*10)/10);
  return Math.round(v*10)/10;
 }

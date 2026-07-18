@@ -45,6 +45,10 @@ expect(/const g=v===1\?\[4,7,6\]/.test(files.html+files.power+read("src/cards/ca
 expect(/applyDarkPurchaseRisk\(k,variant\)/.test(files.effects),"DARK purchase risk is not connected to card acquisition");
 expect(/CARD_PRICE_FLOOR=2/.test(files.config),"paid-card price floor is not 2");
 expect(/playerMarketValue\(p\.ov,"free_agent",round\)/.test(files.html),"free agents do not use the shared player valuation curve");
+expect(/free_agent:0\.90/.test(files.core),"free-agent valuation multiplier is not 0.90");
+expect(/\*0\.10/.test(files.core)&&/freeAgentRoundFloor/.test(files.core),"free-agent round urgency or price floors are disconnected");
+expect(/clampFreeAgentFee\(p\.ov,round,adjustedFee\)/.test(files.html),"free-agent target price bands are not enforced in the market");
+expect(/Math\.min\(24,band\[1\]/.test(files.core),"free-agent EUR24M cap is missing");
 expect(/playerMarketValue/.test(files.core)&&/chairmanTransferMultiplier/.test(files.generate),"draft valuation or chairman transfer modifier is disconnected");
 expect(/installmentTurns>0/.test(files.economy),"installment offers can overwrite an outstanding payment plan");
 expect(/legacyFund=Math\.min\(20/.test(files.html),"Legacy Vault total cap is not normalized to EUR20M");
