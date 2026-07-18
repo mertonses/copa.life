@@ -67,7 +67,9 @@ const checks = [
   },
   {
     name: "mobile result detail remains progressively disclosed",
-    pass: /#result \.mobile-result-disclosure\{[\s\S]*display:block/s.test(mobile)&&/wrapResultDisclosure/.test(mobileScript),
+    pass: /#result \.mobile-result-disclosure\{[\s\S]*display:block/s.test(mobile)
+      && /wrapResultDisclosure/.test(mobileScript)
+      && /function ensureResultDisclosures\(\)\{\s*if\(!isPhoneInteraction\(\)\)/.test(mobileScript),
   },
   {
     name: "mobile landing summary stays visible and uses compact equal rows",
