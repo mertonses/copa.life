@@ -1451,6 +1451,32 @@ canvas{width:100%;height:auto;display:block;border:3px solid #fff;border-radius:
 }
 .money.pos{color:var(--color-primary)!important}
 .money.neg{color:#ef4444!important}
+.narrative-number{
+  font-family:var(--mono);
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.narrative-number.pos{color:var(--color-primary)!important}
+.narrative-number.neg{color:#ef4444!important}
+.narrative-number.neutral{color:#c58c2f!important}
+.narrative-entity{
+  display:inline;
+  padding:.08em .35em;
+  border-radius:4px;
+  background:var(--color-ink);
+  color:var(--color-background)!important;
+  font-weight:900!important;
+  box-decoration-break:clone;
+  -webkit-box-decoration-break:clone;
+}
+html[data-theme="dark"] .result .narrative-entity{
+  background:var(--text-primary)!important;
+  color:var(--surface-dark)!important;
+}
+html[data-theme="dark"] .result .narrative-number.pos{color:#64d6a5!important}
+html[data-theme="dark"] .result .narrative-number.neg{color:#ff7777!important}
+html[data-theme="dark"] .result .narrative-number.neutral{color:#efbf62!important}
 .money.neutral{color:var(--color-ink)!important}
 .result .econwhy{
   margin:0 14px 14px;

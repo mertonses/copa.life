@@ -18,6 +18,11 @@
       copySeed:"SEED’İ KOPYALA",
       copied:"SEED KOPYALANDI",
       share:"PAYLAŞ",
+      enable:"İZİN VER VE HAVUZA EKLE",
+      pendingTitle:"RUN YAŞAMAYA DEVAM EDEBİLİR",
+      pendingMessage:"Bu run henüz Hayalet Kulüp havuzunda değil.<br><strong>Açık izin verirsen kadro seçimlerin, dizilişin ve oyun tarzın başka oyuncuların karşısına çıkabilir.</strong>",
+      pendingSupport:"Paylaşım isteğe bağlıdır; iznin olmadan oyun verisi yüklenmez.",
+      pendingStatus:"HENÜZ HAVUZDA DEĞİL",
       close:"Kapat"
     },
     en:{
@@ -36,6 +41,11 @@
       copySeed:"COPY SEED",
       copied:"SEED COPIED",
       share:"SHARE",
+      enable:"ALLOW AND ADD TO POOL",
+      pendingTitle:"THIS RUN CAN LIVE ON",
+      pendingMessage:"This run is not in the Ghost Club pool yet.<br><strong>With your explicit permission, your squad choices, formation and playing style may face other players.</strong>",
+      pendingSupport:"Sharing is optional; no game data is uploaded without your permission.",
+      pendingStatus:"NOT IN THE POOL YET",
       close:"Close"
     },
     es:{title:"TU CLUB FANTASMA ESTÁ LISTO",restart:"NUEVA PARTIDA",copySeed:"COPIAR SEED",copied:"SEED COPIADO",share:"COMPARTIR",close:"Cerrar"},
@@ -56,7 +66,7 @@
     if(stylesReady||document.querySelector('link[data-ghost-run-result]')){stylesReady=true;return;}
     const link=document.createElement("link");
     link.rel="stylesheet";
-    link.href="src/styles/ghostRunResult.css?v=20260718-ghost-result1";
+    link.href="src/styles/ghostRunResult.css?v=20260718-ghost-result2";
     link.dataset.ghostRunResult="";
     document.head.appendChild(link);
     stylesReady=true;
@@ -85,19 +95,24 @@
     if(!data||!data.completed||typeof global.showModal!=="function")return false;
     ensureStyles();
     const copy=copyFor(data.lang);
+    const shared=!!data.shared;
+    const title=shared?copy.title:copy.pendingTitle;
+    const message=shared?copy.message:copy.pendingMessage;
+    const support=shared?copy.support:copy.pendingSupport;
+    const status=shared?copy.status:copy.pendingStatus;
     const icon=global.GhostClubs&&typeof global.GhostClubs.ghostIcon==="function"
       ?global.GhostClubs.ghostIcon():"";
     const html=`<section class="ghost-run-shell" role="document">
       <header class="ghost-run-head">
         <span class="ghost-run-mark" aria-hidden="true">${icon}</span>
-        <div><span class="ghost-run-kicker">${esc(copy.kicker)}</span><h2>${esc(copy.title)}</h2></div>
+        <div><span class="ghost-run-kicker">${esc(copy.kicker)}</span><h2>${esc(title)}</h2></div>
         <button class="ghost-run-close" type="button" data-ghost-close aria-label="${esc(copy.close)}">×</button>
       </header>
-      <p class="ghost-run-message">${copy.message}</p>
+      <p class="ghost-run-message">${message}</p>
       <article class="ghost-run-card">
         <div class="ghost-run-card-top">
           <div><span class="ghost-run-card-label">${esc(copy.club)}</span><b class="ghost-run-club">${esc(data.club)}</b></div>
-          <span class="ghost-run-status">${esc(copy.status)}</span>
+          <span class="ghost-run-status${shared?"":" is-pending"}">${esc(status)}</span>
         </div>
         <div class="ghost-run-facts">
           ${fact(copy.reached,data.reached)}
@@ -107,14 +122,15 @@
         </div>
         <div class="ghost-run-seed-row"><span class="ghost-run-card-label">${esc(copy.seed)}</span><code>${esc(data.seed)}</code></div>
       </article>
-      <p class="ghost-run-support">${esc(copy.support)}</p>
+      <p class="ghost-run-support">${esc(support)}</p>
       <footer class="ghost-run-actions">
+        ${shared?"":`<button class="btn btn-primary ghost-run-enable" type="button" data-ghost-enable>${esc(copy.enable)}</button>`}
         <button class="btn btn-primary ghost-run-primary" type="button" data-ghost-restart>${esc(copy.restart)}</button>
         <button class="btn btn-ghost" type="button" data-ghost-seed>${esc(copy.copySeed)}</button>
         <button class="btn ghost-run-share" type="button" data-ghost-share>${esc(copy.share)}</button>
       </footer>
     </section>`;
-    global.showModal(html,{dismissOnOverlay:true,label:copy.title,bare:true});
+    global.showModal(html,{dismissOnOverlay:true,label:title,bare:true});
     const modal=document.getElementById("modal");
     if(!modal)return false;
     modal.querySelector("[data-ghost-close]")?.addEventListener("click",()=>global.closeModal());
@@ -123,6 +139,10 @@
       if(actions&&typeof actions.restart==="function")actions.restart();
     });
     modal.querySelector("[data-ghost-seed]")?.addEventListener("click",event=>copySeed(data,event.currentTarget,copy));
+    modal.querySelector("[data-ghost-enable]")?.addEventListener("click",()=>{
+      global.closeModal();
+      if(actions&&typeof actions.enable==="function")actions.enable();
+    });
     modal.querySelector("[data-ghost-share]")?.addEventListener("click",()=>{
       global.closeModal();
       window.setTimeout(()=>{if(actions&&typeof actions.share==="function")actions.share();},0);

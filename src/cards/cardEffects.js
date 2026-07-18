@@ -1,4 +1,4 @@
-/* Kartlarin guce ve run durumuna etkileri — v3 */
+/* Kartlarin guce ve run durumuna etkileri — v4 */
 function squadBasePower(){const s=picksBySlot.filter(Boolean);return s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;}
 
 /* Variant bonus kaldirildi — her kart kendi eff() icinde variant farkini yonetiyor */
@@ -40,6 +40,108 @@ function chairmanCardBoost(k){
 var kumarbazInstallmentTurns=0,kumarbazInstallmentAmt=0;
 /* Kriz bayragi */
 var krizActive=false,krizVariant=0;
+/* Match-bound contracts. All fields are optional in old saves. */
+var matchPromiseState=null,matchPromiseReward=null,matchPromisePromptedRound=0;
+var captainDecisionUsed=false,captainDecisionActive=null;
+
+function matchPromisePowerForRound(r){
+ const reward=matchPromiseReward;
+ return reward&&Number(reward.round)===Number(r)?Number(reward.delta)||0:0;
+}
+function matchPromiseStatusText(){
+ const tr=LANG==="tr",active=matchPromiseState&&matchPromiseState.round===round,reward=matchPromisePowerForRound(round);
+ if(active)return tr?"Söz verildi: gol yeme":"Promise active: keep a clean sheet";
+ if(reward)return (tr?"Bu maç söz ödülü: ":"Promise reward this match: ")+(reward>0?"+":"")+reward;
+ if(matchPromisePromptedRound===round)return tr?"Bu tur söz verilmedi":"No promise this round";
+ return tr?"Maç öncesi söz verilebilir":"A pre-match promise is available";
+}
+function shouldOfferMatchPromise(r){
+ return Number(r)<6&&hasCard("mac_sozu")&&(!matchPromiseState||Number(matchPromiseState.round)!==Number(r))&&Number(matchPromisePromptedRound)!==Number(r);
+}
+function declareCleanSheetPromise(){
+ if(!hasCard("mac_sozu")||round>=6||matchPromiseState)return false;
+ matchPromisePromptedRound=round;
+ matchPromiseState={round,variant:variantOf("mac_sozu")};
+ pushFeed("🤝 <b>"+L().cards.mac_sozu.n+"</b> "+(LANG==="tr"?"Söz: gol yemeyeceğiz.":"Promise: we will keep a clean sheet."),"pres");
+ closeModal();if(typeof renderHub==="function")renderHub();
+ return true;
+}
+function skipMatchPromise(){
+ matchPromisePromptedRound=round;
+ closeModal();if(typeof renderHub==="function")renderHub();
+}
+function showMatchPromiseModal(){
+ if(!shouldOfferMatchPromise(round))return false;
+ if(autoPlay){
+  declareCleanSheetPromise();
+  setTimeout(()=>playMatch(true),0);
+  return true;
+ }
+ matchPromisePromptedRound=round;
+ const tr=LANG==="tr",v=variantOf("mac_sozu"),success=v===1?5:3,failure=v===1?-3:0;
+ const consequence=v===1
+  ?(tr?`Başarı: sonraki maç +${success} güç. Başarısızlık: sonraki maç ${failure} güç.`:`Success: +${success} next match. Failure: ${failure} next match.`)
+  :(tr?`Başarı: yalnızca sonraki maç +${success} güç. Başarısızlıkta ceza yok.`:`Success: +${success} only in the next match. No penalty on failure.`);
+ showModal(`<div class="bulletin match-promise-modal"><div class="bhead"><span>${tr?"MAÇ SÖZÜ":"MATCH PROMISE"}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">🤝</div><div class="bhl">${tr?"GOL YEMEYECEĞİZ":"WE WILL KEEP A CLEAN SHEET"}</div><div class="bbody">${tr?"Takımın önüne tek, net bir hedef koy.":"Set one clear target for the squad."}<br>${consequence}</div><div class="bact"><button class="btn btn-primary" onclick="declareCleanSheetPromise()">${tr?"SÖZ VER":"MAKE THE PROMISE"}</button><button class="btn btn-ghost" onclick="skipMatchPromise()">${tr?"BU MAÇ PAS":"SKIP THIS MATCH"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Maç Sözü":"Match Promise"});
+ return true;
+}
+function resolveMatchPromiseAfterScore(gf,ga,r){
+ const playedRound=Number(r),usedReward=matchPromiseReward&&Number(matchPromiseReward.round)===playedRound?Number(matchPromiseReward.delta)||0:0;
+ if(usedReward)matchPromiseReward=null;
+ let result=null;
+ if(matchPromiseState&&Number(matchPromiseState.round)===playedRound){
+  const state=matchPromiseState,success=Number(ga)===0,delta=success?(state.variant===1?5:3):(state.variant===1?-3:0);
+  matchPromiseState=null;
+  if(playedRound<6&&delta)matchPromiseReward={round:playedRound+1,delta,sourceRound:playedRound};
+  const tr=LANG==="tr";
+  pushFeed("🤝 <b>"+L().cards.mac_sozu.n+"</b> "+(success?(tr?"söz tutuldu":"promise kept"):(tr?"söz tutulamadı":"promise missed"))+(delta?(tr?" · sonraki maç ":" · next match ")+(delta>0?"+":"")+delta:""),success?"win":"lose");
+  result={success,delta,nextRound:playedRound+1};
+ }
+ return {usedReward,result};
+}
+function canUseCaptainDecision(){
+ return hasCard("kaptanin_karari")&&!captainDecisionUsed&&lastTalkResult&&Number(lastTalkResult.delta)<0&&typeof _currentCaptainPlayer==="function"&&!!_currentCaptainPlayer();
+}
+function captainDecisionPlayerPenaltyForRound(r,s){
+ if(!captainDecisionActive||Number(captainDecisionActive.round)!==Number(r))return 0;
+ const squad=Array.isArray(s)?s:[];
+ return squad.some(p=>p&&p.name===captainDecisionActive.playerName)?-Math.abs(Number(captainDecisionActive.penalty)||0):0;
+}
+function captainDecisionChemistryForRound(r){
+ return captainDecisionActive&&Number(captainDecisionActive.round)===Number(r)?Number(captainDecisionActive.chem)||0:0;
+}
+function captainDecisionStatusText(){
+ const tr=LANG==="tr";
+ if(captainDecisionActive&&captainDecisionActive.round===round)return tr
+  ?`Konuşma 0 · kaptan -${captainDecisionActive.penalty}${captainDecisionActive.chem?" · kimya +"+captainDecisionActive.chem:""}`
+  :`Talk 0 · captain -${captainDecisionActive.penalty}${captainDecisionActive.chem?" · chemistry +"+captainDecisionActive.chem:""}`;
+ if(captainDecisionUsed)return tr?"Bu run kullanıldı":"Used this run";
+ return tr?"Olumsuz konuşma sonrası hazır":"Ready after a negative team talk";
+}
+function useCaptainDecision(){
+ if(!canUseCaptainDecision())return false;
+ const captain=_currentCaptainPlayer(),variant=variantOf("kaptanin_karari"),original=Number(lastTalkResult.delta)||0;
+ captainDecisionUsed=true;
+ captainDecisionActive={round,variant,playerName:captain.name,penalty:variant===1?3:2,chem:variant===1?1:0};
+ talkMod.all=0;
+ lastTalkResult=Object.assign({},lastTalkResult,{originalDelta:original,delta:0,captainIntervened:true,captain:captain.name});
+ pushFeed("© <b>"+shortName(captain)+"</b> "+(LANG==="tr"?"takıma sahip çıktı; konuşma etkisi sıfırlandı.":"stepped in; the negative talk was neutralized."),"pres");
+ closeModal();if(typeof renderHub==="function")renderHub();
+ return true;
+}
+function clearCaptainDecisionAfterMatch(r){
+ if(captainDecisionActive&&Number(captainDecisionActive.round)===Number(r))captainDecisionActive=null;
+}
+function cardHasLockedCommitment(k){
+ if(k==="mac_sozu")return !!matchPromiseState||!!matchPromiseReward;
+ if(k==="kaptanin_karari")return !!captainDecisionActive;
+ return false;
+}
+function finishCardMatchCommitments(gf,ga,r){
+ const promise=resolveMatchPromiseAfterScore(gf,ga,r);
+ clearCaptainDecisionAfterMatch(r);
+ return promise;
+}
 function applyCardCashPenalty(k,amount){
  amount=Math.max(0,Math.round(amount||0));
  if(!amount)return;
@@ -96,7 +198,7 @@ function confirmBlackMarketTrade(burnKey,variant){
  showModal(`<div class="black-market-modal black-market-confirm"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><div class="black-market-confirm-mark" aria-hidden="true">&#10005;</div><h2>${name} ${tr?"yakılacak.":"will be burned."}</h2><p>${tr?"Devam et?":"Continue?"}</p><div class="black-market-confirm-card"><span class="var-badge var-${v}">${tier}</span><strong>${name}</strong></div><div class="black-market-warning">${tr?"Bu seçim geri alınamaz.":"This choice cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" onclick="resolveBlackMarketTrade('${burnKey}',${variant})">${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kart yakma onayı":"Burn card confirmation"});
 }
 function openBlackMarketTrade(variant){
- const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k));
+ const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k)&&!cardHasLockedCommitment(k));
  BLACK_MARKET_SELECTION=null;
  if(!choices.length){
   showModal(`<div class="black-market-modal black-market-empty"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2>${tr?"YAKACAK KART YOK":"NO CARD TO BURN"}</h2><p>${tr?"Bu hamle için en az bir aktif kalıcı kart gerekir.":"This move requires at least one active persistent card."}</p><div class="black-market-actions"><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"Kara Borsa":"Black Market"});
@@ -322,6 +424,14 @@ function applyRiskCardGain(k){
    const pow=cardEff(k,picksBySlot.filter(Boolean),round);
    pushFeed("📣 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç (bu tur)":" power (this round)"),"buy");
   if(v===1&&rand()<0.25){chairTrust=Math.max(0,chairTrust-1);pushFeed("📣 "+(tr?"Taraftar baskısı — güven -1":"Fan pressure — trust -1"),"lose");}
+  return;
+ }
+ if(k==="mac_sozu"){
+  pushFeed("🤝 <b>"+L().cards[k].n+"</b> "+(tr?"maç öncesi temiz sayfa sözü açıldı":"pre-match clean-sheet promise unlocked"),"buy");
+  return;
+ }
+ if(k==="kaptanin_karari"){
+  pushFeed("© <b>"+L().cards[k].n+"</b> "+(tr?"olumsuz takım konuşması sonrası kullanıma hazır":"ready after a negative team talk"),"buy");
   return;
  }
  if(k==="kumarbaz"){return;} // yukarida islendi

@@ -1,4 +1,28 @@
 /* Run-end editorial story and economy renderer. Loaded only after a completed run. */
+function narrativeEscape(value){
+  return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function narrativeRegExp(value){
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+}
+function narrativeTone(value){
+  return value==="pos"||value==="neg"?value:"neutral";
+}
+function narrativeEntity(value){
+  return `<strong class="narrative-entity">${narrativeEscape(value)}</strong>`;
+}
+function narrativeMetric(value,tone){
+  return `<span class="narrative-number ${narrativeTone(tone)}">${narrativeEscape(value)}</span>`;
+}
+function narrativeRichText(value,entities,tone){
+  let html=narrativeEscape(value);
+  (Array.isArray(entities)?entities:[]).filter(Boolean).sort((a,b)=>String(b).length-String(a).length).forEach(entity=>{
+    const safe=narrativeEscape(entity);
+    html=html.replace(new RegExp(narrativeRegExp(safe),"g"),narrativeEntity(entity));
+  });
+  return html.replace(/(^|[\s(])([+−-]?(?:€|£|₺|\$)?\d+(?:[.,]\d+)?(?:M|%|\.)?)(?=$|[\s,;:!?)])/g,(_,lead,number)=>lead+narrativeMetric(number,tone));
+}
+window.CopaNarrativeMarkup=Object.freeze({text:narrativeRichText,entity:narrativeEntity,metric:narrativeMetric});
 function narrativeTerminalFixture(){
   const played=(fixtures||[]).filter(f=>f&&f.res);
   return played.length?played[played.length-1]:null;
@@ -43,7 +67,7 @@ function genStoryNarrative(){
       `${shortName(expensive)} fue la mayor inversión del run por ${runMoney(expensive.price)}.`,
       `${shortName(expensive)} war mit ${runMoney(expensive.price)} der teuerste Schritt des Runs.`,
       `${shortName(expensive)} è stato l'acquisto più costoso del run a ${runMoney(expensive.price)}.`
-    )
+    ),entities:[shortName(expensive)],tone:"neutral"
   });
   if(storyCard&&storyCardVal>0)items.push({
     kind:"card",order:30,importance:42+storyCardVal,
@@ -54,7 +78,7 @@ function genStoryNarrative(){
       `${storyCard} fue la carta más efectiva con ${storyCardVal} puntos de aporte.`,
       `${storyCard} war mit ${storyCardVal} Punkten die wirkungsvollste Karte.`,
       `${storyCard} è stata la carta più efficace con un contributo di ${storyCardVal} punti.`
-    )
+    ),entities:[storyCard],tone:"pos"
   });
   if((e.injuries||0)>0)items.push({
     kind:"injury",order:40,importance:52+(e.injuries||0)*4,
@@ -73,7 +97,8 @@ function genStoryNarrative(){
         `${e.injuries} lesión${e.injuries===1?"":"es"} alteraron el plan del run.`,
         `${e.injuries} Verletzung${e.injuries===1?"":"en"} störten den Plan des Runs.`,
         `${e.injuries} infortun${e.injuries===1?"io":"i"} hanno cambiato il piano del run.`
-      )
+      ),
+    tone:"neg"
   });
   if(wkDevName)items.push({
     kind:"star",order:50,importance:60,
@@ -84,7 +109,7 @@ function genStoryNarrative(){
       `${wkDevName} creció a medida que avanzó el torneo.`,
       `${wkDevName} wurde im Verlauf des Turniers stärker.`,
       `${wkDevName} è cresciuto con il procedere del torneo.`
-    )
+    ),entities:[wkDevName],tone:"pos"
   });
   if((e.finalDebt||finalPenalty||0)>0)items.push({
     kind:"risk",order:70,importance:58+(e.finalDebt||finalPenalty||0),
@@ -95,7 +120,7 @@ function genStoryNarrative(){
       `Las decisiones arriesgadas costaron ${e.finalDebt||finalPenalty} puntos de fuerza en el cálculo final.`,
       `Riskante Entscheidungen kosteten in der Schlussrechnung ${e.finalDebt||finalPenalty} Stärke.`,
       `Le scelte rischiose sono costate ${e.finalDebt||finalPenalty} punti forza nel calcolo finale.`
-    )
+    ),tone:"neg"
   });
   if(critical){
     const minute=Number(critical.m??critical.minute)||0,name=critical.name||critical.scorer||fixture.opp;
@@ -108,7 +133,7 @@ function genStoryNarrative(){
         `El gol de ${name} en el minuto ${minute} acabó con las opciones de copa.`,
         `${name}s Tor in der ${minute}. Minute beendete die Pokalhoffnung.`,
         `Il gol di ${name} al ${minute}' ha spento le speranze di coppa.`
-      )
+      ),entities:[name],tone:"neg"
     });
   }
   const roundLabel=x.rounds&&x.rounds[Math.max(0,(r.won?6:r.round)-1)]||String(r.round||"");
@@ -153,7 +178,8 @@ function genStoryNarrative(){
         `Il percorso in coppa è finito in ${roundLabel}.`
       );
   }
-  items.push({kind:r.won?"win":r.endType==="sacked"?"chair":"exit",order:100,importance:100,ending:true,t:endingTitle,d:endingText});
+  const endingEntities=r.endType==="sacked"?[chairName]:(opponent?[opponent]:[]);
+  items.push({kind:r.won?"win":r.endType==="sacked"?"chair":"exit",order:100,importance:100,ending:true,t:endingTitle,d:endingText,entities:endingEntities,tone:r.won?"pos":"neg"});
   return storyFlowHTML(selectNarrativeEvents(items));
 }
 function financeNarrative(e,endCash){
@@ -171,16 +197,16 @@ function econSummaryNarrativeHTML(){
   cards.forEach(card=>{const value=cardEff(card,s,round);if(value>bestVal){bestVal=value;bestCard=(L().cards[card]&&L().cards[card].n)||card;}});
   const endCash=typeof r.budgetAtEnd!=="undefined"?Number(r.budgetAtEnd)||0:Number(budget)||0;
   const cashClass=endCash<0?"neg":endCash>0?"pos":"neutral",rows=[];
-  if((e.earned||0)>0)rows.push({l:LT("Kazanılan","Earned","Ingresado","Eingenommen","Guadagnato"),v:signedRunMoney(e.earned),c:"pos"});
-  if((e.spent||0)>0)rows.push({l:LT("Harcanan","Spent","Gastado","Ausgegeben","Speso"),v:runMoney(-e.spent),c:"neg"});
-  if((e.president||0)>0)rows.push({l:LT("Başkan maliyeti","Chairman cost","Coste presidencial","Präsidentenkosten","Costo presidente"),v:runMoney(-e.president),c:"neg"});
-  if((e.worstDebt||0)<0)rows.push({l:LT("En düşük kasa","Lowest funds","Caja mínima","Niedrigster Kassenstand","Cassa minima"),v:runMoney(e.worstDebt),c:"neg"});
-  if(expensive&&(Number(expensive.price)||0)>0)rows.push({l:LT("En pahalı oyuncu","Most expensive player","Jugador más caro","Teuerster Spieler","Giocatore più costoso"),v:`${shortName(expensive)} ${runMoney(expensive.price)}`,c:"neutral"});
-  if(bestCard&&bestVal>0)rows.push({l:LT("En etkili kart","Most effective card","Carta más efectiva","Effektivste Karte","Carta più efficace"),v:`${bestCard} +${bestVal}`,c:"pos"});
-  if((e.injuries||0)>0||(benchUsed||0)>0)rows.push({l:LT("Sakatlık / yedek","Injuries / bench","Lesiones / banquillo","Verletzungen / Bank","Infortuni / panchina"),v:`${e.injuries||0} / ${benchUsed||0}`,c:"neutral"});
-  if((e.finalDebt||0)>0)rows.push({l:LT("Son maç güç kaybı","Final-match power loss","Pérdida de fuerza final","Stärkeverlust im letzten Spiel","Perdita forza finale"),v:"-"+e.finalDebt,c:"neg"});
+  if((e.earned||0)>0)rows.push({l:LT("Kazanılan","Earned","Ingresado","Eingenommen","Guadagnato"),v:narrativeMetric(signedRunMoney(e.earned),"pos"),c:"pos"});
+  if((e.spent||0)>0)rows.push({l:LT("Harcanan","Spent","Gastado","Ausgegeben","Speso"),v:narrativeMetric(runMoney(-e.spent),"neg"),c:"neg"});
+  if((e.president||0)>0)rows.push({l:LT("Başkan maliyeti","Chairman cost","Coste presidencial","Präsidentenkosten","Costo presidente"),v:narrativeMetric(runMoney(-e.president),"neg"),c:"neg"});
+  if((e.worstDebt||0)<0)rows.push({l:LT("En düşük kasa","Lowest funds","Caja mínima","Niedrigster Kassenstand","Cassa minima"),v:narrativeMetric(runMoney(e.worstDebt),"neg"),c:"neg"});
+  if(expensive&&(Number(expensive.price)||0)>0)rows.push({l:LT("En pahalı oyuncu","Most expensive player","Jugador más caro","Teuerster Spieler","Giocatore più costoso"),v:`${narrativeEntity(shortName(expensive))} ${narrativeMetric(runMoney(expensive.price),"neutral")}`,c:"neutral"});
+  if(bestCard&&bestVal>0)rows.push({l:LT("En etkili kart","Most effective card","Carta más efectiva","Effektivste Karte","Carta più efficace"),v:`${narrativeEntity(bestCard)} ${narrativeMetric("+"+bestVal,"pos")}`,c:"pos"});
+  if((e.injuries||0)>0||(benchUsed||0)>0)rows.push({l:LT("Sakatlık / yedek","Injuries / bench","Lesiones / banquillo","Verletzungen / Bank","Infortuni / panchina"),v:`${narrativeMetric(e.injuries||0,(e.injuries||0)>0?"neg":"neutral")} / ${narrativeMetric(benchUsed||0,(benchUsed||0)>0?"pos":"neutral")}`,c:"neutral"});
+  if((e.finalDebt||0)>0)rows.push({l:LT("Son maç güç kaybı","Final-match power loss","Pérdida de fuerza final","Stärkeverlust im letzten Spiel","Perdita forza finale"),v:narrativeMetric("-"+e.finalDebt,"neg"),c:"neg"});
   const rowHtml=rows.length?rows.map(row=>`<div class="pbr"><span>${row.l}</span><b class="money ${row.c}">${row.v}</b></div>`).join(""):`<div class="econ-empty">${LT("Kayda değer ek maliyet oluşmadı.","No notable extra cost was recorded.","No hubo costes extra relevantes.","Keine nennenswerten Zusatzkosten.","Nessun costo extra rilevante.")}</div>`;
-  return `<div class="econsum"><div class="sth" id="econSumTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-.15em;margin-right:4px"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M9 17l0 -5"/><path d="M12 17l0 -1"/><path d="M15 17l0 -3"/></svg><span id="econSumText">${LT("EKONOMİ ÖZETİ","ECONOMY SUMMARY","RESUMEN ECONÓMICO","FINANZÜBERSICHT","RIEPILOGO ECONOMICO")}</span></div><div class="econ-hero"><span>${LT("FİNANS SONUCU","FINANCE RESULT","RESULTADO FINANCIERO","FINANZERGEBNIS","RISULTATO FINANZIARIO")}</span><b class="money ${cashClass}">${runMoney(endCash)}</b><p>${financeNarrative(e,endCash)}</p></div><div class="pbreak">${rowHtml}</div></div>`;
+  return `<div class="econsum"><div class="sth" id="econSumTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-.15em;margin-right:4px"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M9 17l0 -5"/><path d="M12 17l0 -1"/><path d="M15 17l0 -3"/></svg><span id="econSumText">${LT("EKONOMİ ÖZETİ","ECONOMY SUMMARY","RESUMEN ECONÓMICO","FINANZÜBERSICHT","RIEPILOGO ECONOMICO")}</span></div><div class="econ-hero"><span>${LT("FİNANS SONUCU","FINANCE RESULT","RESULTADO FINANCIERO","FINANZERGEBNIS","RISULTATO FINANZIARIO")}</span><b class="money ${cashClass}">${narrativeMetric(runMoney(endCash),cashClass)}</b><p>${financeNarrative(e,endCash)}</p></div><div class="pbreak">${rowHtml}</div></div>`;
 }
 genStory=genStoryNarrative;
 econSummaryHTML=econSummaryNarrativeHTML;
