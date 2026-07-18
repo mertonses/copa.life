@@ -3043,7 +3043,7 @@ function showSeasonStats(){
   if(window._seasonStatsLoading)return;
   window._seasonStatsLoading=true;
   const script=document.createElement("script");
-  script.src="src/ui/seasonStats.js?v=20260718-season-visual1";
+  script.src="src/ui/seasonStats.js?v=20260718-season-visual2";
   script.onload=()=>{window._seasonStatsLoading=false;window.CopaSeasonStats&&CopaSeasonStats.render();};
   script.onerror=()=>{window._seasonStatsLoading=false;};
   document.head.appendChild(script);
