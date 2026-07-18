@@ -43,7 +43,7 @@
       draft:"DRAFT DURUMU",remaining:"Kadro",budget:"Kasa",deadline:"Süre",
       candidates:"Aday seçimi",squadAverage:"Kadro ort.",cashAfter:"Kasa sonra",
       economical:"Bütçe",balanced:"Dengeli",strong:"Güçlü",elite:"Elit",
-      addPlayer:"KADROYA EKLE",cancel:"VAZGEÇ",roundDigest:"BU TUR",
+      addPlayer:"KADROYA EKLE",cancel:"VAZGEÇ",
       feedMore:"TÜM GELİŞMELER",feedLess:"ÖZETİ GÖSTER",newEvent:"Yeni olay",
       newFeed:"YENİ",lineupWarning:"Kadro uyarısı var · maça çıkmadan kontrol et",
       tacticMore:"Yüklen: hücum etkisi artar, savunma riski yükselir.",
@@ -70,7 +70,7 @@
       draft:"DRAFT STATUS",remaining:"Squad",budget:"Cash",deadline:"Time",
       candidates:"Candidate choice",squadAverage:"Squad avg.",cashAfter:"Cash after",
       economical:"Budget",balanced:"Balanced",strong:"Strong",elite:"Elite",
-      addPlayer:"ADD TO SQUAD",cancel:"CANCEL",roundDigest:"THIS ROUND",
+      addPlayer:"ADD TO SQUAD",cancel:"CANCEL",
       feedMore:"ALL DEVELOPMENTS",feedLess:"SHOW SUMMARY",newEvent:"New event",
       newFeed:"NEW",lineupWarning:"Squad warning · review before playing",
       tacticMore:"Go for it: attacking impact rises with more defensive risk.",
@@ -514,56 +514,6 @@
     bar.querySelector("[data-draft-confirm]").focus({preventScroll:true});
   }
 
-  function currentHubSnapshot(){
-    return{
-      round:String((document.getElementById("roundtag")||{}).textContent||"").trim(),
-      power:numericText(document.getElementById("powV")),
-      chemistry:numericText(document.getElementById("chemV")),
-      cash:String((document.getElementById("kasaV")||{}).textContent||"").trim(),
-    };
-  }
-
-  function ensureRoundDigest(){
-    const hub=document.getElementById("hub"),roundtag=document.getElementById("roundtag");
-    if(!hub||!roundtag||hub.classList.contains("hidden"))return;
-    const snapshot=currentHubSnapshot();
-    if(!snapshot.round)return;
-    let digest=document.getElementById("mobileRoundDigest");
-    if(!digest){
-      digest=document.createElement("aside");
-      digest.id="mobileRoundDigest";
-      digest.className="mobile-round-digest";
-      digest.setAttribute("role","status");
-      roundtag.after(digest);
-    }
-    if(digest.dataset.round===snapshot.round)return;
-    let previous=null;
-    try{previous=JSON.parse(sessionStorage.getItem("copa_mobile_hub_snapshot")||"null");}catch(_){}
-    const delta=(value,old)=>{
-      if(!Number.isFinite(value)||!old||!Number.isFinite(old))return"";
-      const amount=value-old;
-      return amount===0?"":` (${amount>0?"+":""}${amount})`;
-    };
-    const c=copy(),seenKey="copa_mobile_digest_"+snapshot.round;
-    let seen=false;
-    try{seen=sessionStorage.getItem(seenKey)==="1";}catch(_){}
-    digest.innerHTML='<div><span class="mobile-digest-kicker"></span><strong class="mobile-digest-round"></strong></div><p></p><button type="button" aria-label="Kapat">×</button>';
-    digest.querySelector(".mobile-digest-kicker").textContent=c.roundDigest;
-    digest.querySelector(".mobile-digest-round").textContent=snapshot.round;
-    digest.querySelector("p").textContent=[
-      (languageIsTurkish()?"Güç ":"Power ")+(snapshot.power??"—")+delta(snapshot.power,previous&&previous.power),
-      (languageIsTurkish()?"Kimya ":"Chemistry ")+(snapshot.chemistry??"—")+delta(snapshot.chemistry,previous&&previous.chemistry),
-      c.budget+" "+(snapshot.cash||"—"),
-    ].join(" · ");
-    digest.querySelector("button").addEventListener("click",()=>{
-      digest.classList.add("hidden");
-      try{sessionStorage.setItem(seenKey,"1");}catch(_){}
-    },{once:true});
-    digest.classList.toggle("hidden",seen);
-    digest.dataset.round=snapshot.round;
-    try{sessionStorage.setItem("copa_mobile_hub_snapshot",JSON.stringify(snapshot));}catch(_){}
-  }
-
   function ensureFeedSummary(){
     const feed=document.getElementById("feed");
     if(!feed)return;
@@ -872,7 +822,6 @@
     enhanceDraftCandidates();
     ensureAutoFillPresets();
     ensureScrollAffordances();
-    ensureRoundDigest();
     ensureFeedSummary();
     ensureHubPreflight();
     ensureCupPosition();
@@ -927,7 +876,7 @@
   function mutationNeedsEnhance(mutation){
     const target=mutation.target&&mutation.target.nodeType===1?mutation.target:mutation.target&&mutation.target.parentElement;
     if(!target)return false;
-    if(target.closest&&target.closest(".mobile-action-dock,.mobile-pref-group,.mobile-draft-context,.mobile-round-digest,.mobile-profile-nav,.mobile-tactic-status,.mobile-result-disclosure>summary,.mobile-network-banner,.mobile-draft-confirm"))return false;
+    if(target.closest&&target.closest(".mobile-action-dock,.mobile-pref-group,.mobile-draft-context,.mobile-profile-nav,.mobile-tactic-status,.mobile-result-disclosure>summary,.mobile-network-banner,.mobile-draft-confirm"))return false;
     return !!(target.matches&&target.matches("#opts,#feed,#simGoals,#modal,#roundtag,#powV,#chemV,#kasaV,#ddSub,#ddClock,#budgetV,#result,#fixbar,#shopcards,.player-profile-content,.autofill-wrap")||
       target.closest&&target.closest("#opts,#feed,#simGoals,#modal,#roundtag,#result,.player-profile-content"));
   }
