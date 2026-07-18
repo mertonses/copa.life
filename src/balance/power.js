@@ -34,12 +34,14 @@ function chemBonus(s){
  return {total:Math.max(-5,Math.min(5,total)),parts};
 }
 function powerBreakdown(r){
- const s=picksBySlot.filter(Boolean),avg=s.length?s.reduce((a,p)=>a+effOf(p),0)/s.length:0;
+ const s=picksBySlot.filter(Boolean),captainPenalty=typeof captainDecisionPlayerPenaltyForRound==="function"?captainDecisionPlayerPenaltyForRound(r,s):0,avg=s.length?(s.reduce((a,p)=>a+effOf(p),0)+captainPenalty)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
  let cardBonus=0,finalCardRaw=0;
  cards.forEach(k=>{const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
  const finalCardApplied=r>=6?finalCardRaw:0;
  cardBonus+=finalCardApplied;
+ const promiseBonus=typeof matchPromisePowerForRound==="function"?matchPromisePowerForRound(r):0;
+ cardBonus+=promiseBonus;
  const matchup=matchupBonus;
  const risk=riskPowerMod+tempPrimePenalty+shortCampPenalty-(r>=6?finalPenalty:0);
  let trait=0;s.forEach(p=>{if(p.trait&&TRAITS[p.trait])trait+=TRAITS[p.trait].pw();});
@@ -48,7 +50,8 @@ function powerBreakdown(r){
  const cap=typeof _currentCaptainPlayer==="function"?_currentCaptainPlayer():(typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null);
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
  const uncappedRaw=styleBonus+cardBonus+matchup+risk+trait;
- const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total));
- return {avg,styleBonus,cardBonus,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ const captainChem=typeof captainDecisionChemistryForRound==="function"?captainDecisionChemistryForRound(r):0;
+ const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total+captainChem));
+ return {avg,styleBonus,cardBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

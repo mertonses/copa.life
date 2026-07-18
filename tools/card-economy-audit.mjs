@@ -59,6 +59,8 @@ const directDarkDownsides = new Set([
   "vur_igneyi",
   "nasip_kismet",
   "yildiz_krizi",
+  "mac_sozu",
+  "kaptanin_karari",
 ]);
 const darkRiskCoverage = new Set([
   ...Object.keys(context.KARA_PEN || {}),

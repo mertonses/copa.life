@@ -1,4 +1,4 @@
-/* Kart tanimlari — v3 (35 kart, 7 silindi) */
+/* Kart tanimlari — v3 (37 kart) */
 var CARDDEFS={
  /* GÜÇ — GÜÇ */
  taraftar:{price:4,kind:"power",mode:"contract",
@@ -18,6 +18,8 @@ var CARDDEFS={
    eff:(s,r)=>0},
  kaleci_kalesi:{price:4,kind:"risk",mode:"instant",
    eff:(s,r)=>0},
+ mac_sozu:{price:5,kind:"defense",mode:"contract",
+   eff:(s,r)=>0},
  /* KADRO */
  anadolu:{price:4,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const v=variantOf("anadolu");const starters=(s||[]).filter(Boolean);const sub70=starters.filter(p=>p.ov<70).length;return Math.min(v===1?5:3,sub70);}},
@@ -27,6 +29,8 @@ var CARDDEFS={
    eff:(s,r)=>{const n=s.filter(p=>p&&p.age>=32).length;const v=variantOf("tecrubeli_omurga")===1;return Math.min(v?6:4,n*(v?2:1));}},
  yerli_blok:{price:6,kind:"squad",mode:"scaling",
    eff:(s,r)=>{const n=s.filter(p=>p&&p.tr).length;return Math.min(5,n*(variantOf("yerli_blok")===1?2:1));}},
+ kaptanin_karari:{price:6,kind:"squad",mode:"contract",
+   eff:(s,r)=>0},
  /* HÜCUM */
 kanat_akini:{price:6,kind:"power",mode:"scaling",
    eff:(s,r)=>{const wide=["LW","RW","LM","RM","WB","LB","RB","SLA","SĞA","SGA","SLB","SĞB","SGB","SLK","SĞK","SGK"];const n=s.filter(p=>p&&wide.includes(p.pos)).length;const v=variantOf("kanat_akini")===1;return Math.min(v?6:4,n*(v?2:1));}},

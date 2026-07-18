@@ -83,6 +83,30 @@ test("completed shared run becomes a Ghost Club continuity moment and nests shar
   await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
 });
 
+test("completed unshared run shows a truthful Ghost offer and becomes ready after explicit consent",async({page})=>{
+  await page.route("**/v1/ghosts",route=>route.fulfill({
+    status:201,
+    headers:{"access-control-allow-origin":"*"},
+    contentType:"application/json",
+    body:JSON.stringify({ok:true,public_ghost_id:"G-CONSENTED",eligible_until:new Date(Date.now()+86400000).toISOString()})
+  }));
+  await finishRun(page);
+  const shell=page.locator(".ghost-run-shell");
+  await expect(shell).toBeVisible();
+  await expect(shell.locator("h2")).toHaveText("RUN YAŞAMAYA DEVAM EDEBİLİR");
+  await expect(shell.locator(".ghost-run-status")).toHaveText("HENÜZ HAVUZDA DEĞİL");
+  await expect(shell).toContainText("iznin olmadan oyun verisi yüklenmez");
+  await shell.locator("[data-ghost-enable]").click();
+  const consent=page.locator("#ghostConsentDialog");
+  await expect(consent).toBeVisible();
+  await consent.locator("[data-ghost-terms]").check();
+  await consent.locator("[data-ghost-sharing]").check();
+  await consent.locator("[data-ghost-accept]").click();
+  await expect(page.locator(".ghost-run-shell h2")).toHaveText("HAYALET KULÜBÜN HAZIR");
+  await expect(page.locator(".ghost-run-status")).toHaveText("HAVUZDA");
+  expect(await page.evaluate(()=>(globalThis as any).GhostClubs.sharingEnabled())).toBe(true);
+});
+
 test("season story keeps four meaningful chronological beats and economy hides zero rows",async({page})=>{
   await finishRun(page);
   const story=page.locator("#rStory");
@@ -95,6 +119,22 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(economy).not.toContainText("Başkan maliyeti");
   await expect(economy).not.toContainText("Sakatlık / yedek");
   await expect(economy).not.toContainText("Son maç güç kaybı");
+  await expect(story.locator(".narrative-entity")).not.toHaveCount(0);
+  await expect(story.locator(".narrative-number.neg")).not.toHaveCount(0);
+  await expect(economy.locator(".narrative-number")).not.toHaveCount(0);
+  const contrast=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const entity=document.querySelector("#rStory .narrative-entity") as HTMLElement;
+    const score=(color:string)=>{const values=(color.match(/\d+(?:\.\d+)?/g)||[]).slice(0,3).map(Number);return values.reduce((sum,value)=>sum+value,0);};
+    root.dataset.theme="dark";
+    const dark=getComputedStyle(entity);
+    const darkValues={background:score(dark.backgroundColor),foreground:score(dark.color)};
+    root.dataset.theme="light";
+    const light=getComputedStyle(entity);
+    return{dark:darkValues,light:{background:score(light.backgroundColor),foreground:score(light.color)}};
+  });
+  expect(contrast.dark.background).toBeGreaterThan(contrast.dark.foreground);
+  expect(contrast.light.background).toBeLessThan(contrast.light.foreground);
 
   await page.evaluate(()=>(globalThis as any).restart());
   await finishRun(page,{zeroEconomy:true});

@@ -87,6 +87,12 @@
   letter-spacing:.12em;
   text-transform:uppercase;
 }
+.ghost-run-status.is-pending{
+  color:var(--color-slate,#91a5a7);
+  border-style:dashed;
+  border-color:var(--border-subtle,rgba(151,177,179,.32));
+  background:transparent;
+}
 .ghost-run-facts{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -128,6 +134,7 @@
   padding:16px 18px max(18px,env(safe-area-inset-bottom));
 }
 .ghost-run-actions .ghost-run-primary{grid-column:1/-1}
+.ghost-run-actions .ghost-run-enable{grid-column:1/-1}
 .ghost-run-actions .btn{min-height:44px}
 .ghost-run-actions .ghost-run-share{
   background:transparent;
