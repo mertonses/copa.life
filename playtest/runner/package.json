@@ -7,8 +7,8 @@
     "agent:build": "tsc",
     "agent:run": "node dist/cli.js",
     "test": "playwright test tests/",
-    "test:ci": "playwright test tests/critical-flow.test.ts tests/run-lifecycle.test.ts tests/player-profile-ui.test.ts tests/final-sim-ui.test.ts tests/ghost-club-ui.test.ts tests/mobile-experience.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
-    "test:cross": "playwright test tests/cross-browser-smoke.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts",
+    "test:ci": "playwright test tests/critical-flow.test.ts tests/run-lifecycle.test.ts tests/player-profile-ui.test.ts tests/final-sim-ui.test.ts tests/ghost-club-ui.test.ts tests/mobile-experience.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts tests/free-agent-pricing-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
+    "test:cross": "playwright test tests/cross-browser-smoke.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts",
     "test:bridge": "playwright test tests/bridge.test.ts",
     "test:session": "playwright test tests/session.test.ts",
     "assets:store": "node capture-store-assets.mjs"
