@@ -210,6 +210,83 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   await expect(page.locator("#mechSection .mt").first()).toContainText("Formation & Präsident");
 });
 
+test("chairman picker separates personality from mechanics and collapses safely on mobile",async({page},testInfo)=>{
+  await page.goto("/?chair-picker-grid=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    (globalThis as any).setLang("tr");
+    (globalThis as any).unlockedChairs=["babacan","leydi","pinti","sansasyoncu","torpilci","cilgin"];
+    (globalThis as any).showChairPopup("babacan");
+  });
+
+  const modal=page.locator(".chair-picker-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal).toHaveAttribute("data-chair-id","babacan");
+  await expect(modal.locator(".chairpopup-name")).toHaveText("Patron Başkan");
+  await expect(modal.locator(".cp-persona-role")).toHaveText("Büyük Patron");
+  await expect(modal.locator(".cp-role-badge")).toHaveText("Ekonomi");
+  await expect(modal.locator(".cp-fx-hdr")).toHaveText(["AVANTAJLAR","DEZAVANTAJ","OYUN TARZI"]);
+  await expect(modal.locator(".cp-fx-item")).toContainText([
+    "Borç limiti €28M — en geniş marj",
+    "Her turda küçük finansal destek gelebilir",
+    "Finalde −2 güç bırakabilir",
+  ]);
+  await expect(modal.locator(".cp-playstyle")).toContainText("Kasayı rahatlatır");
+  await expect(modal.locator(".cp-sel-btn")).toHaveText("BAŞKANI SEÇ");
+  await expect(modal.locator(".cp-counter")).toHaveText("1 / 6");
+
+  const layout=await modal.evaluate(root=>{
+    const persona=(root.querySelector(".cp-persona") as HTMLElement).getBoundingClientRect();
+    const mechanics=(root.querySelector(".cp-mechanics") as HTMLElement).getBoundingClientRect();
+    const footer=root.querySelector(".cp-bot-row") as HTMLElement;
+    const pros=(root.querySelector(".cp-fx-pro") as HTMLElement).getBoundingClientRect();
+    const cons=(root.querySelector(".cp-fx-con") as HTMLElement).getBoundingClientRect();
+    const play=(root.querySelector(".cp-playstyle") as HTMLElement).getBoundingClientRect();
+    const sheet=root.closest(".sheet") as HTMLElement;
+    return{
+      persona:{top:persona.top,right:persona.right,bottom:persona.bottom},
+      mechanics:{top:mechanics.top,left:mechanics.left,bottom:mechanics.bottom},
+      order:pros.top<cons.top&&cons.top<play.top,
+      footerPosition:getComputedStyle(footer).position,
+      horizontalOverflow:sheet.scrollWidth-sheet.clientWidth,
+      sheetRight:sheet.getBoundingClientRect().right,
+      viewportWidth:window.innerWidth,
+    };
+  });
+  expect(layout.order).toBe(true);
+  expect(layout.footerPosition).toBe("sticky");
+  expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
+  expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
+  if(testInfo.project.name.includes("mobile")){
+    expect(layout.mechanics.top).toBeGreaterThanOrEqual(layout.persona.bottom-1);
+  }else{
+    expect(Math.abs(layout.persona.top-layout.mechanics.top)).toBeLessThanOrEqual(1);
+    expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
+    await expect(modal.locator(".cp-nav-btn small")).toHaveCount(2);
+    await expect(modal.locator(".cp-nav-btn small").first()).toBeVisible();
+  }
+
+  const themeStyles=await modal.evaluate(root=>{
+    const html=document.documentElement;
+    const mechanics=root.querySelector(".cp-mechanics") as HTMLElement;
+    const copy=root.querySelector(".chairpopup-desc") as HTMLElement;
+    return["light","dark"].map(theme=>{
+      html.dataset.theme=theme;
+      return{
+        background:getComputedStyle(mechanics).backgroundColor,
+        text:getComputedStyle(copy).color,
+      };
+    });
+  });
+  expect(themeStyles.every(style=>style.background!=="rgba(0, 0, 0, 0)"&&style.background!==style.text)).toBe(true);
+
+  await modal.locator(".cp-nav-next").click();
+  await expect(page.locator(".chair-picker-modal")).toHaveAttribute("data-chair-id","leydi");
+  await expect(page.locator(".chair-picker-modal .chairpopup-name")).toHaveText("Diplomat Başkan");
+  await expect(page.locator(".chair-picker-modal .cp-counter")).toHaveText("2 / 6");
+  await page.locator(".chair-picker-modal .cp-sel-btn").click();
+  await expect(page.locator("#modal")).toHaveClass(/hidden/);
+});
+
 test("obsolete same-setup restart is absent from UI and runtime",async({page})=>{
   await finishRun(page);
   await expect(page.locator("#quickBtn")).toHaveCount(0);
