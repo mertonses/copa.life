@@ -878,7 +878,7 @@ let _kp=0,_ks=6;
 
 /* ===== power ===== */
 /* ===== fixtures ===== */
-function renderFixtures(){const x=L(),fb=$("fixbar"),rl=LANG==="tr"?["1. Tur","2. Tur","Son 16","Çeyrek","Yarı","Final"]:["Round 1","Round 2","Last 16","Quarter","Semi","Final"];fb.innerHTML="";fb.classList.remove("hidden");fixtures.forEach((f,i)=>{const d=document.createElement("div");let cls="fix";if(f.res==="W")cls+=" win";else if(f.res==="L")cls+=" lose";else if(f.res==="D")cls+=" draw";else if(i===round-1)cls+=" cur";d.className=cls;const hidden=!f.res&&i>round-1;const pw=(!hidden&&!f.res&&bracket[i]&&bracket[i].power)?bracket[i].power:null;const _smm={ENG:CLUB_LOGOS_EN_SM,ES:CLUB_LOGOS_ES_SM,IT:CLUB_LOGOS_IT_SM,DE:CLUB_LOGOS_DE_SM,JP:CLUB_LOGOS_JP_SM};const _smMap=_smm[selectedCountry]||CLUB_LOGOS_SM;const smLogo=!window.COPA_IS_NATIVE&&!hidden&&typeof _smMap!=="undefined"&&_smMap[f.opp];const foHTML=hidden?"???":smLogo?`<img class="fix-logo" src="${smLogo}" alt="${f.opp}" title="${f.opp}" loading="lazy" decoding="async">`:window.CopaClubVisuals.svgFor(f.opp,24,29);d.innerHTML=`<div class="fr">${rl[i]}</div><div class="fo" title="${f.opp}">${foHTML}</div><div class="fs">${f.res?f.gf+"-"+f.ga:(hidden?"?":"")}</div>`;fb.appendChild(d);});const tn=document.createElement("div");const champ=fixtures[5]&&fixtures[5].res==="W";tn.className="fix trophy"+(champ?" lit":"");tn.style.cssText="background:var(--color-ink);border-color:var(--color-ink);color:var(--color-background)";tn.innerHTML=`<svg viewBox="0 0 28 32" width="22" height="25" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15"/><path d="M20 7h4Q24 17 20 15"/><line x1="14" y1="20" x2="14" y2="26"/><path d="M9 26h10"/><path d="M7 30h14" stroke-width="2"/></svg>`;fb.appendChild(tn);}
+function renderFixtures(){const x=L(),fb=$("fixbar"),rl=x.rounds||["Round 1","Round 2","Last 16","Quarter","Semi","Final"];fb.innerHTML="";fb.classList.remove("hidden");fixtures.forEach((f,i)=>{const d=document.createElement("div");let cls="fix";if(f.res==="W")cls+=" win";else if(f.res==="L")cls+=" lose";else if(f.res==="D")cls+=" draw";else if(i===round-1)cls+=" cur";d.className=cls;const hidden=!f.res&&i>round-1;const pw=(!hidden&&!f.res&&bracket[i]&&bracket[i].power)?bracket[i].power:null;const _smm={ENG:CLUB_LOGOS_EN_SM,ES:CLUB_LOGOS_ES_SM,IT:CLUB_LOGOS_IT_SM,DE:CLUB_LOGOS_DE_SM,JP:CLUB_LOGOS_JP_SM};const _smMap=_smm[selectedCountry]||CLUB_LOGOS_SM;const smLogo=!window.COPA_IS_NATIVE&&!hidden&&typeof _smMap!=="undefined"&&_smMap[f.opp];const foHTML=hidden?"???":smLogo?`<img class="fix-logo" src="${smLogo}" alt="${f.opp}" title="${f.opp}" loading="lazy" decoding="async">`:window.CopaClubVisuals.svgFor(f.opp,24,29);d.innerHTML=`<div class="fr">${rl[i]}</div><div class="fo" title="${f.opp}">${foHTML}</div><div class="fs">${f.res?f.gf+"-"+f.ga:(hidden?"?":"")}</div>`;fb.appendChild(d);});const tn=document.createElement("div");const champ=fixtures[5]&&fixtures[5].res==="W";tn.className="fix trophy"+(champ?" lit":"");tn.style.cssText="background:var(--color-ink);border-color:var(--color-ink);color:var(--color-background)";tn.innerHTML=`<svg viewBox="0 0 28 32" width="22" height="25" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15"/><path d="M20 7h4Q24 17 20 15"/><line x1="14" y1="20" x2="14" y2="26"/><path d="M9 26h10"/><path d="M7 30h14" stroke-width="2"/></svg>`;fb.appendChild(tn);}
 
 /* ===== opponent scouting ===== */
 function genOppLineup(){const base=opponent.power,f433=FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=f433.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const source=oppPick(g),nm=source[0],item={name:nm,ov,pos:s[0],natPos:s[0],grp:g,side,club:source[3]||"",age:source[4]||0};if(typeof playerProfileKey==="function")item.profileKey=playerProfileKey(selectedCountry,nm,item.club,item.age);return item;});oppXI=oppLineup.map(o=>o.name);
@@ -1699,19 +1699,14 @@ function _renderResultFx(r){
   }
 }
 function resultHeroLabel(r,wasSacked,x){
-  const tr=LANG==="tr";
-  if(wasSacked)return tr?"BAŞKAN KARARI":"BOARD DECISION";
-  if(r.won)return tr?"FİNAL":"FINAL";
-  const mapTr=["1. TUR","2. TUR","SON 16","ÇEYREK FİNAL","YARI FİNAL","FİNAL"];
-  const mapEn=["ROUND 1","ROUND 2","LAST 16","QUARTER FINAL","SEMI FINAL","FINAL"];
-  return (tr?mapTr:mapEn)[Math.max(0,r.round-1)]||x.rounds[Math.max(0,r.round-1)]||"";
+  if(wasSacked)return LT("BAŞKAN KARARI","BOARD DECISION","DECISIÓN DIRECTIVA","VORSTANDSENTSCHEIDUNG","DECISIONE DIRIGENZIALE");
+  return x.rounds[Math.max(0,(r.won?6:r.round)-1)]||"";
 }
 function resultHeroSubline(r,wasSacked,x,chairName){
-  const tr=LANG==="tr";
-  if(wasSacked)return tr?"Borç krizi yönetimin sabrını bitirdi.":"Debt pressure broke the board's patience.";
-  if(r.won)return tr?"Finali kazandın. Kupa bu build'in oldu.":"You won the final. This build lifted the cup.";
-  if(r.score)return tr?`Final ${r.score}. Kupa son adımda kaçtı.`:`Final ${r.score}. The cup slipped away at the last step.`;
-  return tr?`${r.round}. turda kupaya veda ettin. Daha güçlü bir build kur.`:`The cup run ended in round ${r.round}. Build stronger next time.`;
+  if(wasSacked)return LT("Borç krizi yönetimin sabrını bitirdi.","Debt pressure broke the board's patience.","La presión de la deuda agotó la paciencia de la directiva.","Der Schuldendruck beendete die Geduld des Vorstands.","La pressione dei debiti ha esaurito la pazienza della dirigenza.");
+  if(r.won)return LT("Finali kazandın. Kupa bu build'in oldu.","You won the final. This build lifted the cup.","Ganaste la final. Esta plantilla levantó la copa.","Du hast das Finale gewonnen. Dieser Build holte den Pokal.","Hai vinto la finale. Questa squadra ha alzato la coppa.");
+  if(r.score)return LT(`Final ${r.score}. Kupa son adımda kaçtı.`,`Final ${r.score}. The cup slipped away at the last step.`,`Final ${r.score}. La copa se escapó en el último paso.`,`Finale ${r.score}. Der Pokal entglitt im letzten Schritt.`,`Finale ${r.score}. La coppa è sfuggita all'ultimo passo.`);
+  return LT(`${r.round}. turda kupaya veda ettin. Daha güçlü bir build kur.`,`The cup run ended in round ${r.round}. Build stronger next time.`,`El recorrido terminó en la ronda ${r.round}. Construye una plantilla más fuerte.`,`Der Pokallauf endete in Runde ${r.round}. Baue einen stärkeren Kader.`,`Il percorso è finito al turno ${r.round}. Costruisci una rosa più forte.`);
 }
 function renderResult(){_renderResultFx(lastResult);const x=L(),r=lastResult,wasSacked=r.endType==="sacked",chairName=(r.chairmanId&&x.chair&&x.chair[r.chairmanId]?x.chair[r.chairmanId].n:(chairman&&x.chair[chairman.id]?x.chair[chairman.id].n:"Başkan"));$("rLn").textContent=resultHeroLabel(r,wasSacked,x);$("rFinish").textContent=wasSacked?(LANG==="tr"?"KOVULDUN":"SACKED"):(r.won?x.champTitle:(r.score?(LANG==="tr"?"FİNALDE KAYBETTİN":"LOST THE FINAL"):x.outTitle));$("rFinish").className="big "+(r.won?"gold":wasSacked?"sacked-hdl":"acc");const _sb=document.querySelector(".scoreboard");_sb.classList.toggle("sacked",wasSacked);_sb.classList.toggle("champ",!wasSacked&&r.won);_sb.classList.toggle("elendi",!wasSacked&&!r.won);$("rRound").textContent=resultHeroSubline(r,wasSacked,x,chairName);$("rVerdict").textContent=wasSacked?(LANG==="tr"?`${chairName} sabır eşiğini aştı. Kasa ${runMoney(r.budgetAtEnd)} seviyesine düşünce yönetimle yolların ayrıldı. Genel kredi tabanı ${runMoney(r.debtLimit)}.`:`${chairName}'s patience ran out. Funds fell to ${runMoney(r.budgetAtEnd)} and the board parted ways with you. Base credit floor was ${runMoney(r.debtLimit)}.`):(r.won?x.champV:x.outV(r.round))+(r.newForm?(" "+x.formUnlocked(r.newForm)):"");$("rStoryHdr").textContent=x.storyHdr;$("rStory").innerHTML=genStory();const _et=$("econTile");if(_et){_et.innerHTML=econSummaryHTML();_et.classList.remove("hidden");}setTimeout(_startEconTicker,400);$("rSeedLbl").innerHTML=`<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12" style="vertical-align:-.1em;margin-right:3px;opacity:.7"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-2.833 12a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3zm-3.5 -3.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3zm-3.5 -3.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3z"/></svg>${LANG==="tr"?"RUN KİMLİĞİ":"RUN ID"}`;$("rSeed").textContent="#"+String(seedNum).padStart(4,"0");$("quickBtn").innerHTML=`<svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><g><animateTransform attributeName="transform" type="rotate" values="0 9 9;360 9 9" dur="1.8s" repeatCount="indefinite"/><path d="M3 9Q3 5 7.5 3.5Q12 2 14.5 5.5"/><path d="M15 9Q15 13 10.5 14.5Q6 16 3.5 12.5"/><polyline points="12.5,3 15,6 17,3.5" stroke-width="1.6"/><polyline points="5.5,15 3,12 1,14.5" stroke-width="1.6"/></g></svg><span class="result-action-label">`+(LANG==="tr"?"Aynı ayarla yeniden":"Replay same setup")+"</span>";$("rTur").textContent=x.rounds[Math.max(0,r.round-1)];$("rGuc").textContent=r.power;$("rKart").textContent=r.cards;if($("rCash")){$("rCash").textContent=runMoney(r.budgetAtEnd);$("rCash").className="v money "+(r.budgetAtEnd<0?"neg":r.budgetAtEnd>0?"pos":"neutral");}$("lblTur").textContent=x.lblTur;$("lblGuc").textContent=x.lblGuc;$("lblKart").textContent=x.lblKart;if($("lblCash"))$("lblCash").textContent=LANG==="tr"?"Kasa":"Cash";$("copyBtn").innerHTML=x.copy;$("againBtn").innerHTML=_brandAgainHTML(x.again);
   const mo=$("motm");if(r.final&&motm){mo.classList.remove("hidden");mo.innerHTML=`${x.motm}: <b>${motm}</b> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;color:#429A73"><path d="M8 1.8l1.8 3.3 3.7.5-2.7 2.5.6 3.7L8 10 4.6 11.8l.6-3.7L2.5 5.6l3.7-.5z" fill="currentColor" opacity="0.9"/><path d="M8 1.8l1.8 3.3 3.7.5-2.7 2.5.6 3.7L8 10 4.6 11.8l.6-3.7L2.5 5.6l3.7-.5z"/></svg>`;}else mo.classList.add("hidden");
@@ -1956,7 +1951,7 @@ Object.assign(T.en.cards,{
 const OPPCHARS=[{e:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M11.3 2.8L6.5 10h3.2L8.7 17.2l4.8-7.2h-3.2z" fill="currentColor" opacity="0.12"/><path d="M11.3 2.8L6.5 10h3.2L8.7 17.2l4.8-7.2h-3.2z"/></svg>`,l:{tr:"Kontracı",en:"Counter"}},{e:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M5 3.5h10v4.2c0 4-2.3 6.8-5 8.8-2.7-2-5-4.8-5-8.8V3.5z" fill="currentColor" opacity="0.12"/><path d="M5 3.5h10v4.2c0 4-2.3 6.8-5 8.8-2.7-2-5-4.8-5-8.8V3.5z"/><path d="M7.4 9.8h5.2"/></svg>`,l:{tr:"Defansif",en:"Defensive"}},{e:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M10 2.7c.9 2.5-1.4 4 .6 6.2 1.3 1.5 3.2 2.4 3.2 5a3.8 3.8 0 1 1-7.6 0c0-2.3 1.3-3.6 2.7-4.9 1.4-1.3 1.8-2.4 1.1-6.3z" fill="currentColor" opacity="0.12"/><path d="M10 2.7c.9 2.5-1.4 4 .6 6.2 1.3 1.5 3.2 2.4 3.2 5a3.8 3.8 0 1 1-7.6 0c0-2.3 1.3-3.6 2.7-4.9 1.4-1.3 1.8-2.4 1.1-6.3z"/><path d="M10.3 8.8c.5 1.1-.5 1.9.4 3 .6.7 1.4 1.1 1.4 2.2a2.1 2.1 0 1 1-4.2 0c0-1 .6-1.6 1.3-2.3.7-.6 1-1.4 1.1-2.9z" opacity="0.7"/></svg>`,l:{tr:"Presçi",en:"Pressing"}},{e:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><circle cx="10" cy="10" r="5.8"/><circle cx="10" cy="10" r="2.8"/><path d="M10 2.8v2.2M10 15v2.2M2.8 10H5M15 10h2.2"/></svg>`,l:{tr:"Direkt",en:"Direct"}},{e:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M10 2.8v14.4"/><path d="M3.8 6.4l12.4 7.2"/><path d="M3.8 13.6l12.4-7.2"/><path d="M10 2.8L8.8 4M10 2.8L11.2 4"/><path d="M10 17.2L8.8 16M10 17.2L11.2 16"/><path d="M3.8 6.4l1.7.2M3.8 6.4l.5 1.6"/><path d="M16.2 13.6l-1.7-.2M16.2 13.6l-.5-1.6"/><path d="M3.8 13.6l1.7-.2M3.8 13.6l.5-1.6"/><path d="M16.2 6.4l-1.7.2M16.2 6.4l-.5 1.6"/></svg>`,l:{tr:"Soğukkanlı",en:"Composed"}}];
 function starsOf(pw){return Math.max(1,Math.min(5,Math.round((pw-58)/7)));}
 function assignOppChar(){const sp=(picksBySlot&&picksBySlot.length)?squadPower(round):{power:0};let c=rnd(OPPCHARS),edge=opponentEdge(sp.power,opponent&&opponent.power);if(edge>=4)c=OPPCHARS[2];else if(edge>=2)c=OPPCHARS[1];oppChar={e:c.e,l:(c.l[LANG]||c.l.tr)+(edge?" +"+edge:"")};matchupBonus=-edge;}
-function runIdentity(){const s=picksBySlot.filter(Boolean);const young=s.filter(p=>p.age<=21).length,tr=s.filter(p=>p.tr).length;const cat={};cards.forEach(k=>{const c=CATMAP[k];if(c)cat[c]=(cat[c]||0)+1+tierOf(k);});
+function runIdentity(){const s=picksBySlot.filter(Boolean);const young=s.filter(p=>p.age<=21).length,tr=s.filter(p=>p.tr).length;const cat={};cards.forEach(k=>{const c=CATMAP[k];if(c)cat[c]=(cat[c]||0)+1+variantOf(k);});
  if(young>=4||(hasCard("genc")&&young>=3))return{e:"",l:L().runNames.youth};
  if((cat.baskan||0)>=1)return{e:"",l:LANG==="tr"?"Başkan Riski":"Chairman Risk"};
  if((cat.savunma||0)>=2||style==="blok")return{e:"",l:L().runNames.wall};
@@ -2914,109 +2909,14 @@ function _mvpBonusForPlayer(name){const mem=_mvpLoad();return (mem[name]||0)>=2;
 
 /* ===== Sezon İstatistik Ekranı ===== */
 function showSeasonStats(){
-  const tr=LANG==="tr",r=lastResult||{},e=r.econ||econStats||{};
-  const s=picksBySlot.filter(Boolean);
-  const goals=fixtures.reduce((a,f)=>(f.gf||0)+a,0);
-  const conceded=fixtures.reduce((a,f)=>(f.ga||0)+a,0);
-  const wins=fixtures.filter(f=>f.res==="W").length;
-  const draws=fixtures.filter(f=>f.res==="D").length;
-  const losses=fixtures.filter(f=>f.res==="L").length;
-  const played=wins+draws+losses;
-  const topScorers={};
-  fixtures.forEach(f=>{(f.events||[]).filter(ev=>ev.home&&ev.type==="goal").forEach(ev=>{topScorers[ev.name]=(topScorers[ev.name]||0)+1;});});
-  const topList=Object.entries(topScorers).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  const mvpMem=_mvpLoad();const runMVP=window._finalMVPName||(topList[0]&&topList[0][0])||"—";
-  let bestCard="—",bestVal=-999;
-  cards.forEach(k=>{const v=cardEff(k,s,round);if(v>bestVal){bestVal=v;bestCard=(L().cards[k]&&L().cards[k].n)||k;}});
-  const gd=goals-conceded;
-  const expensive=s.length?s.reduce((a,b)=>(b.price||0)>(a.price||0)?b:a):null;
-  const winPct=played?Math.round(wins/played*100):0;
-  const goalsPer=played?(goals/played).toFixed(1):"0";
-  const net=(e.earned||0)-(e.spent||0)-(e.president||0);
-  const endCash=r&&typeof r.budgetAtEnd!=="undefined"?r.budgetAtEnd:budget;
-  const lowCash=typeof e.worstDebt!=="undefined"?e.worstDebt:endCash;
-  const reached=r&&r.round?((L().rounds&&L().rounds[Math.max(0,r.round-1)])||String(r.round)):"—";
-  const money=v=>typeof runMoney==="function"?runMoney(v):((v<0?"-€"+Math.abs(v):"€"+v)+"M");
-  const signed=v=>(v>0?"+":"")+money(v);
-  const getMoneyTone=v=>v>0?"stat-positive":v<0?"stat-negative":"stat-neutral";
-  const getRatingTone=v=>v>=80?"stat-elite":v>=70?"stat-positive":v>=60?"stat-warning":v>=50?"stat-warning":"stat-negative";
-  const getWinRateTone=v=>v>=75?"stat-elite":v>=50?"stat-positive":v>=30?"stat-warning":"stat-negative";
-  const getInjuryTone=v=>v===0?"stat-positive":v<=2?"stat-warning":"stat-negative";
-  const resultTone=r&&r.endType==="sacked"?"stat-negative":r&&r.won?"stat-elite":(r&&r.round>=5?"stat-positive":"stat-neutral");
-  const resultLabel=r&&r.endType==="sacked"?(tr?"KOVULDUN":"SACKED"):(r&&r.won?(tr?"KUPAYI ALDIN":"CUP WINNERS"):reached);
-  const fixtureBoxes=fixtures.map(f=>{const type=f.res==="W"?"win":f.res==="D"?"draw":f.res==="L"?"loss":"none";const label=f.res==="W"?(tr?"Galibiyet":"Win"):f.res==="D"?(tr?"Beraberlik":"Draw"):f.res==="L"?(tr?"Mağlubiyet":"Loss"):(tr?"Oynanmadı":"Unplayed");return `<div class="ss-fixture ${type}" title="${label}" aria-label="${label}"><b>${f.res||"·"}</b><span>${f.gf!=null?f.gf+"-"+f.ga:"?"}</span></div>`;}).join("");
-  const metric=(id,val,label,cls="stat-neutral",sub="")=>`<div class="ss-metric ${cls}"><b${id?` id="${id}"`:""}>${val}</b><span>${label}</span>${sub?`<em>${sub}</em>`:""}</div>`;
-  const row=(label,val,cls="",extra="")=>`<div class="ss-row"><span>${label}</span><b class="${cls}">${val}</b></div>${extra}`;
-  const bar=(id,cls="")=>`<div class="ss-bar ${cls}"><i id="${id}"></i></div>`;
-  const section=(title,body,extra="")=>`<section class="ss-section ${extra}"><h4>${title}</h4>${body}</section>`;
-  const scorerRows=topList.length?topList.map(([n,g],i)=>`<div class="ss-scorer"><span>${i+1}</span><b>${n}</b><em>${g}</em></div>`).join(""):`<div class="ss-empty">${tr?"Gol kaydı yok":"No scorers"}</div>`;
-  const mvpHtml=runMVP&&runMVP!=="—"?`<div class="ss-mvp-card"><div class="ss-mvp-icon">★</div><div><b>${runMVP}</b><span>${(mvpMem[runMVP]||0)>=2?(tr?"Efsane MVP":"Legendary MVP"):(tr?"Final Yıldızı":"Final Star")}</span></div></div>`:`<div class="ss-empty">${tr?"MVP kaydı yok":"No MVP"}</div>`;
-  const html=`<div class="season-stats-modal">
-    <div class="ss-head">
-      <div><span class="ss-kicker">${tr?"SEZON İSTATİSTİKLERİ":"SEASON STATISTICS"}</span><h3>${teamName||"XI"} <small>${formName}</small></h3><p><span class="ss-run-meta">${tr?"Run Kimliği":"Run ID"} #${String(seedNum).padStart(4,"0")}</span><span class="ss-result-meta ${resultTone}">${tr?"Sonuç":"Result"}: ${resultLabel}</span></p></div>
-      <button class="ss-close" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">×</button>
-    </div>
-    <div class="ss-body">
-      <div class="ss-metrics">
-        ${metric("ss_w",0,tr?"Galibiyet":"Wins",wins>losses?"stat-positive":wins===losses?"stat-neutral":"stat-warning",`${wins}/${played||0}`)}
-        ${metric("ss_g",0,tr?"Atılan Gol":"Goals",goals>0?"stat-positive":"stat-neutral")}
-        ${metric("ss_p","0%",tr?"Galibiyet %":"Win Rate",getWinRateTone(winPct))}
-        ${metric("",r.power||0,tr?"Kadro Gücü":"Squad Power",getRatingTone(r.power||0))}
-        ${metric("",cards.length,tr?"Kart":"Cards",cards.length>3?"stat-elite":cards.length>0?"stat-positive":"stat-neutral")}
-        ${metric("",money(lowCash),tr?"En Düşük Kasa":"Lowest Funds",getMoneyTone(lowCash))}
-      </div>
-      <div class="ss-fixtures">${fixtureBoxes}</div>
-      <div class="ss-grid ss-grid-main">
-        ${section(tr?"MAÇLAR":"MATCHES",`
-          ${row(tr?"G / B / M":"W / D / L",`<span class="stat-positive">${wins}</span> / <span class="stat-neutral">${draws}</span> / <span class="stat-negative">${losses}</span>`)}
-          ${row(tr?"Atılan Gol":"Goals For",goals,goals>0?"stat-positive":"stat-neutral")}${bar("ss_gbar")}
-          ${row(tr?"Yenilen Gol":"Goals Against",conceded,conceded===0?"stat-positive":conceded>goals?"stat-negative":"stat-warning")}${bar("ss_cbar","danger")}
-          ${row(tr?"Gol Farkı":"Goal Diff.",(gd>0?"+":"")+gd,gd>0?"stat-positive":gd<0?"stat-negative":"stat-neutral")}
-          ${row(tr?"Maç Başına Gol":"Goals / Game",goalsPer,parseFloat(goalsPer)>=2?"stat-positive":parseFloat(goalsPer)>=1?"stat-neutral":"stat-warning")}
-        `)}
-        ${section(tr?"EKONOMİ":"ECONOMY",`
-          ${row(tr?"Kazanılan":"Earned",signed(e.earned||0),getMoneyTone(e.earned||0))}
-          ${row(tr?"Harcanan":"Spent",money(-(e.spent||0)),(e.spent||0)>0?"stat-negative":"stat-neutral")}
-          ${row(tr?"Başkan":"Chairman",money(-(e.president||0)),(e.president||0)>0?"stat-negative":"stat-neutral")}
-          ${row(tr?"Net":"Net",signed(net),getMoneyTone(net))}
-          ${row(tr?"En Pahalı Oyuncu":"Costliest Player",expensive?shortName(expensive)+" "+money(expensive.price||0):"—",expensive&&expensive.price>=10?"stat-warning":"stat-neutral")}
-          ${row(tr?"En Güçlü Kart":"Best Card",bestVal>0?bestCard+" +"+bestVal:bestCard||"—",bestVal>0?"stat-positive":"stat-neutral")}
-        `)}
-      </div>
-      <div class="ss-grid ss-grid-detail">
-        ${section(tr?"OYUNCULAR":"PLAYERS",`
-          ${row(tr?"Sakatlık":"Injuries",e.injuries||0,getInjuryTone(e.injuries||0))}
-          ${row(tr?"Yedek":"Bench Used",benchUsed||0,(benchUsed||0)>0?"stat-positive":"stat-neutral")}
-          ${row(tr?"Final Güç":"Final Power",r.power||0,getRatingTone(r.power||0))}
-        `)}
-        ${section(tr?"GOLCÜLER":"SCORERS",scorerRows)}
-        ${section(tr?"MVP":"MVP",mvpHtml,"ss-section-mvp")}
-      </div>
-    </div>
-    <div class="ss-foot"><button class="btn btn-primary" onclick="closeModal()">${tr?"Kapat":"Close"}</button></div>
-  </div>`;
-
-  showModal(html,{dismissOnOverlay:true,label:tr?"Sezon İstatistikleri":"Season Statistics",bare:true});
-  if(window.PlayerProfiles){
-    const findProfilePlayer=name=>s.find(p=>p&&(p.name===name||surOf(p)===name||(typeof shortName==="function"&&shortName(p)===name)));
-    document.querySelectorAll(".ss-scorer").forEach((row,i)=>{const entry=topList[i],p=entry&&findProfilePlayer(entry[0]);if(p)PlayerProfiles.bind(row,p);});
-    const mvpCard=document.querySelector(".ss-mvp-card"),mvpPlayer=findProfilePlayer(runMVP);if(mvpCard&&mvpPlayer)PlayerProfiles.bind(mvpCard,mvpPlayer);
-  }
-
-  /* animate counters and bars after render */
-  setTimeout(()=>{
-    const maxG=Math.max(goals,conceded,1);
-    const gbar=document.getElementById("ss_gbar");
-    const cbar=document.getElementById("ss_cbar");
-    if(gbar)gbar.style.width=(goals/maxG*100)+"%";
-    if(cbar)cbar.style.width=(conceded/maxG*100)+"%";
-    const ctrs=[["ss_w",wins,0],["ss_g",goals,0],["ss_p",winPct,"%"]];
-    ctrs.forEach(([id,val,suf])=>{
-      const el=document.getElementById(id);if(!el)return;
-      let st=null;
-      (function step(ts){if(!st)st=ts;const p=Math.min((ts-st)/800,1);const e2=1-Math.pow(1-p,3);el.textContent=Math.round(e2*val)+suf;if(p<1)requestAnimationFrame(step);})(performance.now());
-    });
-  },80);
+  if(window.CopaSeasonStats)return CopaSeasonStats.render();
+  if(window._seasonStatsLoading)return;
+  window._seasonStatsLoading=true;
+  const script=document.createElement("script");
+  script.src="src/ui/seasonStats.js?v=20260718-season-visual1";
+  script.onload=()=>{window._seasonStatsLoading=false;window.CopaSeasonStats&&CopaSeasonStats.render();};
+  script.onerror=()=>{window._seasonStatsLoading=false;};
+  document.head.appendChild(script);
 }
 
 const COPA_DATA_VERSION="2026-07-15-migrations-1";
