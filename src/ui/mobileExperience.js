@@ -1,7 +1,7 @@
 (function mobileExperienceModule(global){
   "use strict";
 
-  const PHONE_QUERY="(max-width: 760px) and (hover: none), (max-width: 760px) and (pointer: coarse)";
+  const PHONE_QUERY="(max-width: 760px)";
   const phoneMedia=global.matchMedia?global.matchMedia(PHONE_QUERY):{matches:false};
   let dock=null;
   let dockInner=null;
@@ -801,6 +801,7 @@
 
   function syncOverlayScroll(){
     const modal=document.getElementById("modal"),open=isVisible(modal);
+    document.documentElement.classList.toggle("mobile-modal-open",open);
     if(open&&!modalWasOpen)modalScrollY=global.scrollY;
     if(!open&&modalWasOpen&&Math.abs(global.scrollY-modalScrollY)>2){
       requestAnimationFrame(()=>global.scrollTo({top:modalScrollY,behavior:"auto"}));
