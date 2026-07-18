@@ -727,7 +727,18 @@
   }
   #introLand .mstep:nth-last-child(-n+2){border-bottom:1px solid color-mix(in srgb,var(--color-slate) 14%,transparent)!important}
   #introLand .mstep:last-child{border-bottom:none!important}
-  #introLand .mn{min-width:26px!important;padding:0!important;line-height:1!important}
+  #introLand .mn{
+    width:26px!important;
+    height:26px!important;
+    min-width:26px!important;
+    padding:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    line-height:1!important;
+    text-align:center!important;
+    box-sizing:border-box!important;
+  }
   #introLand .mt{margin:0!important;font-size:10px!important;line-height:1.25!important}
   #introLand .mt small{margin-top:3px!important;font-size:8.5px!important;line-height:1.3!important}
 

@@ -6777,25 +6777,13 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 .v7-hero-head{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 188px;
-  gap:32px;
+  grid-template-columns:minmax(0,1fr) 248px;
+  gap:36px;
   align-items:center;
-  min-height:154px;
+  min-height:168px;
   padding:18px 0 17px!important;
 }
 .v7-hero-copy{min-width:0}
-.hero-title-line{
-  display:inline-flex;
-  align-items:center;
-  gap:9px;
-}
-.hero-die-icon{
-  flex:0 0 auto;
-  width:.55em;
-  height:.55em;
-  color:var(--color-primary);
-  opacity:.9;
-}
 .v7-hero-side{
   display:flex;
   flex-direction:column;
@@ -6805,11 +6793,12 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 .tactical-board{
   position:relative;
-  width:164px;
-  height:94px;
+  width:238px;
+  height:138px;
   border:1px solid color-mix(in srgb,var(--color-slate) 42%,transparent);
-  border-radius:7px;
+  border-radius:8px;
   color:var(--color-primary);
+  overflow:hidden;
 }
 .tactical-board::before{
   content:"";
@@ -6827,9 +6816,9 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 .tactical-box{
   position:absolute;
-  top:27px;
-  width:21px;
-  height:38px;
+  top:28%;
+  width:13%;
+  height:44%;
   border:1px solid color-mix(in srgb,var(--color-slate) 30%,transparent);
 }
 .tactical-box-a{left:-1px;border-left:0}
@@ -6843,11 +6832,11 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   border-radius:50%;
   background:var(--surface-default);
 }
-.tactical-token-1{left:18px;top:43px}
-.tactical-token-2{left:53px;top:18px}
-.tactical-token-3{left:58px;bottom:17px}
-.tactical-token-4{right:48px;top:40px}
-.tactical-token-5{right:17px;top:25px}
+.tactical-token-1{left:10%;top:44%}
+.tactical-token-2{left:33%;top:19%}
+.tactical-token-3{left:36%;bottom:18%}
+.tactical-token-4{right:33%;top:40%}
+.tactical-token-5{right:11%;top:22%}
 .tactical-pass{
   position:absolute;
   z-index:1;
@@ -6867,27 +6856,28 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   border-right:1px solid currentColor;
   transform:rotate(45deg);
 }
-.tactical-pass-1{left:26px;top:45px;width:36px;transform:rotate(-37deg)}
-.tactical-pass-2{left:61px;top:25px;width:49px;transform:rotate(24deg)}
-.tactical-pass-3{left:66px;bottom:22px;width:58px;transform:rotate(-21deg)}
+.tactical-pass-1{left:13%;top:47%;width:24%;transform:rotate(-37deg)}
+.tactical-pass-2{left:36%;top:24%;width:30%;transform:rotate(24deg)}
+.tactical-pass-3{left:39%;bottom:23%;width:34%;transform:rotate(-21deg)}
 .v7-hero-head .howto-wrap{
-  position:static!important;
+  position:absolute!important;
+  z-index:4;
+  top:auto!important;
+  right:10px;
+  bottom:9px;
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap:7px;
+  gap:0;
   margin:0!important;
   text-align:right;
 }
-.howto-prompt{
-  color:var(--color-slate);
-  font:650 9px/1.25 var(--mono);
-  white-space:nowrap;
-}
 #howtoToggle{
-  min-height:32px;
+  min-height:30px;
   height:auto!important;
   white-space:nowrap;
+  background:color-mix(in srgb,var(--surface-default) 94%,transparent);
+  backdrop-filter:none;
 }
 .v7-hero-head .howto-body{
   position:absolute;
@@ -6933,12 +6923,17 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   transform:rotate(45deg);
 }
 #introLand .mn{
-  display:grid;
-  place-items:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   width:26px;
   height:26px;
   min-width:26px;
   padding:0;
+  box-sizing:border-box;
+  overflow:hidden;
+  text-align:center;
+  text-indent:0;
   border:1px solid color-mix(in srgb,var(--color-primary) 58%,transparent);
   border-radius:50%;
   color:var(--color-primary);
@@ -6960,34 +6955,23 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 }
 @media(max-width:720px){
   .v7-hero-head{
-    grid-template-columns:minmax(0,1fr) 116px;
+    grid-template-columns:minmax(0,1fr) 176px;
     gap:14px;
-    min-height:130px;
+    min-height:142px;
   }
-  .tactical-board{width:112px;height:68px}
+  .tactical-board{width:170px;height:104px}
   .tactical-board::before{inset:6px}
-  .tactical-box{top:19px;height:28px;width:16px}
-  .tactical-token-1{left:12px;top:30px}
-  .tactical-token-2{left:35px;top:12px}
-  .tactical-token-3{left:39px;bottom:11px}
-  .tactical-token-4{right:31px;top:28px}
-  .tactical-token-5{right:11px;top:17px}
-  .tactical-pass-1{left:20px;top:33px;width:25px}
-  .tactical-pass-2{left:42px;top:19px;width:34px}
-  .tactical-pass-3{left:47px;bottom:16px;width:37px}
   .v7-hero-head .howto-wrap{
-    flex-direction:column;
-    align-items:flex-end;
-    gap:4px;
+    right:7px;
+    bottom:7px;
   }
-  .howto-prompt{font-size:8px}
+  #howtoToggle{min-height:27px;padding-inline:8px;font-size:8px}
   #introLand .mechanics{grid-template-columns:1fr}
   #introLand .mstep:not(:last-child)::after,
   #introLand .mstep:not(:last-child)::before{display:none}
 }
 @media(max-width:420px){
   .v7-hero-head{grid-template-columns:1fr;gap:10px}
-  .v7-hero-side{align-items:flex-start}
-  .tactical-board{display:none}
-  .v7-hero-head .howto-wrap{align-items:flex-start;flex-direction:row}
+  .v7-hero-side{align-items:flex-end}
+  .tactical-board{display:block;width:min(100%,260px);height:118px}
 }

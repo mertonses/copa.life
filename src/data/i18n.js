@@ -554,10 +554,6 @@ function _installCopaHowtoTranslations(){
 }
 
 function _applyCopaHeroTimeline(copy){
- var prompt={
-  tr:"İlk kez mi oynuyorsun?",en:"First time here?",es:"¿Es tu primera partida?",
-  de:"Zum ersten Mal dabei?",it:"È la prima volta?"
- };
  var steps={
   tr:[["Diziliş ve Başkan","Dizilişini ve başkanını seç."],["Zar At","Mevki adaylarını gör ve seç."],["Kadronu Kur","Kadronu kartlarla güçlendir."],["Finale Ulaş","Strateji kur; şansa güvenme."]],
   en:[["Formation & Chairman","Choose your formation and chairman."],["Roll","See and choose the position candidates."],["Build the Squad","Strengthen the squad with cards."],["Reach the Final","Build a plan; do not rely on luck."]],
@@ -565,7 +561,6 @@ function _applyCopaHeroTimeline(copy){
   de:[["Formation & Präsident","Wähle Formation und Präsident."],["Würfeln","Sieh dir Kandidaten an und wähle."],["Kader bauen","Verstärke den Kader mit Karten."],["Finale erreichen","Plane voraus; verlass dich nicht aufs Glück."]],
   it:[["Modulo e presidente","Scegli modulo e presidente."],["Lancia il dado","Valuta e scegli i candidati per ruolo."],["Crea la rosa","Rinforza la rosa con le carte."],["Raggiungi la finale","Fai un piano; non affidarti alla fortuna."]]
  };
- _setCopaText("howtoPrompt",prompt[LANG]||prompt.en);
  var selected=steps[LANG]||steps.en;
  document.querySelectorAll("#mechSection .mstep").forEach(function(step,index){
   var number=step.querySelector(".mn"),text=step.querySelector(".mt"),item=selected[index];
