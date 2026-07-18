@@ -1773,6 +1773,11 @@ function renderResult(){_renderResultFx(lastResult);const x=L(),r=lastResult,was
 
 const GHOST_RUN_RESULT_MODULE="./src/ui/ghostRunResult.js?v=20260718-ghost-result2";
 let _ghostRunResultModulePromise=null;
+let _ghostRunResultRetryTimer=0,_ghostRunResultDeferred=false;
+function ghostRunResultModalBusy(){
+  const modal=$("modal");
+  return !!(modal&&!modal.classList.contains("hidden"));
+}
 function ghostRunResultSnapshot(){
   const r=lastResult||{},x=L();
   const chairId=r.chairmanId||(chairman&&chairman.id);
@@ -1797,8 +1802,18 @@ function ensureGhostRunResult(){
   });
   return _ghostRunResultModulePromise;
 }
-function openGhostRunResult(){
-  return ensureGhostRunResult().then(api=>!!(api&&api.open(ghostRunResultSnapshot(),{
+function openGhostRunResult(onlyWhenIdle=false){
+  if(onlyWhenIdle&&ghostRunResultModalBusy()){
+    _ghostRunResultDeferred=true;
+    return Promise.resolve(false);
+  }
+  return ensureGhostRunResult().then(api=>{
+    if(onlyWhenIdle&&ghostRunResultModalBusy()){
+      _ghostRunResultDeferred=true;
+      return false;
+    }
+    _ghostRunResultDeferred=false;
+    return !!(api&&api.open(ghostRunResultSnapshot(),{
     restart:()=>restart(),
     share:()=>showShareTools(),
     enable:async()=>{
@@ -1810,7 +1825,12 @@ function openGhostRunResult(){
       window._completedGhostPublicId=publicId;
       window.setTimeout(()=>openGhostRunResult(),0);
     }
-  }))).catch(error=>{window._ghostRunResultError=String(error&&error.message||error||"unknown");showShareTools();return false;});
+    }));
+  }).catch(error=>{_ghostRunResultDeferred=false;window._ghostRunResultError=String(error&&error.message||error||"unknown");showShareTools();return false;});
+}
+function retryGhostRunResultOnce(){
+  clearTimeout(_ghostRunResultRetryTimer);
+  _ghostRunResultRetryTimer=setTimeout(showGhostRunResultOnce,350);
 }
 function showGhostRunResultOnce(){
   if(!window._completedGhostRunKey)return;
@@ -1818,8 +1838,12 @@ function showGhostRunResultOnce(){
   try{
     if(localStorage.getItem(noticeKey)===window._completedGhostRunKey)return;
   }catch(_){}
-  openGhostRunResult().then(opened=>{
-    if(!opened)return;
+  openGhostRunResult(true).then(opened=>{
+    if(!opened){
+      if(_ghostRunResultDeferred)retryGhostRunResultOnce();
+      return;
+    }
+    clearTimeout(_ghostRunResultRetryTimer);
     try{localStorage.setItem(noticeKey,window._completedGhostRunKey);}catch(_){}
   });
 }
