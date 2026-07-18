@@ -158,7 +158,7 @@ test("hub context and result details stay compact without hiding information",as
   await page.locator("#postClubName").fill("Mobile Result FK");
   await page.evaluate(()=>{(globalThis as any).pcGo();});
   await expect(page.locator("#hub")).toBeVisible();
-  await expect(page.locator("#mobileRoundDigest")).toBeVisible();
+  await expect(page.locator("#mobileRoundDigest")).toHaveCount(0);
   await page.evaluate(()=>{
     const global=globalThis as any;
     global.pushFeed("Mobil gelişme 1","form");
