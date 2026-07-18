@@ -145,13 +145,14 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(zeroEconomy).not.toContainText("En düşük kasa");
 });
 
-test("landing hero nests the guide in a larger tactical board and keeps the timeline aligned",async({page},testInfo)=>{
+test("landing hero places the guide left of the tactical board and keeps the timeline aligned",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator(".tactical-board")).toBeVisible();
-  await expect(page.locator(".tactical-board #howtoToggle")).toBeVisible();
+  await expect(page.locator(".v7-hero-side > #howtoWrap #howtoToggle")).toBeVisible();
+  await expect(page.locator(".tactical-board #howtoToggle")).toHaveCount(0);
   await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
   await expect(page.locator("#mechSection .mn")).toHaveText(["1","2","3","4"]);
   await expect(page.locator("#mechSection .mt small")).toHaveCount(4);
@@ -178,7 +179,8 @@ test("landing hero nests the guide in a larger tactical board and keeps the time
       opacity:Number(layer.opacity),
       numbers,
       boardWidth:board.width,
-      guideInside:guide.left>=board.left&&guide.right<=board.right-5&&guide.bottom<=board.bottom-5,
+      guideLeftOutside:guide.right<=board.left-6,
+      guideCenterDelta:Math.abs((guide.top+guide.bottom)/2-(board.top+board.bottom)/2),
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
@@ -187,7 +189,8 @@ test("landing hero nests the guide in a larger tactical board and keeps the time
   expect(layout.uniqueTops).toBe(testInfo.project.name.includes("mobile")?4:1);
   expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
-  expect(layout.guideInside).toBe(true);
+  expect(layout.guideLeftOutside).toBe(true);
+  expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
   expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));

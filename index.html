@@ -86,7 +86,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260718-hero-timeline2">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260718-hero-guide-outside1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260718-result-narrative2">
@@ -129,14 +129,14 @@ if("serviceWorker"in navigator){
         <p class="v7-hero-desc">Roguelite futbol kadro yönetim oyunu — her run farklı, hiçbir final kolay değil.</p>
       </div>
       <aside class="v7-hero-side">
+        <div class="howto-wrap" id="howtoWrap">
+          <button class="howto-toggle" id="howtoToggle" onclick="openHowtoModal()"></button>
+          <div class="howto-body hidden" id="howtoBody" aria-hidden="true"></div>
+        </div>
         <div class="tactical-board">
           <span class="tactical-midline"></span><span class="tactical-box tactical-box-a"></span><span class="tactical-box tactical-box-b"></span>
           <i class="tactical-token tactical-token-1"></i><i class="tactical-token tactical-token-2"></i><i class="tactical-token tactical-token-3"></i><i class="tactical-token tactical-token-4"></i><i class="tactical-token tactical-token-5"></i>
           <span class="tactical-pass tactical-pass-1"></span><span class="tactical-pass tactical-pass-2"></span><span class="tactical-pass tactical-pass-3"></span>
-          <div class="howto-wrap" id="howtoWrap">
-            <button class="howto-toggle" id="howtoToggle" onclick="openHowtoModal()"></button>
-            <div class="howto-body hidden" id="howtoBody" aria-hidden="true"></div>
-          </div>
         </div>
       </aside>
     </div>
