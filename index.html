@@ -86,7 +86,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260718-chair-picker-grid1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260718-tactical-board2">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260718-result-narrative2">
@@ -133,10 +133,32 @@ if("serviceWorker"in navigator){
           <button class="howto-toggle" id="howtoToggle" onclick="openHowtoModal()"></button>
           <div class="howto-body hidden" id="howtoBody" aria-hidden="true"></div>
         </div>
-        <div class="tactical-board">
-          <span class="tactical-midline"></span><span class="tactical-box tactical-box-a"></span><span class="tactical-box tactical-box-b"></span>
-          <i class="tactical-token tactical-token-1"></i><i class="tactical-token tactical-token-2"></i><i class="tactical-token tactical-token-3"></i><i class="tactical-token tactical-token-4"></i><i class="tactical-token tactical-token-5"></i>
-          <span class="tactical-pass tactical-pass-1"></span><span class="tactical-pass tactical-pass-2"></span><span class="tactical-pass tactical-pass-3"></span>
+        <div class="tactical-board" aria-hidden="true">
+          <svg class="tactical-diagram" viewBox="0 0 238 138" preserveAspectRatio="xMidYMid meet" focusable="false">
+            <g class="tactical-pitch" fill="none">
+              <path d="M8.5 8.5h221v121h-221z"/>
+              <path class="tactical-pitch-detail" d="M119 8.5v121m0-76a15.5 15.5 0 1 0 0 31 15.5 15.5 0 1 0 0-31m110.5-16h-22v63h22"/>
+            </g>
+            <g class="tactical-links" fill="none">
+              <path d="M42 91C58 86 72 78 85 75"/>
+              <path d="M93 78L121 97"/>
+              <path d="M130 96C145 82 154 61 164 49"/>
+              <path class="tactical-link-secondary" d="M93 72C117 55 140 46 163 44"/>
+            </g>
+            <g class="tactical-final-arrow" fill="none">
+              <path d="M173 47C188 50 198 59 204 67"/>
+              <path d="M198.5 64.5L204.5 67.5 203 61"/>
+            </g>
+            <g class="tactical-ball-carrier">
+              <circle class="tactical-carrier-halo" cx="36" cy="93" r="8"/>
+              <circle class="tactical-player" cx="36" cy="93" r="4"/>
+              <circle class="tactical-ball" cx="46" cy="98" r="1.8"/>
+            </g>
+            <circle class="tactical-player" cx="89" cy="75" r="4"/>
+            <circle class="tactical-player" cx="125" cy="100" r="4"/>
+            <circle class="tactical-player" cx="168" cy="44" r="4"/>
+            <circle class="tactical-player" cx="207" cy="71" r="4"/>
+          </svg>
         </div>
       </aside>
     </div>
