@@ -14,7 +14,7 @@
 
   const COPY={
     tr:{
-      title:"NASIL OYNANIR?",sub:"COPA'YI İKİ DAKİKADA ÖĞREN",quick:"Hızlı Başlangıç",detail:"Detaylı Rehber",
+      title:"COPA REHBERİ",sub:"COPA'YI İKİ DAKİKADA ÖĞREN",quick:"Hızlı Başlangıç",detail:"Detaylı Rehber",
       quickLead:"Üç fikri bil; ilk run'ını oynarken gerisini keşfet.",back:"OYUNA DÖN",close:"Kapat",
       quickItems:[
         ["Kadroyu kur","Diziliş ve başkanını seç; her mevki için gelen üç adaydan bütçene uyanı al."],
@@ -45,7 +45,7 @@
       gotIt:"ANLADIM",expand:"Detayı aç",collapse:"Detayı kapat"
     },
     en:{
-      title:"HOW TO PLAY?",sub:"LEARN COPA IN TWO MINUTES",quick:"Quick Start",detail:"Detailed Guide",
+      title:"COPA GUIDE",sub:"LEARN COPA IN TWO MINUTES",quick:"Quick Start",detail:"Detailed Guide",
       quickLead:"Know three ideas; discover the rest during your first run.",back:"BACK TO GAME",close:"Close",
       quickItems:[
         ["Build the squad","Pick a formation and chairman, then choose one of three candidates for each role."],
@@ -76,7 +76,7 @@
       gotIt:"GOT IT",expand:"Expand details",collapse:"Collapse details"
     },
     es:{
-      title:"¿CÓMO SE JUEGA?",sub:"APRENDE COPA EN DOS MINUTOS",quick:"Inicio rápido",detail:"Guía detallada",
+      title:"GUÍA COPA",sub:"APRENDE COPA EN DOS MINUTOS",quick:"Inicio rápido",detail:"Guía detallada",
       quickLead:"Aprende tres ideas y descubre el resto en tu primera partida.",back:"VOLVER AL JUEGO",close:"Cerrar",
       quickItems:[["Forma la plantilla","Elige formación y presidente; después ficha uno de tres candidatos por puesto."],["Lee bien la fuerza","La fuerza base recibe química, cartas y condiciones del partido."],["Mira cada coste","Deuda, lesiones y riesgos DARK pueden encarecer la fuerza inmediata."]],
       examples:["El 4-3-3 exige bandas y centrocampistas.","Gastar €6M también reduce el presupuesto para los puestos vacíos.","+3 de química añade aproximadamente +3 de fuerza.","Superar el límite de deuda puede acabar en despido.","Un suplente adecuado reduce la pérdida por lesión.","COMMON es estable; DARK ofrece más a cambio de un coste real."],
@@ -87,7 +87,7 @@
       gotIt:"ENTENDIDO",expand:"Abrir detalle",collapse:"Cerrar detalle"
     },
     de:{
-      title:"WIE SPIELT MAN?",sub:"COPA IN ZWEI MINUTEN",quick:"Schnellstart",detail:"Ausführliche Anleitung",
+      title:"COPA-GUIDE",sub:"COPA IN ZWEI MINUTEN",quick:"Schnellstart",detail:"Ausführliche Anleitung",
       quickLead:"Drei Grundideen reichen; den Rest lernst du im ersten Lauf.",back:"ZURÜCK ZUM SPIEL",close:"Schließen",
       quickItems:[["Kader bauen","Wähle Formation und Präsident, dann einen von drei Kandidaten pro Position."],["Stärke richtig lesen","Zur Grundstärke kommen Chemie, Karten und Spielbedingungen."],["Jeden Preis sehen","Schulden, Verletzungen und DARK-Risiken können kurzfristige Stärke verteuern."]],
       examples:["Ein 4-3-3 verlangt Flügel- und Mittelfeldrollen.","€6M Ausgaben verkleinern auch das Budget für offene Positionen.","+3 Chemie ergeben ungefähr +3 Spielstärke.","Unter dem Schuldenlimit droht trotz starkem Kader die Entlassung.","Der richtige Ersatz begrenzt den Verlust durch Verletzungen.","COMMON ist planbar; DARK gibt mehr Wirkung gegen echte Kosten."],
@@ -98,7 +98,7 @@
       gotIt:"VERSTANDEN",expand:"Details öffnen",collapse:"Details schließen"
     },
     it:{
-      title:"COME SI GIOCA?",sub:"IMPARA COPA IN DUE MINUTI",quick:"Avvio rapido",detail:"Guida dettagliata",
+      title:"GUIDA COPA",sub:"IMPARA COPA IN DUE MINUTI",quick:"Avvio rapido",detail:"Guida dettagliata",
       quickLead:"Bastano tre idee; scopri il resto nella prima partita.",back:"TORNA AL GIOCO",close:"Chiudi",
       quickItems:[["Crea la rosa","Scegli modulo e presidente, poi uno dei tre candidati per ogni ruolo."],["Leggi bene la forza","Alla forza base si aggiungono intesa, carte e condizioni partita."],["Valuta ogni costo","Debito, infortuni e rischi DARK possono rendere cara la forza immediata."]],
       examples:["Il 4-3-3 richiede ali e centrocampisti.","Spendere €6M riduce anche il budget per i ruoli vuoti.","+3 intesa aggiunge circa +3 forza.","Sotto il limite debiti rischi l'esonero anche con una rosa forte.","La riserva giusta limita la perdita per infortunio.","COMMON è prevedibile; DARK offre più impatto con un costo reale."],

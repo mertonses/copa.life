@@ -3,11 +3,11 @@ import { test, expect } from "@playwright/test";
 test("TR, EN, ES, DE and IT render the intro, guide, draft and fixture chrome",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single-browser locale contract");
   const expected:{[key:string]:{guide:string,round:string}}={
-    tr:{guide:"NASIL OYNANIR?",round:"1. TUR"},
-    en:{guide:"HOW TO PLAY?",round:"ROUND 1"},
-    es:{guide:"¿CÓMO SE JUEGA?",round:"RONDA 1"},
-    de:{guide:"WIE SPIELT MAN?",round:"RUNDE 1"},
-    it:{guide:"COME SI GIOCA?",round:"TURNO 1"},
+    tr:{guide:"COPA REHBERİ",round:"1. TUR"},
+    en:{guide:"COPA GUIDE",round:"ROUND 1"},
+    es:{guide:"GUÍA COPA",round:"RONDA 1"},
+    de:{guide:"COPA-GUIDE",round:"RUNDE 1"},
+    it:{guide:"GUIDA COPA",round:"TURNO 1"},
   };
   for(const [language,copy] of Object.entries(expected)){
     const errors:string[]=[];

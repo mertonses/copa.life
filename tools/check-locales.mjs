@@ -96,10 +96,10 @@ for(const language of ["es","de","it"]){
     if(!value||value===english)errors.push(`${language} UI key ${key} is missing or English`);
   }
   const guide=context.__howto[language];
-  if(!guide||!guide.title||!guide.subtitle||!guide.close||!guide.back)errors.push(`${language} How to Play chrome is incomplete`);
-  if(!guide||!Array.isArray(guide.steps)||guide.steps.length!==6)errors.push(`${language} How to Play must contain six translated steps`);
+  if(!guide||!guide.title||!guide.subtitle||!guide.close||!guide.back)errors.push(`${language} Copa Guide chrome is incomplete`);
+  if(!guide||!Array.isArray(guide.steps)||guide.steps.length!==6)errors.push(`${language} Copa Guide must contain six translated steps`);
   else guide.steps.forEach((step,index)=>{
-    if(!Array.isArray(step)||!step[0]||!step[1])errors.push(`${language} How to Play step ${index+1} is incomplete`);
+    if(!Array.isArray(step)||!step[0]||!step[1])errors.push(`${language} Copa Guide step ${index+1} is incomplete`);
   });
 }
 
