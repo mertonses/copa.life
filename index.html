@@ -86,13 +86,13 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260719-landing-tactics1">
-<link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260714-profile-retry1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260719-penalty-cleanup1">
+<link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260719-profile-hierarchy1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
-<link rel="stylesheet" href="src/styles/match.css?v=20260718-result-narrative2">
-<link rel="stylesheet" href="src/styles/finalReplay.css?v=20260717-replay-viewer1">
+<link rel="stylesheet" href="src/styles/match.css?v=20260719-pitch-score1">
+<link rel="stylesheet" href="src/styles/finalReplay.css?v=20260719-compact-replay1">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260718-mobile-action-dock1">
+<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260719-ui-bundle1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1a2e22);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -310,7 +310,7 @@ if("serviceWorker"in navigator){
 <script src="src/data/players_japan.js?v=20260714-japan1"></script>
 <script src="src/data/player_profile_store.js?v=20260715-copa-model1"></script>
 <script src="src/data/kits.js?v=20260711-stability1"></script>
-<script src="src/data/i18n.js?v=20260718-hero-copy3"></script>
+<script src="src/data/i18n.js?v=20260719-style-balance1"></script>
 <script src="src/core/clubName.js?v=20260714-club-security1"></script>
 <script src="src/core/squad.js?v=20260711-economy3"></script>
 <script src="src/game/generate.js?v=20260715-elite-position1"></script>
@@ -323,8 +323,8 @@ if("serviceWorker"in navigator){
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260718-advanced-settings1"></script>
-<script src="src/runtime/finalReplay.js?v=20260717-replay-viewer1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260719-ui-bundle1"></script>
+<script src="src/runtime/finalReplay.js?v=20260719-compact-replay1"></script>
 <script src="src/cards/cardDefs.js?v=20260718-contracts1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260713-playback2"></script>
@@ -339,8 +339,8 @@ if("serviceWorker"in navigator){
 <script src="src/audio/sfx.js?v=20260714-i18n1"></script>
 <script src="src/online/ghostClubs.js?v=20260718-advanced-settings1"></script>
 <script src="src/ui/hub.js?v=20260718-contracts1"></script>
-<script src="src/ui/playerProfiles.js?v=20260715-copa-model1"></script>
-<script src="src/ui/mobileExperience.js?v=20260718-mobile-action-dock1"></script>
+<script src="src/ui/playerProfiles.js?v=20260719-profile-hierarchy1"></script>
+<script src="src/ui/mobileExperience.js?v=20260719-ui-bundle1"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -2065,8 +2065,8 @@ function pickWeather(){currentWeather=WEATHERS[rand()*WEATHERS.length|0];}
 function weatherPowerBonus(){
   if(!currentWeather)return 0;
   const w=currentWeather.id;
-  if(w==='rain'){if(style==='kontra'||style==='press')return 2;if(style==='tiki')return -2;}
-  if(w==='wind'){if(style==='uzun')return 2;if(style==='kontra')return 1;if(style==='tiki'||style==='gegen')return -1;}
+  if(w==='rain'){if(style==='kontra'||style==='press')return 1;if(style==='tiki')return -1;}
+  if(w==='wind'){if(style==='uzun')return 2;if(style==='gegen')return -1;}
   return 0;
 }
 function pickCaptain(){
@@ -2843,7 +2843,6 @@ function _restorePenaltyCheckpoint(saved){
     window.keeperA=Number(context.keeperA)||0;window.keeperB=Number(context.keeperB)||0;
     window.goals=Array.isArray(context.goals)?_penClone(context.goals):[];
     if(context.lastMatchPerf&&typeof lastMatchPerf!=="undefined")lastMatchPerf=_penClone(context.lastMatchPerf);
-    window._penHistoryExpanded=false;
     _renderPenaltyModal();
     window._penaltyModalReady=true;
     return true;
@@ -2863,7 +2862,6 @@ function showPenaltyShootout(mode){
   try{closeModal();}catch(e){}
   if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();
   window._penaltyModalReady=false;
-  window._penHistoryExpanded=false;
   const fp=window._finalPenPower||{};
   const home=teamName||"COPA",away=opponent&&opponent.name?opponent.name:"Rakip";
   const homePlayers=_penNormalizePlayers((typeof picksBySlot!=="undefined"?picksBySlot:[]),home,fp.home||(lastMatchPerf&&lastMatchPerf.power)||75);
@@ -2955,11 +2953,6 @@ function _penRevealDesc(r){
   if(r.type==="post")return tr?pName+" direğe takıldı.":pName+" hits the woodwork.";
   return tr?pName+" dışarı vurdu.":pName+" drags it wide.";
 }
-function _penKeeperMoveText(dir){
-  const tr=LANG==="tr";
-  if(dir==="C")return tr?"ortada kaldı":"stayed central";
-  return tr?((dir==="L"?"sola":"sağa")+" atladı"):("dove "+(dir==="L"?"left":"right"));
-}
 function _penDots(arr,team,active){
   const tr=LANG==="tr";
   const len=Math.max(5,arr.length+(active?1:0));
@@ -2983,7 +2976,6 @@ function _renderPenaltyModal(){
   if(sudden&&!s.suddenAnnounced){s.suddenAnnounced=true;_penSfx("sudden_death_start");}
   const shootPhase=s.phase==="shoot";
   const phaseText=done?(homeWon?(sudden||s.sudden?(finalMode?(tr?"ANİ ÖLÜMDE KUPAYI ALDIN":"YOU WIN THE CUP IN SUDDEN DEATH"):(tr?"ANİ ÖLÜMDE TURU GEÇTİN":"YOU ADVANCE IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA KUPAYI ALDIN":"YOU WIN THE CUP ON PENALTIES"):(tr?"PENALTILARLA TURU GEÇTİN":"YOU ADVANCE ON PENALTIES"))):(sudden||s.sudden?(finalMode?(tr?"ANİ ÖLÜMDE FİNALİ KAYBETTİN":"LOST THE FINAL IN SUDDEN DEATH"):(tr?"ANİ ÖLÜMDE ELENDİN":"OUT IN SUDDEN DEATH")):(finalMode?(tr?"PENALTILARLA FİNALİ KAYBETTİN":"LOST THE FINAL ON PENALTIES"):(tr?"PENALTILARLA ELENDİN":"OUT ON PENALTIES")))):(shootPhase?(tr?"ŞUT SENDE":"YOUR KICK"):(tr?"KALECİ SENSİN":"YOU ARE THE KEEPER"));
-  const phaseBadge=done?"":("<i class=\"pen-phase-badge\">"+(shootPhase?(tr?"ŞUT":"SHOT"):(tr?"KURTARIŞ":"SAVE"))+"</i>");
   const shooter=shootPhase?_penActor(s,"home"):_penActor(s,"away");
   const keeper=shootPhase?s.awayKeeper:s.homeKeeper;
   const shooterName=_penPlayerName(shooter,shootPhase?s.home:s.away);
@@ -3022,10 +3014,6 @@ function _renderPenaltyModal(){
   const outcomeHtml=reveal
     ?"<div class=\"pen-outcome "+reveal.type+"\" aria-live=\"polite\"><b>"+_penHeadline(reveal.type,!reveal.byUser)+"</b><span>"+_penRevealDesc(reveal)+"</span></div>"
     :(done?"":"<div class=\"pen-outcome pen-outcome-idle\"><span>"+phaseSub+"</span></div>");
-  const log=s.log.slice(-6).reverse().map(function(l){
-    const desc=l.player+" "+_penDirLabel(l.shot).toLowerCase()+" "+(tr?"vurdu":"shot")+" · "+(l.keeperName||(tr?"kaleci":"keeper"))+" "+_penKeeperMoveText(l.keeper);
-    return "<div class=\"pen-log-row "+(l.type==="goal"?"pen-log-goal":l.type==="save"?"pen-log-save":"pen-miss")+"\"><span>"+l.no+"</span><div><strong>"+l.side+" — "+_penLogWord(l.type)+"</strong><em>"+desc+"</em></div></div>";
-  }).join("");
   const dirBtn=function(d,label,aria){return "<button type=\"button\" class=\"btn pen-dir-btn\" data-dir=\""+d+"\" aria-label=\""+aria+"\" onmouseenter=\"window._penHoverZone&&_penHoverZone('"+d+"')\" onmouseleave=\"window._penHoverZone&&_penHoverZone('')\" onfocus=\"window._penHoverZone&&_penHoverZone('"+d+"')\" onblur=\"window._penHoverZone&&_penHoverZone('')\" onclick=\"_takePenalty('"+d+"')\">"+label+"</button>";};
   const actionBtns=done
     ?"<button type=\"button\" class=\"btn btn-primary pen-continue\" onclick=\"_finishPenaltyShootout("+homeWon+")\">"+(finalMode&&homeWon?(tr?"KUPAYI KALDIR":"LIFT THE CUP"):(tr?"DEVAM":"CONTINUE"))+"</button>"
@@ -3039,10 +3027,6 @@ function _renderPenaltyModal(){
          +dirBtn("R",(tr?"SAĞA ATLA":"DIVE RIGHT")+" →",tr?"Sağa atla":"Dive right"))
       +"</div>";
   const actionDock="<div class=\"pen-action-dock\">"+actionBtns+"</div>";
-  const historyOpen=!!window._penHistoryExpanded;
-  const historyHtml=log
-    ?"<button type=\"button\" class=\"pen-log-toggle\" aria-expanded=\""+(historyOpen?"true":"false")+"\" onclick=\"_togglePenaltyHistory(this)\">"+(historyOpen?(tr?"PENALTI GEÇMİŞİNİ GİZLE":"HIDE PENALTY HISTORY"):(tr?"PENALTI GEÇMİŞİNİ GÖSTER":"SHOW PENALTY HISTORY"))+"</button><div class=\"pen-log"+(historyOpen?"":" is-collapsed")+"\">"+log+"</div>"
-    :"";
   const activeHome=!done&&shootPhase,activeAway=!done&&!shootPhase;
   /* Streak badge: your scoring streak (shoot) or your keeper's save streak (keep) */
   let homeStreakBadge="",awayStreakBadge="";
@@ -3057,17 +3041,8 @@ function _renderPenaltyModal(){
   /* Crowd reaction sweep on a fresh result */
   const crowdHtml=reveal?"<div class=\"pen-crowd "+reveal.type+"\" aria-hidden=\"true\"></div>":"";
   const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save")+((sudden||s.sudden)?" is-sudden":"");
-  showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\">"+phaseBadge+"<b>"+phaseText+"</b><span>"+phaseSub+"</span></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+historyHtml+actionDock+"</div>");
+  showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\"><b>"+phaseText+"</b></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+actionDock+"</div>");
 }
-window._togglePenaltyHistory=function(button){
-  const log=document.querySelector(".pen-modal .pen-log");if(!log)return;
-  window._penHistoryExpanded=!window._penHistoryExpanded;
-  log.classList.toggle("is-collapsed",!window._penHistoryExpanded);
-  if(button){
-    button.setAttribute("aria-expanded",window._penHistoryExpanded?"true":"false");
-    button.textContent=window._penHistoryExpanded?(LANG==="tr"?"PENALTI GEÇMİŞİNİ GİZLE":"HIDE PENALTY HISTORY"):(LANG==="tr"?"PENALTI GEÇMİŞİNİ GÖSTER":"SHOW PENALTY HISTORY");
-  }
-};
 /* Hover a direction button → highlight the matching goal zone (preview) */
 window._penHoverZone=function(d){const g=document.querySelector(".pen-modal .pen-goal");if(!g)return;g.classList.remove("hover-L","hover-C","hover-R");if(d)g.classList.add("hover-"+d);};
 /* Deterministic "reading" hint for the opposing shooter (spoiler-free) */

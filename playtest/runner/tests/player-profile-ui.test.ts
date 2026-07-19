@@ -30,22 +30,31 @@ test("player profile summary, six copa dimensions and insights stay responsive",
   await expect(page.locator(".player-profile-detail.is-country")).not.toContainText(/^Ana$/);
   await expect(page.locator(".player-profile-radar-scores span")).toHaveCount(6);
   await expect(page.locator(".player-profile-fit")).toContainText("75%");
+  await expect(page.locator(".player-profile-quick-meta .player-profile-style")).toBeVisible();
+  await expect(page.locator(".player-profile-quick-meta .player-profile-fit")).toBeVisible();
   await expect(page.locator(".player-profile-model-note")).toContainText("0–100");
   await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-tendency")).toBeVisible();
   await expect(page.locator("[data-profile-attributes]")).toHaveCount(0);
   await expect(page.locator(".player-profile-attribute-panel")).toHaveCount(0);
-  const radarWidth=await radar.evaluate(element=>element.getBoundingClientRect().width);
+  await expect(page.locator(".player-profile-radar text")).toHaveCount(0);
   if(testInfo.project.name.includes("mobile")){
-    expect(radarWidth).toBeGreaterThanOrEqual(260);
-    expect(radarWidth).toBeLessThanOrEqual(286);
+    await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
+    await expect(radar).toBeHidden();
+    await page.locator(".player-profile-radar-disclosure>summary").click();
+    await expect(radar).toBeVisible();
+    const radarWidth=await radar.evaluate(element=>element.getBoundingClientRect().width);
+    expect(radarWidth).toBeGreaterThanOrEqual(230);
+    expect(radarWidth).toBeLessThanOrEqual(250);
     await expect(layer).toHaveClass(/is-sheet/);
     const box=await card.boundingBox();
     expect(box?.width).toBeGreaterThan(400);
   }else{
-    expect(radarWidth).toBeGreaterThanOrEqual(300);
-    expect(radarWidth).toBeLessThanOrEqual(310);
+    await expect(page.locator(".player-profile-radar-disclosure")).toHaveAttribute("open","");
+    const radarWidth=await radar.evaluate(element=>element.getBoundingClientRect().width);
+    expect(radarWidth).toBeGreaterThanOrEqual(240);
+    expect(radarWidth).toBeLessThanOrEqual(250);
     await expect(layer).not.toHaveClass(/is-sheet/);
   }
 
@@ -124,6 +133,7 @@ test("coarse double tap opens the complete Android profile without an expensive 
   await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
   await expect(page.locator(".player-profile-analysis")).toBeVisible();
+  await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
   await expect(page.locator("body")).toHaveClass(/player-profile-open/);
   await expect(page.locator(".player-profile-close")).toBeFocused();
   expect(await page.locator("body").evaluate(element=>getComputedStyle(element).overflow)).toBe("hidden");

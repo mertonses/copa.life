@@ -294,26 +294,42 @@ test("chairman picker separates personality from mechanics and collapses safely 
     const pros=(root.querySelector(".cp-fx-pro") as HTMLElement).getBoundingClientRect();
     const cons=(root.querySelector(".cp-fx-con") as HTMLElement).getBoundingClientRect();
     const play=(root.querySelector(".cp-playstyle") as HTMLElement).getBoundingClientRect();
+    const portrait=(root.querySelector(".cp-portrait-frame") as HTMLElement).getBoundingClientRect();
+    const personaCopy=(root.querySelector(".cp-persona-copy") as HTMLElement).getBoundingClientRect();
+    const modalRect=(root as HTMLElement).getBoundingClientRect();
     const sheet=root.closest(".sheet") as HTMLElement;
     return{
       persona:{top:persona.top,right:persona.right,bottom:persona.bottom},
       mechanics:{top:mechanics.top,left:mechanics.left,bottom:mechanics.bottom},
-      order:pros.top<cons.top&&cons.top<play.top,
+      desktopOrder:Math.abs(pros.top-cons.top)<=1&&play.top>=Math.max(pros.bottom,cons.bottom)-1,
+      mobileOrder:pros.top<cons.top&&cons.top<play.top,
+      portrait:{left:portrait.left,right:portrait.right,width:portrait.width},
+      personaCopy:{left:personaCopy.left},
+      modalHeight:modalRect.height,
+      footerHeight:footer.getBoundingClientRect().height,
       footerPosition:getComputedStyle(footer).position,
       horizontalOverflow:sheet.scrollWidth-sheet.clientWidth,
       sheetRight:sheet.getBoundingClientRect().right,
       viewportWidth:window.innerWidth,
     };
   });
-  expect(layout.order).toBe(true);
   expect(layout.footerPosition).toBe("sticky");
+  expect(layout.footerHeight).toBeLessThanOrEqual(68);
   expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
   if(testInfo.project.name.includes("mobile")){
+    expect(layout.mobileOrder).toBe(true);
     expect(layout.mechanics.top).toBeGreaterThanOrEqual(layout.persona.bottom-1);
+    expect(layout.portrait.width).toBeLessThanOrEqual(88);
+    expect(layout.portrait.right).toBeLessThanOrEqual(layout.personaCopy.left+1);
+    await expect(modal.locator(".cp-playstyle")).not.toHaveAttribute("open","");
   }else{
+    expect(layout.desktopOrder).toBe(true);
     expect(Math.abs(layout.persona.top-layout.mechanics.top)).toBeLessThanOrEqual(1);
     expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
+    expect(layout.portrait.width).toBeLessThanOrEqual(220);
+    expect(layout.modalHeight).toBeLessThanOrEqual(520);
+    await expect(modal.locator(".cp-playstyle")).toHaveAttribute("open","");
     await expect(modal.locator(".cp-nav-btn small")).toHaveCount(2);
     await expect(modal.locator(".cp-nav-btn small").first()).toBeVisible();
   }

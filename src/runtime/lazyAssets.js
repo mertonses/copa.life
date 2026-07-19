@@ -25,7 +25,7 @@
   }
   function ensureFinalSim(){
     return ensureMatchCore()
-      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260718-shared-core1",()=>typeof global.buildSim==="function")).then(()=>{
+      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260719-penalty-cleanup1",()=>typeof global.buildSim==="function")).then(()=>{
       if(typeof global._copaSimPauseUi==="function")global.simPause=global._copaSimPauseUi;
     });
   }
@@ -37,8 +37,8 @@
   }
   function ensureChairPicker(){
     return Promise.all([
-      loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260718-grid1",'link[href*="chairPicker.css"]'),
-      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260718-grid1",()=>!!global.CopaChairPicker)
+      loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260719-compact-chair1",'link[href*="chairPicker.css"]'),
+      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260719-compact-chair1",()=>!!global.CopaChairPicker)
     ]).then(()=>global.CopaChairPicker);
   }
   function ensureAdvancedSettings(){
@@ -51,7 +51,7 @@
     return loadScriptOnce("scout-report","src/ui/scoutReport.js?v=20260719-lazy1",()=>!!global.ScoutReport).then(()=>global.ScoutReport);
   }
   function ensureLastMatchReport(){
-    return loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260719-lazy1",()=>!!global.LastMatchReport).then(()=>global.LastMatchReport);
+    return loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260719-pitch-score1",()=>!!global.LastMatchReport).then(()=>global.LastMatchReport);
   }
   function warmRunReports(){
     return Promise.all([ensureScoutReport(),ensureLastMatchReport()]);

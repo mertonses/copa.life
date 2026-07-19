@@ -11,6 +11,24 @@ const setupHub=async(page:any)=>{
 };
 
 test.describe("run lifecycle and recovery",()=>{
+  test("play styles expose their real tradeoffs and use the rebalanced weather effects",async({page})=>{
+    await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
+    await page.evaluate(()=>{(globalThis as any).setLang("tr");(globalThis as any).normalStart();});
+    await expect(page.locator('[data-style="gegen"] .ssd')).toContainText("+%3,5");
+    await expect(page.locator('[data-style="kontra"] .ssd')).toContainText("yağmurda +1");
+    await expect(page.locator('[data-style="tiki"] .ssd')).toContainText("yağmurda -1");
+    const balance=await page.evaluate(()=>{
+      style="kontra";currentWeather={id:"rain"};const counterRain=weatherPowerBonus();
+      currentWeather={id:"wind"};const counterWind=weatherPowerBonus();
+      style="tiki";currentWeather={id:"rain"};const possessionRain=weatherPowerBonus();
+      currentWeather={id:"wind"};const possessionWind=weatherPowerBonus();
+      style="gegen";currentWeather={id:"sun"};const gegenRisk=injuryRiskFor(70);
+      style="tiki";const baselineRisk=injuryRiskFor(70);
+      return{counterRain,counterWind,possessionRain,possessionWind,injuryRiskDelta:Number((gegenRisk-baselineRisk).toFixed(3))};
+    });
+    expect(balance).toEqual({counterRain:1,counterWind:0,possessionRain:-1,possessionWind:0,injuryRiskDelta:.035});
+  });
+
   test("complete run traverses hub, match, reward and result phases",async({page})=>{
     await setupHub(page);
     for(let expectedRound=2;expectedRound<=6;expectedRound++){
