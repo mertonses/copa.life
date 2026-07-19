@@ -1,6 +1,7 @@
 /* Yerel denge telemetrisi. Yalnızca toplulaştırılmış oyun sayılarını saklar. */
 var BALANCE_TELEMETRY_KEY="copa_balance_telemetry_v1";
 var balanceTelemetryRun=null;
+var CHAIRMAN_METRIC_KEYS=["consults","positiveEvents","negativeEvents","neutralEvents","penaltyWins","penaltyLosses","spotlightSelections","starTransferBonuses","nephewAccepted","nephewRejected","chaosOffers","chaosRolls","savingsEarned","savingsCash","savingsPower","savingsResidualCash","premiumCardsOffered","premiumCardsPurchased"];
 
 function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},updatedAt:0};}
 function _btLoad(){
@@ -20,6 +21,14 @@ function _btCard(data,key){
  else Object.keys(empty).forEach(k=>{if(typeof data.cards[key][k]!=="number")data.cards[key][k]=empty[k];});
  return data.cards[key];
 }
+function _btChair(data,id){
+ const empty={runs:0,finalReached:0,champion:0,sacked:0};
+ CHAIRMAN_METRIC_KEYS.forEach(key=>{empty[key]=0;});
+ const cid=String(id||"unknown");
+ if(!data.chairmen[cid])data.chairmen[cid]=empty;
+ else Object.keys(empty).forEach(key=>{if(typeof data.chairmen[cid][key]!=="number")data.chairmen[cid][key]=empty[key];});
+ return data.chairmen[cid];
+}
 function _btEnsureRun(){
  if(!balanceTelemetryRun)balanceTelemetryRun={chairman:"unknown",cards:{},startedAt:Date.now()};
  return balanceTelemetryRun;
@@ -27,6 +36,16 @@ function _btEnsureRun(){
 function startBalanceTelemetry(meta){
  meta=meta||{};
  balanceTelemetryRun={chairman:String(meta.chairman||"unknown"),cards:{},startedAt:Date.now()};
+}
+function trackChairmanMetric(metric,amount,chairmanId){
+ const key=String(metric||"");
+ if(!CHAIRMAN_METRIC_KEYS.includes(key))return;
+ const value=Number(amount);
+ if(!Number.isFinite(value)||value===0)return;
+ const run=_btEnsureRun(),cid=String(chairmanId||(typeof chairman!=="undefined"&&chairman&&chairman.id)||run.chairman||"unknown");
+ const data=_btLoad(),row=_btChair(data,cid);
+ row[key]+=value;
+ _btSave(data);
 }
 function trackCardOffered(k,v,price){
  const data=_btLoad(),row=_btCard(data,_btKey(k,v));
@@ -82,8 +101,7 @@ function finishBalanceTelemetry(won,meta){
  const finalReached=!!meta.finalReached;
  Object.keys(run.cards).forEach(key=>{const row=_btCard(data,key);row.runsOwned++;if(finalReached)row.finalReached++;if(won)row.champion++;});
  const cid=String(meta.chairman||run.chairman||"unknown");
- if(!data.chairmen[cid])data.chairmen[cid]={runs:0,finalReached:0,champion:0,sacked:0};
- const chair=data.chairmen[cid];chair.runs++;if(finalReached)chair.finalReached++;if(won)chair.champion++;if(meta.endType==="sacked")chair.sacked++;
+ const chair=_btChair(data,cid);chair.runs++;if(finalReached)chair.finalReached++;if(won)chair.champion++;if(meta.endType==="sacked")chair.sacked++;
  _btSave(data);balanceTelemetryRun=null;
 }
 function getBalanceTelemetry(){return _btLoad();}

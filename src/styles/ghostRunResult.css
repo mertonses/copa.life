@@ -146,8 +146,9 @@
     padding:0;
   }
   .ghost-run-shell{
-    width:100%;
-    max-height:min(92dvh,760px);
+    width:calc(100% - 12px);
+    max-height:min(90dvh,740px);
+    margin-inline:auto;
     overflow:auto;
     border-radius:16px 16px 0 0;
     border-bottom:0;

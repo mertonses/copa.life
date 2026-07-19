@@ -56,7 +56,7 @@ async function finishRun(page:Page,options:{ghost?:boolean;zeroEconomy?:boolean;
   await expect(page.locator("#result")).toBeVisible();
 }
 
-test("completed shared run becomes a Ghost Club continuity moment and nests share tools",async({page})=>{
+test("completed shared run becomes a Ghost Club continuity moment and nests share tools",async({page},testInfo)=>{
   await finishRun(page,{ghost:true});
   const shell=page.locator(".ghost-run-shell");
   await expect(shell).toBeVisible();
@@ -68,6 +68,16 @@ test("completed shared run becomes a Ghost Club continuity moment and nests shar
   await expect(shell.locator(".ghost-run-seed-row code")).toHaveText(/^#\d{4,5}$/);
   await expect(shell).not.toContainText("PNG");
   await expect(shell.locator("[data-ghost-restart]")).toHaveText("YENİ RUN BAŞLAT");
+  if(testInfo.project.name.includes("mobile")){
+    const viewport=page.viewportSize()!;
+    const modalSize=await shell.evaluate(element=>{
+      const rect=element.getBoundingClientRect();
+      return{width:rect.width,height:rect.height};
+    });
+    expect(modalSize.width).toBeGreaterThanOrEqual(viewport.width-14);
+    expect(modalSize.width).toBeLessThan(viewport.width);
+    expect(modalSize.height).toBeLessThanOrEqual(Math.min(viewport.height*.9,740)+1);
+  }
 
   await shell.locator("[data-ghost-seed]").click();
   await expect(shell.locator("[data-ghost-seed]")).toHaveText("SEED KOPYALANDI");
@@ -99,8 +109,9 @@ test("completed unshared run shows a truthful Ghost offer and becomes ready afte
   await shell.locator("[data-ghost-enable]").click();
   const consent=page.locator("#ghostConsentDialog");
   await expect(consent).toBeVisible();
-  await consent.locator("[data-ghost-terms]").check();
-  await consent.locator("[data-ghost-sharing]").check();
+  await expect(consent.locator("input[type=checkbox]")).toHaveCount(0);
+  await expect(consent.locator(".ghost-consent-confirm")).toContainText("İznini ayarlardan dilediğin zaman geri çekebilirsin");
+  await expect(consent.locator("[data-ghost-accept]")).toBeEnabled();
   await consent.locator("[data-ghost-accept]").click();
   await expect(page.locator(".ghost-run-shell h2")).toHaveText("HAYALET KULÜBÜN HAZIR");
   await expect(page.locator(".ghost-run-status")).toHaveText("HAVUZDA");
@@ -145,13 +156,15 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(zeroEconomy).not.toContainText("En düşük kasa");
 });
 
-test("landing hero places the guide left of the tactical board and keeps the timeline aligned",async({page},testInfo)=>{
+test("landing hero keeps the desktop tactics and uses the compact mobile guide grid",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
+  const isMobile=testInfo.project.name.includes("mobile");
   await expect(page.locator(".v7-hero-desc")).toHaveText("Her seçiminle yeni bir futbol hikâyesi yaz.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
-  await expect(page.locator(".tactical-board")).toBeVisible();
+  if(isMobile)await expect(page.locator(".tactical-board")).toBeHidden();
+  else await expect(page.locator(".tactical-board")).toBeVisible();
   await expect(page.locator(".tactical-board .tactical-player")).toHaveCount(5);
   await expect(page.locator(".tactical-board .tactical-ball-carrier")).toHaveCount(1);
   await expect(page.locator(".tactical-board .tactical-final-arrow")).toHaveCount(1);
@@ -175,11 +188,13 @@ test("landing hero places the guide left of the tactical board and keeps the tim
         justifyContent:getComputedStyle(element).justifyContent,
       };
     });
-    const board=(document.querySelector(".tactical-board") as HTMLElement).getBoundingClientRect();
+    const boardElement=document.querySelector(".tactical-board") as HTMLElement;
+    const board=boardElement.getBoundingClientRect();
     const diagram=document.querySelector(".tactical-diagram") as SVGElement;
     const secondaryLink=getComputedStyle(document.querySelector(".tactical-link-secondary") as SVGElement);
     const pitchDetail=getComputedStyle(document.querySelector(".tactical-pitch-detail") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
+    const heroSide=(document.querySelector(".v7-hero-side") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
     const connector=document.querySelector("#mechSection .mstep") as HTMLElement;
     const connectorLine=getComputedStyle(connector,"::after");
@@ -193,10 +208,12 @@ test("landing hero places the guide left of the tactical board and keeps the tim
       overflow:document.getElementById("introLand")!.scrollWidth-document.getElementById("introLand")!.clientWidth,
       opacity:Number(layer.opacity),
       numbers,
+      boardHidden:getComputedStyle(boardElement).display==="none",
       boardWidth:board.width,
       diagramRatio:diagram.getBoundingClientRect().width/diagram.getBoundingClientRect().height,
       mobileDetailHidden:secondaryLink.display==="none"&&pitchDetail.display==="none",
       guideLeftOutside:guide.right<=board.left-6,
+      guideRightDelta:Math.abs(heroSide.right-guide.right),
       guideCenterDelta:Math.abs((guide.top+guide.bottom)/2-(board.top+board.bottom)/2),
       connectorCenterDelta,
     };
@@ -204,15 +221,21 @@ test("landing hero places the guide left of the tactical board and keeps the tim
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.opacity).toBeGreaterThanOrEqual(.03);
   expect(layout.opacity).toBeLessThanOrEqual(.05);
-  expect(layout.uniqueTops).toBe(testInfo.project.name.includes("mobile")?4:1);
+  expect(layout.uniqueTops).toBe(isMobile?2:1);
   expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
-  expect(layout.guideLeftOutside).toBe(true);
-  expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
-  if(!testInfo.project.name.includes("mobile"))expect(layout.connectorCenterDelta).toBeLessThanOrEqual(.1);
-  expect(layout.boardWidth).toBeGreaterThanOrEqual(testInfo.project.name.includes("mobile")?160:230);
-  expect(layout.diagramRatio).toBeCloseTo(238/138,1);
-  expect(layout.mobileDetailHidden).toBe(testInfo.project.name.includes("mobile"));
+  expect(layout.boardHidden).toBe(isMobile);
+  if(isMobile){
+    expect(layout.boardWidth).toBe(0);
+    expect(layout.guideRightDelta).toBeLessThanOrEqual(1);
+  }else{
+    expect(layout.guideLeftOutside).toBe(true);
+    expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
+    expect(layout.connectorCenterDelta).toBeLessThanOrEqual(.1);
+    expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
+    expect(layout.diagramRatio).toBeCloseTo(238/138,1);
+    expect(layout.mobileDetailHidden).toBe(false);
+  }
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
   await expect(page.locator(".v7-hero-desc")).toHaveText("Schreibe mit jeder Entscheidung eine neue Fußballgeschichte.");

@@ -8,11 +8,11 @@
     },
     leydi:{
       tag:{tr:"Dengeli",en:"Balanced",es:"Equilibrio",de:"Ausgewogen",it:"Equilibrio"},
-      style:{tr:"Yerli oyuncu ve pozitif kimya üzerine kurulan dengeli kadroları ödüllendirir.",en:"Rewards balanced squads built around local players and positive chemistry.",es:"Premia las plantillas equilibradas basadas en jugadores locales y química positiva.",de:"Belohnt ausgewogene Kader mit einheimischen Spielern und positiver Chemie.",it:"Premia le rose equilibrate costruite su giocatori locali e chimica positiva."}
+      style:{tr:"Draftta yerli adaylara öncelik verir; toplam kimyaya göre maçlık +1 ya da -1 güç uygular.",en:"Prioritises local draft candidates and applies +1 or -1 match power from total chemistry.",es:"Premia las plantillas equilibradas basadas en jugadores locales y química positiva.",de:"Belohnt ausgewogene Kader mit einheimischen Spielern und positiver Chemie.",it:"Premia le rose equilibrate costruite su giocatori locali e chimica positiva."}
     },
     pinti:{
       tag:{tr:"Ekonomi",en:"Economy",es:"Economía",de:"Finanzen",it:"Economia"},
-      style:{tr:"İndirim ve pozitif kasa disipliniyle düşük maliyetli, kontrollü bir run ister.",en:"Favors a controlled, low-cost run built on discounts and keeping the books in the black.",es:"Favorece una partida controlada y barata basada en descuentos y caja positiva.",de:"Fördert einen kontrollierten, günstigen Run mit Rabatten und positiver Kasse.",it:"Favorisce una run controllata e a basso costo, basata su sconti e cassa positiva."}
+      style:{tr:"Transfer indirimi ve tur birikimi sağlar; premium kartları kaldırmaz, ek fiyatla sunar.",en:"Offers transfer discounts and round savings; premium cards remain available with a surcharge.",es:"Favorece una partida controlada y barata basada en descuentos y caja positiva.",de:"Fördert einen kontrollierten, günstigen Run mit Rabatten und positiver Kasse.",it:"Favorisce una run controllata e a basso costo, basata su sconti e cassa positiva."}
     },
     sansasyoncu:{
       tag:{tr:"Risk",en:"Risk",es:"Riesgo",de:"Risiko",it:"Rischio"},
@@ -24,7 +24,7 @@
     },
     cilgin:{
       tag:{tr:"Kaos",en:"Chaos",es:"Caos",de:"Chaos",it:"Caos"},
-      style:{tr:"Geniş borç marjını öngörülemez krizlerle takas eden kaos odaklı bir oyun sunar.",en:"Offers a chaos-first game that trades a wide debt margin for unpredictable crises.",es:"Propone un juego caótico que cambia un amplio margen de deuda por crisis imprevisibles.",de:"Tauscht einen breiten Kreditspielraum gegen unvorhersehbare Krisen und maximales Chaos.",it:"Scambia un ampio margine di debito con crisi imprevedibili e una gestione caotica."}
+      style:{tr:"Geniş borç marjını öngörülemez krizlerle takas eder ve DARK kartları oyuna çağırır.",en:"Trades a wide debt margin for unpredictable crises and draws DARK cards into the run.",es:"Propone un juego caótico que cambia un amplio margen de deuda por crisis imprevisibles.",de:"Tauscht einen breiten Kreditspielraum gegen unvorhersehbare Krisen und maximales Chaos.",it:"Scambia un ampio margine di debito con crisi imprevedibili e una gestione caotica."}
     }
   };
 

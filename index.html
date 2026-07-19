@@ -335,8 +335,6 @@ if("serviceWorker"in navigator){
 <script src="src/ui/hub.js?v=20260718-contracts1"></script>
 <script src="src/ui/playerProfiles.js?v=20260715-copa-model1"></script>
 <script src="src/ui/mobileExperience.js?v=20260718-mobile-action-dock1"></script>
-<script src="src/ui/lastMatchReport.js?v=20260714-last-match-report1"></script>
-<script src="src/ui/scoutReport.js?v=20260714-scout-overflow1"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -413,6 +411,7 @@ function _signFreeAgent(ai){
   const a=fa[ai];if(!canAffordCost(a.fee))return;
   freeAgentBoughtThisTurn++;
   spend(a.fee,"spent");
+  if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(a.fee,"transfer",a.p);
   const p=a.p;p.used=false;p.bench=true;
   bench.push(p);
   window._freeAgents.splice(ai,1);
@@ -606,11 +605,11 @@ function pickChair(id){selectedChairId=id;if(window.CopaAnalytics)window.CopaAna
 function confirmChair(id){selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));buildChairButtons();closeModal();}
 const _CHAIR_FX={
   babacan:{pros:{tr:["Borç limiti €28M — en geniş marj","Her turda küçük finansal destek gelebilir"],en:["€28M debt limit — widest margin","Small financial boost possible each round"]},cons:{tr:["Finalde −2 güç bırakabilir"],en:["May impose −2 power in the final"]}},
-  leydi:{pros:{tr:["Draftta yerli oyuncu çıkma ihtimali +%20","Kimya +3 ve üstüyse maçlık +1 güç"],en:["Local-player draft preference +20%","+1 match power at chemistry +3 or higher"]},cons:{tr:["Negatif kimyada maçlık -1 güç","Borç limiti €20M"],en:["-1 match power with negative chemistry","€20M debt limit"]}},
-  pinti:{pros:{tr:["Transfer fiyatları %10 indirimli","Pozitif kasayla biten her tur €2M birikim"],en:["Transfer prices 10% cheaper","€2M saved after each round finished in the black"]},cons:{tr:["Borç limiti €14M — en sıkı kısıt"],en:["€14M debt limit — tightest constraint"]}},
+  leydi:{pros:{tr:["Draftta yerli adayları tercih eder","Toplam kimya +3 ve üstüyse maçlık +1 güç"],en:["Prefers local candidates in the draft","+1 match power when total chemistry is +3 or higher"]},cons:{tr:["Negatif kimyada maçlık -1 güç","Borç limiti €21M"],en:["-1 match power with negative chemistry","€21M debt limit"]}},
+  pinti:{pros:{tr:["Transfer fiyatları %10 indirimli","Pozitif kasayla biten her tur €2M birikim","Birikim finalde güce veya kasaya çevrilir"],en:["Transfer prices 10% cheaper","€2M saved after each round finished in the black","Savings convert to final power or cash"]},cons:{tr:["Premium kartlar ek fiyatlıdır","Borç limiti €14M — en sıkı kısıt"],en:["Premium cards carry a surcharge","€14M debt limit — tightest constraint"]}},
   sansasyoncu:{pros:{tr:["Güç 85+ transferlerde tur başına tek medya bonusu","Tek maçlık Spotlight gücü"],en:["One media bonus per round for 85+ signings","One-match Spotlight power"]},cons:{tr:["Kart pazarı pahalı","Spotlight sakatlanırsa sonraki pazar daha pahalı","Borç limiti €22M"],en:["Expensive card market","Spotlight injury inflates the next market","€22M debt limit"]}},
-  torpilci:{pros:{tr:["Kabul edilen yeğen her tur +1 gelişir","Yeğen kabulünde €3M destek"],en:["Accepted nephew develops +1 each round","€3M subsidy when accepting the nephew"]},cons:{tr:["Run'da bir kez zorunlu yeğen kararı","Reddedersen borç limiti €5M daralır","Borç limiti €16M"],en:["One guaranteed nephew decision per run","Rejection tightens the debt limit by €5M","€16M debt limit"]}},
-  cilgin:{pros:{tr:["Borç limiti €29M","Pozitif kaos bonusu çıkabilir"],en:["€29M debt limit","Positive chaos bonus can trigger"]},cons:{tr:["Kararlar öngörülemez","Bütçe krizleri €28M toplam kayıpla tavanlanır"],en:["Decisions are unpredictable","Budget-crisis loss is capped at €28M"]}},
+  torpilci:{pros:{tr:["Kabul edilen yeğen her tur +3 gelişir","Yeğen kabulünde €3M destek"],en:["Accepted nephew develops +3 each round","€3M subsidy when accepting the nephew"]},cons:{tr:["Run'da bir kez zorunlu yeğen kararı","Reddedersen borç limiti €3M daralır","Borç limiti €16M"],en:["One guaranteed nephew decision per run","Rejection tightens the debt limit by €3M","€16M debt limit"]}},
+  cilgin:{pros:{tr:["Borç limiti €29M","Pozitif kaos bonusu çıkabilir","DARK kartları çağırır"],en:["€29M debt limit","Positive chaos bonus can trigger","Draws DARK cards into the market"]},cons:{tr:["Kararlar ve kartlar öngörülemez","Bütçe krizleri €28M toplam kayıpla tavanlanır"],en:["Decisions and cards are unpredictable","Budget-crisis loss is capped at €28M"]}},
 };
 function showChairPopup(id){
   if(!(window.CopaChairPicker&&typeof window.CopaChairPicker.render==="function")){
@@ -667,6 +666,12 @@ function _ensureDraftKasa(){
   </div>`;
 }
 function _fmtMoney(v){return (v<0?"−":"")+"€"+Math.abs(Math.round(v))+"M";}
+function _resetMobileDraftScroll(){
+  if(!window.matchMedia||!window.matchMedia("(max-width:760px)").matches)return;
+  const reset=()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);};
+  reset();
+  requestAnimationFrame(()=>{reset();requestAnimationFrame(reset);});
+}
 function _renderKasaTile(rootId,prefix){
   const kt=$(rootId);if(!kt)return;
   const tr=LANG==="tr",bv=Math.round(budget||0);
@@ -692,12 +697,14 @@ function _renderKasaTile(rootId,prefix){
   if(safe)safe.style.width=(Math.max(0,pos-zero)*100).toFixed(1)+"%";
   if(safe)safe.style.left=(zero*100).toFixed(1)+"%";
 }
-function beginDraft(){window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
+function beginDraft(){window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;lotteryCouponAmount=0;lotteryCouponTurns=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
+  medicalProtectionTurns=0;
+  window._postMatchResolvedRound=0;
   window._ghostSeenIds=[];window._ghostCheckedRounds=[];window._ghostOpponentUsed=false;window._ghostOpponentId="";
   window.CopaRunState&&window.CopaRunState.transition("draft",{force:true,reason:"new_run"});
   if(window.GhostClubs&&typeof window.GhostClubs.beginRun==="function")window.GhostClubs.beginRun({seed:seedNum,country:selectedCountry,clubName:teamName,cheatRun:!!window._runUsesCheatSeed});
   if(window.CopaAnalytics)window.CopaAnalytics.track("draft_started",analyticsBalanceProps({round:1}));
-  shopBlocked=0;presidentBlocked=0;cardPriceMod=1.0;cardPriceModTurns=0;
+  shopBlocked=0;presidentBlocked=0;cardPriceMod=1.0;cardPriceModTurns=0;dopingInvestigationResolved=0;
   deferredBudgetPenalty=0;deferredPowerPenalty=0;oppPowerMod=0;draftFatigueTurns=0;draftDebtTurns=0;draftPendingInjury=0;
   shopVariantLock={};
   kurbanScheduled={count:0,turns:0};
@@ -705,6 +712,7 @@ function beginDraft(){window._finalTacticDone=false;window.lastMatchReportData=n
   if(window._wantPenalties){_cheatPenaltyLaunch();return;}
   const _jumpToFinal=!!window._wantFinal;if(_jumpToFinal)window._wantFinal=false;
   $("intro").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.add("hidden");$("fixbar").classList.add("hidden");$("draft").classList.remove("hidden");$("budgetBox").classList.add("introhide");_ensureDraftKasa();
+  _resetMobileDraftScroll();
   $("ddbanner").classList.remove("hidden");updateDeadline();buildPitch($("pitch"));setBudget();applyStatic();loadRollStage();renderDraftExtra();_saveState();
   if(_jumpToFinal){
     round=6;opponent=bracket[5]||bracket[bracket.length-1]||{name:"Final Rakibi",power:80};
@@ -912,6 +920,7 @@ function renderFixtures(){
 function genOppLineup(){const base=opponent.power,f433=FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=f433.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const source=oppPick(g),nm=source[0],item={name:nm,ov,pos:s[0],natPos:s[0],grp:g,side,club:source[3]||"",age:source[4]||0};if(typeof playerProfileKey==="function")item.profileKey=playerProfileKey(selectedCountry,nm,item.club,item.age);return item;});oppXI=oppLineup.map(o=>o.name);
   let has=false;slots.forEach((s,i)=>{const p=picksBySlot[i];if(!p)return;const x=s[1],onSide=weakFlank==="L"?x<42:weakFlank==="R"?x>58:(x>=42&&x<=58);if(onSide&&(FWDP.includes(s[0])||groupOf(s[0])==="FWD"))has=true;});matchupBonus=(has?1:0)-opponentEdge(squadPower(round).power,opponent.power);}
 function openScout(){
+  if(!window.ScoutReport&&window.CopaLazy){CopaLazy.ensureScoutReport().then(openScout).catch(()=>{});return;}
   const x=L();
   const misled=rand()<0.3,bias=misled?ri(-9,9):0;
   const displayPow=Math.max(30,Math.min(99,opponent.power+bias));
@@ -983,14 +992,16 @@ function benchOptionsFor(pos){
 /* ===== Torpilci: yeğen reddi ===== */
 function _torpilNephewChoice(oc){
   const tr=LANG==="tr";
+  eventSeen.nephewDecision=true;
   const lim=Math.abs(chairmanSackLimit());
-  showModal(`<div class="bulletin"><div class="bhead"><span>${L().presHead}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG.nephew}</div><div class="bhl">${tr?"Torpilli Oyuncu Teklifi":"Cronyism Offer"}</div><div class="bbody">${tr?"Başkan yeğenini kadroya almak istiyor.":"The chairman wants his nephew in the squad."}</div><div class="beff down">${tr?"Reddetmek borç toleransını €5M daraltır":"Declining tightens debt tolerance by €5M"}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();_acceptNephew()">${tr?"Kabul Et":"Accept"}</button><button class="btn btn-ghost" onclick="closeModal();_rejectNephew()">${tr?"Reddet (limit: €"+(lim-5)+"M)":"Reject (limit: €"+(lim-5)+"M)"}</button></div></div>`);
+  showModal(`<div class="bulletin"><div class="bhead"><span>${L().presHead}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG.nephew}</div><div class="bhl">${tr?"Torpilli Oyuncu Teklifi":"Cronyism Offer"}</div><div class="bbody">${tr?"Başkan yeğenini kadroya almak istiyor.":"The chairman wants his nephew in the squad."}</div><div class="beff down">${tr?"Reddetmek borç toleransını €3M daraltır":"Declining tightens debt tolerance by €3M"}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();_acceptNephew()">${tr?"Kabul Et":"Accept"}</button><button class="btn btn-ghost" onclick="closeModal();_rejectNephew()">${tr?"Reddet (limit: €"+(lim-3)+"M)":"Reject (limit: €"+(lim-3)+"M)"}</button></div></div>`);
   window._pendingNephewOc=oc;
 }
 function _acceptNephew(){
   const oc=window._pendingNephewOc;window._pendingNephewOc=null;if(!oc)return;
   const x=L();const _namesBefore=picksBySlot.map(p=>p?p.name:null);let info=downgradeSlot(oc.down[0],oc.down[1]);setBudget();
   picksBySlot.forEach((p,i)=>{if(p&&_namesBefore[i]!==p.name){p.isNephew=true;}});
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric("nephewAccepted",1);
   earn(3,"earned");addFinalPenalty(2,"torpil_nephew");
   pushFeed("‍ "+(LANG==="tr"?"Kontenjan kolaylığı: +€3M · finalde -2 güç riski":"Crony subsidy: +€3M · -2 final power risk"),"pres");
   const t=x.pp[oc.id](info);sfxStamp();if(info&&info.delta)sfxCoin();pushFeed(" <b>"+t[0]+"</b> "+t[3],"pres");
@@ -999,6 +1010,7 @@ function _acceptNephew(){
 }
 function _rejectNephew(){
   window._pendingNephewOc=null;torpilDebtPenalty++;
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric("nephewRejected",1);
   const tr=LANG==="tr",lim=Math.abs(chairmanSackLimit());
   pushFeed("‍ "+(tr?"Torpil reddedildi — borç limiti €"+lim+"M":"Cronyism rejected — debt limit €"+lim+"M"),"lose");
   setBudget();
@@ -1008,15 +1020,6 @@ function _rejectNephew(){
 /* ===== Çılgın: kaos zarı ===== */
 function _kaosThresholds(){if(round<=1)return[0.35,0.70,0.85];if(round<=3)return[0.28,0.56,0.78];return[0.20,0.40,0.70];}
 function _kaosOutcomes(){const t=chairTrust;if(t>=3)return{cash:15,pow:7,loss:6,fin:2};if(t>=2)return{cash:10,pow:5,loss:8,fin:3};if(t>=1)return{cash:8,pow:4,loss:10,fin:4};return{cash:8,pow:4,loss:12,fin:5};}
-function _declineKaos(){
-  const tr=LANG==="tr";
-  if(rand()<0.30){
-    spend(3,"president");
-    pushFeed("?? "+(tr?"Ba\u015fkan \u0131srar etti: \u2212\u20ac3M":"Chairman insisted: \u2212\u20ac3M"),"lose");
-    setBudget();renderHub();
-  }
-  closeModal();
-}
 function _kaosDiceSvg(sz){sz=sz||72;return `<svg viewBox="0 0 72 72" width="${sz}" height="${sz}" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="36" cy="36" r="30" stroke="rgba(73,110,113,.25)" stroke-width="1.5" stroke-dasharray="3 4"><animateTransform attributeName="transform" type="rotate" values="0 36 36;-360 36 36" dur="7s" repeatCount="indefinite"/></circle><circle cx="8" cy="36" r="2.5" fill="#429A73"><animate attributeName="opacity" values="0;1;0;0;0;0" dur="1.8s" repeatCount="indefinite"/><animate attributeName="r" values="1;3.5;1" dur="1.8s" repeatCount="indefinite"/></circle><circle cx="64" cy="22" r="2" fill="rgba(230,238,239,.65)"><animate attributeName="opacity" values="0;0;1;0;0;0" dur="1.4s" begin=".5s" repeatCount="indefinite"/></circle><circle cx="14" cy="60" r="1.8" fill="#429A73"><animate attributeName="opacity" values="0;0;0;1;0;0" dur="1.6s" begin=".9s" repeatCount="indefinite"/></circle><circle cx="60" cy="58" r="2.2" fill="rgba(230,238,239,.5)"><animate attributeName="opacity" values="0;0;0;0;1;0" dur="1.9s" begin="1.3s" repeatCount="indefinite"/></circle><circle cx="36" cy="4" r="1.5" fill="#496E71"><animate attributeName="opacity" values="1;0;0;0;0;0;1" dur="2.1s" begin=".2s" repeatCount="indefinite"/></circle><g><animateTransform attributeName="transform" type="rotate" values="20 57 10;-25 57 10;20 57 10" dur="1.9s" repeatCount="indefinite"/><rect x="52" y="5" width="10" height="10" rx="2.5" fill="none" stroke="#496E71" stroke-width="1.3"/><circle cx="55" cy="8" r="1.2" fill="#496E71"/><circle cx="62" cy="12" r="1.2" fill="#496E71"/></g><g><animateTransform attributeName="transform" type="rotate" values="-18 10 62;30 10 62;-18 10 62" dur="2.3s" begin=".6s" repeatCount="indefinite"/><rect x="5" y="57" width="10" height="10" rx="2.5" fill="none" stroke="#429A73" stroke-width="1.3"/><circle cx="10" cy="62" r="1.5" fill="#429A73"/></g><g><animateTransform attributeName="transform" type="rotate" values="-5 36 36;9 36 36;-5 36 36" dur="1.25s" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1" repeatCount="indefinite"/><rect x="14" y="14" width="44" height="44" rx="9" fill="var(--surface-elevated,#fff)" stroke="#496E71" stroke-width="2.2"/><g><animate attributeName="opacity" values="1;0;0;0;0;0;1" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><text x="36" y="43" text-anchor="middle" font-size="22" font-weight="900" fill="#496E71" font-family="monospace">?</text></g><g><animate attributeName="opacity" values="0;1;0;0;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="36" cy="36" r="5" fill="#429A73"/></g><g><animate attributeName="opacity" values="0;0;1;0;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="24" cy="24" r="3.5" fill="#496E71"/><circle cx="36" cy="36" r="3.5" fill="#496E71"/><circle cx="48" cy="48" r="3.5" fill="#496E71"/></g><g><animate attributeName="opacity" values="0;0;0;1;0;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="23" cy="23" r="3" fill="#429A73"/><circle cx="49" cy="23" r="3" fill="#429A73"/><circle cx="36" cy="36" r="3" fill="#429A73"/><circle cx="23" cy="49" r="3" fill="#429A73"/><circle cx="49" cy="49" r="3" fill="#429A73"/></g><g><animate attributeName="opacity" values="0;0;0;0;1;0;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><text x="36" y="43" text-anchor="middle" font-size="22" font-weight="900" fill="rgba(230,238,239,.8)" font-family="monospace">!</text></g><g><animate attributeName="opacity" values="0;0;0;0;0;1;0" dur="1.8s" repeatCount="indefinite" calcMode="discrete"/><circle cx="23" cy="23" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="23" cy="36" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="23" cy="49" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="23" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="36" r="2.8" fill="rgba(230,238,239,.6)"/><circle cx="49" cy="49" r="2.8" fill="rgba(230,238,239,.6)"/></g></g></svg>`;}
 function showKaosOffer(){
   if(chairman.id!=="cilgin"||round<2||runEnded)return;
@@ -1025,16 +1028,10 @@ function showKaosOffer(){
   if(rand()>offerChance)return;
   const _m=$("modal");if(_m&&!_m.classList.contains("hidden")){setTimeout(showKaosOffer,600);return;}
   window._kaosOfferRound=round;
-  const decBtn=forced?"":"<button class=\"btn btn-ghost\" onclick=\"closeModal()\">"+(tr?"PAS GE\u00c7":"PASS")+"</button>";
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric("chaosOffers",1);
   const _trustLbl=chairTrust>=3?(tr?"(g\u00fcven bonusu aktif \u2726)":"(trust bonus active \u2726)"):chairTrust===0?(tr?"(g\u00fcven s\u0131f\u0131r - \u00f6d\u00fcller zay\u0131f)":"(trust zero - weak rewards)"):"";
   const _trustNote=forced?"":(chairTrust>=3?"<span style='color:var(--color-primary);font-size:9px'> "+_trustLbl+"</span>":(chairTrust===0?"<span style='color:var(--color-slate);font-size:9px'> "+_trustLbl+"</span>":""));
-  showModal("<div class=\"kaos-modal\"><div class=\"kaos-hdr\"><span class=\"kaos-title\">"+(tr?"KAOS ZARI":"CHAOS DICE")+"</span><span class=\"kaos-round\">"+L().rounds[round-1]+"</span></div><div class=\"kaos-svg\">"+_kaosDiceSvg()+"</div><div class=\"kaos-sub\">"+(tr?"BA\u015eKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE")+"</div><div class=\"kaos-desc\">"+(forced?(tr?"<b style='color:var(--color-slate)'>G\u00fcven s\u0131f\u0131r - zar zorunlu!</b>":"<b style='color:var(--color-slate)'>Trust is zero - roll is mandatory!</b>"):(tr?"Zar\u0131 at, kaderini g\u00f6r.":"Roll the dice, face your fate.")+_trustNote)+"</div><div class=\"bact\"><button class=\"btn btn-primary\" onclick=\"_kaosStartRoll(false)\">"+(tr?"ZARI AT":"ROLL THE DICE")+"</button>"+decBtn+"</div></div>");
-}
-function showKaosPeek(){
-  closeModal();const tr=LANG==="tr";
-  const [t1,t2,t3]=_kaosThresholds(),o=_kaosOutcomes();
-  const p1=Math.round(t1*100),p2=Math.round((t2-t1)*100),p3=Math.round((t3-t2)*100),p4=100-Math.round(t3*100);
-  showModal("<div class=\"kaos-modal\"><div class=\"kaos-peek-title\">"+(tr?"OLASILIKLAR":"ODDS")+"</div><div class=\"kaos-odds\"><div class=\"kaos-odd good\"><span class=\"ko-pct\">%"+p1+"</span><span class=\"ko-out\">+\u20ac"+o.cash+"M</span></div><div class=\"kaos-odd good\"><span class=\"ko-pct\">%"+p2+"</span><span class=\"ko-out\">+"+o.pow+" "+(tr?"g\u00fc\u00e7 (bu ma\u00e7)":"power (this match)")+"</span></div><div class=\"kaos-odd bad\"><span class=\"ko-pct\">%"+p3+"</span><span class=\"ko-out\">\u2212\u20ac"+o.loss+"M</span></div><div class=\"kaos-odd bad\"><span class=\"ko-pct\">%"+p4+"</span><span class=\"ko-out\">"+(tr?"finalde \u2212"+o.fin+" g\u00fc\u00e7":"final \u2212"+o.fin+" power")+"</span></div></div><div class=\"kaos-half-warn\">\u2212\u20ac3M "+(tr?"bak\u0131\u015f bedeli":"peek cost")+"</div><div class=\"bact\"><button class=\"btn btn-go\" onclick=\"_kaosStartRoll(true)\">"+(tr?"ZARLA (\u2212\u20ac3M)":"ROLL (\u2212\u20ac3M)")+"</button><button class=\"btn btn-ghost\" onclick=\"closeModal()\">"+(tr?"Vazge\u00e7":"Decline")+"</button></div></div>");
+  showModal("<div class=\"kaos-modal\"><div class=\"kaos-hdr\"><span class=\"kaos-title\">"+(tr?"KAOS ZARI":"CHAOS DICE")+"</span><span class=\"kaos-round\">"+L().rounds[round-1]+"</span></div><div class=\"kaos-svg\">"+_kaosDiceSvg()+"</div><div class=\"kaos-sub\">"+(tr?"BA\u015eKAN ZAR SUNUYOR":"CHAIRMAN OFFERS THE DICE")+"</div><div class=\"kaos-desc\">"+(forced?(tr?"<b style='color:var(--color-slate)'>G\u00fcven s\u0131f\u0131r - zar zorunlu!</b>":"<b style='color:var(--color-slate)'>Trust is zero - roll is mandatory!</b>"):(tr?"Zar\u0131 at, kaderini g\u00f6r.":"Roll the dice, face your fate.")+_trustNote)+"</div><div class=\"bact\"><button class=\"btn btn-primary\" onclick=\"_kaosStartRoll()\">"+(tr?"ZARI AT":"ROLL THE DICE")+"</button></div></div>");
 }
 function _computeKaos(){
   const r=rand(),tr=LANG==="tr",[t1,t2,t3]=_kaosThresholds(),o=_kaosOutcomes();
@@ -1051,8 +1048,8 @@ function _applyKaos(res){
   pushFeed("?? "+res.feed,res.good?"buy":"lose");
   setBudget();renderHub();
 }
-function _kaosStartRoll(isPeek){
-  if(isPeek){spend(3,'spent');setBudget();}
+function _kaosStartRoll(){
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric("chaosRolls",1);
   closeModal();
   const res=_computeKaos();
   sfxRoll();
@@ -1067,19 +1064,21 @@ function _showKaosResult(res){
  showModal(`<div class="kaos-modal kaos-result ${res.good?'kr-good':'kr-bad'}">${ptcls}<button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="kaos-kicker">${tr?"PROFES&#214;R BA&#350;KAN KARARI":"PROFESSOR CHAIRMAN CALL"}</div><div class="kr-glow"></div><div class="kr-icon">${icon}</div><div class="kr-label">${res.label}</div><div class="kr-desc">${res.desc}</div></div>`,{dismissOnOverlay:true,label:tr?"Profes&#246;r Ba&#351;kan":"Professor Chairman"});
 }
 
-function maybeInjure(){if(round>1&&injuredIdx<0){const base=hasCard("temiz_sayfa")?0.049:0.07,p=applyRandomInjury(base);if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"idmanda sakatland\u0131":"was injured in training"),"lose");renderRoundel("h"+injuredIdx,p);}}}
+function maybeInjure(){if(round>1){const base=hasCard("temiz_sayfa")?0.049:0.07,p=applyRandomInjury(base);if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"idmanda sakatland\u0131":"was injured in training"),"lose");const idx=picksBySlot.indexOf(p);if(idx>=0)renderRoundel("h"+idx,p);}}}
 function renderInjbar(){
   const ib=$("injbar");
+  if(typeof syncInjuredIdx==="function")syncInjuredIdx();
   if(injuredIdx<0){ib.classList.add("hidden");ib.innerHTML="";return;}
   const p=picksBySlot[injuredIdx],fit=effOf(p)+injPen(p),hurt=effOf(p),available=bench.filter(b=>!b.used).length;
+  const injuryCount=typeof injuredSlotIndices==="function"?injuredSlotIndices().length:1;
   const _injLvl=p.injuryLevel||2,_injSev=_injLvl===1?LT("Hafif","Mild","Leve","Leicht","Lieve"):_injLvl===2?LT("Orta","Moderate","Moderada","Mittel","Media"):LT("Ağır","Severe","Grave","Schwer","Grave");
   const _playLabel=LT("Sakat oyna","Play injured","Jugar lesionado","Verletzt spielen","Gioca infortunato");
   const playInjBtn=round>=5?`<button class="inj-play-btn" onclick="playInjured()" aria-label="${_playLabel}" title="${_playLabel}">${LT("OYNA","PLAY","JUGAR","SPIELEN","GIOCA")}</button>`:"";
   ib.classList.remove("hidden");
-  ib.innerHTML=`<span class="inj-ico" aria-hidden="true">!</span><span class="inj-info"><span class="inj-main"><b>${shortName(p)} ${LT("sakatlandı","injured","lesionado","verletzt","infortunato")}</b><span class="inj-severity">${_injSev}</span></span><span class="inj-detail">${fit} → ${hurt} · ${available} ${LT("yedek","bench","suplentes","Ersatz","riserve")}</span></span><div class="inj-btns"><button onclick="openBackup(${injuredIdx})">${LT("Yedek seç","Choose bench","Elegir suplente","Ersatz wählen","Scegli riserva")}</button><button onclick="healInjury()">${LT("Tedavi €6M","Heal €6M","Curar €6M","Heilen €6M","Cura €6M")}</button>${playInjBtn}</div>`;
+  ib.innerHTML=`<span class="inj-ico" aria-hidden="true">!</span><span class="inj-info"><span class="inj-main"><b>${shortName(p)} ${LT("sakatlandı","injured","lesionado","verletzt","infortunato")}</b><span class="inj-severity">${_injSev}</span></span><span class="inj-detail">${fit} → ${hurt} · ${available} ${LT("yedek","bench","suplentes","Ersatz","riserve")}${injuryCount>1?" · "+injuryCount+" "+LT("sakat","injured","lesionados","Verletzte","infortunati"):""}</span></span><div class="inj-btns"><button onclick="openBackup(${injuredIdx})">${LT("Yedek seç","Choose bench","Elegir suplente","Ersatz wählen","Scegli riserva")}</button><button onclick="healInjury()">${LT("Tedavi €6M","Heal €6M","Curar €6M","Heilen €6M","Cura €6M")}</button>${playInjBtn}</div>`;
 }
 function playInjured(){const ib=$("injbar");if(ib)ib.classList.add("hidden");const p=injuredIdx>=0?picksBySlot[injuredIdx]:null;if(p)pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"sakat sahaya \u00e7\u0131k\u0131yor \u2014 g\u00fc\u00e7 d\u00fc\u015f\u00fck, sakatl\u0131k uzayabilir":"starts injured \u2014 reduced power, worsening risk"),"lose");}
-function healInjury(){if(injuredIdx<0||!canAffordCost(6))return;const p=picksBySlot[injuredIdx];spend(6,"spent");p.injured=false;pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"tedavi edildi (-\u20ac6M)":"healed (-\u20ac6M)"),"buy");injuredIdx=-1;setBudget();renderInjbar();renderHub();}
+function healInjury(){if(typeof syncInjuredIdx==="function")syncInjuredIdx();if(injuredIdx<0||!canAffordCost(6))return;const p=picksBySlot[injuredIdx];spend(6,"spent");p.injured=false;pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"tedavi edildi (-\u20ac6M)":"healed (-\u20ac6M)"),"buy");injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();setBudget();renderInjbar();renderHub();}
 function _backupImpactClass(delta){return delta>=8?"great":delta>=3?"good":delta>=0?"ok":"bad";}
 function selectBackup(idx,i){window._backupSelect={idx,i};document.querySelectorAll(".backup-card").forEach((el,n)=>{const on=n===i;el.classList.toggle("is-selected",on);el.setAttribute("aria-pressed",on?"true":"false");});const item=window._bk&&window._bk[i],btn=$("backupApplyBtn");if(btn&&item){btn.disabled=false;btn.textContent=LANG==="tr"?"SEÇİLİ YEDEĞİ AL":"CONFIRM REPLACEMENT";}}
 function applySelectedBackup(){const s=window._backupSelect;if(!s)return;doBackup(s.idx,s.i);}
@@ -1099,16 +1098,16 @@ function openBackup(idx){const x=L(),pos=slots[idx][0],main=picksBySlot[idx],hur
   const cancel=opts.length?`<button class="btn btn-ghost backup-cancel" onclick="cancelBackup()">${tr?"VAZGEÇ":"CANCEL"}</button>`:"";
   showModal(`<div class="backup-modal scoutmodal"><button type="button" class="backup-close" aria-label="${tr?"Kapat":"Close"}" onclick="cancelBackup()"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg></button><div class="backup-head"><div class="backup-titleblock"><h4>${title}</h4><p>${sub}</p></div><div class="backup-injury"><div class="backup-injury-copy"><span class="backup-summary-label">${tr?"Sakat oyuncu":"Injured player"}</span><strong>${main?shortName(main):""}</strong></div><div class="backup-injury-power"><span><small>${tr?"Normal":"Fit"}</small><b>${fitEff}</b></span><i aria-hidden="true">→</i><span><small>${tr?"Şimdi":"Now"}</small><b>${hurtEff}</b></span></div></div></div><div class="backup-body"><div class="backup-grid">${cards}</div></div><div class="bact backup-actions">${cancel}${cta}</div></div>`,{label:title});
   if(window.PlayerProfiles)document.querySelectorAll(".backup-card[data-profile-player-index]").forEach(card=>{const item=opts[+card.dataset.profilePlayerIndex];if(item&&item.p)PlayerProfiles.bind(card,item.p,{delayCoarseAction:true});});}
-function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,old=picksBySlot[idx];if(old){old.injured=false;old.backupBoost=0;}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(LANG==="tr"?"acil kaleci olarak kaleye geçti":"moved into goal as emergency keeper"),"pres");injuredIdx=-1;sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
+function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,old=picksBySlot[idx];if(old){old.injured=false;old.backupBoost=0;}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(LANG==="tr"?"acil kaleci olarak kaleye geçti":"moved into goal as emergency keeper"),"pres");injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
 
 
 /* ===== president ===== */
 const CHAIRMEN=[
-  {id:"babacan",e:"",w:{generous:4,sponsor:3,sale:3,star:1,bargain:1,academy:1,nephew:1,cut:0.3,yacht:0.3,tax:0.3,federation:0.3,ffp:0.3,fans:0.5,investigation:0.2,management:0.1,youth:3}},
-  {id:"leydi",e:"‍",w:{generous:3,sponsor:2,sale:2,star:1,bargain:1,academy:2,nephew:1,cut:0.5,yacht:0.4,tax:0.5,federation:0.5,ffp:0.6,fans:0.7,investigation:0.4,management:0.2,youth:3}},
+  {id:"babacan",e:"",w:{generous:4,sponsor:3,sale:3,star:0.35,bargain:1,academy:1,nephew:1,cut:0.3,yacht:0.3,tax:0.3,federation:0.3,ffp:0.3,fans:0.5,investigation:0.2,management:0.1,youth:3}},
+  {id:"leydi",e:"‍",w:{generous:3,sponsor:2,sale:2,star:0.35,bargain:1,academy:2,nephew:1,cut:0.5,yacht:0.4,tax:0.5,federation:0.5,ffp:0.6,fans:0.7,investigation:0.4,management:0.2,youth:3}},
   {id:"pinti",e:"",w:{generous:0,sponsor:1,sale:1,star:0,bargain:3,academy:2,nephew:0.5,cut:2,yacht:0,tax:2,federation:1,ffp:2.5,fans:0.8,investigation:0.5,management:0.2,youth:2}},
-  {id:"sansasyoncu",e:"",w:{generous:1,sponsor:2.5,sale:1,star:3,bargain:1,academy:1,nephew:0.5,cut:1,yacht:1,tax:1,federation:1,ffp:0.8,fans:4,investigation:2,management:1,youth:0.5}},
-  {id:"torpilci",e:"‍",w:{generous:1,sponsor:1,sale:1,star:0.5,bargain:1,academy:1,nephew:2,cut:1,yacht:1,tax:1,federation:1.5,ffp:1,fans:1.5,investigation:3,management:1.5,youth:0.5}},
+  {id:"sansasyoncu",e:"",w:{generous:1,sponsor:2.5,sale:1,star:1.5,bargain:1,academy:1,nephew:0.5,cut:1,yacht:1,tax:1,federation:1,ffp:0.8,fans:4,investigation:2,management:1,youth:0.5}},
+  {id:"torpilci",e:"‍",w:{generous:1,sponsor:1,sale:1,star:0.2,bargain:1,academy:1,nephew:2,cut:1,yacht:1,tax:1,federation:1.5,ffp:1,fans:1.5,investigation:3,management:1.5,youth:0.5}},
   {id:"cilgin",e:"",w:null}
 ];
 let chairman=CHAIRMEN[0],panicDone=false,managerName="",seedNum=0,seedStr="",panicCount=0,wkDevName="",reuseClub=false,powerHist=[],suspendedSlotIdx=-1;
@@ -1246,12 +1245,12 @@ function presidentRiskCardCount(){return (usedRiskCards||[]).filter((k,i,a)=>a.i
 function availableChairmanReplacements(){const open=typeof unlockedChairs==="undefined"?CHAIRMEN:CHAIRMEN.filter(c=>unlockedChairs.includes(c.id));return open.filter(c=>c.id!==chairman.id);}
 function discoverYouthPlayer(){const slot=rnd(slots),pos=slot?slot[0]:"ST";let p=takeUnique(pos,64,74);if(!p)p=fabPlayer(pos,64,74);p.price=0;p.bench=true;p.free=true;p.natPos=p.natPos||p.pos;p.pos=pos;p.eff=effOf(p);bench.push(p);if(!p.fab)usedNames.add(p.name);return{name:p.name,ov:p.ov,pos:L().abbr[pos]||pos};}
 function changeChairman(){const pool=availableChairmanReplacements();if(!pool.length)return{old:"",name:""};const old=(L().chair&&L().chair[chairman.id]&&L().chair[chairman.id].n)||chairman.id;chairman=rnd(pool);chairTrust=1;presCharges=0;const name=(L().chair&&L().chair[chairman.id]&&L().chair[chairman.id].n)||chairman.id;return{old,name,id:chairman.id};}
-function pickOutcome(){const pool=POUT.filter(o=>!o.eligible||o.eligible());const safePool=pool.length?pool:POUT.filter(o=>o.id==="sale");const w=chairman.w;if(!w)return safePool[rand()*safePool.length|0];const wl=safePool.map(o=>[o,Math.max(0,w[o.id]!=null?w[o.id]:1)]).filter(e=>e[1]>0);if(!wl.length)return safePool[0];let tot=0;wl.forEach(e=>tot+=e[1]);let r=rand()*tot;for(const e of wl){r-=e[1];if(r<=0)return e[0];}return wl[0][0];}
+function pickOutcome(){const pool=POUT.filter(o=>(o.id!=="nephew"||chairman.id!=="torpilci"||!eventSeen.nephewDecision)&&(!o.eligible||o.eligible()));const safePool=pool.length?pool:POUT.filter(o=>o.id==="sale");const w=chairman.w;if(!w)return safePool[rand()*safePool.length|0];const wl=safePool.map(o=>[o,Math.max(0,w[o.id]!=null?w[o.id]:1)]).filter(e=>e[1]>0);if(!wl.length)return safePool[0];let tot=0;wl.forEach(e=>tot+=e[1]);let r=rand()*tot;for(const e of wl){r-=e[1];if(r<=0)return e[0];}return wl[0][0];}
 const POUT=[
   {id:"generous",run:()=>{const d=ri(7,13);earn(d,"earned");return{delta:d};}},
   {id:"sponsor",run:()=>{const d=ri(6,11);earn(d,"earned");riskPowerMod-=2;return{delta:d};}},
   {id:"sale",run:()=>{const d=ri(7,12);earn(d,"earned");return{delta:d};}},
-  {id:"star",place:[78,84,"fee"]},
+  {id:"star",place:[91,99,"fee"]},
   {id:"bargain",place:[72,78,"fee"]},
   {id:"academy",place:[66,72,0]},
   {id:"youth",eligible:()=>bench.length<8,run:discoverYouthPlayer},
@@ -1289,7 +1288,7 @@ function openPresident(){
   showModal('<div class="chairpopup chair-profile"><button class="modal-x" onclick="closeModal()" aria-label="'+(tr?"Kapat":"Close")+'">&times;</button>'+phimg+'<div class="chairpopup-name">'+(cd?cd.n:chairman.id)+'</div><div class="chairpopup-sub">'+(cd?cd.role:"")+'</div>'+_trustNum+'<div class="chairpopup-desc">'+(cd?cd.desc:"")+'</div>'+sections+consultBtn+'</div>',{dismissOnOverlay:true,label:tr?"Ba&#351;kan":"Chairman"});
 }
 function presidentMoodLine(id){const tr=LANG==="tr";const map={babacan:tr?"Patron Ba&#351;kan son s&#246;z&#252; tart&#305;yor...":"The Patron is weighing the final word...",leydi:tr?"Diplomat Ba&#351;kan teraziyi dengeliyor...":"The Diplomat is balancing the scales...",pinti:tr?"Pinti Ba&#351;kan kasay&#305; say&#305;yor...":"The Miser is counting the cash...",sansasyoncu:tr?"&#350;ovmen Ba&#351;kan kameralar&#305; bekliyor...":"The Showman is waiting for the cameras...",torpilci:tr?"Torpilci Ba&#351;kan telefonlar&#305; a&#231;t&#305;...":"The Fixer is making calls...",cilgin:tr?"Profes&#246;r Ba&#351;kan zarlar&#305; kar&#305;&#351;t&#305;r&#305;yor...":"The Professor is shuffling the dice..."};return map[id]||(tr?"Ba&#351;kan son s&#246;z&#252; s&#246;yl&#252;yor...":"The chairman is making the call...");}
-function presidentResultBody(oc,t){const tr=LANG==="tr";const map={generous:tr?"Kasaya beklenmedik para giri&#351;i oldu.":"Unexpected money entered the coffers.",sponsor:tr?"Yeni bir anla&#351;ma kasay&#305; rahatlatt&#305;.":"A new deal eased the budget.",sale:tr?"B&#252;y&#252;k isim gitti, kasa nefes ald&#305;.":"A big name left; the budget breathed.",star:tr?"Ba&#351;kan transferi ba&#287;lad&#305;.":"The chairman landed the signing.",bargain:tr?"Ta&#351;radan de&#287;erli bir f&#305;rsat &#231;&#305;kt&#305;.":"A useful bargain emerged from the provinces.",academy:tr?"Altyap&#305;dan kadroya yeni bir isim geldi.":"A new name came through the academy.",youth:tr?"Bonservis ödenmeden yedek kulübesine genç bir oyuncu eklendi.":"A young player joined the bench without a transfer fee.",nephew:tr?"Ba&#351;kan&#305;n adam&#305; kadroya girdi.":"The chairman's man entered the squad.",cut:tr?"Ba&#351;kan kasadan kesinti yapt&#305;.":"The chairman cut the club budget.",yacht:tr?"Ba&#351;kan kul&#252;p kasas&#305;n&#305; yordu.":"The chairman drained club funds.",tax:tr?"Vergi cezas&#305; kasaya yans&#305;d&#305;.":"A tax penalty hit the budget.",federation:tr?"Riskli kararlar federasyon denetimine takıldı.":"Risky decisions triggered a federation review.",ffp:tr?"Harcama seviyesi nedeniyle sıradaki transfer pazarı kapatıldı.":"The next transfer market was closed after a spending review.",fans:tr?"Taraftar tepkisi başkan güvenini ve maç hazırlığını düşürdü.":"Supporter pressure hurt board trust and match preparation.",investigation:tr?"Riskli kartlar soruşturma ve para cezası doğurdu.":"Risky cards triggered an investigation and a fine.",management:tr?"Kulüp yönetimi değişti; seçtiğin başkanın yerine yeni bir başkan geldi.":"The board changed and a new chairman took control."};return map[oc.id]||t[2];}
+function presidentResultBody(oc,t){const tr=LANG==="tr";const map={generous:tr?"Kasaya beklenmedik para giri&#351;i oldu.":"Unexpected money entered the coffers.",sponsor:tr?"Sponsor geliri kasay&#305; rahatlatt&#305;; yo&#287;un program bu ma&#231; tak&#305;m g&#252;c&#252;n&#252; 2 d&#252;&#351;&#252;r&#252;r.":"Sponsor income eased the budget, but the schedule reduces team power by 2 this match.",sale:tr?"Kul&#252;b&#252;n adas&#305; sat&#305;ld&#305; ve gelir kasaya akt&#305;.":"The club's island was sold and the proceeds entered the budget.",star:tr?"Ba&#351;kan transferi ba&#287;lad&#305;.":"The chairman landed the signing.",bargain:tr?"Ta&#351;radan de&#287;erli bir f&#305;rsat &#231;&#305;kt&#305;.":"A useful bargain emerged from the provinces.",academy:tr?"Altyap&#305;dan kadroya yeni bir isim geldi.":"A new name came through the academy.",youth:tr?"Bonservis ödenmeden yedek kulübesine genç bir oyuncu eklendi.":"A young player joined the bench without a transfer fee.",nephew:tr?"Ba&#351;kan&#305;n adam&#305; kadroya girdi.":"The chairman's man entered the squad.",cut:tr?"Ba&#351;kan kasadan kesinti yapt&#305;.":"The chairman cut the club budget.",yacht:tr?"Ba&#351;kan kul&#252;p kasas&#305;n&#305; yordu.":"The chairman drained club funds.",tax:tr?"Vergi cezas&#305; kasaya yans&#305;d&#305;.":"A tax penalty hit the budget.",federation:tr?"Riskli kararlar federasyon denetimine takıldı.":"Risky decisions triggered a federation review.",ffp:tr?"Harcama seviyesi nedeniyle sıradaki transfer pazarı kapatıldı.":"The next transfer market was closed after a spending review.",fans:tr?"Taraftar tepkisi başkan güvenini ve maç hazırlığını düşürdü.":"Supporter pressure hurt board trust and match preparation.",investigation:tr?"Riskli kartlar soruşturma ve para cezası doğurdu.":"Risky cards triggered an investigation and a fine.",management:tr?"Kulüp yönetimi değişti; seçtiğin başkanın yerine yeni bir başkan geldi.":"The board changed and a new chairman took control."};return map[oc.id]||t[2];}
 function presidentResultClass(oc,t){if(t[4])return "is-good positive-money";if(PRESIDENT_CASH_RISK_IDS.has(oc.id))return "is-bad negative-money";if(oc.id==="nephew")return "is-bad player-effect";if(oc.id==="management")return "is-neutral neutral-news";return "is-bad neutral-news";}
 function cilginCrisisAmount(id){return id==="yacht"?ri(12,18):id==="tax"?ri(6,10):ri(8,14);}
 function cilginCrisisClone(oc,amount){return {...oc,_pendingDelta:amount,run:()=>{spend(amount,"president");return{delta:amount};}};}
@@ -1302,15 +1301,15 @@ function _finishPresidentThinking(){
     renderHub();
   }
 }
-function consultPresident(){if(round<4||presCharges<=0)return;closeModal();presCharges--;const _cCost=(chairman.id==="babacan"&&chairTrust>=3)?1:(chairman.id==="sansasyoncu"&&sansMediaPressure>0)?5:3;spend(_cCost,"president");pushFeed("\u{1f3db} "+(LANG==="tr"?"Başkan görüşmesi: -€"+_cCost+"M":"Chairman meeting: -€"+_cCost+"M"),"pres");setBudget();sfxStamp();sfxGrumble();const x=L();const cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="${chairSrc(chairman.id)}" alt="" class="chairphoto bchairphoto" onerror="this.replaceWith(document.createTextNode('${chairman.e}'))">`;showModal(`<div class="bulletin bulletin-editorial pres-decision-modal pres-thinking"><div class="pres-bulletin-head"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="pres-thinking-card"><div class="pres-photo-wrap" id="presMascot">${phimg}</div><div class="pres-kicker">${LANG==="tr"?"BA&#350;KAN KARAR VER&#304;YOR...":"CHAIRMAN IS DECIDING..."}</div><div class="pres-micro">${presidentMoodLine(chairman.id)}</div><div class="pres-dots" aria-hidden="true"><span></span><span></span><span></span></div></div></div>`,{label:x.presHead});setTimeout(_finishPresidentThinking,reduce?0:1050);}
-function resolvePresident(){if(runEnded)return;const x=L();let oc=pickOutcome();if(chairman.id==="torpilci"&&rand()<0.12)oc=POUT.find(o=>o.id==="nephew")||oc;sfxJingle();
+function consultPresident(){if(round<4||presCharges<=0)return;closeModal();presCharges--;if(typeof trackChairmanMetric==="function")trackChairmanMetric("consults",1);const _cCost=(chairman.id==="babacan"&&chairTrust>=3)?1:(chairman.id==="sansasyoncu"&&sansMediaPressure>0)?5:3;spend(_cCost,"president");pushFeed("\u{1f3db} "+(LANG==="tr"?"Başkan görüşmesi: -€"+_cCost+"M":"Chairman meeting: -€"+_cCost+"M"),"pres");setBudget();sfxStamp();sfxGrumble();const x=L();const cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="${chairSrc(chairman.id)}" alt="" class="chairphoto bchairphoto" onerror="this.replaceWith(document.createTextNode('${chairman.e}'))">`;showModal(`<div class="bulletin bulletin-editorial pres-decision-modal pres-thinking"><div class="pres-bulletin-head"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="pres-thinking-card"><div class="pres-photo-wrap" id="presMascot">${phimg}</div><div class="pres-kicker">${LANG==="tr"?"BA&#350;KAN KARAR VER&#304;YOR...":"CHAIRMAN IS DECIDING..."}</div><div class="pres-micro">${presidentMoodLine(chairman.id)}</div><div class="pres-dots" aria-hidden="true"><span></span><span></span><span></span></div></div></div>`,{label:x.presHead});setTimeout(_finishPresidentThinking,reduce?0:1050);}
+function resolvePresident(){if(runEnded)return;const x=L();let oc=pickOutcome();sfxJingle();
   if(chairman.id==="torpilci"&&oc.id==="nephew"){const _nephewOc=round>=5?{...oc,down:[70,78]}:oc;_torpilNephewChoice(_nephewOc);return;}
 if(chairman.id==="cilgin"&&(oc.id==="cut"||oc.id==="yacht"||oc.id==="tax")){const tr=LANG==="tr";const amount=cilginCrisisAmount(oc.id);window._pendingCilginOc=cilginCrisisClone(oc,amount);const _warn=`<svg viewBox="0 0 48 48" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="14" width="34" height="24" rx="5"/><path d="M12 14v-3a4 4 0 0 1 4-4h17a3 3 0 0 1 3 3v4"/><path d="M31 26h8"/><path d="M24 20v8"/><path d="M24 34v.01"/><path d="M19 39h10"/></svg>`;showModal(`<div class="bulletin cilgin-crisis-modal"><div class="bhead"><span>${tr?"Profesör Krizi":"Professor Crisis"}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${_warn}</div><div class="crisis-badge">${tr?"BÜTÇE KRİZİ":"BUDGET CRISIS"}</div><div class="bhl down">${tr?"Başkan bütçene saldırdı":"Chairman attacks your budget"}</div><div class="bbody">${tr?"Başkan kasadan para çekmek istiyor. Kabul edebilir ya da itiraz edip riske girebilirsin.":"The chairman wants to take money from the club. Accept it, or object and take the risk."}</div><div class="crisis-effect"><span>${tr?"ETKİ":"IMPACT"}</span><b>&minus;&euro;${amount}M</b></div><div class="crisis-actions"><button class="btn btn-ghost crisis-accept" onclick="closeModal();_cilginKabulEt()"><b>${tr?"KABUL ET":"ACCEPT"}</b><span>${tr?"Kesinti uygulanır.":"The cut is applied."}</span></button><button class="btn btn-ghost crisis-object" onclick="closeModal();_cilginItiraz()"><b>${tr?"İTİRAZ ET":"OBJECT"}</b><span>${tr?"%50 iptal · %50 ceza ikiye katlanır":"50% cancel · 50% double penalty"}</span></button></div></div>`);return;}
   _resolvePresidentOc(oc);}
 function _cilginKabulEt(){const oc=window._pendingCilginOc;window._pendingCilginOc=null;if(oc)_resolvePresidentOc(oc);}
 function _cilginItiraz(){const oc=window._pendingCilginOc;window._pendingCilginOc=null;if(!oc)return;const tr=LANG==="tr";const _ok=`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>`;const _bad=`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>`;if(rand()<0.5){pushFeed(" "+(tr?"İtiraz kabul edildi — olay iptal!":"Object succeeded — event cancelled!"),"buy");showModal(`<div class="bulletin"><div class="bhead"><span> ${tr?"İtiraz":"Object"}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_ok}</div><div class="bhl up">${tr?"Başkan Geri Adım Attı":"Chairman Backed Down"}</div><div class="bbody">${tr?"İtirazın işe yaradı — bütçen korundu.":"Your objection worked — budget protected."}</div><div class="beff up">${tr?"Olay iptal":"Event cancelled"}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${L().presClose}</button></div></div>`);return;}const _base=Math.max(0,Math.round(oc._pendingDelta||cilginCrisisAmount(oc.id)));const _d=Math.min(28,_base*2);spend(_d,"president");setBudget();pushFeed(" "+(tr?"İtiraz ters tepti — etkisi iki katı: -€"+_d+"M":"Object backfired — double effect: -€"+_d+"M"),"lose");showModal(`<div class="bulletin"><div class="bhead"><span> ${tr?"İtiraz":"Object"}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_bad}</div><div class="bhl down">${tr?"İtiraz Ters Tepti":"Object Backfired"}</div><div class="bbody">${tr?"Başkan daha da çıldırdı.":"Chairman went even more crazy."}</div><div class="beff down">-€${_d}M</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${L().presClose}</button></div></div>`);if(round>=3)checkChairmanSack("president");}
-function _resolvePresidentOc(oc){if(runEnded)return;const x=L();
-  let info;if(oc.place)info=upgradeSlot(oc.place[0],oc.place[1],oc.place[2]);else if(oc.down)info=downgradeSlot(oc.down[0],oc.down[1]);else info=oc.run();setBudget();const t=x.pp[oc.id](info);if(chairman.id==="babacan"&&t[4]&&chairSupportDebt<2){const _support=Math.min(2-chairSupportDebt,2);chairSupportDebt+=_support;addFinalPenalty(_support,"chairman_support");pushFeed("⚠️ "+(LANG==="tr"?"Başkan desteği finalde -"+_support+" güç bıraktı":"Chairman support added final -"+_support+" power"),"lose");}if(!t[4]&&info&&info.delta)notePresidentHit(t[0],info.delta);sfxStamp();if(info&&info.delta)sfxCoin();
+function _resolvePresidentOc(oc){if(runEnded)return;const x=L(),_eventChairmanId=chairman.id;
+  let info;if(oc.place)info=upgradeSlot(oc.place[0],oc.place[1],oc.place[2]);else if(oc.down)info=downgradeSlot(oc.down[0],oc.down[1]);else info=oc.run();setBudget();const t=x.pp[oc.id](info);if(typeof trackChairmanMetric==="function")trackChairmanMetric(oc.id==="management"?"neutralEvents":t[4]?"positiveEvents":"negativeEvents",1,_eventChairmanId);if(_eventChairmanId==="babacan"&&t[4]&&chairSupportDebt<2){const _support=Math.min(2-chairSupportDebt,2);chairSupportDebt+=_support;addFinalPenalty(_support,"chairman_support");pushFeed("⚠️ "+(LANG==="tr"?"Başkan desteği finalde -"+_support+" güç bıraktı":"Chairman support added final -"+_support+" power"),"lose");}if(!t[4]&&info&&info.delta)notePresidentHit(t[0],info.delta);sfxStamp();if(info&&info.delta)sfxCoin();
   const _FEED_ICOS={generous:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><circle cx="7" cy="7" r="6"/><path d="M7 4.5v5M5.5 5.5Q5.5 4.5 7 4.5Q8.5 4.5 8.5 6Q8.5 7.5 7 7.5Q8.5 7.5 8.5 9Q8.5 9.5 7 9.5Q5.5 9.5 5.5 8.5" stroke-width="1.1"/></svg>`,sponsor:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="vertical-align:-.15em"><rect x="1" y="3" width="12" height="8" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="5" y1="9" x2="7" y2="9"/></svg>`,sale:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="vertical-align:-.15em"><circle cx="7" cy="7" r="5.5"/><line x1="4.5" y1="9.5" x2="9.5" y2="4.5"/><circle cx="5.5" cy="5.5" r=".9" fill="currentColor" stroke="none"/><circle cx="8.5" cy="8.5" r=".9" fill="currentColor" stroke="none"/></svg>`};
   const _pIco=_FEED_ICOS[oc.id]||"";
   pushFeed(_pIco+" <b>"+t[0]+"</b> "+t[3],"pres");if(round>=3&&checkChairmanSack("president"))return;
@@ -1399,10 +1398,10 @@ function _showPintiSavingsModal(sp){
   const _coinSvg=`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 0 0 4h-2a2 2 0 0 0 -1.8 -1"/><path d="M12 6v2m0 8v2"/></svg>`;
   const _powSvg=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/></svg>`;
   const _cashSvg=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="12" cy="14" r="2"/></svg>`;
-  showModal(`<div><div class="kithdr">${_coinSvg}  ${tr?"Final Öncesi Birikim":"Pre-Final Savings"}</div><div class="kitsub">${tr?"€"+sav+"M birikimin var. Ne yapıyorsun?":"You have €"+sav+"M savings. What do you do?"}</div><div class="stylelist"><div class="stylebtn" onclick="closeModal();_pintiSavingsCash(${sav});playMatch(true)"><div class="ssi" style="color:var(--gold)">${_cashSvg}</div><div class="ssm"><div class="sst">${tr?"Kasaya Ekle":"Add to Budget"}</div><div class="ssd">+€${sav}M ${tr?"kasa bugüne eklenir":"added to funds now"}</div></div></div><div class="stylebtn" onclick="closeModal();_pintiSavingsPow(${pow});playMatch(true)"><div class="ssi" style="color:var(--color-slate)">${_powSvg}</div><div class="ssm"><div class="sst">${tr?"Güce Dönüştür":"Convert to Power"}</div><div class="ssd">+${pow} ${tr?"güç finalde (€4M = +1 güç)":"power in the final (€4M = +1 power)"}</div></div></div></div></div>`);
+  showModal(`<div><div class="kithdr">${_coinSvg}  ${tr?"Final Öncesi Birikim":"Pre-Final Savings"}</div><div class="kitsub">${tr?"€"+sav+"M birikimin var. Ne yapıyorsun?":"You have €"+sav+"M savings. What do you do?"}</div><div class="stylelist"><div class="stylebtn" onclick="closeModal();_pintiSavingsCash(${sav});playMatch(true)"><div class="ssi" style="color:var(--gold)">${_cashSvg}</div><div class="ssm"><div class="sst">${tr?"Kasaya Ekle":"Add to Budget"}</div><div class="ssd">+€${sav}M ${tr?"kasa bugüne eklenir":"added to funds now"}</div></div></div><div class="stylebtn" onclick="closeModal();_pintiSavingsPow(${pow},${sav});playMatch(true)"><div class="ssi" style="color:var(--color-slate)">${_powSvg}</div><div class="ssm"><div class="sst">${tr?"Güce Dönüştür":"Convert to Power"}</div><div class="ssd">+${pow} ${tr?"güç finalde; kalan €"+(sav-pow*4)+"M kasaya":"final power; remaining €"+(sav-pow*4)+"M to budget"}</div></div></div></div></div>`);
 }
-function _pintiSavingsCash(sav){pintiSavings=0;earn(sav,"earned");pushFeed(" "+(LANG==="tr"?"Birikim kasaya: +€"+sav+"M":"Savings to budget: +€"+sav+"M"),"buy");}
-function _pintiSavingsPow(pow){pintiSavings=0;riskPowerMod+=pow;pushFeed(" "+(LANG==="tr"?"Birikim güce: +"+pow+" güç (final)":"Savings to power: +"+pow+" power (final)"),"buy");}
+function _pintiSavingsCash(sav){pintiSavings=0;earn(sav,"earned");if(typeof trackChairmanMetric==="function")trackChairmanMetric("savingsCash",sav);if(typeof syncPintiSavingsWidget==="function")syncPintiSavingsWidget();pushFeed(" "+(LANG==="tr"?"Birikim kasaya: +€"+sav+"M":"Savings to budget: +€"+sav+"M"),"buy");}
+function _pintiSavingsPow(pow,sav){const remainder=Math.max(0,(Number(sav)||0)-pow*4);pintiSavings=0;riskPowerMod+=pow;if(remainder>0)earn(remainder,"earned");if(typeof trackChairmanMetric==="function"){trackChairmanMetric("savingsPower",pow);trackChairmanMetric("savingsResidualCash",remainder);}if(typeof syncPintiSavingsWidget==="function")syncPintiSavingsWidget();pushFeed(" "+(LANG==="tr"?"Birikim: +"+pow+" final gücü · kalan +€"+remainder+"M kasaya":"Savings: +"+pow+" final power · remaining +€"+remainder+"M to budget"),"buy");}
 function scorerPool(home){if(home){const s=picksBySlot.filter(p=>p&&p.pos!=="GK");return s.length?s:picksBySlot.filter(Boolean);}return (oppLineup&&oppLineup.length?oppLineup.map(o=>({name:o.name,pos:o.pos})):["Rakip"].map(name=>({name,pos:""})));}
 function makeMatchEvents(gf,ga){const ev=[];for(let i=0;i<gf;i++){const p=rnd(scorerPool(true));if(p)ev.push({m:ri(8,88),home:true,name:surOf(p),type:"goal"});}for(let i=0;i<ga;i++){const p=rnd(scorerPool(false));if(p)ev.push({m:ri(8,88),home:false,name:p.name||"Rakip",type:"goal"});}
   /* Yellow cards — 1-3 per side, random players */
@@ -1559,9 +1558,6 @@ function playMatch(skipRisk){if(runEnded)return;if(!hasCompleteStartingXI()){sho
   riskPowerMod=0;{const _sb=document.querySelector(".spot-badge");if(_sb)_sb.remove();}if(usedTempPrimePenalty<0){tempPrimePenalty=0;pushFeed("\u{1f4b8} "+(LANG==="tr"?"Geçici Prim yorgunluğu bitti":"Temporary Bonus fatigue ended"),"pres");}if(usedShortCampPenalty<0){shortCampPenalty=0;pushFeed("\u{26fa} "+(LANG==="tr"?"Kısa Kamp yorgunluğu bitti":"Short Camp fatigue ended"),"pres");}
   /* Başkan güveni güncelle */
   if(win)chairTrust=Math.min(3,chairTrust+1);else chairTrust=Math.max(0,chairTrust-1);
-  /* Sansasyoncu MOTM bonusu */
-  if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0&&win){const _me=chairTrust===3?10:6;earn(_me,"earned");setBudget();pushFeed(" "+(LANG==="tr"?"Spotlight MOTM — +€"+_me+"M":"Spotlight MOTM — +€"+_me+"M"),"buy");}
-  if(chairman.id==="sansasyoncu"&&win&&(gf-ga>=2||picksBySlot.some(p=>p&&p.ov>=85))){const _headline=gf-ga>=2?5:3;earn(_headline,"earned");setBudget();pushFeed(" "+(LANG==="tr"?"Manşet primi: +€"+_headline+"M":"Headline bonus: +€"+_headline+"M"),"buy");}
   const vcls=win?"win":draw?"draw":"lose",vtxt=draw?(LANG==="tr"?"PENALTILAR":"PENALTIES"):(advance?x.matchWin:x.matchLose);
   if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
   const _drawBtn=draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTILARA →":"PENALTIES →"}</button>`:
@@ -1569,49 +1565,132 @@ function playMatch(skipRisk){if(runEnded)return;if(!hasCompleteStartingXI()){sho
   showModal(`<div class="tele tele-${vcls}"><div class="thead">${x.teleHead} · ${x.rounds[round-1]}</div><div class="tele-body"><div class="tscore"><div class="tt ${win?"winner":""}">${clip(teamName||"US",13)}</div><div class="scoreblock"><span class="tn">${gf}</span><span class="score-sep">-</span><span class="tn">${ga}</span></div><div class="tt ${!win&&!draw?"winner":""}">${clip(opponent.name,13)}</div></div><div class="match-summary"><div class="perfnote">${lastMatchPerf.note}</div><div class="perfwhy">${lastMatchPerf.why}</div></div>${matchEventsHTML(lastMatchEvents)}<div class="tv ${vcls}"><span>${vtxt}</span></div></div><div class="bact tele-footer">${_drawBtn}</div></div>`);
   if(window.PlayerProfiles)document.querySelectorAll(".goalsum [data-profile-event-index]").forEach(row=>{const ev=lastMatchEvents[+row.dataset.profileEventIndex];if(!ev)return;const pool=ev.home?picksBySlot:oppLineup;const p=pool&&pool.find(p=>p&&(p.name===ev.name||(ev.home&&surOf(p)===ev.name)||(!ev.home&&p.name&&p.name.split(" ").pop()===ev.name)));if(p)PlayerProfiles.bind(row,p);});
   if(autoPlay)setTimeout(()=>{if(!$("modal").classList.contains("hidden")){draw?showPenaltyShootout():afterMatch(advance);}},1300);}
-function afterMatch(advance){if(runEnded)return;closeModal();if(!advance){endRun(false);return;}showRewardChoice();}
+var pendingLoanReward=null,rewardCardSwapState=null;
+function expireRewardLoanBeforeChoice(){
+  if(!loanPlayer||typeof loanPlayer.turnsLeft==="undefined")return;
+  loanPlayer.turnsLeft--;
+  if(loanPlayer.turnsLeft>0)return;
+  const expired=loanPlayer,slotIdx=Number(expired.slotIdx),name=shortName(expired);
+  if(Number.isInteger(slotIdx)&&slotIdx>=0&&typeof expired.displaced!=="undefined"){
+    picksBySlot[slotIdx]=expired.displaced;
+    if(expired.displaced)renderRoundel("h"+slotIdx,expired.displaced);
+  }
+  loanPlayer=null;
+  if(typeof syncInjuredIdx==="function"){injuredIdx=-1;syncInjuredIdx();}
+  pushFeed(" <b>"+name+"</b> "+(LANG==="tr"?"kiralık süresi doldu, gitti":"loan expired, left"),"lose");
+}
+function resolvePostMatchStateBeforeReward(){
+  if(window._postMatchResolvedRound===round)return;
+  window._postMatchResolvedRound=round;
+  const injuredBefore=(typeof injuredSlotIndices==="function"?injuredSlotIndices():[]).map(i=>picksBySlot[i]).filter(Boolean);
+  const spotlightPlayer=chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0?picksBySlot[sansSpotlightIdx]:null;
+  injuredBefore.forEach(p=>{
+    if(p&&p.injured&&picksBySlot.includes(p)&&rand()<0.35){
+      p.dev=(p.dev||0)-1;
+      pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"sakat oynadı, sakatlık uzadı (-1)":"played injured, recovery worsened (-1)"),"lose");
+    }
+  });
+  if(typeof expireTemporaryCards==="function")expireTemporaryCards();
+  if(kurbanScheduled&&kurbanScheduled.count>0){
+    const list=applyMultiInjury(kurbanScheduled.count);
+    pushFeed(" "+(LANG==="tr"?"Kurban bedeli: "+list.length+" oyuncu sakatlandı":"Sacrifice price: "+list.length+" player(s) injured"),"lose");
+    kurbanScheduled={count:0,turns:0};
+  }
+  if(draftPendingInjury>0){
+    draftPendingInjury=0;
+    if(rand()<0.35){
+      const p=applyRandomInjury(1);
+      if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(LANG==="tr"?"riskli zorlamadan sonra sakatlandı":"was injured after the gamble"),"lose");}
+    }else pushFeed("\u{1fa79} "+(LANG==="tr"?"Riskli zorlama sakatlık bırakmadı":"The gamble left no injury"),"pres");
+  }
+  const perf=lastMatchPerf||{power:squadPower(round).power};
+  const normalInjury=applyRandomInjury(injuryRiskFor(perf.power));
+  if(normalInjury){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(normalInjury)+"</b> "+(LANG==="tr"?"maçtan sonra sakatlandı":"was injured after the match"),"lose");}
+  if(spotlightPlayer&&spotlightPlayer.injured){
+    sansMediaPressure=Math.max(sansMediaPressure,2);
+    pushFeed(" "+(LANG==="tr"?"Spotlight oyuncusu sakatlandı — sonraki tur pazar pahalı":"Spotlight player injured — market inflated next round"),"lose");
+  }
+  expireRewardLoanBeforeChoice();
+  if(chairman.id==="sansasyoncu")sansSpotlightIdx=-1;
+  if(typeof syncInjuredIdx==="function")syncInjuredIdx();
+  if(medicalProtectionTurns>0)medicalProtectionTurns--;
+}
+function afterMatch(advance){if(runEnded)return;closeModal();if(!advance){endRun(false);return;}resolvePostMatchStateBeforeReward();showRewardChoice();}
 function rewardPreview(kind,prize){
   const tr=LANG==="tr";
   if(kind==="cash")return "€"+budget+"M → €"+(budget+prize)+"M";
-  if(kind==="loan")return tr?"En zayıf oyuncunun yerini alır. 1 tur, -€5M.":"Replaces weakest player — 1 round, -€5M";
-  if(kind==="swap")return cards.length?(tr?"Elinden kart iade et, rastgele kart al":"Return a card, get a random one back"):tr?"Aktif kart yok":"No active cards";
-  if(!(injuredIdx>=0&&picksBySlot[injuredIdx]))return tr?"Sakat oyuncu yok":"No injured player";
-  const p=picksBySlot[injuredIdx];return shortName(p)+" "+effOf(p)+" → "+(effOf(p)+injPen(p));
+  if(kind==="loan")return tr?"En düşük etkin güce sahip sağlıklı oyuncunun yerine 1 turluk ücretsiz takviye gelir.":"A free one-round reinforcement replaces the healthy player with the lowest effective power.";
+  if(kind==="swap")return cards.length?(tr?"Kart iade et, tura uygun iki karttan birini seç":"Return a card, choose one of two round-eligible replacements"):tr?"Aktif kart yok":"No active cards";
+  const indices=typeof injuredSlotIndices==="function"?injuredSlotIndices():[];
+  if(!indices.length)return tr?"Sakat oyuncu yok":"No injured player";
+  const p=picksBySlot[indices[0]];return shortName(p)+" "+effOf(p)+" → "+(effOf(p)+injPen(p));
 }
 function generateLoanPlayer(weakIdx){
    if(typeof POOL==="undefined"||!POOL.length)return null;
    const weak=weakIdx>=0?picksBySlot[weakIdx]:null;
    const pos=weakIdx>=0&&slots[weakIdx]?slots[weakIdx][0]:(slots.length?rnd(slots.map(s=>s[0]).filter(Boolean))||"MID":"MID");
-   const target=Math.min(86,Math.max(68,(weak?effOf(weak):72)+ri(4,7)));
+   const target=Math.min(94,Math.max(72,(weak?effOf(weak):72)+ri(8,12)));
    const group=groupOf(pos);
    let pool=POOL.filter(p=>!usedNames.has(p[0])&&p[2]===group&&p[1]>=target-2&&p[1]<=target+2);
    if(!pool.length)pool=POOL.filter(p=>!usedNames.has(p[0])&&p[2]===group);
    const base=rnd(pool.length?pool:POOL.filter(p=>!usedNames.has(p[0]))||POOL);
    if(!base)return null;
-   const ov=Math.min(86,Math.max(target,base[1]));
+   const ov=Math.min(99,Math.max(target,base[1]));
   return{name:base[0],ov,natG:base[2],pos,club:base[3]||"",age:base[4]||26,tr:base[5]||0,
          price:0,fab:false,train:0,dev:0,trait:null,injured:false,
          eff:ov,loan:true,loanCost:0,used:false,bench:true};
 }
+function prepareLoanReward(){
+  if(pendingLoanReward&&pendingLoanReward.round===round)return pendingLoanReward;
+  let weakIdx=-1,weakPower=Infinity;
+  picksBySlot.forEach((p,i)=>{if(p&&!p.injured&&effOf(p)<weakPower){weakPower=effOf(p);weakIdx=i;}});
+  if(weakIdx<0)return null;
+  const displaced=picksBySlot[weakIdx],player=generateLoanPlayer(weakIdx);
+  if(!player)return null;
+  player.club=displaced.club||player.club;
+  player.tr=displaced.tr||0;
+  player.teamPowerBoost=0;
+  const targetRound=Math.min(6,round+1),before=squadPower(targetRound).power,original=picksBySlot[weakIdx];
+  picksBySlot[weakIdx]=player;
+  while(player.ov<99&&squadPower(targetRound).power<before+2){player.ov++;player.eff=player.ov;}
+  player.teamPowerBoost=Math.max(0,before+2-squadPower(targetRound).power);
+  const after=squadPower(targetRound).power;
+  picksBySlot[weakIdx]=original;
+  pendingLoanReward={round,weakIdx,displaced,player,before,after};
+  return pendingLoanReward;
+}
 function showRewardChoice(){
   window.CopaRunState&&window.CopaRunState.transition("reward",{reason:"match_complete"});
-  const prize=[0,4,6,8,10,12][round]||10,tr=LANG==="tr";
-  const careOk=injuredIdx>=0&&picksBySlot[injuredIdx];
+  const basePrize=[0,4,6,8,10,12][round]||10,prize=kaosHalfReward?Math.floor(basePrize/2):basePrize,tr=LANG==="tr";
+  const injuredIndices=typeof injuredSlotIndices==="function"?injuredSlotIndices():[],careOk=injuredIndices.length>0;
   const swapOk=cards.length>0;
-  if(autoPlay){setTimeout(()=>finishRoundReward(careOk?"care":"cash"),600);return;}
+  const loanOffer=prepareLoanReward(),loanOk=!!loanOffer;
+  if(autoPlay){const careIdx=careOk?injuredIndices.slice().sort((a,b)=>(picksBySlot[b].injuryLevel||2)-(picksBySlot[a].injuryLevel||2))[0]:-1;setTimeout(()=>finishRoundReward(careOk?"care":"cash","",careIdx),600);return;}
   const _rCash=`<svg viewBox='0 0 36 24' width='32' height='22' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='3' width='32' height='18' rx='2.5'/><line x1='7' y1='3' x2='7' y2='21'/><line x1='29' y1='3' x2='29' y2='21'/><circle cx='18' cy='12' r='5'><animate attributeName='r' values='5;6;5;4.2;5' dur='1.4s' repeatCount='indefinite'/></circle><path d='M18 7V9M18 15V17'><animate attributeName='opacity' values='1;0.3;1' dur='1.4s' repeatCount='indefinite'/></path></svg>`;
   const _rLoan=`<svg viewBox='0 0 36 28' width='32' height='24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='14' cy='8' r='4.5'/><path d='M4 26Q4 18 14 18Q24 18 24 26'/><circle cx='28' cy='12' r='3' stroke-dasharray='2 2'/><path d='M23 24Q23 19 28 19Q33 19 33 24'/><line x1='28' y1='4' x2='28' y2='8'><animate attributeName='opacity' values='1;0.15;1' dur='0.85s' repeatCount='indefinite'/></line><line x1='26' y1='6' x2='30' y2='6'><animate attributeName='opacity' values='1;0.15;1' dur='0.85s' repeatCount='indefinite'/></line></svg>`;
   const _rSwap=`<svg viewBox='0 0 36 28' width='32' height='24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='4' width='14' height='20' rx='2.5'/><rect x='20' y='4' width='14' height='20' rx='2.5'/><path d='M16 10L20 14L16 18' fill='none'><animate attributeName='d' values='M16 10L20 14L16 18;M14 11L18 14L14 17;M16 10L20 14L16 18' dur='0.8s' repeatCount='indefinite'/></path><path d='M20 10L16 14L20 18' fill='none'><animate attributeName='d' values='M20 10L16 14L20 18;M22 11L18 14L22 17;M20 10L16 14L20 18' dur='0.8s' repeatCount='indefinite'/></path></svg>`;
   const _rBand=`<svg viewBox='0 0 36 28' width='28' height='22' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='28' height='12' rx='5' transform='rotate(-15 18 14)'><animate attributeName='stroke-width' values='2;3.2;2' dur='0.9s' repeatCount='indefinite'/></rect><line x1='18' y1='10' x2='18' y2='18'/><line x1='14' y1='14' x2='22' y2='14'/></svg>`;
   const arrow=`<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h9"/><path d="M10 5l4 4-4 4"/></svg>`;
   const lock=`<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M6.2 11.8 11.8 6.2"/></svg>`;
-  const rewardCard=(kind,enabled,icon,title,desc,effect,meta,status)=>`<button type="button" class="reward-card ${enabled?"is-active":"is-disabled"} reward-${kind}" ${enabled?`onclick="finishRoundReward('${kind}')"`:"disabled aria-disabled=\"true\""}><span class="reward-ico">${icon}</span><span class="reward-copy"><span class="reward-title-row"><span class="reward-title">${title}</span></span><span class="reward-desc">${desc}</span><span class="reward-impact">${effect}</span><span class="reward-meta">${meta}</span>${status?`<span class="reward-status">${status}</span>`:""}</span><span class="reward-action">${enabled?arrow:lock}</span></button>`;
+  const rewardCard=(kind,enabled,icon,title,desc,effect,meta,status)=>{const action=kind==="care"?"showRewardCareModal()":`finishRoundReward('${kind}')`;return `<button type="button" class="reward-card ${enabled?"is-active":"is-disabled"} reward-${kind}" ${enabled?`onclick="${action}"`:"disabled aria-disabled=\"true\""}><span class="reward-ico">${icon}</span><span class="reward-copy"><span class="reward-title-row"><span class="reward-title">${title}</span></span><span class="reward-desc">${desc}</span><span class="reward-impact">${effect}</span><span class="reward-meta">${meta}</span>${status?`<span class="reward-status">${status}</span>`:""}</span><span class="reward-action">${enabled?arrow:lock}</span></button>`;};
   showModal("<div class=\"reward-modal\"><div class=\"kithdr\">"+(tr?"Galibiyet Ödülü":"Win Reward")+"</div><div class=\"kitsub\">"+(tr?"Galibiyetin karşılığını seç. Sonraki tur buna göre değişir.":"Choose your reward. The next round changes around it.")+"</div><div class=\"reward-list\">"+
-    rewardCard("cash",true,_rCash,tr?"Kasa Primi":"Cash Bonus",tr?"Kasaya doğrudan para ekler.":"Adds money directly to the budget.",(tr?"Kasa +€":"Funds +€")+prize+"M","","")+
-    rewardCard("loan",true,_rLoan,tr?"Kiralık Oyuncu":"Loan Player",tr?"En zayıf oyuncunun yerine 1 turluk takviye gelir.":"A one-round reinforcement replaces your weakest player.",tr?"Zayıf halka değişir.":"Weak link replaced.",tr?"1 tur ücretsiz takviye.":"One-round reinforcement, free.","")+
-    rewardCard("swap",swapOk,_rSwap,tr?"Kart Takas":"Card Swap",tr?"Bir aktif kartı başka bir kartla değiştirebilirsin.":"Trade one active card for a random replacement.",swapOk?(tr?"Kart iade et, yenisi gelsin":"Return a card, get a new one"):(tr?"Önce aktif kart gerekir.":"Needs an active card first."),"","")+
-    rewardCard("care",careOk,_rBand,tr?"Sakatlık Tedavisi":"Injury Care",tr?"Sakat bir oyuncuyu tedavi eder.":"Heals one injured player.",careOk?(tr?"Sakat oyuncu iyileşir":"Injured player recovers"):(tr?"Tedavi edilecek oyuncu yok.":"No player needs treatment."),"","")+
+    rewardCard("cash",true,_rCash,tr?"Kasa Primi":"Cash Bonus",tr?"Kasaya doğrudan para ekler.":"Adds money directly to the budget.",(tr?"Kasa +€":"Funds +€")+prize+"M",kaosHalfReward?(tr?"Kaos etkisi: ödül yarıya düştü.":"Chaos effect: reward halved."):"","")+
+    rewardCard("loan",loanOk,_rLoan,tr?"Kiralık Oyuncu":"Loan Player",loanOk?(tr?shortName(loanOffer.displaced)+" çıkar, "+shortName(loanOffer.player)+" gelir.":shortName(loanOffer.displaced)+" out, "+shortName(loanOffer.player)+" in."):(tr?"Uygun kiralık bulunamadı.":"No suitable loan player found."),loanOk?((tr?"Takım gücü ":"Squad power ")+loanOffer.before+" → "+loanOffer.after):(tr?"Takviye kullanılamıyor.":"Reinforcement unavailable."),tr?"1 tur ücretsiz; kulüp ve yerli uyumu korunur.":"One round free; club and local chemistry preserved.","")+
+    rewardCard("swap",swapOk,_rSwap,tr?"Kart Takas":"Card Swap",tr?"Bir kartı ver, tura uygun iki alternatiften birini seç.":"Return a card, choose one of two round-eligible alternatives.",swapOk?(tr?"İki yeni karttan birini seç":"Choose one of two new cards"):(tr?"Önce aktif kart gerekir.":"Needs an active card first."),"","")+
+    rewardCard("care",careOk,_rBand,tr?"Sağlık Ekibi":"Medical Team",tr?"Bir sakatı iyileştirir; sonraki maç sakatlık riskini %50 azaltır.":"Heals one player and halves injury risk for the next match.",careOk?(tr?injuredIndices.length+" sakat arasından seç":"Choose from "+injuredIndices.length+" injured"):(tr?"Tedavi edilecek oyuncu yok.":"No player needs treatment."),"","")+
     "</div><div class=\"reward-foot\">"+(tr?"Devam etmek için bir ödül seçmelisin.":"Pick a reward to continue.")+"</div></div>");
+}
+function projectedCarePower(slotIdx){
+  const p=picksBySlot[slotIdx];if(!p||!p.injured)return null;
+  const targetRound=Math.min(6,round+1),before=squadPower(targetRound).power;
+  p.injured=false;const after=squadPower(targetRound).power;p.injured=true;
+  return{before,after};
+}
+function showRewardCareModal(){
+  const tr=LANG==="tr",indices=typeof injuredSlotIndices==="function"?injuredSlotIndices():[];
+  if(!indices.length){showRewardChoice();return;}
+  const list=indices.map(i=>{const p=picksBySlot[i],power=projectedCarePower(i),level=p.injuryLevel||2,severity=level===1?(tr?"Hafif":"Mild"):level===2?(tr?"Orta":"Moderate"):(tr?"Ağır":"Severe");return `<button class="swap-card-btn" onclick="finishRoundReward('care','',${i})"><b>${shortName(p)}</b><span>${severity}</span><span style="color:var(--color-primary)">${power.before} → ${power.after}</span></button>`;}).join("");
+  showModal(`<div style="padding:14px 16px"><div class="kithdr">${tr?"Sağlık Ekibi":"Medical Team"}</div><div class="kitsub" style="margin-bottom:12px">${tr?"İyileştirilecek oyuncuyu seç. Sonraki maç bütün sakatlık riskleri %50 azalır.":"Choose a player to heal. All injury risks are halved for the next match."}</div><div class="swap-list">${list}</div><div class="bact" style="margin-top:14px"><button class="btn btn-ghost" onclick="showRewardChoice()">← ${tr?"GERİ":"BACK"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Sağlık Ekibi":"Medical Team"});
 }
 function showCardSwapModal(){
   const x=L(),s=picksBySlot.filter(Boolean);
@@ -1620,20 +1699,42 @@ function showCardSwapModal(){
   const list=swappable.map(k=>{const cd=x.cards[k],v=variantOf(k),cv=cardEff(k,s,round);const vl=(L().variantLbl||["COMMON","DARK"])[v];
     return `<button class="swap-card-btn" onclick="doCardSwap('${k}')"><span class="var-badge var-${v}">${vl}</span> <b>${cd.n}</b> <span style="color:var(--color-primary)">${cv>=0?"+":""}${cv}</span></button>`;
   }).join("");
-  showModal(`<div style="padding:14px 16px"><div class="kithdr">${LANG==="tr"?"Kart Takas":"Card Swap"}</div><div class="kitsub" style="margin-bottom:12px">${LANG==="tr"?"Hangi kartı iade edeceksin? Yerine rastgele bir kart gelir.":"Which card to return? A random replacement arrives."}</div><div class="swap-list">${list}</div><div class="bact" style="margin-top:14px"><button class="btn btn-ghost" onclick="showRewardChoice()">← ${LANG==="tr"?"GERİ":"BACK"}</button></div></div>`);
+  showModal(`<div style="padding:14px 16px"><div class="kithdr">${LANG==="tr"?"Kart Takas":"Card Swap"}</div><div class="kitsub" style="margin-bottom:12px">${LANG==="tr"?"İade edilecek kartı seç. Ardından tura uygun iki alternatif göreceksin.":"Choose a card to return. You will then see two round-eligible alternatives."}</div><div class="swap-list">${list}</div><div class="bact" style="margin-top:14px"><button class="btn btn-ghost" onclick="showRewardChoice()">← ${LANG==="tr"?"GERİ":"BACK"}</button></div></div>`);
+}
+function rewardSwapPower(k,v,targetRound){
+  const old=cardVariant[k]||0;cardVariant[k]=v;
+  const squad=picksBySlot.filter(Boolean),now=cardEff(k,squad,targetRound),final=cardEff(k,squad,6);
+  cardVariant[k]=old;return{now,final};
 }
 function doCardSwap(k){
   if(typeof cardHasLockedCommitment==="function"&&cardHasLockedCommitment(k)){showToast(LANG==="tr"?"Aktif sözleşme önce tamamlanmalı.":"Finish the active contract first.");return;}
-  closeModal();
-  const oldName=L().cards[k]?.n||k;
-  cards=cards.filter(c=>c!==k);cardInv[k]=0;cardVariant[k]=0;
-  const pool=allCardKeys().filter(kk=>kk!==k&&invOf(kk)<=0&&!isInstantCard(kk));
-  let rewardText;
-  if(pool.length){const nk=rnd(pool),nv=weightedVariant();addCard(nk,nv,{silent:true});const nl=(L().variantLbl||["COMMON","DARK"])[nv];const newName=L().cards[nk].n;pushFeed("⬆️ "+(LANG==="tr"?"<b>"+newName+"</b> ("+nl+") kadroya eklendi":"<b>"+newName+"</b> ("+nl+") added to squad"),"buy");pushFeed("⬇️ "+(LANG==="tr"?"<b>"+oldName+"</b> iade edildi":"<b>"+oldName+"</b> returned"),"lose");rewardText=(LANG==="tr"?"Takas: "+oldName+" → "+newName+" ("+nl+")":"Swap: "+oldName+" → "+newName+" ("+nl+")");}
-  else{pushFeed("⬇️ "+(LANG==="tr"?"<b>"+oldName+"</b> iade edildi (başka kart yok)":"<b>"+oldName+"</b> returned (no cards left)"),"lose");rewardText=LANG==="tr"?"Takas: "+oldName+" iade (başka kart yok)":"Swap: "+oldName+" returned (no more cards)";}
-  finishRoundReward("_done",rewardText);
+  const tr=LANG==="tr",targetRound=Math.min(6,round+1);
+  let pool=typeof eligibleMarketCardPool==="function"?eligibleMarketCardPool(targetRound,{persistentOnly:true,exclude:[k]}):allCardKeys().filter(kk=>kk!==k&&invOf(kk)<=0&&!isInstantCard(kk));
+  const oldBase=Number(CARDDEFS[k]&&CARDDEFS[k].price)||0,near=pool.filter(kk=>Math.abs((Number(CARDDEFS[kk]&&CARDDEFS[kk].price)||0)-oldBase)<=4);
+  if(near.length>=2)pool=near;
+  const offers=[];
+  while(offers.length<2&&pool.length){const key=rnd(pool);pool=pool.filter(item=>item!==key);offers.push({key,variant:weightedVariant()});}
+  if(!offers.length){showToast(tr?"Bu tur için uygun takas kartı yok.":"No eligible replacement card this round.");showRewardChoice();return;}
+  rewardCardSwapState={burnKey:k,offers,targetRound};
+  const oldDebt=variantOf(k)===1&&typeof KARA_PEN!=="undefined"?Number(KARA_PEN[k]||0):0;
+  const list=offers.map((offer,index)=>{
+    const power=rewardSwapPower(offer.key,offer.variant,targetRound),costs=typeof cardCostLines==="function"?cardCostLines(offer.key,offer.variant):[],tier=(L().variantLbl||["COMMON","DARK"])[offer.variant],costText=costs.length?costs.join(" · "):(tr?"Ek bedel yok":"No extra cost");
+    return `<button class="swap-card-btn" onclick="completeCardSwap(${index})"><span class="var-badge var-${offer.variant}">${tier}</span><b>${L().cards[offer.key].n}</b><span>${tr?"Sonraki maç":"Next match"} ${power.now>=0?"+":""}${power.now} · ${tr?"Final":"Final"} ${power.final>=0?"+":""}${power.final}</span><small>${costText}</small></button>`;
+  }).join("");
+  const debtWarning=oldDebt?`<div class="black-market-warning">${tr?"Bu DARK karttan yazılmış -"+oldDebt+" final borcu takastan sonra da kalır.":"The -"+oldDebt+" final debt already booked by this DARK card remains after the swap."}</div>`:"";
+  showModal(`<div style="padding:14px 16px"><div class="kithdr">${tr?"Yeni Kartını Seç":"Choose Your New Card"}</div><div class="kitsub" style="margin-bottom:12px">${tr?(L().cards[k]?.n||k)+" iade edilecek. Bütün yeni bedeller aşağıda görünür.":(L().cards[k]?.n||k)+" will be returned. All new costs are shown below."}</div><div class="swap-list">${list}</div>${debtWarning}<div class="bact" style="margin-top:14px"><button class="btn btn-ghost" onclick="showCardSwapModal()">← ${tr?"GERİ":"BACK"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kart Takas":"Card Swap"});
 }
-function finishRoundReward(kind,extraText){
+function completeCardSwap(index){
+  const state=rewardCardSwapState,offer=state&&state.offers[index];if(!state||!offer)return;
+  const k=state.burnKey,oldName=L().cards[k]?.n||k,newName=L().cards[offer.key]?.n||offer.key,tier=(L().variantLbl||["COMMON","DARK"])[offer.variant];
+  cards=cards.filter(c=>c!==k);cardInv[k]=0;cardVariant[k]=0;
+  addCard(offer.key,offer.variant,{silent:true,freeSource:"win_reward"});
+  pushFeed("⬆️ "+(LANG==="tr"?"<b>"+newName+"</b> ("+tier+") kadroya eklendi":"<b>"+newName+"</b> ("+tier+") added to squad"),"buy");
+  pushFeed("⬇️ "+(LANG==="tr"?"<b>"+oldName+"</b> iade edildi":"<b>"+oldName+"</b> returned"),"lose");
+  rewardCardSwapState=null;
+  finishRoundReward("_done",LANG==="tr"?"Takas: "+oldName+" → "+newName+" ("+tier+")":"Swap: "+oldName+" → "+newName+" ("+tier+")");
+}
+function finishRoundReward(kind,extraText,careSlotIdx){
   if(kind!=="_done"&&window.CopaAnalytics)window.CopaAnalytics.track("reward_selected",analyticsBalanceProps({reward:kind}));
   if(kind!=="_done"&&typeof trackRewardChoice==="function")trackRewardChoice(kind,round);
   if(kind!=="swap"&&kind!=="_done")closeModal();
@@ -1644,22 +1745,21 @@ function finishRoundReward(kind,extraText){
   if(shopBlocked>0){shopBlocked--;if(shopBlocked>0)pushFeed(" "+(LANG==="tr"?"Pazar hâlâ kapalı":"Market still closed"),"lose");}
   if(presidentBlocked>0){presidentBlocked--;}
   if(cardPriceModTurns>0){cardPriceModTurns--;if(cardPriceModTurns<=0)cardPriceMod=1.0;}
+  if(lotteryCouponTurns>0){
+    lotteryCouponTurns--;
+    if(lotteryCouponTurns<=0){
+      lotteryCouponTurns=0;lotteryCouponAmount=0;
+      pushFeed("🎟️ "+(LANG==="tr"?"Piyango kuponunun süresi doldu.":"The Lottery coupon expired."),"lose");
+    }
+  }
   /* Eski Kurt power penalty */
   if(eskiKurtSlotIdx>=0&&picksBySlot[eskiKurtSlotIdx]){const _p=picksBySlot[eskiKurtSlotIdx];_p.ov=Math.max(55,_p.ov-eskiKurtPenalty);_p.eff=effOf(_p);renderRoundel("h"+eskiKurtSlotIdx,_p);pushFeed(" <b>"+shortName(_p)+"</b> "+(LANG==="tr"?"eski kurt bedeli: -"+eskiKurtPenalty+" puan":"veteran, -"+eskiKurtPenalty+" rating"),"lose");eskiKurtSlotIdx=-1;eskiKurtPenalty=0;}
-  /* Kurban Belli deferred injury */
-  if(kurbanScheduled&&kurbanScheduled.count>0){const _kinj=applyMultiInjury(kurbanScheduled.count);pushFeed(" "+(LANG==="tr"?"Kurban bedeli: "+_kinj.length+" oyuncu sakatlandı":"Sacrifice price: "+_kinj.length+" player(s) injured"),"lose");kurbanScheduled={count:0,turns:0};}
-  /* Loan expiry (turnsLeft-based) */
-  if(loanPlayer&&typeof loanPlayer.turnsLeft!=="undefined"){loanPlayer.turnsLeft--;if(loanPlayer.turnsLeft<=0){const _lname=shortName(loanPlayer);if(typeof loanPlayer.slotIdx!=="undefined"&&loanPlayer.slotIdx>=0&&typeof loanPlayer.displaced!=="undefined"){picksBySlot[loanPlayer.slotIdx]=loanPlayer.displaced;if(loanPlayer.displaced)renderRoundel("h"+loanPlayer.slotIdx,loanPlayer.displaced);}pushFeed(" <b>"+_lname+"</b> "+(LANG==="tr"?"kiralık süresi doldu, gitti":"loan expired, left"),"lose");loanPlayer=null;}}
   const prizes=[0,4,6,8,10,12];let prize=prizes[round]||10;if(kaosHalfReward){prize=Math.floor(prize/2);kaosHalfReward=false;}
   let rewardText=extraText||"";
   if(kind==="cash"){earn(prize,"earned");rewardText=L().prize(prize);showToast((LANG==="tr"?" +€"+prize+"M kasa primi":" +€"+prize+"M cash bonus"),{type:"default"});}
   else if(kind==="loan"){
-    /* En zayıf 11 oyuncusunu bul */
-    let weakIdx=-1,weakOv=Infinity;
-    picksBySlot.forEach((p,i)=>{if(p&&!p.injured&&(p.ov||p.eff||0)<weakOv){weakOv=(p.ov||p.eff||0);weakIdx=i;}});
-    const lp=generateLoanPlayer(weakIdx);if(lp){
-    if(weakIdx>=0){
-      const displaced=picksBySlot[weakIdx];
+    const offer=prepareLoanReward(),weakIdx=offer?offer.weakIdx:-1,lp=offer&&offer.player,displaced=offer&&offer.displaced;
+    if(lp&&weakIdx>=0&&picksBySlot[weakIdx]===displaced){
       lp.turnsLeft=1;lp.slotIdx=weakIdx;lp.displaced=displaced;
       loanPlayer=lp;lp.bench=false;
       picksBySlot[weakIdx]=lp;
@@ -1667,28 +1767,24 @@ function finishRoundReward(kind,extraText){
       pushFeed("⬇️ "+(LANG==="tr"?"<b>"+shortName(displaced)+"</b> geçici devre dışı — 1 tur":"<b>"+shortName(displaced)+"</b> temporarily benched — 1 round"),"lose");
       rewardText=(LANG==="tr"?"Kiralık: "+shortName(lp)+" geldi, "+shortName(displaced)+" çıktı":"Loan: "+shortName(lp)+" in, "+shortName(displaced)+" out");
     }else{earn(prize,"earned");rewardText=L().prize(prize);}
-  }else{earn(prize,"earned");rewardText=L().prize(prize);}}
+  }
   else if(kind==="swap"){showCardSwapModal();return;}
-  else if(kind==="care"){if(!(injuredIdx>=0&&picksBySlot[injuredIdx])){showRewardChoice();return;}picksBySlot[injuredIdx].injured=false;rewardText=(LANG==="tr"?"Tedavi edildi: ":"Healed: ")+shortName(picksBySlot[injuredIdx]);injuredIdx=-1;}
+  else if(kind==="care"){
+    const idx=Number.isInteger(careSlotIdx)?careSlotIdx:injuredIdx,p=picksBySlot[idx];
+    if(!p||!p.injured){showRewardCareModal();return;}
+    p.injured=false;medicalProtectionTurns=Math.max(medicalProtectionTurns,1);
+    rewardText=(LANG==="tr"?"Sağlık Ekibi: ":"Medical Team: ")+shortName(p)+(LANG==="tr"?" iyileşti · sonraki maç risk %50 azaldı":" healed · next-match risk halved");
+    injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();
+  }
+  pendingLoanReward=null;rewardCardSwapState=null;
   /* kind==="cash" veya "_done" — ortak ilerleyiş */
   pushFeed("\u{1f3c1} "+rewardText,"buy");
   /* Kiralık oyuncu vadesi (turnsLeft olmayan eski tarz kiralık) */
   if(loanPlayer&&kind!=="loan"&&typeof loanPlayer.turnsLeft==="undefined"){const lp=loanPlayer;bench=bench.filter(b=>b!==lp);picksBySlot=picksBySlot.map(p=>p===lp?null:p);if(canAffordCost(lp.loanCost))spend(lp.loanCost,"spent");pushFeed("\u{1f504} <b>"+shortName(lp)+"</b> "+(LANG==="tr"?"kiralık bitti (-€"+lp.loanCost+"M)":"loan ended (-€"+lp.loanCost+"M)"),"lose");loanPlayer=null;}
   if(round>=3&&checkChairmanSack("debt"))return;
-  expireTemporaryCards();
-  if(injuredIdx>=0&&picksBySlot[injuredIdx]&&rand()<0.35){picksBySlot[injuredIdx].dev=(picksBySlot[injuredIdx].dev||0)-1;pushFeed("\u{1fa79} <b>"+shortName(picksBySlot[injuredIdx])+"</b> "+(LANG==="tr"?"sakat oynadı, sakatlık uzadı (-1)":"played injured, recovery worsened (-1)"),"lose");}
-  if(draftPendingInjury>0){
-    draftPendingInjury=0;
-    if(rand()<0.35){const dp=applyRandomInjury(1);if(dp){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(dp)+"</b> "+(LANG==="tr"?"riskli zorlamadan sonra sakatlandı":"was injured after the gamble"),"lose");}}
-    else pushFeed("\u{1fa79} "+(LANG==="tr"?"Riskli zorlama sakatlık bırakmadı":"The gamble left no injury"),"pres");
-  }
-  const perf=lastMatchPerf||{power:squadPower(round).power};
-  const inj=applyRandomInjury(injuryRiskFor(perf.power));if(inj){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"maçtan sonra sakatlandı":"was injured after the match"),"lose");}
-  if(chairman.id==="pinti"&&budget>=0&&round<6){pintiSavings=Math.min(12,pintiSavings+2);pushFeed("🪙 "+(LANG==="tr"?"Pinti birikimi +€2M (toplam €"+pintiSavings+"M)":"Miser savings +€2M (total €"+pintiSavings+"M)"),"buy");}
+  if(chairman.id==="pinti"&&budget>=0&&round<6){const _pintiBefore=pintiSavings;pintiSavings=Math.min(12,pintiSavings+2);const _pintiAdded=pintiSavings-_pintiBefore;if(typeof trackChairmanMetric==="function"&&_pintiAdded>0)trackChairmanMetric("savingsEarned",_pintiAdded);if(typeof syncPintiSavingsWidget==="function")syncPintiSavingsWidget();pushFeed("🪙 "+(LANG==="tr"?"Pinti birikimi +€"+_pintiAdded+"M (toplam €"+pintiSavings+"M)":"Miser savings +€"+_pintiAdded+"M (total €"+pintiSavings+"M)"),"buy");}
   /* Torpilci: yeğen gelişimi */
-  if(chairman.id==="torpilci"){picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){p.ov++;p.eff=effOf(p);renderRoundel("h"+i,p);pushFeed(`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><path d="M17 6.1h3v12h-3"/><path d="M13 6h3v7"/><path d="M9 6h3v10"/><path d="M5 10h3v6"/></svg> <b>`+shortName(p)+"</b> "+(LANG==="tr"?"yeğen gelişiyor (+1 Güç)":"nephew developing (+1 Power)"),"pres");}});}
-  /* Sansasyoncu spotlight sakatlık kontrolü */
-  if(chairman.id==="sansasyoncu"&&sansSpotlightIdx>=0){if(inj&&picksBySlot[sansSpotlightIdx]===inj){sansMediaPressure=1;pushFeed(" "+(LANG==="tr"?"Spotlight oyuncusu sakatlandı — sonraki tur pazar pahalı":"Spotlight player injured — market inflated next round"),"lose");}sansSpotlightIdx=-1;}
+  if(chairman.id==="torpilci"){picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){const _nephewGain=Math.min(3,80-p.ov);p.ov+=_nephewGain;p.eff=effOf(p);renderRoundel("h"+i,p);pushFeed(`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><path d="M17 6.1h3v12h-3"/><path d="M13 6h3v7"/><path d="M9 6h3v10"/><path d="M5 10h3v6"/></svg> <b>`+shortName(p)+"</b> "+(LANG==="tr"?"yeğen gelişiyor (+"+_nephewGain+" Güç)":"nephew developing (+"+_nephewGain+" Power)"),"pres");}});}
   if(window.CopaAnalytics)window.CopaAnalytics.track("round_completed",analyticsBalanceProps({round,outcome:"win"}));
   devWonderkids();round++;enterHub();
   pushFeed("\u{1f4f0} "+rnd(L().heads),"pres");$("roundtag").textContent=rewardText;
@@ -1697,7 +1793,7 @@ function finishRoundReward(kind,extraText){
 
 
 /* ===== result / meta ===== */
-function endRun(won,score,endType){runEnded=true;window.CopaRunState&&window.CopaRunState.transition("result",{force:true,reason:endType||"run_complete"});_clearState();clearTimeout(autoTimer);crowdStop();if(typeof closeModal==="function")closeModal();_cardMemRecord();if(won&&score)_recordFinalMVP();const sp=squadPower(round);if(score){fixtures[round-1].res=won?"W":"L";const pr=score.split(/[–-]/);fixtures[round-1].gf=pr[0];fixtures[round-1].ga=pr[1];if(typeof finishCardMatchCommitments==="function")finishCardMatchCommitments(pr[0],pr[1],round);}
+function endRun(won,score,endType){runEnded=true;if(typeof syncPintiSavingsWidget==="function")syncPintiSavingsWidget();window.CopaRunState&&window.CopaRunState.transition("result",{force:true,reason:endType||"run_complete"});_clearState();clearTimeout(autoTimer);crowdStop();if(typeof closeModal==="function")closeModal();_cardMemRecord();if(won&&score)_recordFinalMVP();const sp=squadPower(round);if(score){fixtures[round-1].res=won?"W":"L";const pr=score.split(/[–-]/);fixtures[round-1].gf=pr[0];fixtures[round-1].ga=pr[1];if(typeof finishCardMatchCommitments==="function")finishCardMatchCommitments(pr[0],pr[1],round);}
   /* Şampiyonluk bahsi sonucu */
   if(window._legacyBet){const bet=window._legacyBet;window._legacyBet=null;if(won){const payout=Math.round(bet.payout||bet.doubled||bet.stake);legacyFund=Math.min(20,legacyFund+payout);pushFeed(` ${LANG==="tr"?"Bahis kazanıldı, Miras Kasa'ya":"Bet won, added to Legacy Vault"}: +€${payout}M `,"win");}else{pushFeed(` ${LANG==="tr"?"Bahis kaybedildi":"Bet lost"}: -€${bet.stake}M`,"lose");}}
   /* Miras Kasa: pozitif kapanışın %30'u, run başına en fazla €8M; toplam tavan €20M. */
@@ -2011,78 +2107,78 @@ const CATMAP={taraftar:"taraftar",genc:"ekonomi",ch_momentum:"hucum",kontra:"huc
 Object.assign(T.tr.cards,{
   taraftar:{n:"12. Adam",d:"Taraftar desteği tüm takım gücüne eklenir. COMMON: 1. tur +2, 2. tur +3, 3. turdan itibaren +4. DARK: +3/+5/+6; satın alırken %25 ihtimalle güven -1 ve finalde -6 güç.",i:""},
   genc:{n:"Wonderkid",d:"Oyuncuları büyütmez; kartın takım gücü katkısı her tur artar. COMMON: 1. tur +1'den finalde +6'ya. DARK: 1. tur +4'ten finalde +9'a; finalde -4 güç.",i:""},
-  ch_momentum:{n:"İvme",d:"Turnuva ilerledikçe takımın kazandığı ritmi güce çevirir. COMMON: 1-2. tur +2, 3-4. tur +3, 5. turdan itibaren +4. DARK: +4/+6/+8; finalde -6 güç.",i:""},
+  ch_momentum:{n:"İvme",d:"Turnuva ilerledikçe takımın kazandığı ritmi güce çevirir. COMMON: 1-2. tur +1, 3-4. tur +3, 5. turdan itibaren +5. DARK: +2/+5/+8; finalde -6 güç.",i:""},
   kontra:{n:"Kontra",d:"COMMON: Forvet başına +1 güç. DARK: Forvet başına +2 güç; %25 ihtimal -€10M ceza.",i:"⚡"},
   buyuk_mac:{n:"Büyük Maç Adamı",d:"COMMON: Tek maçlık +6 güç. DARK: Tek maçlık +10 güç; %20 ihtimal -€12M ceza.",i:""},
-  yildiz:{n:"Pastanın Çileği",d:"COMMON: En iyi oyuncuna göre +4/+6/+8/+10 güç. DARK: +6/+8/+10/+14 güç; %25 ihtimal -€6M ceza.",i:"⭐"},
+  yildiz:{n:"Lokomotif",d:"COMMON: En iyi oyuncuna göre +4/+6/+8/+10 güç. DARK: +6/+8/+10/+14 güç; %25 ihtimal -€6M ceza.",i:"⭐"},
   otobus:{n:"Otobüs",d:"COMMON: Stoper başına +3, max +9. DARK: Stoper başına +4, max +12; %10 ihtimal -€6M; finalde -3.",i:""},
   kaleci_kalesi:{n:"Kaleci Kalesi",d:"COMMON: Kaleci gücü +5. DARK: +9; %15 ihtimal -€15M; finalde -8.",i:""},
   mac_sozu:{n:"Maç Sözü",d:"Maçtan önce “gol yemeyeceğiz” sözü ver. COMMON: başarıda yalnızca sonraki maç +3 güç. DARK: başarıda sonraki maç +5, başarısızlıkta -3. Aynı anda yalnızca bir söz aktif olabilir.",i:""},
   anadolu:{n:"Anadolu Eksp.",d:"70 altı oyuncu başına +1. COMMON max +3. DARK max +5; %20 ihtimalle €5M ek masraf.",i:"️"},
   altyapi_plani:{n:"Altyapı Planı",d:"COMMON: 23 yaş ve altı başına +1, max +4. DARK: Başına +2, max +6; finalde -4.",i:""},
-  tecrubeli_omurga:{n:"Tecrübeli Omurga",d:"COMMON: İlk 11'deki 32+ başına +1, max +4. DARK: Başına +2, max +6; finalde -4.",i:""},
-  yerli_blok:{n:"Yerli Blok",d:"COMMON: Yerli başına +1, max +5. DARK: Başına +2, max +5; finalde -3.",i:""},
+  tecrubeli_omurga:{n:"Duvar!",d:"COMMON: İlk 11'deki 32+ başına +1, max +4. DARK: Başına +2, max +6; finalde -4.",i:""},
+  yerli_blok:{n:"Yerli Blok",d:"COMMON: Yerli başına +1, max +5. DARK: Başına +2, max +8; finalde -3.",i:""},
   kaptanin_karari:{n:"Kaptanın Kararı",d:"Olumsuz takım konuşmasından sonra run başına bir kez kullanılır. COMMON: etkiyi sıfırlar; kaptan o maç -2 efektif güç. DARK: etkiyi sıfırlar, maçlık +1 kimya; kaptan -3 efektif güç.",i:""},
   kanat_akini:{n:"Kanat Akını",d:"COMMON: Kanat/bek başına +1, max +4. DARK: Başına +2, max +6; finalde -5.",i:""},
   cift_forvet:{n:"Çift Forvet",d:"COMMON: SNT başına +2, max +4. DARK: Başına +4, max +8; finalde -4.",i:"⚔️"},
   derbi:{n:"Derbi Aslanı",d:"İlk üç tur etkisizdir. COMMON: çeyrek +2, yarı +4, final +8. DARK: çeyrek +4, yarı +7, final +6; %25 ihtimalle €7M ek masraf.",i:""},
-  final_provasi:{n:"Final Provası",d:"Yalnız final maçında çalışır. COMMON finalde +5 güç verir. DARK finalde +9 güç verir; satın alırken %25 ihtimalle €3M ek masraf çıkarır.",i:"️"},
-  son_dans:{n:"Son Dans",d:"COMMON: Finalde sakatsız +8, sakatlık varsa +2. DARK: sakatsız +14, sakatlık varsa -8.",i:""},
+  final_provasi:{n:"Son Koz",d:"Yalnız final maçında çalışır. COMMON finalde +5 güç verir. DARK finalde +9 güç verir; satın alırken %25 ihtimalle €3M ek masraf çıkarır.",i:"️"},
+  son_dans:{n:"Son Dans",d:"COMMON: Finalde sakatsız +7, sakatlık varsa +3. DARK: sakatsız +10, sakatlık varsa +0.",i:""},
   taksit_transfer:{n:"Taksitli Transfer",d:"COMMON: Hemen +€10M, sonraki 2 tur -€4M. DARK: +€18M, 2 tur -€7M; güven -1, finalde -6.",i:""},
   son_kredi:{n:"Son Kredi",d:"COMMON: Kasa -€10M altındaysa +€15M. DARK: +€20M, güven -1. Başkan eşiği 5M sertleşir.",i:""},
-  kara_borsa:{n:"Kara Borsa",d:"COMMON: 1 bedava COMMON kalıcı kart. DARK: 2 bedava kalıcı kart; %40 ihtimal -€10M.",i:""},
-  sahte_evrak:{n:"Sahte Evrak",d:"COMMON: +6 güç/tur, %18 güven riski. DARK: +10 güç/tur, güven -1 ve finalde -10.",i:""},
-  deplasman_kafilesi:{n:"Deplasman Kafilesi",d:"COMMON: Güçlü rakibe karşı +4, değilse +2. DARK: Güçlü rakibe karşı +8; değilse %50 +4 / %50 -4.",i:"✈️"},
+  kara_borsa:{n:"Kara Borsa",d:"COMMON: €3M; bir kart yak, 3 COMMON karttan 1'ini seç. DARK: €7M; 4 karttan 2'sini seç, %25 ihtimal -€8M.",i:""},
+  sahte_evrak:{n:"Mükâfat",d:"COMMON €6M: +5 güç/tur, %18 güven riski. DARK €8M: +8 güç/tur, güven -1 ve finalde -8.",i:""},
+  deplasman_kafilesi:{n:"Fedailer",d:"COMMON €4M: Toplam takım gücünden güçlü rakibe karşı +6, değilse +2. DARK €6M: Güçlü rakibe karşı +9; değilse %50 +4 / %50 -2.",i:"✈️"},
   kumarbaz:{n:"Kumarbaz",d:"COMMON: Şimdi +€15M, sonraki 2 tur -€5M öde. DARK: Şimdi +€25M, sonraki 2 tur -€10M öde, başkan güveni -1.",i:""},
   gecici_prim:{n:"Geçici Prim",d:"COMMON: Bu maç +6; %30 sakatlık riski. Sonraki maç -2. DARK: Bu maç +12; %60 sakatlık riski. Sonraki maç -2.",i:""},
   kisa_kamp:{n:"Kısa Kamp",d:"COMMON: Bu maç +4, sonraki maç -2. DARK: Bu maç +6, sonraki maç -4.",i:"⛺"},
-  doping:{n:"Doping Söylentisi",d:"COMMON: +6 güç/tur, %20 güven riski ve her tur %35 ihtimal -€15M. DARK: +10 güç/tur, güven -1, her tur %25 ihtimal -€25M ve finalde -6.",i:""},
-  kriz:{n:"Kriz Yönetimi",d:"COMMON toplam final cezasının %50'sini telafi eder. DARK %75'ini telafi eder; %20 ihtimalle €5M ek masraf.",i:""},
+  doping:{n:"Doping Söylentisi",d:"COMMON: +6 güç/tur, %20 güven riski; her tur %25 ihtimal -€10M, en fazla 2 ceza. DARK: +9 güç/tur, güven -1; her tur %20 ihtimal -€18M, en fazla 2 ceza ve finalde -8.",i:""},
+  kriz:{n:"Kriz Yönetimi",d:"COMMON final cezasının %50'sini, en fazla 6 gücü telafi eder. DARK %65'ini, en fazla 10 gücü telafi eder; %20 ihtimalle €5M ek masraf.",i:""},
   kurban_belli:{n:"Kurban Belli",d:"COMMON: +6 güç; tur sonunda 1 oyuncu 1 tur sakatlanır. DARK: +12 güç; tur sonunda 2 oyuncu 1 tur sakatlanır; %25 ihtimal -€6M ek ceza.",i:""},
-  primler_yatinca:{n:"Primler Yatınca",d:"+4 güç; gelecek tur −€8M.",i:""},
+  primler_yatinca:{n:"Riziko",d:"Ücretsiz. COMMON: +5 güç, gelecek tur −€6M. DARK: +9 güç, gelecek tur −€12M.",i:""},
   vur_igneyi:{n:"Vur İğneyi",d:"COMMON: 1 sakat oyuncuyu iyileştirir; kart bedeli dışında ek masraf yok. DARK: 2 sakat oyuncuyu iyileştirir; %25 ihtimal -€6M ek masraf.",i:""},
-  bu_adam:{n:"Sürpriz Faktör",d:"COMMON: 70-79 güçlü yedek ekler. DARK: 80-89 güçlü yedek ekler; %25 ihtimalle €6M ek masraf.",i:""},
-  gec_gec:{n:"Geç Geçebilirsen",d:"COMMON: Güçlü rakibe karşı +5, diğer +2. DARK: +2 ekstra (+7/+4), finalde -3.",i:"⏱️"},
-  nasip_kismet:{n:"Nasip, Kısmet",d:"COMMON: Sonraki tur kart fiyatları -%25. DARK: -%40; %25 ihtimal -€4M ceza.",i:""},
+  bu_adam:{n:"Joker",d:"COMMON: 70-79 güçlü yedek ekler. DARK: 80-89 güçlü yedek ekler; %25 ihtimalle €6M ek masraf.",i:""},
+  gec_gec:{n:"Barikat",d:"COMMON: Güçlü rakibe karşı +5, diğer +2. DARK: +2 ekstra (+7/+4), finalde -3.",i:"⏱️"},
+  nasip_kismet:{n:"Piyango",d:"COMMON: €2M; iki tur içinde alınan bir karta -€5M. DARK: €3M; -€8M kupon, %20 ihtimal -€3M.",i:""},
   yildiz_krizi:{n:"Yıldız Krizi",d:"COMMON: Medya ilgisi bu maç +3 güç verir. DARK: Bu maç +4 güç; %20 ihtimal -€4M ceza.",i:""},
   kasiga_para:{n:"Saha Dışı Baskı",d:"COMMON: Rakip -4 güç; gelecek pazar kapalı, sonraki açık pazarda kart fiyatları +%25. DARK: Rakip -8 güç; gelecek pazar kapalı, sonraki açık pazarda kart fiyatları +%50 ve güven -1.",i:""}
 });
 Object.assign(T.en.cards,{
   taraftar:{n:"12th Man",d:"Crowd support is added to the whole team's power. COMMON: +2 in round 1, +3 in round 2, then +4. DARK: +3/+5/+6; 25% chance of trust -1 on purchase and -6 power in the final.",i:""},
   genc:{n:"Wonderkid",d:"Does not develop players; the card's team-power contribution rises each round. COMMON: +1 in round 1 to +6 in the final. DARK: +4 to +9; -4 power in the final.",i:""},
-  ch_momentum:{n:"Momentum",d:"Converts the team's growing tournament rhythm into power. COMMON: +2 in rounds 1-2, +3 in rounds 3-4, then +4. DARK: +4/+6/+8; -6 power in the final.",i:""},
+  ch_momentum:{n:"Momentum",d:"Converts the team's growing tournament rhythm into power. COMMON: +1 in rounds 1-2, +3 in rounds 3-4, then +5. DARK: +2/+5/+8; -6 power in the final.",i:""},
   kontra:{n:"Counter",d:"COMMON: +1 power per striker. DARK: +2 power per striker; 25% chance -€10M fine.",i:"⚡"},
   buyuk_mac:{n:"Big Game Player",d:"COMMON: Single-match +6 power. DARK: Single-match +10 power; 20% chance -€12M fine.",i:""},
-  yildiz:{n:"Cherry on Top",d:"COMMON: +4/+6/+8/+10 power from your best player. DARK: +6/+8/+10/+14 power; 25% chance -€6M fine.",i:"⭐"},
+  yildiz:{n:"Locomotive",d:"COMMON: +4/+6/+8/+10 power from your best player. DARK: +6/+8/+10/+14 power; 25% chance -€6M fine.",i:"⭐"},
   otobus:{n:"The Bus",d:"COMMON: +3 per starting CB, max +9. DARK: +4 per CB, max +12; 10% chance -€6M; -3 in final.",i:""},
   kaleci_kalesi:{n:"Keeper's Fortress",d:"COMMON: Goalkeeper rating +5. DARK: +9; 15% chance -€15M; -8 in final.",i:""},
   mac_sozu:{n:"Match Promise",d:"Before a match, promise to keep a clean sheet. COMMON: success grants +3 only in the next match. DARK: success grants +5 next match; failure gives -3. Only one promise can be active.",i:""},
   anadolu:{n:"Anadolu Express",d:"+1 per sub-70 starter. COMMON max +3. DARK max +5; 20% chance of an extra €5M cost.",i:"️"},
   altyapi_plani:{n:"Academy Plan",d:"COMMON: +1 per U23 starter, max +4. DARK: +2 each, max +6; -4 in final.",i:""},
-  tecrubeli_omurga:{n:"Veteran Spine",d:"COMMON: +1 per age-32+ starter, max +4. DARK: +2 each, max +6; -4 in final.",i:""},
-  yerli_blok:{n:"Local Block",d:"COMMON: +1 per local, max +5. DARK: +2 each, max +5; -3 in final.",i:""},
+  tecrubeli_omurga:{n:"The Wall!",d:"COMMON: +1 per age-32+ starter, max +4. DARK: +2 each, max +6; -4 in final.",i:""},
+  yerli_blok:{n:"Local Block",d:"COMMON: +1 per local, max +5. DARK: +2 each, max +8; -3 in final.",i:""},
   kaptanin_karari:{n:"Captain's Call",d:"Use once per run after a negative team talk. COMMON: neutralizes it; captain has -2 effective power that match. DARK: neutralizes it, adds +1 match chemistry; captain has -3 effective power.",i:""},
   kanat_akini:{n:"Wing Surge",d:"COMMON: +1 per wing/fullback, max +4. DARK: +2 each, max +6; -5 in final.",i:""},
   cift_forvet:{n:"Two Strikers",d:"COMMON: +2 per ST, max +4. DARK: +4 per ST, max +8; -4 in final.",i:"⚔️"},
   derbi:{n:"Derby Lion",d:"Inactive in the first three rounds. COMMON: quarter +2, semi +4, final +8. DARK: quarter +4, semi +7, final +6; 25% chance of an extra €7M cost.",i:""},
-  final_provasi:{n:"Final Rehearsal",d:"Works only in the final. COMMON adds +5 power. DARK adds +9 power and has a 25% chance of an extra €3M cost when acquired.",i:"️"},
-  son_dans:{n:"Last Dance",d:"COMMON: Final +8 if healthy, +2 if injured. DARK: +14 if healthy, -8 if injured.",i:""},
+  final_provasi:{n:"Last Resort",d:"Works only in the final. COMMON adds +5 power. DARK adds +9 power and has a 25% chance of an extra €3M cost when acquired.",i:"️"},
+  son_dans:{n:"Last Dance",d:"COMMON: Final +7 if healthy, +3 if injured. DARK: +10 if healthy, +0 if injured.",i:""},
   taksit_transfer:{n:"Installment Deal",d:"COMMON: +€10M now, -€4M for 2 rounds. DARK: +€18M, -€7M for 2 rounds; trust -1, final -6.",i:""},
   son_kredi:{n:"Last Credit",d:"COMMON: Below -€10M: +€15M. DARK: +€20M, trust -1. Chairman limit tightens by 5M.",i:""},
-  kara_borsa:{n:"Black Market",d:"COMMON: 1 free COMMON persistent card. DARK: 2 free persistent cards; 40% chance -€10M.",i:""},
-  sahte_evrak:{n:"Fake Papers",d:"COMMON: +6 power/round, 18% trust risk. DARK: +10 power/round, trust -1 and -10 in the final.",i:""},
-  deplasman_kafilesi:{n:"Away Convoy",d:"COMMON: +4 against stronger opponent, otherwise +2. DARK: +8 against stronger opponent; otherwise 50% +4 / 50% -4.",i:"✈️"},
+  kara_borsa:{n:"Black Market",d:"COMMON: €3M; burn one card and choose 1 of 3 COMMON cards. DARK: €7M; choose 2 of 4, 25% chance of an €8M fine.",i:""},
+  sahte_evrak:{n:"Reward",d:"COMMON €6M: +5 power/round, 18% trust risk. DARK €8M: +8 power/round, trust -1 and -8 in the final.",i:""},
+  deplasman_kafilesi:{n:"Devotees",d:"COMMON €4M: +6 against an opponent stronger than your total squad power, otherwise +2. DARK €6M: +9 against a stronger opponent; otherwise 50% +4 / 50% -2.",i:"✈️"},
   kumarbaz:{n:"Gambler",d:"COMMON: +€15M now, pay -€5M for the next 2 rounds. DARK: +€25M now, pay -€10M for the next 2 rounds, chairman trust -1.",i:""},
   gecici_prim:{n:"Temp Bonus",d:"COMMON: This match +6; 30% injury risk. Next match -2. DARK: This match +12; 60% injury risk. Next match -2.",i:""},
   kisa_kamp:{n:"Short Camp",d:"COMMON: This match +4, next match -2. DARK: This match +6, next match -4.",i:"⛺"},
-  doping:{n:"Doping Rumour",d:"COMMON: +6 power/round, 20% trust risk and 35% chance -€15M each round. DARK: +10, trust -1, 25% chance -€25M each round and -6 in the final.",i:""},
-  kriz:{n:"Crisis Mgmt",d:"COMMON offsets 50% of the total final penalty. DARK offsets 75%; 20% chance of an extra €5M cost.",i:""},
+  doping:{n:"Doping Rumour",d:"COMMON: +6 power/round, 20% trust risk; 25% chance -€10M each round, max 2 fines. DARK: +9, trust -1; 20% chance -€18M each round, max 2 fines and -8 in the final.",i:""},
+  kriz:{n:"Crisis Mgmt",d:"COMMON offsets 50% of the final penalty, up to 6. DARK offsets 65%, up to 10; 20% chance of an extra €5M cost.",i:""},
   kurban_belli:{n:"Sacrificial Lamb",d:"COMMON: +6 power; 1 player injured for 1 round after. DARK: +12 power; 2 players injured for 1 round after; 25% chance -€6M extra fine.",i:""},
-  primler_yatinca:{n:"Bonus Day",d:"+4 power; next round −€8M.",i:""},
+  primler_yatinca:{n:"Risk",d:"Free. COMMON: +5 power, next round −€6M. DARK: +9 power, next round −€12M.",i:""},
   vur_igneyi:{n:"Play Through Pain",d:"COMMON: Heals 1 injured player; no extra cost beyond the card price. DARK: Heals 2 injured players; 25% chance -€6M extra cost.",i:""},
-  bu_adam:{n:"Surprise Factor",d:"COMMON: Adds a Power 70-79 bench player. DARK: Adds a Power 80-89 player; 25% chance of an extra €6M cost.",i:""},
-  gec_gec:{n:"Try and Stop Us",d:"COMMON: +5 against stronger opponent, +2 otherwise. DARK: +2 extra (+7/+4), -3 in the final.",i:"⏱️"},
-  nasip_kismet:{n:"Luck of the Draw",d:"COMMON: Next-round card prices -25%. DARK: -40%; 25% chance -€4M fine.",i:""},
+  bu_adam:{n:"Joker",d:"COMMON: Adds a Power 70-79 bench player. DARK: Adds a Power 80-89 player; 25% chance of an extra €6M cost.",i:""},
+  gec_gec:{n:"Barricade",d:"COMMON: +5 against stronger opponent, +2 otherwise. DARK: +2 extra (+7/+4), -3 in the final.",i:"⏱️"},
+  nasip_kismet:{n:"Lottery",d:"COMMON: €2M; -€5M on one card bought within two rounds. DARK: €3M; -€8M coupon, 20% chance of a €3M cost.",i:""},
   yildiz_krizi:{n:"Star Crisis",d:"COMMON: Media attention grants +3 this match. DARK: +4 this match; 20% chance -€4M fine.",i:""},
   kasiga_para:{n:"Backroom Pressure",d:"COMMON: Opponent -4 power; next market closes, the next open market has card prices +25%. DARK: Opponent -8 power; next market closes, the next open market has card prices +50%, trust -1.",i:""}
 });
@@ -2579,8 +2675,8 @@ function _saveState(){
     shopOffers:[...shopOffers],shopVariants:Object.assign({},shopVariants),shopPriceChaos:Object.assign({},shopPriceChaos),
     freeAgents:(window._freeAgents||[]).map(p=>Object.assign({},p)),freeAgentsRound:window._freeAgentsRound||0,
     cardsBoughtThisTurn,freeAgentBoughtThisTurn,shopRerolledThisTurn,lastTalkResult:lastTalkResult?Object.assign({},lastTalkResult):null,
-    talkUsed,talkMod:Object.assign({},talkMod),injuredIdx,powerHist:[...powerHist],
-    tempPrimePenalty,shortCampPenalty,installmentTurns,installmentAmt,primFreeze,lastCreditActive,
+    talkUsed,talkMod:Object.assign({},talkMod),injuredIdx,medicalProtectionTurns,powerHist:[...powerHist],
+    tempPrimePenalty,shortCampPenalty,installmentTurns,installmentAmt,primFreeze,lastCreditActive,lotteryCouponAmount,lotteryCouponTurns,dopingInvestigationResolved,
     matchPromiseState:matchPromiseState?Object.assign({},matchPromiseState):null,matchPromiseReward:matchPromiseReward?Object.assign({},matchPromiseReward):null,matchPromisePromptedRound,captainDecisionUsed,captainDecisionActive:captainDecisionActive?Object.assign({},captainDecisionActive):null,
     draftFatigueTurns,draftDebtTurns,draftPendingInjury,pintiSavings,sansMediaPressure,sansHeadlineRound,sansStarBonusRound,torpilDebtPenalty,chairTrust,chairSupportDebt,cardChemDebt,eventSeen:Object.assign({},eventSeen),usedRiskCards:[...(usedRiskCards||[])],telemetryRun:typeof balanceTelemetryRun!=="undefined"?balanceTelemetryRun:null,
     draft:{remaining,currentSlot,currentOpts:(currentOpts||[]).map(p=>p?Object.assign({},p):null),rerollsLeft:draftRerollsLeft,deadlineH,usedNames:[...usedNames]}
@@ -2625,9 +2721,9 @@ function _tryRestoreState(){
     currentWeather=st.currentWeather?Object.assign({},st.currentWeather):null;oppChar=st.oppChar?Object.assign({},st.oppChar):null;oppLineup=Array.isArray(st.oppLineup)?st.oppLineup.map(p=>Object.assign({},p)):[];oppXI=oppLineup.map(p=>p.name);weakFlank=st.weakFlank||"C";matchupBonus=Number(st.matchupBonus)||0;
     shopOffers=Array.isArray(st.shopOffers)?[...st.shopOffers]:[];shopVariants=st.shopVariants||{};shopPriceChaos=st.shopPriceChaos||{};window._freeAgents=Array.isArray(st.freeAgents)?st.freeAgents.map(p=>Object.assign({},p)):[];window._freeAgentsRound=Number(st.freeAgentsRound)||0;
     cardsBoughtThisTurn=Number(st.cardsBoughtThisTurn)||0;freeAgentBoughtThisTurn=Number(st.freeAgentBoughtThisTurn)||0;shopRerolledThisTurn=Number(st.shopRerolledThisTurn)||0;lastTalkResult=st.lastTalkResult||null;
-    talkUsed=st.talkUsed||false;talkMod=st.talkMod||{all:0,def:0,atk:0};injuredIdx=Number.isInteger(st.injuredIdx)?st.injuredIdx:-1;powerHist=Array.isArray(st.powerHist)?[...st.powerHist]:[];
+    talkUsed=st.talkUsed||false;talkMod=st.talkMod||{all:0,def:0,atk:0};injuredIdx=Number.isInteger(st.injuredIdx)?st.injuredIdx:-1;medicalProtectionTurns=Math.max(0,Number(st.medicalProtectionTurns)||0);if(typeof syncInjuredIdx==="function")syncInjuredIdx();powerHist=Array.isArray(st.powerHist)?[...st.powerHist]:[];
     tempPrimePenalty=st.tempPrimePenalty||0;shortCampPenalty=st.shortCampPenalty||0;
-    installmentTurns=st.installmentTurns||0;installmentAmt=st.installmentAmt||0;primFreeze=st.primFreeze||0;lastCreditActive=st.lastCreditActive||0;
+    installmentTurns=st.installmentTurns||0;installmentAmt=st.installmentAmt||0;primFreeze=st.primFreeze||0;lastCreditActive=st.lastCreditActive||0;lotteryCouponAmount=Math.max(0,Number(st.lotteryCouponAmount)||0);lotteryCouponTurns=Math.max(0,Number(st.lotteryCouponTurns)||0);dopingInvestigationResolved=Math.min(2,Math.max(0,st.dopingInvestigationResolved===true?1:Number(st.dopingInvestigationResolved)||0));
     matchPromiseState=st.matchPromiseState&&Number(st.matchPromiseState.round)===Number(round)?Object.assign({},st.matchPromiseState):null;matchPromiseReward=st.matchPromiseReward&&Number(st.matchPromiseReward.round)===Number(round)?Object.assign({},st.matchPromiseReward):null;matchPromisePromptedRound=Number(st.matchPromisePromptedRound)||0;captainDecisionUsed=!!st.captainDecisionUsed;captainDecisionActive=st.captainDecisionActive&&Number(st.captainDecisionActive.round)===Number(round)?Object.assign({},st.captainDecisionActive):null;
     draftFatigueTurns=st.draftFatigueTurns||0;draftDebtTurns=st.draftDebtTurns||0;draftPendingInjury=st.draftPendingInjury||0;
     pintiSavings=st.pintiSavings||0;sansMediaPressure=st.sansMediaPressure||0;sansHeadlineRound=st.sansHeadlineRound||0;sansStarBonusRound=st.sansStarBonusRound||0;torpilDebtPenalty=st.torpilDebtPenalty||0;chairTrust=st.chairTrust??1;chairSupportDebt=st.chairSupportDebt||0;cardChemDebt=st.cardChemDebt||0;eventSeen=st.eventSeen||{};usedRiskCards=Array.isArray(st.usedRiskCards)?st.usedRiskCards:[];if(typeof balanceTelemetryRun!=="undefined")balanceTelemetryRun=st.telemetryRun||{chairman:chairman.id,cards:{},startedAt:Date.now()};
@@ -3025,6 +3121,7 @@ function _finishPenaltyShootout(homeWon){
   const shootout=(s.homeGoals||0)+"-"+(s.awayGoals||0);
   if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();
   if(window.LastMatchReport)LastMatchReport.setPenalty(s.mode==="final"?(window._finalPenaltyScore||"0-0"):(lastMatchPerf?lastMatchPerf.gf+"-"+lastMatchPerf.ga:"0-0"),shootout,!!homeWon);
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric(homeWon?"penaltyWins":"penaltyLosses",1);
   if(s.mode==="final"){
     const tr=LANG==="tr";
     const base=window._finalPenaltyScore||"0-0";
@@ -3039,6 +3136,11 @@ function _finishPenaltyShootout(homeWon){
     closeModal();
     endRun(!!homeWon,base+" p "+shootout);
     return;
+  }
+  if(fixtures[round-1])fixtures[round-1].res=homeWon?"W":"L";
+  if(lastMatchPerf){lastMatchPerf.win=!!homeWon;lastMatchPerf.draw=false;lastMatchPerf.penaltyWin=!!homeWon;lastMatchPerf.penaltyScore=shootout;}
+  if(homeWon){
+    chairTrust=Math.min(3,chairTrust+2);
   }
   closeModal();
   afterMatch(!!homeWon);

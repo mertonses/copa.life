@@ -49,6 +49,7 @@ expect(worker.includes("routeBucket(url.pathname)")&&worker.includes('return "no
 expect(!worker.includes("writeDataPoint({indexes"),"Analytics Engine metrics must not write an identifier index");
 expect(reportWorkflow.includes("CLOUDFLARE_ANALYTICS_TOKEN")&&reportScript.includes("_sample_interval"),"weekly sampled KPI report is missing");
 expect(reportScript.includes("blob14 AS chairman")&&reportScript.includes("blob17 AS reward"),"weekly balance decision report is missing");
+expect(reportScript.includes("chairman_outcomes")&&reportScript.includes("blob5 AS outcome"),"weekly chairman outcome report is missing");
 expect(reportScript.includes("sumIf(")&&monitorScript.includes("sumIf("),"Analytics Engine conditional aggregates must use supported sumIf syntax");
 expect(!reportScript.includes("NULLIF(")&&!reportScript.includes("SUM(IF(")&&!monitorScript.includes("SUM(IF("),"Analytics Engine queries contain unsupported SQL functions or mixed numeric IF branches");
 expect(monitorWorkflow.includes("PROFILE_ERROR_RATE")&&monitorWorkflow.includes("WORKER_5XX_RATE"),"analytics error monitor thresholds are missing");

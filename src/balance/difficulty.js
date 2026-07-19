@@ -7,7 +7,7 @@ function applyRiskDraftCarryovers(){
   if(draftFatigueTurns>0){
     draftFatigueTurns--;
     riskPowerMod-=2;
-    pushFeed("⚡ "+(tr?"Tam Saha Baskı yorgunluğu: -2 güç":"Full Press fatigue: -2 power"),"lose");
+    pushFeed("⚡ "+(tr?"Vadeli Kudret bedeli: -2 güç":"Deferred Might cost: -2 power"),"lose");
   }
   if(draftDebtTurns>0){
     draftDebtTurns--;
@@ -52,11 +52,11 @@ function showDraftEvent(){
  const _bolt=_decisionIcon("press"),_case=_decisionIcon("envelope"),_dice=_decisionIcon("contract"),_band=_decisionIcon("grit"),_hand=_decisionIcon("hold");
  const gain=tr?"Kazanç":"Gain",cost=tr?"Bedel":"Cost",risk=tr?"Risk":"Risk",note=tr?"Not":"Note";
  const opts=[
-  {i:_bolt,c:"#f59e0b",n:tr?"Tam Saha Baskı":"Full Press",badge:tr?"RİSKLİ":"RISKY",lines:[[gain,tr?"Bu maç +6 güç":"This match +6 power","risk-offer-gain"],[cost,tr?"-€8M, sonraki maç -2 güç":"-€8M, next match -2 power","risk-offer-cost"]],go:()=>{riskPowerMod+=6;spend(8,"spent");draftFatigueTurns=Math.max(draftFatigueTurns,1);pushFeed("⚡ "+(tr?"Tam Saha Baskı: +6 güç, sonraki maç -2":"Full Press: +6 power, next match -2"),"pres");}},
-  {i:_case,c:"#16a34a",n:tr?"Kapalı Zarf":"Sealed Envelope",badge:tr?"KUMAR":"GAMBLE",lines:[[gain,tr?"+€16M hemen":"Immediate +€16M","risk-offer-gain"],[risk,tr?"%30 ihtimal -€12M geri ödeme":"30% chance -€12M clawback","risk-offer-risk"]],go:()=>{earn(16,"earned");let msg="💼 "+(tr?"Kapalı Zarf: +€16M":"Sealed Envelope: +€16M");if(rand()<0.30){spend(12,"spent");msg+=(tr?", geri ödeme -€12M":", clawback -€12M");}pushFeed(msg,"buy");}},
-  {i:_dice,c:"#7c3aed",n:tr?"Kupaya Senet":"Cup IOU",badge:tr?"FİNAL BORCU":"FINAL DEBT",lines:[[gain,tr?"+€8M ve bu maç +3 güç":"+€8M and this match +3 power","risk-offer-gain"],[cost,tr?"Sonraki 2 maç -2, finalde -4":"Next 2 matches -2, final -4","risk-offer-cost"]],go:()=>{earn(8,"earned");riskPowerMod+=3;draftDebtTurns=Math.max(draftDebtTurns,2);addFinalPenalty(4,"cup_iou");pushFeed("🎲 "+(tr?"Kupaya Senet: +€8M, +3 güç, final -4":"Cup IOU: +€8M, +3 power, final -4"),"pres");}},
+  {i:_bolt,c:"#f59e0b",n:tr?"Vadeli Kudret":"Deferred Might",badge:tr?"RİSKLİ":"RISKY",lines:[[gain,tr?"Bu maç +6 güç":"This match +6 power","risk-offer-gain"],[cost,tr?"-€8M, sonraki maç -2 güç":"-€8M, next match -2 power","risk-offer-cost"]],go:()=>{riskPowerMod+=6;spend(8,"spent");draftFatigueTurns=Math.max(draftFatigueTurns,1);pushFeed("⚡ "+(tr?"Vadeli Kudret: +6 güç, sonraki maç -2":"Deferred Might: +6 power, next match -2"),"pres");}},
+  {i:_case,c:"#16a34a",n:tr?"Kör Talih":"Blind Fortune",badge:tr?"KUMAR":"GAMBLE",lines:[[gain,tr?"+€12M hemen":"Immediate +€12M","risk-offer-gain"],[risk,tr?"%35 ihtimal -€20M geri ödeme":"35% chance -€20M clawback","risk-offer-risk"]],go:()=>{earn(12,"earned");let msg="💼 "+(tr?"Kör Talih: +€12M":"Blind Fortune: +€12M");if(rand()<0.35){spend(20,"spent");msg+=(tr?", geri ödeme -€20M":", clawback -€20M");}pushFeed(msg,"buy");}},
+  {i:_dice,c:"#7c3aed",n:tr?"Kupaya Senet":"Cup IOU",badge:tr?"FİNAL BORCU":"FINAL DEBT",lines:[[gain,tr?"+€8M ve bu maç +3 güç":"+€8M and this match +3 power","risk-offer-gain"],[cost,tr?"Sonraki 2 maç -2, finalde -4":"Next 2 matches -2, final -4","risk-offer-cost"]],go:()=>{earn(8,"earned");riskPowerMod+=3;draftDebtTurns+=2;addFinalPenalty(4,"cup_iou");pushFeed("🎲 "+(tr?"Kupaya Senet: +€8M, +3 güç, final -4":"Cup IOU: +€8M, +3 power, final -4"),"pres");}},
   {i:_band,c:"#dc2626",n:tr?"Dişini Sık":"Grit Your Teeth",badge:tr?"SAKATLIK":"INJURY",lines:[[gain,tr?"Bu maç +5 güç":"This match +5 power","risk-offer-gain"],[risk,tr?"Maç sonu %35 sakatlık riski":"35% post-match injury risk","risk-offer-risk"]],go:()=>{riskPowerMod+=5;draftPendingInjury=1;pushFeed("🩹 "+(tr?"Dişini Sık: +5 güç, maç sonu risk":"Grit Your Teeth: +5 power, post-match risk"),"pres");}},
-  {i:_hand,c:"#496E71",n:tr?"Planı Bozma":"Hold the Plan",badge:tr?"GÜVENLİ":"SAFE",skip:true,lines:[[gain,tr?"Başkan güveni +1":"Chairman trust +1","risk-offer-gain"],[note,tr?"Risk alma, mevcut düzeni koru":"Take no risk, keep the plan","risk-offer-note"]],go:()=>{chairTrust=Math.min(3,chairTrust+1);pushFeed("✋ "+(tr?"Planı Bozma: başkan güveni +1":"Hold the Plan: chairman trust +1"),"pres");}}
+  {i:_hand,c:"#496E71",n:tr?"Pas Geç":"Pass",badge:tr?"GÜVENLİ":"SAFE",skip:true,lines:[[gain,tr?"Etki yok":"No effect","risk-offer-note"],[note,tr?"Risk alma, mevcut düzeni koru":"Take no risk, keep the plan","risk-offer-note"]],go:()=>{pushFeed("✋ "+(tr?"Pas geçildi: risk alınmadı":"Passed: no risk taken"),"pres");}}
  ];
  let h=`<div class="riskdraft-modal"><div class="kithdr">${tr?"RİSKLİ TEKLİFLER":"RISKY OFFERS"}</div><div class="kitsub">${tr?"Büyük kazanç, gerçek bedel. Gerek yoksa pas geç.":"Big upside, real cost. Skip if you do not need it."}</div><div class="risk-offer-list">`;
  opts.forEach((o,i)=>{h+=_riskOfferHTML(o,i);});

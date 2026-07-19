@@ -11,8 +11,8 @@ var KARA_PEN={
  altyapi_plani:4,tecrubeli_omurga:4,
  yerli_blok:3,kanat_akini:5,
  taksit_transfer:6,
- sahte_evrak:10,
- doping:6,
+ sahte_evrak:8,
+ doping:8,
  gec_gec:3,
  kasiga_para:2,
  /* DARK now carries real final risk on cards that previously had free upside */
@@ -163,22 +163,70 @@ function applyDarkPurchaseRisk(k,variant){
  return{triggered:true,cash:risk.cash};
 }
 
+function blackMarketRewardPool(burnKey){
+ if(typeof eligibleMarketCardPool==="function")return eligibleMarketCardPool(round,{persistentOnly:true,exclude:["kara_borsa",burnKey]});
+ return CARDKEYS.filter(k=>k!=="kara_borsa"&&k!==burnKey&&invOf(k)<=0&&!isInstantCard(k)&&!(cardKind(k)==="final"&&round<5)&&(round<6||cardKind(k)==="final"));
+}
+function blackMarketCardPreview(k,v){
+ const old=cardVariant[k]||0;cardVariant[k]=v;
+ const value=cardEff(k,picksBySlot.filter(Boolean),round);
+ cardVariant[k]=old;
+ return value;
+}
+function blackMarketCardCosts(k,v){
+ const lines=typeof cardCostLines==="function"?cardCostLines(k,v):[];
+ return lines.length?lines:[LANG==="tr"?"Ek bedel yok":"No extra cost"];
+}
+function showBlackMarketRewards(){
+ const state=BLACK_MARKET_REWARD;if(!state)return;
+ const tr=LANG==="tr",required=state.required;
+ const list=state.offers.map(function(item){
+  const card=L().cards[item.key]||{},tier=typeof variantBadge==="function"?variantBadge(item.variant):(item.variant===1?"DARK":"COMMON"),power=blackMarketCardPreview(item.key,item.variant),costs=blackMarketCardCosts(item.key,item.variant);
+  return `<button type="button" class="black-market-card black-market-reward-card" role="checkbox" aria-checked="false" data-card="${item.key}" onclick="toggleBlackMarketReward('${item.key}')"><span class="black-market-card-copy"><strong>${card.n||item.key}</strong><small>${tr?"Bu tur güç":"Power this round"}: ${power>=0?"+":""}${power}</small><span class="black-market-card-costs">${costs.map(line=>`<i>${line}</i>`).join("")}</span></span><span class="var-badge var-${item.variant}">${tier}</span><span class="black-market-card-mark" aria-hidden="true"></span></button>`;
+ }).join("");
+ showModal(`<div class="black-market-modal black-market-rewards"><header class="black-market-head"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2>${tr?(required===1?"BİR KART SEÇ":"İKİ KART SEÇ"):(required===1?"CHOOSE ONE CARD":"CHOOSE TWO CARDS")}</h2><p>${tr?"Varyantı ve bütün bedelleri görerek ödülünü seç.":"Choose your reward with its variant and every cost visible."}</p></header><div class="black-market-list" role="group" aria-label="${tr?"Alınacak kartlar":"Cards to take"}">${list}</div><div class="black-market-status" data-black-market-status aria-live="polite">${tr?"0 / "+required+" seçildi":"0 / "+required+" selected"}</div>${state.variant===1?`<div class="black-market-warning">${tr?"Seçim tamamlanınca %25 ihtimalle -€8M ceza uygulanır.":"Completing the trade has a 25% chance of an €8M fine."}</div>`:""}<div class="black-market-actions"><button class="btn black-market-burn" data-black-market-take disabled onclick="completeBlackMarketTrade()">${tr?"SEÇİMİ AL":"TAKE SELECTION"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kara Borsa ödül seçimi":"Black Market reward selection"});
+}
 function resolveBlackMarketTrade(burnKey,variant){
  const tr=LANG==="tr";
+ if(!cards.includes(burnKey)||isInstantCard(burnKey)||cardHasLockedCommitment(burnKey))return false;
+ const pool=blackMarketRewardPool(burnKey),offerCount=Math.min(variant===1?4:3,pool.length),required=Math.min(variant===1?2:1,offerCount);
+ if(!required){showModal(`<div class="black-market-modal black-market-empty"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2>${tr?"UYGUN KART YOK":"NO ELIGIBLE CARDS"}</h2><p>${tr?"Bu tur takas havuzunda uygun kalıcı kart bulunmuyor.":"There is no eligible persistent card in this round's trade pool."}</p><div class="black-market-actions"><button class="btn btn-ghost" onclick="closeModal()">${tr?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:false});return false;}
+ const offers=[];
+ while(offers.length<offerCount&&pool.length){
+  const index=Math.floor(rand()*pool.length),key=pool.splice(index,1)[0];
+  offers.push({key,variant:variant===1?weightedVariant():0});
+ }
  const oldName=(L().cards[burnKey]&&L().cards[burnKey].n)||burnKey;
  cards=cards.filter(k=>k!==burnKey);cardInv[burnKey]=0;cardVariant[burnKey]=0;
- const pool=CARDKEYS.filter(k=>k!=="kara_borsa"&&k!==burnKey&&invOf(k)<=0&&!isInstantCard(k));
- let gained=0;
- while(gained<2&&pool.length){
-  const next=pool.splice(ri(0,pool.length-1),1)[0];
-  addCard(next,variant===1?weightedVariant():0,{silent:true,freeSource:"kara_borsa"});
-  gained++;
- }
- if(variant===1&&rand()<0.35){applyCardCashPenalty("kara_borsa",10);pushFeed(tr?"Kara Borsa riski: -\u20ac10M":"Black Market risk: -\u20ac10M","lose");}
- pushFeed("<b>"+((L().cards.kara_borsa&&L().cards.kara_borsa.n)||"Kara Borsa")+"</b> "+(tr?oldName+" yak\u0131ld\u0131, "+gained+" kart geldi.":oldName+" burned; "+gained+" cards arrived."),"buy");
- closeModal();if(typeof renderHub==="function")renderHub();
+ BLACK_MARKET_REWARD={burnKey,burnName:oldName,variant,required,offers,selected:[]};
+ showBlackMarketRewards();
+ return true;
 }
-var BLACK_MARKET_SELECTION=null;
+var BLACK_MARKET_SELECTION=null,BLACK_MARKET_REWARD=null;
+function toggleBlackMarketReward(key){
+ const state=BLACK_MARKET_REWARD;if(!state||!state.offers.some(item=>item.key===key))return;
+ const selected=state.selected,index=selected.indexOf(key);
+ if(index>=0)selected.splice(index,1);
+ else if(selected.length<state.required)selected.push(key);
+ const root=document.querySelector(".black-market-rewards");if(!root)return;
+ root.querySelectorAll(".black-market-reward-card").forEach(button=>{const on=selected.includes(button.dataset.card);button.classList.toggle("is-selected",on);button.setAttribute("aria-checked",on?"true":"false");});
+ const status=root.querySelector("[data-black-market-status]");if(status)status.textContent=(LANG==="tr"?selected.length+" / "+state.required+" seçildi":selected.length+" / "+state.required+" selected");
+ const action=root.querySelector("[data-black-market-take]");if(action)action.disabled=selected.length!==state.required;
+}
+function completeBlackMarketTrade(){
+ const state=BLACK_MARKET_REWARD;if(!state||state.selected.length!==state.required)return false;
+ const chosen=state.selected.map(key=>state.offers.find(item=>item.key===key)).filter(Boolean),tr=LANG==="tr";
+ chosen.forEach(item=>addCard(item.key,item.variant,{silent:true,freeSource:"kara_borsa"}));
+ if(state.variant===1&&rand()<0.25){
+  const old=cardVariant.kara_borsa||0;cardVariant.kara_borsa=1;
+  applyCardCashPenalty("kara_borsa",8);cardVariant.kara_borsa=old;
+  pushFeed(tr?"Kara Borsa riski: -€8M":"Black Market risk: -€8M","lose");
+ }
+ pushFeed("<b>"+((L().cards.kara_borsa&&L().cards.kara_borsa.n)||"Kara Borsa")+"</b> "+(tr?state.burnName+" yakıldı; "+chosen.length+" kart seçildi.":state.burnName+" burned; "+chosen.length+" card(s) selected."),"buy");
+ BLACK_MARKET_REWARD=null;BLACK_MARKET_SELECTION=null;
+ closeModal();if(typeof renderHub==="function")renderHub();
+ return true;
+}
 function selectBlackMarketCard(burnKey,variant){
  BLACK_MARKET_SELECTION=burnKey;
  const root=document.querySelector(".black-market-modal");if(!root)return;
@@ -195,7 +243,7 @@ function selectBlackMarketCard(burnKey,variant){
 }
 function confirmBlackMarketTrade(burnKey,variant){
  const tr=LANG==="tr",card=L().cards[burnKey],name=(card&&card.n)||burnKey,v=variantOf(burnKey),tier=typeof variantBadge==="function"?variantBadge(v):(v===1?"DARK":"COMMON");
- showModal(`<div class="black-market-modal black-market-confirm"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><div class="black-market-confirm-mark" aria-hidden="true">&#10005;</div><h2>${name} ${tr?"yakılacak.":"will be burned."}</h2><p>${tr?"Devam et?":"Continue?"}</p><div class="black-market-confirm-card"><span class="var-badge var-${v}">${tier}</span><strong>${name}</strong></div><div class="black-market-warning">${tr?"Bu seçim geri alınamaz.":"This choice cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" onclick="resolveBlackMarketTrade('${burnKey}',${variant})">${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kart yakma onayı":"Burn card confirmation"});
+ showModal(`<div class="black-market-modal black-market-confirm"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><div class="black-market-confirm-mark" aria-hidden="true">&#10005;</div><h2>${name} ${tr?"yakılacak.":"will be burned."}</h2><p>${tr?"Ardından ödül kartlarını sen seçeceksin.":"You will choose the reward cards next."}</p><div class="black-market-confirm-card"><span class="var-badge var-${v}">${tier}</span><strong>${name}</strong></div><div class="black-market-warning">${tr?"Yakma işlemi geri alınamaz.":"The burn cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" onclick="resolveBlackMarketTrade('${burnKey}',${variant})">${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="openBlackMarketTrade(${variant})">${tr?"GERİ":"BACK"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kart yakma onayı":"Burn card confirmation"});
 }
 function openBlackMarketTrade(variant){
  const tr=LANG==="tr",choices=cards.filter(k=>k!=="kara_borsa"&&!isInstantCard(k)&&!cardHasLockedCommitment(k));
@@ -205,7 +253,7 @@ function openBlackMarketTrade(variant){
   return;
  }
  const list=choices.map(function(k){const card=L().cards[k],v=variantOf(k),tier=typeof variantBadge==="function"?variantBadge(v):(v===1?"DARK":"COMMON");return `<button type="button" class="black-market-card" role="radio" aria-checked="false" data-card="${k}" onclick="selectBlackMarketCard('${k}',${variant})"><span class="black-market-card-copy"><strong>${(card&&card.n)||k}</strong><small>${tr?"Bu kartı yak":"Burn this card"}</small></span><span class="var-badge var-${v}">${tier}</span><span class="black-market-card-mark" aria-hidden="true"></span></button>`;}).join("");
- showModal(`<div class="black-market-modal"><button class="modal-x" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">&times;</button><header class="black-market-head"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2><span>${tr?"BİR KARTI YAK,":"BURN ONE CARD,"}</span><span>${tr?"İKİ KART AL":"TAKE TWO"}</span></h2><p>${tr?"Feda edeceğin kartı seç.":"Choose a card to sacrifice."}</p></header><div class="black-market-list" role="radiogroup" aria-label="${tr?"Yakılacak kart":"Card to burn"}">${list}</div><div class="black-market-status" data-black-market-status aria-live="polite"></div><div class="black-market-warning">${tr?"Bu seçim geri alınamaz.":"This choice cannot be undone."}</div><div class="black-market-actions"><button class="btn black-market-burn" data-black-market-burn hidden>${tr?"KARTI YAK":"BURN CARD"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"Kara Borsa kart yakma":"Black Market card burn"});
+ showModal(`<div class="black-market-modal"><header class="black-market-head"><div class="black-market-badge">${tr?"KARA BORSA":"BLACK MARKET"}</div><h2><span>${tr?"BİR KARTI YAK,":"BURN ONE CARD,"}</span><span>${tr?(variant===1?"İKİ KART SEÇ":"BİR KART SEÇ"):(variant===1?"CHOOSE TWO":"CHOOSE ONE")}</span></h2><p>${tr?"Feda edeceğin kartı seç.":"Choose a card to sacrifice."}</p></header><div class="black-market-list" role="radiogroup" aria-label="${tr?"Yakılacak kart":"Card to burn"}">${list}</div><div class="black-market-status" data-black-market-status aria-live="polite"></div><div class="black-market-warning">${tr?"Kart yakılmadan önce son kez onaylayacaksın.":"You will confirm once more before the card is burned."}</div><div class="black-market-actions"><button class="btn black-market-burn" data-black-market-burn hidden>${tr?"DEVAM ET":"CONTINUE"}</button></div></div>`,{dismissOnOverlay:false,label:tr?"Kara Borsa kart yakma":"Black Market card burn"});
 }
 
 /* ===== Kart satin alma etkileri ===== */
@@ -292,14 +340,13 @@ function applyRiskCardGain(k){
 
  /* --- DEPLASMAN (INSTANT) --- */
  if(k==="deplasman_kafilesi"){
-  const s=picksBySlot.filter(Boolean);
-  const avg=s.length?Math.round(s.reduce((a,p)=>a+effOf(p),0)/s.length):0;
-  const stronger=typeof opponent!=="undefined"&&opponent&&opponent.power>avg;
+  const currentSquadPower=typeof squadPower==="function"?squadPower(round).power:0;
+  const stronger=typeof opponent!=="undefined"&&opponent&&opponent.power>currentSquadPower;
   if(v===1){
-   if(stronger){riskPowerMod+=8;pushFeed("✈️ <b>"+L().cards[k].n+"</b> +8"+(tr?" güç":" power"),"pres");}
-   else{if(rand()<0.5){riskPowerMod+=4;pushFeed("✈️ <b>"+L().cards[k].n+"</b> +4"+(tr?" güç (şans)":" power (luck)"),"pres");}else{riskPowerMod-=4;pushFeed("✈️ <b>"+L().cards[k].n+"</b> -4"+(tr?" güç (kötü deplasman)":" power (bad away)"),"lose");}}
+   if(stronger){riskPowerMod+=9;pushFeed("✈️ <b>"+L().cards[k].n+"</b> +9"+(tr?" güç":" power"),"pres");}
+   else{if(rand()<0.5){riskPowerMod+=4;pushFeed("✈️ <b>"+L().cards[k].n+"</b> +4"+(tr?" güç (şans)":" power (luck)"),"pres");}else{riskPowerMod-=2;pushFeed("✈️ <b>"+L().cards[k].n+"</b> -2"+(tr?" güç (kötü deplasman)":" power (bad away)"),"lose");}}
   }else{
-   const pow=stronger?4:2;riskPowerMod+=pow;
+   const pow=stronger?6:2;riskPowerMod+=pow;
    pushFeed("✈️ <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç":" power"),"pres");
   }
   return;
@@ -307,14 +354,7 @@ function applyRiskCardGain(k){
 
  /* --- KARA BORSA (INSTANT) --- */
  if(k==="kara_borsa"){
-   openBlackMarketTrade(v);return;
-   const count=v===1?2:1;
-   const pool=CARDKEYS.filter(x=>x!==k&&invOf(x)<=0&&!isInstantCard(x));
-   let added=0;
-   for(let i=0;i<count&&pool.length;i++){const idx=ri(0,pool.length-1);const fk=pool.splice(idx,1)[0];addCard(fk,v===1&&i>0?weightedVariant():0,{silent:false,freeSource:"kara_borsa"});added++;}
-   pushFeed("🖤 <b>"+L().cards[k].n+"</b> "+(tr?added+" bedava kart":added+" free cards"),"buy");
-   if(v===1&&rand()<0.40){applyCardCashPenalty(k,10);pushFeed("🖤 "+(tr?"Kara Borsa cezası: -€10M":"Black Market fine: -€10M"),"lose");}
-  return;
+  openBlackMarketTrade(v);return;
  }
 
  /* --- GEÇİCİ GÜÇLER (INSTANT) --- */
@@ -355,7 +395,7 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="primler_yatinca"){
-  const pow=v===1?8:4,pen=v===1?16:8;
+  const pow=v===1?9:5,pen=v===1?12:6;
   riskPowerMod+=pow;
   deferredBudgetPenalty+=pen;
   pushFeed("💰 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç, gelecek tur -€":" power, next turn -€")+pen+"M","pres");
@@ -393,12 +433,13 @@ function applyRiskCardGain(k){
   return;
  }
  if(k==="nasip_kismet"){
-   const discount=v===1?0.60:0.75;
-  // Bought this turn consumes the 1-card purchase, so the discount must land NEXT turn.
-  // turns=2 survives the end-of-turn decrement and stays active through the next round's shopping.
-  cardPriceMod=discount;cardPriceModTurns=2;
-   pushFeed("🍀 <b>"+L().cards[k].n+"</b> "+(tr?"sonraki tur kart fiyatları "+(v===1?"-%40":"-%25"):"next round card prices "+(v===1?"-40%":"-25%")),"buy");
-  if(v===1&&rand()<0.25){applyCardCashPenalty(k,4);pushFeed("🍀 "+(tr?"Talih cezası: -€4M":"Fate penalty: -€4M"),"lose");}
+  const coupon=v===1?8:5;
+  lotteryCouponAmount=coupon;
+  // The purchase round immediately decrements this counter at reward time.
+  // Three ticks therefore cover the next two card-market rounds.
+  lotteryCouponTurns=3;
+  pushFeed("🎟️ <b>"+L().cards[k].n+"</b> "+(tr?"iki tur içinde alınacak bir kartta -€"+coupon+"M":"-€"+coupon+"M on one card bought within two rounds"),"buy");
+  if(v===1&&rand()<0.20){applyCardCashPenalty(k,3);pushFeed("🎟️ "+(tr?"Piyango masrafı: -€3M":"Lottery cost: -€3M"),"lose");}
   return;
  }
  if(k==="yildiz_krizi"){
@@ -436,17 +477,17 @@ function applyRiskCardGain(k){
  }
  if(k==="kumarbaz"){return;} // yukarida islendi
  if(k==="sahte_evrak"){
-  const pow=v===1?10:6;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Evrak riski: güven -1":"Paperwork risk: trust -1"),"lose");}
-  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Başkan evrakı sorguladı: güven -1":"Chairman questioned the papers: trust -1"),"lose");}
+  const pow=v===1?8:5;
+  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Kontrat riski: güven -1":"Contract risk: trust -1"),"lose");}
+  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Başkan kontratı sorguladı: güven -1":"Chairman questioned the contract: trust -1"),"lose");}
   pushFeed("📄 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur (kontrat)":" power/turn (contract)"),"buy");
   return;
  }
  if(k==="doping"){
-  const pow=v===1?10:6;
-  const fineChance=v===1?25:35,fineAmt=v===1?25:15;
+  const pow=v===1?9:6;
+  const fineChance=v===1?20:25,fineAmt=v===1?18:10;
   if(v===1||rand()<0.20){chairTrust=Math.max(0,chairTrust-1);pushFeed("🧪 "+(tr?"Doping şüphesi: güven -1":"Doping suspicion: trust -1"),"lose");}
-  pushFeed("🧪 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur; %"+fineChance+" -€"+fineAmt+"M":" power/turn; "+fineChance+"% -€"+fineAmt+"M")+(v===1?" · finalde -6":""),"pres");
+  pushFeed("🧪 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur; her tur %"+fineChance+" -€"+fineAmt+"M · en fazla 2 ceza":" power/round; "+fineChance+"% -€"+fineAmt+"M each round · max 2 fines")+(v===1?" · finalde -8":""),"pres");
   return;
  }
 }
@@ -475,15 +516,19 @@ function processRiskCards(){
   pushFeed("🆘 <b>"+(L().cards.son_kredi&&L().cards.son_kredi.n||"Son Kredi")+"</b> +€"+gain+"M"+(v===1?" · güven -1":""),"buy");
  }
  /* Doping ceza sansi */
- if(hasCard("doping")&&round>1){
+ if(hasCard("doping")&&round>1&&Number(dopingInvestigationResolved||0)<2){
   const v=variantOf("doping");
-  const fineChance=v===1?0.25:0.35,fineAmt=v===1?25:15;
-  if(rand()<fineChance){applyCardCashPenalty("doping",fineAmt);pushFeed("🧪 "+(tr?"Doping incelemesi: -€":"Doping review: -€")+fineAmt+"M","lose");}
+  const fineChance=v===1?0.20:0.25,fineAmt=v===1?18:10;
+  if(rand()<fineChance){
+   dopingInvestigationResolved=Math.min(2,Number(dopingInvestigationResolved||0)+1);
+   applyCardCashPenalty("doping",fineAmt);
+   pushFeed("🧪 "+(tr?"Doping incelemesi cezası "+dopingInvestigationResolved+"/2: -€":"Doping investigation fine "+dopingInvestigationResolved+"/2: -€")+fineAmt+"M","lose");
+  }
  }
  /* Gec Gec dark: sakatlık riski */
  if(hasCard("gec_gec")&&variantOf("gec_gec")===1&&rand()<0.25){
   const inj=applyRandomInjury(1);
-  if(inj)pushFeed("🦺 "+(tr?"Geç Geçebilirsen riski: ":"Defensive wall risk: ")+"<b>"+shortName(inj)+"</b>"+(tr?" sakatlandı":" injured"),"lose");
+  if(inj)pushFeed("🦺 "+(tr?"Barikat riski: ":"Barricade risk: ")+"<b>"+shortName(inj)+"</b>"+(tr?" sakatlandı":" injured"),"lose");
  }
 }
 
@@ -513,8 +558,9 @@ function applyKriz(){
  krizActive=false;
  const v=krizVariant;krizVariant=0;
  /* Sigorta riski tamamen silmez; sabit tavan yerine toplam cezanın bir bölümünü telafi eder. */
- const rate=v===1?0.75:0.50;
- const cleared=Math.min(finalPenalty,Math.ceil(finalPenalty*rate));
+ const rate=v===1?0.65:0.50;
+ const cap=v===1?10:6;
+ const cleared=Math.min(finalPenalty,cap,Math.ceil(finalPenalty*rate));
  finalPenalty=Math.max(0,finalPenalty-cleared);
  if(cleared>0)pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: finalde -"+cleared+" güç telafi edildi.":"Crisis Management: -"+cleared+" final power offset."),"buy");
  else pushFeed("🧯 "+(LANG==="tr"?"Kriz Yönetimi: telafi edilecek final cezası yoktu.":"Crisis Management: no final penalty to offset."),"pres");

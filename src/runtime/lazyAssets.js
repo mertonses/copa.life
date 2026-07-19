@@ -47,11 +47,21 @@
       loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260718-layout1",()=>!!global.CopaAdvancedSettings)
     ]).then(()=>global.CopaAdvancedSettings);
   }
+  function ensureScoutReport(){
+    return loadScriptOnce("scout-report","src/ui/scoutReport.js?v=20260719-lazy1",()=>!!global.ScoutReport).then(()=>global.ScoutReport);
+  }
+  function ensureLastMatchReport(){
+    return loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260719-lazy1",()=>!!global.LastMatchReport).then(()=>global.LastMatchReport);
+  }
+  function warmRunReports(){
+    return Promise.all([ensureScoutReport(),ensureLastMatchReport()]);
+  }
   function toggleAdvancedSettings(button){
     const body=button&&button.nextElementSibling;if(!body)return Promise.resolve();
     const open=body.classList.contains("hidden"),apply=()=>{body.classList.toggle("hidden",!open);button.classList.toggle("open",open);button.setAttribute("aria-expanded",String(open));};
     if(!open){apply();return Promise.resolve();}return ensureAdvancedSettings().then(api=>{api.ensureMarkup(body);apply();}).catch(apply);
   }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,toggleAdvancedSettings,openMetaProgression});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openMetaProgression});
+  global.addEventListener("load",()=>{warmRunReports().catch(()=>{});},{once:true});
 })(window);

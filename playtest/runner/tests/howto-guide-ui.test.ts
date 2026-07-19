@@ -59,3 +59,24 @@ test("first-run setup tip records itself and does not reopen after reload",async
   await expect(page.locator(".copa-coachmark")).toHaveCount(0);
   await context.close();
 });
+
+test("mobile draft opens at the page top and uses the simpler budget tip",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"mobile draft scroll contract");
+  await page.goto("/?draft-scroll-top=1",{waitUntil:"domcontentloaded"});
+  const before=await page.evaluate(()=>{
+    localStorage.setItem("copa.guide.context.v2",JSON.stringify({setup:1,hub:1}));
+    (globalThis as any).setLang("tr");
+    window.scrollTo(0,document.documentElement.scrollHeight);
+    (globalThis as any).normalStart();
+    return window.scrollY;
+  });
+  expect(before).toBeGreaterThan(0);
+  await expect(page.locator("#modal")).toBeVisible();
+  await page.waitForTimeout(100);
+  await page.locator('.stylebtn[data-style="gegen"]').click();
+  await expect(page.locator("#draft")).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+  const tip=page.locator(".copa-coachmark");
+  await expect(tip).toBeVisible({timeout:6000});
+  await expect(tip.locator("p")).toHaveText("Zarı attığında üç aday gelir. Seçtiğin oyuncu kalan bütçeni de etkiler.");
+});

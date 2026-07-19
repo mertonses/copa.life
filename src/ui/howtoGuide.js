@@ -39,7 +39,7 @@
       actions:{formation:"Diziliş ekranına git",market:"Kart pazarını göster",unavailable:"Bu aksiyon ilgili oyun ekranında açılır."},
       tips:{
         setup:["İLK RUN İPUCU","Diziliş, dolduracağın mevkileri belirler. Başkan ise bütçe ve borç alanını değiştirir."],
-        draft:["İLK RUN İPUCU","Zarı attığında üç aday gelir. Bir oyuncuyu değil, kalan kadro bütçeni de seçiyorsun."],
+        draft:["İLK RUN İPUCU","Zarı attığında üç aday gelir. Seçtiğin oyuncu kalan bütçeni de etkiler."],
         hub:["İLK RUN İPUCU","Kimya kutusuna dokunarak güç katkısını; kartlarda ise para dışındaki riskleri görebilirsin."]
       },
       gotIt:"ANLADIM",expand:"Detayı aç",collapse:"Detayı kapat"

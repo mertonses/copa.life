@@ -101,6 +101,10 @@ if (/<script[^>]+src=["'][^"']*finalSim\.js/i.test(indexHtml)||!fs.readFileSync(
   failed = true;
   console.error("performance budget failed: final simulation must load lazily");
 }
+if (/<script[^>]+src=["'][^"']*(?:lastMatchReport|scoutReport)\.js/i.test(indexHtml)) {
+  failed = true;
+  console.error("performance budget failed: run-report modules must load after the landing critical path");
+}
 if (
   !/cleanupTouchDragGhosts/.test(hubSource) ||
   !/orientationchange/.test(hubSource) ||

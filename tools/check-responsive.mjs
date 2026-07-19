@@ -72,8 +72,10 @@ const checks = [
       && /function ensureResultDisclosures\(\)\{\s*if\(!isPhoneInteraction\(\)\)/.test(mobileScript),
   },
   {
-    name: "mobile landing summary stays visible and uses compact equal rows",
-    pass: !/button\.id="mobileMechanicsToggle"/.test(mobileScript)&&/#introLand \.mechanics\{[\s\S]*grid-auto-rows:minmax\(32px,auto\)/s.test(mobile),
+    name: "mobile landing hides tactics and uses a two-by-two summary grid",
+    pass: !/button\.id="mobileMechanicsToggle"/.test(mobileScript)
+      && /\.tactical-board\{display:none!important\}/.test(mobile)
+      && /#introLand \.mechanics\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important;[\s\S]*grid-auto-rows:minmax\(54px,auto\)/s.test(mobile),
   },
   {
     name: "mobile connection loss has a non-blocking state",
