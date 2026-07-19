@@ -224,7 +224,30 @@ test("hub context and result details stay compact without hiding information",as
     global.pushFeed("Mobil gelişme 3","form");
   });
   await expect(page.locator("#mobileFeedToggle")).toBeVisible();
-  await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();(globalThis as any).endRun(false);});
+  await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.setCaptain(0);
+    global.closeModal();
+    const home=global.picksBySlot.filter(Boolean).slice(0,11);
+    const away=home.map((player:any,index:number)=>({...player,name:`Mobil Rakip ${index+1}`}));
+    global.LastMatchReport.capture({
+      round:5,
+      homeName:"Mobile Result FK",
+      awayName:"Mobil Rakip FK",
+      homeFormation:global.formName,
+      awayFormation:"4-3-3",
+      homeSlots:global.slots,
+      awaySlots:global.FORMATIONS["4-3-3"],
+      homePlayers:home,
+      awayPlayers:away,
+      homePower:80,
+      awayPower:81,
+      score:[1,2],
+      homeWon:false,
+      seed:32714,
+    });
+    global.endRun(false);
+  });
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
   const resultActions=page.locator("#result .result-row .btn");
@@ -256,6 +279,23 @@ test("hub context and result details stay compact without hiding information",as
   await expect(story).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+  await page.locator(".mobile-result-disclosure>summary").filter({hasText:/KADROLAR|LINEUPS/}).click();
+  await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
+  await expect(page.locator("#lineups .lmr-header .lmr-score")).toHaveCount(0);
+  const mobileScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
+    const score=element.getBoundingClientRect();
+    const pitch=element.parentElement!.getBoundingClientRect();
+    return{
+      centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
+      inside:score.top>=pitch.top&&score.right<=pitch.right+1,
+      widthRatio:score.width/pitch.width,
+      radius:Number.parseFloat(getComputedStyle(element).borderRadius),
+    };
+  });
+  expect(mobileScore.centered).toBeLessThanOrEqual(1);
+  expect(mobileScore.inside).toBe(true);
+  expect(mobileScore.widthRatio).toBeLessThanOrEqual(.98);
+  expect(mobileScore.radius).toBeGreaterThan(12);
 });
 
 test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
@@ -299,6 +339,20 @@ test("desktop result keeps season story, economy and lineups in the document flo
   await expect(page.locator("#econTile .econsum")).toBeVisible();
   await expect(page.locator("#lineups")).toBeVisible();
   await expect(page.locator("#lineups .last-match-report")).toBeVisible();
+  await expect(page.locator("#lineups .lmr-header .lmr-score")).toHaveCount(0);
+  await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
+  const desktopScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
+    const score=element.getBoundingClientRect();
+    const pitch=element.parentElement!.getBoundingClientRect();
+    return{
+      centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
+      inside:score.top>=pitch.top&&score.right<=pitch.right+1,
+      widthRatio:score.width/pitch.width,
+    };
+  });
+  expect(desktopScore.centered).toBeLessThanOrEqual(1);
+  expect(desktopScore.inside).toBe(true);
+  expect(desktopScore.widthRatio).toBeLessThanOrEqual(.73);
 });
 
 test("footer keeps its link rail separate from the independent-project note",async({page},testInfo)=>{

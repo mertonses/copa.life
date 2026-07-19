@@ -343,7 +343,7 @@
     width:48px!important;
     height:48px!important;
   }
-  .player-profile-layer.is-sheet .player-profile-radar svg{width:min(286px,76vw)}
+  .player-profile-layer.is-sheet .player-profile-radar svg{width:min(250px,70vw)}
   .player-profile-layer.is-sheet .player-profile-analysis p,
   .player-profile-layer.is-sheet .player-profile-insights li{font-size:10px;line-height:1.45}
 
@@ -513,20 +513,6 @@
     background:var(--surface-bg);
   }
   .pen-modal .pen-continue{width:100%;min-height:50px}
-  .pen-modal .pen-log-toggle{
-    width:100%;
-    min-height:48px;
-    margin-top:10px;
-    border:1px solid var(--border-default);
-    border-radius:8px;
-    background:var(--surface-muted);
-    color:var(--color-ink);
-    font:800 8px/1 var(--mono);
-    letter-spacing:.8px;
-  }
-  .pen-modal .pen-log{max-height:30dvh!important;overscroll-behavior:contain}
-  .pen-modal .pen-log.is-collapsed{display:none}
-
   .tap-helper{
     right:max(8px,var(--copa-safe-right));
     bottom:calc(var(--mobile-dock-height) + 8px + var(--copa-safe-bottom));
@@ -934,6 +920,7 @@
     justify-content:center;
     cursor:pointer;
   }
+  .player-profile-layer.is-sheet .player-profile-radar-disclosure,
   .player-profile-layer.is-sheet .player-profile-radar,
   .player-profile-layer.is-sheet .player-profile-insight-grid,
   .player-profile-layer.is-sheet .player-profile-analysis{scroll-margin-top:134px}
@@ -983,10 +970,10 @@
     display:block;
     margin:8px 0;
     padding:7px 9px;
-    border:1px solid rgba(230,238,239,.14);
+    border:1px solid var(--border-subtle);
     border-radius:7px;
-    background:rgba(230,238,239,.07);
-    color:rgba(230,238,239,.82);
+    background:var(--surface-muted);
+    color:var(--color-ink);
     font:700 9px/1.4 var(--mono);
   }
 

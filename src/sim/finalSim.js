@@ -2563,8 +2563,8 @@ function buildSim(myPow, oppPow) {
     });
   }
   function finalAuditDetailsHTML(includeReplay){
-    const replayButton=includeReplay?`<button type="button" class="btn btn-primary final-replay-open" onclick="openFinalMatchReplay()">${isTR?"MAÇI YENİDEN İZLE":"WATCH MATCH REPLAY"}</button><button type="button" class="btn btn-ghost final-replay-copy" onclick="copyFinalReplayCode()">${isTR?"TEKRAR KODUNU KOPYALA":"COPY REPLAY CODE"}</button>`:"";
-    const replay=`<div class="final-replay-actions">${replayButton}<button type="button" class="btn btn-ghost" onclick="openFinalCalibration()">${isTR?"KALİBRASYON":"CALIBRATION"}</button></div>`;
+    const replayButton=includeReplay?`<button type="button" class="btn btn-primary final-replay-action final-replay-open" onclick="openFinalMatchReplay()">${isTR?"MAÇI YENİDEN İZLE":"WATCH MATCH REPLAY"}</button><button type="button" class="btn btn-ghost final-replay-action final-replay-copy" onclick="copyFinalReplayCode()">${isTR?"TEKRAR KODUNU KOPYALA":"COPY REPLAY CODE"}</button>`:"";
+    const replay=`<div class="final-replay-actions">${replayButton}<button type="button" class="btn btn-ghost final-replay-action final-replay-calibration" onclick="openFinalCalibration()">${isTR?"KALİBRASYON":"CALIBRATION"}</button></div>`;
     const summary=isTR?"SİMÜLASYON DENETİMİ":"SIMULATION AUDIT";
     return replay+`<details class="final-audit-details"><summary>${summary}</summary><div class="final-audit-body">${auditReportHTML()}</div></details>`;
   }

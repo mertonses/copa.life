@@ -127,6 +127,18 @@ test("real match replay is read-only, seekable, keyboard accessible and narratab
   await expect(viewer).toBeVisible();
   await expect(page.locator("#finalReplayPlay")).toBeFocused();
   await expect(page.locator("#finalReplayCounter")).toHaveText("1 / 4");
+  const compactControls=await page.locator(".final-replay-close,.final-replay-prev,.final-replay-next").evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();
+    return{width:Math.round(rect.width),height:Math.round(rect.height)};
+  }));
+  expect(compactControls).toHaveLength(3);
+  expect(compactControls.every(control=>control.width<=40&&control.height<=40)).toBe(true);
+  const controlGrid=await page.locator(".final-replay-controls").evaluate(element=>{
+    const style=getComputedStyle(element);
+    return{display:style.display,columns:style.gridTemplateColumns};
+  });
+  expect(controlGrid.display).toBe("grid");
+  expect(controlGrid.columns.split(" ").length).toBeGreaterThanOrEqual(3);
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#finalReplayCounter")).toHaveText("2 / 4");
   await expect(page.locator("#finalReplayScore")).toHaveText("1 – 0");
@@ -137,6 +149,26 @@ test("real match replay is read-only, seekable, keyboard accessible and narratab
   const spoken=await page.evaluate(()=>(globalThis as any).speechSynthesis.spoken);
   expect(spoken).toContain("2–1");
   expect(await page.locator("#finalReplayEvent").getAttribute("aria-live")).toBe("polite");
+});
+
+test("final report replay actions share one equal-width row",async({page},testInfo)=>{
+  test.skip(!primaryProject(testInfo.project.name),"final report action layout runs once");
+  await page.goto("/?final-replay-actions=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const host=document.createElement("div");
+    host.className="finalreport";
+    host.innerHTML='<div class="final-replay-actions"><button class="btn btn-primary final-replay-action">MAÇI YENİDEN İZLE</button><button class="btn btn-ghost final-replay-action">TEKRAR KODUNU KOPYALA</button><button class="btn btn-ghost final-replay-action">KALİBRASYON</button></div>';
+    document.body.append(host);
+  });
+  const actions=page.locator(".final-replay-actions .final-replay-action");
+  await expect(actions).toHaveCount(3);
+  const boxes=await actions.evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();
+    return{top:Math.round(rect.top),width:Math.round(rect.width),height:Math.round(rect.height)};
+  }));
+  expect(new Set(boxes.map(box=>box.top)).size).toBe(1);
+  expect(Math.max(...boxes.map(box=>box.width))-Math.min(...boxes.map(box=>box.width))).toBeLessThanOrEqual(1);
+  expect(Math.max(...boxes.map(box=>box.height))-Math.min(...boxes.map(box=>box.height))).toBeLessThanOrEqual(1);
 });
 
 test("weekly calibration stores anonymous aggregates and evaluates thresholds",async({page},testInfo)=>{

@@ -1382,7 +1382,6 @@ html[data-theme="dark"] .country-new-ribbon{background:#c9973d;color:#10100c;bor
 .frrow b{color:var(--color-primary);font-family:var(--mono);font-size:11px}
 
 /* ===== Penalty Shootout ===== */
-.pen-log-row{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;font-family:var(--mono);font-size:10px;border-bottom:1px solid var(--border-subtle)}
 .pen-goal{color:var(--color-primary)}
 .pen-save{color:var(--color-slate)}
 
@@ -2744,14 +2743,6 @@ img,svg,canvas{max-width:100%}
 .pen-actors em{font-style:normal;font-family:var(--mono);color:var(--color-primary);font-weight:900}
 .pen-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .pen-actions .btn,.pen-final-btn{padding:12px 10px;font-size:13px;font-weight:900}
-.pen-log{display:grid;gap:5px;margin-top:12px;text-align:left}
-.pen-modal .pen-log{max-height:132px;overflow:auto}
-.pen-log-row{display:grid;grid-template-columns:72px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--surface-muted);font-size:11px}
-.pen-log-row b{font-family:var(--mono);font-size:10px}
-.pen-log-row em{font-style:normal;color:var(--color-slate);font-size:10px}
-.pen-log-row.pen-log-goal b{color:var(--color-primary)}
-.pen-log-row.pen-log-save b{color:#496E71}
-.pen-log-row.pen-miss b{color:#ef4444}
 @media(max-width:620px){
   #hub .hubcols{display:flex!important;flex-direction:column!important}
   #hub .hub-action-panel{order:1;position:sticky;top:6px;z-index:45}
@@ -3457,27 +3448,6 @@ img,svg,canvas{max-width:100%}
 .pen-modal .pen-slots>div{
   min-width:0;
 }
-.pen-modal .pen-log-row{
-  grid-template-columns:86px minmax(0,1fr) auto!important;
-}
-.pen-modal .pen-log{
-  max-height:min(108px,22dvh)!important;
-  overflow:auto!important;
-  overscroll-behavior:contain;
-}
-.pen-modal .pen-log-row strong{
-  display:block;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:var(--color-ink);
-}
-.pen-modal .pen-log-row em{
-  display:block;
-}
-.pen-modal .pen-log-row.pen-miss b{color:#ef4444}
-.pen-modal .pen-log-row.pen-log-save b{color:var(--color-primary)}
-.pen-modal .pen-log-row.pen-log-goal b{color:var(--color-primary)}
 @media(max-width:760px){
   #sim.simwrap{max-width:calc(100vw - 16px)}
   #sim .board{grid-template-columns:minmax(0,1fr) 86px minmax(0,1fr);gap:6px;padding:8px 9px}
@@ -3492,7 +3462,6 @@ img,svg,canvas{max-width:100%}
   .pen-modal .pen-actors{grid-template-columns:1fr}
   .pen-modal .pen-score{gap:6px!important}
   .pen-modal .pen-score span{font-size:12px}
-  .pen-modal .pen-log-row{grid-template-columns:62px minmax(0,1fr) auto!important}
 }
 
 /* Bench picker: dismiss without substituting */
@@ -3723,31 +3692,6 @@ img,svg,canvas{max-width:100%}
 }
 .pen-modal .pen-dir-btn:hover{border-color:var(--color-primary)}
 .pen-modal .pen-dir-btn:active{transform:translateY(1px)}
-/* richer log rows: no | headline + description */
-.pen-modal .pen-log-row{
-  grid-template-columns:24px minmax(0,1fr)!important;
-  align-items:start!important;
-  padding:7px 9px!important;
-}
-.pen-modal .pen-log-row>span{
-  font-family:var(--mono);
-  font-size:10px;
-  font-weight:900;
-  color:var(--color-slate);
-  padding-top:1px;
-}
-.pen-modal .pen-log-row strong{
-  white-space:normal!important;
-  font-size:11px;
-}
-.pen-modal .pen-log-row em{
-  margin-top:1px;
-  font-size:10px;
-}
-.pen-modal .pen-log-row.pen-log-goal strong{color:var(--color-primary)}
-.pen-modal .pen-log-row.pen-log-save strong{color:var(--color-slate)}
-.pen-modal .pen-log-row.pen-miss strong{color:#b0564a}
-.pen-modal .pen-log{max-height:min(150px,26dvh)!important}
 @media(max-width:480px){
   .pen-modal{width:calc(100vw - 34px)!important;max-width:calc(100vw - 34px)!important;box-sizing:border-box}
   .pen-modal .pen-dir-grid{grid-template-columns:1fr!important;gap:7px}
@@ -3847,7 +3791,6 @@ img,svg,canvas{max-width:100%}
   .pen-modal{width:min(560px,calc(100vw - 14px))!important;padding-inline:12px!important}
   .pen-modal .pen-head{margin-inline:-12px!important;padding-inline:12px!important}
   .pen-modal .pen-goal{height:126px!important}
-  .pen-modal .pen-log{max-height:84px!important}
 }
 
 /* ===== Final sim: timeline + event map ===== */
@@ -6270,12 +6213,21 @@ body{
 .pen-modal .pen-kicker{
   display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
 }
+.pen-modal .pen-head{
+  background:#0c1213!important;
+  color:#eef5f1!important;
+}
+.pen-modal .pen-kicker>span:first-child{color:rgba(238,245,241,.78)}
 .pen-modal .pen-kicker .pen-kickno{
   padding:1px 7px;border-radius:999px;
   background:rgba(230,238,239,.16);color:rgba(230,238,239,.9);
   font-size:9px;letter-spacing:1px;
 }
 .pen-modal.is-sudden .pen-kicker .pen-kickno{background:#c9973f;color:var(--color-ink)}
+.pen-modal .pen-score span{color:rgba(238,245,241,.76)!important}
+.pen-modal .pen-score b{color:#fff!important;text-shadow:0 1px 8px rgba(0,0,0,.42)}
+.pen-modal .pen-phase{margin:8px 0 0}
+.pen-modal .pen-phase b{color:#fff!important;font-size:15px;line-height:1.15}
 
 .pen-modal .pen-actors .pen-duel{position:relative}
 .pen-modal .pen-actors .pen-duel .pen-ov{
@@ -6402,7 +6354,7 @@ body{
 .pen-modal .pen-outcome b{display:block;font-family:var(--disp);font-size:18px;line-height:1.05}
 .pen-modal .pen-outcome span{display:block;margin-top:2px;font-size:11px;color:var(--color-slate)}
 .pen-modal .pen-outcome.pen-outcome-idle{background:transparent;border-color:transparent;padding:6px}
-.pen-modal .pen-outcome.pen-outcome-idle span{font-size:12px}
+.pen-modal .pen-outcome.pen-outcome-idle span{font-size:12px;font-weight:700;color:var(--color-ink)!important}
 .pen-modal .pen-outcome.goal{background:var(--color-primary);border-color:var(--color-primary)}
 .pen-modal .pen-outcome.goal b{color:#fff}
 .pen-modal .pen-outcome.goal span{color:rgba(255,255,255,.82)}
@@ -6525,7 +6477,6 @@ body{
 .finalreport .final-heatmap-title{color:var(--color-slate);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.4px;text-align:center}
 .finalreport .final-heatmap img{display:block;width:min(100%,330px);margin:8px auto 0;border:1px solid var(--border-subtle);border-radius:6px}
 .finalreport .final-heatmap p{margin:7px 0 0;color:var(--color-slate);font-size:10px;line-height:1.4;text-align:center}
-.finalreport .final-replay-copy{display:block;width:calc(100% - 18px);margin:9px;font-size:9px;letter-spacing:1px}
 .finalreport .final-audit-details{border-top:1px solid var(--border-subtle);background:color-mix(in srgb,var(--surface-muted) 50%,var(--surface-elevated))}
 .finalreport .final-audit-details>summary{padding:9px;color:var(--color-slate);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:1.2px;text-align:center;cursor:pointer;list-style-position:inside}
 .finalreport .final-audit-details[open]>summary{border-bottom:1px solid var(--border-subtle)}

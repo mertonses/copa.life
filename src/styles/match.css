@@ -2341,6 +2341,9 @@ html[data-theme="dark"] .result .pr-rt.pr-pow{
 .lmr-team-head>strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--color-ink)}
 .lmr-team-head>small{grid-column:1/3;color:var(--color-slate);font-family:var(--mono);font-size:8px;line-height:1.35}.lmr-team-head>small b{font-size:10px}
 .lmr-pitch{position:relative;isolation:isolate;width:calc(100% - 24px);aspect-ratio:16/8.8;margin:12px;overflow:hidden;border:1px solid color-mix(in srgb,var(--text-on-dark) 54%,transparent);border-radius:var(--radius-md);background:linear-gradient(90deg,rgba(255,255,255,.025) 50%,rgba(0,0,0,.025) 50%),repeating-linear-gradient(90deg,transparent 0,transparent 12.5%,rgba(255,255,255,.018) 12.5%,rgba(255,255,255,.018) 25%),var(--lmr-pitch);box-shadow:inset 0 0 0 5px color-mix(in srgb,var(--surface-dark) 12%,transparent)}
+.lmr-pitch-score{position:absolute;top:7px;left:50%;z-index:4;width:min(72%,520px);min-width:0;transform:translateX(-50%);gap:8px;padding:5px 10px;border:1px solid color-mix(in srgb,var(--text-on-dark) 24%,transparent);border-radius:999px;background:color-mix(in srgb,var(--surface-dark) 88%,transparent);box-shadow:0 4px 14px rgba(7,16,17,.28);color:var(--text-on-dark)}
+.lmr-pitch-score .lmr-club{font-size:clamp(8px,1.1vw,11px);color:var(--text-secondary)}.lmr-pitch-score .lmr-club.is-winner{color:var(--text-on-dark)}
+.lmr-pitch-score .lmr-scoreline{min-width:54px}.lmr-pitch-score .lmr-scoreline b{font-size:clamp(17px,2vw,21px);letter-spacing:0}.lmr-pitch-score .lmr-scoreline b i{padding-inline:4px}.lmr-pitch-score .lmr-scoreline span{margin-top:1px;font-size:6px}
 .lmr-pitch-lines{position:absolute;inset:4%;z-index:0;border:1px solid var(--lmr-line);pointer-events:none}
 .lmr-half{position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--lmr-line)}
 .lmr-circle{position:absolute;left:50%;top:50%;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border:1px solid var(--lmr-line);border-radius:50%}
@@ -2367,12 +2370,12 @@ html[data-theme="dark"] .lmr-team-head>strong,html[data-theme="dark"] .lmr-summa
 @media(max-width:760px){
   .lmr-header{padding:12px 11px 14px;gap:9px}.lmr-header>p{font-size:8px}.lmr-kicker{gap:5px}.lmr-score{gap:8px}.lmr-scoreline{min-width:72px}.lmr-scoreline b i{padding-inline:5px}
   .lmr-team-head{padding:8px 9px}.lmr-team-head>strong{font-size:11px}.lmr-team-head>small{font-size:7px}
-  .lmr-pitch{width:calc(100% - 12px);margin:6px;aspect-ratio:16/9.5}.lmr-player{width:60px}.lmr-token{width:34px;height:34px;padding:3px}.lmr-token strong{min-width:25px;font-size:8px}.lmr-token small{font-size:5px}.lmr-name{font-size:7.5px}.lmr-events>i{font-size:8px}
+  .lmr-pitch{width:calc(100% - 12px);margin:6px;aspect-ratio:16/9.5}.lmr-pitch-score{width:min(84%,430px);gap:5px;padding:4px 7px}.lmr-pitch-score .lmr-scoreline{min-width:48px}.lmr-pitch-score .lmr-scoreline b{font-size:17px}.lmr-player{width:60px}.lmr-token{width:34px;height:34px;padding:3px}.lmr-token strong{min-width:25px;font-size:8px}.lmr-token small{font-size:5px}.lmr-name{font-size:7.5px}.lmr-events>i{font-size:8px}
 }
 @media(max-width:520px){
   .lineups.is-last-match-report{margin-inline:-4px}.last-match-report{border-radius:var(--radius-md)}.lmr-header{grid-template-columns:1fr}.lmr-kicker,.lmr-header>p{grid-column:1;justify-self:center;text-align:center}.lmr-score{grid-column:1}.lmr-club{font-size:11px}.lmr-scoreline{min-width:58px}.lmr-scoreline b{font-size:25px}.lmr-scoreline span{font-size:7px}.lmr-outcome{grid-column:1}
   .lmr-team-head{display:block}.lmr-team-head>*{display:block!important}.lmr-team-head>span{margin-bottom:2px}.lmr-team-head>small{margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lmr-team-head.is-away{text-align:right}
-  .lmr-pitch{aspect-ratio:1.38}.lmr-player{width:48px}.lmr-token{width:30px;height:30px}.lmr-name{font-size:6.5px}.lmr-events{gap:1px}.lmr-event{font-size:6px}.lmr-legend{font-size:5px;bottom:3px}
+  .lmr-pitch{aspect-ratio:1.38}.lmr-pitch-score{top:5px;width:calc(100% - 14px);padding:3px 6px}.lmr-pitch-score .lmr-club{font-size:7px}.lmr-pitch-score .lmr-scoreline{min-width:42px}.lmr-pitch-score .lmr-scoreline b{font-size:15px}.lmr-pitch-score .lmr-scoreline span{font-size:5px}.lmr-player{width:48px}.lmr-token{width:30px;height:30px}.lmr-name{font-size:6.5px}.lmr-events{gap:1px}.lmr-event{font-size:6px}.lmr-legend{font-size:5px;bottom:3px}
   .lmr-summary{grid-template-columns:1fr;gap:6px;padding:0 6px 7px}.lmr-summary-card{padding:7px 8px}
 }
 

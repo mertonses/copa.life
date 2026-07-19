@@ -605,7 +605,11 @@
       button.textContent=label;
       button.addEventListener("click",()=>{
         const target=content.querySelector(selector);
-        if(target)target.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"});
+        if(target){
+          const disclosure=target.closest(".player-profile-radar-disclosure");
+          if(disclosure)disclosure.open=true;
+          requestAnimationFrame(()=>target.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"}));
+        }
       });
       nav.appendChild(button);
     });

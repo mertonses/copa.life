@@ -135,7 +135,7 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   expect(errors).toEqual([]);
 });
 
-test("mobile penalty decisions keep status and actions visible while history stays collapsible",async({page},testInfo)=>{
+test("mobile penalty decisions keep one clear status and remove the obsolete history control",async({page},testInfo)=>{
   test.skip(!testInfo.project.name.includes("mobile"),"mobile penalty presentation regression");
   await openFinalReadyHub(page);
   await page.evaluate(()=>{(globalThis as any).showPenaltyShootout("final");});
@@ -149,16 +149,19 @@ test("mobile penalty decisions keep status and actions visible while history sta
   expect(controls.every(control=>control.width>=44&&control.height>=48)).toBe(true);
   expect(await page.locator(".pen-head").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
   expect(await page.locator(".pen-action-dock").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
+  await expect(page.locator(".pen-phase-badge")).toHaveCount(0);
+  await expect(page.locator(".pen-phase span")).toHaveCount(0);
+  await expect(page.locator(".pen-phase b")).toHaveText(/ŞUT SENDE|YOUR KICK/);
+  const headContrast=await page.locator(".pen-head").evaluate(element=>{
+    const head=getComputedStyle(element);
+    const score=getComputedStyle(element.querySelector(".pen-score b") as HTMLElement);
+    return{headColor:head.color,background:head.backgroundColor,scoreColor:score.color};
+  });
+  expect(headContrast.headColor).not.toBe(headContrast.background);
+  expect(headContrast.scoreColor).not.toBe(headContrast.background);
 
   await page.locator('.pen-dir-btn[data-dir="L"]').click();
-  const history=page.locator(".pen-log");
-  const toggle=page.locator(".pen-log-toggle");
-  await expect(toggle).toBeVisible();
-  await expect(toggle).toHaveAttribute("aria-expanded","false");
-  await expect(history).toBeHidden();
-  await toggle.click();
-  await expect(toggle).toHaveAttribute("aria-expanded","true");
-  await expect(history).toBeVisible();
+  await expect(page.locator(".pen-log,.pen-log-toggle")).toHaveCount(0);
 });
 
 test("final resumes from a process-death checkpoint at the same match state",async({page},testInfo)=>{
