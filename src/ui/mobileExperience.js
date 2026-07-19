@@ -10,6 +10,7 @@
   let enhanceFrame=0;
   let modalWasOpen=false;
   let modalScrollY=0;
+  let modalScreen="";
   let lastEventCount=0;
   let unreadEventCount=0;
   let smartSpeedTimer=0;
@@ -802,9 +803,17 @@
   function syncOverlayScroll(){
     const modal=document.getElementById("modal"),open=isVisible(modal);
     document.documentElement.classList.toggle("mobile-modal-open",open);
-    if(open&&!modalWasOpen)modalScrollY=global.scrollY;
-    if(!open&&modalWasOpen&&Math.abs(global.scrollY-modalScrollY)>2){
-      requestAnimationFrame(()=>global.scrollTo({top:modalScrollY,behavior:"auto"}));
+    const activeScreen=()=>["intro","draft","hub","sim","result"].find(id=>isVisible(document.getElementById(id)))||"";
+    if(open&&!modalWasOpen){
+      modalScrollY=global.scrollY;
+      modalScreen=activeScreen();
+    }
+    if(!open&&modalWasOpen){
+      const screen=activeScreen();
+      if(screen===modalScreen&&Math.abs(global.scrollY-modalScrollY)>2){
+        requestAnimationFrame(()=>global.scrollTo({top:modalScrollY,behavior:"auto"}));
+      }
+      modalScreen="";
     }
     modalWasOpen=open;
   }

@@ -330,6 +330,7 @@ test("footer keeps its link rail separate from the independent-project note",asy
 });
 
 test("backup picker stays readable and bounded on desktop and mobile",async({page},testInfo)=>{
+  const phoneProject=testInfo.project.name.includes("mobile");
   await page.goto("/?backup-picker-layout=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
@@ -392,7 +393,8 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
     const sheetRect=sheet.getBoundingClientRect();
     const cards=[...document.querySelectorAll(".backup-card")].map(element=>{
       const rect=element.getBoundingClientRect();
-      return{width:rect.width,height:rect.height};
+      const ratingLabel=element.querySelector(".bk-rating span") as HTMLElement;
+      return{width:rect.width,height:rect.height,ratingLabelDisplay:getComputedStyle(ratingLabel).display};
     });
     const buttons=[...actions.querySelectorAll("button")].map(element=>{
       const rect=element.getBoundingClientRect();
@@ -414,7 +416,36 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
   expect(layout.buttons).toHaveLength(2);
   expect(layout.buttons.every(button=>button.height>=44&&button.width>0)).toBe(true);
-  expect(layout.columns).toBe(mobileOnly(testInfo.project.name)?1:2);
+  expect(layout.columns).toBe(phoneProject?1:2);
+  if(phoneProject){
+    expect(Math.max(...layout.cards.map(card=>card.height))).toBeLessThanOrEqual(95);
+    expect(layout.cards.every(card=>card.ratingLabelDisplay==="none")).toBe(true);
+  }
+
+  const darkHeader=await page.evaluate(()=>{
+    document.documentElement.dataset.theme="dark";
+    const title=document.querySelector(".backup-titleblock h4") as HTMLElement;
+    const head=document.querySelector(".backup-head") as HTMLElement;
+    const titleStyle=getComputedStyle(title),headStyle=getComputedStyle(head);
+    const rgb=(value:string)=>(value.match(/[\d.]+/g)||[]).slice(0,3).map(Number);
+    const luminance=(value:string)=>{
+      const channels=rgb(value).map(channel=>{
+        const normalized=channel/255;
+        return normalized<=.04045?normalized/12.92:Math.pow((normalized+.055)/1.055,2.4);
+      });
+      return .2126*channels[0]+.7152*channels[1]+.0722*channels[2];
+    };
+    const lighter=Math.max(luminance(titleStyle.color),luminance(headStyle.backgroundColor));
+    const darker=Math.min(luminance(titleStyle.color),luminance(headStyle.backgroundColor));
+    return{
+      contrast:(lighter+.05)/(darker+.05),
+      titleBackground:titleStyle.backgroundColor,
+      titleBackgroundImage:titleStyle.backgroundImage,
+    };
+  });
+  expect(darkHeader.contrast).toBeGreaterThanOrEqual(4.5);
+  expect(darkHeader.titleBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(darkHeader.titleBackgroundImage).toBe("none");
 
   const firstCard=page.locator(".backup-card").first();
   await firstCard.click();

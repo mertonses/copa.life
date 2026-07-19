@@ -31,12 +31,12 @@ function addFinalPenalty(amount,source){
  return{added,overflow,cash};
 }
 function hasRunCard(k){return typeof hasCard==="function"&&hasCard(k);}
-function baseChairmanSackLimit(id){const m={pinti:-14,torpilci:-16,leydi:-20,sansasyoncu:-22,babacan:-28,cilgin:-29};return m[id||(chairman&&chairman.id)]||DEBT_LIMIT;}
+function baseChairmanSackLimit(id){const m={pinti:-14,torpilci:-16,leydi:-21,sansasyoncu:-22,babacan:-28,cilgin:-29};return m[id||(chairman&&chairman.id)]||DEBT_LIMIT;}
 function chairmanTrustDebtAdjustment(value){
  const trust=Math.max(0,Math.min(3,Math.round(value==null?(typeof chairTrust==="number"?chairTrust:1):value)));
  return trust===3?-4:trust===2?-2:trust===0?3:0;
 }
-function chairmanSackLimit(){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*5;return lim;}
+function chairmanSackLimit(){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*3;return lim;}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -1;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanTransferMultiplier(){return chairman&&chairman.id==="pinti"?0.90:1;}
@@ -56,6 +56,7 @@ function chairmanReactToSpend(cost,context,payload){
   sansStarBonusRound=round;
   const bonus=payload.ov>=90?3:2;
   if(typeof riskPowerMod!=="undefined")riskPowerMod+=bonus;
+  if(typeof trackChairmanMetric==="function")trackChairmanMetric("starTransferBonuses",1);
   if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Manşet transferi: +"+bonus+" güç":"Headline signing: +"+bonus+" power"),"buy");
  }else if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov&&payload.ov<72&&cost>=6){
   chairTrust=Math.max(0,chairTrust-1);
@@ -66,6 +67,26 @@ function opponentEdge(power,oppPower){const gap=(power||0)-(oppPower||0);return 
 function injuryRiskFor(power){const s=picksBySlot.filter(Boolean);let risk=0.09;risk+=s.filter(p=>p.age>=32).length*0.022;if(style==="gegen")risk+=0.035;if(lastTalkResult&&lastTalkResult.key==="gaz"&&lastTalkResult.delta>0)risk+=0.025;if(power>=90)risk+=0.035;if(power>=95)risk+=0.035;if(hasRunCard("temiz_sayfa"))risk*=0.70;return Math.min(0.40,Math.max(0.02,risk));}
 var _r=function(){return typeof rand==="function"?rand():Math.random();};
 function _randInjLevel(){const r=_r();return r<0.50?1:r<0.80?2:3;}
-function applyRandomInjury(chance){if(injuredIdx>=0||_r()>=chance)return null;const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});if(!idxs.length)return null;injuredIdx=rnd(idxs);const p=picksBySlot[injuredIdx];p.injured=true;p.injuryLevel=_randInjLevel();if(econStats)econStats.injuries=(econStats.injuries||0)+1;return p;}
+function injuredSlotIndices(){const out=[];picksBySlot.forEach((p,i)=>{if(p&&p.injured)out.push(i);});return out;}
+function syncInjuredIdx(preferred){
+ const current=Number.isInteger(preferred)&&picksBySlot[preferred]&&picksBySlot[preferred].injured?preferred:
+  (Number.isInteger(injuredIdx)&&picksBySlot[injuredIdx]&&picksBySlot[injuredIdx].injured?injuredIdx:-1);
+ injuredIdx=current>=0?current:(injuredSlotIndices()[0]??-1);
+ return injuredIdx;
+}
+function injuryChanceWithMedicalProtection(chance){
+ const base=Math.max(0,Math.min(1,Number(chance)||0));
+ return typeof medicalProtectionTurns!=="undefined"&&medicalProtectionTurns>0?base*0.50:base;
+}
+function applyRandomInjury(chance){
+ if(_r()>=injuryChanceWithMedicalProtection(chance))return null;
+ const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});
+ if(!idxs.length)return null;
+ const slotIdx=rnd(idxs),p=picksBySlot[slotIdx];
+ p.injured=true;p.injuryLevel=_randInjLevel();
+ syncInjuredIdx(slotIdx);
+ if(econStats)econStats.injuries=(econStats.injuries||0)+1;
+ return p;
+}
 /* Birden fazla sakatlık (kurban_belli gibi) — injuredIdx kısıtlamasını aşar */
-function applyMultiInjury(count){const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});const injured=[];for(let i=0;i<count&&idxs.length;i++){const pick=Math.floor(rand()*idxs.length);const slotIdx=idxs.splice(pick,1)[0];const p=picksBySlot[slotIdx];p.injured=true;p.injuryLevel=_randInjLevel();if(econStats)econStats.injuries=(econStats.injuries||0)+1;if(injuredIdx<0)injuredIdx=slotIdx;injured.push(p);}return injured;}
+function applyMultiInjury(count){const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});const injured=[];for(let i=0;i<count&&idxs.length;i++){const pick=Math.floor(rand()*idxs.length);const slotIdx=idxs.splice(pick,1)[0];const p=picksBySlot[slotIdx];p.injured=true;p.injuryLevel=_randInjLevel();if(econStats)econStats.injuries=(econStats.injuries||0)+1;injured.push(p);}syncInjuredIdx(injured.length?picksBySlot.indexOf(injured[0]):-1);return injured;}

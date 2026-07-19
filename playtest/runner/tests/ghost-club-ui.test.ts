@@ -49,10 +49,9 @@ test("web Ghost opponents default on while sharing requires consent and deletion
   const dialog=page.locator("#ghostConsentDialog");
   const accept=dialog.locator("[data-ghost-accept]");
   await expect(dialog).toBeVisible();
-  await expect(accept).toBeDisabled();
-  await dialog.locator("[data-ghost-terms]").check();
-  await expect(accept).toBeDisabled();
-  await dialog.locator("[data-ghost-sharing]").check();
+  await expect(dialog.locator("input[type=checkbox]")).toHaveCount(0);
+  await expect(dialog.locator(".ghost-consent-confirm")).toContainText(/“(?:KABUL ET VE PAYLAŞ|ACCEPT AND SHARE)”/);
+  await expect(dialog.locator(".ghost-consent-links a")).toHaveCount(2);
   await expect(accept).toBeEnabled();
   await accept.click();
   await expect(dialog).toHaveCount(0);
@@ -60,7 +59,7 @@ test("web Ghost opponents default on while sharing requires consent and deletion
   await expect(shareToggle).toHaveAttribute("aria-pressed","true");
 
   const consent=await page.evaluate(()=>JSON.parse(localStorage.getItem("copa_ghost_consent_v1")||"null"));
-  expect(consent).toMatchObject({version:"ghost-terms-v1",terms:true,sharing:true});
+  expect(consent).toMatchObject({version:"ghost-terms-v1",terms:true,sharing:true,action:"accept_and_share"});
 
   const report=await page.evaluate(async()=>{
     const ghosts=(globalThis as any).GhostClubs;

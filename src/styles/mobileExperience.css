@@ -368,7 +368,7 @@
     background:var(--surface-bg);
   }
   #modal .backup-modal.scoutmodal .backup-actions.bact{
-    padding:10px 12px calc(10px + env(safe-area-inset-bottom))!important;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom))!important;
   }
   #modal .backup-modal.scoutmodal .backup-actions .btn{
     max-width:none!important;
@@ -741,10 +741,14 @@
     color:var(--color-ink);
   }
 
+  .tactical-board{display:none!important}
+  .v7-hero-side{justify-content:flex-end!important}
+  .v7-hero-head .howto-wrap{margin-left:auto!important}
+
   #introLand .mechanics{
-    grid-template-columns:1fr!important;
-    grid-auto-rows:minmax(32px,auto);
-    gap:0!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(54px,auto);
+    gap:0 12px!important;
     margin-top:8px!important;
     padding:8px 0!important;
   }
@@ -756,8 +760,8 @@
     column-gap:9px!important;
     box-sizing:border-box;
   }
-  #introLand .mstep:nth-last-child(-n+2){border-bottom:1px solid color-mix(in srgb,var(--color-slate) 14%,transparent)!important}
-  #introLand .mstep:last-child{border-bottom:none!important}
+  #introLand .mstep{border-bottom:none!important}
+  #introLand .mstep:nth-child(-n+2){border-bottom:1px solid color-mix(in srgb,var(--color-slate) 14%,transparent)!important}
   #introLand .mn{
     width:26px!important;
     height:26px!important;

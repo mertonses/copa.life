@@ -4,7 +4,7 @@ const output=process.env.ANALYTICS_REPORT_OUTPUT||"outputs/analytics/weekly.json
 const generatedAt=new Date().toISOString();
 const eventOrder=["session_started","draft_started","xi_completed","run_finished","profile_open_error"];
 
-const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions]=await Promise.all([queryAnalytics(`
+const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes]=await Promise.all([queryAnalytics(`
   SELECT blob1 AS event, SUM(_sample_interval * double1) AS total
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
@@ -41,17 +41,25 @@ const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisi
   GROUP BY model_version, power_gap, end_type, tactic
   ORDER BY finals DESC LIMIT 100
 `),queryAnalytics(`
-  SELECT blob1 AS event, blob14 AS chairman, blob15 AS formation, blob16 AS style,
+  SELECT blob1 AS event, blob5 AS outcome, blob14 AS chairman, blob15 AS formation, blob16 AS style,
     blob17 AS reward, blob18 AS card_kind, blob19 AS economy_band,
     SUM(_sample_interval * double1) AS total
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
-    AND blob1 IN ('chairman_selected','formation_selected','style_selected','reward_selected','card_acquired','match_completed')
-  GROUP BY event, chairman, formation, style, reward, card_kind, economy_band
+    AND blob1 IN ('chairman_selected','formation_selected','style_selected','reward_selected','card_acquired','match_completed','round_completed')
+  GROUP BY event, outcome, chairman, formation, style, reward, card_kind, economy_band
   ORDER BY total DESC LIMIT 250
+`),queryAnalytics(`
+  SELECT blob14 AS chairman, blob5 AS outcome, blob11 AS end_type,
+    SUM(_sample_interval * double1) AS runs
+  FROM copa_life_product_events
+  WHERE timestamp >= NOW() - INTERVAL '7' DAY
+    AND blob1 = 'run_finished' AND blob14 != ''
+  GROUP BY chairman, outcome, end_type
+  ORDER BY runs DESC
 `)]);
 
-const queries=[funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions];
+const queries=[funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes];
 const configured=queries.every(query=>query.configured);
 const ready=queries.every(query=>query.available);
 const totals=Object.fromEntries(eventOrder.map(event=>[event,0]));
@@ -73,7 +81,8 @@ const report={
   completed_runs_by_country:countries.rows.map(row=>({game_country:row.game_country||"unknown",completed_runs:numeric(row.completed_runs)})),
   profile_errors_by_build:profileErrors.rows.map(row=>({build_version:row.build_version||"unknown",detail:row.detail||"unknown",errors:numeric(row.errors)})),
   final_simulation:finalSim.rows.map(row=>({model_version:row.model_version||"unknown",power_gap:row.power_gap||"unknown",end_type:row.end_type||"unknown",tactic:row.tactic||"unknown",finals:numeric(row.finals)})),
-  balance_decisions:balanceDecisions.rows.map(row=>({event:row.event||"unknown",chairman:row.chairman||"",formation:row.formation||"",style:row.style||"",reward:row.reward||"",card_kind:row.card_kind||"",economy_band:row.economy_band||"",total:numeric(row.total)})),
+  balance_decisions:balanceDecisions.rows.map(row=>({event:row.event||"unknown",outcome:row.outcome||"",chairman:row.chairman||"",formation:row.formation||"",style:row.style||"",reward:row.reward||"",card_kind:row.card_kind||"",economy_band:row.economy_band||"",total:numeric(row.total)})),
+  chairman_outcomes:chairmanOutcomes.rows.map(row=>({chairman:row.chairman||"unknown",outcome:row.outcome||"unknown",end_type:row.end_type||"unknown",runs:numeric(row.runs)})),
   worker:{requests:numeric(workerSummary.requests),server_errors:numeric(workerSummary.server_errors),avg_latency_ms:numeric(workerSummary.avg_latency_ms),routes:workerRoutes.rows.map(row=>({route:row.route,requests:numeric(row.requests),server_errors:numeric(row.server_errors)}))}
 };
 writeReport(output,report);

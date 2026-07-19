@@ -46,6 +46,10 @@
 .chrow .crw{font-family:var(--disp);font-weight:600;font-size:10px;color:var(--color-slate);flex-shrink:0}
 .chrow.done .crw{color:var(--color-primary)}
 .shopcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:8px;margin-bottom:8px}
+.lottery-coupon-banner{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid color-mix(in srgb,var(--color-primary) 65%,var(--border-default));border-radius:var(--radius-md);background:color-mix(in srgb,var(--color-primary) 11%,var(--surface-elevated));color:var(--color-ink);font-family:var(--mono)}
+.lottery-coupon-icon{font-size:18px;line-height:1}
+.lottery-coupon-banner b{display:block;font-size:8px;letter-spacing:1.3px}
+.lottery-coupon-banner small{display:block;margin-top:2px;color:var(--color-slate);font-size:8px}
 .shopcard{display:flex;gap:9px;align-items:center;border:1px solid var(--border-default);border-radius:var(--radius-md);padding:10px;background:var(--surface-elevated);cursor:pointer;transition:border-color var(--tr-fast),box-shadow var(--tr-fast),background var(--tr-fast);box-shadow:var(--shadow-sm)}
 .shopcard.bronze{border-color:var(--border-default)}.shopcard.silver{border-color:var(--color-slate)}.shopcard.gold{border-color:var(--color-primary)}
 .shopcard:hover:not(.owned):not(.cant){border-color:var(--color-primary);box-shadow:var(--shadow-md);background:var(--surface-muted)}
@@ -189,6 +193,10 @@
   white-space:nowrap;
 }
 .black-market-card-copy small{color:var(--text-secondary);font-family:var(--mono);font-size:9px;line-height:1.2}
+.black-market-card-costs{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.black-market-card-costs i{padding:2px 4px;border:1px solid var(--border-subtle);border-radius:4px;color:var(--text-secondary);font-family:var(--mono);font-size:7px;font-style:normal;line-height:1.15}
+.black-market-reward-card{min-height:76px}
+.black-market-reward-card.is-selected .black-market-card-costs i{border-color:color-mix(in srgb,var(--burn-accent) 35%,var(--border-subtle))}
 .black-market-card .var-badge{justify-self:end;white-space:nowrap}
 .black-market-modal .var-badge.var-0{background:var(--color-primary);color:var(--text-on-primary)}
 .black-market-card-mark{
@@ -220,6 +228,7 @@
   box-shadow:0 2px 0 color-mix(in srgb,var(--burn-accent-strong) 72%,transparent);
 }
 .black-market-actions .black-market-burn:hover{background:var(--burn-accent-strong);border-color:var(--burn-accent-strong)}
+.black-market-actions .black-market-burn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
 .black-market-actions .black-market-burn[hidden]{display:none}
 .black-market-actions:has(.black-market-burn[hidden]){grid-template-columns:1fr}
 .black-market-empty,.black-market-confirm{text-align:center}

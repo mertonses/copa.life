@@ -91,7 +91,7 @@ context.pushFeed = () => {};
 context.L = () => ({
   variantLbl: ["COMMON", "DARK"],
   cards: {
-    final_provasi: { n: "Final Provası" },
+    final_provasi: { n: "Son Koz" },
     derbi: { n: "Derbi Aslanı" },
   },
 });
@@ -264,15 +264,29 @@ const keyChecks = [
   ["veteran spine COMMON card cap", effectOf("tecrubeli_omurga", 0, squads.veteran, 3) === 4],
   ["veteran spine DARK card cap", effectOf("tecrubeli_omurga", 1, squads.veteran, 3) === 6],
   ["local block COMMON card cap", effectOf("yerli_blok", 0, squads.local, 3) === 5],
-  ["local block DARK card cap", effectOf("yerli_blok", 1, squads.local, 3) === 5],
+  ["local block DARK card cap", effectOf("yerli_blok", 1, squads.local, 3) === 8],
   ["derbi COMMON final", effectOf("derbi", 0, squads.balanced, 6) === 8],
   ["derbi DARK final", effectOf("derbi", 1, squads.balanced, 6) === 6],
   ["vur_igneyi COMMON price", priceOf("vur_igneyi", 0) === 3],
   ["vur_igneyi DARK price", priceOf("vur_igneyi", 1) === 3],
-  ["son_dans COMMON healthy", effectOf("son_dans", 0, squads.balanced, 6) === 8],
-  ["son_dans COMMON injured", effectOf("son_dans", 0, squads.balanced.map((p,index)=>index===4?{...p,injured:true}:p), 6) === 2],
-  ["son_dans DARK healthy", effectOf("son_dans", 1, squads.balanced, 6) === 14],
-  ["son_dans DARK injured", effectOf("son_dans", 1, squads.balanced.map((p,index)=>index===4?{...p,injured:true}:p), 6) === -8],
+  ["son_dans COMMON healthy", effectOf("son_dans", 0, squads.balanced, 6) === 7],
+  ["son_dans COMMON injured", effectOf("son_dans", 0, squads.balanced.map((p,index)=>index===4?{...p,injured:true}:p), 6) === 3],
+  ["son_dans DARK healthy", effectOf("son_dans", 1, squads.balanced, 6) === 10],
+  ["son_dans DARK injured", effectOf("son_dans", 1, squads.balanced.map((p,index)=>index===4?{...p,injured:true}:p), 6) === 0],
+  ["kara_borsa COMMON price", priceOf("kara_borsa", 0) === 3],
+  ["kara_borsa DARK price", priceOf("kara_borsa", 1) === 7],
+  ["piyango COMMON price", priceOf("nasip_kismet", 0) === 2],
+  ["piyango DARK price", priceOf("nasip_kismet", 1) === 3],
+  ["piyango Turkish name", context.T?.tr?.cards?.nasip_kismet?.n === "Piyango"],
+  ["momentum COMMON curve", [1, 2, 3, 4, 5, 6].map((round) => effectOf("ch_momentum", 0, squads.balanced, round)).join(",") === "1,1,3,3,5,5"],
+  ["momentum DARK curve", [1, 2, 3, 4, 5, 6].map((round) => effectOf("ch_momentum", 1, squads.balanced, round)).join(",") === "2,2,5,5,8,8"],
+  ["momentum DARK price", priceOf("ch_momentum", 1) === 6],
+  ["doping COMMON price", priceOf("doping", 0) === 7],
+  ["doping DARK price", priceOf("doping", 1) === 9],
+  ["doping DARK power", effectOf("doping", 1, squads.balanced, 3) === 9],
+  ["doping DARK final debt", context.KARA_PEN?.doping === 8],
+  ["crisis COMMON price", priceOf("kriz", 0) === 9],
+  ["crisis DARK price", priceOf("kriz", 1) === 12],
 ];
 
 for (const [label, ok] of keyChecks) {

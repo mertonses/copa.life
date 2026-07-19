@@ -36,6 +36,7 @@ function chemBonus(s){
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),captainPenalty=typeof captainDecisionPlayerPenaltyForRound==="function"?captainDecisionPlayerPenaltyForRound(r,s):0,avg=s.length?(s.reduce((a,p)=>a+effOf(p),0)+captainPenalty)/s.length:0;
  const styleBonus=STYLES[style].eff(s);
+ const loanBonus=s.reduce((sum,p)=>sum+(p&&p.loan?Math.max(0,Number(p.teamPowerBoost)||0):0),0);
  let cardBonus=0,finalCardRaw=0;
  cards.forEach(k=>{const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
  const finalCardApplied=r>=6?finalCardRaw:0;
@@ -49,9 +50,9 @@ function powerBreakdown(r){
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
  const cap=typeof _currentCaptainPlayer==="function"?_currentCaptainPlayer():(typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null);
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
- const uncappedRaw=styleBonus+cardBonus+matchup+risk+trait;
+ const uncappedRaw=styleBonus+cardBonus+loanBonus+matchup+risk+trait;
  const captainChem=typeof captainDecisionChemistryForRound==="function"?captainDecisionChemistryForRound(r):0;
  const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total+captainChem));
- return {avg,styleBonus,cardBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ return {avg,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

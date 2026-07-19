@@ -78,11 +78,12 @@ if (tokenCount !== 22) throw new Error(`Yatay sahada 22 oyuncu bekleniyordu, bul
 if (container.innerHTML.includes('class="xi"') || !container.innerHTML.includes("lmr-pitch")) throw new Error("Eski iki liste görünümü normal render akışında kaldı");
 
 const index = read("index.html");
+const lazyAssets = read("src/runtime/lazyAssets.js");
 const finalSim = read("src/sim/finalSim.js");
 const css = read("src/styles/match.css");
 const sw = read("sw.js");
 for (const marker of ["src/ui/lastMatchReport.js", "_captureLastMatchReportSnapshot", "LastMatchReport.render", "LastMatchReport.setPenalty"]) {
-  if (!index.includes(marker)) throw new Error(`Run sonu bağlantısı eksik: ${marker}`);
+  if (!(index + lazyAssets).includes(marker)) throw new Error(`Run sonu bağlantısı eksik: ${marker}`);
 }
 for (const marker of ["homeRatings:window.lastMatchRatings", "homeSlots:_fmA", "awaySlots:_fmB"]) {
   if (!finalSim.includes(marker)) throw new Error(`Final simülasyonu snapshot bağlantısı eksik: ${marker}`);
