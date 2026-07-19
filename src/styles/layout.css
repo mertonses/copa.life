@@ -816,7 +816,7 @@ html[data-theme="dark"] .country-new-ribbon{background:#c9973d;color:#10100c;bor
 .mstats{font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:1px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-subtle)}
 .mstats b{color:var(--color-primary)}
 
-/* ===== nasıl oynanır toggle ===== */
+/* ===== Copa Rehberi toggle ===== */
 .howto-wrap{margin-top:16px;text-align:left;border-top:1px solid var(--border-subtle);padding-top:12px}
 .howto-toggle{background:transparent;border:1px solid var(--border-default);border-radius:var(--radius-sm);color:var(--color-slate);font-family:var(--mono);font-size:9px;letter-spacing:.5px;cursor:pointer;padding:0 10px;height:34px;display:inline-flex;align-items:center;gap:5px;text-transform:uppercase;transition:border-color var(--tr-fast),color var(--tr-fast),background var(--tr-fast)}
 .howto-toggle:hover{border-color:var(--color-slate);color:var(--color-ink);background:var(--surface-muted)}
@@ -4222,7 +4222,7 @@ img,svg,canvas{max-width:100%}
   .spot-card{min-height:52px!important}
 }
 
-/* ===== How to play modal cleanup ===== */
+/* ===== Copa Guide modal cleanup ===== */
 .howto-modal-shell{
   width:min(920px,calc(100vw - 24px))!important;
   max-height:calc(100dvh - 32px)!important;
@@ -6783,7 +6783,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 .v7-hero-side{
   display:flex;
   flex-direction:row;
-  align-items:center;
+  align-items:flex-end;
   justify-content:flex-end;
   gap:12px;
   min-width:0;
@@ -6795,6 +6795,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   border-radius:8px;
   color:var(--color-primary);
   overflow:hidden;
+  background:color-mix(in srgb,var(--surface-default) 88%,transparent);
 }
 .tactical-diagram{display:block;width:100%;height:100%}
 .tactical-pitch{
@@ -6803,29 +6804,44 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   vector-effect:non-scaling-stroke;
 }
 .tactical-pitch-detail{opacity:.62}
+.tactical-penalty-area{opacity:.72}
+.tactical-goal-area,.tactical-penalty-mark{opacity:.48}
 .tactical-links,.tactical-final-arrow{
   stroke:currentColor;
   stroke-linecap:round;
   stroke-linejoin:round;
   vector-effect:non-scaling-stroke;
 }
-.tactical-links{stroke-width:1;opacity:.48}
+.tactical-links{stroke-width:1;opacity:.48;stroke-dasharray:4 5;animation:tacticalRouteFlow 4s linear infinite}
 .tactical-link-secondary{opacity:.48}
-.tactical-final-arrow{stroke-width:1.15;opacity:.88}
+.tactical-final-arrow{stroke-width:1.15;opacity:.88;animation:tacticalArrowDrift 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 .tactical-player{
   fill:var(--surface-default);
   stroke:currentColor;
   stroke-width:1.25;
   vector-effect:non-scaling-stroke;
+  animation:tacticalNodePulse 3.6s ease-in-out infinite;
+  transform-box:fill-box;
+  transform-origin:center;
 }
+.tactical-node-2{animation-delay:-.7s}.tactical-node-3{animation-delay:-1.4s}.tactical-node-4{animation-delay:-2.1s}.tactical-node-5{animation-delay:-2.8s}
 .tactical-carrier-halo{
   fill:color-mix(in srgb,var(--color-primary) 12%,transparent);
   stroke:currentColor;
   stroke-width:1;
   opacity:.7;
   vector-effect:non-scaling-stroke;
+  animation:tacticalHaloPulse 2.4s ease-out infinite;
+  transform-box:fill-box;
+  transform-origin:center;
 }
-.tactical-ball{fill:currentColor;stroke:var(--surface-default);stroke-width:.8;vector-effect:non-scaling-stroke}
+.tactical-ball{fill:currentColor;stroke:var(--surface-default);stroke-width:.8;vector-effect:non-scaling-stroke;animation:tacticalBallBlink 2.4s ease-in-out infinite}
+@keyframes tacticalRouteFlow{to{stroke-dashoffset:-18}}
+@keyframes tacticalArrowDrift{50%{transform:translate(2px,1px);opacity:.62}}
+@keyframes tacticalNodePulse{50%{transform:scale(1.12);opacity:.68}}
+@keyframes tacticalHaloPulse{50%{transform:scale(1.18);opacity:.34}}
+@keyframes tacticalBallBlink{50%{opacity:.42}}
+body.reduced-motion .tactical-links,body.reduced-motion .tactical-final-arrow,body.reduced-motion .tactical-player,body.reduced-motion .tactical-carrier-halo,body.reduced-motion .tactical-ball{animation:none}
 .v7-hero-head .howto-wrap{
   position:relative!important;
   z-index:4;
@@ -6868,26 +6884,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   padding:0 6px 0 0;
   border:0;
 }
-#introLand .mstep:not(:last-child)::after{
-  content:"";
-  position:absolute;
-  top:13px;
-  right:-14px;
-  width:11px;
-  height:1px;
-  background:color-mix(in srgb,var(--color-slate) 42%,transparent);
-}
-#introLand .mstep:not(:last-child)::before{
-  content:"";
-  position:absolute;
-  top:11px;
-  right:-14px;
-  width:5px;
-  height:5px;
-  border-top:1px solid color-mix(in srgb,var(--color-slate) 55%,transparent);
-  border-right:1px solid color-mix(in srgb,var(--color-slate) 55%,transparent);
-  transform:rotate(45deg);
-}
+#introLand .mstep::before,#introLand .mstep::after{content:none;display:none}
 #introLand .mn{
   display:flex;
   align-items:center;

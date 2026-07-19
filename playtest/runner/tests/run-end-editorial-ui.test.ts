@@ -168,8 +168,11 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
   await expect(page.locator(".tactical-board .tactical-player")).toHaveCount(5);
   await expect(page.locator(".tactical-board .tactical-ball-carrier")).toHaveCount(1);
   await expect(page.locator(".tactical-board .tactical-final-arrow")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-penalty-area")).toHaveCount(2);
+  await expect(page.locator(".tactical-board .tactical-goal-area")).toHaveCount(2);
   await expect(page.locator(".tactical-board svg gradient,.tactical-board svg filter")).toHaveCount(0);
   await expect(page.locator(".v7-hero-side > #howtoWrap #howtoToggle")).toBeVisible();
+  await expect(page.locator("#howtoToggle")).toContainText("COPA REHBERİ");
   await expect(page.locator(".tactical-board #howtoToggle")).toHaveCount(0);
   await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
   await expect(page.locator("#mechSection .mn")).toHaveText(["1","2","3","4"]);
@@ -193,16 +196,14 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
     const diagram=document.querySelector(".tactical-diagram") as SVGElement;
     const secondaryLink=getComputedStyle(document.querySelector(".tactical-link-secondary") as SVGElement);
     const pitchDetail=getComputedStyle(document.querySelector(".tactical-pitch-detail") as SVGElement);
+    const route=getComputedStyle(document.querySelector(".tactical-links") as SVGElement);
+    const player=getComputedStyle(document.querySelector(".tactical-player") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
     const heroSide=(document.querySelector(".v7-hero-side") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
     const connector=document.querySelector("#mechSection .mstep") as HTMLElement;
     const connectorLine=getComputedStyle(connector,"::after");
     const connectorHead=getComputedStyle(connector,"::before");
-    const connectorCenterDelta=Math.abs(
-      (Number.parseFloat(connectorLine.top)+Number.parseFloat(connectorLine.height)/2)
-      -(Number.parseFloat(connectorHead.top)+Number.parseFloat(connectorHead.height)/2)
-    );
     return{
       uniqueTops:new Set(steps.map(rect=>Math.round(rect.top))).size,
       overflow:document.getElementById("introLand")!.scrollWidth-document.getElementById("introLand")!.clientWidth,
@@ -212,10 +213,15 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
       boardWidth:board.width,
       diagramRatio:diagram.getBoundingClientRect().width/diagram.getBoundingClientRect().height,
       mobileDetailHidden:secondaryLink.display==="none"&&pitchDetail.display==="none",
+      routeAnimation:route.animationName,
+      playerAnimation:player.animationName,
       guideLeftOutside:guide.right<=board.left-6,
       guideRightDelta:Math.abs(heroSide.right-guide.right),
-      guideCenterDelta:Math.abs((guide.top+guide.bottom)/2-(board.top+board.bottom)/2),
-      connectorCenterDelta,
+      guideBottomDelta:Math.abs(guide.bottom-board.bottom),
+      connectorLineContent:connectorLine.content,
+      connectorHeadContent:connectorHead.content,
+      connectorLineDisplay:connectorLine.display,
+      connectorHeadDisplay:connectorHead.display,
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
@@ -224,17 +230,30 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
   expect(layout.uniqueTops).toBe(isMobile?2:1);
   expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
+  expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
+  expect(layout.connectorHeadContent==="none"||layout.connectorHeadDisplay==="none").toBe(true);
   expect(layout.boardHidden).toBe(isMobile);
   if(isMobile){
     expect(layout.boardWidth).toBe(0);
     expect(layout.guideRightDelta).toBeLessThanOrEqual(1);
   }else{
     expect(layout.guideLeftOutside).toBe(true);
-    expect(layout.guideCenterDelta).toBeLessThanOrEqual(3);
-    expect(layout.connectorCenterDelta).toBeLessThanOrEqual(.1);
+    expect(layout.guideBottomDelta).toBeLessThanOrEqual(1);
+    expect(layout.routeAnimation).toContain("tacticalRouteFlow");
+    expect(layout.playerAnimation).toContain("tacticalNodePulse");
     expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
     expect(layout.diagramRatio).toBeCloseTo(238/138,1);
     expect(layout.mobileDetailHidden).toBe(false);
+    const reducedAnimations=await page.evaluate(()=>{
+      document.body.classList.add("reduced-motion");
+      const values=[
+        getComputedStyle(document.querySelector(".tactical-links") as SVGElement).animationName,
+        getComputedStyle(document.querySelector(".tactical-player") as SVGElement).animationName,
+      ];
+      document.body.classList.remove("reduced-motion");
+      return values;
+    });
+    expect(reducedAnimations).toEqual(["none","none"]);
   }
 
   await page.evaluate(()=>(globalThis as any).setLang("de"));
