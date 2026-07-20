@@ -1931,6 +1931,12 @@ function retryGhostRunResultOnce(){
   _ghostRunResultRetryTimer=setTimeout(showGhostRunResultOnce,350);
 }
 function showGhostRunResultOnce(){
+  const resultScreen=$("result");
+  if(!resultScreen||resultScreen.classList.contains("hidden")){
+    _ghostRunResultDeferred=false;
+    clearTimeout(_ghostRunResultRetryTimer);
+    return;
+  }
   if(!window._completedGhostRunKey)return;
   const noticeKey="copa.ghost.result.notice.v1";
   try{

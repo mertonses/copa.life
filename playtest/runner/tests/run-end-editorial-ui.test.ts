@@ -156,6 +156,21 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(zeroEconomy).not.toContainText("En düşük kasa");
 });
 
+test("deferred Ghost result never interrupts a new active screen",async({page})=>{
+  await finishRun(page);
+  await expect(page.locator(".ghost-run-shell")).toBeVisible();
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    document.querySelector("#result")?.classList.add("hidden");
+    document.querySelector("#sim")?.classList.remove("hidden");
+    game.showGhostRunResultOnce();
+  });
+  await page.waitForTimeout(500);
+  await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
+  await expect(page.locator("#modal")).toBeHidden();
+});
+
 test("landing hero keeps desktop tactics and persistent header actions",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
