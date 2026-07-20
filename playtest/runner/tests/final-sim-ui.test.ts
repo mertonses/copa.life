@@ -6,6 +6,7 @@ const openFinalReadyHub=async(page:any)=>{
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{
     const global=globalThis as any;
+    global.GhostClubs=Object.freeze({...global.GhostClubs,findOpponent:()=>new Promise(()=>{})});
     const input=document.querySelector("#seedInput") as HTMLInputElement;
     input.value="COPAFINALE2026";
     global.normalStart();
