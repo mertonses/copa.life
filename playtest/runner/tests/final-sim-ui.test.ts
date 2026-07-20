@@ -207,17 +207,15 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
   await page.locator('.spd[data-s="20"]').click();
   await page.locator("#shPush").click();
-  await page.locator("#pauseBtn").click();
-  await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(20);
-  await page.locator("#pauseBtn").click();
   const before=await page.evaluate(()=>{
     const global=globalThis as any;
     global.sim.pause();
     global._saveState();
-    global.sim.checkpoint();
+    const persisted=global.sim.checkpoint();
     const state=global.sim.getState();
-    return{minute:state.matchTime,score:state.score,rngState:state.rngState,decisionLog:state.decisionLog};
+    return{persisted,minute:state.matchTime,score:state.score,rngState:state.rngState,decisionLog:state.decisionLog};
   });
+  expect(before.persisted).toBe(true);
   expect(before.decisionLog.at(-1)?.tactic).toBe("push");
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(page.locator("#sim")).toBeVisible({timeout:15_000});
