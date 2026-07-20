@@ -3,13 +3,13 @@ var BALANCE_TELEMETRY_KEY="copa_balance_telemetry_v1";
 var balanceTelemetryRun=null;
 var CHAIRMAN_METRIC_KEYS=["consults","positiveEvents","negativeEvents","neutralEvents","penaltyWins","penaltyLosses","spotlightSelections","starTransferBonuses","nephewAccepted","nephewRejected","chaosOffers","chaosRolls","savingsEarned","savingsCash","savingsPower","savingsResidualCash","premiumCardsOffered","premiumCardsPurchased"];
 
-function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},updatedAt:0};}
+function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},hiddenDraft:{},updatedAt:0};}
 function _btLoad(){
  try{
   const raw=localStorage.getItem(BALANCE_TELEMETRY_KEY);
   const data=raw?JSON.parse(raw):_btBlank();
   if(!data||data.version!==1)return _btBlank();
-  data.cards=data.cards||{};data.chairmen=data.chairmen||{};data.rewards=data.rewards||{};
+  data.cards=data.cards||{};data.chairmen=data.chairmen||{};data.rewards=data.rewards||{};data.hiddenDraft=data.hiddenDraft||{};
   return data;
  }catch(e){return _btBlank();}
 }
@@ -85,6 +85,15 @@ function trackRewardChoice(kind,roundNo){
  const data=_btLoad(),roundKey=String(Math.max(1,Math.min(5,Math.round(Number(roundNo)||1))));
  if(!data.rewards[roundKey])data.rewards[roundKey]={cash:0,loan:0,swap:0,care:0};
  data.rewards[roundKey][key]++;_btSave(data);
+}
+function trackHiddenDraftMetric(kind,meta){
+ meta=meta||{};if(!["offered","selected","revealed","rerolled"].includes(kind))return;
+ const data=_btLoad(),row=data.hiddenDraft||(data.hiddenDraft={}),inc=key=>row[key]=(row[key]||0)+1,cap=key=>key[0].toUpperCase()+key.slice(1),suffix=cap(kind);
+ inc(kind);inc((["manual","reroll","auto"].includes(meta.source)?meta.source:"manual")+suffix);
+ if(meta.late)inc("late"+suffix);
+ if((kind==="offered"||kind==="selected")&&["positive","neutral","negative"].includes(meta.signal))inc("signal"+cap(meta.signal)+suffix);
+ if(kind==="revealed"&&["gem","fair","bust"].includes(meta.outcome))inc("outcome"+cap(meta.outcome));
+ _btSave(data);
 }
 function trackCardPenalty(k,power,overflow,cash){
  if(!k||k==="system")return;

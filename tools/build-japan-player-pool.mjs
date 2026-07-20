@@ -49,6 +49,23 @@ function roleOf(row) {
   return "MID";
 }
 
+function naturalPositionOf(row, role) {
+  const position = String(row["En Verimli Mevki"] || row.Mevki || "").toLocaleUpperCase("tr-TR");
+  if (/\bKL\b|\bGK\b/.test(position)) return "GK";
+  if (/\bD\/KB\s*\((?:SĞ|R)|\bKB\s*\((?:SĞ|R)/.test(position)) return "RB";
+  if (/\bD\/KB\s*\((?:SL|L)|\bKB\s*\((?:SL|L)/.test(position)) return "LB";
+  if (/\bD\s*\(M\)|\bSTP\b/.test(position)) return "CB";
+  if (/\bDOS\b/.test(position)) return "DM";
+  if (/\bOOS\s*\((?:SĞ|R)/.test(position)) return "RW";
+  if (/\bOOS\s*\((?:SL|L)/.test(position)) return "LW";
+  if (/\bOOS\s*\(M\)/.test(position)) return "AM";
+  if (/\bOS\s*\(M\)/.test(position)) return "CM";
+  if (/\bOS\s*\((?:SĞ|R)/.test(position)) return "RM";
+  if (/\bOS\s*\((?:SL|L)/.test(position)) return "LM";
+  if (/\bST\b/.test(position)) return "ST";
+  return role === "GK" ? "GK" : role === "DEF" ? "CB" : role === "MID" ? "CM" : "ST";
+}
+
 function attribute(row, field) {
   const value = Number(String(row[field] ?? "").replace(",", "."));
   return Number.isFinite(value) ? Math.max(1, Math.min(20, value)) : 1;
@@ -80,10 +97,14 @@ const pool = rows.map((row, index) => {
   if (seen.has(identity)) throw new Error(`Tekrarlanan Japonya oyuncusu: ${identity}`);
   seen.add(identity);
   const role = roleOf(row);
-  const overall = overallOf(row, role);
+  const rawOverall = overallOf(row, role);
+  const overall = Math.max(52, Math.min(82, rawOverall - 5));
   const local = String(row["Milli Takım"] || "").trim() ? 1 : 0;
   const valueBand = Math.max(1, Math.min(60, Math.round(Math.pow(Math.max(1, overall - 54), 1.55) / 7)));
-  return [name, overall, role, club, age, local, valueBand];
+  const naturalPosition = naturalPositionOf(row, role);
+  const growth = age <= 17 ? 9 : age <= 19 ? 7 : age <= 21 ? 5 : age <= 23 ? 3 : age <= 25 ? 1 : 0;
+  const potential = Math.min(86, overall + growth);
+  return [name, overall, role, club, age, local, valueBand, naturalPosition, potential, 1];
 });
 
 const clubs = new Set(pool.map(player => player[3]));
@@ -94,7 +115,7 @@ for (const role of Object.keys(ROLE_WEIGHTS)) {
   if (!pool.some(player => player[2] === role)) throw new Error(`Japonya havuzunda ${role} oyuncusu yok`);
 }
 
-const header = `/* FM26 Japonya ligi dışa aktarımından üretildi (${path.basename(input)}).\n   Şema: [ad, güç, grup, kulüp, yaş, yerli/milli takım kaydı, değer bandı]. */\n`;
+const header = `/* FM26 Japonya ligi dışa aktarımından üretildi (${path.basename(input)}).\n   Şema: [ad, güç, grup, kulüp, yaş, yerli/milli takım kaydı, değer bandı, doğal mevki, potansiyel, lig seviyesi]. */\n`;
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, `${header}var POOL_JP=${JSON.stringify(pool)};\n`, "utf8");
 console.log(`Japonya havuzu yazıldı: ${pool.length} oyuncu, ${clubs.size} kulüp -> ${output}`);

@@ -17,11 +17,14 @@ expect(Array.isArray(pool) && pool.length === 561, `Japonya oyuncu sayısı: ${p
 expect(new Set(pool.map(player => player[3])).size === 20, "Japonya havuzunda 20 kulüp bulunmalı");
 for (const role of ["GK", "DEF", "MID", "FWD"]) expect(pool.some(player => player[2] === role), `Japonya ${role} grubu eksik`);
 for (const player of pool) {
-  expect(player.length === 7, `Geçersiz Japonya tuple şeması: ${player[0]}`);
+  expect(player.length === 10, `Geçersiz Japonya tuple şeması: ${player[0]}`);
   expect(typeof player[0] === "string" && player[0], "Oyuncu adı eksik");
-  expect(Number.isInteger(player[1]) && player[1] >= 55 && player[1] <= 90, `Geçersiz güç: ${player[0]}`);
+  expect(Number.isInteger(player[1]) && player[1] >= 52 && player[1] <= 82, `Geçersiz güç: ${player[0]}`);
   expect(Number.isInteger(player[4]) && player[4] >= 15 && player[4] <= 45, `Geçersiz yaş: ${player[0]}`);
   expect(player[5] === 0 || player[5] === 1, `Geçersiz yerli alanı: ${player[0]}`);
+  expect(["GK","CB","LB","RB","DM","CM","LM","RM","AM","LW","RW","ST"].includes(player[7]), `Geçersiz doğal mevki: ${player[0]}`);
+  expect(Number.isInteger(player[8]) && player[8] >= player[1] && player[8] <= 86, `Geçersiz potansiyel: ${player[0]}`);
+  expect(player[9] === 1, `Geçersiz lig seviyesi: ${player[0]}`);
 }
 
 const opponents = load("src/data/opponents.js", "[OPP_POOL_JP,OPP_BASES_JP]");
@@ -48,7 +51,7 @@ for (const marker of [
   'data-country="JP"', 'class="country-new-ribbon"', 'assets/flags/JP.svg',
   'src/data/players_japan.js', 'JP:[POOL_JP,OPP_POOL_JP]', 'if(k==="JP")return[POOL_JP,OPP_POOL_JP,OPP_BASES_JP]',
   'src/data/opponents.js?v=20260714-japan1', 'src/data/logos.js?v=20260714-japan1',
-  'src/game/generate.js?v=20260715-elite-position1', 'src/ui/hub.js?v=',
+  'src/game/generate.js?v=20260720-player-balance1', 'src/ui/hub.js?v=',
   'src/styles/layout.css?v=',
   'country:selectedCountry', 'COUNTRY_CODES.includes(st.country)',
   'JP:"JAPONYA KUPASI FİNALİ"', 'JP:"JAPAN CUP FINAL"',

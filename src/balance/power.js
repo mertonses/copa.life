@@ -35,6 +35,7 @@ function chemBonus(s){
 }
 function powerBreakdown(r){
  const s=picksBySlot.filter(Boolean),captainPenalty=typeof captainDecisionPlayerPenaltyForRound==="function"?captainDecisionPlayerPenaltyForRound(r,s):0,avg=s.length?(s.reduce((a,p)=>a+effOf(p),0)+captainPenalty)/s.length:0;
+ const starImpact=Math.min(2.5,s.map(effOf).sort((a,b)=>b-a).slice(0,2).reduce((sum,value)=>sum+Math.max(0,value-86)*.16,0));
  const styleBonus=STYLES[style].eff(s);
  const loanBonus=s.reduce((sum,p)=>sum+(p&&p.loan?Math.max(0,Number(p.teamPowerBoost)||0):0),0);
  let cardBonus=0,finalCardRaw=0;
@@ -53,6 +54,6 @@ function powerBreakdown(r){
  const uncappedRaw=styleBonus+cardBonus+loanBonus+matchup+risk+trait;
  const captainChem=typeof captainDecisionChemistryForRound==="function"?captainDecisionChemistryForRound(r):0;
  const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total+captainChem));
- return {avg,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+bonus+chem)};
+ return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
 }
 function squadPower(r){return powerBreakdown(r);}

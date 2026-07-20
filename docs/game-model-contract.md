@@ -18,6 +18,13 @@ sonuç üreten kurallar değişemez.
   çözer.
 - Ghost rakibi almak, kullanıcının kendi kulübünü paylaşmasından ayrıdır.
   Paylaşım açık rıza ister; eşleşme alınması tek başına veri yüklemez.
+- Drafttaki her üçlü en fazla bir Gizli Oyuncu içerir. Nihai sonuç sabit fiyatla
+  karşılaştırılan piyasa değerinden `gem`, `fair` veya `bust` olarak türetilir.
+- Gizli Oyuncu scout sinyali sonuçtan ayrı ve kontrollü biçimde hatalı üretilir;
+  metin oyun durumuna yazılmaz, aktif dilde render edilir. İmzalama geri alınamaz
+  ve oyuncunun mevcut trait bilgisi reveal sırasında korunur.
+- Otomatik kadro doldurma doğrudan oyuncu havuzunu atlayamaz; manuel draft ile
+  aynı aday üretimi, bütçe, gizli oyuncu ve deadline kurallarını kullanır.
 
 ## Sürüm sözleşmesi
 
@@ -57,3 +64,23 @@ Global Privacy Control veya Do Not Track sinyali varsa ürün telemetrisi
   tek başına almamalıdır; aksi durumda dominant seçenek incelemesi gerekir.
 - Final shout'ları maç durumuna bağlı avantaj üretmeli; tüm maç boyunca
   koşulsuz en iyi seçim olmamalıdır.
+
+## Oyuncu verisi ve transfer değeri
+
+- Oyuncu tuple şeması `[ad, güç, rol, kulüp, yaş, yerli, piyasa ipucu, doğal
+  mevki, potansiyel, lig seviyesi]` olmak üzere 10 alandır.
+- `güç` bugünkü saha katkısını, `potansiyel` gelişim tavanını ifade eder.
+  Piyasa değeri tek başına mevcut güce dönüştürülmez. Wonderkid gelişimi
+  oyuncunun potansiyelini aşamaz.
+- Doğal mevki draftta seçilen slot tarafından değiştirilemez. Slot uyumsuzluğu
+  doğal mevki ile oynanan mevki arasındaki ceza tablosundan hesaplanır.
+- Draft bonservisi tam sayı milyon avrodur; güç eğrisine ek olarak yaş ve
+  potansiyel primi içerir. Aynı güçte genç/yüksek potansiyelli oyuncu prime
+  oyuncudan, prime oyuncu da ileri yaştaki oyuncudan daha pahalıdır.
+- Birinci lig oyuncuları draftta daha sık görünür; düşük güçlü akademi
+  oyuncuları ilk takım adaylarını bastıramaz.
+- İlk 11'deki en güçlü iki oyuncu, 86 üzerindeki etkin güçleri oranında ve
+  toplam `+2.5` ile sınırlı bir yıldız etkisi üretir.
+- Ülke elit bantları `check:playerbalance` ile korunur: Türkiye `4-6`,
+  İngiltere `10-14`, İspanya `7-10`, İtalya ve Almanya `4-7` adet `90+`;
+  Japonya'da `90+` yoktur ve güç tavanı `82`dir.

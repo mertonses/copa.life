@@ -50,6 +50,8 @@
     "check:responsive": "node tools/check-responsive.mjs",
     "check:cards": "node tools/check-card-copy.mjs",
     "check:positions": "node tools/check-position-fit.mjs",
+    "players:rebalance": "node tools/rebalance-player-pools.mjs --write",
+    "check:playerbalance": "node tools/check-player-balance.mjs",
     "check:draftquality": "node tools/check-draft-quality.mjs",
     "check:finalsim": "node tools/check-final-sim.mjs",
     "check:finalsim:stats": "node tools/final-sim-quality-report.mjs --check",
@@ -81,7 +83,7 @@
     "check:japan": "node tools/check-japan-country.mjs",
     "audit:japan-data": "node tools/audit-japan-player-data.mjs",
     "check:persistence": "node tools/check-run-persistence.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

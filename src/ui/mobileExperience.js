@@ -3,6 +3,12 @@
 
   const PHONE_QUERY="(max-width: 760px)";
   const phoneMedia=global.matchMedia?global.matchMedia(PHONE_QUERY):{matches:false};
+  const isMobileDevice=()=>{
+    const platform=global.Capacitor&&typeof global.Capacitor.getPlatform==="function"?global.Capacitor.getPlatform():"";
+    const userAgent=global.navigator&&global.navigator.userAgent||"";
+    const userAgentData=global.navigator&&global.navigator.userAgentData;
+    return phoneMedia.matches||platform==="android"||platform==="ios"||!!(userAgentData&&userAgentData.mobile)||/Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
+  };
   let dock=null;
   let dockInner=null;
   let mounted=null;
@@ -955,6 +961,7 @@
 
   function init(){
     try{hadSavedRunOnInit=!!localStorage.getItem("copa_run_v5");}catch(_){}
+    if(isMobileDevice())document.documentElement.classList.add("copa-mobile-device");
     ensureDock();
     ensureSimTabs();
     const observed=["intro","draft","hub","sim","result","modal"]

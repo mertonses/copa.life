@@ -72,16 +72,38 @@ function clampFreeAgentFee(ov,roundNo,value){
  const floor=Math.max(band[0],freeAgentRoundFloor(roundNo));
  return Math.min(24,band[1],Math.max(floor,Math.round(Number(value)||0)));
 }
-function playerMarketValue(ov,channel,roundNo){
+function playerAgeValueMultiplier(age){
+ const value=Number(age);
+ if(!Number.isFinite(value)||value<=0)return 1;
+ if(value<=20)return 1.18;
+ if(value<=23)return 1.12;
+ if(value<=28)return 1;
+ if(value<=30)return .88;
+ if(value<=32)return .72;
+ if(value<=34)return .55;
+ return .40;
+}
+function playerPotential(ov,age,hint){
+ const current=Math.max(45,Math.min(99,Number(ov)||60)),given=Number(hint);
+ if(Number.isFinite(given)&&given>=current)return Math.min(99,Math.round(given));
+ const value=Number(age)||26;
+ const growth=value<=17?9:value<=19?7:value<=21?5:value<=23?3:value<=25?1:0;
+ return Math.min(99,current+growth);
+}
+function playerMarketValue(ov,channel,roundNo,age,potential){
  const mult={draft:1,free_agent:0.90,bench:0.45,loan:0}[channel||"draft"]??1;
- let v=_valueCurve(ov)*mult;
+ const current=Math.max(45,Math.min(99,Number(ov)||60));
+ const ceiling=playerPotential(current,age,potential);
+ const potentialPremium=1+Math.min(.45,Math.max(0,ceiling-current)*.06);
+ let v=_valueCurve(current)*mult*playerAgeValueMultiplier(age)*potentialPremium;
  if(channel==="free_agent"){
   v*=1+Math.max(0,(roundNo||1)-1)*0.10;
   v=Math.max(v,freeAgentRoundFloor(roundNo));
  }
- if(v<1)return Math.max(channel==="draft"?0.3:1,Math.round(v*10)/10);
+ if(channel==="draft")return Math.max(1,Math.round(v));
+ if(v<1)return Math.max(1,Math.round(v*10)/10);
  return Math.round(v*10)/10;
 }
-function valueOf(ov){return playerMarketValue(ov,"draft",1);}
+function valueOf(ov,age,potential){return playerMarketValue(ov,"draft",1,age,potential);}
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
 function effOf(p){return p.ov-positionPenaltyFor(p,p.pos)+(p.train||0)+(p.dev||0)+(p.backupBoost||0)-injPen(p);}

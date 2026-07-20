@@ -9,7 +9,7 @@ const startDraft=async(page:any)=>{
 const chooseOne=async(page:any)=>{
   await page.evaluate(()=>{(globalThis as any).roll();});
   await expect(page.locator("#optstage")).toBeVisible();
-  await page.evaluate(()=>{const w=globalThis as any;w.choose(0);w.choose(0);});
+  await page.evaluate(()=>{const w=globalThis as any,i=w.currentOpts.findIndex((player:any)=>!player.hidden);w.choose(i);w.choose(i);});
 };
 
 test.describe("critical mobile run integrity",()=>{
@@ -42,4 +42,15 @@ test.describe("critical mobile run integrity",()=>{
     const phase=await page.evaluate(()=>{const w=globalThis as any;w.picksBySlot[2]=null;w.playMatch();return w.CopaRunState.phase;});
     expect(phase).toBe("hub");await expect(page.locator("#modal")).toContainText(/Kadro tamamlanmadı|Squad incomplete/);
   });
+});
+
+test("England player pool loads on selection and is ready before draft generation",async({page})=>{
+  await page.addInitScript(()=>{localStorage.setItem("copa_country","TR");localStorage.removeItem("copa_run_v5");});
+  await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
+  expect(await page.evaluate(()=>Array.isArray((globalThis as any).POOL_EN)&&(globalThis as any).POOL_EN.length)).toBe(0);
+  await page.evaluate(()=>{(globalThis as any).pickCountry("ENG");});
+  await page.waitForFunction(()=>Array.isArray((globalThis as any).POOL_EN)&&(globalThis as any).POOL_EN.length===2983);
+  await page.evaluate(()=>{const w=globalThis as any;w.formName="4-3-3";w.slots=w.FORMATIONS[w.formName];w.style="gegen";w.beginDraft();});
+  await expect(page.locator("#draft")).toBeVisible();
+  expect(await page.evaluate(()=>({country:(globalThis as any).selectedCountry,pool:(globalThis as any).POOL.length}))).toEqual({country:"ENG",pool:2983});
 });

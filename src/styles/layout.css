@@ -1690,7 +1690,7 @@ svg[stroke]{stroke-width:1.75}
 .v7-cta-stack .btn-quick-inline{min-height:40px;padding:10px 30px;border-color:var(--border-default)!important;color:var(--color-ink);background:var(--surface-elevated);font-weight:850;letter-spacing:1px}
 .v7-cta-stack .btn-quick-inline svg{margin-right:7px}
 
-@media(max-width:720px){
+@media(max-width:720px),(pointer:coarse){
   .mechanics{grid-template-columns:1fr;gap:0}
   .mstep:nth-last-child(-n+2){border-bottom:1px solid color-mix(in srgb,var(--color-slate) 14%,transparent)}
   .mstep:last-child{border-bottom:none}
@@ -1733,7 +1733,17 @@ svg[stroke]{stroke-width:1.75}
 .hub-action-panel .actionbar #playBtn,.hub-action-panel .actionbar #talkBtn{padding-inline:8px}
 .pitch-overlay #cardrow{margin-top:4px;max-width:220px}
 
-@media(max-width:720px){
+html.copa-mobile-device .tools{flex:0 0 auto}
+html.copa-mobile-device .tools #howtoToggle{
+  width:44px;
+  min-width:44px;
+  padding:0;
+  font-size:0;
+  letter-spacing:0;
+  justify-content:center;
+}
+html.copa-mobile-device .tools #howtoToggle svg{width:16px;height:16px;margin:0!important}
+@media(max-width:760px){
   .v7-hero-head{padding-right:0}
   .v7-hero-head .howto-wrap{position:static;margin-top:12px;text-align:left}
   .draft-right .pitch{width:100%;height:auto}
@@ -5885,7 +5895,7 @@ html[data-theme="dark"] .backup-modal .backup-titleblock p{
   .backup-injury-power{gap:5px}
   .backup-injury-power b{font-size:15px}
   .backup-grid{grid-template-columns:1fr!important;padding:8px 10px!important;gap:6px!important}
-  .backup-card{min-height:0!important;padding:8px 9px!important;border-radius:7px!important;box-shadow:none!important}
+  .backup-card{min-height:0!important;padding:7px 9px!important;border-radius:7px!important;box-shadow:none!important}
   .bk-check{top:7px;right:7px;width:17px;height:17px;font-size:10px}
   .bk-top{align-items:center!important}
   .bk-name{font-size:13px!important}
@@ -6906,4 +6916,47 @@ body.reduced-motion .tactical-links,body.reduced-motion .tactical-final-arrow,bo
 @media(max-width:360px){
   .v7-hero-side{gap:6px}
   #howtoToggle{padding-inline:6px;font-size:7.5px}
+}
+
+/* Keep the guide beside Settings in the persistent header on every viewport. */
+.tools .howto-wrap{
+  position:relative!important;
+  inset:auto!important;
+  display:flex;
+  align-items:center;
+  margin:0!important;
+  padding:0;
+  border:0;
+  text-align:left;
+}
+.tools #howtoToggle{
+  height:44px!important;
+  min-height:44px;
+  box-sizing:border-box;
+  padding:0 12px;
+  font-size:9px;
+  font-weight:700;
+  opacity:1;
+  background:var(--surface-elevated);
+  border-color:var(--border-default);
+  box-shadow:var(--shadow-sm);
+}
+.tools #howtoToggle:hover,.tools #howtoToggle:focus-visible{
+  border-color:var(--color-primary);
+  color:var(--color-primary);
+}
+@media(max-width:720px){
+  .tools{flex:0 0 auto}
+  .tools #howtoToggle{
+    width:44px;
+    min-width:44px;
+    padding:0;
+    font-size:0;
+    letter-spacing:0;
+    justify-content:center;
+  }
+  .tools #howtoToggle svg{width:16px;height:16px;margin:0!important}
+}
+@media(max-width:360px){
+  .tools{gap:4px}
 }
