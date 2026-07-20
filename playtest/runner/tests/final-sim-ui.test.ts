@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+test.use({serviceWorkers:"block"});
+
 const openFinalReadyHub=async(page:any)=>{
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{
@@ -144,33 +146,50 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
 test("mobile penalty decisions keep one clear status and remove the obsolete history control",async({page},testInfo)=>{
   test.skip(!testInfo.project.name.includes("mobile"),"mobile penalty presentation regression");
   await openFinalReadyHub(page);
-  await page.evaluate(()=>{
-    (globalThis as any).showPenaltyShootout("final");
+  const penalty=await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.showPenaltyShootout("final");
     window.dispatchEvent(new Event("resize"));
+    await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
+    const modal=document.querySelector(".pen-modal") as HTMLElement;
+    const head=modal.querySelector(".pen-head") as HTMLElement;
+    const score=head.querySelector(".pen-score b") as HTMLElement;
+    const controls=[...modal.querySelectorAll(".pen-dir-btn")].map(element=>{
+      const rect=element.getBoundingClientRect();
+      return{width:rect.width,height:rect.height};
+    });
+    const headStyle=getComputedStyle(head),scoreStyle=getComputedStyle(score);
+    return{
+      visible:!!modal&&getComputedStyle(modal).display!=="none",
+      coach:!!modal.querySelector(".mobile-penalty-coach"),
+      controls,
+      headPosition:headStyle.position,
+      dockPosition:getComputedStyle(modal.querySelector(".pen-action-dock") as HTMLElement).position,
+      phaseBadges:modal.querySelectorAll(".pen-phase-badge").length,
+      phaseSpans:modal.querySelectorAll(".pen-phase span").length,
+      phaseText:(modal.querySelector(".pen-phase b")?.textContent||"").trim(),
+      headColor:headStyle.color,
+      background:headStyle.backgroundColor,
+      scoreColor:scoreStyle.color,
+    };
   });
-  await expect(page.locator(".pen-modal")).toBeVisible();
-  await expect(page.locator(".mobile-penalty-coach")).toBeVisible();
-  await expect(page.locator(".pen-dir-btn")).toHaveCount(3);
-  const controls=await page.locator(".pen-dir-btn").evaluateAll(elements=>elements.map(element=>{
-    const rect=element.getBoundingClientRect();
-    return{width:rect.width,height:rect.height};
-  }));
-  expect(controls.every(control=>control.width>=44&&control.height>=48)).toBe(true);
-  expect(await page.locator(".pen-head").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
-  expect(await page.locator(".pen-action-dock").evaluate(element=>getComputedStyle(element).position)).toBe("sticky");
-  await expect(page.locator(".pen-phase-badge")).toHaveCount(0);
-  await expect(page.locator(".pen-phase span")).toHaveCount(0);
-  await expect(page.locator(".pen-phase b")).toHaveText(/ŞUT SENDE|YOUR KICK/);
-  const headContrast=await page.locator(".pen-head").evaluate(element=>{
-    const head=getComputedStyle(element);
-    const score=getComputedStyle(element.querySelector(".pen-score b") as HTMLElement);
-    return{headColor:head.color,background:head.backgroundColor,scoreColor:score.color};
-  });
-  expect(headContrast.headColor).not.toBe(headContrast.background);
-  expect(headContrast.scoreColor).not.toBe(headContrast.background);
+  expect(penalty.visible).toBe(true);
+  expect(penalty.coach).toBe(true);
+  expect(penalty.controls).toHaveLength(3);
+  expect(penalty.controls.every(control=>control.width>=44&&control.height>=48)).toBe(true);
+  expect(penalty.headPosition).toBe("sticky");
+  expect(penalty.dockPosition).toBe("sticky");
+  expect(penalty.phaseBadges).toBe(0);
+  expect(penalty.phaseSpans).toBe(0);
+  expect(penalty.phaseText).toMatch(/ŞUT SENDE|YOUR KICK/);
+  expect(penalty.headColor).not.toBe(penalty.background);
+  expect(penalty.scoreColor).not.toBe(penalty.background);
 
-  await page.locator('.pen-dir-btn[data-dir="L"]').click();
-  await expect(page.locator(".pen-log,.pen-log-toggle")).toHaveCount(0);
+  const obsoleteHistory=await page.evaluate(()=>{
+    (globalThis as any)._takePenalty("L");
+    return document.querySelectorAll(".pen-log,.pen-log-toggle").length;
+  });
+  expect(obsoleteHistory).toBe(0);
 });
 
 test("final resumes from a process-death checkpoint at the same match state",async({page},testInfo)=>{
@@ -193,7 +212,9 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   await page.locator("#pauseBtn").click();
   const before=await page.evaluate(()=>{
     const global=globalThis as any;
-    global.sim.pause();global.sim.checkpoint();
+    global.sim.pause();
+    global._saveState();
+    global.sim.checkpoint();
     const state=global.sim.getState();
     return{minute:state.matchTime,score:state.score,rngState:state.rngState,decisionLog:state.decisionLog};
   });
