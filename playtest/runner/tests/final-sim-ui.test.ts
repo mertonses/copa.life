@@ -55,6 +55,7 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   await openFinalReadyHub(page);
   await page.evaluate(()=>{(globalThis as any).startFinalSim2();});
   await expect(page.locator("#sim")).toBeVisible();
+  await page.evaluate(()=>{(globalThis as any).setSpeed(1);});
   await expect(page.locator("#simEventMap svg")).toBeVisible();
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","false");
   await expect(page.locator("#mobileSkipBtn")).toBeVisible();
@@ -169,6 +170,7 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   await openFinalReadyHub(page);
   await page.evaluate(()=>{(globalThis as any).startFinalSim2();});
   await expect(page.locator("#sim")).toBeVisible();
+  await page.evaluate(()=>{(globalThis as any).setSpeed(1);});
   await page.locator('[data-sim-view="stats"]').click();
   await page.locator("#pauseBtn").click();
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
