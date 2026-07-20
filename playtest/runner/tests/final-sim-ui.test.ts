@@ -6,6 +6,7 @@ const openFinalReadyHub=async(page:any)=>{
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{
     const global=globalThis as any;
+    global.GhostClubs.setEnabled(false);
     const input=document.querySelector("#seedInput") as HTMLInputElement;
     input.value="COPAFINALE2026";
     global.normalStart();
