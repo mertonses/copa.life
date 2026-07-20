@@ -112,6 +112,14 @@ test("mobile preferences stay opt-in and draft choices expose decision context",
   await expect(page.locator("#mobileDraftConfirm")).toContainText(/Kasa sonra|Cash after/);
   await page.locator("[data-draft-confirm]").click();
   await expect(page.locator("#mobileDraftConfirm")).toHaveCount(0);
+  const hiddenConfirmation=page.locator(".hidden-player-confirm");
+  await expect.poll(async()=>await page.locator("#rollstage").isVisible()||await hiddenConfirmation.isVisible()).toBe(true);
+  if(await hiddenConfirmation.isVisible()){
+    await hiddenConfirmation.locator(".btn-primary").click();
+    const hiddenReveal=page.locator(".hidden-player-reveal");
+    await expect(hiddenReveal).toBeVisible();
+    await hiddenReveal.locator(".btn-primary").click();
+  }
   await expect(page.locator("#rollstage")).toBeVisible();
 });
 

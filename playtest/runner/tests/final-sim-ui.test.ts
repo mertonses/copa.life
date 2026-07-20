@@ -144,7 +144,10 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
 test("mobile penalty decisions keep one clear status and remove the obsolete history control",async({page},testInfo)=>{
   test.skip(!testInfo.project.name.includes("mobile"),"mobile penalty presentation regression");
   await openFinalReadyHub(page);
-  await page.evaluate(()=>{(globalThis as any).showPenaltyShootout("final");});
+  await page.evaluate(()=>{
+    (globalThis as any).showPenaltyShootout("final");
+    window.dispatchEvent(new Event("resize"));
+  });
   await expect(page.locator(".pen-modal")).toBeVisible();
   await expect(page.locator(".mobile-penalty-coach")).toBeVisible();
   await expect(page.locator(".pen-dir-btn")).toHaveCount(3);
@@ -183,7 +186,7 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   });
   await page.locator('[data-sim-view="stats"]').click();
   await expect(page.locator("#pauseBtn")).toHaveAttribute("aria-pressed","true");
-  await page.locator('.spd[data-s="80"]').click();
+  await page.locator('.spd[data-s="20"]').click();
   await page.locator("#shPush").click();
   await page.locator("#pauseBtn").click();
   await expect.poll(()=>page.locator("#simClk").textContent().then(value=>Number.parseInt(value||"0",10)),{timeout:10_000}).toBeGreaterThanOrEqual(20);
