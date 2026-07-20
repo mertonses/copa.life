@@ -19,11 +19,11 @@ async function finishRun(page:Page,options:{ghost?:boolean;zeroEconomy?:boolean;
     }));
   }
   await page.goto(options.path||"/?run-end-editorial=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const game=globalThis as any;
     game.setLang("tr");
     game.quickStart();
-    game.quickAll();
+    await game.quickAll();
   });
   await page.locator("#postClubName").fill("Editorial XI");
   await page.evaluate(({zeroEconomy})=>{
