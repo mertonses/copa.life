@@ -50,6 +50,14 @@
   function ensureScoutReport(){
     return loadScriptOnce("scout-report","src/ui/scoutReport.js?v=20260719-lazy1",()=>!!global.ScoutReport).then(()=>global.ScoutReport);
   }
+  function ensureHiddenDraft(){
+    return loadScriptOnce("hidden-draft","src/ui/hiddenDraft.js?v=20260720-hidden-draft1",()=>!!global.CopaHiddenDraft).then(()=>global.CopaHiddenDraft);
+  }
+  function ensureCountryPlayers(country){
+    const code=String(country||"TR").toUpperCase();
+    if(code!=="ENG")return Promise.resolve();
+    return loadScriptOnce("country-players-eng","src/data/players_england.js?v=20260720-player-balance1",()=>Array.isArray(global.POOL_EN)&&global.POOL_EN.length>0);
+  }
   function ensureLastMatchReport(){
     return loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260719-pitch-score1",()=>!!global.LastMatchReport).then(()=>global.LastMatchReport);
   }
@@ -62,6 +70,6 @@
     if(!open){apply();return Promise.resolve();}return ensureAdvancedSettings().then(api=>{api.ensureMarkup(body);apply();}).catch(apply);
   }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openMetaProgression});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openMetaProgression});
   global.addEventListener("load",()=>{warmRunReports().catch(()=>{});},{once:true});
 })(window);

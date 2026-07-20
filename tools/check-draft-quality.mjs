@@ -40,6 +40,18 @@ function groupOf(pos) {
   return "FWD";
 }
 
+function draftMarketValue(ov) {
+  const anchors = [[50, 0.2], [55, 0.3], [60, 0.5], [65, 1], [70, 2], [75, 4], [80, 7], [85, 12], [90, 20], [95, 32], [99, 45]];
+  const power = Math.max(45, Math.min(99, Number(ov) || 60));
+  for (let i = 1; i < anchors.length; i++) {
+    if (power > anchors[i][0]) continue;
+    const from = anchors[i - 1], to = anchors[i], ratio = (power - from[0]) / (to[0] - from[0]);
+    const value = from[1] + (to[1] - from[1]) * ratio;
+    return value < 1 ? Math.max(0.3, Math.round(value * 10) / 10) : Math.round(value * 10) / 10;
+  }
+  return 45;
+}
+
 function makeContext(country, pool) {
   const random = seededRandom(0xc0facafe ^ country.charCodeAt(0));
   const math = Object.create(Math);
@@ -50,13 +62,14 @@ function makeContext(country, pool) {
     selectedCountry: country,
     chairman: null,
     LANG: "tr",
+    deadlineH: 24,
     rand: random,
     groupOf,
-    valueOf: ov => Math.max(1, Math.round((Number(ov) - 50) / 4)),
+    valueOf: draftMarketValue,
     effOf: player => player.ov,
   };
   vm.createContext(context);
-  vm.runInContext(`${GENERATOR}\nthis.__draftOptions=draftOptions;`, context);
+  vm.runInContext(`${GENERATOR}\nthis.__draftOptions=draftOptions;this.__makeHidden=makeHidden;`, context);
   return context;
 }
 
@@ -71,9 +84,31 @@ for (const [country, [file, variable]] of Object.entries(COUNTRIES)) {
     let visible = 0;
     let allLow = 0;
     let hasGood = 0;
+    let hiddenSets = 0;
+    let correctSignals = 0;
+    let signalSamples = 0;
     for (let run = 0; run < RUNS; run++) {
       const options = context.__draftOptions(pos);
       const shown = options.filter(option => !option.hidden);
+      const hidden = options.filter(option => option.hidden);
+      if (hidden.length > 1) {
+        console.error(`Bir üçlüde birden fazla gizli aday üretildi: ${country}/${pos}`);
+        failed = true;
+      }
+      if (hidden.length) hiddenSets++;
+      for (const option of hidden) {
+        if (!["gem", "fair", "bust"].includes(option.hiddenOutcome) || option.hiddenTier !== option.hiddenOutcome) {
+          console.error(`Gizli sonuç sözleşmesi geçersiz: ${country}/${pos}`);
+          failed = true;
+        }
+        if (!["positive", "neutral", "negative"].includes(option.scoutSignal) || "scoutHint" in option) {
+          console.error(`Scout sinyali semantik anahtar olarak saklanmadı: ${country}/${pos}`);
+          failed = true;
+        }
+        const expectedSignal = option.hiddenOutcome === "gem" ? "positive" : option.hiddenOutcome === "bust" ? "negative" : "neutral";
+        correctSignals += Number(option.scoutSignal === expectedSignal);
+        signalSamples++;
+      }
       total += options.reduce((sum, option) => sum + option.ov, 0);
       visible += shown.length;
       if (shown.length === 3 && shown.every(option => option.ov <= 60)) allLow++;
@@ -82,11 +117,38 @@ for (const [country, [file, variable]] of Object.entries(COUNTRIES)) {
     const mean = total / (RUNS * 3);
     const allLowPct = (allLow / RUNS) * 100;
     const goodPct = (hasGood / RUNS) * 100;
-    rows.push(`${groupOf(pos)} ort ${mean.toFixed(1)} · 3×≤60 %${allLowPct.toFixed(2)} · 70+ %${goodPct.toFixed(1)}`);
+    const hiddenSetPct = (hiddenSets / RUNS) * 100;
+    const signalAccuracy = signalSamples ? (correctSignals / signalSamples) * 100 : 0;
+    rows.push(`${groupOf(pos)} ort ${mean.toFixed(1)} · 3×≤60 %${allLowPct.toFixed(2)} · 70+ %${goodPct.toFixed(1)} · gizli %${hiddenSetPct.toFixed(1)} · scout %${signalAccuracy.toFixed(1)}`);
     if (country !== "TR" && allLow > 0) failed = true;
     if (!visible) failed = true;
+    if (hiddenSetPct < 32 || hiddenSetPct > 58) failed = true;
+    if (signalSamples && (signalAccuracy < 52 || signalAccuracy > 82)) failed = true;
   }
   console.log(`${country}: ${rows.join(" | ")}`);
+}
+
+{
+  const pool = loadPool(...COUNTRIES.TR);
+  const context = makeContext("TR", pool);
+  context.deadlineH = 6;
+  let hiddenSets = 0;
+  for (let run = 0; run < RUNS * 4; run++) {
+    const options = context.__draftOptions(POSITIONS[run % POSITIONS.length]);
+    const hidden = options.filter(option => option.hidden);
+    if (hidden.length > 1) failed = true;
+    if (hidden.length) hiddenSets++;
+  }
+  const latePct = (hiddenSets / (RUNS * 4)) * 100;
+  console.log(`Geç draft gizli üçlü oranı: %${latePct.toFixed(1)}`);
+  if (latePct < 62 || latePct > 82) failed = true;
+
+  const traitPlayer = { name: "Trait Guard", ov: 78, eff: 78, trait: "lider", price: 5 };
+  context.__makeHidden(traitPlayer);
+  if (traitPlayer.trait !== "lider") {
+    console.error("Gizli oyuncu mevcut trait bilgisini kaybetti.");
+    failed = true;
+  }
 }
 
 {

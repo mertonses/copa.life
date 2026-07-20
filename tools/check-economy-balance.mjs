@@ -44,7 +44,7 @@ expect(!/derbi\s*:\s*4/.test(files.effects),"Derby Lion DARK still carries the o
 expect(/const g=v===1\?\[4,7,6\]/.test(files.html+files.power+read("src/cards/cardDefs.js")),"Derby Lion DARK round values are stale");
 expect(/applyDarkPurchaseRisk\(k,variant\)/.test(files.effects),"DARK purchase risk is not connected to card acquisition");
 expect(/CARD_PRICE_FLOOR=2/.test(files.config),"paid-card price floor is not 2");
-expect(/playerMarketValue\(p\.ov,"free_agent",round\)/.test(files.html),"free agents do not use the shared player valuation curve");
+expect(/playerMarketValue\(p\.ov,"free_agent",round,p\.age,p\.potential\)/.test(files.html),"free agents do not use the shared age/potential valuation curve");
 expect(/free_agent:0\.90/.test(files.core),"free-agent valuation multiplier is not 0.90");
 expect(/\*0\.10/.test(files.core)&&/freeAgentRoundFloor/.test(files.core),"free-agent round urgency or price floors are disconnected");
 expect(/clampFreeAgentFee\(p\.ov,round,adjustedFee\)/.test(files.html),"free-agent target price bands are not enforced in the market");

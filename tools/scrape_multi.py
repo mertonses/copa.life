@@ -2,7 +2,7 @@
 Sortitoutsi FM2026 — Spain, Italy, Germany scraper
 Cikti: src/data/players_spain.js, players_italy.js, players_germany.js
 """
-import sys, re, json, time, math, requests
+import sys, re, json, time, math, subprocess, requests
 from bs4 import BeautifulSoup
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -48,12 +48,41 @@ COUNTRIES = {
 }
 
 def to_role(pos_raw):
-    p = pos_raw.upper()
-    if "GK" in p: return "GK"
-    if any(x in p for x in ["CB","LB","RB","WB","SW","DC","DL","DR"]): return "DEF"
-    if any(x in p for x in ["ST","CF","SS"]): return "FWD"
-    if any(x in p for x in ["LW","RW","AM","AML","AMR","AMC"]): return "FWD"
+    natural = to_natural_position(pos_raw)
+    if natural == "GK": return "GK"
+    if natural in {"CB","LB","RB"}: return "DEF"
+    if natural in {"ST","LW","RW"}: return "FWD"
     return "MID"
+
+def to_natural_position(pos_raw):
+    p = re.sub(r"\s+", " ", str(pos_raw).upper()).strip()
+    if re.search(r"\b(?:GK|KL)\b", p): return "GK"
+    if re.search(r"\b(?:RB|DR|D\s*\(R\)|D/WB\s*\(R\))\b", p): return "RB"
+    if re.search(r"\b(?:LB|DL|D\s*\(L\)|D/WB\s*\(L\))\b", p): return "LB"
+    if re.search(r"\b(?:CB|DC|SW|D\s*\(C\))\b", p): return "CB"
+    if re.search(r"\b(?:DM|DMC)\b", p): return "DM"
+    if re.search(r"\b(?:AMR|AM\s*\(R\)|RW)\b", p): return "RW"
+    if re.search(r"\b(?:AML|AM\s*\(L\)|LW)\b", p): return "LW"
+    if re.search(r"\b(?:AMC|AM\s*\(C\))\b", p): return "AM"
+    if re.search(r"\b(?:MC|M\s*\(C\)|CM)\b", p): return "CM"
+    if re.search(r"\b(?:MR|M\s*\(R\)|RM)\b", p): return "RM"
+    if re.search(r"\b(?:ML|M\s*\(L\)|LM)\b", p): return "LM"
+    if re.search(r"\b(?:ST|CF|SS)\b", p): return "ST"
+    return "CM"
+
+def first_team_roster(players, limit=36):
+    quotas = {"GK": 4, "DEF": 11, "MID": 11, "FWD": 10}
+    ranked = sorted(players, key=lambda player: (player[6], player[1], -player[4]), reverse=True)
+    selected = []
+    for role, quota in quotas.items():
+        selected.extend([player for player in ranked if player[2] == role][:quota])
+    selected_ids = {id(player) for player in selected}
+    for player in ranked:
+        if len(selected) >= limit: break
+        if id(player) not in selected_ids:
+            selected.append(player)
+            selected_ids.add(id(player))
+    return selected[:limit]
 
 def parse_value(txt):
     txt = txt.strip().replace(",","")
@@ -97,8 +126,8 @@ def parse_team_page(soup, club_name, local_nats):
         role    = to_role(pos_raw)
         ov      = value_to_ov(val_m)
         price   = value_to_price(val_m)
-        players.append([name, ov, role, club_name, age, is_local, price])
-    return players
+        players.append([name, ov, role, club_name, age, is_local, price, to_natural_position(pos_raw)])
+    return first_team_roster(players)
 
 def scrape_competition(comp_id, slug, league_name, local_nats):
     print(f"\n  [{league_name}]")
@@ -141,4 +170,5 @@ def scrape_country(code, cfg):
 if __name__ == "__main__":
     for code, cfg in COUNTRIES.items():
         scrape_country(code, cfg)
+    subprocess.run(["node", "tools/rebalance-player-pools.mjs", "--write"], check=True)
     print("\n\nTUM ULKELER TAMAMLANDI.")

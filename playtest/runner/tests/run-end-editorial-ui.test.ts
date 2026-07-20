@@ -156,7 +156,7 @@ test("season story keeps four meaningful chronological beats and economy hides z
   await expect(zeroEconomy).not.toContainText("En düşük kasa");
 });
 
-test("landing hero keeps the desktop tactics and uses the compact mobile guide grid",async({page},testInfo)=>{
+test("landing hero keeps desktop tactics and persistent header actions",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
   const isMobile=testInfo.project.name.includes("mobile");
@@ -171,9 +171,11 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
   await expect(page.locator(".tactical-board .tactical-penalty-area")).toHaveCount(2);
   await expect(page.locator(".tactical-board .tactical-goal-area")).toHaveCount(2);
   await expect(page.locator(".tactical-board svg gradient,.tactical-board svg filter")).toHaveCount(0);
-  await expect(page.locator(".v7-hero-side > #howtoWrap #howtoToggle")).toBeVisible();
+  await expect(page.locator(".tools > #howtoWrap #howtoToggle")).toBeVisible();
   await expect(page.locator("#howtoToggle")).toContainText("COPA REHBERİ");
+  await expect(page.locator(".v7-hero-side #howtoToggle")).toHaveCount(0);
   await expect(page.locator(".tactical-board #howtoToggle")).toHaveCount(0);
+  await expect(page.locator("#settingsBtn")).toBeVisible();
   await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
   await expect(page.locator("#mechSection .mn")).toHaveText(["1","2","3","4"]);
   await expect(page.locator("#mechSection .mt small")).toHaveCount(4);
@@ -199,7 +201,7 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
     const route=getComputedStyle(document.querySelector(".tactical-links") as SVGElement);
     const player=getComputedStyle(document.querySelector(".tactical-player") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
-    const heroSide=(document.querySelector(".v7-hero-side") as HTMLElement).getBoundingClientRect();
+    const settings=(document.getElementById("settingsBtn") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
     const connector=document.querySelector("#mechSection .mstep") as HTMLElement;
     const connectorLine=getComputedStyle(connector,"::after");
@@ -215,9 +217,11 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
       mobileDetailHidden:secondaryLink.display==="none"&&pitchDetail.display==="none",
       routeAnimation:route.animationName,
       playerAnimation:player.animationName,
-      guideLeftOutside:guide.right<=board.left-6,
-      guideRightDelta:Math.abs(heroSide.right-guide.right),
-      guideBottomDelta:Math.abs(guide.bottom-board.bottom),
+      guideSettingsGap:settings.left-guide.right,
+      guideSettingsHeightDelta:Math.abs(guide.height-settings.height),
+      guideSettingsWidthDelta:Math.abs(guide.width-settings.width),
+      guideSettingsCenterDelta:Math.abs((guide.top+guide.height/2)-(settings.top+settings.height/2)),
+      guideFontSize:Number.parseFloat(getComputedStyle(document.getElementById("howtoToggle")!).fontSize),
       connectorLineContent:connectorLine.content,
       connectorHeadContent:connectorHead.content,
       connectorLineDisplay:connectorLine.display,
@@ -233,12 +237,16 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
   expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
   expect(layout.connectorHeadContent==="none"||layout.connectorHeadDisplay==="none").toBe(true);
   expect(layout.boardHidden).toBe(isMobile);
+  expect(layout.guideSettingsGap).toBeGreaterThanOrEqual(0);
+  expect(layout.guideSettingsGap).toBeLessThanOrEqual(8);
+  expect(layout.guideSettingsHeightDelta).toBeLessThanOrEqual(1);
+  expect(layout.guideSettingsCenterDelta).toBeLessThanOrEqual(1);
   if(isMobile){
     expect(layout.boardWidth).toBe(0);
-    expect(layout.guideRightDelta).toBeLessThanOrEqual(1);
+    expect(layout.guideSettingsWidthDelta).toBeLessThanOrEqual(1);
+    expect(layout.guideFontSize).toBe(0);
   }else{
-    expect(layout.guideLeftOutside).toBe(true);
-    expect(layout.guideBottomDelta).toBeLessThanOrEqual(1);
+    expect(layout.guideFontSize).toBeGreaterThan(0);
     expect(layout.routeAnimation).toContain("tacticalRouteFlow");
     expect(layout.playerAnimation).toContain("tacticalNodePulse");
     expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
@@ -256,11 +264,28 @@ test("landing hero keeps the desktop tactics and uses the compact mobile guide g
     expect(reducedAnimations).toEqual(["none","none"]);
   }
 
+  await page.setViewportSize({width:isMobile?900:700,height:900});
+  const collapsedGuide=await page.evaluate(()=>{
+    const guide=document.getElementById("howtoToggle")!.getBoundingClientRect();
+    const settings=document.getElementById("settingsBtn")!.getBoundingClientRect();
+    return{
+      fontSize:Number.parseFloat(getComputedStyle(document.getElementById("howtoToggle")!).fontSize),
+      widthDelta:Math.abs(guide.width-settings.width),
+    };
+  });
+  expect(collapsedGuide.fontSize).toBe(0);
+  expect(collapsedGuide.widthDelta).toBeLessThanOrEqual(1);
+  await expect(page.locator("#howtoToggle")).toHaveAttribute("aria-label","COPA REHBERİ");
+
   await page.evaluate(()=>(globalThis as any).setLang("de"));
   await expect(page.locator(".v7-hero-desc")).toHaveText("Schreibe mit jeder Entscheidung eine neue Fußballgeschichte.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
   await expect(page.locator("#mechSection .mt").first()).toContainText("Formation & Präsident");
+  await expect(page.locator("#howtoToggle")).toContainText("COPA-GUIDE");
+  await page.evaluate(()=>(globalThis as any).quickStart());
+  await expect(page.locator("#draft")).toBeVisible();
+  await expect(page.locator(".tools > #howtoWrap #howtoToggle")).toBeVisible();
 });
 
 test("chairman picker separates personality from mechanics and collapses safely on mobile",async({page},testInfo)=>{

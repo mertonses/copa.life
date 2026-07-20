@@ -85,3 +85,6 @@
   .howto-path-step.is-active .howto-path-node{transform:none}
   .guide-focus{transition:none}
 }
+@media(max-width:720px),(pointer:coarse){
+  .copa-coachmark{display:none!important}
+}

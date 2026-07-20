@@ -60,7 +60,7 @@ test("first-run setup tip records itself and does not reopen after reload",async
   await context.close();
 });
 
-test("mobile draft opens at the page top and uses the simpler budget tip",async({page},testInfo)=>{
+test("mobile draft opens at the page top without contextual first-run tips",async({page},testInfo)=>{
   test.skip(!testInfo.project.name.includes("mobile"),"mobile draft scroll contract");
   await page.goto("/?draft-scroll-top=1",{waitUntil:"domcontentloaded"});
   const before=await page.evaluate(()=>{
@@ -76,7 +76,9 @@ test("mobile draft opens at the page top and uses the simpler budget tip",async(
   await page.locator('.stylebtn[data-style="gegen"]').click();
   await expect(page.locator("#draft")).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
-  const tip=page.locator(".copa-coachmark");
-  await expect(tip).toBeVisible({timeout:6000});
-  await expect(tip.locator("p")).toHaveText("Zarı attığında üç aday gelir. Seçtiğin oyuncu kalan bütçeni de etkiler.");
+  await page.waitForTimeout(1000);
+  await expect(page.locator(".copa-coachmark")).toHaveCount(0);
+  await expect(page.locator("#rollBtn")).not.toHaveClass(/guide-focus/);
+  const contextState=await page.evaluate(()=>JSON.parse(localStorage.getItem("copa.guide.context.v2")||"{}"));
+  expect(contextState.draft).toBeUndefined();
 });

@@ -32,11 +32,13 @@ assert(pool.length === 561, `Oyuncu sayısı 561 değil: ${pool.length}`);
 assert(byClub.length === 20, `Kulüp sayısı 20 değil: ${byClub.length}`);
 assert(Object.values(byRole).every(Boolean), `Eksik mevki grubu: ${JSON.stringify(byRole)}`);
 assert(Math.min(...ages) >= 15 && Math.max(...ages) <= 45, `Yaş aralığı geçersiz: ${Math.min(...ages)}-${Math.max(...ages)}`);
-assert(Math.min(...powers) >= 55 && Math.max(...powers) <= 90, `Güç aralığı geçersiz: ${Math.min(...powers)}-${Math.max(...powers)}`);
+assert(Math.min(...powers) >= 52 && Math.max(...powers) <= 82, `Güç aralığı geçersiz: ${Math.min(...powers)}-${Math.max(...powers)}`);
 assert(duplicates.length === 0, `Tekrarlanan kimlik sayısı: ${duplicates.length}`);
 assert(jpProfiles.length === pool.length, `Profil kapsamı ${jpProfiles.length}/${pool.length}`);
-assert(pool.every(player => player.length === 7), "7 alanlı tuple şemasına uymayan oyuncu var");
+assert(pool.every(player => player.length === 10), "10 alanlı tuple şemasına uymayan oyuncu var");
 assert(pool.every(player => player[5] === 0 || player[5] === 1), "Yerli/milli bayrağı 0/1 olmayan oyuncu var");
+assert(pool.every(player => Number.isInteger(player[8]) && player[8] >= player[1] && player[8] <= 86), "Potansiyel alanı geçersiz oyuncu var");
+assert(pool.every(player => player[9] === 1), "Japonya lig seviyesi 1 olmayan oyuncu var");
 
 const localFlagCount = pool.filter(player => player[5]).length;
 console.log(JSON.stringify({

@@ -116,12 +116,13 @@
   const guideData=()=>typeof _HOWTO!=="undefined"&&(_HOWTO[currentLang()]||_HOWTO.en)||{steps:[]};
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const visible=node=>!!(node&&node.isConnected&&!node.classList.contains("hidden")&&node.getClientRects().length);
+  const contextualTipsAllowed=()=>!document.documentElement.classList.contains("copa-mobile-device")&&!matchMedia("(max-width: 760px), (pointer: coarse)").matches;
 
   function ensureStyle(){
     if(document.querySelector("link[data-copa-howto]"))return;
     const link=document.createElement("link");
     link.rel="stylesheet";
-    link.href="src/styles/howtoGuide.css?v=20260718-guide1";
+    link.href="src/styles/howtoGuide.css?v=20260720-mobile-tip1";
     link.dataset.copaHowto="1";
     document.head.appendChild(link);
   }
@@ -276,7 +277,7 @@
   }
   function showTip(key,target){
     const c=lang(),tip=c.tips[key];
-    if(!tip||tipNode||!target)return;
+    if(!contextualTipsAllowed()||!tip||tipNode||!target)return;
     const state=readContext();
     if(state[key])return;
     state[key]=Date.now();saveContext(state);
@@ -289,6 +290,7 @@
     tipNode.querySelectorAll("button").forEach(button=>button.addEventListener("click",dismissTip));
   }
   function scanContext(){
+    if(!contextualTipsAllowed()){dismissTip();return;}
     if(tipNode||!document.getElementById("modal")?.classList.contains("hidden"))return;
     const state=readContext();
     const candidates=[
@@ -301,6 +303,7 @@
   }
   function initContextualTips(){
     ensureStyle();
+    if(!contextualTipsAllowed()){dismissTip();return;}
     if(tipObserver)return;
     tipObserver=new MutationObserver(()=>setTimeout(scanContext,120));
     tipObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
