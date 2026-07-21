@@ -1,57 +1,48 @@
 # Android mağaza ve yayın hazırlık raporu
 
-Son güncelleme: **21 Temmuz 2026**
+Son güncelleme: **22 Temmuz 2026**
 
 ## Hazır olanlar
 
-- Paket kimliği: `life.copa.app`
-- Sürüm: `1.0.0` (`versionCode` 1)
-- Min SDK 24, target/compile SDK 36
-- Play App Signing uyumlu upload certificate pin'i
-- Kaynak izinleri `INTERNET` ve `AD_ID`; GMA SDK birleşik manifestte ağ durumu ile Android Privacy Sandbox reklam izinlerini ekler
-- 512×512 PNG mağaza ikonu
-- Beş dil için 1024×500 özellik görseli
-- Beş dil için beşer 1080×1920 telefon ekranı
-- Beş dil için beşer 1920×1080 tablet ekranı
-- Beş dil için kısa/tam açıklama ve sürüm notları
-- Beş dil için erişilebilir alternatif metinler
-- Play Console App Content ve Data Safety cevap haritası
-- Herkese açık gizlilik politikası URL'si
-- Run sonu AdMob geçiş reklamı, UMP rıza akışı ve Ayarlar gizlilik girişi
-- Uygulama içi satın alma yok
-- Hesap veya giriş zorunluluğu yok
+- Paket: `life.copa.app`, sürüm `1.0.0` (`versionCode` 1), min SDK 24, target/compile SDK 36.
+- Güncel kaynak commitinden imzalı yerel aday üretildi; AAB içeriği, sertifika, web/Android paritesi ve bağımlılık güvenliği doğrulandı.
+- Mobil pakette gerçek arma, bayrak görseli veya resmi kupa adı bulunmuyor.
+- Beş dil için listing metni, özellik grafiği, beş telefon ve beş tablet ekran görüntüsü hazır.
+- Gizlilik, kullanım koşulları, kaldırma ve güvenlik sayfaları doğrulandı.
+- Run sonu geçiş reklamı, UMP rıza akışı ve uygulama içi gizlilik ayarları kodlandı.
+- GitHub Actions'a dört upload-key secret'ı eklendi: keystore, keystore parolası, alias ve key parolası.
+- Ghost Club Worker üretime dağıtıldı; D1 şeması güncel ve canlı health kontrolü başarılı.
 
-## Kalan Console ve yayın kapıları
+## Play Console'da doğrulanan durum
 
-Doğrulanmış destek adresi `support@copa.life` olarak sabitlendi; alan adı ve yasal geliştirici bilgileri Play Console'da doğrulandı.
+- Uygulama mevcut ve geliştirici hesabında erişilebilir.
+- Kurulum görevlerinin **8/11** tanesi tamamlanmış.
+- Eksik görevler: Data Safety, uygulama kategorisi/iletişim bilgileri ve varsayılan mağaza girişi.
+- Varsayılan `en-US` listing'inde yalnız uygulama adı var; açıklamalar ve görseller henüz kaydedilmemiş.
+- Production erişimi kilitli: kapalı testte şu an **0 test kullanıcısı** var; Console en az 12 kullanıcı ve 14 gün şartını gösteriyor.
+- Yayınlanmamış Console değişikliği bulunmuyor.
 
-1. **Yasal kimlik eşleştirmesi:** Gizlilik politikasındaki geliştirici adı, Play Console'daki doğrulanmış yasal adla birebir eşleştirilmeli.
-2. **Console anketleri:** IARC içerik derecelendirmesi, hedef kitle, UGC ve Data Safety cevapları Console'da kaydedilip son AAB ile yeniden karşılaştırılmalı.
-3. **AdMob üretim bilgileri:** AdMob uygulaması ve `run_end_interstitial` birimi oluşturulmalı; gerçek uygulama/reklam birimi kimlikleri release ortamına ve GitHub Secrets'a eklenmeli.
-4. **Gizlilik mesajı ve app-ads.txt:** AdMob Privacy & messaging üzerinden Avrupa mesajı yayımlanmalı; gerçek yayıncı kimliğiyle `app-ads.txt` copa.life köküne konmalı.
+## Güncel AAB
 
-## AAB durumu
+- Kaynak commit: `e0ff32c1ac57d7a2c8abea56e4c8e7bc7ad76d17`
+- Dosya: `android/app/build/outputs/bundle/release/app-release-signed.aab`
+- Boyut: `15,578,190` bayt
+- SHA-256: `BAE9015D0BA601A6594EB788C39201A48510D79E9CC998C400BF746FDE5D10A3`
+- Upload certificate: `64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56`
 
-- Depodaki `release-manifest.json` ve imzalı AAB **17 Temmuz 2026** tarihli eski adaya aittir; güncel grup turnuvası/UI değişikliklerini temsil etmediği için **yüklenmemelidir**.
-- Güncel dirty-worktree aday koşusunda statik, güvenlik, mağaza ve servis kontrolleri geçti; ancak aynı çalışma alanında devam eden ürün/test değişiklikleri sırasında tarayıcı matrisi kararsızlaştığı için imzalama aşamasına bilinçli olarak geçilmedi.
-- Son yüklenebilir AAB, değişiklikler tek ve temiz bir committe sabitlendikten sonra `npm run android:release:local` ile üretilmeli. `release-manifest.json` içindeki yeni hash ve `exact_release_emulator_smoke` sonucu görülmeden Console'a dosya yüklenmemeli.
+Bu AAB yerel adaydır ve Google'ın test AdMob kimlikleriyle üretildi. Production AdMob kimlikleri ve exact-release emulator smoke sonucu olmadan Play'e yüklenmemelidir. `release-manifest.json` bu durumu `store_upload_eligible: false` olarak kilitler.
 
-## Hesaba bağlı test kapısı
+## Dış hesaplara bağlı kalan kapılar
 
-Kişisel geliştirici hesabı 13 Kasım 2023'ten sonra oluşturulduysa production erişimi istemeden önce kapalı testte en az **12 test kullanıcısının 14 gün kesintisiz** opt-in durumda kalması gerekir. Console hesabı bu kapsama girmiyorsa kendi gösterdiği test kapısı izlenmelidir.
+1. AdMob hesabı henüz kurulmamış; `apps.admob.com` kayıt akışına yönlendiriyor. Hesap şartları kullanıcı tarafından kabul edildikten sonra uygulama ve `run_end_interstitial` birimi oluşturulmalı.
+2. Gerçek `COPA_ADMOB_APP_ID` ve `COPA_ADMOB_INTERSTITIAL_ID` hem release ortamına hem GitHub Secrets'a eklenmeli.
+3. AdMob Avrupa gizlilik mesajı yayımlanmalı ve gerçek publisher ID ile `https://copa.life/app-ads.txt` hazırlanmalı.
+4. Google Play servis hesabı oluşturulup `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ı eklenmeli.
+5. Data Safety cevapları son SDK/izin listesiyle Console'da tamamlanıp kaydedilmeli.
+6. Listing metinleri ve hakları temiz görseller Console'a yüklenip kaydedilmeli.
+7. Gerçek production-ID buildinde exact-release emulator ve fiziksel cihaz smoke testleri geçmeli.
+8. Internal/closed test yayını başlatılıp 12 kullanıcıyla 14 günlük kapı tamamlanmalı.
 
-## Yükleme sırası
+## Terfi kuralı
 
-1. `application-create.md` ile uygulamayı oluştur.
-2. `play-console-declarations.md` ile App Content alanlarını doldur.
-3. Türkçe ana listing'i ekle; ardından dört yerelleştirmeyi ekle.
-4. `asset-manifest.json` içindeki ölçü ve hash'lerle görselleri doğrula.
-5. Son imzalı AAB'yi önce **Internal testing** kanalına yükle.
-6. Pre-launch raporu ve gerçek cihaz testleri temizlenince gerekli kapalı testi başlat.
-7. Production'a aynı doğrulanmış artifact'i terfi ettir; yeni AAB üretme.
-
-## İsteğe bağlı ama önerilen
-
-- 20–30 saniyelik, en az %80 gerçek oynanış içeren reklamsız ve listelenmemiş YouTube önizleme videosu.
-- İlk üç telefon ekranında draft, kadro ve maç akışını bu sırada tutmak.
-- Destek e-postasına dışarıdan test mesajı gönderip teslimat ve yanıt akışını doğrulamak.
+Internal testte doğrulanan AAB'nin hash'i manifestle birebir eşleşmeden kapalı teste veya production'a terfi yapılmaz. Mobil düzeltme gerekirse aynı `versionCode` yeniden kullanılmaz; sürüm artırılıp yeni aday üretilir.

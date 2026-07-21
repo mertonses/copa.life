@@ -26,12 +26,24 @@ const bytes = fs.readFileSync(aabPath);
 const certificate = fs
   .readFileSync(path.join(ROOT, "release", "android-upload-certificate.sha256"), "utf8")
   .trim();
+const admobTestAppId = "ca-app-pub-3940256099942544~3347511713";
+const admobTestInterstitialId = "ca-app-pub-3940256099942544/1033173712";
+const admobAppId = String(process.env.COPA_ADMOB_APP_ID || admobTestAppId).trim();
+const admobInterstitialId = String(
+  process.env.COPA_ADMOB_INTERSTITIAL_ID || admobTestInterstitialId,
+).trim();
+const productionAdmobIdsPresent =
+  /^ca-app-pub-\d{16}~\d{10}$/.test(admobAppId) &&
+  /^ca-app-pub-\d{16}\/\d{10}$/.test(admobInterstitialId) &&
+  admobAppId !== admobTestAppId &&
+  admobInterstitialId !== admobTestInterstitialId;
 
 const manifest = {
   package_id: "life.copa.app",
   version_code: version.versionCode,
   version_name: version.versionName,
-  release_status: "candidate",
+  release_status: productionAdmobIdsPresent ? "candidate" : "local_candidate",
+  store_upload_eligible: productionAdmobIdsPresent && emulatorSmokePassed,
   source: {
     build_version: platformBuild.build_version,
     build_fingerprint: platformBuild.build_fingerprint,
@@ -47,6 +59,10 @@ const manifest = {
     sha256: createHash("sha256").update(bytes).digest("hex").toUpperCase(),
   },
   upload_certificate_sha256: certificate,
+  admob: {
+    mode: productionAdmobIdsPresent ? "production" : "test",
+    production_ids_present: productionAdmobIdsPresent,
+  },
   permissions: [
     "android.permission.INTERNET",
     "android.permission.ACCESS_NETWORK_STATE",

@@ -140,9 +140,11 @@ const releaseManifestWriter = read("tools/write-android-release-manifest.mjs");
 if (
   !releaseManifestWriter.includes("exact_release_emulator_smoke:") ||
   !releaseManifestWriter.includes('"required after candidate build"') ||
-  !releaseManifestWriter.includes("--emulator-smoke-passed")
+  !releaseManifestWriter.includes("--emulator-smoke-passed") ||
+  !releaseManifestWriter.includes("store_upload_eligible:") ||
+  !releaseManifestWriter.includes("productionAdmobIdsPresent")
 ) {
-  fail("release manifest does not reset exact-release emulator verification after each build");
+  fail("release manifest does not lock emulator and production AdMob upload eligibility after each build");
 }
 
 if (failures.length) {
