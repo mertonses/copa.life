@@ -25,7 +25,7 @@ Takım ve oyuncu adlarının kamusal bilgi olması tek başına sıfır hukuki r
 
 ## Play Data Safety taslağı
 
-Ghost Club paylaşımı açılırsa aşağıdaki veri sınıfları işlenir:
+Ghost Club paylaşımı veya Dünya Kulüpler Sıralaması açılırsa aşağıdaki veri sınıfları işlenir:
 
 | Veri | Zorunluluk | Amaç | Süre |
 | --- | --- | --- | --- |
@@ -33,11 +33,13 @@ Ghost Club paylaşımı açılırsa aşağıdaki veri sınıfları işlenir:
 | Tamamlanmış kadro ve oyun sonucu | İsteğe bağlı | Uygulama işlevi / Ghost rakibi | En çok 45 gün |
 | Rastgele anonim kurulum kimliği | İsteğe bağlı | Kötüye kullanım önleme, raporlama ve silme | Aktif kayıtlar ve güvenlik gereksinimi boyunca |
 | Ghost raporu ve nedeni | İsteğe bağlı | Güvenlik, moderasyon ve kötüye kullanım önleme | En çok 90 gün |
+| Herkese açık kulüp profili ve toplu kariyer değerleri | İsteğe bağlı | Dünya sıralaması / uygulama işlevi | Sıralamadan ayrılana veya silene kadar |
+| Tur, galibiyet ve şampiyonluk içeren sıralama koşusu | İsteğe bağlı | Sunucuda puanlama ve kötüye kullanım önleme | Aktif aylık sezon |
 
-- Ghost paylaşımı varsayılan olarak kapalıdır.
-- Etkinleştirme için kullanım şartı kabulü ve ayrı açık paylaşım rızası gerekir.
+- Ghost paylaşımı ve Dünya sıralaması varsayılan olarak kapalıdır.
+- Her özellik için kullanım şartı kabulü ve birbirinden ayrı açık rıza gerekir.
 - Aktarım HTTPS üzerinden yapılır.
-- Kullanıcı ayarlardan tüm Ghost verilerini silebilir ve rızasını geri çekebilir.
+- Kullanıcı ayarlardan tüm Ghost ve sıralama verilerini birlikte silebilir; sıralamadan çıkmak profil ve koşu satırlarını siler.
 - 45 günlük süre dolan Ghost kayıtları günlük sunucu göreviyle D1'den fiziksel olarak silinir.
 - Uygulama reklam kimliği, konum, kişi listesi, fotoğraf, ses veya finansal bilgi istemez.
 
@@ -64,15 +66,15 @@ Mevcut güvenlik katmanları:
 - Üretim AAB'sini ayrı ve gizli bir yükleme anahtarıyla imzala; anahtarı depoya ekleme.
 - Kapalı test kanalında geri tuşu, yaşam döngüsü kaydı, çevrimdışı açılış, Ghost rızası/silmesi ve farklı ekran oranlarını test et.
 
-## 17 Temmuz 2026 uygulama durumu
+## 20 Temmuz 2026 uygulama durumu
 
-- Ghost Club D1 veritabanı üretimden yedeklendi; `0001` ve `0002` migration'ları uygulandı. Üretim Worker'ı `https://copa-life-ghost-clubs.mertonses-copa.workers.dev` adresinde şema sürümü 2 ile çalışıyor; günlük fiziksel silme görevi `17 3 * * *` zamanlamasına bağlı.
+- Ghost Club D1 veritabanının üretiminde `0001` ve `0002` migration'ları çalışmaktadır. Dünya sıralaması için `0003_club_leaderboard.sql` ve şema sürümü 3 Worker kodu hazırlanıp test edilmiştir; üretime açılmadan önce migration ve Worker birlikte dağıtılmalıdır. Günlük fiziksel silme görevi `17 3 * * *` zamanlamasına bağlıdır.
 - Gizlilik, kullanım şartları ve takedown sayfaları ana web paketindeki logo hakları engeline karışmadan ayrı Cloudflare Pages paketine dağıtıldı. Kalıcı gizlilik politikası URL'si: `https://copa-life-legal.pages.dev/privacy.html`.
 - Play yükleme anahtarı depo dışında üretildi. Parola Windows Current User DPAPI ile şifreli tutuluyor; yükleme sertifikası SHA-256 parmak izi `64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56`.
 - İmzalı AAB: `android/app/build/outputs/bundle/release/app-release-signed.aab`. Değişken AAB boyutu ve SHA-256 değeri yalnız `store/android/release-manifest.json` dosyasından okunur; bu belgede kopyalanmaz.
 - Android paketindeki Web3Forms iletişim formu ve erişim anahtarı kaldırıldı. Android'deki destek düğmeleri açık web sitesine çıkar; ad, e-posta ve destek mesajı native paket tarafından toplanmaz.
 - Destek URL'si resmi Capacitor Browser bileşeniyle Chrome/Custom Tab akışında açılır. Pixel 3a API 34 emülatöründe eklenti kaydı, destek işlevinin eklenti yolunu kullanması ve `https://copa.life/` VIEW intent'i doğrulandı.
-- Türkçe/İngilizce mağaza metinleri, Play Console beyan cevapları, 512×512 ikon, 1024×500 feature graphic, dört telefon ve dört tablet ekran görüntüsü `store/android/` altında hazırlandı.
+- Türkçe, İngilizce, İspanyolca, Almanca ve İtalyanca mağaza metinleri ile sürüm notları; Play Console beyan cevapları; 512×512 ikon; dil başına 1024×500 feature graphic, beş telefon ve beş tablet ekran görüntüsü `store/android/` altında hazırlandı.
 - Destek e-postasının özel alan adı taşıması zorunlu değildir. Play Console'a girilecek Gmail veya özel alan adı adresinin doğrulanmış, düzenli izlenen ve destek/takedown taleplerine cevap verebilir olması gerekir; kesin adres henüz beyan dosyasına girilmedi.
 - Android 14 / API 34 Pixel 3a emülatöründe temiz kurulum, splash, çevrimdışı açılış, arka plan-devam, geri tuşuyla küçültme ve Ghost'un varsayılan kapalı/çift rızalı olması doğrulandı. Bu test Capacitor 8 global eklenti uyumsuzluğunu ortaya çıkardı; `src/runtime/nativeApp.js` düzeltilip temiz kurulumda yeniden doğrulandı.
 - Android candidate workflow'u artık her adayda API 34 emülatörü açar, instrumentation testini çalıştırır, gerçek `life.copa.app` paketini başlatır ve crash/ANR, çalışan süreç, odaklanan Activity ve ekran görüntüsünü otomatik doğrular.

@@ -13,7 +13,7 @@ async function openHub(page:Page){
   await page.locator("#postClubName").fill("Balance XI");
   await page.evaluate(()=>{
     const game=globalThis as any;
-    game.pcGo();
+    game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();
     game.setCaptain(0);
     game.closeModal();
   });
@@ -44,6 +44,38 @@ test("Son Dans uses the safer final-only COMMON and DARK values",async({page})=>
   });
 });
 
+test("Barikat compares the opponent POWER with your POWER before its own bonus",async({page})=>{
+  await openHub(page);
+  const values=await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.cards=[];
+    game.riskPowerMod=20;
+    const ownPower=game.squadPower(game.round,"gec_gec").power;
+    const effect=(variant:number,opponentPower:number)=>{
+      game.cardVariant.gec_gec=variant;
+      game.opponent={...(game.opponent||{}),power:opponentPower};
+      return game.cardEff("gec_gec",game.picksBySlot.filter(Boolean),game.round);
+    };
+    return{
+      ownPower,
+      commonLower:effect(0,ownPower-1),
+      commonEqual:effect(0,ownPower),
+      commonHigher:effect(0,ownPower+1),
+      darkLower:effect(1,ownPower-1),
+      darkHigher:effect(1,ownPower+1),
+      commonCopy:game.shopCardDesc("gec_gec","",0),
+    };
+  });
+  expect(values).toMatchObject({
+    commonLower:2,
+    commonEqual:2,
+    commonHigher:5,
+    darkLower:4,
+    darkHigher:7,
+    commonCopy:"Barikat eklenmeden önce rakibin GÜÇ değeri seninkinden yüksekse +5, aksi durumda +2.",
+  });
+});
+
 test("Piyango creates, persists and consumes the fixed two-round coupon",async({page})=>{
   await openHub(page);
   const state=await page.evaluate(()=>{
@@ -71,6 +103,9 @@ test("Piyango creates, persists and consumes the fixed two-round coupon",async({
       turns:game.lotteryCouponTurns,
       savedAmount:saved.lotteryCouponAmount,
       savedTurns:saved.lotteryCouponTurns,
+      commonDesc:game.shopCardDesc("nasip_kismet","",0),
+      darkDesc:game.shopCardDesc("nasip_kismet","",1),
+      darkCostLines:game.cardCostLines("nasip_kismet",1),
     };
   });
   expect(state).toMatchObject({
@@ -80,15 +115,22 @@ test("Piyango creates, persists and consumes the fixed two-round coupon",async({
     turns:3,
     savedAmount:5,
     savedTurns:3,
+    commonDesc:"Satın alınca kupon açılır. Önündeki 2 turda alacağın ilk kart en fazla €5M ucuzlar (min. €2M).",
+    darkDesc:"Satın alınca kupon açılır. Önündeki 2 turda alacağın ilk kart en fazla €8M ucuzlar (min. €2M).",
+    darkCostLines:["İlk kart · 2 tur: en fazla −€8M · min. €2M","Satın alırken %20: −€3M"],
   });
   expect(state.priceBefore-state.priceWithCoupon).toBe(5);
   await expect(page.locator(".lottery-coupon-banner")).toContainText("PİYANGO KUPONU");
+  await expect(page.locator(".lottery-coupon-banner")).toContainText("İlk kart en fazla −€5M · min. €2M · 2 tur");
 
   const purchase=await page.evaluate(()=>{
     const game=globalThis as any;
     const before=game.budget;
     game.cardsBoughtThisTurn=0;
+    game.shopOffers=["son_dans"];
     game.shopVariants.son_dans=1;
+    game.buyCard.locked=false;
+    if(game.CopaRunState)game.CopaRunState.transition("hub",{force:true,reason:"piyango_test_purchase"});
     game.buyCard("son_dans");
     return{
       spent:before-game.budget,
@@ -424,7 +466,10 @@ test("Riziko is free, consumes the purchase turn and applies the new delayed cos
     game.cardsBoughtThisTurn=0;
     game.riskPowerMod=0;
     game.deferredBudgetPenalty=0;
+    game.shopOffers=["primler_yatinca"];
     game.shopVariants.primler_yatinca=0;
+    game.buyCard.locked=false;
+    if(game.CopaRunState)game.CopaRunState.transition("hub",{force:true,reason:"riziko_test_purchase"});
     game.buyCard("primler_yatinca");
     const common={
       price:game.cardPrice("primler_yatinca"),

@@ -3,6 +3,9 @@
   "versionName": "1.0.0",
   "locales": [
     "tr-TR",
-    "en-US"
+    "en-US",
+    "es-ES",
+    "de-DE",
+    "it-IT"
   ]
 }

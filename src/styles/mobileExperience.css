@@ -12,7 +12,6 @@
 .mobile-draft-context,
 .mobile-draft-confirm,
 .mobile-feed-toggle,
-.mobile-profile-nav,
 .mobile-tactic-status,
 .mobile-penalty-coach{display:none}
 
@@ -26,7 +25,7 @@
     padding-left:var(--copa-safe-left);
   }
 
-  html.mobile-dock-active #app{
+  html.mobile-dock-active body{
     padding-bottom:calc(var(--mobile-dock-height) + 10px);
   }
 
@@ -40,7 +39,7 @@
     padding:7px max(10px,var(--copa-safe-right)) calc(7px + var(--copa-safe-bottom)) max(10px,var(--copa-safe-left));
     border-top:1px solid var(--border-default);
     background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
-    box-shadow:0 -5px 18px rgba(7,16,17,.14);
+    box-shadow:0 -5px 18px rgba(10,17,24,.14);
     isolation:isolate;
     pointer-events:auto;
     touch-action:manipulation;
@@ -344,7 +343,6 @@
     height:48px!important;
   }
   .player-profile-layer.is-sheet .player-profile-radar svg{width:min(250px,70vw)}
-  .player-profile-layer.is-sheet .player-profile-analysis p,
   .player-profile-layer.is-sheet .player-profile-insights li{font-size:10px;line-height:1.45}
 
   #modal{
@@ -400,7 +398,7 @@
     border-color:var(--border-default);
     background:var(--surface-elevated);
     color:var(--color-ink);
-    box-shadow:0 1px 4px rgba(7,16,17,.08);
+    box-shadow:0 1px 4px rgba(10,17,24,.08);
   }
 
   #sim[data-mobile-view="field"] .simstats,
@@ -454,12 +452,12 @@
     text-overflow:ellipsis;
     white-space:nowrap;
   }
-  .simgoals>.event-goal{--event-accent:#429A73}
-  .simgoals>.event-save{--event-accent:#496E71}
-  .simgoals>.event-yellow-card{--event-accent:#c9973f}
-  .simgoals>.event-red-card{--event-accent:#a75555}
-  .simgoals>.event-danger,.simgoals>.event-post{--event-accent:#b66f37}
-  .simgoals>.event-tactic{--event-accent:#657989}
+  .simgoals>.event-goal{--event-accent:#4E9B65}
+  .simgoals>.event-save{--event-accent:#68757C}
+  .simgoals>.event-yellow-card{--event-accent:#F24A28}
+  .simgoals>.event-red-card{--event-accent:#420102}
+  .simgoals>.event-danger,.simgoals>.event-post{--event-accent:#DA3D2E}
+  .simgoals>.event-tactic{--event-accent:#101D28}
   .simgoals>.is-marker-linked{cursor:pointer}
   .simgoals>.is-marker-linked:focus-visible{
     outline:2px solid var(--color-primary);
@@ -498,7 +496,7 @@
     top:0;
     margin-inline:-14px;
     padding:9px 14px;
-    border-bottom:1px solid rgba(230,238,239,.14);
+    border-bottom:1px solid rgba(243,245,244,.14);
     background:var(--color-ink);
   }
   .pen-modal .pen-dir-grid{gap:6px}
@@ -526,7 +524,7 @@
   }
   .tap-helper-copy{display:grid;min-width:0;flex:1;gap:2px}
   .tap-helper-copy>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .tap-helper-meta{color:rgba(230,238,239,.68);font-size:8px}
+  .tap-helper-meta{color:rgba(243,245,244,.68);font-size:8px}
   .tap-detail,.tap-cancel{
     min-width:48px;
     min-height:44px;
@@ -643,7 +641,7 @@
      persistent ambient animation. */
   .mobile-action-dock,
   .player-profile-card{backdrop-filter:none!important}
-  .player-profile-card{box-shadow:0 -10px 28px rgba(7,16,17,.24)!important}
+  .player-profile-card{box-shadow:0 -10px 28px rgba(10,17,24,.24)!important}
 
   /* Connection and asynchronous states stay informative without blocking a
      saved run. */
@@ -659,11 +657,11 @@
     gap:8px;
     min-height:44px;
     padding:7px 8px 7px 12px;
-    border:1px solid rgba(230,238,239,.16);
+    border:1px solid rgba(243,245,244,.16);
     border-radius:10px;
     background:var(--color-ink);
-    color:#fff;
-    box-shadow:0 8px 24px rgba(7,16,17,.2);
+    color:#FFFFFF;
+    box-shadow:0 8px 24px rgba(10,17,24,.2);
     font:800 10px/1.25 var(--mono);
   }
   .mobile-network-banner.hidden{display:none}
@@ -727,7 +725,8 @@
     color:var(--color-ink);
   }
 
-  .tactical-board{display:none!important}
+  /* The landing board is part of the story on mobile too; layout.css scales it. */
+  .tactical-board{display:grid!important}
   .v7-hero-side{justify-content:flex-end!important}
   .v7-hero-head .howto-wrap{margin-left:auto!important}
 
@@ -776,7 +775,7 @@
     border:1px solid var(--border-default);
     border-radius:9px;
     background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
-    box-shadow:0 3px 10px rgba(7,16,17,.08);
+    box-shadow:0 3px 10px rgba(10,17,24,.08);
   }
   .mobile-draft-kicker{
     flex:0 0 auto;
@@ -832,7 +831,7 @@
     padding:8px max(10px,var(--copa-safe-right)) calc(8px + var(--copa-safe-bottom)) max(10px,var(--copa-safe-left));
     border-top:1px solid var(--border-default);
     background:var(--surface-bg);
-    box-shadow:0 -8px 24px rgba(7,16,17,.16);
+    box-shadow:0 -8px 24px rgba(10,17,24,.16);
   }
   .mobile-draft-confirm-copy{display:grid;min-width:0;gap:3px}
   .mobile-draft-confirm-copy strong,
@@ -855,13 +854,13 @@
   .mobile-scroll-affordance{
     --scroll-mask-left:transparent;
     --scroll-mask-right:transparent;
-    mask-image:linear-gradient(90deg,var(--scroll-mask-left),#000 18px,#000 calc(100% - 18px),var(--scroll-mask-right));
-    -webkit-mask-image:linear-gradient(90deg,var(--scroll-mask-left),#000 18px,#000 calc(100% - 18px),var(--scroll-mask-right));
+    mask-image:linear-gradient(90deg,var(--scroll-mask-left),#0A1118 18px,#0A1118 calc(100% - 18px),var(--scroll-mask-right));
+    -webkit-mask-image:linear-gradient(90deg,var(--scroll-mask-left),#0A1118 18px,#0A1118 calc(100% - 18px),var(--scroll-mask-right));
   }
-  .mobile-scroll-affordance.is-scroll-start{--scroll-mask-left:#000}
-  .mobile-scroll-affordance.is-scroll-end{--scroll-mask-right:#000}
+  .mobile-scroll-affordance.is-scroll-start{--scroll-mask-left:#0A1118}
+  .mobile-scroll-affordance.is-scroll-end{--scroll-mask-right:#0A1118}
 
-  #feed:not(.mobile-feed-expanded)>:nth-child(n+4){display:none!important}
+  #FFFFFFDD:not(.mobile-feed-expanded)>:nth-child(n+4){display:none!important}
   .mobile-feed-toggle{
     display:flex;
     align-items:center;
@@ -888,42 +887,9 @@
   }
   .mobile-feed-unread.hidden{display:none}
   #playBtn.mobile-has-warning{
-    box-shadow:inset 0 0 0 2px #c9973f!important;
+    box-shadow:inset 0 0 0 2px #F24A28!important;
   }
 
-  .mobile-profile-nav{
-    position:sticky;
-    z-index:4;
-    top:81px;
-    display:flex;
-    gap:4px;
-    padding:5px 8px;
-    overflow-x:auto;
-    border-bottom:1px solid var(--border-subtle);
-    background:var(--surface-bg);
-    scrollbar-width:none;
-  }
-  .mobile-profile-nav::-webkit-scrollbar{display:none}
-  .mobile-profile-nav .mobile-profile-jump{
-    flex:1 0 auto;
-    min-width:92px;
-    min-height:40px!important;
-    padding:6px 8px;
-    border:1px solid var(--border-default);
-    border-radius:999px;
-    background:var(--surface-muted);
-    color:var(--color-ink);
-    font:900 8px/1 var(--mono);
-    letter-spacing:.5px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-  }
-  .player-profile-layer.is-sheet .player-profile-radar-disclosure,
-  .player-profile-layer.is-sheet .player-profile-radar,
-  .player-profile-layer.is-sheet .player-profile-insight-grid,
-  .player-profile-layer.is-sheet .player-profile-analysis{scroll-margin-top:134px}
   .player-profile-layer.is-sheet .player-profile-detail>b,
   .player-profile-layer.is-sheet .player-profile-radar-scores i,
   .player-profile-layer.is-sheet .player-profile-model-note{font-size:9px}
@@ -933,7 +899,7 @@
     position:sticky;
     z-index:18;
     top:calc(3px + var(--copa-safe-top));
-    box-shadow:0 4px 12px rgba(7,16,17,.12);
+    box-shadow:0 4px 12px rgba(10,17,24,.12);
   }
   .mobile-sim-tabs button{position:relative}
   .mobile-tab-badge{
@@ -946,8 +912,8 @@
     place-items:center;
     padding:0 4px;
     border-radius:999px;
-    background:#a75555;
-    color:#fff;
+    background:#420102;
+    color:#FFFFFF;
     font:900 8px/1 var(--mono);
   }
   .mobile-tab-badge.hidden{display:none}

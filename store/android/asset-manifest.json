@@ -1,84 +1,561 @@
 {
+  "generatedAt": "2026-07-21T19:43:41.008Z",
+  "sourceBuild": {
+    "schema_version": 1,
+    "platform": "android",
+    "build_version": "3dbadf06bef8",
+    "build_fingerprint": "3dbadf06bef8a8f7e9ea748895f0ef5bf3aa5b097b25e88e75bad339d9ea5c30",
+    "build_input_count": 651,
+    "source_fingerprint": "59a99da49336d6cff842fc773000655a30a4dd99a9b581a0ad71de351375edba",
+    "source_file_count": 546,
+    "source_commit": null,
+    "package_id": "life.copa.app",
+    "version_code": 1,
+    "version_name": "1.0.0"
+  },
+  "locales": [
+    "tr-TR",
+    "en-US",
+    "es-ES",
+    "de-DE",
+    "it-IT"
+  ],
   "assets": [
     {
       "file": "graphics/app-icon-512.png",
       "width": 512,
       "height": 512,
       "mime": "image/png",
-      "bytes": 21226,
-      "sha256": "e5d2d70e10da4e19e825653159465315068825aef3e6f3150010575ea9cc28ec"
+      "bytes": 21028,
+      "sha256": "1850905fde5415fff65ee1e0f0910f021fb1687561582dd90d8bdf8d292da9a0"
     },
     {
       "file": "graphics/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 76186,
-      "sha256": "6388e5d5578095f2ace2210ef09fe8f53adc26f95156d5dc19f3b5f193bc73a4"
+      "bytes": 182377,
+      "sha256": "c47ff7e9c8c7e89eece21c2f7cf18937a581457d812a6812847b51135bf8e1f9"
     },
     {
-      "file": "graphics/phone/01-her-kosuda-yeni-kadro.jpg",
+      "file": "graphics/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 218630,
-      "sha256": "b8176ab10b61fea6590be7300080d9272a9d986b8ad8d9c96a72ba82348144bc"
+      "bytes": 236754,
+      "sha256": "8aae7e5200f7feb62b31c6f3d4802392d01f3eb8f99609d5cf5b8cc9b56b51de"
     },
     {
-      "file": "graphics/phone/02-zar-at-oyuncunu-sec.jpg",
+      "file": "graphics/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 216742,
-      "sha256": "7f1a529d74f8132d45aa69f4d6e7609dec16c8fcb0369fa152b8e2b07b35996d"
+      "bytes": 215295,
+      "sha256": "763b192c79649fba705893f3cb5c1c8fe18178a14be0071ce31f5ba91f3af591"
     },
     {
-      "file": "graphics/phone/03-taktigini-kur.jpg",
+      "file": "graphics/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 225220,
-      "sha256": "aa9747855b8ad91386a6a985e5b85ba7c1114ada399ff0968f18b3add8bf5520"
+      "bytes": 195105,
+      "sha256": "2d8ed5c90a382d7ed4421915660a4d08997f99b0bebcb0e18daed10fe2635164"
     },
     {
-      "file": "graphics/phone/04-copa-oyuncu-profili.jpg",
+      "file": "graphics/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 156430,
-      "sha256": "4d6a1f535bb1780e4e86c18a26d584219b4f28ebf92a8bf093e4aa506b805074"
+      "bytes": 258307,
+      "sha256": "780e5d7638b26d9f9d83ea79c684cb13afbe3f03048d5ad9aa563712179df4c0"
     },
     {
-      "file": "graphics/tablet/01-her-kosuda-yeni-kadro.jpg",
+      "file": "graphics/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 109787,
+      "sha256": "ad45a1335e00f386b395ca25074f65c118bffbf4ab72ae664b5acb6cda0f01f8"
+    },
+    {
+      "file": "graphics/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 217977,
-      "sha256": "d30ea1193ae532e5aa577c746cdbbaa9d7792afaadd571d338809dd105ddbc2e"
+      "bytes": 212686,
+      "sha256": "582680c60a19e5c2019164febcffb454a6e7c8f015265997ba11b8621468f35f"
     },
     {
-      "file": "graphics/tablet/02-zar-at-oyuncunu-sec.jpg",
+      "file": "graphics/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167816,
-      "sha256": "e2cff3c79ca979d11ee0e6d2f4b04ffe07052b5bad9eb59ed243309b5ec7e041"
+      "bytes": 155462,
+      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
     },
     {
-      "file": "graphics/tablet/03-taktigini-kur.jpg",
+      "file": "graphics/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 258142,
-      "sha256": "23d54a91edbda3fe3512d0d81e0b57b3e5afad7d08ab50362639d9cc905a608f"
+      "bytes": 176147,
+      "sha256": "86756c76c1315cfb20a6baa18e2facb1916df383c29e0dc79e2f11edf6578ae8"
     },
     {
-      "file": "graphics/tablet/04-rakibini-analiz-et.jpg",
+      "file": "graphics/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 164167,
-      "sha256": "a23abc596567adf236d7ad1c208842cd1914eb23beea84784f77b339c690e19a"
+      "bytes": 250793,
+      "sha256": "8710a3d426b081f4125246635c4eaa3b56d1b3d747ec20f8c8af9101a1a368bc"
+    },
+    {
+      "file": "graphics/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 167951,
+      "sha256": "00f2b9dbdea656a8240c67cfd804755e1e0539ee71616f4d5a981b0808be6355"
+    },
+    {
+      "file": "graphics/localized/tr-TR/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 182377,
+      "sha256": "c47ff7e9c8c7e89eece21c2f7cf18937a581457d812a6812847b51135bf8e1f9"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/01-run-setup.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 236754,
+      "sha256": "8aae7e5200f7feb62b31c6f3d4802392d01f3eb8f99609d5cf5b8cc9b56b51de"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/02-player-draft.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 215295,
+      "sha256": "763b192c79649fba705893f3cb5c1c8fe18178a14be0071ce31f5ba91f3af591"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/03-group-draw.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 195105,
+      "sha256": "2d8ed5c90a382d7ed4421915660a4d08997f99b0bebcb0e18daed10fe2635164"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/04-match-hub.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 258307,
+      "sha256": "780e5d7638b26d9f9d83ea79c684cb13afbe3f03048d5ad9aa563712179df4c0"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 109787,
+      "sha256": "ad45a1335e00f386b395ca25074f65c118bffbf4ab72ae664b5acb6cda0f01f8"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 212686,
+      "sha256": "582680c60a19e5c2019164febcffb454a6e7c8f015265997ba11b8621468f35f"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 155462,
+      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 176147,
+      "sha256": "86756c76c1315cfb20a6baa18e2facb1916df383c29e0dc79e2f11edf6578ae8"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 250793,
+      "sha256": "8710a3d426b081f4125246635c4eaa3b56d1b3d747ec20f8c8af9101a1a368bc"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 167951,
+      "sha256": "00f2b9dbdea656a8240c67cfd804755e1e0539ee71616f4d5a981b0808be6355"
+    },
+    {
+      "file": "graphics/localized/en-US/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 183391,
+      "sha256": "fee0aaecb9b3b1b8a08f04347d6a8cc8581207740abb4f240cbfa6ab93f6ad4b"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/01-run-setup.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 242437,
+      "sha256": "dc093b8306099922384ef0bab0aa9aff9d61a7e2a08b4754510bda93c3d7d0c0"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/02-player-draft.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 219773,
+      "sha256": "878fe6c712358694d53ace7ddc71efa56a6932cbfa8fefa55aa4c382fcc34d1b"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/03-group-draw.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 206280,
+      "sha256": "2920e2ce5b39bf4226548dfc74345f13571d8501453c045c97aa43bc46eb852f"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/04-match-hub.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 256480,
+      "sha256": "c0121d6b29c9a32907659799e3f5985402419f99219eb7d7511eb0d1da56e05f"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 110553,
+      "sha256": "81aeb2f87f726edcd4d7c11976eb7207b64a62dd94a278caf6ada8be471a6f63"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 220340,
+      "sha256": "6063601eb5ec6e24288d4f7386b08926a5e607b3c982304f8f8ef4458040762e"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 156489,
+      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 182733,
+      "sha256": "82e927608cef6ff97738a900051976aa7fc5af2ca1700d99ba3ce947a04f1dfb"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 243935,
+      "sha256": "9cc0061750791b59b680f51d13e733802e57637a57adb56fece21a86fa84d312"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 169079,
+      "sha256": "8d2302a8710740affe38416e464a2cc99da2889720b62d2d18f4ed8abc93395d"
+    },
+    {
+      "file": "graphics/localized/es-ES/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 182802,
+      "sha256": "9fcd192331bba6a683aebbf4087373a233910af9686fdf1a71917e9c198c0e77"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/01-run-setup.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 260789,
+      "sha256": "d55ffbf118991c01f53e474266c1ce512307dca188eca211b74daa0bf31c1850"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/02-player-draft.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 218590,
+      "sha256": "597a31a95875268c4ed6f6e07273a42848bab616253f5da0fe71227848775ca0"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/03-group-draw.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 223804,
+      "sha256": "908823fb5f32ab9f38c03abd2bc7d45baba535974ef337cad0eb2f8f352247ee"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/04-match-hub.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 263404,
+      "sha256": "1e4180ae986b6fd3945112d7bd67c62b106107a9b51b2168b73226c07f2a82ca"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 116707,
+      "sha256": "ba554f4d5290baa7b0990a51f7634399ef5545bb5459289720c14ffaaf2bd8fa"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 232408,
+      "sha256": "5d7832071cf0124c26bd1a4cd02dc86c29970fde7ce4a2c678d874edc82866ff"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 155747,
+      "sha256": "1a66a3a512886835338deebb27a3358660855fbb1e4d577c0108e1064fd2d4ed"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 196231,
+      "sha256": "4ed6dc716846c8e5f24b707faafd93c8bbb632bf3b3d80daf6c7331f2df4a78a"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 259595,
+      "sha256": "22f90a346311629a4601e4c857fded49a651b343651131b34a247e6bd134efaf"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 172713,
+      "sha256": "a55fdcea74223475602188dda53bc88252495bfda2620a130606f0cc2423b0b5"
+    },
+    {
+      "file": "graphics/localized/de-DE/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 185533,
+      "sha256": "775e77b794c24d01ad00bd561d7922206b747720bde39a4a9c33ee4bb1a02c15"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/01-run-setup.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 281404,
+      "sha256": "b7a8c1391c691702abc2b11294e4553f9b24824ffbd409477fbe45763155e636"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/02-player-draft.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 229731,
+      "sha256": "b42b82547e25efe5be2a43e447c24bb0c730a8d7c769c3a49e3822e252536268"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/03-group-draw.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 234615,
+      "sha256": "25140ff54189c23d949453a4f772e526d84df820c6e6f0db3ff9d2274160e19b"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/04-match-hub.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 258923,
+      "sha256": "d724b221d5f3bbe911dd712af3bb8ad2a3a085e2f2511553f6af32cb979f4b7d"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 93799,
+      "sha256": "3efdfca024f3ea21c7e382b29aac29f5bcd787733edb3f4f9abe2d3f587cc9ea"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 239449,
+      "sha256": "d85b452378ba2d3c90f8c527cbfb049fa3b87712a3631386b23ca1dd855bda36"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 158881,
+      "sha256": "c373393621de2707a72faf2c7f93335a83f559e36d5a604bcefacf47572763b1"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 206342,
+      "sha256": "364247baf00ba0705c89c32d386f81df12830be21e4f389142fcd6b455da7155"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 246164,
+      "sha256": "7525689e9f28b251075f7977c9162245a16c1d06044a3687bd0ba93d5c8ec195"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 159390,
+      "sha256": "1a9da9cb723de547671f770a9a0246d0d2123ca890b491ca7798c8b54126f987"
+    },
+    {
+      "file": "graphics/localized/it-IT/feature-graphic.jpg",
+      "width": 1024,
+      "height": 500,
+      "mime": "image/jpeg",
+      "bytes": 184259,
+      "sha256": "90b6950c1b81c61767d463b0926a8f997e6a03c1552bf2a4b032ce9a1b9dd8a1"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/01-run-setup.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 251269,
+      "sha256": "29be221ba4f17d866b1dd192426a0e71dfab6c1d4014f2a07d69e6cba5096d2a"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/02-player-draft.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 221249,
+      "sha256": "5e708d73ae7aef8441be62ea2472865148e9dc9ed640c9b71380bfdafe364333"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/03-group-draw.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 230707,
+      "sha256": "dc227e895a12741ef9b376bb0be57a2fb5d8c36afe6459833749151e51f0d70e"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/04-match-hub.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 260607,
+      "sha256": "51defc0fbe193c2ed119eac1d9df4eec2b6af8b1d0058cdb572b3988944888e3"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/05-player-profile.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 108836,
+      "sha256": "a0193f3436f67c5869564a6374d665c798d6536e9a0383550b5d7ee11ce57446"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 223947,
+      "sha256": "a0ad1665574564f1f98864c52e1aa4dc6d5092c6090a73f929af9824141321a3"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 157401,
+      "sha256": "3665cc8a347b081eca9bdfadbc2d6980f165f9a14e948973c7e9c352ea6a1444"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 199075,
+      "sha256": "6ee1f6dd23641581ad9c195ec6aa5afa45509a3e9757e34fca4acb4cd3765fdb"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 248998,
+      "sha256": "a3c776bc8cfc985973f583c3de6ab8e7a739463ba7d3fe517985c6c81bc7539b"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 169434,
+      "sha256": "74ed27e588380219199d30f5a18513cc517f1eb02ea06105098c7c4efdec0d2e"
     }
   ]
 }

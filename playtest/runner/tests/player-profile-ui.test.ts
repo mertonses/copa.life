@@ -38,7 +38,13 @@ test("player profile summary, six copa dimensions and insights stay responsive",
   await expect(page.locator(".player-profile-insights.is-tendency")).toBeVisible();
   await expect(page.locator("[data-profile-attributes]")).toHaveCount(0);
   await expect(page.locator(".player-profile-attribute-panel")).toHaveCount(0);
-  await expect(page.locator(".player-profile-radar text")).toHaveCount(0);
+  await expect(page.locator(".player-profile-radar-label")).toHaveCount(6);
+  await expect(page.locator(".player-profile-radar-label").first()).toHaveText(/^(AttackingImpact|Hücum Etkisi)$/);
+  await expect(page.locator(".player-profile-analysis")).toHaveCount(0);
+  await expect(page.locator(".player-profile-pos.is-secondary")).toHaveCount(3);
+  await expect(page.locator(".player-profile-pos.is-great")).toHaveCount(2);
+  await expect(page.locator(".player-profile-pos.is-good")).toHaveCount(1);
+  await expect(page.locator(".player-profile-pos.is-secondary").first()).toHaveAttribute("aria-label",/%/);
   if(testInfo.project.name.includes("mobile")){
     await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
     await expect(radar).toBeHidden();
@@ -132,7 +138,7 @@ test("coarse double tap opens the complete Android profile without an expensive 
   await expect(page.locator(".player-profile-style")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
-  await expect(page.locator(".player-profile-analysis")).toBeVisible();
+  await expect(page.locator(".player-profile-analysis")).toHaveCount(0);
   await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
   await expect(page.locator("body")).toHaveClass(/player-profile-open/);
   await expect(page.locator(".player-profile-close")).toBeFocused();

@@ -1,6 +1,6 @@
 # copa.life Ghost Club API
 
-Cloudflare Worker + D1 service for opt-in anonymous completed-run opponents, plus a privacy-minimised aggregate product-event endpoint. The game always falls back to AI and analytics calls fail silently when this service is unavailable.
+Cloudflare Worker + D1 service for opt-in anonymous completed-run opponents, a separately opt-in World Club Ranking, and a privacy-minimised aggregate product-event endpoint. The game always falls back to AI and online calls fail safely when this service is unavailable.
 
 ## Local validation
 
@@ -62,6 +62,15 @@ node scripts/check-health.mjs
 - The dataset is created automatically on the first production write after deployment.
 - Android does not ship the analytics client; the endpoint currently receives web events only.
 
+## World Club Ranking
+
+- `POST /v1/leaderboard/runs` accepts a completed run only with `leaderboard-terms-v1` consent and the client-held deletion token.
+- The Worker validates the six-match route and computes Reputation itself. Duplicate run IDs, cheat-marked runs and invalid histories never add score.
+- `GET /v1/leaderboard` returns the current monthly top 100. `GET /v1/leaderboard/me` returns the participant's profile and nearby ranks.
+- Monthly Club Coefficient is the sum of the participant's best 10 accepted runs. Lifetime Reputation and career totals do not reset.
+- `DELETE /v1/me/leaderboard` removes the public profile and its run rows. `DELETE /v1/me/ghosts` removes both Ghost and ranking data owned by the same deletion token.
+- Detailed career-run rows are purged after their monthly season; the aggregate public profile remains until opt-out/deletion.
+
 ## Rollback
 
 1. Inspect versions: `npx wrangler versions list --config wrangler.jsonc`.
@@ -80,3 +89,4 @@ node scripts/check-health.mjs
 - D1 stores only one-way hashes of installation and deletion identifiers.
 - Reports immediately move a Ghost to review; three unique reports block it and repeat violations can block the submitting client.
 - A daily scheduled handler physically deletes expired Ghost rows after 45 days and prunes reports after 90 days.
+- The same scheduled handler removes detailed ranking runs outside the active monthly season.

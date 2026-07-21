@@ -60,7 +60,6 @@
       tacticApplied:"Komut sahaya iletildi",criticalSpeed:"Kritik an · hız 1×",
       skipTitle:"Maçı geç?",skipBody:"Kalan süre anında tamamlanacak. Maç sonucu yine aynı oyun çekirdeğiyle hesaplanır.",
       skipConfirm:"MAÇI TAMAMLA",penaltyHint:"Yönünü tek dokunuşla seç. Seri, kapanırsa aynı atıştan devam eder.",
-      profileOverview:"ÖZET",profileInsights:"GÜÇLÜ / RİSK",profileAnalysis:"ANALİZ",
       resultMatch:"MAÇ RAPORU",resultStory:"SEZON HİKÂYESİ",
       resultEconomy:"EKONOMİ",resultLineups:"KADROLAR",
       nativeShare:"PAYLAŞ",resumed:"Kaldığın yerden devam edildi.",
@@ -87,7 +86,6 @@
       tacticApplied:"Instruction sent to the pitch",criticalSpeed:"Key moment · speed 1×",
       skipTitle:"Skip match?",skipBody:"The remaining time will finish instantly. The result still uses the same game core.",
       skipConfirm:"FINISH MATCH",penaltyHint:"Choose a direction with one tap. If closed, the shootout resumes from the same kick.",
-      profileOverview:"OVERVIEW",profileInsights:"STRENGTH / RISK",profileAnalysis:"ANALYSIS",
       resultMatch:"MATCH REPORT",resultStory:"SEASON STORY",
       resultEconomy:"ECONOMY",resultLineups:"LINEUPS",
       nativeShare:"SHARE",resumed:"Your saved run has resumed.",
@@ -591,39 +589,6 @@
     });
   }
 
-  function ensureProfileNav(){
-    const layer=document.querySelector(".player-profile-layer.is-sheet:not(.hidden)");
-    const content=layer&&layer.querySelector(".player-profile-content");
-    if(!content||content.querySelector(".mobile-profile-nav")||!content.querySelector(".player-profile-overview"))return;
-    const c=copy(),nav=document.createElement("nav");
-    nav.className="mobile-profile-nav";
-    nav.setAttribute("aria-label",languageIsTurkish()?"Profil bölümleri":"Profile sections");
-    [
-      [".player-profile-radar",c.profileOverview],
-      [".player-profile-insight-grid",c.profileInsights],
-      [".player-profile-analysis",c.profileAnalysis],
-    ].forEach(([selector,label])=>{
-      if(!content.querySelector(selector))return;
-      const button=document.createElement("span");
-      button.tabIndex=-1;
-      button.className="mobile-profile-jump";
-      button.setAttribute("role","button");
-      button.textContent=label;
-      button.addEventListener("click",()=>{
-        const target=content.querySelector(selector);
-        if(target){
-          const disclosure=target.closest(".player-profile-radar-disclosure");
-          if(disclosure)disclosure.open=true;
-          requestAnimationFrame(()=>target.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"}));
-        }
-      });
-      nav.appendChild(button);
-    });
-    const details=content.querySelector(".player-profile-details");
-    if(details)details.after(nav);
-    else content.querySelector(".player-profile-head")?.after(nav);
-  }
-
   function wrapResultDisclosure(node,label,open){
     if(!node||node.closest(".mobile-result-disclosure"))return;
     const details=document.createElement("details");
@@ -770,7 +735,10 @@
     if(settings&&!settings.classList.contains("hidden")){settings.classList.add("hidden");return true;}
     if(closeDraftConfirmation())return true;
     const modal=document.getElementById("modal");
-    if(isVisible(modal)&&typeof global.closeModal==="function"){global.closeModal();return true;}
+    if(isVisible(modal)){
+      if(modal.dataset.dismissOnEscape==="false")return true;
+      if(typeof global.closeModal==="function"){global.closeModal();return true;}
+    }
     const cancel=document.querySelector(".tap-helper:not(.hidden) .tap-cancel");
     if(cancel){cancel.click();return true;}
     const sim=document.getElementById("sim"),pause=document.getElementById("pauseBtn");
@@ -841,6 +809,10 @@
 
   function enhance(){
     enhanceFrame=0;
+    // Result disclosures are a responsive DOM transformation. Run their
+    // cleanup before the phone-only guard so a narrow -> wide resize can
+    // restore the desktop result layout.
+    ensureResultDisclosures();
     if(!isPhoneInteraction())return;
     ensurePreferences();
     syncPreferenceLanguage();
@@ -853,8 +825,6 @@
     ensureFeedSummary();
     ensureHubPreflight();
     ensureCupPosition();
-    ensureProfileNav();
-    ensureResultDisclosures();
     ensurePenaltyCoach();
     ensureTacticStatus();
     ensureSkipButton();
@@ -876,6 +846,7 @@
     if(sim&&!sim.dataset.mobileView)setSimView("field");
     if(!isPhoneInteraction()){
       hideDock();
+      scheduleEnhance();
       return;
     }
     if(dock)dock.setAttribute("aria-label",copy().actions);
@@ -904,9 +875,9 @@
   function mutationNeedsEnhance(mutation){
     const target=mutation.target&&mutation.target.nodeType===1?mutation.target:mutation.target&&mutation.target.parentElement;
     if(!target)return false;
-    if(target.closest&&target.closest(".mobile-action-dock,.mobile-pref-group,.mobile-draft-context,.mobile-profile-nav,.mobile-tactic-status,.mobile-result-disclosure>summary,.mobile-network-banner,.mobile-draft-confirm"))return false;
-    return !!(target.matches&&target.matches("#opts,#feed,#simGoals,#modal,#roundtag,#powV,#chemV,#kasaV,#ddSub,#ddClock,#budgetV,#result,#fixbar,#shopcards,.player-profile-content,.autofill-wrap")||
-      target.closest&&target.closest("#opts,#feed,#simGoals,#modal,#roundtag,#result,.player-profile-content"));
+    if(target.closest&&target.closest(".mobile-action-dock,.mobile-pref-group,.mobile-draft-context,.mobile-tactic-status,.mobile-result-disclosure>summary,.mobile-network-banner,.mobile-draft-confirm"))return false;
+    return !!(target.matches&&target.matches("#opts,#FFFFFFDD,#simGoals,#modal,#roundtag,#powV,#chemV,#kasaV,#ddSub,#ddClock,#budgetV,#result,#fixbar,#shopcards,.player-profile-content,.autofill-wrap")||
+      target.closest&&target.closest("#opts,#FFFFFFDD,#simGoals,#modal,#roundtag,#result,.player-profile-content"));
   }
 
   function handleDocumentCapture(event){
@@ -960,7 +931,7 @@
   }
 
   function init(){
-    try{hadSavedRunOnInit=!!localStorage.getItem("copa_run_v5");}catch(_){}
+    try{hadSavedRunOnInit=!!(localStorage.getItem("copa_run_v6")||localStorage.getItem("copa_run_v5"));}catch(_){}
     if(isMobileDevice())document.documentElement.classList.add("copa-mobile-device");
     ensureDock();
     ensureSimTabs();

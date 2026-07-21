@@ -1,16 +1,17 @@
 /* Versioned, validated run checkpoint storage. Gameplay state assembly stays in the orchestrator. */
 (function(global){
   "use strict";
-  const VERSION=5;
-  const KEYS=Object.freeze({primary:"copa_run_v5",backup:"copa_run_v5_last_good",session:"copa_run"});
+  const VERSION=6;
+  const KEYS=Object.freeze({primary:"copa_run_v6",backup:"copa_run_v6_last_good",session:"copa_run",legacyPrimary:"copa_run_v5",legacyBackup:"copa_run_v5_last_good"});
   const object=value=>!!value&&typeof value==="object"&&!Array.isArray(value);
   const finite=value=>Number.isFinite(Number(value));
   const issue=(code,path)=>({code,path});
   function defaults(value){
     const state=Object.assign({},value);
     state.v=VERSION;
-    state.phase=state.phase==="draft"?"draft":"hub";
+    state.phase=["draft","draw","hub","match","reward"].includes(state.phase)?state.phase:"hub";
     state.savedAt=finite(state.savedAt)?Number(state.savedAt):Date.now();
+    state.rngCalls=Number.isInteger(Number(state.rngCalls))?Number(state.rngCalls):0;
     state.cards=Array.isArray(state.cards)?state.cards:[];
     state.cardInv=object(state.cardInv)?state.cardInv:{};
     state.cardVariant=object(state.cardVariant)?state.cardVariant:{};
@@ -18,6 +19,8 @@
     state.feed=Array.isArray(state.feed)?state.feed:[];
     state.bracket=Array.isArray(state.bracket)?state.bracket:[];
     state.fixtures=Array.isArray(state.fixtures)?state.fixtures:[];
+    state.tournament=object(state.tournament)?state.tournament:null;
+    state.tournamentFormat=state.tournament&&state.tournament.format==="groups16_v1"?"groups16_v1":"legacy_knockout_v1";
     if(state.phase==="draft"){
       const draft=object(state.draft)?Object.assign({},state.draft):{};
       draft.remaining=finite(draft.remaining)?Number(draft.remaining):(Array.isArray(state.picks)?state.picks.filter(player=>!player).length:11);
@@ -33,27 +36,50 @@
   function migrate(value){
     if(!object(value))return null;
     const version=Number(value.v);
-    if(![2,3,4,5].includes(version))return null;
+    if(![2,3,4,5,6].includes(version))return null;
     const state=Object.assign({},value);
     if(version<5){
       const complete=Array.isArray(state.picks)&&state.picks.length===11&&state.picks.every(Boolean);
       state.phase=complete?"hub":"draft";
     }
+    if(version<6){state.tournament=null;state.tournamentFormat="legacy_knockout_v1";if(state.phase==="draw")state.phase="hub";}
     return defaults(state);
   }
   function validate(value){
     const errors=[];
     if(!object(value))return{ok:false,errors:[issue("not_object","")]};
     if(value.v!==VERSION)errors.push(issue("unsupported_version","v"));
-    if(value.phase!=="draft"&&value.phase!=="hub")errors.push(issue("invalid_phase","phase"));
+    if(!["draft","draw","hub","match","reward"].includes(value.phase))errors.push(issue("invalid_phase","phase"));
     if(!finite(value.savedAt)||Number(value.savedAt)<=0)errors.push(issue("invalid_timestamp","savedAt"));
     if(!Array.isArray(value.picks)||value.picks.length!==11)errors.push(issue("invalid_picks","picks"));
     if(!Number.isInteger(Number(value.round))||Number(value.round)<1||Number(value.round)>6)errors.push(issue("invalid_round","round"));
-    if(!finite(value.budget))errors.push(issue("invalid_budget","budget"));
+    if(!finite(value.budget)||Number(value.budget)<-250||Number(value.budget)>1000)errors.push(issue("invalid_budget","budget"));
     if(!finite(value.seedNum))errors.push(issue("invalid_seed","seedNum"));
+    if(!Number.isInteger(Number(value.rngCalls))||Number(value.rngCalls)<0||Number(value.rngCalls)>2_000_000)errors.push(issue("invalid_rng_calls","rngCalls"));
     if(typeof value.formName!=="string"||!value.formName)errors.push(issue("invalid_formation","formName"));
     if(typeof value.country!=="string"||!value.country)errors.push(issue("invalid_country","country"));
-    if(value.phase==="hub"&&Array.isArray(value.picks)&&!value.picks.every(object))errors.push(issue("incomplete_hub","picks"));
+    if(global.FORMATIONS&&(!Array.isArray(global.FORMATIONS[value.formName])||global.FORMATIONS[value.formName].length!==11))errors.push(issue("unknown_formation","formName"));
+    if(global.COUNTRY_CODES&&Array.isArray(global.COUNTRY_CODES)&&!global.COUNTRY_CODES.includes(value.country))errors.push(issue("unknown_country","country"));
+    const validPlayer=player=>object(player)&&typeof player.name==="string"&&player.name.trim().length>0&&player.name.length<=90&&typeof player.pos==="string"&&player.pos.length<=12&&finite(player.ov)&&Number(player.ov)>=35&&Number(player.ov)<=99;
+    if(Array.isArray(value.picks)&&value.picks.some(player=>player!=null&&!validPlayer(player)))errors.push(issue("invalid_player","picks"));
+    if(Array.isArray(value.bench)&&value.bench.some(player=>!validPlayer(player)))errors.push(issue("invalid_player","bench"));
+    if(["draw","hub","match","reward"].includes(value.phase)&&Array.isArray(value.picks)&&!value.picks.every(validPlayer))errors.push(issue("incomplete_hub","picks"));
+    if(Array.isArray(value.cards)){
+      if(value.cards.length>35||new Set(value.cards).size!==value.cards.length)errors.push(issue("invalid_cards","cards"));
+      if(global.CARDDEFS&&value.cards.some(key=>typeof key!=="string"||!global.CARDDEFS[key]))errors.push(issue("unknown_card","cards"));
+    }else errors.push(issue("invalid_cards","cards"));
+    if(Array.isArray(value.fixtures)&&value.fixtures.length&&value.fixtures.length!==6)errors.push(issue("invalid_fixtures","fixtures"));
+    if(value.tournamentFormat==="groups16_v1"){
+      if(!object(value.tournament))errors.push(issue("missing_tournament","tournament"));
+      else if(global.CopaTournamentEngine){const checked=global.CopaTournamentEngine.validate(value.tournament);if(!checked.ok)errors.push(issue("invalid_tournament","tournament"));}
+      if(value.phase==="draw"&&(!value.tournament||value.tournament.phase!=="draw"))errors.push(issue("invalid_draw_phase","tournament.phase"));
+      if(value.phase!=="draw"&&value.tournament&&value.tournament.phase==="draw")errors.push(issue("incomplete_draw","tournament.phase"));
+    }else if(value.tournamentFormat!=="legacy_knockout_v1")errors.push(issue("invalid_tournament_format","tournamentFormat"));
+    if(value.phase==="match"){
+      const pending=value.pendingMatchResolution;
+      if(!object(pending)||Number(pending.round)!==Number(value.round)||!Number.isInteger(Number(pending.gf))||!Number.isInteger(Number(pending.ga))||Number(pending.gf)<0||Number(pending.gf)>20||Number(pending.ga)<0||Number(pending.ga)>20)errors.push(issue("invalid_pending_match","pendingMatchResolution"));
+    }
+    if(value.phase==="reward"&&(Number(value.rewardPendingRound)!==Number(value.round)||Number(value.rewardResolvedRound)===Number(value.round)))errors.push(issue("invalid_pending_reward","rewardPendingRound"));
     if(value.phase==="draft"){
       if(!object(value.draft))errors.push(issue("missing_draft","draft"));
       else{
@@ -89,7 +115,7 @@
     return{ok:local||session,errors:local||session?[]:[issue("storage_unavailable","")]};
   }
   function read(){
-    const candidates=[["primary",safeGet(global.localStorage,KEYS.primary)],["backup",safeGet(global.localStorage,KEYS.backup)],["session",safeGet(global.sessionStorage,KEYS.session)]];
+    const candidates=[["primary",safeGet(global.localStorage,KEYS.primary)],["backup",safeGet(global.localStorage,KEYS.backup)],["session",safeGet(global.sessionStorage,KEYS.session)],["legacy",safeGet(global.localStorage,KEYS.legacyPrimary)],["legacy_backup",safeGet(global.localStorage,KEYS.legacyBackup)]];
     const rejected=[];
     for(const [source,raw] of candidates){
       if(!raw)continue;
@@ -100,6 +126,6 @@
     if(rejected.length)capture("restore_rejected",rejected.map(item=>item.source+":"+item.errors.map(error=>error.code).join("+")).join(","));
     return{state:null,source:null,rejected};
   }
-  function clear(){safeRemove(global.localStorage,KEYS.primary);safeRemove(global.localStorage,KEYS.backup);safeRemove(global.sessionStorage,KEYS.session);}
+  function clear(){safeRemove(global.localStorage,KEYS.primary);safeRemove(global.localStorage,KEYS.backup);safeRemove(global.localStorage,KEYS.legacyPrimary);safeRemove(global.localStorage,KEYS.legacyBackup);safeRemove(global.sessionStorage,KEYS.session);}
   global.CopaRunPersistence=Object.freeze({VERSION,KEYS,migrate,validate,parse,persist,read,clear});
 })(window);

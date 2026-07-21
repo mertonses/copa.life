@@ -14,7 +14,7 @@ const notes = JSON.parse(read("store/android/release-notes.json"));
 if (notes.versionCode !== version.versionCode || notes.versionName !== version.versionName) {
   fail("release notes are stale; edit them and run npm run android:notes:stamp");
 }
-for (const locale of ["tr-TR", "en-US"]) {
+for (const locale of ["tr-TR", "en-US", "es-ES", "de-DE", "it-IT"]) {
   if (!notes.locales?.includes(locale)) fail(`release notes metadata is missing ${locale}`);
 }
 

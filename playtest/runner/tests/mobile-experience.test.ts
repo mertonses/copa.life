@@ -35,10 +35,10 @@ test("narrow hub keeps the action dock at the viewport bottom and clickable afte
   test.skip(!["desktop-chromium","webkit-mobile"].includes(testInfo.project.name),"narrow viewport and iOS contract");
   if(testInfo.project.name==="desktop-chromium")await page.setViewportSize({width:430,height:932});
   await page.goto("/?mobile-hub-dock=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{const game=globalThis as any;await game.quickStart();await game.quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Dock Test FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
   await expect(page.locator("#hub")).toBeVisible();
   await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
 
@@ -112,15 +112,8 @@ test("mobile preferences stay opt-in and draft choices expose decision context",
   await expect(page.locator("#mobileDraftConfirm")).toContainText(/Kasa sonra|Cash after/);
   await page.locator("[data-draft-confirm]").click();
   await expect(page.locator("#mobileDraftConfirm")).toHaveCount(0);
-  const hiddenConfirmation=page.locator(".hidden-player-confirm");
-  await expect.poll(async()=>await page.locator("#rollstage").isVisible()||await hiddenConfirmation.isVisible()).toBe(true);
-  if(await hiddenConfirmation.isVisible()){
-    await hiddenConfirmation.locator(".btn-primary").click();
-    const hiddenReveal=page.locator(".hidden-player-reveal");
-    await expect(hiddenReveal).toBeVisible();
-    await hiddenReveal.locator(".btn-primary").click();
-  }
   await expect(page.locator("#rollstage")).toBeVisible();
+  await expect(page.locator(".hidden-player-confirm,.hidden-player-reveal")).toHaveCount(0);
 });
 
 test("desktop keeps primary actions in their original layout",async({page},testInfo)=>{
@@ -196,7 +189,7 @@ test("single tap keeps placement active while the peek detail opens and closes s
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Peek Test FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
   await expect(page.locator("#hub")).toBeVisible();
   await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
 
@@ -208,7 +201,7 @@ test("single tap keeps placement active while the peek detail opens and closes s
   await expect(page.locator("#tapDetailBtn")).toBeVisible();
   await page.locator("#tapDetailBtn").click();
   await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","false");
-  await expect(page.locator(".mobile-profile-nav")).toBeVisible();
+  await expect(page.locator(".mobile-profile-nav")).toHaveCount(0);
   await page.locator(".player-profile-close").click();
   await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","true");
   await expect(player).toHaveClass(/tap-selected/);
@@ -222,7 +215,7 @@ test("hub context and result details stay compact without hiding information",as
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Mobile Result FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
   await expect(page.locator("#hub")).toBeVisible();
   await expect(page.locator("#mobileRoundDigest")).toHaveCount(0);
   await page.evaluate(()=>{
@@ -231,7 +224,7 @@ test("hub context and result details stay compact without hiding information",as
     global.pushFeed("Mobil gelişme 2","form");
     global.pushFeed("Mobil gelişme 3","form");
   });
-  await expect(page.locator("#mobileFeedToggle")).toBeVisible();
+  await expect(page.locator("#feed .feeditem").filter({hasText:"Mobil"})).toHaveCount(3);
   await page.evaluate(()=>{
     const global=globalThis as any;
     global.setCaptain(0);
@@ -289,21 +282,32 @@ test("hub context and result details stay compact without hiding information",as
   expect(overflow).toBeLessThanOrEqual(1);
   await page.locator(".mobile-result-disclosure>summary").filter({hasText:/KADROLAR|LINEUPS/}).click();
   await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
-  await expect(page.locator("#lineups .lmr-header .lmr-score")).toHaveCount(0);
+  await expect(page.locator("#lineups .lmr-header,#lineups .lmr-summary")).toHaveCount(0);
+  await expect(page.locator("#lineups .lmr-pitch > .lmr-highlights")).toBeVisible();
   const mobileScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
     const score=element.getBoundingClientRect();
-    const pitch=element.parentElement!.getBoundingClientRect();
+    const pitchElement=element.parentElement!;
+    const pitch=pitchElement.getBoundingClientRect();
+    const highlights=pitchElement.querySelector(".lmr-highlights")!.getBoundingClientRect();
+    const highlightPlayerOverlaps=Array.from(pitchElement.querySelectorAll(".lmr-player")).filter(node=>{
+      const player=node.getBoundingClientRect();
+      return!(player.right<highlights.left||player.left>highlights.right||player.bottom<highlights.top||player.top>highlights.bottom);
+    }).length;
     return{
       centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
       inside:score.top>=pitch.top&&score.right<=pitch.right+1,
       widthRatio:score.width/pitch.width,
       radius:Number.parseFloat(getComputedStyle(element).borderRadius),
+      highlightsBelowScore:highlights.top>=score.bottom,
+      highlightPlayerOverlaps,
     };
   });
   expect(mobileScore.centered).toBeLessThanOrEqual(1);
   expect(mobileScore.inside).toBe(true);
   expect(mobileScore.widthRatio).toBeLessThanOrEqual(.98);
   expect(mobileScore.radius).toBeGreaterThan(12);
+  expect(mobileScore.highlightsBelowScore).toBe(true);
+  expect(mobileScore.highlightPlayerOverlaps).toBe(0);
 });
 
 test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
@@ -312,14 +316,15 @@ test("desktop result keeps season story, economy and lineups in the document flo
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Desktop Result FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
   await expect(page.locator("#hub")).toBeVisible();
   await page.evaluate(()=>{
     const global=globalThis as any;
     global.setCaptain(0);
     global.closeModal();
-    const home=global.picksBySlot.filter(Boolean).slice(0,11);
+    const home=global.picksBySlot.filter(Boolean).slice(0,11).map((player:any)=>({...player}));
     const away=home.map((player:any,index:number)=>({...player,name:`Rakip Oyuncu ${index+1}`}));
+    home[0].name="Yeğen Demir 1";
     global.LastMatchReport.capture({
       round:5,
       homeName:"Desktop Result FK",
@@ -332,8 +337,14 @@ test("desktop result keeps season story, economy and lineups in the document flo
       awayPlayers:away,
       homePower:80,
       awayPower:81,
-      score:[1,2],
+      score:[2,3],
       homeWon:false,
+      events:[
+        {m:21,home:true,name:"1",type:"goal"},
+        {m:64,home:true,name:"1",type:"goal"},
+      ],
+      homeRatings:[{name:"Yeğen Demir 1",rating:8.8}],
+      motm:"Yeğen Demir 1",
       seed:32713,
     });
     global.endRun(false);
@@ -347,20 +358,65 @@ test("desktop result keeps season story, economy and lineups in the document flo
   await expect(page.locator("#econTile .econsum")).toBeVisible();
   await expect(page.locator("#lineups")).toBeVisible();
   await expect(page.locator("#lineups .last-match-report")).toBeVisible();
-  await expect(page.locator("#lineups .lmr-header .lmr-score")).toHaveCount(0);
+  await expect(page.locator("#lineups .lmr-header,#lineups .lmr-summary")).toHaveCount(0);
   await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
+  await expect(page.locator("#lineups .lmr-pitch > .lmr-highlights")).toBeVisible();
+  const generatedScorer=page.locator('#lineups .lmr-player[data-lmr-team="home"][data-lmr-index="0"]');
+  await expect(generatedScorer.locator(".lmr-name")).toHaveText("Demir #1");
+  await expect(generatedScorer.locator(".lmr-goal-ball")).toHaveCount(2);
+  await expect(generatedScorer.locator(".lmr-events>i")).toHaveCount(1);
+  const scorerBadgeLayout=await generatedScorer.evaluate(element=>{
+    const name=element.querySelector(".lmr-name")!.getBoundingClientRect();
+    const events=element.querySelector(".lmr-events")!.getBoundingClientRect();
+    return{eventsBelowName:events.top>=name.bottom-1};
+  });
+  expect(scorerBadgeLayout.eventsBelowName).toBe(true);
   const desktopScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
     const score=element.getBoundingClientRect();
-    const pitch=element.parentElement!.getBoundingClientRect();
+    const pitchElement=element.parentElement!;
+    const pitch=pitchElement.getBoundingClientRect();
+    const highlights=pitchElement.querySelector(".lmr-highlights")!.getBoundingClientRect();
     return{
       centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
       inside:score.top>=pitch.top&&score.right<=pitch.right+1,
       widthRatio:score.width/pitch.width,
+      highlightsBelowScore:highlights.top>=score.bottom,
     };
   });
   expect(desktopScore.centered).toBeLessThanOrEqual(1);
   expect(desktopScore.inside).toBe(true);
   expect(desktopScore.widthRatio).toBeLessThanOrEqual(.73);
+  expect(desktopScore.highlightsBelowScore).toBe(true);
+});
+
+test("widening a mobile result restores every result section to the desktop flow",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","responsive desktop transition contract");
+  await page.setViewportSize({width:430,height:932});
+  await page.goto("/?result-resize-cleanup=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    document.getElementById("intro")?.classList.add("hidden");
+    const result=document.getElementById("result")!;
+    result.classList.remove("hidden");
+    for(const [id,text] of [["econTile","Ekonomi"],["lineups","Son maç"]] as const){
+      const section=document.getElementById(id)!;
+      section.classList.remove("hidden");
+      section.textContent=text;
+    }
+    window.dispatchEvent(new Event("resize"));
+  });
+
+  await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(4);
+  await expect(page.locator("#storyTile")).toBeHidden();
+
+  await page.setViewportSize({width:1440,height:900});
+
+  await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(0);
+  await expect(page.locator("#storyTile")).toBeVisible();
+  await expect(page.locator("#econTile")).toBeVisible();
+  await expect(page.locator("#lineups")).toBeVisible();
+  await expect(page.locator("#finalRow > #storyTile")).toHaveCount(1);
+  await expect(page.locator("#finalRow > #econTile")).toHaveCount(1);
+  await expect(page.locator("#result > #lineups")).toHaveCount(1);
 });
 
 test("footer keeps its link rail separate from the independent-project note",async({page},testInfo)=>{
@@ -397,7 +453,7 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Backup Test FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
+  await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();w.setCaptain(0);w.closeModal();});
   await page.evaluate(()=>{
     const global=globalThis as any;
     global.injuredIdx=0;

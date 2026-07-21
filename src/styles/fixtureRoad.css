@@ -11,9 +11,9 @@
 .fixture-node-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
 #fixbar .fixture-node .fs{font:900 14px/1 var(--mono)!important;color:var(--color-ink)!important}
 .fixture-result{max-width:100%;font:900 7px/1.2 var(--mono);font-style:normal;letter-spacing:.25px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fixture-result.result-w{color:var(--color-primary)}
-.fixture-result.result-d{color:#b7791f}
-.fixture-result.result-l{color:#d84a42}
+.fixture-result.result-w{color:var(--status-positive-text)}
+.fixture-result.result-d{color:var(--status-info)}
+.fixture-result.result-l{color:var(--status-critical)}
 .fixture-result.is-current{color:var(--color-primary)}
 .fixture-opponent{max-width:100%;font:900 8px/1.15 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #fixbar .fixture-node.is-played{min-height:52px!important;background:var(--surface-bg)!important}
@@ -25,15 +25,19 @@
 #fixbar .fixture-trophy{position:relative;z-index:1;min-width:42px!important;min-height:60px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:3px!important;border:0!important;background:transparent!important;color:var(--color-slate)!important;cursor:pointer;scroll-snap-align:center}
 .fixture-trophy-ring{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--color-primary) var(--trophy-progress,0%),var(--border-subtle) 0);position:relative}
 .fixture-trophy-ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--color-ink)}
-.fixture-trophy svg{position:relative;z-index:1;width:17px;height:20px;fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.fixture-trophy svg{position:relative;z-index:1;width:17px;height:20px;fill:none;stroke:#FFFFFF;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .fixture-trophy small{font:900 6px/1 var(--mono);letter-spacing:.5px;text-transform:uppercase}
 .fixture-trophy.is-near .fixture-trophy-ring{animation:fixtureTrophyPulse 1.8s ease-in-out infinite}
-.fixture-trophy.is-champion .fixture-trophy-ring{background:var(--color-primary);box-shadow:0 0 0 5px color-mix(in srgb,var(--color-primary) 18%,transparent)}
+.fixture-trophy.is-champion .fixture-trophy-ring{background:var(--status-success);box-shadow:0 0 0 5px color-mix(in srgb,var(--status-success) 18%,transparent)}
 .fixture-trophy.is-champion svg{stroke:var(--color-ink)}
-.fixture-trophy.is-champion .fixture-trophy-ring::before{background:var(--color-primary)}
-.fixture-trophy.is-champion small{color:var(--color-primary)}
+.fixture-trophy.is-champion .fixture-trophy-ring::before{background:var(--status-success)}
+.fixture-trophy.is-champion small{color:var(--status-positive-text)}
 .fixture-detail{position:relative;margin-top:4px;padding:10px 36px 10px 12px;border-top:1px dashed var(--border-subtle);background:var(--surface-bg);border-radius:7px}
-.fixture-detail-copy>span{display:block;color:var(--color-primary);font:900 7px/1 var(--mono);letter-spacing:1px;text-transform:uppercase}
+.fixture-detail-copy>span{display:block;color:var(--color-slate);font:900 7px/1 var(--mono);letter-spacing:1px;text-transform:uppercase}
+.fixture-detail[data-fixture-state="W"] .fixture-detail-copy>span{color:var(--status-success)}
+.fixture-detail[data-fixture-state="D"] .fixture-detail-copy>span{color:var(--status-info)}
+.fixture-detail[data-fixture-state="L"] .fixture-detail-copy>span{color:var(--status-critical-text)}
+.fixture-detail[data-fixture-state="current"] .fixture-detail-copy>span{color:var(--action-primary)}
 .fixture-detail-copy>b{display:block;margin-top:4px;color:var(--color-ink);font:900 11px/1.2 var(--mono)}
 .fixture-detail-copy>p{margin:5px 0 0;color:var(--color-slate);font:700 9px/1.35 var(--mono)}
 .fixture-detail-stats{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px;margin-top:8px}

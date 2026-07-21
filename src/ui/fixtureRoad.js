@@ -28,7 +28,9 @@
     link.rel="stylesheet";
     link.href="src/styles/fixtureRoad.css?v=20260718-fixture1";
     link.dataset.copaFixtureRoad="1";
-    document.head.appendChild(link);
+    const palette=document.querySelector('link[href*="src/styles/palette.css"]');
+    if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);
+    else document.head.appendChild(link);
   }
 
   function resultCopy(result){
@@ -122,7 +124,9 @@
     if(!panel)return;
     if(selected===index){closeDetail();return;}
     selected=index;
+    const selectedNode=document.querySelector(`#fixbar [data-fixture-index="${index}"]`);
     document.querySelectorAll("#fixbar [data-fixture-index]").forEach(node=>node.setAttribute("aria-expanded",String(Number(node.dataset.fixtureIndex)===index)));
+    panel.dataset.fixtureState=selectedNode?.dataset.fixtureState||"locked";
     panel.innerHTML=`${detailMarkup(index)}<button type="button" class="fixture-detail-close" aria-label="${esc(copy().close)}">×</button>`;
     panel.classList.remove("hidden");
     panel.querySelector(".fixture-detail-close")?.addEventListener("click",closeDetail);

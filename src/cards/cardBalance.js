@@ -51,6 +51,11 @@ function cardCostLines(k,v){
  const c=cardCostMeta(k,v),tr=typeof LANG!=="undefined"&&LANG==="tr",out=[];
  const add=s=>{if(s&&!out.includes(s))out.push(s);};
  const addMany=s=>Array.isArray(s)?s.forEach(add):add(s);
+ if(k==="nasip_kismet"){
+  add(tr?`İlk kart · ${c.turns||2} tur: en fazla −€${c.coupon}M · min. €2M`:`First card · ${c.turns||2} rounds: up to −€${c.coupon}M · min. €2M`);
+  if(c.risk)add(tr?`Satın alırken %${c.risk}: −€${c.cash}M`:`On purchase ${c.risk}%: −€${c.cash}M`);
+  return out;
+ }
  if(c.chem)add(tr?"Kimya -"+c.chem:"Chemistry -"+c.chem);
  if(c.trust)add(tr?"Güven -"+c.trust:"Trust -"+c.trust);
  if(c.nextMarket)add(tr?"Sonraki pazar +%"+c.priceRise:"Next market +"+c.priceRise+"%");
@@ -67,7 +72,7 @@ function cardCostLines(k,v){
    kisa_kamp:{0:tr?"Sonraki maç -2 güç":"Next match -2 power",1:tr?"Sonraki maç -4 güç":"Next match -4 power"},
    // Keep the post-match risk compact: this is rendered in a narrow card footer.
    gecici_prim:{0:tr?["Maç sonu · %30 sakatlık","Sonraki maç -2 güç"]:["Post-match · 30% injury","Next match -2 power"],1:tr?["Maç sonu · %60 sakatlık","Sonraki maç -2 güç"]:["Post-match · 60% injury","Next match -2 power"]},
-   deplasman_kafilesi:{1:tr?"Rakip güçlü değilse %50: -2 güç":"If opponent is not stronger: 50% -2 power"},
+   deplasman_kafilesi:{1:tr?"Rakip GÜÇ ≤ senin GÜÇ: %50 ihtimalle -2":"Opponent POWER ≤ your POWER: 50% chance of -2"},
    kurban_belli:{0:tr?"Tur sonunda 1 oyuncu sakatlanır":"1 player injured after the round",1:tr?"Tur sonunda 2 oyuncu sakatlanır":"2 players injured after the round"},
    son_kredi:{0:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M",1:tr?"Borç toleransı €5M daralır":"Debt tolerance tightens by €5M"}
  };

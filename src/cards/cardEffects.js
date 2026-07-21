@@ -438,8 +438,8 @@ function applyRiskCardGain(k){
   // The purchase round immediately decrements this counter at reward time.
   // Three ticks therefore cover the next two card-market rounds.
   lotteryCouponTurns=3;
-  pushFeed("🎟️ <b>"+L().cards[k].n+"</b> "+(tr?"iki tur içinde alınacak bir kartta -€"+coupon+"M":"-€"+coupon+"M on one card bought within two rounds"),"buy");
-  if(v===1&&rand()<0.20){applyCardCashPenalty(k,3);pushFeed("🎟️ "+(tr?"Piyango masrafı: -€3M":"Lottery cost: -€3M"),"lose");}
+  pushFeed("🎟️ <b>"+L().cards[k].n+"</b> "+(tr?"kuponu açıldı: önündeki 2 turda alınan ilk karta en fazla -€"+coupon+"M (min. €2M)":"coupon unlocked: up to -€"+coupon+"M on the first card bought within the next 2 rounds (min. €2M)"),"buy");
+  if(v===1&&rand()<0.20){applyCardCashPenalty(k,3);pushFeed("🎟️ "+(tr?"Anında piyango masrafı: -€3M":"Immediate lottery expense: -€3M"),"lose");}
   return;
  }
  if(k==="yildiz_krizi"){

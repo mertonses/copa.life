@@ -22,13 +22,20 @@ async function finishRun(page:Page,options:{ghost?:boolean;zeroEconomy?:boolean;
   await page.evaluate(async()=>{
     const game=globalThis as any;
     game.setLang("tr");
-    game.quickStart();
+    if(game.COPA_IS_NATIVE){
+      localStorage.setItem("copa_online_features_onboarding_v1",JSON.stringify({
+        version:"online-features-v1",terms:true,matching:false,sharing:false,leaderboard:false,
+        action:"test_fixture",accepted_at:new Date().toISOString()
+      }));
+    }
+    await game.quickStart();
+    if(game._countryDraftPromise)await game._countryDraftPromise;
     await game.quickAll();
   });
   await page.locator("#postClubName").fill("Editorial XI");
   await page.evaluate(({zeroEconomy})=>{
     const game=globalThis as any;
-    game.pcGo();
+    game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();
     game.setCaptain(0);
     game.closeModal();
     const scorer=game.picksBySlot.find((player:any)=>player)?.name?.split(" ").pop()||"Duarte";
@@ -56,70 +63,34 @@ async function finishRun(page:Page,options:{ghost?:boolean;zeroEconomy?:boolean;
   await expect(page.locator("#result")).toBeVisible();
 }
 
-test("completed shared run becomes a Ghost Club continuity moment and nests share tools",async({page},testInfo)=>{
+test("completed shared run stays on the result and keeps Club Career in the main flow",async({page})=>{
   await finishRun(page,{ghost:true});
-  const shell=page.locator(".ghost-run-shell");
-  await expect(shell).toBeVisible();
-  await expect(shell.locator("h2")).toHaveText("HAYALET KULÜBÜN HAZIR");
-  await expect(shell).toContainText("başka oyuncuların karşısına çıkabilir");
-  await expect(shell.locator(".ghost-run-status")).toHaveText("HAVUZDA");
-  await expect(shell.locator(".ghost-run-fact")).toHaveCount(4);
-  await expect(shell).toContainText("EDITORIAL XI");
-  await expect(shell.locator(".ghost-run-seed-row code")).toHaveText(/^#\d{4,5}$/);
-  await expect(shell).not.toContainText("PNG");
-  await expect(shell.locator("[data-ghost-restart]")).toHaveText("YENİ RUN BAŞLAT");
-  if(testInfo.project.name.includes("mobile")){
-    const viewport=page.viewportSize()!;
-    const modalSize=await shell.evaluate(element=>{
-      const rect=element.getBoundingClientRect();
-      return{width:rect.width,height:rect.height};
-    });
-    expect(modalSize.width).toBeGreaterThanOrEqual(viewport.width-14);
-    expect(modalSize.width).toBeLessThan(viewport.width);
-    expect(modalSize.height).toBeLessThanOrEqual(Math.min(viewport.height*.9,740)+1);
-  }
-
-  await shell.locator("[data-ghost-seed]").click();
-  await expect(shell.locator("[data-ghost-seed]")).toHaveText("SEED KOPYALANDI");
-  await shell.locator("[data-ghost-share]").click();
-  await expect(page.locator(".share-modal")).toBeVisible();
-  await expect(page.locator(".share-actions")).toContainText("PNG İndir");
-
-  await page.evaluate(()=>{
-    (globalThis as any).closeModal();
-    (globalThis as any).showGhostRunResultOnce();
-  });
-  await page.waitForTimeout(250);
   await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
+  await expect(page.locator("#result")).toBeVisible();
+  await expect(page.locator("#rCareerProgress")).toBeVisible();
+  await expect(page.locator("#rCareerProgress")).toContainText(/CLUB CAREER|KULÜP KARİYERİ/);
+  await expect(page.locator("#modal")).toBeHidden();
 });
 
-test("completed unshared run shows a truthful Ghost offer and becomes ready after explicit consent",async({page})=>{
-  await page.route("**/v1/ghosts",route=>route.fulfill({
-    status:201,
-    headers:{"access-control-allow-origin":"*"},
-    contentType:"application/json",
-    body:JSON.stringify({ok:true,public_ghost_id:"G-CONSENTED",eligible_until:new Date(Date.now()+86400000).toISOString()})
-  }));
+test("completed unshared run does not interrupt the result with a Ghost solicitation",async({page})=>{
   await finishRun(page);
-  const shell=page.locator(".ghost-run-shell");
-  await expect(shell).toBeVisible();
-  await expect(shell.locator("h2")).toHaveText("RUN YAŞAMAYA DEVAM EDEBİLİR");
-  await expect(shell.locator(".ghost-run-status")).toHaveText("HENÜZ HAVUZDA DEĞİL");
-  await expect(shell).toContainText("iznin olmadan oyun verisi yüklenmez");
-  await shell.locator("[data-ghost-enable]").click();
-  const consent=page.locator("#ghostConsentDialog");
-  await expect(consent).toBeVisible();
-  await expect(consent.locator("input[type=checkbox]")).toHaveCount(0);
-  await expect(consent.locator(".ghost-consent-confirm")).toContainText("İznini ayarlardan dilediğin zaman geri çekebilirsin");
-  await expect(consent.locator("[data-ghost-accept]")).toBeEnabled();
-  await consent.locator("[data-ghost-accept]").click();
-  await expect(page.locator(".ghost-run-shell h2")).toHaveText("HAYALET KULÜBÜN HAZIR");
-  await expect(page.locator(".ghost-run-status")).toHaveText("HAVUZDA");
-  expect(await page.evaluate(()=>(globalThis as any).GhostClubs.sharingEnabled())).toBe(true);
+  await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
+  await expect(page.locator("#ghostConsentDialog")).toHaveCount(0);
+  await expect(page.locator("#result")).toBeVisible();
+  await expect(page.locator("#rCareerProgress")).toBeVisible();
+  expect(await page.evaluate(()=>(globalThis as any).GhostClubs.sharingEnabled())).toBe(false);
 });
 
 test("season story keeps four meaningful chronological beats and economy hides zero rows",async({page})=>{
   await finishRun(page);
+  await expect(page.locator("#rFinish")).toHaveText("ELENDİN");
+  await expect(page.locator("#rLn")).toBeHidden();
+  const heroAlignment=await page.locator(".scoreboard").evaluate(element=>{
+    const board=element.getBoundingClientRect();
+    const title=element.querySelector("#rFinish")!.getBoundingClientRect();
+    return Math.abs((title.left+title.width/2)-(board.left+board.width/2));
+  });
+  expect(heroAlignment).toBeLessThanOrEqual(1);
   const story=page.locator("#rStory");
   await expect(story.locator(".storyevent")).toHaveCount(4);
   await expect(story).toContainText("85. dakikadaki Duarte golü");
@@ -158,10 +129,9 @@ test("season story keeps four meaningful chronological beats and economy hides z
 
 test("deferred Ghost result never interrupts a new active screen",async({page})=>{
   await finishRun(page);
-  await expect(page.locator(".ghost-run-shell")).toBeVisible();
+  await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
   await page.evaluate(()=>{
     const game=globalThis as any;
-    game.closeModal();
     document.querySelector("#result")?.classList.add("hidden");
     document.querySelector("#sim")?.classList.remove("hidden");
     game.showGhostRunResultOnce();
@@ -171,20 +141,20 @@ test("deferred Ghost result never interrupts a new active screen",async({page})=
   await expect(page.locator("#modal")).toBeHidden();
 });
 
-test("landing hero keeps desktop tactics and persistent header actions",async({page},testInfo)=>{
+test("landing hero keeps responsive tactics and persistent header actions",async({page},testInfo)=>{
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
   const isMobile=testInfo.project.name.includes("mobile");
   await expect(page.locator(".v7-hero-desc")).toHaveText("Her seçiminle yeni bir futbol hikâyesi yaz.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
-  if(isMobile)await expect(page.locator(".tactical-board")).toBeHidden();
-  else await expect(page.locator(".tactical-board")).toBeVisible();
-  await expect(page.locator(".tactical-board .tactical-player")).toHaveCount(5);
-  await expect(page.locator(".tactical-board .tactical-ball-carrier")).toHaveCount(1);
-  await expect(page.locator(".tactical-board .tactical-final-arrow")).toHaveCount(1);
-  await expect(page.locator(".tactical-board .tactical-penalty-area")).toHaveCount(2);
-  await expect(page.locator(".tactical-board .tactical-goal-area")).toHaveCount(2);
+  await expect(page.locator(".tactical-board")).toBeVisible();
+  await expect(page.locator(".tactical-board .tactical-unit")).toHaveCount(10);
+  await expect(page.locator(".tactical-board .tactical-selected")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-route-primary")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-run")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-penalty-area")).toHaveCount(1);
+  await expect(page.locator(".tactical-board .tactical-goal-area")).toHaveCount(1);
   await expect(page.locator(".tactical-board svg gradient,.tactical-board svg filter")).toHaveCount(0);
   await expect(page.locator(".tools > #howtoWrap #howtoToggle")).toBeVisible();
   await expect(page.locator("#howtoToggle")).toContainText("COPA REHBERİ");
@@ -211,10 +181,8 @@ test("landing hero keeps desktop tactics and persistent header actions",async({p
     const boardElement=document.querySelector(".tactical-board") as HTMLElement;
     const board=boardElement.getBoundingClientRect();
     const diagram=document.querySelector(".tactical-diagram") as SVGElement;
-    const secondaryLink=getComputedStyle(document.querySelector(".tactical-link-secondary") as SVGElement);
-    const pitchDetail=getComputedStyle(document.querySelector(".tactical-pitch-detail") as SVGElement);
-    const route=getComputedStyle(document.querySelector(".tactical-links") as SVGElement);
-    const player=getComputedStyle(document.querySelector(".tactical-player") as SVGElement);
+    const route=getComputedStyle(document.querySelector(".tactical-route-primary") as SVGElement);
+    const player=getComputedStyle(document.querySelector(".tactical-unit") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
     const settings=(document.getElementById("settingsBtn") as HTMLElement).getBoundingClientRect();
     const layer=getComputedStyle(document.getElementById("introLand")!,"::before");
@@ -229,7 +197,6 @@ test("landing hero keeps desktop tactics and persistent header actions",async({p
       boardHidden:getComputedStyle(boardElement).display==="none",
       boardWidth:board.width,
       diagramRatio:diagram.getBoundingClientRect().width/diagram.getBoundingClientRect().height,
-      mobileDetailHidden:secondaryLink.display==="none"&&pitchDetail.display==="none",
       routeAnimation:route.animationName,
       playerAnimation:player.animationName,
       guideSettingsGap:settings.left-guide.right,
@@ -251,33 +218,31 @@ test("landing hero keeps desktop tactics and persistent header actions",async({p
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
   expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
   expect(layout.connectorHeadContent==="none"||layout.connectorHeadDisplay==="none").toBe(true);
-  expect(layout.boardHidden).toBe(isMobile);
+  expect(layout.boardHidden).toBe(false);
+  expect(layout.routeAnimation).toContain("tacticalRouteFlow");
+  expect(layout.playerAnimation).toContain("tacticalNodePulse");
+  expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
+  expect(layout.diagramRatio).toBeCloseTo(360/144,1);
   expect(layout.guideSettingsGap).toBeGreaterThanOrEqual(0);
   expect(layout.guideSettingsGap).toBeLessThanOrEqual(8);
   expect(layout.guideSettingsHeightDelta).toBeLessThanOrEqual(1);
   expect(layout.guideSettingsCenterDelta).toBeLessThanOrEqual(1);
   if(isMobile){
-    expect(layout.boardWidth).toBe(0);
     expect(layout.guideSettingsWidthDelta).toBeLessThanOrEqual(1);
     expect(layout.guideFontSize).toBe(0);
   }else{
     expect(layout.guideFontSize).toBeGreaterThan(0);
-    expect(layout.routeAnimation).toContain("tacticalRouteFlow");
-    expect(layout.playerAnimation).toContain("tacticalNodePulse");
-    expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
-    expect(layout.diagramRatio).toBeCloseTo(238/138,1);
-    expect(layout.mobileDetailHidden).toBe(false);
-    const reducedAnimations=await page.evaluate(()=>{
-      document.body.classList.add("reduced-motion");
-      const values=[
-        getComputedStyle(document.querySelector(".tactical-links") as SVGElement).animationName,
-        getComputedStyle(document.querySelector(".tactical-player") as SVGElement).animationName,
-      ];
-      document.body.classList.remove("reduced-motion");
-      return values;
-    });
-    expect(reducedAnimations).toEqual(["none","none"]);
   }
+  const reducedAnimations=await page.evaluate(()=>{
+    document.body.classList.add("reduced-motion");
+    const values=[
+      getComputedStyle(document.querySelector(".tactical-route-primary") as SVGElement).animationName,
+      getComputedStyle(document.querySelector(".tactical-unit") as SVGElement).animationName,
+    ];
+    document.body.classList.remove("reduced-motion");
+    return values;
+  });
+  expect(reducedAnimations).toEqual(["none","none"]);
 
   await page.setViewportSize({width:isMobile?900:700,height:900});
   const collapsedGuide=await page.evaluate(()=>{
@@ -336,6 +301,18 @@ test("chairman picker separates personality from mechanics and collapses safely 
     const play=(root.querySelector(".cp-playstyle") as HTMLElement).getBoundingClientRect();
     const portrait=(root.querySelector(".cp-portrait-frame") as HTMLElement).getBoundingClientRect();
     const personaCopy=(root.querySelector(".cp-persona-copy") as HTMLElement).getBoundingClientRect();
+    const badge=(root.querySelector(".cp-role-badge") as HTMLElement).getBoundingClientRect();
+    const firstPro=(root.querySelector(".cp-fx-pro .cp-fx-item") as HTMLElement).getBoundingClientRect();
+    const firstCon=(root.querySelector(".cp-fx-con .cp-fx-item") as HTMLElement).getBoundingClientRect();
+    const effectSymbol=(root.querySelector(".cp-fx-item .cp-fx-sym") as HTMLElement).getBoundingClientRect();
+    const effectCopy=(root.querySelector(".cp-fx-item span:last-child") as HTMLElement).getBoundingClientRect();
+    const counter=(root.querySelector(".cp-counter") as HTMLElement).getBoundingClientRect();
+    const close=(root.querySelector(".cp-close") as HTMLElement).getBoundingClientRect();
+    const navButtons=[
+      root.querySelector(".cp-nav-prev"),
+      root.querySelector(".cp-sel-btn"),
+      root.querySelector(".cp-nav-next"),
+    ].map(node=>(node as HTMLElement).getBoundingClientRect());
     const modalRect=(root as HTMLElement).getBoundingClientRect();
     const sheet=root.closest(".sheet") as HTMLElement;
     return{
@@ -345,6 +322,19 @@ test("chairman picker separates personality from mechanics and collapses safely 
       mobileOrder:pros.top<cons.top&&cons.top<play.top,
       portrait:{left:portrait.left,right:portrait.right,width:portrait.width},
       personaCopy:{left:personaCopy.left},
+      badgeInPersona:!!root.querySelector(".cp-persona > .cp-role-badge"),
+      badgeInMechanics:!!root.querySelector(".cp-mechanics .cp-role-badge"),
+      badgeCenterDelta:Math.abs((badge.left+badge.width/2)-(persona.left+persona.width/2)),
+      firstEffectTopDelta:Math.abs(firstPro.top-firstCon.top),
+      firstConHeight:firstCon.height,
+      effectFontSize:Number.parseFloat(getComputedStyle(root.querySelector(".cp-fx-item") as HTMLElement).fontSize),
+      iconCopyTopDelta:Math.abs(effectSymbol.top-effectCopy.top),
+      actionTopDelta:Math.max(...navButtons.map(rect=>rect.top))-Math.min(...navButtons.map(rect=>rect.top)),
+      counterInTopControls:!!root.querySelector(".cp-top-controls > .cp-counter"),
+      closeInTopControls:!!root.querySelector(".cp-top-controls > .cp-close"),
+      counterCloseGap:Math.abs(close.left-counter.right),
+      counterCloseCenterDelta:Math.abs((counter.top+counter.height/2)-(close.top+close.height/2)),
+      counterInFooter:!!root.querySelector(".cp-bot-row .cp-counter"),
       modalHeight:modalRect.height,
       footerHeight:footer.getBoundingClientRect().height,
       footerPosition:getComputedStyle(footer).position,
@@ -355,6 +345,17 @@ test("chairman picker separates personality from mechanics and collapses safely 
   });
   expect(layout.footerPosition).toBe("sticky");
   expect(layout.footerHeight).toBeLessThanOrEqual(68);
+  expect(layout.actionTopDelta).toBeLessThanOrEqual(1);
+  expect(layout.counterInTopControls).toBe(true);
+  expect(layout.closeInTopControls).toBe(true);
+  expect(layout.counterCloseGap).toBeLessThanOrEqual(8);
+  expect(layout.counterCloseCenterDelta).toBeLessThanOrEqual(1);
+  expect(layout.counterInFooter).toBe(false);
+  expect(layout.badgeInPersona).toBe(true);
+  expect(layout.badgeInMechanics).toBe(false);
+  expect(layout.badgeCenterDelta).toBeLessThanOrEqual(1);
+  expect(layout.effectFontSize).toBeGreaterThanOrEqual(10.5);
+  expect(layout.iconCopyTopDelta).toBeLessThanOrEqual(1);
   expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
   if(testInfo.project.name.includes("mobile")){
@@ -365,10 +366,12 @@ test("chairman picker separates personality from mechanics and collapses safely 
     await expect(modal.locator(".cp-playstyle")).not.toHaveAttribute("open","");
   }else{
     expect(layout.desktopOrder).toBe(true);
+    expect(layout.firstEffectTopDelta).toBeLessThanOrEqual(1);
+    expect(layout.firstConHeight).toBeLessThanOrEqual(50);
     expect(Math.abs(layout.persona.top-layout.mechanics.top)).toBeLessThanOrEqual(1);
     expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
-    expect(layout.portrait.width).toBeLessThanOrEqual(220);
-    expect(layout.modalHeight).toBeLessThanOrEqual(520);
+    expect(layout.portrait.width).toBeLessThanOrEqual(190);
+    expect(layout.modalHeight).toBeLessThanOrEqual(425);
     await expect(modal.locator(".cp-playstyle")).toHaveAttribute("open","");
     await expect(modal.locator(".cp-nav-btn small")).toHaveCount(2);
     await expect(modal.locator(".cp-nav-btn small").first()).toBeVisible();
@@ -403,7 +406,7 @@ test("obsolete same-setup restart is absent from UI and runtime",async({page})=>
   expect(await page.evaluate(()=>typeof (globalThis as any).quickRestart)).toBe("undefined");
 });
 
-test("native Android and iOS packages keep the Ghost sheet safe-area layout",async({page},testInfo)=>{
+test("native Android and iOS packages keep the inline result and Club Career layout safe",async({page},testInfo)=>{
   const isAndroid=testInfo.project.name==="mobile-chromium";
   const isIos=testInfo.project.name==="webkit-mobile";
   test.skip(!isAndroid&&!isIos,"native mobile contract");
@@ -411,15 +414,16 @@ test("native Android and iOS packages keep the Ghost sheet safe-area layout",asy
     ghost:true,
     path:isIos?"/dist-ios/index.html?ghost-result-native=ios":"/dist-android/index.html?ghost-result-native=android",
   });
-  const shell=page.locator(".ghost-run-shell");
-  await expect(shell).toBeVisible();
-  await expect(shell.locator("h2")).toHaveText("HAYALET KULÜBÜN HAZIR");
+  await expect(page.locator(".ghost-run-shell")).toHaveCount(0);
+  const career=page.locator("#rCareerProgress");
+  await expect(career).toBeVisible();
   await expect(page.locator("#quickBtn")).toHaveCount(0);
-  const layout=await shell.evaluate(element=>({
+  const layout=await page.locator("#result").evaluate(element=>({
     overflow:element.scrollWidth-element.clientWidth,
-    bottomPadding:getComputedStyle(element.querySelector(".ghost-run-actions")!).paddingBottom,
+    careerWidth:(element.querySelector("#rCareerProgress") as HTMLElement).getBoundingClientRect().width,
+    resultWidth:element.getBoundingClientRect().width,
   }));
   expect(layout.overflow).toBeLessThanOrEqual(1);
-  expect(Number.parseFloat(layout.bottomPadding)).toBeGreaterThanOrEqual(14);
+  expect(layout.careerWidth).toBeLessThanOrEqual(layout.resultWidth);
   expect(await page.evaluate(()=>(globalThis as any).COPA_PLATFORM)).toBe(isIos?"ios":"android");
 });

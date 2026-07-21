@@ -12,6 +12,7 @@ const ROOT_FILES = [
   "favicon-16x16.png",
   "favicon-32x32.png",
   "favicon-48x48.png",
+  "faq.html",
   "apple-touch-icon.png",
   "web-app-icon-192.png",
   "web-app-icon-512.png",
@@ -103,6 +104,7 @@ export function buildNativePackage({
     .replace("</body>", `<script src="src/runtime/nativeApp.js?v=${buildInfo.buildVersion}"></script></body>`)
     .replaceAll("__COPA_BUILD_VERSION__", buildInfo.buildVersion);
   index = index.replace(LOCAL_ASSET_URL, `$1?v=${buildInfo.buildVersion}`);
+  index = index.replace(/\?v=202\d[A-Za-z0-9._-]*/g, `?v=${buildInfo.buildVersion}`);
   fs.writeFileSync(indexPath, index);
 
   transformFiles(out);

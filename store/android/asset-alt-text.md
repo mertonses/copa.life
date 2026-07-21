@@ -1,16 +1,60 @@
 # Google Play görsel alternatif metinleri
 
-Her metin 140 karakterin altındadır. Türkçe ana listeye TR, İngilizce yerelleştirmeye EN sütunu girilecek.
+Her metin 140 karakterin altındadır. Play Console'da ilgili dilin ana mağaza girişine girilmelidir.
 
-| Dosya | TR | EN |
-| --- | --- | --- |
-| `feature-graphic.jpg` | copa.life logosu, futbol sahası, oyuncu kartı ve zar ile kadro kurma teması. | copa.life logo with a football pitch, player card, and die representing squad building. |
-| `phone/01-her-kosuda-yeni-kadro.jpg` | Oyunun başlangıç ekranı; oynanış adımları ve diziliş seçimi. | Game start screen with the core loop and formation selection. |
-| `phone/02-zar-at-oyuncunu-sec.jpg` | Zar sonrası üç oyuncu adayı, fiyatları ve takım bütçesi. | Three player candidates and their prices after a roll, alongside the squad budget. |
-| `phone/03-taktigini-kur.jpg` | Maç öncesi rakip, takım gücü, taktik ve saha üzerindeki ilk on bir. | Pre-match opponent, squad power, tactic, and starting eleven on the pitch. |
-| `phone/04-copa-oyuncu-profili.jpg` | Oyuncunun altı copa puanı, radar grafiği ve mevki uyumu. | Player profile with six copa scores, a radar chart, and position fit. |
-| `tablet/01-her-kosuda-yeni-kadro.jpg` | Geniş ekranda başlangıç, diziliş, başkan ve ülke seçimleri. | Large-screen setup with formation, chairman, and country choices. |
-| `tablet/02-zar-at-oyuncunu-sec.jpg` | Geniş ekranda oyuncu adayları, bütçe ve boş ilk on bir sahası. | Large-screen draft with player candidates, budget, and an empty starting-eleven pitch. |
-| `tablet/03-taktigini-kur.jpg` | Geniş ekranda maç merkezi, kart pazarı ve tamamlanmış kadro. | Large-screen match hub with the card market and completed squad. |
-| `tablet/04-rakibini-analiz-et.jpg` | Rakibin tahmini dizilişini ve zayıf alanını gösteren scout raporu. | Scout report showing the opponent's predicted formation and weak area. |
+## Türkçe — tr-TR
 
+| Görsel | Alternatif metin |
+| --- | --- |
+| Özellik görseli | Futbol sahası, oyuncu kartları ve zar üzerinde copa.life kadro kurma teması. |
+| 01 | Oyunun başlangıç ekranında ana oynanış döngüsü, diziliş ve başkan seçimi. |
+| 02 | Zar sonrası üç oyuncu adayı, fiyatları ve kalan takım bütçesi. |
+| 03 | Dört torbadan 16 takımın gruplara ayrıldığı canlı kupa kurası. |
+| 04 | Rakip, kadro gücü, taktik ve saha üzerindeki ilk on bir. |
+| 05 | Oyuncunun copa puanları, radar grafiği ve mevki uyumu. |
+
+## English — en-US
+
+| Asset | Alt text |
+| --- | --- |
+| Feature graphic | copa.life squad-building theme with a football pitch, player cards, and a die. |
+| 01 | Start screen showing the core loop, formation choices, and chairman selection. |
+| 02 | Three player candidates, their prices, and the remaining squad budget after a roll. |
+| 03 | Live cup draw placing 16 teams from four pots into groups. |
+| 04 | Opponent, squad power, tactic, and starting eleven on the pitch. |
+| 05 | Player profile with copa scores, radar chart, and position fit. |
+
+## Español — es-ES
+
+| Recurso | Texto alternativo |
+| --- | --- |
+| Gráfico de funciones | Tema de creación de plantillas de copa.life con campo, cartas de jugador y un dado. |
+| 01 | Inicio con el ciclo principal, las formaciones y la selección de presidente. |
+| 02 | Tres candidatos, sus precios y el presupuesto restante tras una tirada. |
+| 03 | Sorteo en vivo que reparte 16 equipos de cuatro bombos en grupos. |
+| 04 | Rival, fuerza del equipo, táctica y once titular sobre el campo. |
+| 05 | Perfil de jugador con valores copa, gráfico radial y afinidad de posición. |
+
+## Deutsch — de-DE
+
+| Asset | Alternativtext |
+| --- | --- |
+| Feature-Grafik | copa.life-Kaderaufbau mit Fußballfeld, Spielerkarten und Würfel. |
+| 01 | Startbildschirm mit Spielablauf, Formationen und Präsidentenwahl. |
+| 02 | Drei Kandidaten, ihre Preise und das verbleibende Budget nach einem Wurf. |
+| 03 | Live-Auslosung, die 16 Teams aus vier Töpfen in Gruppen verteilt. |
+| 04 | Gegner, Kaderstärke, Taktik und Startelf auf dem Spielfeld. |
+| 05 | Spielerprofil mit copa-Werten, Radardiagramm und Positionspassung. |
+
+## Italiano — it-IT
+
+| Risorsa | Testo alternativo |
+| --- | --- |
+| Grafica delle funzionalità | Tema di costruzione della rosa copa.life con campo, carte giocatore e dado. |
+| 01 | Schermata iniziale con ciclo di gioco, moduli e scelta del presidente. |
+| 02 | Tre candidati, i prezzi e il budget rimasto dopo un lancio. |
+| 03 | Sorteggio live che divide 16 squadre da quattro fasce nei gruppi. |
+| 04 | Avversario, forza della rosa, tattica e undici titolare in campo. |
+| 05 | Profilo giocatore con valori copa, grafico radar e affinità di ruolo. |
+
+Telefon ve tablet sürümlerinde aynı sahne kullanıldığı için aynı alternatif metin girilebilir.

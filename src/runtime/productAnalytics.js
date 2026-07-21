@@ -19,7 +19,11 @@
     "ghost_opt_in",
     "meta_unlocked",
     "profile_open_error",
-    "final_sim_completed"
+    "final_sim_completed",
+    "group_draw_started",
+    "group_draw_completed",
+    "group_draw_skipped",
+    "tournament_match_resolved"
   ]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
   const OUTCOMES=new Set(["","win","draw","loss","sacked"]);
@@ -33,6 +37,9 @@
   const REWARDS=new Set(["","cash","loan","swap","care"]);
   const CARD_KINDS=new Set(["","power","final","risk","instant","contract","other"]);
   const ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9","cash_0_9","cash_10_plus"]);
+  const TOURNAMENT_STAGES=new Set(["","group","quarterfinal","semifinal","final"]);
+  const DRAW_MODES=new Set(["","manual","fast","complete"]);
+  const QUALIFICATION_STATES=new Set(["","yes","no","pending"]);
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
@@ -68,9 +75,13 @@
     const reward=REWARDS.has(String(props.reward||""))?String(props.reward||""):"";
     const cardKind=CARD_KINDS.has(String(props.card_kind||""))?String(props.card_kind||""):"";
     const economyBand=ECONOMY_BANDS.has(String(props.economy_band||""))?String(props.economy_band||""):"";
+    const tournamentStage=TOURNAMENT_STAGES.has(String(props.stage||""))?String(props.stage||""):"";
+    const drawMode=DRAW_MODES.has(String(props.mode||""))?String(props.mode||""):"";
+    const qualification=QUALIFICATION_STATES.has(String(props.qualified||""))?String(props.qualified||""):"";
+    const groupMatchday=Math.max(0,Math.min(3,Math.round(Number(props.group_matchday)||0)));
     const round=Math.max(0,Math.min(6,Math.round(Number(props.round)||0)));
     return {
-      schema_version:3,
+      schema_version:4,
       event:eventName,
       platform:"web",
       locale:locale(),
@@ -89,7 +100,11 @@
       style,
       reward,
       card_kind:cardKind,
-      economy_band:economyBand
+      economy_band:economyBand,
+      tournament_stage:tournamentStage,
+      draw_mode:drawMode,
+      qualification,
+      group_matchday:groupMatchday
     };
   }
 

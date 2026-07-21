@@ -46,7 +46,7 @@ const css = read("src/styles/layout.css");
 const ghost = read("src/online/ghostClubs.js");
 const persistence = read("src/state/runPersistence.js");
 const sw = read("sw.js");
-expect(persistence.includes('[2,3,4,5].includes(version)'), "Legacy save migration is missing from runPersistence");
+expect(persistence.includes('[2,3,4,5,6].includes(version)'), "Legacy/current save migration is missing from runPersistence");
 for (const marker of [
   'data-country="JP"', 'class="country-new-ribbon"', 'assets/flags/JP.svg',
   'src/data/players_japan.js', 'JP:[POOL_JP,OPP_POOL_JP]', 'if(k==="JP")return[POOL_JP,OPP_POOL_JP,OPP_BASES_JP]',

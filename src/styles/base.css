@@ -1,14 +1,14 @@
 /* Kupa Yolu - temel tema, reset ve global kurallar */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 input,textarea,[contenteditable]{user-select:text;-webkit-user-select:text}
-:focus-visible{outline:2px solid var(--focus-ring,rgba(66,154,115,0.38));outline-offset:2px;border-radius:4px}
+:focus-visible{outline:2px solid var(--focus-ring,rgba(104,117,124,0.38));outline-offset:2px;border-radius:4px}
 @keyframes ddshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-3px)}}
 @keyframes blink{50%{opacity:.4}}
 html,body{background:var(--page-bg);color:var(--text-primary);font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:400;font-size:15px;letter-spacing:-0.01em}
 body{position:relative;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(rgba(73,110,113,0.08) 1px,transparent 1px);background-size:20px 20px;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(rgba(86,97,106,0.08) 1px,transparent 1px);background-size:20px 20px;}
 .wrap{position:relative;z-index:1}
-@keyframes ddp{50%{background:rgba(12,18,19,.1)}}
+@keyframes ddp{50%{background:rgba(16,29,40,.1)}}
 body.reduced-motion *{animation-duration:.001s!important;transition-duration:.001s!important}
 @keyframes slidein{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
 .hidden{display:none!important}.pop{animation:pop .3s}@keyframes pop{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}60%{transform:translate(-50%,-50%) scale(1.08)}100%{transform:translate(-50%,-50%) scale(1)}}
@@ -18,16 +18,16 @@ body.reduced-motion *{animation-duration:.001s!important;transition-duration:.00
 /* Theme values only: gameplay, tier rules and state calculations remain untouched. */
 html[data-theme="dark"]{
   color-scheme:dark;
-  --color-background:#0b1517;--color-ink:#edf4f4;--color-slate:#9db7b9;--color-primary:#57ad84;
-  --page-bg:#0b1517;--surface-default:#111d1f;--surface-bg:#101b1d;--surface-elevated:#142225;--surface-raised:#17272a;
-  --surface-muted:rgba(157,183,185,.11);--surface-primary-soft:rgba(87,173,132,.16);--surface-dark:#071011;
-  --text-primary:#edf4f4;--text-secondary:#9db7b9;--text-on-dark:#edf4f4;--text-on-primary:#071011;
-  --border-subtle:rgba(157,183,185,.19);--border-default:rgba(157,183,185,.34);--border-strong:#789b9f;--border-selected:#57ad84;
-  --action-primary:#57ad84;--action-primary-hover:#6dc497;--overlay-bg:rgba(0,0,0,.72);--focus-ring:rgba(87,173,132,.4);
-  --disabled-bg:rgba(237,244,244,.08);--disabled-text:rgba(237,244,244,.4);--paper:#0b1517;--paper2:#101b1d;
-  --ink:#edf4f4;--ink2:#9db7b9;--line:rgba(157,183,185,.19);--navy:#071011;--good:#65be91;
+  --color-background:#101D28;--color-ink:#FFFFFF;--color-slate:#AAB2B3;--color-primary:#F24A28;
+  --page-bg:#101D28;--surface-default:#17242D;--surface-bg:#17242D;--surface-elevated:#1F2B34;--surface-raised:#1F2B34;
+  --surface-muted:rgba(170,178,179,.11);--surface-primary-soft:rgba(104,117,124,.16);--surface-dark:#0A1118;
+  --text-primary:#FFFFFF;--text-secondary:#AAB2B3;--text-on-dark:#FFFFFF;--text-on-primary:#0A1118;
+  --border-subtle:rgba(170,178,179,.19);--border-default:rgba(170,178,179,.34);--border-strong:#F25F40;--border-selected:#F24A28;
+  --action-primary:#F24A28;--action-primary-hover:#F25F40;--overlay-bg:rgba(10,17,24,.72);--focus-ring:rgba(104,117,124,.4);
+  --disabled-bg:rgba(255,255,255,.08);--disabled-text:rgba(255,255,255,.4);--paper:#101D28;--paper2:#17242D;
+  --ink:#FFFFFF;--ink2:#AAB2B3;--line:rgba(170,178,179,.19);--navy:#0A1118;--good:#F25F40;
 }
-html[data-theme="dark"] body::before{background:radial-gradient(rgba(157,183,185,.1) 1px,transparent 1px)}
+html[data-theme="dark"] body::before{background:radial-gradient(rgba(170,178,179,.1) 1px,transparent 1px)}
 html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{color:var(--text-primary);background:var(--surface-elevated)}
 html[data-copa-platform="android"] body,
 html[data-copa-platform="ios"] body{box-sizing:border-box;padding-top:var(--safe-area-inset-top,env(safe-area-inset-top,0px));padding-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));padding-left:var(--safe-area-inset-left,env(safe-area-inset-left,0px));padding-right:var(--safe-area-inset-right,env(safe-area-inset-right,0px))}

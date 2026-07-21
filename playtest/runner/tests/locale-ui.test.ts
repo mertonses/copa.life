@@ -2,12 +2,12 @@ import { test, expect } from "@playwright/test";
 
 test("TR, EN, ES, DE and IT render the intro, guide, draft and fixture chrome",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single-browser locale contract");
-  const expected:{[key:string]:{guide:string,round:string}}={
-    tr:{guide:"COPA REHBERİ",round:"1. TUR"},
-    en:{guide:"COPA GUIDE",round:"ROUND 1"},
-    es:{guide:"GUÍA COPA",round:"RONDA 1"},
-    de:{guide:"COPA-GUIDE",round:"RUNDE 1"},
-    it:{guide:"GUIDA COPA",round:"TURNO 1"},
+  const expected:{[key:string]:{guide:string}}={
+    tr:{guide:"COPA REHBERİ"},
+    en:{guide:"COPA GUIDE"},
+    es:{guide:"GUÍA COPA"},
+    de:{guide:"COPA-GUIDE"},
+    it:{guide:"GUIDA COPA"},
   };
   for(const [language,copy] of Object.entries(expected)){
     const errors:string[]=[];
@@ -29,14 +29,15 @@ test("TR, EN, ES, DE and IT render the intro, guide, draft and fixture chrome",a
     await page.locator("[data-guide-mode='detail']").click();
     await expect(page.locator(".howto-path-step")).toHaveCount(6);
     await page.evaluate(()=>(globalThis as any).closeModal());
-    await page.evaluate(()=>{
+    await page.evaluate(async()=>{
       const game=globalThis as any;
-      game.quickStart();
+      await game.quickStart();
+      if(game._countryDraftPromise)await game._countryDraftPromise;
       game.renderFixtures();
     });
     await expect(page.locator("#draft")).toBeVisible();
     await expect(page.locator("#pickhdr")).toHaveText(await page.evaluate(()=>(globalThis as any).L().pickhdr));
-    await expect(page.locator("#fixbar .fr").first()).toHaveText(copy.round);
+    await expect(page.locator("#fixbar .fr").first()).toHaveText(await page.evaluate(()=>(globalThis as any).L().rounds[0]));
     const visibleText=await page.locator("body").innerText();
     expect(visibleText).not.toMatch(/\b(?:undefined|null|NaN)\b/i);
     expect(errors).toEqual([]);

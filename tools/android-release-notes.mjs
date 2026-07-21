@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const NOTES_DIR = path.join(ROOT, "store", "android", "whatsnew");
-const REQUIRED_LOCALES = ["tr-TR", "en-US"];
+const REQUIRED_LOCALES = ["tr-TR", "en-US", "es-ES", "de-DE", "it-IT"];
 
 export function validateReleaseNotes() {
   const failures = [];

@@ -1,16 +1,35 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, purgeExpired, routeBucket } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, detectSchemaVersion, purgeExpired, routeBucket } from "../src/index.js";
 
 const origin="https://copa.life";
-const snapshot=(id="G-CLIENT123")=>({
-  schema_version:1,game_version:"2026.07.13",data_version:"2026.07.13",public_ghost_id:id,
-  simulation_version:"copa-final-core-v3",card_schema_version:"2026.07",
-  reached_round:3,squad_power:74,cash:12,club:{name:"Test Athletic",country:"TR"},active_cards:[],
-  starting_xi:Array.from({length:11},(_,index)=>({name:`Player ${index+1}`,pos:index?"OS":"KL",power:70+index%4}))
-});
+const formation442=["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"];
+const snapshot=(id="G-CLIENT123")=>{
+  const starting=formation442.map((pos,index)=>({name:`Player ${index+1}`,pos,power:70+index%4}));
+  return {
+    schema_version:1,game_version:"2026.07.13",data_version:"2026.07.13",public_ghost_id:id,
+    simulation_version:"copa-final-core-v3",card_schema_version:"2026.07",
+    reached_round:3,squad_power:74,cash:12,club:{name:"Test Athletic",country:"TR"},chairman:{id:"babacan",name:"Patron"},formation:"4-4-2",active_cards:[],
+    squad:starting.map(player=>({...player})),starting_xi:starting,bench:[],
+    match_history:Array.from({length:6},(_,index)=>({opponent:`Opponent ${index+1}`,result:index<2?"W":index===2?"L":"",gf:index<2?2:index===2?1:0,ga:index<2?0:index===2?2:0})),
+    result:{won:false,score:"",end_type:""}
+  };
+};
+const reachFinal=(value,won=false)=>{
+  value.reached_round=6;
+  value.match_history=value.match_history.map((match,index)=>({...match,result:index<5?"W":won?"W":"L",gf:index<5?2:won?2:1,ga:index<5?0:won?1:2}));
+  value.result={won,score:won?"2-1":"1-2",end_type:"regulation"};
+  return value;
+};
 const authHeaders=(client="GCL-CLIENT123",token="GDT-DELETE1234567890")=>({origin,"content-type":"application/json","x-copa-client":client,"x-copa-consent-version":"ghost-terms-v1","x-copa-delete-token":token});
 const post=(body,client,token)=>exports.default.fetch(new Request("https://ghost.test/v1/ghosts",{method:"POST",headers:authHeaders(client,token),body:JSON.stringify(body)}));
+const careerRun=(id="run-career123",won=false)=>({
+  schema_version:1,run_id:id,cheat_run:false,club:{name:"Test Athletic",country:"TR"},reached_round:won?6:3,
+  result:{won,score:won?"2-1":"",end_type:won?"regulation":""},
+  match_history:Array.from({length:6},(_,index)=>({opponent:`Opponent ${index+1}`,result:index<(won?6:2)?"W":index===(won?99:2)?"L":"",gf:index<(won?6:2)?2:index===(won?99:2)?1:0,ga:index<(won?6:2)?0:index===(won?99:2)?2:0}))
+});
+const leaderboardHeaders=(client="GCL-CAREER123",token="GDT-CAREERDELETE12345")=>({origin,"content-type":"application/json","x-copa-client":client,"x-copa-leaderboard-consent-version":"leaderboard-terms-v1","x-copa-delete-token":token});
+const postCareer=(body,client,token)=>exports.default.fetch(new Request("https://ghost.test/v1/leaderboard/runs",{method:"POST",headers:leaderboardHeaders(client,token),body:JSON.stringify(body)}));
 
 describe("Ghost Club Worker",()=>{
   it("uses fixed privacy-safe route buckets for worker metrics",()=>{
@@ -22,7 +41,14 @@ describe("Ghost Club Worker",()=>{
   it("reports D1 health",async()=>{
     const response=await exports.default.fetch(new Request("https://ghost.test/v1/health",{headers:{origin}}));
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ok:true,service:"ghost-club-api",schema_version:2,consent_version:"ghost-terms-v1"});
+    expect(await response.json()).toMatchObject({ok:true,service:"ghost-club-api",schema_version:3,consent_version:"ghost-terms-v1",leaderboard_consent_version:"leaderboard-terms-v1"});
+  });
+
+  it("reports the highest fully installed schema instead of hard-coding health",()=>{
+    expect(detectSchemaVersion(null)).toBe(0);
+    expect(detectSchemaVersion({ghost_runs:1})).toBe(1);
+    expect(detectSchemaVersion({ghost_runs:1,ghost_reports:1,ghost_clients:1})).toBe(2);
+    expect(detectSchemaVersion({ghost_runs:1,ghost_reports:1,ghost_clients:1,club_profiles:1,career_runs:1})).toBe(3);
   });
 
   it("creates server-owned IDs and never overwrites a submitted ID",async()=>{
@@ -70,6 +96,66 @@ describe("Ghost Club Worker",()=>{
     expect(response.status).toBe(428);expect(await response.json()).toMatchObject({error:"consent_required"});
   });
 
+  it("scores career runs on the server, deduplicates them and exposes ranked profiles",async()=>{
+    const token="GDT-CAREERDELETE12345";
+    const missingConsent=await exports.default.fetch(new Request("https://ghost.test/v1/leaderboard/runs",{method:"POST",headers:{origin,"content-type":"application/json","x-copa-delete-token":token},body:JSON.stringify(careerRun())}));
+    expect(missingConsent.status).toBe(428);
+    const first=await postCareer(careerRun("run-career123"),"GCL-CAREER123",token);
+    expect(first.status).toBe(201);
+    expect(await first.json()).toMatchObject({ok:true,duplicate:false,reputation:46,profile:{club_name:"Test Athletic",country:"TR",lifetime_reputation:46,total_runs:1}});
+    const duplicate=await postCareer(careerRun("run-career123"),"GCL-CAREER123",token);
+    expect(duplicate.status).toBe(200);expect(await duplicate.json()).toMatchObject({ok:true,duplicate:true});
+    const champion=await postCareer(careerRun("run-champion123",true),"GCL-CAREER123",token);
+    expect(champion.status).toBe(201);
+    expect(await champion.json()).toMatchObject({reputation:105,profile:{lifetime_reputation:151,total_runs:2,total_champions:1,total_finals:1,career_level:2}});
+    const ranking=await exports.default.fetch(new Request("https://ghost.test/v1/leaderboard?limit=100",{headers:{origin}}));
+    expect(ranking.status).toBe(200);
+    expect(await ranking.json()).toMatchObject({clubs:[{rank:1,club_name:"Test Athletic",season_score:151}]});
+    const mine=await exports.default.fetch(new Request("https://ghost.test/v1/leaderboard/me",{headers:{origin,"x-copa-client":"GCL-CAREER123","x-copa-delete-token":token}}));
+    expect(mine.status).toBe(200);expect(await mine.json()).toMatchObject({profile:{rank:1,season_score:151}});
+    await env.GHOSTS.prepare("UPDATE club_profiles SET season_key='2000-01',season_score=151").run();
+    const betweenSeasons=await exports.default.fetch(new Request("https://ghost.test/v1/leaderboard/me",{headers:{origin,"x-copa-client":"GCL-CAREER123","x-copa-delete-token":token}}));
+    expect(betweenSeasons.status).toBe(200);expect(await betweenSeasons.json()).toMatchObject({profile:{rank:0,season_score:0,lifetime_reputation:151},nearby:[]});
+    const removed=await exports.default.fetch(new Request("https://ghost.test/v1/me/leaderboard",{method:"DELETE",headers:{origin,"x-copa-client":"GCL-CAREER123","x-copa-delete-token":token}}));
+    expect(removed.status).toBe(200);expect(await removed.json()).toMatchObject({ok:true,deleted:3});
+  });
+
+  it("keeps concurrent career totals atomic and gives equal scores the same rank",async()=>{
+    const ownerToken="GDT-CONCURRENTDELETE1";
+    const [first,second]=await Promise.all([
+      postCareer(careerRun("run-concurrenta",true),"GCL-CONCURRENT1",ownerToken),
+      postCareer(careerRun("run-concurrentb",true),"GCL-CONCURRENT1",ownerToken)
+    ]);
+    expect([first.status,second.status].sort()).toEqual([201,201]);
+    const concurrentBodies=await Promise.all([first.json(),second.json()]);
+    expect(concurrentBodies.map(body=>body.reputation).sort((a,b)=>a-b)).toEqual([95,105]);
+    const owner=await env.GHOSTS.prepare("SELECT * FROM club_profiles WHERE owner_hash=(SELECT owner_hash FROM career_runs WHERE run_id='run-concurrenta')").first();
+    expect(owner).toMatchObject({lifetime_reputation:200,total_runs:2,total_champions:2,total_finals:2,season_score:200});
+
+    const rivalToken="GDT-EQUALRANKDELETE12";
+    const rivalResponses=await Promise.all([
+      postCareer(careerRun("run-equalranka",true),"GCL-EQUALRANK01",rivalToken),
+      postCareer(careerRun("run-equalrankb",true),"GCL-EQUALRANK01",rivalToken)
+    ]);
+    expect(rivalResponses.every(response=>response.status===201)).toBe(true);
+    const ranking=await exports.default.fetch(new Request("https://ghost.test/v1/leaderboard?limit=100",{headers:{origin}}));
+    const clubs=(await ranking.json()).clubs;
+    expect(clubs).toHaveLength(2);
+    expect(clubs.map(club=>club.rank)).toEqual([1,1]);
+    expect(clubs.map(club=>club.season_score)).toEqual([200,200]);
+  });
+
+  it("rejects semantically forged squads and histories",async()=>{
+    const overpowered=snapshot();overpowered.starting_xi[0].power=115;overpowered.squad[0].power=115;
+    expect((await post(overpowered,"GCL-FORGER001","GDT-FORGERDELETE12345")).status).toBe(422);
+    const wrongShape=snapshot();wrongShape.starting_xi[1].pos="ST";wrongShape.squad[1].pos="ST";
+    expect((await post(wrongShape,"GCL-FORGER002","GDT-FORGERDELETE45678")).status).toBe(422);
+    const fakePath=snapshot();fakePath.match_history[0].result="L";
+    expect((await post(fakePath,"GCL-FORGER003","GDT-FORGERDELETE78901")).status).toBe(422);
+    const fakePower=snapshot();fakePower.squad_power=115;
+    expect((await post(fakePower,"GCL-FORGER004","GDT-FORGERDELETEABCDE")).status).toBe(422);
+  });
+
   it("records only allowlisted aggregate product events",async()=>{
     const raw={schema_version:1,event:"draft_started",platform:"web",locale:"tr",game_country:"TR",round:1,outcome:"",detail:"",page_path:"/",app_version:"build-123",player_name:"Must Not Be Stored",club_name:"Must Not Be Stored",session_id:"Must Not Be Stored"};
     expect(normalizeAnalyticsEvent(raw)).toEqual({event:"draft_started",platform:"web",locale:"tr",gameCountry:"TR",outcome:"",detail:"",round:1,pagePath:"/",appVersion:"build-123"});
@@ -85,6 +171,9 @@ describe("Ghost Club Worker",()=>{
     expect(normalizeAnalyticsEvent(balanceEvent)).toMatchObject({event:"reward_selected",schemaVersion:3,outcome:"draw",chairman:"babacan",formation:"4-3-3",style:"gegen",reward:"cash",cardKind:"power",economyBand:"cash_0_9"});
     expect(normalizeAnalyticsEvent({...balanceEvent,chairman:"unknown"})).toBeNull();
     expect(normalizeAnalyticsEvent({...finalEvent,schema_version:3,chairman:"babacan"})).toMatchObject({event:"final_sim_completed",schemaVersion:3,chairman:"babacan"});
+    const tournamentEvent={...balanceEvent,schema_version:4,event:"tournament_match_resolved",tournament_stage:"group",draw_mode:"",qualification:"yes",group_matchday:3};
+    expect(normalizeAnalyticsEvent(tournamentEvent)).toMatchObject({event:"tournament_match_resolved",schemaVersion:4,tournamentStage:"group",qualification:"yes",groupMatchday:3});
+    expect(normalizeAnalyticsEvent({...tournamentEvent,tournament_stage:"round-of-16"})).toBeNull();
     expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });
 
@@ -96,9 +185,9 @@ describe("Ghost Club Worker",()=>{
   });
 
   it("matches only compatible simulation and card schemas in the tight power band",async()=>{
-    const compatibleSnapshot=snapshot();compatibleSnapshot.squad_power=104;compatibleSnapshot.reached_round=6;
+    const compatibleSnapshot=reachFinal(snapshot());compatibleSnapshot.squad_power=104;compatibleSnapshot.active_cards=[{id:"derbi",tier:"COMMON"},{id:"final_provasi",tier:"COMMON"},{id:"son_dans",tier:"COMMON"}];
     const compatible=await post(compatibleSnapshot,"GCL-MATCHOWNER1","GDT-MATCHDELETE12345"),compatibleId=(await compatible.json()).id;
-    const legacy=snapshot();legacy.squad_power=104;legacy.reached_round=6;legacy.simulation_version="copa-final-core-v2";
+    const legacy=reachFinal(snapshot());legacy.squad_power=104;legacy.active_cards=[{id:"derbi",tier:"COMMON"},{id:"final_provasi",tier:"COMMON"},{id:"son_dans",tier:"COMMON"}];legacy.simulation_version="copa-final-core-v2";
     const legacyCreated=await post(legacy,"GCL-MATCHOWNER2","GDT-MATCHDELETE56789");expect(legacyCreated.status).toBe(201);
     const legacyId=(await legacyCreated.json()).id;
     const response=await exports.default.fetch(new Request("https://ghost.test/v1/ghosts/match?power=104&round=6&simulation_version=copa-final-core-v3&card_schema_version=2026.07",{headers:{origin}}));
@@ -109,13 +198,27 @@ describe("Ghost Club Worker",()=>{
     expect(matched.public_ghost_id).toBe(compatibleId);
   });
 
-  it("reports hide a Ghost from matching and repeated reports block it",async()=>{
+  it("uses the compatibility index before reading ghost snapshots",async()=>{
+    const plan=await env.GHOSTS.prepare("EXPLAIN QUERY PLAN SELECT public_id, snapshot FROM ghost_runs WHERE status='eligible' AND eligible_until > ? AND json_extract(snapshot,'$.simulation_version')=? AND json_extract(snapshot,'$.card_schema_version')=? AND reached_round BETWEEN ? AND ? AND squad_power BETWEEN ? AND ? ORDER BY ABS(squad_power-?) ASC, created_at DESC LIMIT 60").bind("2026-07-01T00:00:00.000Z","copa-final-core-v3","2026.07",5,6,96,112,104).all();
+    expect(JSON.stringify(plan.results||[])).toContain("ghost_match_compat_lookup");
+    const leaderboardPlan=await env.GHOSTS.prepare("EXPLAIN QUERY PLAN SELECT * FROM club_profiles WHERE status='eligible' AND season_key=? AND season_score>0 ORDER BY season_score DESC LIMIT ?").bind("2026-07",100).all();
+    expect(JSON.stringify(leaderboardPlan.results||[])).toContain("club_leaderboard_lookup");
+  });
+
+  it("deduplicates spoofed reports by network and sends three distinct reporters to review",async()=>{
     const created=await post(snapshot(),"GCL-OWNER1234","GDT-OWNERDELETE12345"),id=(await created.json()).id;
     for(let index=1;index<=3;index++){
-      const report=await exports.default.fetch(new Request(`https://ghost.test/v1/ghosts/${id}/report`,{method:"POST",headers:{origin,"content-type":"application/json","x-copa-client":`GCL-REPORTER${index}A`},body:JSON.stringify({reason:"impersonation"})}));
+      const duplicate=await exports.default.fetch(new Request(`https://ghost.test/v1/ghosts/${id}/report`,{method:"POST",headers:{origin,"content-type":"application/json","cf-connecting-ip":"203.0.113.10","x-copa-client":`GCL-SPOOFED${index}A`},body:JSON.stringify({reason:"impersonation"})}));
+      expect(duplicate.status).toBe(201);
+    }
+    let row=await env.GHOSTS.prepare("SELECT status FROM ghost_runs WHERE public_id=?").bind(id).first();expect(row.status).toBe("eligible");
+    for(let index=1;index<=3;index++){
+      const report=await exports.default.fetch(new Request(`https://ghost.test/v1/ghosts/${id}/report`,{method:"POST",headers:{origin,"content-type":"application/json","cf-connecting-ip":`203.0.113.${20+index}`,"x-copa-client":`GCL-REPORTER${index}A`},body:JSON.stringify({reason:"impersonation"})}));
       expect(report.status).toBe(201);
     }
-    const row=await env.GHOSTS.prepare("SELECT status FROM ghost_runs WHERE public_id=?").bind(id).first();expect(row.status).toBe("blocked");
+    row=await env.GHOSTS.prepare("SELECT status FROM ghost_runs WHERE public_id=?").bind(id).first();expect(row.status).toBe("review");
+    const owner=await env.GHOSTS.prepare("SELECT violation_count FROM ghost_clients WHERE client_hash=(SELECT client_hash FROM ghost_runs WHERE public_id=?)").bind(id).first();
+    expect(Number(owner.violation_count)).toBe(0);
   });
 
   it("deletes all rows owned by the client-held deletion token",async()=>{
