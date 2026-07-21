@@ -4,14 +4,22 @@ const primaryProject=(name:string)=>name==="mobile-chromium";
 
 const openFinalReadyHub=async(page:any)=>{
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const global=globalThis as any;
-    (document.querySelector("#seedInput") as HTMLInputElement).value="COPAFINALE2026";
-    global.normalStart();
-    global.pickStyle("gegen");
+    global.quickStart();
+    await global.quickAll();
   });
   await page.locator("#postClubName").fill("Checkpoint FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{
+    const global=globalThis as any;
+    global.pcGo();
+    global.setCaptain(0);
+    global.closeModal();
+    global.round=6;
+    global.opponent={...global.bracket[5]};
+    global.CopaRunState.transition("hub",{force:true,reason:"penalty_checkpoint_test"});
+    global._saveState("hub");
+  });
   await expect(page.locator("#hub")).toBeVisible();
 };
 

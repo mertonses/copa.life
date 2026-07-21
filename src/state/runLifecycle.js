@@ -1,9 +1,9 @@
 /* Central run phase and invariant guard. */
 (function(global){
   "use strict";
-  const PHASES=Object.freeze(["intro","draft","hub","match","reward","result"]);
+  const PHASES=Object.freeze(["intro","draft","draw","hub","match","reward","result"]);
   const ALLOWED=Object.freeze({
-    intro:["draft"],draft:["hub","intro"],hub:["match","result","intro"],
+    intro:["draft"],draft:["draw","hub","intro"],draw:["hub","intro"],hub:["match","result","intro"],
     match:["hub","reward","result"],reward:["hub","result"],result:["intro","draft"]
   });
   let phase="intro";
@@ -20,7 +20,8 @@
     const errors=[];
     if(!PHASES.includes(target))errors.push("unknown_phase");
     if(target==="draft"&&!draftShape())errors.push("invalid_draft_shape");
-    if(["hub","match","reward"].includes(target)&&!completeXI())errors.push("incomplete_starting_xi");
+    if(["draw","hub","match","reward"].includes(target)&&!completeXI())errors.push("incomplete_starting_xi");
+    if(target==="draw"&&global.CopaTournamentEngine&&(!global.tournament||!global.CopaTournamentEngine.validate(global.tournament).ok))errors.push("invalid_tournament");
     if(typeof global.round!=="undefined"&&target!=="intro"&&(!Number.isInteger(global.round)||global.round<1||global.round>6))errors.push("invalid_round");
     return{ok:errors.length===0,errors,phase:target};
   }
@@ -34,7 +35,7 @@
     try{global.dispatchEvent(new CustomEvent("copa:phase",{detail:{from,to:next}}));}catch(_){ }
     return{ok:true,errors:[],from,to:next};
   }
-  function safeCheckpointPhase(){return phase==="draft"?"draft":phase==="hub"?"hub":null;}
+  function safeCheckpointPhase(){return phase==="draft"?"draft":phase==="draw"?"draw":phase==="hub"?"hub":null;}
   global.runPhase=phase;
   global.CopaRunState=Object.freeze({PHASES,get phase(){return phase;},transition,validate,completeXI,draftShape,safeCheckpointPhase,history:()=>history.slice()});
 })(window);

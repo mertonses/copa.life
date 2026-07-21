@@ -124,7 +124,9 @@
     link.rel="stylesheet";
     link.href="src/styles/howtoGuide.css?v=20260720-mobile-tip1";
     link.dataset.copaHowto="1";
-    document.head.appendChild(link);
+    const palette=document.querySelector('link[href*="src/styles/palette.css"]');
+    if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);
+    else document.head.appendChild(link);
   }
 
   function quickPanel(c){

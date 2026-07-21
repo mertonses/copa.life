@@ -7,8 +7,8 @@ const OUT = path.join(ROOT, "dist-legal");
 const REMOTE_BASE = "https://copa-life-legal.pages.dev";
 const failures = [];
 const required = {
-  "privacy.html": ["Gizlilik", "45 gün", "Verilerimi sil", "ghost-terms-v1"],
-  "terms.html": ["Kullanım", "Ghost Club", "Moderasyon"],
+  "privacy.html": ["Gizlilik", "45 gün", "Çevrimiçi verilerimi sil", "ghost-terms-v1", "leaderboard-terms-v1"],
+  "terms.html": ["Kullanım", "Ghost Club", "Dünya Kulüpler Sıralaması", "Moderasyon"],
   "takedown.html": ["TAKEDOWN", "bildir", "hak"],
 };
 

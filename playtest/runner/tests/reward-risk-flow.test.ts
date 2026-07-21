@@ -13,19 +13,28 @@ async function openHub(page:Page){
   await page.locator("#postClubName").fill("Reward XI");
   await page.evaluate(()=>{
     const game=globalThis as any;
-    game.pcGo();
+    game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();
     game.setCaptain(0);
     game.closeModal();
   });
   await expect(page.locator("#hub")).toBeVisible();
 }
 
+async function enterReward(page:Page){
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    const moved=game.CopaRunState.transition("match",{reason:"reward_risk_flow_test"});
+    if(!moved.ok)throw new Error(`reward setup failed: ${moved.error||"transition"}`);
+    game.showRewardChoice();
+  });
+}
+
 test("reward screen shows real cash and a chemistry-safe +2 loan preview",async({page})=>{
   await openHub(page);
+  await page.evaluate(()=>{(globalThis as any).kaosHalfReward=true;});
+  await enterReward(page);
   const preview=await page.evaluate(()=>{
     const game=globalThis as any;
-    game.kaosHalfReward=true;
-    game.showRewardChoice();
     const offer=game.pendingLoanReward;
     return{
       gain:offer.after-offer.before,
@@ -75,14 +84,17 @@ test("loan keeps the +2 squad guarantee even at the 99 OV ceiling",async({page})
 
 test("Medical Team lists every injury, heals the selected player and protects the next match",async({page})=>{
   await openHub(page);
-  const names=await page.evaluate(()=>{
+  await page.evaluate(()=>{
     const game=globalThis as any;
     game.picksBySlot[0].injured=true;
     game.picksBySlot[0].injuryLevel=2;
     game.picksBySlot[1].injured=true;
     game.picksBySlot[1].injuryLevel=3;
     game.syncInjuredIdx();
-    game.showRewardChoice();
+  });
+  await enterReward(page);
+  const names=await page.evaluate(()=>{
+    const game=globalThis as any;
     return[game.shortName(game.picksBySlot[0]),game.shortName(game.picksBySlot[1])];
   });
 
@@ -220,6 +232,7 @@ test("risky offers use the new names and preserve the intended packages",async({
 
 test("Card Swap offers two eligible cards and discloses retained final debt",async({page})=>{
   await openHub(page);
+  await enterReward(page);
   const setup=await page.evaluate(()=>{
     const game=globalThis as any;
     game.round=2;

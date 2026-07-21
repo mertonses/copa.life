@@ -3,6 +3,9 @@ import fs from "node:fs";
 const hub = fs.readFileSync("src/ui/hub.js", "utf8");
 const i18n = fs.readFileSync("src/data/i18n.js", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
+const cardBalance = fs.readFileSync("src/cards/cardBalance.js", "utf8");
+const cardDefs = fs.readFileSync("src/cards/cardDefs.js", "utf8");
+const power = fs.readFileSync("src/balance/power.js", "utf8");
 const cardCss = fs.readFileSync("src/styles/cards.css", "utf8");
 const cardReportTool = fs.existsSync("tools/card-balance-report.mjs")
   ? fs.readFileSync("tools/card-balance-report.mjs", "utf8")
@@ -66,8 +69,8 @@ const checks = [
     name: "DARK market cards keep the softened black-white identity and readable price",
     pass:
       /#hub \.cardtile\.is-dark\{[^}]*background:(?:var\(--color-ink\)|linear-gradient)/s.test(cardCss) &&
-      /#hub \.cardtile\.is-dark \.ct-name,[\s\S]*color:#(?:fff|f4f8f8)/s.test(cardCss) &&
-      /#hub \.cardtile\.is-dark \.ct-head-price,[\s\S]*background:#fff;[\s\S]*color:var\(--color-ink\)/s.test(cardCss),
+      /#hub \.cardtile\.is-dark \.ct-name,[\s\S]*color:#FFFFFF/s.test(cardCss) &&
+      /#hub \.cardtile\.is-dark \.ct-head-price,[\s\S]*background:#FFFFFF;[\s\S]*color:var\(--color-ink\)/s.test(cardCss),
   },
   {
     name: "forbidden card tier terms are absent from visible copy",
@@ -80,6 +83,25 @@ const checks = [
   {
     name: "backroom pressure card copy stays explicit",
     pass: !unclearCardCopy.some((term) => visibleCopy.includes(term)),
+  },
+  {
+    name: "lottery card explains automatic first-card coupon and immediate risk",
+    pass:
+      hub.includes("Önündeki 2 turda alacağın ilk kart en fazla €8M ucuzlar (min. €2M)") &&
+      hub.includes("%20 ihtimalle hemen €3M masraf çıkar") &&
+      cardBalance.includes("İlk kart · ${c.turns||2} tur: en fazla") &&
+      !hub.includes('nasip_kismet:()=>sv===1?(tr?"€3M;'),
+  },
+  {
+    name: "opponent-strength cards compare explicit POWER values",
+    pass:
+      hub.includes("Barikat eklenmeden önce rakibin GÜÇ değeri seninkinden yüksekse") &&
+      hub.includes("Rakibin GÜÇ değeri seninkinden yüksekse +6") &&
+      !hub.includes("Rakip güçlüyse") &&
+      !hub.includes("Güçlü rakibe karşı") &&
+      cardDefs.includes('squadPower(r,"gec_gec").power') &&
+      power.includes("function powerBreakdown(r,excludedCard)") &&
+      power.includes("if(k===excludedCard)return"),
   },
   {
     name: "card balance report generator is UTF-8 clean",

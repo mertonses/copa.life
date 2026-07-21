@@ -15,14 +15,13 @@
 - Oyun / Ücretsiz seçimlerini yap.
 - Paket adı: `life.copa.app`.
 - Play App Signing'i etkinleştir.
-- Mağaza adı, kısa açıklama ve tam açıklamayı `listing-tr.md` dosyasından gir; İngilizce yerelleştirmeyi `listing-en.md` ile ekle.
+- Mağaza adı, kısa açıklama ve tam açıklamayı `listing-tr.md` dosyasından gir; `listing-en.md`, `listing-es.md`, `listing-de.md` ve `listing-it.md` ile dört yerelleştirmeyi ekle.
 
 ## 3. Görseller
 
 - `graphics/app-icon-512.png`
-- `graphics/feature-graphic.jpg`
-- `graphics/phone/` altındaki dört adet 1080×1920 ekran görüntüsü
-- `graphics/tablet/` altındaki dört adet 1920×1080 geniş ekran görüntüsü
+- Türkçe varsayılan giriş için `graphics/feature-graphic.jpg`, `graphics/phone/` ve `graphics/tablet/`
+- Dört ek dil için `graphics/localized/<locale>/` altındaki feature graphic, beş adet 1080×1920 telefon ve beş adet 1920×1080 tablet görseli
 - Yüklemeden önce `asset-manifest.json` boyut ve SHA‑256 değerlerini doğrula.
 
 ## 4. App content

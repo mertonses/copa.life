@@ -8,14 +8,14 @@
 
 ## Toplanan veriler
 
-Ghost Club açılmadıkça sunucuya kullanıcı verisi gönderilmez. Özellik açık rıza ile açıldığında:
+Ghost paylaşımı veya Dünya Kulüpler Sıralaması açılmadıkça sunucuya kullanıcı verisi gönderilmez. Her özellik ayrı açık rıza ile açıldığında:
 
 | Apple veri türü | Amaç | Kimlikle bağlantılı | Takip |
 |---|---|---:|---:|
 | Gameplay Content | App Functionality | Hayır | Hayır |
 | Device ID (uygulamanın ürettiği anonim kurulum kimliğinin tek yönlü özeti) | App Functionality | Hayır | Hayır |
 
-Gameplay Content; kadro, oyun sonucu, kullanıcı kulüp adı ve moderasyon raporunu kapsar. Kesin cevaplar gönderilecek build ve çalışan sunucu davranışıyla yeniden karşılaştırılmalıdır.
+Gameplay Content; Ghost kadrosu/sonucu, kullanıcı kulüp adı, moderasyon raporu ve sıralama için tur-galibiyet-kupa sonucunu kapsar. Sıralama tekil koşuları aktif aylık sezon, herkese açık toplu kulüp profili katılım/silme süresince tutulur. Kesin cevaplar gönderilecek build ve çalışan sunucu davranışıyla yeniden karşılaştırılmalıdır.
 
 ## URL'ler
 
@@ -23,4 +23,4 @@ Gameplay Content; kadro, oyun sonucu, kullanıcı kulüp adı ve moderasyon rapo
 - Privacy Choices: `https://copa-life-legal.pages.dev/privacy.html`
 - Support: `https://copa.life/`
 
-Uygulama hesabı oluşturulmaz. Ghost verisi uygulama içinden kalıcı olarak silinebilir.
+Uygulama hesabı oluşturulmaz. Ghost ve Dünya sıralaması verileri uygulama içinden kalıcı olarak silinebilir.

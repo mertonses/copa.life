@@ -12,9 +12,13 @@
   }
   function closeOverlay(){
     if(root.PlayerProfiles&&root.PlayerProfiles.isOpen()){root.PlayerProfiles.close();return true;}
+    const onboarding=document.getElementById("onlineFeaturesOnboarding");if(onboarding)return true;
     const consent=document.getElementById("ghostConsentDialog");if(consent){consent.remove();return true;}
     const settings=document.getElementById("settingsDrop");if(settings&&!settings.classList.contains("hidden")){settings.classList.add("hidden");return true;}
-    const modal=document.getElementById("modal");if(modal&&!modal.classList.contains("hidden")&&typeof root.closeModal==="function"){root.closeModal();return true;}
+    const modal=document.getElementById("modal");if(modal&&!modal.classList.contains("hidden")){
+      if(modal.dataset.dismissOnEscape==="false")return true;
+      if(typeof root.closeModal==="function"){root.closeModal();return true;}
+    }
     return false;
   }
   addNativeListener("appStateChange",state=>{if(!state.isActive)checkpoint();root.dispatchEvent(new CustomEvent("copa:native-state",{detail:{active:!!state.isActive}}));});
@@ -28,6 +32,6 @@
     });
   root.addEventListener("pagehide",checkpoint,{passive:true});
   const statusTasks=[StatusBar.setStyle({style:"LIGHT"}),StatusBar.setOverlaysWebView({overlay:false})];
-  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#f5f0e8"}));
+  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#F3F5F4"}));
   Promise.allSettled(statusTasks).finally(()=>SplashScreen.hide().catch(()=>{}));
 })(window);

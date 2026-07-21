@@ -41,7 +41,7 @@ if (!html.includes('chairmanReactToSpend(a.fee,"transfer",a.p)')) failures.push(
 if (!html.includes("eventSeen.nephewDecision=true") || html.includes("rand()<0.12")) failures.push("Torpilci can still trigger a second nephew offer");
 if (!html.includes("Math.min(3,80-p.ov)")) failures.push("accepted nephew does not develop by up to +3 each round");
 if (!html.includes('trackChairmanMetric(homeWon?"penaltyWins":"penaltyLosses",1)')) failures.push("penalty outcome chairman telemetry is missing");
-if (!html.includes("chairTrust=Math.min(3,chairTrust+2)")) failures.push("penalty win does not restore normal-win chairman trust");
+if (!html.includes("if(homeWon)chairTrust=Math.min(3,chairTrust+1);else chairTrust=Math.max(0,chairTrust-1)")) failures.push("penalty outcome does not apply the normal win/loss chairman-trust delta");
 if (!html.includes('fixtures[round-1].res=homeWon?"W":"L"')) failures.push("penalty result is not recorded as a normal win/loss");
 
 if (failures.length) {

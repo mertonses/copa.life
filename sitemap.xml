@@ -3,10 +3,22 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://copa.life/</loc>
-    <lastmod>2026-07-04</lastmod>
+    <lastmod>2026-07-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="tr" href="https://copa.life/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://copa.life/"/>
+  </url>
+  <url>
+    <loc>https://copa.life/faq.html</loc>
+    <lastmod>2026-07-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://copa.life/faq.html?lang=tr"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://copa.life/faq.html?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://copa.life/faq.html?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://copa.life/faq.html?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://copa.life/faq.html?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://copa.life/faq.html"/>
   </url>
 </urlset>

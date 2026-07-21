@@ -6,6 +6,7 @@
   },
   "scripts": {
     "postinstall": "node tools/patch-capacitor-safe-area.mjs",
+    "brand:assets": "node tools/apply-brand-palette.mjs && node tools/generate-favicons.mjs favicon.svg && node tools/generate-ios-assets.mjs && node tools/generate-android-assets.mjs",
     "favicons": "node tools/generate-favicons.mjs favicon.svg",
     "fix:encoding": "node tools/fix-mojibake.mjs",
     "build:pages": "node tools/build-pages.mjs",
@@ -28,6 +29,7 @@
     "android:candidate:local": "powershell -ExecutionPolicy Bypass -File tools/build-android-release.ps1 -AllowDirty",
     "android:release:local": "powershell -ExecutionPolicy Bypass -File tools/build-android-release.ps1",
     "check:android": "node tools/check-android-package.mjs",
+    "check:android:store": "node tools/check-android-store-assets.mjs",
     "check:android:release": "node tools/check-android-release.mjs",
     "check:android:aab": "node tools/run-java.mjs tools/CheckAndroidAab.java android/app/build/outputs/bundle/release/app-release.aab",
     "check:android:signature": "node tools/check-android-signature.mjs android/app/build/outputs/bundle/release/app-release-signed.aab",
@@ -48,6 +50,8 @@
     "check:encoding": "node tools/check-encoding.mjs",
     "check:locales": "node tools/check-locales.mjs",
     "check:responsive": "node tools/check-responsive.mjs",
+    "check:faq": "node tools/check-faq.mjs",
+    "check:palette": "node tools/check-color-palette.mjs",
     "check:cards": "node tools/check-card-copy.mjs",
     "check:positions": "node tools/check-position-fit.mjs",
     "players:rebalance": "node tools/rebalance-player-pools.mjs --write",
@@ -83,7 +87,9 @@
     "check:japan": "node tools/check-japan-country.mjs",
     "audit:japan-data": "node tools/audit-japan-player-data.mjs",
     "check:persistence": "node tools/check-run-persistence.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:release && npm run check:ios:readiness"
+    "check:tournament": "node tools/check-group-tournament.mjs",
+    "check:tournament:balance": "node tools/check-tournament-balance.mjs",
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:tournament && npm run check:tournament:balance && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:store && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

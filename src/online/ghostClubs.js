@@ -4,6 +4,11 @@
   const SETTINGS_KEY="copa_ghost_clubs_enabled";
   const SHARING_KEY="copa_ghost_sharing_enabled";
   const CONSENT_KEY="copa_ghost_consent_v1";
+  const LEADERBOARD_CONSENT_KEY="copa_leaderboard_consent_v1";
+  const LEADERBOARD_ENABLED_KEY="copa_leaderboard_enabled";
+  const LEADERBOARD_QUEUE_KEY="copa_leaderboard_queue_v1";
+  const LEADERBOARD_DELETE_PENDING_KEY="copa_leaderboard_delete_pending_v1";
+  const ONBOARDING_KEY="copa_online_features_onboarding_v1";
   const CLIENT_KEY="copa_ghost_client_id_v1";
   const DELETE_TOKEN_KEY="copa_ghost_delete_token_v1";
   const BLOCKED_KEY="copa_ghost_blocked_ids_v1";
@@ -15,6 +20,8 @@
   const CONFIG=Object.freeze({
     schemaVersion:1,
     consentVersion:"ghost-terms-v1",
+    leaderboardConsentVersion:"leaderboard-terms-v1",
+    onboardingVersion:"online-features-v1",
     gameVersion:"2026.07.13",
     dataVersion:"2026.07.15-copa1",
     cardSchemaVersion:"2026.07",
@@ -28,9 +35,15 @@
   const safeRemove=key=>{try{localStorage.removeItem(key);return true;}catch(_){return false;}};
   function consent(){try{const value=JSON.parse(safeGet(CONSENT_KEY,"null"));return value&&value.version===CONFIG.consentVersion&&value.terms===true&&value.sharing===true?value:null;}catch(_){return null;}}
   const hasConsent=()=>!!consent();
+  function leaderboardConsent(){try{const value=JSON.parse(safeGet(LEADERBOARD_CONSENT_KEY,"null"));return value&&value.version===CONFIG.leaderboardConsentVersion&&value.terms===true&&value.public_profile===true?value:null;}catch(_){return null;}}
+  const hasLeaderboardConsent=()=>!!leaderboardConsent();
+  const leaderboardEnabled=()=>safeGet(LEADERBOARD_ENABLED_KEY,hasLeaderboardConsent()?"1":"0")==="1"&&hasLeaderboardConsent();
   const defaultMatchSetting=()=>window.COPA_IS_NATIVE?"0":"1";
   const enabled=()=>safeGet(SETTINGS_KEY,defaultMatchSetting())==="1";
   const sharingEnabled=()=>safeGet(SHARING_KEY,hasConsent()?"1":"0")==="1"&&hasConsent();
+  function onboarding(){try{const value=JSON.parse(safeGet(ONBOARDING_KEY,"null"));return value&&value.version===CONFIG.onboardingVersion?value:null;}catch(_){return null;}}
+  const mobileOnboardingComplete=()=>!!onboarding();
+  const shouldGateMobileOnboarding=()=>!!window.COPA_IS_NATIVE&&!mobileOnboardingComplete();
   function setEnabled(value){safeSet(SETTINGS_KEY,value?"1":"0");ensureSetting();return enabled();}
   function setSharingEnabled(value){
     if(value&&!hasConsent()){requestConsent();return false;}
@@ -125,6 +138,21 @@
   function reportQueue(){try{const q=JSON.parse(safeGet(REPORT_QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return [];}}
   function saveReportQueue(items){safeSet(REPORT_QUEUE_KEY,JSON.stringify(items.slice(-32)));}
   function enqueueReport(id,reason){const items=reportQueue(),key=id+"|"+reason;if(!items.some(item=>item.id+"|"+item.reason===key))items.push({id,reason,created_at:new Date().toISOString()});saveReportQueue(items);}
+  function leaderboardQueue(){try{const q=JSON.parse(safeGet(LEADERBOARD_QUEUE_KEY,"[]"));return Array.isArray(q)?q:[];}catch(_){return[];}}
+  function saveLeaderboardQueue(items){safeSet(LEADERBOARD_QUEUE_KEY,JSON.stringify(items.slice(-CONFIG.queueMax)));}
+  async function setLeaderboardEnabled(value){
+    if(value&&!hasLeaderboardConsent()){requestLeaderboardConsent();return false;}
+    safeSet(LEADERBOARD_ENABLED_KEY,value?"1":"0");
+    if(!value){
+      saveLeaderboardQueue([]);
+      await deleteLeaderboardData();
+    }else{
+      safeRemove(LEADERBOARD_DELETE_PENDING_KEY);
+      flushLeaderboardQueue();
+    }
+    ensureSetting();
+    return leaderboardEnabled();
+  }
   function playerSnapshot(player,index){
     const p=player||{};
     return {
@@ -222,6 +250,122 @@
     };
     profile.integrity=hash(JSON.stringify(profile));
     return profile;
+  }
+  function normalizeLeaderboardRun(context){
+    const safe=context&&typeof context==="object"?context:{},started=readStartedRun(),result=safe.run||{};
+    const fixtures=(Array.isArray(safe.fixtures)?safe.fixtures:[]).slice(0,6).map(match=>({
+      opponent:cleanText(match&&((match.opp||match.name)||"")),
+      result:cleanText(match&&match.res||""),
+      gf:Math.round(bounded(match&&match.gf,0,20)),
+      ga:Math.round(bounded(match&&match.ga,0,20))
+    }));
+    while(fixtures.length<6)fixtures.push({opponent:"",result:"",gf:0,ga:0});
+    return {
+      schema_version:1,
+      run_id:cleanText(started.id||("run-"+hash([safe.seed,safe.teamName,Date.now()].join("|")))).toLowerCase(),
+      cheat_run:!!(safe.cheatRun||started.cheatRun),
+      club:{name:cleanClubName(safe.teamName||started.clubName||"copa.life XI","copa.life XI"),country:cleanText(safe.selectedCountry||started.country||"TR").toUpperCase()},
+      reached_round:Math.round(bounded(result.won?6:(result.round||safe.round),1,6)),
+      result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
+      match_history:fixtures
+    };
+  }
+  async function flushLeaderboardQueue(){
+    if(!leaderboardEnabled()||!navigator.onLine)return false;
+    const base=apiBase();if(!base)return false;
+    const items=leaderboardQueue(),remaining=[];
+    for(const item of items){
+      try{
+        const response=await fetchWithTimeout(base+"/v1/leaderboard/runs",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId(),"x-copa-leaderboard-consent-version":CONFIG.leaderboardConsentVersion,"x-copa-delete-token":deleteToken()},body:JSON.stringify(item),keepalive:true});
+        if(!response.ok&&response.status!==409&&response.status!==422)remaining.push(item);
+      }catch(_){remaining.push(item);}
+    }
+    saveLeaderboardQueue(remaining);return remaining.length===0;
+  }
+  async function flushLeaderboardDeletion(){
+    if(safeGet(LEADERBOARD_DELETE_PENDING_KEY,"0")!=="1"||!navigator.onLine)return false;
+    const base=apiBase();if(!base)return false;
+    try{
+      const response=await fetchWithTimeout(base+"/v1/me/leaderboard",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});
+      if(!response.ok)return false;
+      safeRemove(LEADERBOARD_DELETE_PENDING_KEY);
+      return true;
+    }catch(_){return false;}
+  }
+  function recordLeaderboardRun(context){
+    if(!leaderboardEnabled())return false;
+    const run=normalizeLeaderboardRun(context);if(run.cheat_run)return false;
+    const items=leaderboardQueue();if(!items.some(item=>item.run_id===run.run_id))items.push(run);saveLeaderboardQueue(items);setTimeout(flushLeaderboardQueue,0);return true;
+  }
+  let leaderboardConsentRequest=null;
+  function requestLeaderboardConsent(){
+    if(hasLeaderboardConsent()){safeSet(LEADERBOARD_ENABLED_KEY,"1");flushLeaderboardQueue();return Promise.resolve(true);}
+    if(leaderboardConsentRequest)return leaderboardConsentRequest;
+    leaderboardConsentRequest=new Promise(resolve=>{
+      const layer=document.createElement("div");layer.className="ghost-consent-layer";layer.id="leaderboardConsentDialog";
+      const finish=accepted=>{layer.remove();leaderboardConsentRequest=null;resolve(accepted);};
+      layer.innerHTML=`<section class="ghost-consent-card" role="dialog" aria-modal="true" aria-labelledby="leaderboardConsentTitle"><h3 id="leaderboardConsentTitle">${tr("DÜNYA KULÜPLER SIRALAMASI · BETA","WORLD CLUB RANKING · BETA")}</h3><p>${tr("Bu, ödülsüz bir topluluk kariyer sıralamasıdır. Katılırsan kulüp adın, ülken, Dünya Seviyen, sezon Katsayın ve kupa istatistiklerin herkese açık gösterilir. Katsayı en iyi 10 koşunu kullanır ve her ay yenilenir.","This is a community career ranking with no competitive rewards. If you join, your club name, country, World Level, seasonal Coefficient and cup statistics are shown publicly. The Coefficient uses your best 10 runs and resets monthly.")}</p><p class="ghost-consent-confirm">${tr("Sonuçlara tutarlılık kontrolleri uygulanır; ancak istemci tarafında çalışan oyunda mutlak hile koruması garanti edilmez. Dünya profilin bu cihazdaki anonim anahtara bağlıdır ve kariyer kayıt koduna dahil değildir. Geçmiş koşular geriye dönük gönderilmez; profilini ve sonuçlarını ayarlardan kalıcı olarak silebilirsin.","Results receive consistency checks, but absolute cheat protection cannot be guaranteed in a client-side game. Your World profile is tied to this device's anonymous key and is not included in the career save code. Past runs are not uploaded retroactively; you can permanently delete your profile and results from Settings.")}</p><div class="ghost-consent-links"><a href="terms.html" target="_blank" rel="noopener">${tr("Kullanım şartları","Terms")}</a><a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a></div><div class="ghost-consent-actions"><button type="button" data-lb-cancel>${tr("VAZGEÇ","CANCEL")}</button><button type="button" data-lb-accept>${tr("KATIL VE YAYINLA","JOIN AND PUBLISH")}</button></div></section>`;
+      layer.querySelector("[data-lb-cancel]").onclick=()=>finish(false);
+      layer.querySelector("[data-lb-accept]").onclick=()=>{safeSet(LEADERBOARD_CONSENT_KEY,JSON.stringify({version:CONFIG.leaderboardConsentVersion,terms:true,public_profile:true,accepted_at:new Date().toISOString()}));safeSet(LEADERBOARD_ENABLED_KEY,"1");deleteToken();ensureSetting();flushLeaderboardQueue();finish(true);};
+      document.body.appendChild(layer);
+    });
+    return leaderboardConsentRequest;
+  }
+  const escapeHTML=value=>cleanText(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  function leaderboardRows(rows,myId){
+    return (Array.isArray(rows)?rows:[]).map(row=>`<div class="world-rank-row${row.public_club_id===myId?" is-me":""}"><b>#${row.rank}</b><span><strong>${escapeHTML(row.club_name)}</strong><small>${escapeHTML(row.country)} · ${tr("Dünya Sv.","World Lv.")} ${row.career_level} · ${row.total_champions} ${tr("kupa","cups")}</small></span><em>${row.season_score}</em></div>`).join("");
+  }
+  function worldStateHTML(kind,title,copy,action=true){
+    const icons={offline:"⌁",error:"!",unavailable:"◎"},label=tr("TEKRAR DENE","TRY AGAIN");
+    return `<div class="meta-world-state is-${kind}"><span aria-hidden="true">${icons[kind]||"◎"}</span><h3>${title}</h3><p>${copy}</p>${action?`<button type="button" class="meta-world-action" onclick="GhostClubs.renderLeaderboard(document.getElementById('metaWorldPanel'))">${label}</button>`:""}</div>`;
+  }
+  function worldLoadingHTML(){
+    return `<div class="meta-world-skeleton" aria-label="${tr("Dünya sıralaması yükleniyor","Loading world rankings")}"><i></i><i></i><i></i><i></i></div>`;
+  }
+  async function renderLeaderboard(root){
+    if(!root)return;
+    root.classList.add("meta-world-panel");
+    const base=apiBase();
+    if(!base){
+      root.innerHTML=worldStateHTML("unavailable",tr("Dünya sıralaması kullanılamıyor","World rankings are unavailable"),tr("Bu sürümde sıralama servisi yapılandırılmamış.","The ranking service is not configured in this build."),false);
+      return;
+    }
+    if(!navigator.onLine){
+      root.innerHTML=worldStateHTML("offline",tr("Çevrimdışısın","You are offline"),tr("Dünya sıralamasını görmek için bağlantını kontrol et.","Check your connection to view the World ranking."));
+      return;
+    }
+    root.innerHTML=worldLoadingHTML();
+    try{
+      const topPromise=fetchWithTimeout(base+"/v1/leaderboard?limit=100",{headers:{accept:"application/json"},cache:"no-store"});
+      const mePromise=leaderboardEnabled()?fetchWithTimeout(base+"/v1/leaderboard/me",{headers:{accept:"application/json","x-copa-client":clientId(),"x-copa-delete-token":deleteToken()},cache:"no-store"}):Promise.resolve(null);
+      const [topResponse,meResponse]=await Promise.all([topPromise,mePromise]);
+      if(!topResponse.ok)throw new Error("leaderboard_unavailable");
+      const top=topResponse.ok?await topResponse.json():{clubs:[]},mine=meResponse&&meResponse.ok?await meResponse.json():{profile:null,nearby:[]},profile=mine.profile;
+      const joined=leaderboardEnabled();
+      root.innerHTML=`<div class="world-season-head"><span><small>${tr("AKTİF SEZON","ACTIVE SEASON")}</small><b>${escapeHTML(top.season||new Date().toISOString().slice(0,7))}</b></span><span><small>${tr("DÜNYA SIRAN","WORLD RANK")}</small><b>${profile&&profile.rank?`#${profile.rank} · ${profile.season_score}`:joined?tr("İlk koşunu tamamla","Complete your first run"):tr("Henüz katılmadın","Not joined yet")}</b></span></div>
+        ${!joined?`<div class="world-join-card"><span><b>${tr("Topluluk sıralamasına katıl · Beta","Join the community ranking · Beta")}</b><small>${tr("Katıldıktan sonraki geçerli koşuların aylık Katsayını oluşturur. Geçmiş koşular gönderilmez.","Eligible runs after joining build your monthly Coefficient. Past runs are never uploaded.")}</small></span><button type="button" onclick="GhostClubs.joinLeaderboard()">${tr("SIRALAMAYA KATIL","JOIN RANKING")}</button></div>`:""}
+        ${joined&&!profile?`<div class="world-new-card"><span aria-hidden="true">◎</span><p><b>${tr("Sıralama profilin hazır","Your ranking profile is ready")}</b><small>${tr("İlk dereceli koşunu tamamladığında burada yerini göreceksin.","Complete your first ranked run to see your place here.")}</small></p></div>`:""}
+        ${profile&&mine.nearby&&mine.nearby.length?`<section><div class="meta-section-heading"><h4>${tr("SIRALAMADAKİ YERİN","YOUR POSITION")}</h4><small>${tr("Yakın kulüpler","Nearby clubs")}</small></div>${leaderboardRows(mine.nearby,profile.public_club_id)}</section>`:""}
+        <section><div class="meta-section-heading"><h4>${tr("DÜNYA İLK 100 · BETA","WORLD TOP 100 · BETA")}</h4><small>${escapeHTML(top.season||"")}</small></div><div class="world-rank-list">${leaderboardRows(top.clubs,profile&&profile.public_club_id)||`<div class="meta-inline-empty">${tr("Bu sezon henüz sıralanan kulüp yok.","No clubs are ranked this season yet.")}</div>`}</div></section>
+        <p class="world-rule">${tr("Kulüp Katsayısı bu ay kabul edilen en iyi 10 koşunun Dünya İtibarı toplamıdır; eşit Katsayılar aynı sırayı paylaşır. Kalıcı Dünya İtibarı sezon sonunda sıfırlanmaz. Bu ödülsüz topluluk sıralamasında tutarlılık kontrolleri vardır, mutlak hile koruması yoktur. Dünya profili cihaz anahtarına bağlıdır ve kariyer kayıt koduyla taşınmaz.","Club Coefficient is the World Reputation total of your best 10 accepted runs this month; equal Coefficients share the same rank. Permanent World Reputation never resets. This reward-free community ranking uses consistency checks, not absolute cheat protection. The World profile is device-bound and does not transfer with the career save code.")}</p>`;
+    }catch(_){
+      root.innerHTML=worldStateHTML("error",tr("Sıralama yüklenemedi","Ranking could not be loaded"),tr("Sunucuya şu anda ulaşılamıyor. Biraz sonra yeniden deneyebilirsin.","The server cannot be reached right now. You can try again shortly."));
+    }
+  }
+  async function joinLeaderboard(){
+    const accepted=await requestLeaderboardConsent();
+    if(accepted&&window.CopaMeta)window.CopaMeta.openProgression("world");
+    return accepted;
+  }
+  async function deleteLeaderboardData(){
+    const base=apiBase();safeSet(LEADERBOARD_ENABLED_KEY,"0");safeRemove(LEADERBOARD_CONSENT_KEY);saveLeaderboardQueue([]);safeSet(LEADERBOARD_DELETE_PENDING_KEY,"1");
+    if(!base||!navigator.onLine){ensureSetting();return {ok:false,offline:true,pending:true};}
+    try{
+      const response=await fetchWithTimeout(base+"/v1/me/leaderboard",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});
+      if(!response.ok)return {ok:false,status:response.status,pending:true};
+      safeRemove(LEADERBOARD_DELETE_PENDING_KEY);ensureSetting();
+      return await response.json();
+    }catch(_){return {ok:false,pending:true};}
   }
   function validRemote(snapshot){
     if(!snapshot||snapshot.schema_version!==CONFIG.schemaVersion)return false;
@@ -334,8 +478,39 @@
     document.body.appendChild(layer);const accept=layer.querySelector("[data-ghost-accept]");layer.querySelector("[data-ghost-cancel]").addEventListener("click",()=>complete(false));accept.addEventListener("click",()=>{safeSet(CONSENT_KEY,JSON.stringify({version:CONFIG.consentVersion,terms:true,sharing:true,action:"accept_and_share",accepted_at:new Date().toISOString()}));safeSet(SHARING_KEY,"1");if(window.CopaAnalytics)window.CopaAnalytics.track("ghost_opt_in");deleteToken();ensureSetting();flushQueue();complete(true);});
     return consentRequest;
   }
-  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
-  async function deleteMyData(){const base=apiBase();saveQueue([]);safeSet(SHARING_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});if(!response.ok)return {ok:false,status:response.status};const result=await response.json();if(result&&result.ok)clearLocalGhostData();return result;}catch(_){return {ok:false};}}
+  function applyOnboardingChoices(choices,action){
+    const selected=choices&&typeof choices==="object"?choices:{};
+    const matching=!!selected.matching,sharing=!!selected.sharing,leaderboard=!!selected.leaderboard,acceptedAt=new Date().toISOString();
+    safeSet(SETTINGS_KEY,matching?"1":"0");
+    if(sharing){safeSet(CONSENT_KEY,JSON.stringify({version:CONFIG.consentVersion,terms:true,sharing:true,action:"mobile_onboarding",accepted_at:acceptedAt}));safeSet(SHARING_KEY,"1");deleteToken();}
+    else{safeSet(SHARING_KEY,"0");if(!hasConsent())safeRemove(CONSENT_KEY);saveQueue([]);}
+    if(leaderboard){safeSet(LEADERBOARD_CONSENT_KEY,JSON.stringify({version:CONFIG.leaderboardConsentVersion,terms:true,public_profile:true,action:"mobile_onboarding",accepted_at:acceptedAt}));safeSet(LEADERBOARD_ENABLED_KEY,"1");deleteToken();}
+    else{safeSet(LEADERBOARD_ENABLED_KEY,"0");if(!hasLeaderboardConsent())safeRemove(LEADERBOARD_CONSENT_KEY);saveLeaderboardQueue([]);}
+    safeSet(ONBOARDING_KEY,JSON.stringify({version:CONFIG.onboardingVersion,terms:true,matching,sharing,leaderboard,action:action||"save_choices",accepted_at:acceptedAt}));
+    ensureSetting();
+    if(sharing)flushQueue();
+    if(leaderboard)flushLeaderboardQueue();
+    if(window.CopaAnalytics)window.CopaAnalytics.track("online_onboarding_complete",{matching,sharing,leaderboard,action:action||"save_choices"});
+    return {matching,sharing,leaderboard};
+  }
+  let onboardingRequest=null;
+  function requestMobileOnboarding(){
+    if(!shouldGateMobileOnboarding())return Promise.resolve(onboarding()||{matching:enabled(),sharing:sharingEnabled(),leaderboard:leaderboardEnabled()});
+    if(onboardingRequest)return onboardingRequest;
+    onboardingRequest=new Promise(resolve=>{
+      const layer=document.createElement("div");layer.id="onlineFeaturesOnboarding";layer.className="ghost-consent-layer online-onboarding-layer";
+      layer.innerHTML=`<section class="ghost-consent-card online-onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onlineOnboardingTitle"><div class="online-onboarding-kicker">${tr("İLK KURULUM · ÇEVRİMİÇİ OYUN","FIRST SETUP · ONLINE PLAY")}</div><h3 id="onlineOnboardingTitle">${tr("Çevrimiçi özelliklerini seç","Choose your online features")}</h3><p>${tr("Üç özelliği şimdi tek ekrandan ayarla. Seçimlerini daha sonra Gelişmiş Ayarlar’dan değiştirebilirsin.","Set all three features on one screen now. You can change your choices later in Advanced Settings.")}</p><div class="online-onboarding-options"><label><input type="checkbox" data-online-matching ${enabled()?"checked":""}><span><b>${tr("Ghost rakiplerle oyna","Play Ghost opponents")}</b><small>${tr("Diğer oyuncuların anonim kadrolarını rakip olarak indirir; senin kulübünü yayınlamaz.","Downloads other players’ anonymous squads as opponents; this does not publish your club.")}</small></span></label><label><input type="checkbox" data-online-sharing ${sharingEnabled()?"checked":""}><span><b>${tr("Kulübümü Ghost olarak paylaş","Share my club as a Ghost")}</b><small>${tr("Tamamlanan kadro, kulüp adı ve anonim cihaz kimliği 45 gün Ghost havuzunda saklanır.","Your completed squad, club name and anonymous device ID are retained in the Ghost pool for 45 days.")}</small></span></label><label><input type="checkbox" data-online-leaderboard ${leaderboardEnabled()?"checked":""}><span><b>${tr("Dünya Kulüpler Sıralaması’na katıl","Join the World Club Ranking")}</b><small>${tr("Kulüp adı, ülke, kariyer seviyesi ve kupa istatistikleri herkese açık profil olur.","Club name, country, career level and cup statistics become a public profile.")}</small></span></label></div><p class="ghost-consent-confirm">${tr("“TÜMÜNÜ AÇ VE KABUL ET” ile Kullanım Şartları’nı kabul eder ve seçili veri paylaşımlarına açıkça izin verirsin. İzinlerini geri çekebilir ve çevrimiçi verilerini kalıcı olarak silebilirsin.","By choosing “ENABLE ALL AND ACCEPT”, you accept the Terms and explicitly consent to the selected data sharing. You can withdraw consent and permanently delete your online data.")}</p><div class="ghost-consent-links"><a href="terms.html" target="_blank" rel="noopener">${tr("Kullanım şartları","Terms")}</a><a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a></div><div class="online-onboarding-actions"><button type="button" data-online-offline>${tr("ÇEVRİMDIŞI DEVAM","CONTINUE OFFLINE")}</button><button type="button" data-online-save>${tr("SEÇİMLERİ KAYDET","SAVE CHOICES")}</button><button type="button" data-online-all>${tr("TÜMÜNÜ AÇ VE KABUL ET","ENABLE ALL AND ACCEPT")}</button></div></section>`;
+      const finish=(choices,action)=>{const result=applyOnboardingChoices(choices,action);layer.remove();onboardingRequest=null;resolve(result);};
+      const readChoices=()=>({matching:layer.querySelector("[data-online-matching]").checked,sharing:layer.querySelector("[data-online-sharing]").checked,leaderboard:layer.querySelector("[data-online-leaderboard]").checked});
+      layer.querySelector("[data-online-offline]").onclick=()=>finish({matching:false,sharing:false,leaderboard:false},"continue_offline");
+      layer.querySelector("[data-online-save]").onclick=()=>finish(readChoices(),"save_choices");
+      layer.querySelector("[data-online-all]").onclick=()=>finish({matching:true,sharing:true,leaderboard:true},"enable_all");
+      document.body.appendChild(layer);
+    });
+    return onboardingRequest;
+  }
+  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,LEADERBOARD_ENABLED_KEY,LEADERBOARD_CONSENT_KEY,LEADERBOARD_QUEUE_KEY,LEADERBOARD_DELETE_PENDING_KEY,ONBOARDING_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
+  async function deleteMyData(){const base=apiBase();saveQueue([]);saveLeaderboardQueue([]);safeSet(SHARING_KEY,"0");safeSet(LEADERBOARD_ENABLED_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});if(!response.ok)return {ok:false,status:response.status};const result=await response.json();if(result&&result.ok)clearLocalGhostData();return result;}catch(_){return {ok:false};}}
   function withdrawConsent(){safeSet(SHARING_KEY,"0");safeRemove(CONSENT_KEY);saveQueue([]);ensureSetting();}
   async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!/^G-[A-Z0-9]{8,32}$/.test(value))return {ok:false,error:"invalid_id"};if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}blockGhost(value);const requested=cleanText(reason).toLowerCase().slice(0,32),cleanReason=REPORT_REASONS.has(requested)?requested:"other";enqueueReport(value,cleanReason);const result=await flushReportQueue();return {ok:true,hidden:true,pending:result.pending>0,sent:result.sent};}
   function ensureSetting(){
@@ -351,24 +526,31 @@
       const shareHeader=document.createElement("div");shareHeader.className="ghost-setting-header";shareHeader.id="ghostShareSettingHdr";shareOption.appendChild(shareHeader);
       const shareButton=document.createElement("button");shareButton.type="button";shareButton.id="ghostShareToggle";shareButton.className="ghost-setting-toggle";shareButton.onclick=()=>setSharingEnabled(!sharingEnabled());shareOption.appendChild(shareButton);
       const shareText=document.createElement("div");shareText.className="ghost-setting-copy";shareText.id="ghostShareSettingCopy";shareOption.appendChild(shareText);group.appendChild(shareOption);
+      const rankOption=document.createElement("div");rankOption.className="ghost-setting-option";
+      const rankHeader=document.createElement("div");rankHeader.className="ghost-setting-header";rankHeader.id="leaderboardSettingHdr";rankOption.appendChild(rankHeader);
+      const rankButton=document.createElement("button");rankButton.type="button";rankButton.id="leaderboardToggle";rankButton.className="ghost-setting-toggle";rankButton.onclick=async()=>{const turningOn=!leaderboardEnabled();if(!turningOn&&!globalThis.confirm(tr("Dünya sıralaması profilin ve koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your World ranking profile and run results?")))return;await setLeaderboardEnabled(turningOn);};rankOption.appendChild(rankButton);
+      const rankText=document.createElement("div");rankText.className="ghost-setting-copy";rankText.id="leaderboardSettingCopy";rankOption.appendChild(rankText);group.appendChild(rankOption);
     }
     if(group.parentElement!==slot)slot.appendChild(group);
     if(privacySlot){
       let privacy=document.getElementById("ghostSettingPrivacy");if(!privacy){privacy=document.createElement("div");privacy.id="ghostSettingPrivacy";privacy.className="ghost-setting-privacy";}
       if(privacy.parentElement!==privacySlot)privacySlot.appendChild(privacy);
-      privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><button type="button" data-ghost-delete>${tr("Verilerimi sil","Delete my data")}</button>`;
-      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan tüm Ghost verileriniz kalıcı olarak silinsin mi?","Permanently delete all of your shared Ghost data?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Ghost verileri silindi.","Ghost data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
+      privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><button type="button" data-ghost-delete>${tr("Çevrimiçi verilerimi sil","Delete my online data")}</button>`;
+      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan Ghost verilerin, Dünya sıralaması profilin ve çevrimiçi koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your shared Ghost data, World ranking profile and online run results?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Çevrimiçi veriler silindi.","Online data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
     }
-    const on=enabled(),sharing=sharingEnabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle"),shareHeader=document.getElementById("ghostShareSettingHdr"),shareCopy=document.getElementById("ghostShareSettingCopy"),shareButton=document.getElementById("ghostShareToggle");
-    if(header)header.textContent=tr("GHOST RAKİPLERİ","GHOST OPPONENTS");
-    if(copy)copy.textContent=on?tr("Bu run uygun bir Ghost rakiple eşleşebilir.","This run can match an eligible Ghost opponent."):tr("Bu run yalnızca standart rakipleri kullanır.","This run uses standard opponents only.");
+    const on=enabled(),sharing=sharingEnabled(),ranked=leaderboardEnabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle"),shareHeader=document.getElementById("ghostShareSettingHdr"),shareCopy=document.getElementById("ghostShareSettingCopy"),shareButton=document.getElementById("ghostShareToggle"),rankHeader=document.getElementById("leaderboardSettingHdr"),rankCopy=document.getElementById("leaderboardSettingCopy"),rankButton=document.getElementById("leaderboardToggle");
+    if(header)header.textContent=tr("GHOST RAKİPLER","GHOST OPPONENTS");
+    if(copy)copy.textContent=on?tr("Bu run uygun bir Ghost rakiple eşleşilebilir.","This run can match an eligible Ghost opponent."):tr("Bu run uygun bir Ghost rakiple eşleşemez.","This run cannot match an eligible Ghost opponent.");
     if(button){button.classList.toggle("on",on);button.setAttribute("aria-pressed",String(on));button.innerHTML=`<span aria-hidden="true">${ghostIcon()}</span><span>${on?tr("A\u00c7IK","ON"):tr("KAPALI","OFF")}</span>`;button.title=tr("Hayalet Kul\u00fcplere Kar\u015f\u0131 Oyna","Play Against Ghost Clubs");}
     if(shareHeader)shareHeader.textContent=tr("KULÜBÜMÜ GHOST OLARAK PAYLAŞ","SHARE MY CLUB AS A GHOST");
-    if(shareCopy)shareCopy.textContent=sharing?tr("Tamamlanan kulübün Ghost havuzuyla paylaşılıyor.","Your completed club is shared with the Ghost pool."):tr("Tamamlanan kulübün Ghost havuzuna gönderilmiyor.","Your completed club is not sent to the Ghost pool.");
+    if(shareCopy)shareCopy.textContent=sharing?tr("Kulübün run sonunda Ghost havuzuna katılır.","Your club joins the Ghost pool at the end of the run."):tr("Kulübün run sonunda Ghost havuzuna katılmaz.","Your club does not join the Ghost pool at the end of the run.");
     if(shareButton){shareButton.classList.toggle("on",sharing);shareButton.setAttribute("aria-pressed",String(sharing));shareButton.innerHTML=`<span aria-hidden="true">${ghostIcon()}</span><span>${sharing?tr("PAYLAŞILIYOR","SHARING"):tr("PAYLAŞILMIYOR","NOT SHARING")}</span>`;shareButton.title=tr("Kulübümü Ghost olarak paylaş","Share my club as a Ghost");}
+    if(rankHeader)rankHeader.textContent=tr("DÜNYA KULÜPLER SIRALAMASI · BETA","WORLD CLUB RANKING · BETA");
+    if(rankCopy)rankCopy.textContent=ranked?tr("Ödülsüz topluluk sıralamasındasın. Profil bu cihaza bağlıdır; kariyer kayıt koduyla taşınmaz.","You are in the reward-free community ranking. The profile is tied to this device and does not transfer with the career save code."):tr("Kulüp profilin yayınlanmaz ve koşuların sıralamaya gönderilmez.","Your club profile is not published and runs are not sent to the ranking.");
+    if(rankButton){rankButton.classList.toggle("on",ranked);rankButton.setAttribute("aria-pressed",String(ranked));rankButton.innerHTML=`<span aria-hidden="true">◎</span><span>${ranked?tr("SIRALAMADA","RANKED"):tr("KATILMIYOR","NOT JOINED")}</span>`;rankButton.title=tr("Dünya Kulüpler Sıralaması","World Club Ranking");}
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
-  window.addEventListener("online",()=>{flushQueue();flushReportQueue();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,ensureSetting,requestConsent,hasConsent,withdrawConsent,deleteMyData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,findOpponent,flushQueue,flushReports:flushReportQueue,ghostIcon,normalizeCompletedRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
-  setTimeout(()=>{ensureSetting();flushQueue();flushReportQueue();},0);
+  window.addEventListener("online",()=>{flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,leaderboardEnabled,setLeaderboardEnabled,ensureSetting,requestConsent,requestLeaderboardConsent,requestMobileOnboarding,mobileOnboardingComplete,shouldGateMobileOnboarding,hasConsent,hasLeaderboardConsent,withdrawConsent,deleteMyData,deleteLeaderboardData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,recordLeaderboardRun,findOpponent,flushQueue,flushLeaderboardQueue,flushReports:flushReportQueue,renderLeaderboard,joinLeaderboard,ghostIcon,normalizeCompletedRun,normalizeLeaderboardRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
+  setTimeout(()=>{ensureSetting();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();},0);
 })();

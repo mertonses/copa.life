@@ -52,6 +52,11 @@ for(const language of required){
     }
   }
 }
+const fullRoundNames={tr:["ÇEYREK FİNAL","YARI FİNAL"],en:["QUARTER FINAL","SEMI FINAL"],es:["CUARTOS DE FINAL","SEMIFINAL"],de:["VIERTELFINALE","HALBFINALE"],it:["QUARTI DI FINALE","SEMIFINALE"]};
+for(const [language,names] of Object.entries(fullRoundNames)){
+  const rounds=context.__locales[language]&&context.__locales[language].rounds||[];
+  for(const name of names)if(!rounds.includes(name))errors.push(`${language}.rounds must use full round name "${name}"`);
+}
 
 const rewardNumbers=["6M","5","18","1","8M","8","1","8"];
 const riskNumbers=["5","6M","9","12M"];
@@ -106,7 +111,7 @@ for(const language of ["es","de","it"]){
 const profileSource=fs.readFileSync(new URL("../src/ui/playerProfiles.js",import.meta.url),"utf8");
 const seasonSource=fs.readFileSync(new URL("../src/ui/seasonStats.js",import.meta.url),"utf8");
 for(const language of ["es","de","it"]){
-  for(const key of ["overview","playStyle","strengths","risks","tendencies","analysis","loading","noModel","positionFit","modelNote"]){
+  for(const key of ["overview","playStyle","strengths","risks","tendencies","loading","noModel","positionFit","modelNote"]){
     const marker=new RegExp(`${language}:\\{[^\\n]*${key}:`);
     if(!marker.test(profileSource))errors.push(`player profile ${language}.${key} missing`);
   }

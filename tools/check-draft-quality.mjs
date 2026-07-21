@@ -156,7 +156,7 @@ for (const [country, [file, variable]] of Object.entries(COUNTRIES)) {
   const context = makeContext("TR", pool);
   for (const pos of POSITIONS) {
     context.eliteBonus = true;
-    const elite = context.__draftOptions(pos).find(option => option.eliteDiscount);
+    const elite = context.__draftOptions(pos).find(option => option.eliteContact);
     if (!elite || elite.natG !== groupOf(pos)) {
       console.error(`Elit bonus mevki filtresi başarısız: ${pos} slotuna ${elite?.name || "oyuncu gelmedi"}.`);
       failed = true;

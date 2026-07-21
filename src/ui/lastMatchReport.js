@@ -11,17 +11,18 @@ const COPY={
 const STAGES={
   tr:["1. TUR","2. TUR","SON 16","ÇEYREK FİNAL","YARI FİNAL","FİNAL"],
   en:["ROUND 1","ROUND 2","LAST 16","QUARTER FINAL","SEMI FINAL","FINAL"],
-  es:["1.ª RONDA","2.ª RONDA","OCTAVOS","CUARTOS","SEMIFINAL","FINAL"],
+  es:["1.ª RONDA","2.ª RONDA","OCTAVOS","CUARTOS DE FINAL","SEMIFINAL","FINAL"],
   de:["1. RUNDE","2. RUNDE","ACHTELFINALE","VIERTELFINALE","HALBFINALE","FINALE"],
-  it:["1° TURNO","2° TURNO","OTTAVI","QUARTI","SEMIFINALE","FINALE"]
+  it:["1° TURNO","2° TURNO","OTTAVI","QUARTI DI FINALE","SEMIFINALE","FINALE"]
 };
 
 function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(char){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];});}
 function clamp(value,min,max){return Math.max(min,Math.min(max,Number(value)||0));}
 function finite(value){const number=Number(value);return Number.isFinite(number)?number:null;}
 function norm(value){return String(value||"").toLocaleLowerCase("tr-TR").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();}
-function surname(value){const parts=String(value||"").trim().split(/\s+/).filter(Boolean);return parts.length?parts[parts.length-1]:"?";}
-function nameMatches(playerName,eventName){const player=norm(playerName),event=norm(eventName);return !!player&&!!event&&(player===event||norm(surname(playerName))===event||player===norm(surname(eventName)));}
+function rawSurname(value){const parts=String(value||"").trim().split(/\s+/).filter(Boolean);return parts.length?parts[parts.length-1]:"?";}
+function surname(value){const parts=String(value||"").trim().split(/\s+/).filter(Boolean);if(!parts.length)return"?";const last=parts[parts.length-1];return /^\d+$/.test(last)&&parts.length>1?parts[parts.length-2]+" #"+last:last;}
+function nameMatches(playerName,eventName){const player=norm(playerName),event=norm(eventName);return !!player&&!!event&&(player===event||norm(rawSurname(playerName))===event||player===norm(rawSurname(eventName)));}
 function parseScore(value){const parts=String(value||"").match(/(\d+)\s*[–-]\s*(\d+)/);return parts?[Number(parts[1]),Number(parts[2])]:null;}
 function slotCopy(slot,player,index){const value=Array.isArray(slot)?slot:[];return[String(value[0]||(player&&player.pos)||"?"),clamp(value[1]==null?50:value[1],0,100),clamp(value[2]==null?50:value[2],0,100),index];}
 function playerCopy(player){return player&&typeof player==="object"?Object.assign({},player):null;}
@@ -87,12 +88,12 @@ function setPenalty(baseScore,shootout,homeWon){
 }
 function ratingTone(value){return value>=9?"star":value>=8?"elite":value>=7.5?"strong":value>=7?"good":value>=6.5?"decent":value>=6?"average":value>=5.5?"weak":"poor";}
 function positionFor(slot,side){
-  const lateral=clamp(slot[1],0,100),depth=clamp(slot[2],0,100),x=side==="home"?7+(100-depth)*.41:93-(100-depth)*.41,y=side==="home"?7+lateral*.86:93-lateral*.86;
-  return{x:Math.round(x*10)/10,y:Math.round(y*10)/10};
+  const lateral=clamp(slot[1],0,100),depth=clamp(slot[2],0,100),x=side==="home"?7+(100-depth)*.41:93-(100-depth)*.41,y=side==="home"?7+lateral*.86:93-lateral*.86,mobileY=side==="home"?21+lateral*.58:79-lateral*.58;
+  return{x:Math.round(x*10)/10,y:Math.round(y*10)/10,mobileY:Math.round(mobileY*10)/10};
 }
 function eventBadges(item,copy){
   const badges=[];
-  if(item.stats.goals)badges.push('<span class="lmr-event lmr-goal" title="'+esc(copy.goal)+'" aria-label="'+esc(copy.goal)+'">⚽'+(item.stats.goals>1?'×'+item.stats.goals:'')+'</span>');
+  if(item.stats.goals)badges.push('<span class="lmr-goal-badges" title="'+esc(copy.goal)+' ×'+item.stats.goals+'" aria-label="'+esc(copy.goal)+' ×'+item.stats.goals+'">'+Array.from({length:item.stats.goals},function(){return'<i class="lmr-goal-ball" aria-hidden="true"><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="m6 3 1.8 1.3-.7 2.1H4.9l-.7-2.1L6 3Zm-1.1 3.4L3.2 8m3.9-1.6L8.8 8M6 3V1.2M3.2 8l.5 1.8M8.8 8l-.5 1.8"/></svg></i>';}).join("")+'</span>');
   if(item.stats.assists)badges.push('<span class="lmr-event lmr-assist" title="'+esc(copy.assist)+'" aria-label="'+esc(copy.assist)+'">↗'+(item.stats.assists>1?'×'+item.stats.assists:'')+'</span>');
   if(item.stats.yellow)badges.push('<span class="lmr-event lmr-yellow" title="'+esc(copy.yellow)+'" aria-label="'+esc(copy.yellow)+'"></span>');
   if(item.stats.red)badges.push('<span class="lmr-event lmr-red" title="'+esc(copy.red)+'" aria-label="'+esc(copy.red)+'"></span>');
@@ -101,15 +102,16 @@ function eventBadges(item,copy){
 }
 function playerToken(item,side,copy,isMotm){
   const point=positionFor(item.slot,side),tone=ratingTone(item.rating),label=item.name+" · "+copy.performance+" "+item.rating.toFixed(1);
-  return '<button type="button" class="lmr-player is-'+side+(isMotm?' is-motm':'')+'" style="--lmr-x:'+point.x+'%;--lmr-y:'+point.y+'%" data-lmr-team="'+side+'" data-lmr-index="'+item.index+'" aria-label="'+esc(label)+'"><span class="lmr-token"><small>'+esc(item.pos)+'</small><strong class="is-'+tone+'">'+item.rating.toFixed(1)+'</strong></span><span class="lmr-name">'+esc(surname(item.name))+'</span><span class="lmr-events">'+(isMotm?'<i title="'+esc(copy.star)+'" aria-label="'+esc(copy.star)+'">★</i>':'')+eventBadges(item,copy)+'</span></button>';
+  return '<button type="button" class="lmr-player is-'+side+(isMotm?' is-motm':'')+'" style="--lmr-x:'+point.x+'%;--lmr-y:'+point.y+'%;--lmr-mobile-y:'+point.mobileY+'%" data-lmr-team="'+side+'" data-lmr-index="'+item.index+'" aria-label="'+esc(label)+'"><span class="lmr-token"><small>'+esc(item.pos)+'</small><strong class="is-'+tone+'">'+item.rating.toFixed(1)+'</strong></span><span class="lmr-name">'+esc(surname(item.name))+'</span><span class="lmr-events">'+(isMotm?'<i title="'+esc(copy.star)+'" aria-label="'+esc(copy.star)+'">★</i>':'')+eventBadges(item,copy)+'</span></button>';
 }
+function powerTone(value){return value>=85?"strong":value>=75?"decent":value>=60?"average":"poor";}
 function teamHeader(side,label,name,formation,avg,power,copy){
-  return '<div class="lmr-team-head is-'+side+'"><span>'+esc(label)+'</span><strong>'+esc(name)+'</strong><small>'+esc(copy.avg)+' <b class="is-'+ratingTone(avg||0)+'">'+(avg==null?'—':avg.toFixed(1))+'</b> · '+esc(copy.formation)+' '+esc(formation)+(power==null?'':' · '+esc(copy.power)+' '+Math.round(power))+'</small></div>';
+  return '<div class="lmr-team-head is-'+side+'"><span>'+esc(label)+'</span><strong>'+esc(name)+'</strong><small>'+esc(copy.avg)+' <b class="is-'+ratingTone(avg||0)+'">'+(avg==null?'—':avg.toFixed(1))+'</b> · '+esc(copy.formation)+' '+esc(formation)+(power==null?'':' · '+esc(copy.power)+' <b class="is-'+powerTone(power)+'">'+Math.round(power)+'</b>')+'</small></div>';
 }
 function stageFor(report,lang){const list=STAGES[lang]||STAGES.en;return list[Math.max(0,Math.min(5,report.round-1))]||COPY[lang].last;}
 function outcomeFor(report,copy){if(report.penalty)return report.homeWon?copy.penWon:copy.penLost;if(report.score[0]===report.score[1])return copy.draw;return report.homeWon?copy.won:copy.lost;}
 function sublineFor(report,copy,result){if(result&&result.endType==="sacked")return copy.lastValid;if(report.isFinal&&report.homeWon)return copy.champion;if(!report.homeWon)return copy.exit;return copy.lastValid;}
-function summaryCard(label,item,copy,side){if(!item)return"";return '<div class="lmr-summary-card" data-lmr-summary-team="'+side+'" data-lmr-summary-index="'+item.index+'"><span>'+esc(label)+'</span><strong>'+esc(item.name)+'</strong><b class="is-'+ratingTone(item.rating)+'">'+item.rating.toFixed(1)+'</b></div>';}
+function summaryCard(label,item,copy,side){if(!item)return"";return '<button type="button" class="lmr-highlight" data-lmr-summary-team="'+side+'" data-lmr-summary-index="'+item.index+'"><span>'+esc(label)+'</span><strong>'+esc(item.name)+'</strong><b class="is-'+ratingTone(item.rating)+'">'+item.rating.toFixed(1)+'</b></button>';}
 function bindProfiles(container,report){
   if(!global.PlayerProfiles)return;
   container.querySelectorAll("[data-lmr-team]").forEach(function(node){const team=node.dataset.lmrTeam==="home"?report.home:report.away,item=team[Number(node.dataset.lmrIndex)];if(item&&item.player)global.PlayerProfiles.bind(node,item.player);});
@@ -118,7 +120,7 @@ function bindProfiles(container,report){
 function render(container,report,options){
   if(!container||!report||!report.home||!report.home.length||!report.away||!report.away.length)return false;
   const opts=options||{},lang=COPY[opts.lang]?opts.lang:"en",copy=COPY[lang],stage=stageFor(report,lang),homeWinner=report.homeWon,awayWinner=!report.homeWon&&report.score[0]!==report.score[1]||!!report.penalty&&!report.homeWon;
-  container.innerHTML='<section class="last-match-report"><header class="lmr-header"><div class="lmr-kicker"><span>'+esc(copy.last)+'</span><b>'+esc(stage)+'</b></div><p>'+esc(sublineFor(report,copy,opts.result))+'</p><span class="lmr-outcome is-'+(report.homeWon?'positive':'negative')+'">'+esc(outcomeFor(report,copy))+'</span></header><div class="lmr-team-row">'+teamHeader("home",copy.yours,report.homeName,report.homeFormation,report.homeAverage,report.homePower,copy)+teamHeader("away",copy.opponent,report.awayName,report.awayFormation,report.awayAverage,report.awayPower,copy)+'</div><div class="lmr-pitch" role="group" aria-label="'+esc(copy.performance)+'"><div class="lmr-pitch-lines" aria-hidden="true"><i class="lmr-half"></i><i class="lmr-circle"></i><i class="lmr-box is-left"></i><i class="lmr-box is-right"></i><i class="lmr-goal is-left"></i><i class="lmr-goal is-right"></i><i class="lmr-spot is-left"></i><i class="lmr-spot is-right"></i></div><div class="lmr-score lmr-pitch-score" aria-label="'+esc(report.homeName+" "+report.score[0]+" - "+report.score[1]+" "+report.awayName)+'"><strong class="lmr-club'+(homeWinner?' is-winner':'')+'">'+esc(report.homeName)+'</strong><div class="lmr-scoreline"><b>'+report.score[0]+'<i>–</i>'+report.score[1]+'</b>'+(report.penalty?'<span>'+esc(copy.pen)+' '+report.penalty[0]+'–'+report.penalty[1]+'</span>':'')+'</div><strong class="lmr-club'+(awayWinner?' is-winner':'')+'">'+esc(report.awayName)+'</strong></div>'+report.home.map(function(item){return playerToken(item,"home",copy,report.motm===item);}).join("")+report.away.map(function(item){return playerToken(item,"away",copy,report.motm===item);}).join("")+'<span class="lmr-legend">'+esc(copy.performance)+'</span></div><div class="lmr-summary">'+summaryCard(copy.motm,report.motm,copy,report.home.includes(report.motm)?"home":"away")+summaryCard(copy.threat,report.bestOpponent,copy,"away")+'</div></section>';
+  container.innerHTML='<section class="last-match-report"><div class="lmr-team-row">'+teamHeader("home",copy.yours,report.homeName,report.homeFormation,report.homeAverage,report.homePower,copy)+teamHeader("away",copy.opponent,report.awayName,report.awayFormation,report.awayAverage,report.awayPower,copy)+'</div><div class="lmr-pitch" role="group" aria-label="'+esc(copy.performance)+'"><div class="lmr-pitch-lines" aria-hidden="true"><i class="lmr-half"></i><i class="lmr-circle"></i><i class="lmr-box is-left"></i><i class="lmr-box is-right"></i><i class="lmr-goal is-left"></i><i class="lmr-goal is-right"></i><i class="lmr-spot is-left"></i><i class="lmr-spot is-right"></i></div><div class="lmr-score lmr-pitch-score" aria-label="'+esc(report.homeName+" "+report.score[0]+" - "+report.score[1]+" "+report.awayName)+'"><strong class="lmr-club'+(homeWinner?' is-winner':'')+'">'+esc(report.homeName)+'</strong><div class="lmr-scoreline"><b>'+report.score[0]+'<i>–</i>'+report.score[1]+'</b>'+(report.penalty?'<span>'+esc(copy.pen)+' '+report.penalty[0]+'–'+report.penalty[1]+'</span>':'')+'</div><strong class="lmr-club'+(awayWinner?' is-winner':'')+'">'+esc(report.awayName)+'</strong></div><div class="lmr-highlights">'+summaryCard(copy.motm,report.motm,copy,report.home.includes(report.motm)?"home":"away")+summaryCard(copy.threat,report.bestOpponent,copy,"away")+'</div>'+report.home.map(function(item){return playerToken(item,"home",copy,report.motm===item);}).join("")+report.away.map(function(item){return playerToken(item,"away",copy,report.motm===item);}).join("")+'</div></section>';
   bindProfiles(container,report);return true;
 }
 

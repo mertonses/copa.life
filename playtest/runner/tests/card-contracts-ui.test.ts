@@ -13,7 +13,7 @@ async function openHub(page:Page){
   await page.locator("#postClubName").fill("Contract XI");
   await page.evaluate(()=>{
     const game=globalThis as any;
-    game.pcGo();
+    game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();
     game.setCaptain(0);
     game.closeModal();
   });

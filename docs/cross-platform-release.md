@@ -51,7 +51,7 @@ npm run android:release:local
 - Geriye uyumlu özellik: `android:version:minor`
 - Kırıcı ürün değişikliği: `android:version:major`
 
-Sürüm artırıldıktan sonra `store/android/whatsnew/` altındaki Türkçe ve İngilizce notlar güncellenmeli, ardından `npm run android:notes:stamp` çalıştırılmalıdır. Not damgası sürümle uyuşmuyorsa release durur. Yerel yayın betiği bağımlılıkları temiz kurar, ana testleri, Ghost API testlerini, mobil tarayıcı testlerini ve parite kontrolünü çalıştırır; AAB içeriğini tarar, upload sertifikasını doğrular, Android paketini imzalar ve `store/android/release-manifest.json` dosyasını günceller.
+Sürüm artırıldıktan sonra `store/android/whatsnew/` altındaki Türkçe, İngilizce, İspanyolca, Almanca ve İtalyanca notlar güncellenmeli, ardından `npm run android:notes:stamp` çalıştırılmalıdır. Not damgası sürümle uyuşmuyorsa release durur. Yerel yayın betiği bağımlılıkları temiz kurar, ana testleri, Ghost API testlerini, mobil tarayıcı testlerini ve parite kontrolünü çalıştırır; AAB içeriğini tarar, upload sertifikasını doğrular, Android paketini imzalar ve `store/android/release-manifest.json` dosyasını günceller.
 
 `npm run android:release:local` yalnız `main` dalındaki temiz ve commit edilmiş bir çalışma ağacında mağaza adayı üretir. Devam eden geliştirme veya release dalında aynı hattı sınamak için `npm run android:candidate:local` kullanılabilir; bu çıktı doğrulansa ve imzalansa bile mağaza adayı sayılmaz ve Play'e yüklenmez. Candidate manifesti kaynak commit/fingerprint bilgisini kaydetse de final paket `main` üzerinde yeniden üretilir.
 

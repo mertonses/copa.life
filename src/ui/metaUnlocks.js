@@ -17,10 +17,9 @@
     const result=global.lastResult,container=document.getElementById("rUnlocks");
     if(!result||!container)return;
     const pending=result.chairChoices&&result.chairChoices.length?result.chairChoices:(!result.newChair?global.pendingChairChoices:[]);
-    const html=choiceHTML(pending);
-    if(!html)return;
-    container.querySelector(".chair-unlock-choice")?.remove();
-    container.insertAdjacentHTML("beforeend",html);
+    if(!choices(pending).length)return;
+    container.querySelector(".chair-unlock-choice,.chair-choice-cta")?.remove();
+    container.insertAdjacentHTML("beforeend",`<button type="button" class="chair-choice-cta" onclick="showPendingChairUnlock()"><span><small>${global.LANG==="tr"?"ŞAMPİYONLUK ÖDÜLÜ":"CHAMPIONSHIP REWARD"}</small><b>${global.LANG==="tr"?"Yeni başkan seçimi hazır":"New chairman choice ready"}</b></span><em>${global.LANG==="tr"?"SEÇ":"CHOOSE"} →</em></button>`);
     container.classList.remove("hidden");
   }
   function augmentMeta(){

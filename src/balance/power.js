@@ -33,13 +33,13 @@ function chemBonus(s){
  if(spent>0){total-=spent;parts.push(["CARD",LANG==="tr"?"Kart bedeli":"Card cost",-spent]);}
  return {total:Math.max(-5,Math.min(5,total)),parts};
 }
-function powerBreakdown(r){
+function powerBreakdown(r,excludedCard){
  const s=picksBySlot.filter(Boolean),captainPenalty=typeof captainDecisionPlayerPenaltyForRound==="function"?captainDecisionPlayerPenaltyForRound(r,s):0,avg=s.length?(s.reduce((a,p)=>a+effOf(p),0)+captainPenalty)/s.length:0;
  const starImpact=Math.min(2.5,s.map(effOf).sort((a,b)=>b-a).slice(0,2).reduce((sum,value)=>sum+Math.max(0,value-86)*.16,0));
  const styleBonus=STYLES[style].eff(s);
  const loanBonus=s.reduce((sum,p)=>sum+(p&&p.loan?Math.max(0,Number(p.teamPowerBoost)||0):0),0);
  let cardBonus=0,finalCardRaw=0;
- cards.forEach(k=>{const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
+ cards.forEach(k=>{if(k===excludedCard)return;const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
  const finalCardApplied=r>=6?finalCardRaw:0;
  cardBonus+=finalCardApplied;
  const promiseBonus=typeof matchPromisePowerForRound==="function"?matchPromisePowerForRound(r):0;
@@ -56,4 +56,4 @@ function powerBreakdown(r){
  const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total+captainChem));
  return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
 }
-function squadPower(r){return powerBreakdown(r);}
+function squadPower(r,excludedCard){return powerBreakdown(r,excludedCard);}

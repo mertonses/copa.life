@@ -16,12 +16,16 @@ const output = path.join(ROOT, "store/ios/graphics");
 await fs.mkdir(output, { recursive: true });
 try {
   const icon = await browser.newPage({ viewport: { width: 1024, height: 1024 }, deviceScaleFactor: 1 });
-  await icon.setContent(`<style>html,body{margin:0;width:1024px;height:1024px;background:#090a0a;overflow:hidden}img{display:block;width:1024px;height:1024px}</style><img src="${dataUrl}">`, { waitUntil: "load" });
+  await icon.setContent(`<style>html,body{margin:0;width:1024px;height:1024px;background:#101D28;overflow:hidden}img{display:block;width:1024px;height:1024px}</style><img src="${dataUrl}">`, { waitUntil: "load" });
   await icon.screenshot({ path: path.join(output, "app-icon-1024.png"), omitBackground: false });
+  await fs.copyFile(
+    path.join(output, "app-icon-1024.png"),
+    path.join(ROOT, "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"),
+  );
   await icon.close();
 
   const splash = await browser.newPage({ viewport: { width: 1366, height: 1366 }, deviceScaleFactor: 2 });
-  await splash.setContent(`<style>html,body{margin:0;width:1366px;height:1366px;background:#f5f0e8;overflow:hidden;display:grid;place-items:center}img{display:block;width:510px;height:510px}</style><img src="${dataUrl}">`, { waitUntil: "load" });
+  await splash.setContent(`<style>html,body{margin:0;width:1366px;height:1366px;background:#F3F5F4;overflow:hidden;display:grid;place-items:center}img{display:block;width:510px;height:510px}</style><img src="${dataUrl}">`, { waitUntil: "load" });
   await splash.screenshot({ path: path.join(output, "splash-2732.png"), omitBackground: false });
   await splash.close();
 } finally {

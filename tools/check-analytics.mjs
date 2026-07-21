@@ -26,7 +26,7 @@ const iosIndex=read("dist-ios/index.html");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
-for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed"]){
+for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved"]){
   expect(runtime.includes(`"${event}"`),`product event is missing: ${event}`);
   expect(worker.includes(`"${event}"`),`Worker allowlist is missing: ${event}`);
 }
@@ -34,10 +34,13 @@ for(const forbidden of ["localStorage","sessionStorage","document.cookie","sessi
   expect(!runtime.includes(forbidden),`analytics runtime contains forbidden identifier/storage marker: ${forbidden}`);
 }
 expect(runtime.includes("globalPrivacyControl")&&runtime.includes("doNotTrack"),"browser privacy signals are not respected");
-expect(runtime.includes("schema_version:3")&&worker.includes("[1,2,3].includes"),"versioned analytics schema compatibility is missing");
+expect(runtime.includes("schema_version:4")&&worker.includes("[1,2,3,4].includes"),"versioned analytics schema compatibility is missing");
 expect(runtime.includes("power_gap")&&runtime.includes("end_type")&&runtime.includes("model_version"),"coarse final simulation telemetry is missing");
 for(const dimension of ["chairman","formation","style","reward","card_kind","economy_band"]){
   expect(runtime.includes(dimension),`balance telemetry dimension is missing: ${dimension}`);
+}
+for(const dimension of ["tournament_stage","draw_mode","qualification","group_matchday"]){
+  expect(runtime.includes(dimension),`tournament telemetry dimension is missing: ${dimension}`);
 }
 expect(!runtime.includes("seed")&&!runtime.includes("replay"),"final analytics must not transmit a seed or replay code");
 expect(worker.includes("No user/session index is written"),"Analytics Engine privacy schema is not documented in code");

@@ -1,6 +1,6 @@
 # copa.life iOS / App Store hazırlık durumu
 
-Son güncelleme: 17 Temmuz 2026
+Son güncelleme: 20 Temmuz 2026
 
 ## Teknik sözleşme
 
@@ -37,12 +37,12 @@ Son güncelleme: 17 Temmuz 2026
 
 ## Gizlilik ve UGC
 
-- Ghost Club varsayılan kapalıdır; kullanım şartı ve ayrı paylaşım rızası gerekir.
+- Ghost Club paylaşımı ve Dünya Kulüpler Sıralaması varsayılan kapalıdır; her biri için kullanım şartı ve birbirinden ayrı açık rıza gerekir.
 - Uygulama hesabı oluşturulmaz.
-- Uygulama içinden tüm Ghost verileri silinebilir.
+- Uygulama içinden tüm Ghost ve sıralama verileri silinebilir; sıralamadan çıkış herkese açık profili ve koşu satırlarını kaldırır.
 - Ghost kayıtları en çok 45, raporlar en çok 90 gün tutulur ve fiziksel olarak silinir.
 - Kulüp adı filtresi, bildirme, bir daha göstermeme, `review`/`blocked`, tekrar eden ihlal engeli ve yayınlanmış takedown kanalı vardır.
-- iOS privacy manifest, isteğe bağlı Ghost kullanımında `Gameplay Content` ve anonim `Device ID` sınıflarını yalnız `App Functionality`, ilişkilendirilmemiş ve takipsiz olarak beyan eder.
+- iOS privacy manifest, isteğe bağlı Ghost/sıralama kullanımında `Gameplay Content`, kullanıcı üretimi kulüp adı ve anonim `Device ID` sınıflarını yalnız `App Functionality`, ilişkilendirilmemiş ve takipsiz olarak beyan eder.
 - Native paket web analitiği, reklam SDK'sı, ATT, IDFA, IAP veya abonelik içermez.
 - Kalıcı gizlilik URL'si: `https://copa-life-legal.pages.dev/privacy.html`
 - Destek/takedown: `https://copa-life-legal.pages.dev/takedown.html`

@@ -5,6 +5,8 @@ const match = fs.readFileSync("src/styles/match.css", "utf8");
 const cards = fs.readFileSync("src/styles/cards.css", "utf8");
 const mobile = fs.readFileSync("src/styles/mobileExperience.css", "utf8");
 const mobileScript = fs.readFileSync("src/ui/mobileExperience.js", "utf8");
+const chairPicker = fs.readFileSync("src/ui/chairPicker.js", "utf8");
+const chairPickerCss = fs.readFileSync("src/styles/chairPicker.css", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
 
 const checks = [
@@ -17,8 +19,29 @@ const checks = [
     pass: /\.brandmark \.logo-beta\{[\s\S]*?font-size:5px;[\s\S]*?letter-spacing:\.25px;/s.test(layout),
   },
   {
+    name: "mobile run chrome omits duplicate slogan and round label",
+    pass: /@media\(max-width:760px\)\{[\s\S]*?body\.run-active #logoSlogan,\s*body\.run-active #hub>\.roundtag\{display:none!important\}/s.test(layout)
+      && /function beginDraft\(\)\{[\s\S]*?document\.body\.classList\.add\("run-active"\)/s.test(html)
+      && /function restart\(\)\{[\s\S]*?document\.body\.classList\.remove\("run-active"\)/s.test(html)
+      && /function _tryRestoreState\(\)\{[\s\S]*?document\.body\.classList\.add\("run-active"\)[\s\S]*?catch\(e\)\{\s*document\.body\.classList\.remove\("run-active"\)/s.test(html),
+  },
+  {
     name: "mobile viewport-bound screens",
     pass: /@media\(max-width:900px\)\{[\s\S]*#app,[\s\S]*#result\{[\s\S]*max-width:100%!important;[\s\S]*overflow-x:hidden!important/s.test(layout),
+  },
+  {
+    name: "chairman profile badge belongs to the centred persona panel",
+    pass: /<div class="chairpopup-desc">\$\{model\.desc\}<\/div><\/div><strong class="cp-role-badge">/.test(chairPicker)
+      && !/cp-mechanics-head[\s\S]*?cp-role-badge/.test(chairPicker)
+      && /\.chair-picker-modal \.cp-role-badge\{[^}]*align-self:center;[^}]*justify-content:center;[^}]*margin:12px auto 0;/s.test(chairPickerCss)
+      && /@media\(max-width:720px\)\{[\s\S]*?\.chair-picker-modal \.cp-role-badge\{grid-column:1\/-1;justify-self:center;/s.test(chairPickerCss),
+  },
+  {
+    name: "chairman profile counter sits directly beside the fitted close control",
+    pass: /<div class="cp-top-controls"><span class="cp-counter">[\s\S]*?<button class="cp-close"/.test(chairPicker)
+      && !/cp-mechanics-head[\s\S]*?cp-counter/.test(chairPicker)
+      && /\.chair-picker-modal \.cp-top-controls\{[^}]*top:10px;[^}]*right:14px;[^}]*display:flex;[^}]*align-items:center;[^}]*gap:8px;[^}]*height:36px\}/s.test(chairPickerCss)
+      && /\.chair-picker-modal \.cp-close\{[^}]*position:static;[^}]*width:36px;[^}]*height:36px;/s.test(chairPickerCss),
   },
   {
     name: "mobile metrics fit in one four-column row",
@@ -40,6 +63,13 @@ const checks = [
   {
     name: "mobile result secondary actions stay in one three-column row",
     pass: /#result \.result-row\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/s.test(mobile),
+  },
+  {
+    name: "result summary stays compact on narrow screens",
+    pass: /\.result \.scoreboard\{[\s\S]*?min-height:94px;[\s\S]*?padding:14px 22px 13px;/s.test(match)
+      && /\.result \.scoreboard-title\{[\s\S]*?display:flex;[\s\S]*?align-items:baseline;/s.test(match)
+      && /@media\(max-width:760px\)\{[\s\S]*?\.result \.statline\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}[\s\S]*?\.result \.scoreboard\{min-height:82px;/s.test(match)
+      && /function resultHeroLabel\(r,wasSacked,x\)\{\s*if\(wasSacked\)return "";\s*if\(r\.won\)return typeof teamName/s.test(html),
   },
   {
     name: "mobile action dock accounts for the bottom safe area",
@@ -72,9 +102,12 @@ const checks = [
       && /function ensureResultDisclosures\(\)\{\s*if\(!isPhoneInteraction\(\)\)/.test(mobileScript),
   },
   {
-    name: "mobile landing hides tactics and uses a two-by-two summary grid",
+    name: "mobile landing keeps live formation-linked tactics and a two-by-two summary grid",
     pass: !/button\.id="mobileMechanicsToggle"/.test(mobileScript)
-      && /\.tactical-board\{display:none!important\}/.test(mobile)
+      && /\.tactical-board\{display:grid!important\}/.test(mobile)
+      && /function _updateTacticalFormation\(name\)/.test(html)
+      && /function _tickTacticalBoard\(\)/.test(html)
+      && /function pickForm\(f\)\{[\s\S]*?_updateTacticalFormation\(f\)/.test(html)
       && /#introLand \.mechanics\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important;[\s\S]*grid-auto-rows:minmax\(54px,auto\)/s.test(mobile),
   },
   {

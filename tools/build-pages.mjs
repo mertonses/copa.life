@@ -28,6 +28,7 @@ const ROOT_FILES = [
   "favicon-16x16.png",
   "favicon-32x32.png",
   "favicon-48x48.png",
+  "faq.html",
   "apple-touch-icon.png",
   "web-app-icon-192.png",
   "web-app-icon-512.png",

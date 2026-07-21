@@ -66,9 +66,11 @@
     if(stylesReady||document.querySelector('link[data-ghost-run-result]')){stylesReady=true;return;}
     const link=document.createElement("link");
     link.rel="stylesheet";
-    link.href="src/styles/ghostRunResult.css?v=20260718-ghost-result2";
+    link.href="src/styles/ghostRunResult.css?v=20260720-ghost-result3";
     link.dataset.ghostRunResult="";
-    document.head.appendChild(link);
+    const palette=document.querySelector('link[href*="src/styles/palette.css"]');
+    if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);
+    else document.head.appendChild(link);
     stylesReady=true;
   }
   function fallbackCopy(value,onDone){
@@ -79,10 +81,21 @@
     area.select();
     try{document.execCommand("copy");onDone();}finally{area.remove();}
   }
+  function copyIcon(copied){
+    return copied
+      ?'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4.5 10.5 3.2 3.2 7.8-8"/></svg>'
+      :'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="7" width="9" height="9" rx="1.8"/><path d="M13 7V5.8A1.8 1.8 0 0 0 11.2 4H5.8A1.8 1.8 0 0 0 4 5.8v5.4A1.8 1.8 0 0 0 5.8 13H7"/></svg>';
+  }
   function copySeed(data,button,copy){
     const done=()=>{
-      button.textContent=copy.copied;
-      window.setTimeout(()=>{button.textContent=copy.copySeed;},1800);
+      button.innerHTML=copyIcon(true);
+      button.classList.add("is-copied");
+      button.setAttribute("aria-label",copy.copied);
+      window.setTimeout(()=>{
+        button.innerHTML=copyIcon(false);
+        button.classList.remove("is-copied");
+        button.setAttribute("aria-label",copy.copySeed);
+      },1800);
     };
     if(navigator.clipboard&&navigator.clipboard.writeText){
       navigator.clipboard.writeText(data.seed).then(done).catch(()=>fallbackCopy(data.seed,done));
@@ -120,32 +133,25 @@
           ${fact(copy.power,data.power)}
           ${fact(copy.chairman,data.chairman)}
         </div>
-        <div class="ghost-run-seed-row"><span class="ghost-run-card-label">${esc(copy.seed)}</span><code>${esc(data.seed)}</code></div>
+        <div class="ghost-run-seed-row">
+          <span class="ghost-run-card-label">${esc(copy.seed)}</span>
+          <span class="ghost-run-seed-value">
+            <code>${esc(data.seed)}</code>
+            <button class="ghost-run-seed-copy" type="button" data-ghost-seed aria-label="${esc(copy.copySeed)}">${copyIcon(false)}</button>
+          </span>
+        </div>
       </article>
       <p class="ghost-run-support">${esc(support)}</p>
-      <footer class="ghost-run-actions">
-        ${shared?"":`<button class="btn btn-primary ghost-run-enable" type="button" data-ghost-enable>${esc(copy.enable)}</button>`}
-        <button class="btn btn-primary ghost-run-primary" type="button" data-ghost-restart>${esc(copy.restart)}</button>
-        <button class="btn btn-ghost" type="button" data-ghost-seed>${esc(copy.copySeed)}</button>
-        <button class="btn ghost-run-share" type="button" data-ghost-share>${esc(copy.share)}</button>
-      </footer>
+      ${shared?"":`<footer class="ghost-run-actions"><button class="btn btn-primary ghost-run-enable" type="button" data-ghost-enable>${esc(copy.enable)}</button></footer>`}
     </section>`;
     global.showModal(html,{dismissOnOverlay:true,label:title,bare:true});
     const modal=document.getElementById("modal");
     if(!modal)return false;
     modal.querySelector("[data-ghost-close]")?.addEventListener("click",()=>global.closeModal());
-    modal.querySelector("[data-ghost-restart]")?.addEventListener("click",()=>{
-      global.closeModal();
-      if(actions&&typeof actions.restart==="function")actions.restart();
-    });
     modal.querySelector("[data-ghost-seed]")?.addEventListener("click",event=>copySeed(data,event.currentTarget,copy));
     modal.querySelector("[data-ghost-enable]")?.addEventListener("click",()=>{
       global.closeModal();
       if(actions&&typeof actions.enable==="function")actions.enable();
-    });
-    modal.querySelector("[data-ghost-share]")?.addEventListener("click",()=>{
-      global.closeModal();
-      window.setTimeout(()=>{if(actions&&typeof actions.share==="function")actions.share();},0);
     });
     return true;
   }
