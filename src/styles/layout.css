@@ -5540,16 +5540,16 @@ img,svg,canvas{max-width:100%}
 html[data-theme="dark"] .risk-offer{
   background:linear-gradient(105deg,color-mix(in srgb,var(--surface-raised) 87%,var(--risk-accent) 13%),var(--surface-elevated) 52%);
   border-color:color-mix(in srgb,var(--risk-accent) 32%,var(--border-default));
-  box-shadow:0 5px 17px rgba(5,11,17,.26),inset 0 1px 0 rgba(255,255,255,.035);
+  box-shadow:0 5px 17px rgba(10,17,24,.26),inset 0 1px 0 rgba(255,255,255,.035);
 }
 html[data-theme="dark"] .risk-offer-icon{
   background:linear-gradient(145deg,color-mix(in srgb,var(--surface-raised) 76%,var(--risk-secondary) 24%),color-mix(in srgb,var(--surface-elevated) 88%,var(--risk-accent) 12%));
   border-color:color-mix(in srgb,var(--risk-accent) 42%,var(--border-default));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 5px 14px rgba(3,8,13,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 5px 14px rgba(10,17,24,.28);
 }
 html[data-theme="dark"] .risk-offer:hover,html[data-theme="dark"] .risk-offer:focus-visible{
   border-color:color-mix(in srgb,var(--risk-accent) 68%,var(--border-default));
-  box-shadow:0 9px 24px rgba(2,7,12,.4),0 0 0 1px color-mix(in srgb,var(--risk-accent) 16%,transparent);
+  box-shadow:0 9px 24px rgba(10,17,24,.4),0 0 0 1px color-mix(in srgb,var(--risk-accent) 16%,transparent);
 }
 @keyframes riskOfferEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @keyframes riskBoltSurge{0%,72%,100%{transform:scale(1);filter:none}78%{transform:scale(1.12);filter:drop-shadow(0 0 3px currentColor)}84%{transform:scale(.97)}90%{transform:scale(1.06)}}

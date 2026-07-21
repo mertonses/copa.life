@@ -86,7 +86,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260721-ui-semantics1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260722-bench-corner1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260714-blackmarket1-cost-wrap1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260722-story-icons1">
@@ -388,11 +388,11 @@ try{
 <script src="src/cards/cardEffects.js?v=20260720-lottery-copy1"></script>
 <script src="src/balance/power.js?v=20260720-explicit-power1"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
-<script src="src/balance/difficulty.js?v=20260711-stability1"></script>
+<script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260714-i18n1"></script>
 <script src="src/online/ghostClubs.js?v=20260721-mobile-onboarding1"></script>
-<script src="src/ui/hub.js?v=20260721-power-semantics1"></script>
+<script src="src/ui/hub.js?v=20260722-bench-corner1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260720-modal-lock1"></script>
 <script>
@@ -1821,7 +1821,7 @@ function prepareLoanReward(){
   if(weakIdx<0)return null;
   const displaced=picksBySlot[weakIdx],player=generateLoanPlayer(weakIdx);
   if(!player)return null;
-  player.club=displaced.club||player.club;
+  player.club=displaced.club??player.club;
   player.tr=displaced.tr||0;
   player.teamPowerBoost=0;
   const targetRound=Math.min(6,round+1),before=squadPower(targetRound).power,original=picksBySlot[weakIdx];
