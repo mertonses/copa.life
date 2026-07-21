@@ -572,6 +572,53 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   await expect(page.locator("#backupApplyBtn")).toContainText(/SEÇİLİ YEDEĞİ AL|CONFIRM REPLACEMENT/);
 });
 
+test("bench stays compact in the pitch corner on wide screens and returns to flow on phones",async({page},testInfo)=>{
+  const isPhone=mobileOnly(testInfo.project.name);
+  test.skip(!["desktop-chromium","mobile-chromium"].includes(testInfo.project.name),"responsive bench contract");
+  await page.goto("/?bench-corner-layout=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{const game=globalThis as any;await game.quickStart();await game.quickAll();});
+  await expect(page.locator("#postClubName")).toBeVisible();
+  await page.locator("#postClubName").fill("Bench Layout FK");
+  await page.evaluate(()=>{const game=globalThis as any;game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  await expect(page.locator("#hub")).toBeVisible();
+  await expect(page.locator("#hubBenchSection .bench-row")).toHaveCount(4);
+
+  const metrics=await page.evaluate(()=>{
+    const pitch=document.querySelector("#hubPitch") as HTMLElement;
+    const bench=document.querySelector("#hubBenchSection") as HTMLElement;
+    const row=bench.querySelector(".bench-row") as HTMLElement;
+    const pitchRect=pitch.getBoundingClientRect();
+    const benchRect=bench.getBoundingClientRect();
+    const rowRect=row.getBoundingClientRect();
+    return{
+      parentClass:bench.parentElement?.parentElement?.className||"",
+      position:getComputedStyle(bench).position,
+      pitchTop:Math.round(pitchRect.top),
+      pitchRight:Math.round(pitchRect.right),
+      pitchBottom:Math.round(pitchRect.bottom),
+      benchTop:Math.round(benchRect.top),
+      benchRight:Math.round(benchRect.right),
+      benchWidth:Math.round(benchRect.width),
+      rowHeight:Math.round(rowRect.height),
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+    };
+  });
+  expect(metrics.parentClass).toContain("pitch-area");
+  expect(metrics.pageOverflow).toBeLessThanOrEqual(1);
+  if(isPhone){
+    expect(metrics.position).toBe("static");
+    expect(metrics.benchTop).toBeGreaterThanOrEqual(metrics.pitchBottom);
+  }else{
+    expect(metrics.position).toBe("absolute");
+    expect(metrics.benchTop-metrics.pitchTop).toBeGreaterThanOrEqual(8);
+    expect(metrics.benchTop-metrics.pitchTop).toBeLessThanOrEqual(12);
+    expect(metrics.pitchRight-metrics.benchRight).toBeGreaterThanOrEqual(8);
+    expect(metrics.pitchRight-metrics.benchRight).toBeLessThanOrEqual(12);
+    expect(metrics.benchWidth).toBeLessThanOrEqual(234);
+    expect(metrics.rowHeight).toBeLessThanOrEqual(28);
+  }
+});
+
 test("phone portrait and landscape matrices stay inside the viewport with usable hit areas",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   const sizes=[

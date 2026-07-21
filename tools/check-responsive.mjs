@@ -5,6 +5,7 @@ const match = fs.readFileSync("src/styles/match.css", "utf8");
 const cards = fs.readFileSync("src/styles/cards.css", "utf8");
 const mobile = fs.readFileSync("src/styles/mobileExperience.css", "utf8");
 const mobileScript = fs.readFileSync("src/ui/mobileExperience.js", "utf8");
+const hubScript = fs.readFileSync("src/ui/hub.js", "utf8");
 const chairPicker = fs.readFileSync("src/ui/chairPicker.js", "utf8");
 const chairPickerCss = fs.readFileSync("src/styles/chairPicker.css", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
@@ -131,6 +132,14 @@ const checks = [
     name: "injury notice stays compact directly above the bench",
     pass: /<div class="hub-bench-stack" id="hubBenchStack">\s*<div class="injbar hidden" id="injbar"[\s\S]*<div id="hubBenchSection"><\/div>/s.test(html)
       && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:18px minmax\(0,1fr\) auto;[\s\S]*min-height:44px;[\s\S]*box-shadow:none!important/s.test(layout),
+  },
+  {
+    name: "wide bench is a compact pitch-corner overlay with a narrow-screen fallback",
+    pass: /<div class="pitch-area">[\s\S]*?<div class="pitch" id="hubPitch"[\s\S]*?<div class="hub-bench-stack" id="hubBenchStack">/s.test(html)
+      && /@media\(min-width:981px\) and \(orientation:landscape\)\{[\s\S]*?#hub \.pitch-area #hubBenchSection\{[\s\S]*?position:absolute;[\s\S]*?top:10px;[\s\S]*?right:10px;[\s\S]*?width:clamp\(202px,27%,232px\)!important;/s.test(layout)
+      && /@media\(max-width:980px\), \(orientation:portrait\)\{[\s\S]*?#hub \.pitch-area #hubBenchSection\{[\s\S]*?position:static;/s.test(layout)
+      && /class="bench-head"/.test(hubScript)
+      && /class="bench-list"/.test(hubScript),
   },
   {
     name: "mobile card market reroll stays visually minimal",
