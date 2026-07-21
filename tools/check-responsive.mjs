@@ -15,8 +15,8 @@ const checks = [
     pass: /html,\s*\nbody\{[\s\S]*?overflow-x:hidden/s.test(layout),
   },
   {
-    name: "beta badge remains discreet",
-    pass: /\.brandmark \.logo-beta\{[\s\S]*?font-size:5px;[\s\S]*?letter-spacing:\.25px;/s.test(layout),
+    name: "retired beta badge is absent from the brand chrome",
+    pass: !/logo-beta/.test(layout)&&!/logo-beta/.test(html),
   },
   {
     name: "mobile run chrome omits duplicate slogan and round label",

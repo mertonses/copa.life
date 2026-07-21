@@ -1,13 +1,10 @@
-# D‑U‑N‑S geldikten sonra Play yayın sırası
+# Play kuruluş doğrulaması sonrası yayın sırası
 
-## 1. Kuruluş hesabı
+## 1. Kuruluş hesabı — tamamlandı
 
-- D‑U‑N‑S numarasını gir.
-- Play'deki yasal kuruluş adı ve adresini Dun & Bradstreet kaydıyla karakter karakter eşleştir.
-- Yetkili temsilcinin resmî kimliğini ve istenen kuruluş belgesini yükle.
-- Kuruluş alan adına bağlı iletişim e-postasını ve telefonu doğrula.
-- `copa.life` web sitesi sahiplik doğrulamasını tamamla.
-- Kamuya açık geliştirici e-postası ve telefonunun yayımlanmasını onayla.
+- D‑U‑N‑S, yasal kuruluş bilgileri, yetkili temsilci ve alan adı Play Console'da doğrulandı.
+- Resmî kamuya açık destek adresi: `support@copa.life`.
+- Gizlilik sayfasındaki geliştirici adı, Play Console'daki doğrulanmış yasal adla birebir karşılaştırılacak.
 
 ## 2. Uygulama kaydı
 
@@ -28,7 +25,7 @@
 
 - `play-console-declarations.md` dosyasındaki App access, Ads, Target audience, IARC, UGC, hesap ve Data Safety cevaplarını gir.
 - Gizlilik politikası URL'sini ekle.
-- Destek/takedown posta kutusuna gerçek bir test iletisi gönder ve yanıt alabildiğini doğrula.
+- `support@copa.life` posta kutusuna dışarıdan gerçek bir test iletisi gönder ve yanıt alabildiğini doğrula.
 - Kurumsal geliştirici adı ve e-postasını gizlilik/takedown sayfalarında yayımla.
 
 ## 5. Kapalı test

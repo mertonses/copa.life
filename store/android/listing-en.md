@@ -21,7 +21,7 @@ Features:
 - Budget, squad chemistry, and tactical trade-offs
 - Six-dimensional copa.life player profiles
 - Cards, match events, and unpredictable turns
-- A six-round cup run
+- Three group matches followed by quarter-final, semi-final and final
 - Light and dark themes
 - No account or sign-in required
 
@@ -34,5 +34,5 @@ copa.life is an independent game. It is not affiliated with or endorsed by any p
 - Type: Game
 - Category: Sports
 - Price: Free
-- Ads: No
+- Ads: Yes — full-screen interstitial after a completed run
 - In-app purchases: No

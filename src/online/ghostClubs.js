@@ -215,7 +215,10 @@
     const clubName=cleanClubName(context.teamName||context.clubName||startedRun.clubName||"copa.life XI","copa.life XI");
     const publicId=("G-"+hash([context.seed,clubName,createdAt].join("|")).slice(0,8)).toUpperCase();
     const formation=cleanText(context.formName||context.formation||"4-3-3")||"4-3-3";
-    const result=context.run||context.lastResult||{};
+    const result=context.run||context.lastResult||{},tournamentState=result.tournament||context.tournament||null;
+    const playerGroup=tournamentState&&Array.isArray(tournamentState.groups)?tournamentState.groups.find(group=>group&&group.id===(tournamentState.group&&tournamentState.group.playerGroupId)):null;
+    const playerRow=playerGroup&&Array.isArray(playerGroup.table)?playerGroup.table.find(row=>row&&row.teamId==="player"):null;
+    const tournamentSnapshot=tournamentState&&tournamentState.format==="groups16_v1"?{format:"groups16_v1",stage:tournamentState.player&&tournamentState.player.exitStage||tournamentState.knockout&&tournamentState.knockout.round||tournamentState.phase||"group",group:{id:playerGroup&&playerGroup.id||"",rank:Math.round(Number(playerRow&&playerRow.rank)||0),points:Math.round(Number(playerRow&&playerRow.points)||0),gd:Math.round(Number(playerRow&&playerRow.gd)||0),qualified:!!(tournamentState.group&&tournamentState.group.qualified)}}:null;
     const profile={
       schema_version:CONFIG.schemaVersion,
       game_version:CONFIG.gameVersion,
@@ -239,9 +242,10 @@
       used_cards:(Array.isArray(context.usedRiskCards)?context.usedRiskCards:[]).map(cleanText),
       chairman_effects:{trust:Math.round(bounded(context.chairTrust,0,3)),risk_power:Math.round(bounded(context.riskPowerMod,-30,30))},
       tactics:tacticProfile(context,cards),
-      match_history:(Array.isArray(context.fixtures)?context.fixtures:[]).slice(0,6).map(match=>({opponent:cleanText(match.opp||match.name||""),result:cleanText(match.res||""),gf:Math.round(bounded(match.gf,0,20)),ga:Math.round(bounded(match.ga,0,20))})),
+      match_history:(Array.isArray(context.fixtures)?context.fixtures:[]).slice(0,6).map((match,index)=>({opponent:cleanText(match.opp||match.name||""),result:cleanText(match.res||""),gf:Math.round(bounded(match.gf,0,20)),ga:Math.round(bounded(match.ga,0,20)),stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",penalty:Array.isArray(match.penalty)?match.penalty.slice(0,2).map(value=>Math.round(bounded(value,0,20))):null})),
       reached_round:Math.round(bounded(result.round||context.round,1,6)),
       result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
+      tournament:tournamentSnapshot,
       final_profile:finalProfileSnapshot(context),
       mvp:cleanText(context.motm||context.mvp||""),
       scorers:Array.isArray(context.scorers)?context.scorers.slice(0,8).map(cleanText):[],
@@ -253,13 +257,17 @@
   }
   function normalizeLeaderboardRun(context){
     const safe=context&&typeof context==="object"?context:{},started=readStartedRun(),result=safe.run||{};
-    const fixtures=(Array.isArray(safe.fixtures)?safe.fixtures:[]).slice(0,6).map(match=>({
+    const fixtures=(Array.isArray(safe.fixtures)?safe.fixtures:[]).slice(0,6).map((match,index)=>({
       opponent:cleanText(match&&((match.opp||match.name)||"")),
       result:cleanText(match&&match.res||""),
       gf:Math.round(bounded(match&&match.gf,0,20)),
-      ga:Math.round(bounded(match&&match.ga,0,20))
+      ga:Math.round(bounded(match&&match.ga,0,20)),
+      stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",
+      penalty:Array.isArray(match&&match.penalty)?match.penalty.slice(0,2).map(value=>Math.round(bounded(value,0,20))):null
     }));
-    while(fixtures.length<6)fixtures.push({opponent:"",result:"",gf:0,ga:0});
+    while(fixtures.length<6){const index=fixtures.length;fixtures.push({opponent:"",result:"",gf:0,ga:0,stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",penalty:null});}
+    const tournamentState=result.tournament||safe.tournament||null,playerGroup=tournamentState&&Array.isArray(tournamentState.groups)?tournamentState.groups.find(group=>group&&group.id===(tournamentState.group&&tournamentState.group.playerGroupId)):null,playerRow=playerGroup&&Array.isArray(playerGroup.table)?playerGroup.table.find(row=>row&&row.teamId==="player"):null;
+    const tournamentSnapshot=tournamentState&&tournamentState.format==="groups16_v1"?{format:"groups16_v1",stage:tournamentState.player&&tournamentState.player.exitStage||tournamentState.knockout&&tournamentState.knockout.round||tournamentState.phase||"group",group:{id:playerGroup&&playerGroup.id||"",rank:Math.round(Number(playerRow&&playerRow.rank)||0),points:Math.round(Number(playerRow&&playerRow.points)||0),gd:Math.round(Number(playerRow&&playerRow.gd)||0),qualified:!!(tournamentState.group&&tournamentState.group.qualified)}}:null;
     return {
       schema_version:1,
       run_id:cleanText(started.id||("run-"+hash([safe.seed,safe.teamName,Date.now()].join("|")))).toLowerCase(),
@@ -267,7 +275,8 @@
       club:{name:cleanClubName(safe.teamName||started.clubName||"copa.life XI","copa.life XI"),country:cleanText(safe.selectedCountry||started.country||"TR").toUpperCase()},
       reached_round:Math.round(bounded(result.won?6:(result.round||safe.round),1,6)),
       result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
-      match_history:fixtures
+      match_history:fixtures,
+      tournament:tournamentSnapshot
     };
   }
   async function flushLeaderboardQueue(){
@@ -277,7 +286,8 @@
     for(const item of items){
       try{
         const response=await fetchWithTimeout(base+"/v1/leaderboard/runs",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId(),"x-copa-leaderboard-consent-version":CONFIG.leaderboardConsentVersion,"x-copa-delete-token":deleteToken()},body:JSON.stringify(item),keepalive:true});
-        if(!response.ok&&response.status!==409&&response.status!==422)remaining.push(item);
+        if(response.status===422){safeSet("copa_leaderboard_last_rejection_v1",JSON.stringify({run_id:item.run_id,at:new Date().toISOString()}));continue;}
+        if(!response.ok&&response.status!==409)remaining.push(item);
       }catch(_){remaining.push(item);}
     }
     saveLeaderboardQueue(remaining);return remaining.length===0;
@@ -408,7 +418,8 @@
       const current=items[0];
       try{
         const res=await fetchWithTimeout(base+"/v1/ghosts",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId(),"x-copa-consent-version":CONFIG.consentVersion,"x-copa-delete-token":deleteToken()},body:JSON.stringify(current),keepalive:true});
-        if(!res.ok)break;
+        if(res.status===422){safeSet("copa_ghost_last_rejection_v1",JSON.stringify({run_id:current.run_id||"",at:new Date().toISOString()}));items.shift();continue;}
+        if(!res.ok&&res.status!==409)break;
         items.shift();sent++;
       }catch(_){break;}
     }

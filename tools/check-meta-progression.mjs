@@ -3,6 +3,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 
 const source=fs.readFileSync(new URL("../src/state/metaProgression.js",import.meta.url),"utf8");
+assert.match(source,/draws\*2/,"group draws must contribute to career reputation");
 const storage=new Map();
 const sandbox={
   console,JSON,Math,Date,Object,Array,Number,String,Set,Uint8Array,TextEncoder,TextDecoder,Blob,URL,

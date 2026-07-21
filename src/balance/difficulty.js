@@ -1,5 +1,5 @@
 /* Risk/odul draftlari ve tur ici zorluk carpanlari. */
-function maybeDraftEvent(){if(round<2||round>5||eventSeen[round]||runEnded)return;eventSeen[round]=1;if(rand()>0.75)return;setTimeout(showDraftEvent,260);}
+function maybeDraftEvent(){if(round<2||round>5||eventSeen[round]||runEnded)return;eventSeen[round]=1;if(rand()>0.75)return;const scheduledRound=round;setTimeout(()=>showDraftEvent(scheduledRound),260);}
 
 function applyRiskDraftCarryovers(){
   if(round<=1)return;
@@ -47,8 +47,8 @@ function _decisionIcon(name){
   return icons[name]||"";
 }
 
-function showDraftEvent(){
- if($("hub").classList.contains("hidden"))return;const tr=LANG==="tr";
+function showDraftEvent(scheduledRound){
+ if(runEnded||Number(scheduledRound||round)!==Number(round)||$("hub").classList.contains("hidden")||pendingMatchResolution||window.CopaRunState&&window.CopaRunState.phase!=="hub"||!$("modal").classList.contains("hidden"))return;const tr=LANG==="tr";
  const _bolt=_decisionIcon("press"),_case=_decisionIcon("envelope"),_dice=_decisionIcon("contract"),_band=_decisionIcon("grit"),_hand=_decisionIcon("hold");
  const gain=tr?"Kazanç":"Gain",cost=tr?"Bedel":"Cost",risk=tr?"Risk":"Risk",note=tr?"Not":"Note";
  const opts=[

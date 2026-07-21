@@ -2,11 +2,11 @@
   "use strict";
 
   const COPY={
-    tr:{current:"Sıradaki maç",won:"Kazandı",draw:"Berabere",lost:"Kaybetti",locked:"Kilitli",reveal:"Rakip tur sonrası belli olur",opponent:"Rakip",score:"Skor",penalties:"Penaltılar",event:"Önemli olay",noEvent:"Kayıtlı önemli olay yok",close:"Detayı kapat",cup:"Kupa",champion:"Şampiyon",progress:"Kupa ilerlemesi"},
-    en:{current:"Next match",won:"Won",draw:"Draw",lost:"Lost",locked:"Locked",reveal:"Opponent revealed after the round",opponent:"Opponent",score:"Score",penalties:"Penalties",event:"Key event",noEvent:"No key event recorded",close:"Close details",cup:"Cup",champion:"Champion",progress:"Cup progress"},
-    es:{current:"Próximo partido",won:"Victoria",draw:"Empate",lost:"Derrota",locked:"Bloqueado",reveal:"El rival se revela tras la ronda",opponent:"Rival",score:"Marcador",penalties:"Penaltis",event:"Momento clave",noEvent:"Sin momento clave registrado",close:"Cerrar detalle",cup:"Copa",champion:"Campeón",progress:"Progreso de copa"},
-    de:{current:"Nächstes Spiel",won:"Sieg",draw:"Remis",lost:"Niederlage",locked:"Gesperrt",reveal:"Gegner wird nach der Runde enthüllt",opponent:"Gegner",score:"Ergebnis",penalties:"Elfmeterschießen",event:"Schlüsselmoment",noEvent:"Kein Schlüsselmoment gespeichert",close:"Details schließen",cup:"Pokal",champion:"Meister",progress:"Pokalfortschritt"},
-    it:{current:"Prossima partita",won:"Vittoria",draw:"Pareggio",lost:"Sconfitta",locked:"Bloccato",reveal:"L'avversario appare dopo il turno",opponent:"Avversario",score:"Risultato",penalties:"Rigori",event:"Momento chiave",noEvent:"Nessun momento chiave registrato",close:"Chiudi dettagli",cup:"Coppa",champion:"Campione",progress:"Progresso coppa"}
+    tr:{current:"Sıradaki maç",scheduled:"Fikstürde",won:"Kazandı",draw:"Berabere",lost:"Kaybetti",locked:"Kilitli",reveal:"Rakip eşleşme sonrası belli olur",opponent:"Rakip",score:"Skor",penalties:"Penaltılar",event:"Önemli olay",noEvent:"Kayıtlı önemli olay yok",close:"Detayı kapat",cup:"Kupa",champion:"Şampiyon",progress:"Kupa ilerlemesi"},
+    en:{current:"Next match",scheduled:"Scheduled",won:"Won",draw:"Draw",lost:"Lost",locked:"Locked",reveal:"Opponent revealed after the tie is set",opponent:"Opponent",score:"Score",penalties:"Penalties",event:"Key event",noEvent:"No key event recorded",close:"Close details",cup:"Cup",champion:"Champion",progress:"Cup progress"},
+    es:{current:"Próximo partido",scheduled:"Programado",won:"Victoria",draw:"Empate",lost:"Derrota",locked:"Bloqueado",reveal:"El rival se revela al definir el cruce",opponent:"Rival",score:"Marcador",penalties:"Penaltis",event:"Momento clave",noEvent:"Sin momento clave registrado",close:"Cerrar detalle",cup:"Copa",champion:"Campeón",progress:"Progreso de copa"},
+    de:{current:"Nächstes Spiel",scheduled:"Angesetzt",won:"Sieg",draw:"Remis",lost:"Niederlage",locked:"Gesperrt",reveal:"Gegner erscheint, sobald das Duell feststeht",opponent:"Gegner",score:"Ergebnis",penalties:"Elfmeterschießen",event:"Schlüsselmoment",noEvent:"Kein Schlüsselmoment gespeichert",close:"Details schließen",cup:"Pokal",champion:"Meister",progress:"Pokalfortschritt"},
+    it:{current:"Prossima partita",scheduled:"In calendario",won:"Vittoria",draw:"Pareggio",lost:"Sconfitta",locked:"Bloccato",reveal:"L'avversario appare quando si definisce l'incrocio",opponent:"Avversario",score:"Risultato",penalties:"Rigori",event:"Momento chiave",noEvent:"Nessun momento chiave registrato",close:"Chiudi dettagli",cup:"Coppa",champion:"Campione",progress:"Progresso coppa"}
   };
   const LOCK='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M7 8V6a3 3 0 0 1 6 0v2"/></svg>';
   const CUP='<svg viewBox="0 0 28 32" aria-hidden="true"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15M20 7h4Q24 17 20 15M14 20v6M9 26h10M7 30h14"/></svg>';
@@ -19,7 +19,7 @@
   const currentRound=()=>typeof round!=="undefined"?Math.max(1,Number(round)||1):1;
   const labels=()=>{
     const data=typeof L==="function"?L():{};
-    return data.rounds||["Round 1","Round 2","Last 16","Quarter-final","Semi-final","Final"];
+    return data.rounds||["Group · Match 1","Group · Match 2","Group · Match 3","Quarter-final","Semi-final","Final"];
   };
 
   function ensureStyle(){
@@ -82,27 +82,27 @@
   }
 
   function nodeMarkup(fixture,index,roundLabels){
-    const c=copy(),played=!!fixture.res,active=!played&&index===currentRound()-1,locked=!played&&!active;
-    const state=played?fixture.res:active?"current":"locked";
-    const result=played?resultCopy(fixture.res):active?c.current:c.locked;
+    const c=copy(),played=!!fixture.res,active=!played&&index===currentRound()-1,scheduled=!played&&!active&&!!fixture.matchId,locked=!played&&!active&&!scheduled;
+    const state=played?fixture.res:active?"current":scheduled?"scheduled":"locked";
+    const result=played?resultCopy(fixture.res):active?c.current:scheduled?c.scheduled:c.locked;
     const score=played?`${fixture.gf}–${fixture.ga}`:"";
     const opponent=locked?c.reveal:fixture.opp||c.opponent;
-    const aria=played?`${roundLabels[index]}, ${opponent}, ${score}, ${result}`:active?`${roundLabels[index]}, ${c.current}, ${opponent}`:`${roundLabels[index]}, ${c.locked}, ${c.reveal}`;
+    const aria=played?`${roundLabels[index]}, ${opponent}, ${score}, ${result}`:active?`${roundLabels[index]}, ${c.current}, ${opponent}`:scheduled?`${roundLabels[index]}, ${c.scheduled}, ${opponent}`:`${roundLabels[index]}, ${c.locked}, ${c.reveal}`;
     return `<button type="button" class="fix fixture-node ${played?"is-played":""} ${active?"cur is-active":""} ${locked?"is-locked":""} ${fixture.res==="W"?"win":fixture.res==="D"?"draw":fixture.res==="L"?"lose":""}" data-fixture-index="${index}" data-fixture-state="${state}" aria-label="${esc(aria)}" aria-expanded="${selected===index}">
       <span class="fr">${esc(roundLabels[index]||String(index+1))}</span>
       <span class="fixture-visual">${opponentVisual(fixture,locked)}</span>
-      <span class="fixture-node-main">${played?`<b class="fs">${esc(score)}</b><em class="fixture-result result-${fixture.res.toLowerCase()}">${fixture.res} · ${esc(result)}</em>`:active?`<b class="fixture-opponent">${esc(opponent)}</b><em class="fixture-result is-current">${esc(c.current)}</em>`:`<b class="fixture-reveal">${esc(c.reveal)}</b>`}</span>
+      <span class="fixture-node-main">${played?`<b class="fs">${esc(score)}</b><em class="fixture-result result-${fixture.res.toLowerCase()}">${fixture.res} · ${esc(result)}</em>`:active?`<b class="fixture-opponent">${esc(opponent)}</b><em class="fixture-result is-current">${esc(c.current)}</em>`:scheduled?`<b class="fixture-opponent">${esc(opponent)}</b><em class="fixture-result">${esc(c.scheduled)}</em>`:`<b class="fixture-reveal">${esc(c.reveal)}</b>`}</span>
     </button>`;
   }
 
   function detailMarkup(index){
     const list=fixtureList(),fixture=list[index],c=copy(),roundLabels=labels();
     if(!fixture)return"";
-    const played=!!fixture.res,active=!played&&index===currentRound()-1,locked=!played&&!active;
+    const played=!!fixture.res,active=!played&&index===currentRound()-1,scheduled=!played&&!active&&!!fixture.matchId,locked=!played&&!active&&!scheduled;
     if(locked)return `<div class="fixture-detail-copy"><span>${esc(roundLabels[index])}</span><b>${esc(c.locked)}</b><p>${esc(c.reveal)}</p></div>`;
     const penalty=penaltyScore(fixture,index),event=eventText(fixture,index);
     return `<div class="fixture-detail-copy">
-      <span>${esc(roundLabels[index])} · ${esc(played?resultCopy(fixture.res):c.current)}</span>
+      <span>${esc(roundLabels[index])} · ${esc(played?resultCopy(fixture.res):active?c.current:c.scheduled)}</span>
       <b>${esc(fixture.opp||c.opponent)}</b>
       <div class="fixture-detail-stats">
         ${played?`<div><small>${esc(c.score)}</small><strong>${esc(fixture.gf)}–${esc(fixture.ga)}</strong></div>`:""}

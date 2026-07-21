@@ -8,7 +8,7 @@ Son güncelleme: **21 Temmuz 2026**
 - Sürüm: `1.0.0` (`versionCode` 1)
 - Min SDK 24, target/compile SDK 36
 - Play App Signing uyumlu upload certificate pin'i
-- İzinler yalnız `android.permission.INTERNET`
+- Kaynak izinleri `INTERNET` ve `AD_ID`; GMA SDK birleşik manifestte ağ durumu ile Android Privacy Sandbox reklam izinlerini ekler
 - 512×512 PNG mağaza ikonu
 - Beş dil için 1024×500 özellik görseli
 - Beş dil için beşer 1080×1920 telefon ekranı
@@ -17,15 +17,18 @@ Son güncelleme: **21 Temmuz 2026**
 - Beş dil için erişilebilir alternatif metinler
 - Play Console App Content ve Data Safety cevap haritası
 - Herkese açık gizlilik politikası URL'si
-- Reklam ve uygulama içi satın alma yok
+- Run sonu AdMob geçiş reklamı, UMP rıza akışı ve Ayarlar gizlilik girişi
+- Uygulama içi satın alma yok
 - Hesap veya giriş zorunluluğu yok
 
-## Yayını durduran dış bilgiler
+## Kalan Console ve yayın kapıları
 
-1. **Doğrulanmış destek e-postası:** Mağaza girişi, gizlilik ve UGC kaldırma taleplerinde aynı, düzenli izlenen adres kullanılmalı.
-2. **Geliştirici hesabı türü:** Kuruluş hesabıysa D‑U‑N‑S, yasal ad, adres, telefon ve web alanı doğrulaması tamamlanmalı. Kişisel hesapsa Console'un kimlik ve cihaz doğrulaması tamamlanmalı.
-3. **Yasal kimlik eşleştirmesi:** Gizlilik politikasındaki geliştirici adı, Play Console'daki yasal adla eşleşmeli.
-4. **Console anketleri:** IARC içerik derecelendirmesi, hedef kitle, UGC ve Data Safety cevapları Console'da kaydedilip son AAB ile yeniden karşılaştırılmalı.
+Doğrulanmış destek adresi `support@copa.life` olarak sabitlendi; alan adı ve yasal geliştirici bilgileri Play Console'da doğrulandı.
+
+1. **Yasal kimlik eşleştirmesi:** Gizlilik politikasındaki geliştirici adı, Play Console'daki doğrulanmış yasal adla birebir eşleştirilmeli.
+2. **Console anketleri:** IARC içerik derecelendirmesi, hedef kitle, UGC ve Data Safety cevapları Console'da kaydedilip son AAB ile yeniden karşılaştırılmalı.
+3. **AdMob üretim bilgileri:** AdMob uygulaması ve `run_end_interstitial` birimi oluşturulmalı; gerçek uygulama/reklam birimi kimlikleri release ortamına ve GitHub Secrets'a eklenmeli.
+4. **Gizlilik mesajı ve app-ads.txt:** AdMob Privacy & messaging üzerinden Avrupa mesajı yayımlanmalı; gerçek yayıncı kimliğiyle `app-ads.txt` copa.life köküne konmalı.
 
 ## AAB durumu
 
@@ -51,5 +54,4 @@ Kişisel geliştirici hesabı 13 Kasım 2023'ten sonra oluşturulduysa productio
 
 - 20–30 saniyelik, en az %80 gerçek oynanış içeren reklamsız ve listelenmemiş YouTube önizleme videosu.
 - İlk üç telefon ekranında draft, kadro ve maç akışını bu sırada tutmak.
-- Yayından önce arayüzdeki `BETA` rozetinin ürün kararını kesinleştirmek. Rozet kalacaksa mağaza görselleri mevcut sürümü doğru yansıtır; kaldırılacaksa görseller yeniden üretilmelidir.
 - Destek e-postasına dışarıdan test mesajı gönderip teslimat ve yanıt akışını doğrulamak.

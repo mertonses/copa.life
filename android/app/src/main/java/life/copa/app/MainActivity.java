@@ -17,6 +17,7 @@ public class MainActivity extends BridgeActivity {
         SharedPreferences preferences = getSharedPreferences(RELEASE_PREFS, Context.MODE_PRIVATE);
         long previousVersion = preferences.getLong(VERSION_CODE_KEY, -1L);
 
+        registerPlugin(CopaAdsPlugin.class);
         super.onCreate(savedInstanceState);
 
         if (currentVersion >= 0L && previousVersion >= 0L && previousVersion != currentVersion && getBridge() != null) {

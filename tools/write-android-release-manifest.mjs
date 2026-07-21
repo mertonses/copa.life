@@ -47,7 +47,14 @@ const manifest = {
     sha256: createHash("sha256").update(bytes).digest("hex").toUpperCase(),
   },
   upload_certificate_sha256: certificate,
-  permissions: previous.permissions || ["android.permission.INTERNET"],
+  permissions: [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "com.google.android.gms.permission.AD_ID",
+    "android.permission.ACCESS_ADSERVICES_TOPICS",
+    "android.permission.ACCESS_ADSERVICES_AD_ID",
+    "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+  ],
   verification: verified
     ? {
         main_test_suite: "passed",

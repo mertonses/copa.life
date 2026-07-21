@@ -110,6 +110,21 @@ for(const language of ["es","de","it"]){
 
 const profileSource=fs.readFileSync(new URL("../src/ui/playerProfiles.js",import.meta.url),"utf8");
 const seasonSource=fs.readFileSync(new URL("../src/ui/seasonStats.js",import.meta.url),"utf8");
+const lastMatchSource=fs.readFileSync(new URL("../src/ui/lastMatchReport.js",import.meta.url),"utf8");
+const fixtureRoadSource=fs.readFileSync(new URL("../src/ui/fixtureRoad.js",import.meta.url),"utf8");
+const tournamentSource=fs.readFileSync(new URL("../src/tournament/tournamentRuntime.js",import.meta.url),"utf8");
+const tournamentWindow={LANG:"en"};tournamentWindow.window=tournamentWindow;
+const tournamentContext={window:tournamentWindow};vm.createContext(tournamentContext);vm.runInContext(tournamentSource,tournamentContext);
+const tournamentKeys=["ceremony","drawTitle","drawRule","tournament","team","played","wins","draws","losses","gd","points","groupMatchday","topTwo","allGroups","knockoutRule","quarterfinal","semifinal","final","groupEliminated","drawPoint","winPoints","lossPoints"];
+const tournamentLocalizedText=new Set(["ceremony","drawTitle","drawRule","tournament","groupMatchday","topTwo","allGroups","knockoutRule","quarterfinal","semifinal","groupEliminated","drawPoint","winPoints","lossPoints"]);
+const tournamentEnglish=tournamentWindow.CopaTournamentRuntime.copy();
+for(const language of required){
+  tournamentWindow.LANG=language;const copy=tournamentWindow.CopaTournamentRuntime.copy();
+  for(const key of tournamentKeys){
+    if(!copy[key])errors.push(`tournament ${language}.${key} is missing`);
+    else if(["es","de","it"].includes(language)&&tournamentLocalizedText.has(key)&&copy[key]===tournamentEnglish[key])errors.push(`tournament ${language}.${key} still falls back to English`);
+  }
+}
 for(const language of ["es","de","it"]){
   for(const key of ["overview","playStyle","strengths","risks","tendencies","loading","noModel","positionFit","modelNote"]){
     const marker=new RegExp(`${language}:\\{[^\\n]*${key}:`);
@@ -119,6 +134,13 @@ for(const language of ["es","de","it"]){
 for(const marker of ["SEZON İSTATİSTİKLERİ","SEASON STATISTICS","ESTADÍSTICAS DE TEMPORADA","SAISONSTATISTIK","STATISTICHE STAGIONALI"]){
   if(!seasonSource.includes(marker))errors.push(`season statistics locale marker missing: ${marker}`);
 }
+for(const marker of ["GRUP · 1. MAÇ","GROUP · MATCH 1","GRUPO · PARTIDO 1","GRUPPE · SPIEL 1","GIRONE · PARTITA 1"]){
+  if(!lastMatchSource.includes(marker))errors.push(`last-match group-stage marker missing: ${marker}`);
+}
+for(const legacy of ["SON 16","LAST 16","OCTAVOS","ACHTELFINALE","OTTAVI"]){
+  if(lastMatchSource.includes(legacy)||fixtureRoadSource.includes(legacy))errors.push(`legacy direct-knockout stage remains in match UI: ${legacy}`);
+}
+if(!fixtureRoadSource.includes('Group · Match 1'))errors.push("fixture road fallback still assumes a direct-knockout format");
 
 if(errors.length){
   console.error("Locale check failed:\n- "+errors.join("\n- "));

@@ -19,7 +19,12 @@
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "permissions": [
-    "android.permission.INTERNET"
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "com.google.android.gms.permission.AD_ID",
+    "android.permission.ACCESS_ADSERVICES_TOPICS",
+    "android.permission.ACCESS_ADSERVICES_AD_ID",
+    "android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
   ],
   "verification": {
     "main_test_suite": "passed",
@@ -32,8 +37,8 @@
     "physical_device_smoke": "required before track promotion"
   },
   "external_prerequisites": [
-    "D-U-N-S and Google Play organization verification",
-    "verified reachable support email (Gmail or custom domain)",
-    "final legal entity name and contact details on privacy and takedown pages"
+    "exact verified legal entity name mirrored on the public privacy page",
+    "production AdMob app and run-end interstitial IDs",
+    "published AdMob privacy message and copa.life app-ads.txt"
   ]
 }

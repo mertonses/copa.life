@@ -9,7 +9,7 @@ Bu değerler ilk **Uygulama oluştur** ekranına doğrudan girilebilir.
 | Varsayılan dil | **Türkçe (Türkiye) — tr-TR** |
 | Uygulama veya oyun | **Oyun** |
 | Ücretsiz veya ücretli | **Ücretsiz** |
-| Kullanıcı iletişim e-postası | `[YAYINDAN ÖNCE DOĞRULANMIŞ DESTEK E-POSTASI]` |
+| Kullanıcı iletişim e-postası | `support@copa.life` |
 
 ## Beyan kutuları
 

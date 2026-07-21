@@ -140,12 +140,38 @@ function validHistory(snapshot){
   if(!Array.isArray(snapshot.match_history)||snapshot.match_history.length!==6)return false;
   const reached=Number(snapshot.reached_round),result=object(snapshot.result)?snapshot.result:{};
   if(typeof result.won!=="boolean"||typeof result.end_type!=="string"||result.end_type.length>24||typeof result.score!=="string"||result.score.length>32)return false;
+  const groupFormat=object(snapshot.tournament)&&snapshot.tournament.format==="groups16_v1";
+  let played=0;
   for(let index=0;index<snapshot.match_history.length;index++){
     const match=snapshot.match_history[index];
     if(!object(match)||typeof match.opponent!=="string"||match.opponent.length>72||!["","W","L","D"].includes(String(match.result||"")))return false;
     if(!Number.isInteger(Number(match.gf))||Number(match.gf)<0||Number(match.gf)>20||!Number.isInteger(Number(match.ga))||Number(match.ga)<0||Number(match.ga)>20)return false;
-    if(index<reached-1&&match.result!=="W")return false;
+    if(match.penalty!=null&&(!Array.isArray(match.penalty)||match.penalty.length!==2||match.penalty.some(value=>!Number.isInteger(Number(value))||Number(value)<0||Number(value)>20)||Number(match.penalty[0])===Number(match.penalty[1])))return false;
+    if(match.result)played++;
+    if(!groupFormat&&index<reached-1&&match.result!=="W")return false;
     if(index>=reached&&match.result)return false;
+  }
+  if(groupFormat){
+    const tournament=snapshot.tournament,group=object(tournament.group)?tournament.group:{};
+    if(played!==reached||reached<3||!["A","B","C","D"].includes(group.id)||!Number.isInteger(Number(group.rank))||group.rank<1||group.rank>4||!Number.isInteger(Number(group.points))||group.points<0||group.points>9||!Number.isInteger(Number(group.gd))||group.gd<-60||group.gd>60||typeof group.qualified!=="boolean")return false;
+    for(let index=0;index<reached;index++){
+      const match=snapshot.match_history[index],expectedStage=index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final";
+      if(match.stage!==expectedStage)return false;
+      if(index<3){if(match.penalty||match.result==="W"&&Number(match.gf)<=Number(match.ga)||match.result==="D"&&Number(match.gf)!==Number(match.ga)||match.result==="L"&&Number(match.gf)>=Number(match.ga))return false;}
+      else{
+        if(match.result==="D"||Number(match.gf)===Number(match.ga)&&!match.penalty)return false;
+        const playerWon=Number(match.gf)>Number(match.ga)||Number(match.gf)===Number(match.ga)&&Number(match.penalty[0])>Number(match.penalty[1]);
+        if(match.result!==(playerWon?"W":"L"))return false;
+      }
+    }
+    const groupMatches=snapshot.match_history.slice(0,3),expectedPoints=groupMatches.reduce((sum,match)=>sum+(match.result==="W"?3:match.result==="D"?1:0),0),expectedGd=groupMatches.reduce((sum,match)=>sum+Number(match.gf)-Number(match.ga),0);
+    if(group.points!==expectedPoints||group.gd!==expectedGd||group.qualified!==(group.rank<=2))return false;
+    if(result.end_type==="sacked")return !result.won;
+    if(result.end_type==="group_eliminated")return !result.won&&reached===3&&!group.qualified&&group.rank>=3;
+    if(!group.qualified||group.rank>2)return false;
+    for(let index=3;index<reached-1;index++)if(snapshot.match_history[index].result!=="W")return false;
+    const terminal=snapshot.match_history[reached-1];
+    return result.won?reached===6&&terminal.result==="W":reached>=4&&terminal.result==="L";
   }
   const terminal=snapshot.match_history[reached-1];
   if(result.end_type==="sacked")return !result.won;
@@ -231,13 +257,14 @@ function normalizeCareerRun(value){
   if(!validClubName(club.name)||!ANALYTICS_COUNTRIES.has(country)||!country)return null;
   const reached=Math.round(Number(value.reached_round)||0),result=object(value.result)?value.result:{};
   const history=Array.isArray(value.match_history)?value.match_history:[];
-  const historySnapshot={reached_round:reached,result,match_history:history};
+  const historySnapshot={reached_round:reached,result,match_history:history,tournament:value.tournament};
   if(!validHistory(historySnapshot))return null;
   const played=history.filter(match=>match&&["W","L","D"].includes(String(match.result||""))).length;
   const wins=history.filter(match=>match&&match.result==="W").length;
-  if(played<1||played>6||wins>played)return null;
+  const draws=history.filter(match=>match&&match.result==="D").length;
+  if(played<1||played>6||wins+draws>played)return null;
   const champion=!!result.won&&reached===6;
-  return {runId,clubName:String(club.name).trim(),country,reached,result,history,played,wins,champion};
+  return {runId,clubName:String(club.name).trim(),country,reached,result,history,played,wins,draws,champion};
 }
 function publicProfile(row,rank=0){
   if(!row)return null;
@@ -270,7 +297,7 @@ async function handleLeaderboardPost(request,env){
   const run=normalizeCareerRun(body);if(!run)return json(request,env,{error:"invalid_career_run"},422);
   const moderation=moderateClubName(run.clubName);if(moderation.status==="blocked")return json(request,env,{error:"club_name_blocked",reason:moderation.reason},422);
   const now=new Date().toISOString(),season=seasonKey(new Date());
-  const baseReputation=10+run.played*6+run.wins*4+(run.champion?25:0);
+  const baseReputation=10+run.played*6+run.wins*4+run.draws*2+(run.champion?25:0);
   const inserted=await env.GHOSTS.prepare("INSERT OR IGNORE INTO career_runs (owner_hash,run_id,season_key,reputation,reached_round,wins,champion,created_at) VALUES (?,?,?,?,?,?,?,?)").bind(owner,run.runId,season,baseReputation,run.reached,run.wins,run.champion?1:0,now).run();
   if(!(Number(inserted.meta&&inserted.meta.changes)||0)){
     const duplicate=await env.GHOSTS.prepare("SELECT * FROM club_profiles WHERE owner_hash=?").bind(owner).first();
@@ -441,4 +468,4 @@ export default {
   async scheduled(controller,env){await purgeExpired(env,new Date(controller.scheduledTime));}
 };
 
-export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validClubName,moderateClubName,normalizeAnalyticsEvent,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket};
+export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket};
