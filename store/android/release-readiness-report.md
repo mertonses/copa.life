@@ -11,37 +11,36 @@ Son güncelleme: **22 Temmuz 2026**
 - Gizlilik, kullanım koşulları, kaldırma ve güvenlik sayfaları doğrulandı.
 - Run sonu geçiş reklamı, UMP rıza akışı ve uygulama içi gizlilik ayarları kodlandı.
 - GitHub Actions'a dört upload-key secret'ı eklendi: keystore, keystore parolası, alias ve key parolası.
+- AdMob hesabı onaylandı; `copa.life` Android uygulaması ve `run_end_interstitial` geçiş reklamı birimi oluşturuldu.
+- Üretim AdMob uygulama/reklam birimi kimlikleri GitHub Actions secret'larına eklendi.
+- Gerçek yayıncı kaydı `app-ads.txt` olarak web paketine eklendi ve dağıtım kontrolüyle zorunlu hale getirildi.
 - Ghost Club Worker üretime dağıtıldı; D1 şeması güncel ve canlı health kontrolü başarılı.
 
 ## Play Console'da doğrulanan durum
 
 - Uygulama mevcut ve geliştirici hesabında erişilebilir.
-- Kurulum görevlerinin **8/11** tanesi tamamlanmış.
-- Eksik görevler: Data Safety, uygulama kategorisi/iletişim bilgileri ve varsayılan mağaza girişi.
-- Varsayılan `en-US` listing'inde yalnız uygulama adı var; açıklamalar ve görseller henüz kaydedilmemiş.
-- Production erişimi kilitli: kapalı testte şu an **0 test kullanıcısı** var; Console en az 12 kullanıcı ve 14 gün şartını gösteriyor.
+- Geliştirici, izin/beyan/belge ve mağaza bilgisi düzenlemelerini tamamladığını doğruladı.
+- Kapalı test `Alpha` kanalı henüz etkin değil: ülke seçimi tamamlandı; testçi listesi ve ilk sürüm eksik.
+- Production erişimi kapalı testte en az 12 kullanıcı ve kesintisiz 14 gün şartı tamamlanana kadar kilitli.
 - Yayınlanmamış Console değişikliği bulunmuyor.
 
 ## Güncel AAB
 
-- Kaynak commit: `e0ff32c1ac57d7a2c8abea56e4c8e7bc7ad76d17`
+- Kaynak build: `617d12591ffa` (AdMob/app-ads değişiklikleri commitlenmeden üretilen doğrulama adayı)
 - Dosya: `android/app/build/outputs/bundle/release/app-release-signed.aab`
-- Boyut: `15,578,190` bayt
-- SHA-256: `BAE9015D0BA601A6594EB788C39201A48510D79E9CC998C400BF746FDE5D10A3`
+- Boyut: `15,595,813` bayt
+- SHA-256: `92249AA1EE03243C51E9F767EFEB797295B3A606E06E0370EEF734569B9E965A`
 - Upload certificate: `64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56`
 
-Bu AAB yerel adaydır ve Google'ın test AdMob kimlikleriyle üretildi. Production AdMob kimlikleri ve exact-release emulator smoke sonucu olmadan Play'e yüklenmemelidir. `release-manifest.json` bu durumu `store_upload_eligible: false` olarak kilitler.
+Bu AAB gerçek production AdMob kimlikleriyle üretildi; ancak kaynak çalışma ağacı build anında dirty olduğu için yalnız doğrulama adayıdır ve Play'e yüklenmemelidir. `release-manifest.json` bu durumu `store_upload_eligible: false` olarak kilitler. Merge sonrasında temiz `main` commitinden yeni AAB üretilmelidir.
 
 ## Dış hesaplara bağlı kalan kapılar
 
-1. AdMob hesabı henüz kurulmamış; `apps.admob.com` kayıt akışına yönlendiriyor. Hesap şartları kullanıcı tarafından kabul edildikten sonra uygulama ve `run_end_interstitial` birimi oluşturulmalı.
-2. Gerçek `COPA_ADMOB_APP_ID` ve `COPA_ADMOB_INTERSTITIAL_ID` hem release ortamına hem GitHub Secrets'a eklenmeli.
-3. AdMob Avrupa gizlilik mesajı yayımlanmalı ve gerçek publisher ID ile `https://copa.life/app-ads.txt` hazırlanmalı.
-4. Google Play servis hesabı oluşturulup `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ı eklenmeli.
-5. Data Safety cevapları son SDK/izin listesiyle Console'da tamamlanıp kaydedilmeli.
-6. Listing metinleri ve hakları temiz görseller Console'a yüklenip kaydedilmeli.
-7. Gerçek production-ID buildinde exact-release emulator ve fiziksel cihaz smoke testleri geçmeli.
-8. Internal/closed test yayını başlatılıp 12 kullanıcıyla 14 günlük kapı tamamlanmalı.
+1. AdMob Avrupa gizlilik mesajı yayımlanmalı.
+2. Bu dal merge edilerek `https://copa.life/app-ads.txt` yayına alınmalı; ardından AdMob doğrulaması beklenmeli.
+3. Google Play servis hesabı oluşturulup `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ı eklenmeli.
+4. Temiz `main` commitinden production-ID AAB üretilip exact-release emulator ve fiziksel cihaz smoke testleri geçirilmeli.
+5. Kapalı test testçi listesi en az 12 Google hesabıyla oluşturulmalı, ilk sürüm yayımlanmalı ve kesintisiz 14 günlük kapı tamamlanmalı.
 
 ## Terfi kuralı
 
