@@ -35,11 +35,12 @@ Bu dosya `tools/write-android-release-manifest.mjs` tarafından AAB manifestiyle
 - [x] Production AdMob kimlikleri CI secret'larında mevcut.
 - [x] `https://copa.life/app-ads.txt` canlı ve doğrulandı.
 - [x] Kapalı test AAB'si Play Console'a gönderildi.
+- [x] AdMob Avrupa tüzükleri rıza mesajı 5 dilde yayımlanmış durumda.
+- [x] AdMob uygulaması `life.copa.app` Google Play kaydına bağlandı ve doğrulandı.
 
 ## Kalan dış kapılar
 
-- [ ] AdMob UMP gizlilik mesajının yayımlandığını doğrula.
-- [ ] AdMob uygulamasını Google Play mağaza kaydına bağla ve uygulama onayını al.
+- [ ] AdMob uygulama incelemesinin tamamlanmasını ve reklam sunum limitinin kaldırılmasını bekle.
 - [ ] En az 12 katılımcıya ulaş ve 14 günlük kapalı test şartını tamamla.
 - [ ] Kapalı test sırasında fiziksel cihaz smoke kaydı topla.
 - [ ] Otomatik internal-track yüklemesi için `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ını ekle.

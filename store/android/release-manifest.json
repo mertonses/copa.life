@@ -25,7 +25,11 @@
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "admob": {
     "mode": "production",
-    "production_ids_present": true
+    "production_ids_present": true,
+    "google_play_store_linked": true,
+    "app_verification": "verified",
+    "app_review": "pending",
+    "ump_european_regulations_message": "published"
   },
   "permissions": [
     "android.permission.INTERNET",
@@ -47,8 +51,7 @@
     "physical_device_smoke": "collect through closed testing"
   },
   "external_prerequisites": [
-    "confirm published AdMob UMP privacy message",
-    "link the AdMob app to its Google Play listing and obtain AdMob app approval",
+    "obtain AdMob app approval after Google Play store linking",
     "add GOOGLE_PLAY_SERVICE_ACCOUNT_JSON for automated internal-track uploads",
     "reach at least 12 opted-in closed testers and keep the requirement satisfied for 14 days",
     "record physical-device smoke evidence during closed testing"
