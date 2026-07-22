@@ -38,6 +38,10 @@
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({shown:false,reason:"missing_run_key"});
     return new Promise(resolve=>setTimeout(resolve,900)).then(()=>Ads.showRunEnd({runKey:key})).catch(()=>({shown:false,reason:"native_error"}));
   }
-  root.CopaNativeAds=Object.freeze({showRunEnd,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
+  function showRewardedReroll(runKey){
+    const key=String(runKey||"").trim();if(!key)return Promise.resolve({earned:false,reason:"missing_run_key"});
+    return Ads.showRewardedReroll({runKey:key}).catch(()=>({earned:false,reason:"native_error"}));
+  }
+  root.CopaNativeAds=Object.freeze({showRunEnd,showRewardedReroll,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
   scheduleInitialize();
 })(window);

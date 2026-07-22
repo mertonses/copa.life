@@ -30,9 +30,11 @@ if (releaseSigningValues.any { it != null && !it.trim().isEmpty() } && !releaseS
 
 def admobTestAppId = 'ca-app-pub-3940256099942544~3347511713'
 def admobTestInterstitialId = 'ca-app-pub-3940256099942544/1033173712'
+def admobTestRewardedId = 'ca-app-pub-3940256099942544/5224354917'
 def configuredAdmobAppId = (project.findProperty('COPA_ADMOB_APP_ID') ?: System.getenv('COPA_ADMOB_APP_ID') ?: admobTestAppId).toString().trim()
 def configuredAdmobInterstitialId = (project.findProperty('COPA_ADMOB_INTERSTITIAL_ID') ?: System.getenv('COPA_ADMOB_INTERSTITIAL_ID') ?: admobTestInterstitialId).toString().trim()
-def admobTestMode = configuredAdmobAppId == admobTestAppId || configuredAdmobInterstitialId == admobTestInterstitialId
+def configuredAdmobRewardedId = (project.findProperty('COPA_ADMOB_REWARDED_ID') ?: System.getenv('COPA_ADMOB_REWARDED_ID') ?: admobTestRewardedId).toString().trim()
+def admobTestMode = configuredAdmobAppId == admobTestAppId || configuredAdmobInterstitialId == admobTestInterstitialId || configuredAdmobRewardedId == admobTestRewardedId
 def asBuildConfigString = { value -> '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"' }
 
 android {
@@ -58,6 +60,7 @@ android {
         manifestPlaceholders = [admobAppId: configuredAdmobAppId]
         buildConfigField "String", "COPA_ADMOB_APP_ID", asBuildConfigString(configuredAdmobAppId)
         buildConfigField "String", "COPA_ADMOB_INTERSTITIAL_ID", asBuildConfigString(configuredAdmobInterstitialId)
+        buildConfigField "String", "COPA_ADMOB_REWARDED_ID", asBuildConfigString(configuredAdmobRewardedId)
         buildConfigField "boolean", "COPA_ADMOB_TEST_MODE", admobTestMode.toString()
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

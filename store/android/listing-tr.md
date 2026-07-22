@@ -34,5 +34,5 @@ copa.life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyo
 - Tür: Oyun
 - Kategori: Spor
 - Fiyat: Ücretsiz
-- Reklam: Var — koşu sonunda tam ekran geçiş reklamı
+- Reklam: Var — koşu sonunda tam ekran geçiş reklamı ve isteğe bağlı ödüllü yenileme reklamı
 - Uygulama içi satın alma: Yok

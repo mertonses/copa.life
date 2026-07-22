@@ -31,7 +31,7 @@ Play App Signing etkinleştirilecek. Mevcut gizli yükleme anahtarı yalnız AAB
 
 ### Ads
 
-- Uygulama reklam içeriyor mu: **Evet** — koşu tamamlandıktan sonra AdMob tam ekran geçiş reklamı.
+- Uygulama reklam içeriyor mu: **Evet** — koşu tamamlandıktan sonra AdMob tam ekran geçiş reklamı ve kullanıcının isteğe bağlı izleyerek draftta +1 yenileme hakkı kazandığı ödüllü reklam.
 - Reklam SDK'sı: **Google GMA Next‑Gen 1.2.1**.
 - Gizlilik mesajı: **Google UMP 4.0.0**; reklam isteği yalnız `canRequestAds()` izin verdiğinde yapılır.
 - Android reklam kimliği kullanımı: **Evet** — `com.google.android.gms.permission.AD_ID` beyan edilir.

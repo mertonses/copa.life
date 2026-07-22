@@ -43,7 +43,7 @@ for (const marker of ['com.google.android.gms.ads.APPLICATION_ID', '${admobAppId
   if (!manifest.includes(marker)) fail(`AdMob manifest configuration is missing ${marker}`);
 }
 const appGradle = read("android/app/build.gradle");
-for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID"]) {
+for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
   if (!appGradle.includes(marker)) fail(`Android ad dependency/configuration is missing ${marker}`);
 }
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");
@@ -90,7 +90,7 @@ if (!/tracks:\s*internal/.test(playWorkflow)) fail("automated upload must target
 if (/tracks:\s*(?:production|alpha|beta)/.test(playWorkflow)) {
   fail("automated uploader must not bypass internal testing");
 }
-for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID"]) {
+for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
   if (!playWorkflow.includes(`secrets.${marker}`)) fail(`Google Play workflow is missing ${marker}`);
 }
 

@@ -19,6 +19,14 @@ Kod tarafı GMA Next‑Gen `1.2.1`, UMP `4.0.0` ve Google test kimlikleriyle haz
 4. İlk sürüm için AdMob frequency cap önerisi: kullanıcı başına **10 dakikada en fazla 1 gösterim**.
 5. Oluşan `ca-app-pub-…/…` biçimindeki **Ad unit ID** değerini kopyala.
 
+## 2.1. Ödüllü yenileme reklam birimi
+
+1. Uygulama içinde **Ad units → Add ad unit → Rewarded** seç.
+2. Ad: `draft_reroll_rewarded`.
+3. Ödül miktarı: `1`; ödül adı: `yenileme_hakki`.
+4. Her tamamlanan reklam +1 draft yenilemesi verir; ücretsiz 2 hak korunur ve koşu başına en fazla 2 reklam ödülü alınabilir.
+5. Oluşan `ca-app-pub-…/…` biçimindeki rewarded **Ad unit ID** değerini kopyala.
+
 Kod tüm istekleri `TEEN` yaş koruması ve en fazla `T` reklam içerik derecesiyle sınırlar; AdMob arayüzünde daha dar bir filtre istersen `PG` seçebilirsin.
 
 Kod yalnız run tamamen bittikten ve sonuç ekranı oluşturulduktan sonra gösterim ister. Reklam hazır değilse oyun beklemez; aynı tamamlanmış run için daha sonra sürpriz gösterim yapılmaz. AdMob ayarına ek olarak uygulama da iki gösterim arasında en az 10 dakika bekler.
@@ -38,6 +46,7 @@ Yerel temiz release için:
 ```powershell
 $env:COPA_ADMOB_APP_ID = "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
 $env:COPA_ADMOB_INTERSTITIAL_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ"
+$env:COPA_ADMOB_REWARDED_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/RRRRRRRRRR"
 npm run android:release:local
 ```
 
@@ -45,6 +54,7 @@ GitHub Actions için aynı adlarla iki repository/environment secret ekle:
 
 - `COPA_ADMOB_APP_ID`
 - `COPA_ADMOB_INTERSTITIAL_ID`
+- `COPA_ADMOB_REWARDED_ID`
 
 Üretim hattı test kimliklerini reddeder. Geliştirme ve emülatör derlemeleri yalnız Google'ın resmî test uygulama ve interstitial kimliklerini kullanır.
 

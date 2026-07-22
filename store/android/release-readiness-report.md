@@ -9,7 +9,7 @@ Son güncelleme: **22 Temmuz 2026**
 - Mobil pakette gerçek arma, bayrak görseli veya resmi kupa adı bulunmuyor.
 - Beş dil için listing metni, özellik grafiği, beş telefon ve beş tablet ekran görüntüsü hazır.
 - Gizlilik, kullanım koşulları, kaldırma ve güvenlik sayfaları doğrulandı.
-- Run sonu geçiş reklamı, UMP rıza akışı ve uygulama içi gizlilik ayarları kodlandı.
+- Run sonu geçiş reklamı, draftta koşu başına en fazla +2 hak veren isteğe bağlı ödüllü reklam, UMP rıza akışı ve uygulama içi gizlilik ayarları kodlandı.
 - GitHub Actions'a dört upload-key secret'ı eklendi: keystore, keystore parolası, alias ve key parolası.
 - AdMob hesabı onaylandı; `copa.life` Android uygulaması ve `run_end_interstitial` geçiş reklamı birimi oluşturuldu.
 - Üretim AdMob uygulama/reklam birimi kimlikleri GitHub Actions secret'larına eklendi.
@@ -37,10 +37,11 @@ Bu AAB gerçek production AdMob kimlikleriyle üretildi; ancak kaynak çalışma
 ## Dış hesaplara bağlı kalan kapılar
 
 1. AdMob Avrupa gizlilik mesajı yayımlanmalı.
-2. Bu dal merge edilerek `https://copa.life/app-ads.txt` yayına alınmalı; ardından AdMob doğrulaması beklenmeli.
-3. Google Play servis hesabı oluşturulup `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ı eklenmeli.
-4. Temiz `main` commitinden production-ID AAB üretilip exact-release emulator ve fiziksel cihaz smoke testleri geçirilmeli.
-5. Kapalı test testçi listesi en az 12 Google hesabıyla oluşturulmalı, ilk sürüm yayımlanmalı ve kesintisiz 14 günlük kapı tamamlanmalı.
+2. AdMob'da `draft_reroll_rewarded` ödüllü reklam birimi oluşturulup `COPA_ADMOB_REWARDED_ID` GitHub secret'ı eklenmeli.
+3. Bu dal merge edilerek `https://copa.life/app-ads.txt` yayına alınmalı; ardından AdMob doğrulaması beklenmeli.
+4. Google Play servis hesabı oluşturulup `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret'ı eklenmeli.
+5. Temiz `main` commitinden production-ID AAB üretilip exact-release emulator ve fiziksel cihaz smoke testleri geçirilmeli.
+6. Kapalı test testçi listesi en az 12 Google hesabıyla oluşturulmalı, ilk sürüm yayımlanmalı ve kesintisiz 14 günlük kapı tamamlanmalı.
 
 ## Terfi kuralı
 

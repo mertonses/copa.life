@@ -32,6 +32,7 @@
       draft.currentSlot=Number.isInteger(draft.currentSlot)?draft.currentSlot:-1;
       draft.currentOpts=Array.isArray(draft.currentOpts)?draft.currentOpts:[];
       draft.rerollsLeft=finite(draft.rerollsLeft)?Math.max(0,Number(draft.rerollsLeft)):2;
+      draft.rewardedRerollsEarned=finite(draft.rewardedRerollsEarned)?Math.max(0,Math.min(2,Number(draft.rewardedRerollsEarned))):0;
       draft.deadlineH=finite(draft.deadlineH)?Math.max(1,Number(draft.deadlineH)):24;
       draft.usedNames=Array.isArray(draft.usedNames)?draft.usedNames:[];
       state.draft=draft;

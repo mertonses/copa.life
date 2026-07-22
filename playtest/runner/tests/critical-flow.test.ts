@@ -42,6 +42,22 @@ test.describe("critical mobile run integrity",()=>{
     const phase=await page.evaluate(()=>{const w=globalThis as any;w.picksBySlot[2]=null;w.playMatch();return w.CopaRunState.phase;});
     expect(phase).toBe("hub");await expect(page.locator("#modal")).toContainText(/Kadro tamamlanmadı|Squad incomplete/);
   });
+
+  test("rewarded ads add at most two persisted draft rerolls",async({page})=>{
+    await startDraft(page);
+    await page.evaluate(()=>{const w=globalThis as any;w.roll();w.COPA_IS_NATIVE=true;w.COPA_PLATFORM="android";w.__rewardCalls=0;w.CopaNativeAds={showRewardedReroll:async({runKey}:any)=>{w.__rewardCalls++;return{earned:true,earnedCount:w.__rewardCalls,runKey};}};w.draftRerollsLeft=0;w.draftRewardedRerollsEarned=0;w.renderOpts();});
+    const reroll=page.locator("#rerollBtn");
+    await expect(reroll).toContainText(/Reklam izle|Watch ad/);
+    await reroll.click();
+    await page.waitForFunction(()=>{const w=globalThis as any;return w.draftRerollsLeft===1&&w.draftRewardedRerollsEarned===1;});
+    await page.evaluate(()=>{const w=globalThis as any;w.rerollOptions();});
+    await reroll.click();
+    await page.waitForFunction(()=>{const w=globalThis as any;return w.draftRerollsLeft===1&&w.draftRewardedRerollsEarned===2;});
+    await page.evaluate(()=>{const w=globalThis as any;w.rerollOptions();});
+    await expect(reroll).toBeDisabled();
+    const saved=await page.evaluate(()=>{const w=globalThis as any;const run=JSON.parse(localStorage.getItem("copa_run_v6")||"null");return{calls:w.__rewardCalls,left:w.draftRerollsLeft,earned:w.draftRewardedRerollsEarned,saved:run&&run.draft&&run.draft.rewardedRerollsEarned};});
+    expect(saved).toEqual({calls:2,left:0,earned:2,saved:2});
+  });
 });
 
 test("England player pool loads on selection and is ready before draft generation",async({page})=>{

@@ -43,6 +43,7 @@
   },
   "external_prerequisites": [
     "published AdMob UMP privacy message",
+    "production AdMob rewarded reroll ID",
     "deployed and verified copa.life app-ads.txt",
     "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON repository secret",
     "exact-release emulator smoke",

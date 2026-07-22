@@ -28,15 +28,21 @@ const certificate = fs
   .trim();
 const admobTestAppId = "ca-app-pub-3940256099942544~3347511713";
 const admobTestInterstitialId = "ca-app-pub-3940256099942544/1033173712";
+const admobTestRewardedId = "ca-app-pub-3940256099942544/5224354917";
 const admobAppId = String(process.env.COPA_ADMOB_APP_ID || admobTestAppId).trim();
 const admobInterstitialId = String(
   process.env.COPA_ADMOB_INTERSTITIAL_ID || admobTestInterstitialId,
 ).trim();
+const admobRewardedId = String(
+  process.env.COPA_ADMOB_REWARDED_ID || admobTestRewardedId,
+).trim();
 const productionAdmobIdsPresent =
   /^ca-app-pub-\d{16}~\d{10}$/.test(admobAppId) &&
   /^ca-app-pub-\d{16}\/\d{10}$/.test(admobInterstitialId) &&
+  /^ca-app-pub-\d{16}\/\d{10}$/.test(admobRewardedId) &&
   admobAppId !== admobTestAppId &&
-  admobInterstitialId !== admobTestInterstitialId;
+  admobInterstitialId !== admobTestInterstitialId &&
+  admobRewardedId !== admobTestRewardedId;
 
 const manifest = {
   package_id: "life.copa.app",
