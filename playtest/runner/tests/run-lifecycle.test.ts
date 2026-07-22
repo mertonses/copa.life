@@ -74,6 +74,7 @@ test.describe("run lifecycle and recovery",()=>{
     await expect(page.locator(".meta-progress-actions")).toHaveCount(0);
     await expect(page.locator(".meta-close")).toBeVisible();
     await expect(page.locator(".meta-run-row")).toHaveCount(5);
+    if(!(await page.locator(".meta-see-all").isVisible()))await page.locator(".meta-archive > summary").click();
     await page.locator(".meta-see-all").click();
     await expect(page.locator(".meta-history-modal .meta-run-row")).toHaveCount(8);
     await page.locator(".meta-history-back").click();

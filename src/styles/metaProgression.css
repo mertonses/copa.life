@@ -37,6 +37,7 @@
 .meta-progress-modal h4,.meta-history-modal h4{margin:0;color:var(--color-slate);font-family:var(--mono);font-size:10px;line-height:1.2;letter-spacing:1.15px}
 .meta-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .meta-section-heading small{color:var(--color-slate);font:700 9px/1.2 var(--mono)}
+.meta-career-disclosure{overflow:hidden;padding:0!important;border:1px solid color-mix(in srgb,var(--border-subtle) 70%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface-bg) 74%,var(--surface-elevated))}.meta-career-disclosure>summary{display:none;list-style:none}.meta-career-disclosure-body{padding:15px}
 .meta-inline-empty{padding:18px 12px;color:var(--color-slate);font-size:12px;line-height:1.5;text-align:center}
 .meta-badges{display:flex;gap:7px;padding-bottom:2px;overflow-x:auto;scrollbar-width:none}.meta-badges::-webkit-scrollbar{display:none}
 .meta-badge{flex:0 0 auto;padding:7px 9px;border:1px solid color-mix(in srgb,var(--meta-reward) 36%,transparent);border-radius:999px;background:color-mix(in srgb,var(--meta-reward) 9%,var(--surface-elevated));color:var(--color-ink);font:800 9px/1 var(--mono)}
@@ -150,18 +151,20 @@
 @media(max-width:620px){
   .modal:has(.meta-progress-modal),.modal:has(.meta-history-modal){align-items:flex-end;padding:8px 8px 0}
   .sheet:has(.meta-progress-modal),.sheet:has(.meta-history-modal){border-radius:18px 18px 0 0}
-  .meta-progress-modal,.meta-history-modal{width:calc(100vw - 16px);min-width:0;max-height:min(92dvh,780px)}
+  .meta-progress-modal,.meta-history-modal{position:relative;width:calc(100vw - 16px);min-width:0;height:min(96dvh,820px);max-height:min(96dvh,820px);padding-top:7px}
+  .meta-progress-modal::before,.meta-history-modal::before{position:absolute;top:5px;left:50%;width:38px;height:4px;border-radius:999px;background:var(--border-default);transform:translateX(-50%);content:""}
   .meta-history-modal{height:min(92dvh,680px)}
   .meta-transfer-modal{width:calc(100vw - 22px);min-width:0;max-height:calc(100dvh - 26px)}
-  .meta-progress-head{padding:16px 14px 12px}.meta-progress-head .kithdr{font-size:18px}.meta-progress-head .kitsub{font-size:10px}
+  .meta-progress-head{padding:13px 14px 9px}.meta-progress-head .kithdr{font-size:18px}.meta-progress-head .kitsub{margin-top:3px;font-size:9px}
   .meta-save-menu{width:40px;padding:0;justify-content:center}.meta-save-menu>span:last-child{display:none}.meta-save-menu,.meta-close{min-height:44px}.meta-close{width:44px}
   .meta-tabs{margin:0 12px}.meta-tabs button{min-height:42px;font-size:8px;letter-spacing:.25px}
-  .meta-tab-panel{gap:12px;padding:10px 12px 18px}
-  .meta-career-hero{grid-template-columns:74px minmax(0,1fr)!important;gap:13px;padding:15px!important}.meta-license-count{grid-column:1/-1;grid-template-columns:auto 1fr auto}.meta-license-count>span{grid-row:auto}.meta-next-reward{grid-template-columns:auto minmax(0,1fr)}.meta-next-reward>strong{grid-column:2;text-align:left}
+  .meta-tab-panel{gap:9px;padding:8px 10px calc(14px + env(safe-area-inset-bottom,0px))}
+  .meta-career-hero{grid-template-columns:62px minmax(0,1fr)!important;gap:10px;padding:12px!important}.meta-license-count{grid-column:1/-1;grid-template-columns:auto 1fr auto;padding:8px}.meta-license-count>span{grid-row:auto}.meta-next-reward{grid-template-columns:auto minmax(0,1fr);padding:9px}.meta-next-reward>strong{grid-column:2;text-align:left}
   .meta-level-lockup{padding-right:12px}.meta-level-lockup strong{font-size:32px}.meta-career-progress b{font-size:12px}
   .meta-run-row{gap:8px}.meta-run-row b{max-width:170px}.meta-run-row small{font-size:8px}.meta-run-result>b{font-size:7px}
   .meta-hall-grid,.museum-player-grid{grid-template-columns:1fr}.meta-memory-card{grid-template-columns:1fr}.meta-memory-card button{border-color:transparent;border-top-color:var(--border-subtle);border-radius:0;padding:8px 0 0}
   .meta-museum-summary{align-items:flex-start;flex-direction:column}.meta-empty-state{min-height:230px}
   .world-season-head{grid-template-columns:1fr}.world-join-card{grid-template-columns:1fr}.world-join-card button{width:100%}
+  .meta-career-disclosure>summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;min-height:44px;padding:0 12px;color:var(--color-slate);cursor:pointer;list-style:none}.meta-career-disclosure>summary::-webkit-details-marker{display:none}.meta-career-disclosure>summary span{font:900 9px/1 var(--mono);letter-spacing:1px}.meta-career-disclosure>summary small{font:800 8px/1 var(--mono)}.meta-career-disclosure>summary i{font-style:normal;font-size:15px;transition:transform .15s}.meta-career-disclosure:not([open])>summary i{transform:rotate(-90deg)}.meta-career-disclosure[open]>summary{border-bottom:1px solid var(--border-subtle)}.meta-career-disclosure-body{padding:10px 12px}
   .runCareerProgress{margin:9px 0;padding:10px}
 }

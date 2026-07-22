@@ -9,10 +9,26 @@
   function revealedTeamIds(state){return new Set(state.draw.entries.slice(0,state.draw.revealIndex).map(entry=>entry.teamId));}
   function drawGroup(state,group,copy,revealed,latestTeamId){
     const entries=state.draw.entries.filter(entry=>entry.groupId===group.id&&revealed.has(entry.teamId)).sort((a,b)=>a.pot-b.pot);
-    return `<article class="td-group${group.id===state.group.playerGroupId?" is-player-group":""}" aria-label="${esc(copy.group)} ${group.id}">
+    return `<article class="td-group${group.id===state.group.playerGroupId?" is-player-group":""}" data-group-id="${esc(group.id)}" aria-label="${esc(copy.group)} ${group.id}">
       <header><span>${esc(copy.group)} ${group.id}</span><small>${entries.length}/4</small></header>
       <ol>${[1,2,3,4].map(pot=>{const entry=entries.find(item=>item.pot===pot);return `<li class="${entry&&entry.teamId==="player"?"is-player":""}${entry&&entry.teamId===latestTeamId?" is-latest":""}"><span class="td-pot">${pot}</span><b>${entry?esc(teamName(state,entry.teamId)):"••••••"}</b>${entry?`<em>${teamPower(state,entry.teamId)}</em>`:""}</li>`;}).join("")}</ol>
     </article>`;
+  }
+  function drawMobileCopy(){
+    const tr=root.LANG==="tr";
+    return tr?{swipe:"Gruplar arasında kaydır",hint:"Çekilen topun düştüğü gruba otomatik gideceksin.",close:"İpucunu kapat",groups:"Grup seçimi"}:{swipe:"Swipe between groups",hint:"The view follows the group receiving each ball.",close:"Dismiss tip",groups:"Group selector"};
+  }
+  function bindDrawNavigation(container,latestGroupId){
+    const strip=container.querySelector(".td-groups"),dots=[...container.querySelectorAll(".td-group-dot")],cards=[...container.querySelectorAll(".td-group")],tip=container.querySelector(".td-swipe-tip"),key="copa.draw.swipe.v1";
+    if(!strip||!cards.length)return;
+    const remember=()=>{try{localStorage.setItem(key,"1");}catch(_){}if(tip)tip.classList.add("is-dismissed");};
+    let seen=false;try{seen=localStorage.getItem(key)==="1";}catch(_){}if(seen&&tip)tip.remove();
+    const update=()=>{const centre=strip.scrollLeft+strip.clientWidth/2;let active=0,best=Infinity;cards.forEach((card,index)=>{const delta=Math.abs(card.offsetLeft+card.offsetWidth/2-centre);if(delta<best){best=delta;active=index;}});dots.forEach((dot,index)=>{dot.classList.toggle("is-active",index===active);dot.setAttribute("aria-current",index===active?"true":"false");});};
+    strip.addEventListener("scroll",update,{passive:true});strip.addEventListener("pointerdown",remember,{once:true,passive:true});strip.addEventListener("touchstart",remember,{once:true,passive:true});strip.addEventListener("wheel",remember,{once:true,passive:true});
+    tip?.querySelector("button")?.addEventListener("click",remember);
+    dots.forEach((dot,index)=>dot.addEventListener("click",()=>{remember();const card=cards[index];strip.scrollTo({left:Math.max(0,card.offsetLeft-(strip.clientWidth-card.clientWidth)/2),behavior:(root.motionReduced&&root.motionReduced())?"auto":"smooth"});}));
+    update();
+    if(latestGroupId)requestAnimationFrame(()=>{const card=cards.find(item=>item.dataset.groupId===String(latestGroupId));if(!card)return;strip.scrollTo({left:Math.max(0,card.offsetLeft-(strip.clientWidth-card.clientWidth)/2),behavior:(root.motionReduced&&root.motionReduced())?"auto":"smooth"});setTimeout(update,240);});
   }
   function renderDraw(container,state,copy){
     if(!container||!state)return;
@@ -27,10 +43,10 @@
           <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
           <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost" onclick="fastTournamentDraw()">${esc(copy.quickDraw)}</button>`}</div>
         </aside>
-        <div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId)).join("")}</div>
+        <div class="td-group-stage"><div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId)).join("")}</div><div class="td-group-nav" role="navigation" aria-label="${esc(drawMobileCopy().groups)}">${state.groups.map((group,index)=>`<button type="button" class="td-group-dot${index===0?" is-active":""}" aria-label="${esc(copy.group)} ${group.id}" aria-current="${index===0?"true":"false"}">${esc(group.id)}</button>`).join("")}</div><aside class="td-swipe-tip"><span class="td-swipe-hand" aria-hidden="true">☝</span><p><b>${esc(drawMobileCopy().swipe)}</b><small>${esc(drawMobileCopy().hint)}</small></p><button type="button" aria-label="${esc(drawMobileCopy().close)}">×</button></aside></div>
       </div>
       <p class="td-rule">${esc(copy.drawRule)}</p>
-    </div>`;
+    </div>`;bindDrawNavigation(container,last&&last.groupId);
   }
   function tableMarkup(state,group,copy,compact=false){
     const rows=group.table||[];
@@ -45,14 +61,15 @@
   }
   function renderHub(container,state,copy){
     if(!container)return;
-    if(!state||state.format!=="groups16_v1"){container.innerHTML="";container.classList.add("hidden");return;}
+    const road=()=>`<div class="tg-road-wrap"><span>${esc(root.LANG==="tr"?"FİKSTÜR":"FIXTURES")}</span><div class="cuproad" id="fixbar"></div></div>`;
+    if(!state||state.format!=="groups16_v1"){container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.tournament)}</h3></div></header>${road()}</section>`;container.classList.remove("hidden");return;}
     container.classList.remove("hidden");
     const group=state.groups.find(item=>item.id===state.group.playerGroupId),playerRow=group&&group.table.find(row=>row.teamId==="player");
     if(state.phase==="group"){
-      container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.group)} ${group.id}</h3></div><div class="tg-stage-chip">${esc(currentStageCopy(state,copy))}</div></header>${tableMarkup(state,group,copy,true)}<footer><span>${playerRow&&playerRow.played?`${playerRow.points} ${esc(copy.points)} · ${playerRow.gd>0?"+":""}${playerRow.gd} ${esc(copy.gd)}`:esc(copy.topTwo)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.allGroups)} →</button></footer></section>`;
+      container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.group)} ${group.id}</h3></div><div class="tg-stage-chip">${esc(currentStageCopy(state,copy))}</div></header>${road()}${tableMarkup(state,group,copy,true)}<footer><span>${playerRow&&playerRow.played?`${playerRow.points} ${esc(copy.points)} · ${playerRow.gd>0?"+":""}${playerRow.gd} ${esc(copy.gd)}`:esc(copy.topTwo)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.allGroups)} →</button></footer></section>`;
     }else{
       const match=root.CopaTournamentEngine&&root.CopaTournamentEngine.getCurrentPlayerMatch(state),opponent=match&&(match.homeId==="player"?match.awayId:match.homeId);
-      container.innerHTML=`<section class="tg-hub-card tg-knockout-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(currentStageCopy(state,copy))}</h3></div><div class="tg-stage-chip">${esc(copy.knockout)}</div></header><div class="tg-next"><span>${esc(copy.nextOpponent)}</span><b>${opponent?esc(matchTeamName(state,match,opponent)):"—"}</b></div><footer><span>${esc(copy.knockoutRule)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.bracket)} →</button></footer></section>`;
+      container.innerHTML=`<section class="tg-hub-card tg-knockout-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(currentStageCopy(state,copy))}</h3></div><div class="tg-stage-chip">${esc(copy.knockout)}</div></header>${road()}<div class="tg-next"><span>${esc(copy.nextOpponent)}</span><b>${opponent?esc(matchTeamName(state,match,opponent)):"—"}</b></div><footer><span>${esc(copy.knockoutRule)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.bracket)} →</button></footer></section>`;
     }
   }
   function knockoutMarkup(state,copy){

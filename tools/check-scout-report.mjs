@@ -29,7 +29,7 @@ if (fallbackModel.bars.attack !== 57 || fallbackModel.bars.midfield !== 57 || fa
 }
 const fallbackHtml = context.ScoutReport.html(fallbackModel, labels);
 if (/\d+\.\d{2,}/.test(fallbackHtml)) throw new Error("Scout raporunda uzun ondalık değer kaldı");
-if (!fallbackHtml.includes('aria-valuenow="57"') || !fallbackHtml.includes('>59</b>')) throw new Error("Yuvarlanmış güç profili render edilmedi");
+if (fallbackHtml.includes('aria-valuenow=') || !fallbackHtml.includes("KİLİT OYUNCULAR")) throw new Error("Scout özeti gereksiz güç çubuklarını kaldırmadı");
 
 const profiles = players.map((_, index) => ({
   copa_impact: 55 + index % 4,
@@ -44,7 +44,7 @@ if (Object.values(profileModel.bars).some(value => value != null && (!Number.isI
   throw new Error(`Profil tabanlı güç değerleri güvenli aralıkta değil: ${JSON.stringify(profileModel.bars)}`);
 }
 const profileHtml = context.ScoutReport.html(profileModel, labels);
-if (profileHtml.includes("NaN") || !profileHtml.includes("COPA PROFİLİ")) throw new Error("copa.life scout profili render edilmedi");
+if (profileHtml.includes("NaN") || !profileHtml.includes("EŞLEŞME ÖNERİSİ")) throw new Error("Kompakt scout önerisi render edilmedi");
 for (const legacy of ["finishing", "composure", "natural_fitness", "value*5", "raw*5"]) {
   if (read("src/ui/scoutReport.js").includes(legacy)) throw new Error(`Eski 1–20 scout alanı kaldı: ${legacy}`);
 }
@@ -52,7 +52,7 @@ for (const legacy of ["finishing", "composure", "natural_fitness", "value*5", "r
 const css = read("src/styles/match.css");
 for (const marker of [
   "overflow-x:hidden",
-  ".scout-strength-row>span",
+  "width:min(330px,100%)!important",
   "font-variant-numeric:tabular-nums",
   ".scout-mhdr-main{align-items:flex-start;flex-direction:column",
   ".scout-head-stats{width:100%}",

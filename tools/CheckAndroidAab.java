@@ -23,10 +23,10 @@ public final class CheckAndroidAab {
     private static final Set<String> TEXT_EXTENSIONS = Set.of(
         ".html", ".js", ".css", ".json", ".webmanifest", ".svg", ".txt"
     );
+    private static final Set<String> APPROVED_FLAGS = Set.of("TR.svg", "IT.svg", "ENGLAND.svg", "GB.svg", "ES.svg", "DE.svg", "JP.svg");
 
     private static final List<String> FORBIDDEN_PATHS = List.of(
         PUBLIC + "assets/clubs/",
-        PUBLIC + "assets/flags/",
         PUBLIC + "assets/icons/patreon.svg",
         PUBLIC + "src/data/logos.js",
         PUBLIC + "src/state/diagnostics.js",
@@ -46,6 +46,13 @@ public final class CheckAndroidAab {
         PUBLIC + "src/runtime/nativeAds.js",
         PUBLIC + "src/data/generic_club_visuals.js",
         PUBLIC + "assets/data/copa/player_profiles.json",
+        PUBLIC + "assets/flags/TR.svg",
+        PUBLIC + "assets/flags/IT.svg",
+        PUBLIC + "assets/flags/ENGLAND.svg",
+        PUBLIC + "assets/flags/GB.svg",
+        PUBLIC + "assets/flags/ES.svg",
+        PUBLIC + "assets/flags/DE.svg",
+        PUBLIC + "assets/flags/JP.svg",
         PUBLIC + "privacy.html",
         PUBLIC + "terms.html"
     );
@@ -112,6 +119,7 @@ public final class CheckAndroidAab {
                 if (totalBytes > MAX_TOTAL_BYTES) failures.add("AAB uncompressed size exceeds safety limit");
                 if (entry.isDirectory() || !name.startsWith(PUBLIC)) continue;
                 publicFiles++;
+                if (name.startsWith(PUBLIC + "assets/flags/") && !APPROVED_FLAGS.contains(name.substring((PUBLIC + "assets/flags/").length()))) failures.add("unapproved packaged flag: " + name);
 
                 for (String forbidden : FORBIDDEN_PATHS) {
                     if (name.equals(forbidden) || name.startsWith(forbidden)) failures.add("forbidden packaged path: " + name);
@@ -145,9 +153,7 @@ public final class CheckAndroidAab {
             if (packagedIndex == null || !packagedIndex.contains("src/runtime/nativeAds.js?v=" + buildVersion)) {
                 failures.add("native ad runtime cache key does not match packaged build version");
             }
-            if (packagedIndex == null || !packagedIndex.contains("class=\"generic-country-code\"")) {
-                failures.add("generic Android country-code visuals are missing");
-            }
+            if (packagedIndex == null || !packagedIndex.contains("assets/flags/TR.svg") || !packagedIndex.contains("assets/flags/JP.svg")) failures.add("first-party Android flag visuals are missing");
             String visibleVersion = "v" + jsonString(expectedVersion, "versionName") + " (" + jsonInt(expectedVersion, "versionCode") + ")";
             if (packagedIndex == null || !packagedIndex.contains(visibleVersion)) failures.add("visible Android version label is missing");
             if (packagedIndex != null && Pattern.compile("\\?v=202\\d").matcher(packagedIndex).find()) {

@@ -39,8 +39,11 @@
       actions:{formation:"Diziliş ekranına git",market:"Kart pazarını göster",unavailable:"Bu aksiyon ilgili oyun ekranında açılır."},
       tips:{
         setup:["İLK RUN İPUCU","Diziliş, dolduracağın mevkileri belirler. Başkan ise bütçe ve borç alanını değiştirir."],
-        draft:["İLK RUN İPUCU","Zarı attığında üç aday gelir. Seçtiğin oyuncu kalan bütçeni de etkiler."],
-        hub:["İLK RUN İPUCU","Kimya kutusuna dokunarak güç katkısını; kartlarda ise para dışındaki riskleri görebilirsin."]
+        draft:["İLK ZAR","Her atış bir mevkiyi belirler ve 2 saat harcar. Animasyonlar kapalıysa sonuç yine kısa bir titreşim ve zar yüzüyle gösterilir."],
+        hub:["MAÇ MERKEZİ","Kimya kutusuna dokunarak güç katkısını; kartlarda ise para dışındaki riskleri görebilirsin."],
+        bench:["YEDEK KULÜBESİ","Yedekler düğmesi kadroyu alt panelde açar. Android geri tuşu paneli kapatır."],
+        injury:["SAKATLIK KARARI","Güç kaybını karşılaştır; yedek, ücretli tedavi veya opsiyonel ücretsiz reklam tedavisinden birini seç."],
+        table:["GRUP TABLOSU","İlk iki sıra tur atlar. O: oynanan, G/B/M: galibiyet/beraberlik/mağlubiyet, AV: averaj, P: puan."]
       },
       gotIt:"ANLADIM",expand:"Detayı aç",collapse:"Detayı kapat"
     },
@@ -70,8 +73,11 @@
       actions:{formation:"Go to formation",market:"Show card market",unavailable:"This action becomes available on the relevant game screen."},
       tips:{
         setup:["FIRST-RUN TIP","Formation sets the roles you must fill. The chairman changes your budget and debt room."],
-        draft:["FIRST-RUN TIP","A roll brings three candidates. You are choosing both a player and the budget left for the squad."],
-        hub:["FIRST-RUN TIP","Tap Chemistry to inspect its power contribution; check every non-cash cost on cards."]
+        draft:["FIRST ROLL","Each roll chooses a role and costs 2 hours. Reduced motion still shows the result with a die face and haptic."],
+        hub:["MATCH HUB","Tap Chemistry to inspect its power contribution; check every non-cash cost on cards."],
+        bench:["BENCH","The Bench button opens your substitutes in a bottom sheet. Android Back closes it."],
+        injury:["INJURY DECISION","Compare the power loss, then choose a substitute, paid treatment, or the optional rewarded treatment."],
+        table:["GROUP TABLE","The top two advance. P: played, W/D/L: results, GD: goal difference, Pts: points."]
       },
       gotIt:"GOT IT",expand:"Expand details",collapse:"Collapse details"
     },
@@ -110,13 +116,13 @@
     }
   };
 
-  let mode="quick",activeStep=0,tipObserver=null,tipNode=null,tipTarget=null;
+  let mode="quick",activeStep=0,tipObserver=null,tipNode=null,tipTarget=null,tipCooldownUntil=0;
   const currentLang=()=>typeof LANG!=="undefined"?LANG:"en";
   const lang=()=>COPY[currentLang()]||COPY.en;
   const guideData=()=>typeof _HOWTO!=="undefined"&&(_HOWTO[currentLang()]||_HOWTO.en)||{steps:[]};
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const visible=node=>!!(node&&node.isConnected&&!node.classList.contains("hidden")&&node.getClientRects().length);
-  const contextualTipsAllowed=()=>!document.documentElement.classList.contains("copa-mobile-device")&&!matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+  const contextualTipsAllowed=()=>true;
 
   function ensureStyle(){
     if(document.querySelector("link[data-copa-howto]"))return;
@@ -276,6 +282,7 @@
     if(tipNode)tipNode.remove();
     if(tipTarget)tipTarget.classList.remove("guide-focus");
     tipNode=null;tipTarget=null;
+    tipCooldownUntil=Date.now()+5000;
   }
   function showTip(key,target){
     const c=lang(),tip=c.tips[key];
@@ -293,12 +300,20 @@
   }
   function scanContext(){
     if(!contextualTipsAllowed()){dismissTip();return;}
-    if(tipNode||!document.getElementById("modal")?.classList.contains("hidden"))return;
+    if(Date.now()<tipCooldownUntil)return;
+    if(!document.getElementById("modal")?.classList.contains("hidden")){
+      if(tipNode)dismissTip();
+      return;
+    }
+    if(tipNode)return;
     const state=readContext();
     const candidates=[
       ["setup",document.getElementById("formpick"),document.getElementById("intro")],
       ["draft",document.getElementById("rollBtn"),document.getElementById("draft")],
-      ["hub",document.getElementById("chemTile"),document.getElementById("hub")]
+      ["hub",document.getElementById("chemTile"),document.getElementById("hub")],
+      ["bench",document.getElementById("nativeBenchTrigger"),document.getElementById("hub")],
+      ["injury",document.getElementById("injbar"),document.getElementById("hub")],
+      ["table",document.querySelector("#tournamentHubPanel .tg-table"),document.getElementById("hub")]
     ];
     const match=candidates.find(([key,target,screen])=>!state[key]&&visible(target)&&visible(screen));
     if(match)showTip(match[0],match[1]);

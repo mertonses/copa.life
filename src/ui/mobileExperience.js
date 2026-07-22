@@ -25,6 +25,7 @@
   let unreadFeedCount=0;
   let hadSavedRunOnInit=false;
   let draftConfirm=null;
+  let nativeBenchHome=null;
   const approvedDraftChoices=new WeakSet();
   const PREF_KEYS={
     haptics:"copa_mobile_haptics",
@@ -144,18 +145,27 @@
 
   function closeNativeBench(){
     document.documentElement.classList.remove("native-bench-open");
+    const panel=document.getElementById("hubBenchSection");
+    if(panel)panel.classList.remove("native-bench-sheet");
+    if(panel&&nativeBenchHome&&nativeBenchHome.parent&&nativeBenchHome.parent.isConnected){
+      const anchor=nativeBenchHome.next&&nativeBenchHome.next.parentNode===nativeBenchHome.parent?nativeBenchHome.next:null;
+      nativeBenchHome.parent.insertBefore(panel,anchor);nativeBenchHome=null;
+    }
     const trigger=document.getElementById("nativeBenchTrigger");
-    if(trigger)trigger.setAttribute("aria-expanded","false");
+    if(trigger){trigger.setAttribute("aria-expanded","false");try{trigger.focus({preventScroll:true});}catch(_){}}
   }
 
   function openNativeBench(){
     const panel=document.getElementById("hubBenchSection");
     if(!panel||!panel.children.length)return;
+    if(panel.parentNode!==document.body){nativeBenchHome={parent:panel.parentNode,next:panel.nextSibling};document.body.appendChild(panel);}
+    panel.classList.add("native-bench-sheet");
     document.documentElement.classList.add("native-bench-open");
     const trigger=document.getElementById("nativeBenchTrigger");
     if(trigger)trigger.setAttribute("aria-expanded","true");
     const first=panel.querySelector("button,[tabindex]");
     if(first)setTimeout(()=>first.focus({preventScroll:true}),80);
+    haptic([12,18]);
   }
 
   function ensureNativeHubNavigation(){
@@ -601,18 +611,19 @@
       toggle.type="button";
       toggle.className="mobile-feed-toggle";
       toggle.addEventListener("click",()=>{
-        const expanded=feed.classList.toggle("mobile-feed-expanded");
         unreadFeedCount=0;
         const unread=document.querySelector(".mobile-feed-unread");
         if(unread)unread.classList.add("hidden");
-        toggle.setAttribute("aria-expanded",expanded?"true":"false");
-        toggle.textContent=expanded?copy().feedLess:copy().feedMore;
+        const items=[...feed.querySelectorAll(":scope > .feeditem")].map(item=>item.outerHTML).join("");
+        if(typeof global.showModal==="function")global.showModal(`<div class="mobile-feed-sheet"><header><div><span>${copy().newFeed}</span><h3>${copy().feedMore}</h3></div><button type="button" onclick="closeModal()" aria-label="${copy().cancel}">×</button></header><div class="mobile-feed-history">${items}</div></div>`,{dismissOnOverlay:true,label:copy().feedMore});
+        toggle.setAttribute("aria-expanded","false");
+        toggle.textContent=copy().feedMore;
       });
       feed.after(toggle);
     }
     toggle.classList.remove("hidden");
-    toggle.setAttribute("aria-expanded",feed.classList.contains("mobile-feed-expanded")?"true":"false");
-    toggle.textContent=feed.classList.contains("mobile-feed-expanded")?copy().feedLess:copy().feedMore;
+    toggle.setAttribute("aria-expanded","false");
+    toggle.textContent=copy().feedMore;
   }
 
   function ensureHubPreflight(){
@@ -930,8 +941,8 @@
     const target=mutation.target&&mutation.target.nodeType===1?mutation.target:mutation.target&&mutation.target.parentElement;
     if(!target)return false;
     if(target.closest&&target.closest(".mobile-action-dock,.mobile-pref-group,.mobile-draft-context,.mobile-tactic-status,.mobile-result-disclosure>summary,.mobile-network-banner,.mobile-draft-confirm"))return false;
-    return !!(target.matches&&target.matches("#opts,#FFFFFFDD,#simGoals,#modal,#roundtag,#powV,#chemV,#kasaV,#ddSub,#ddClock,#budgetV,#result,#fixbar,#shopcards,.player-profile-content,.autofill-wrap")||
-      target.closest&&target.closest("#opts,#FFFFFFDD,#simGoals,#modal,#roundtag,#result,.player-profile-content"));
+    return !!(target.matches&&target.matches('#opts,[id="feed"],#simGoals,#modal,#roundtag,#powV,#chemV,#kasaV,#ddSub,#ddClock,#budgetV,#result,#fixbar,#shopcards,.player-profile-content,.autofill-wrap')||
+      target.closest&&target.closest('#opts,[id="feed"],#simGoals,#modal,#roundtag,#result,.player-profile-content'));
   }
 
   function handleDocumentCapture(event){
@@ -976,7 +987,7 @@
     }
     const speed=target.closest(".spd[data-s]");
     if(speed)requestedSmartSpeed=Number(speed.dataset.s)||10;
-    if(target.closest("#opts .opt,.shopcard,.pen-dir-btn,#playBtn,#againBtn"))haptic(12);
+    if(target.closest("#opts .opt,.shopcard,.pen-dir-btn,#playBtn,#againBtn,.inj-btns button,#nativeBenchTrigger,.td-ball,.td-group-dot"))haptic(target.closest(".inj-reward-btn,.td-ball")?[14,20]:12);
   }
 
   function checkpoint(){

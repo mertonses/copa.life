@@ -83,11 +83,12 @@ const PRECACHE = [
   "/assets/mascot.webp",
   "/assets/icons/cl.png",
   "/assets/icons/copa.png",
-  "/assets/flags/TR.png",
-  "/assets/flags/IT.png",
-  "/assets/flags/ENGLAND.png",
-  "/assets/flags/ES.png",
-  "/assets/flags/DE.png",
+  "/assets/flags/TR.svg",
+  "/assets/flags/IT.svg",
+  "/assets/flags/ENGLAND.svg",
+  "/assets/flags/GB.svg",
+  "/assets/flags/ES.svg",
+  "/assets/flags/DE.svg",
   "/assets/flags/JP.svg"
 ];
 

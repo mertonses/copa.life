@@ -106,7 +106,10 @@ test("group draw and loss award points correctly and continue the run",async({pa
 });
 
 test("the tournament overview is responsive and exposes all groups semantically",async({page})=>{
-  await startDraw(page);await finishDraw(page);
+  await startDraw(page);
+  await expect(page.locator(".td-group-dot")).toHaveCount(4);
+  await expect(page.locator(".td-swipe-tip")).toBeVisible();
+  await finishDraw(page);
   const stripLayout=await page.evaluate(()=>{
     const hubColumns=document.querySelector("#hub .hubcols") as HTMLElement;
     const pitch=document.querySelector("#hubPitch") as HTMLElement;
@@ -117,14 +120,15 @@ test("the tournament overview is responsive and exposes all groups semantically"
   });
   expect(stripLayout.overflow).toBeLessThanOrEqual(1);
   expect(stripLayout.panelParent).toContain("hcol-l");
-  expect(stripLayout.roadParent).toContain("hub-fixture-bottom");
+  expect(stripLayout.roadParent).toContain("tg-road-wrap");
   expect(Math.abs(stripLayout.panel.x-stripLayout.pitch.x)).toBeLessThanOrEqual(1);
   expect(Math.abs(stripLayout.panel.width-stripLayout.pitch.width)).toBeLessThanOrEqual(1);
   expect(stripLayout.panel.y).toBeGreaterThanOrEqual(stripLayout.pitch.y+stripLayout.pitch.height);
-  expect(stripLayout.road.y).toBeGreaterThan(stripLayout.panel.y+stripLayout.panel.height);
-  expect(Math.abs(stripLayout.road.x-stripLayout.hubColumns.x)).toBeLessThanOrEqual(1);
-  expect(Math.abs(stripLayout.road.width-stripLayout.hubColumns.width)).toBeLessThanOrEqual(1);
-  await page.locator("#tournamentHubPanel button").click();
+  expect(stripLayout.road.y).toBeGreaterThanOrEqual(stripLayout.panel.y);
+  expect(stripLayout.road.y+stripLayout.road.height).toBeLessThanOrEqual(stripLayout.panel.y+stripLayout.panel.height+1);
+  expect(stripLayout.road.x).toBeGreaterThanOrEqual(stripLayout.panel.x);
+  expect(stripLayout.road.width).toBeLessThanOrEqual(stripLayout.panel.width);
+  await page.getByRole("button",{name:/Tüm gruplar|All groups/i}).click();
   await expect(page.locator(".tg-overview")).toBeVisible();
   await expect(page.locator(".tg-all-groups table")).toHaveCount(4);
   await expect(page.locator(".tg-all-groups tbody tr")).toHaveCount(16);

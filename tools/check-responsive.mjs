@@ -144,10 +144,11 @@ const checks = [
       && /class="bench-list"/.test(hubScript),
   },
   {
-    name: "cup table follows the pitch and fixture road owns the final full-width row",
+    name: "cup table follows the pitch and fixture road is integrated into Kupa Yolu",
     pass: html.indexOf('id="tournamentHubPanel"')>html.indexOf('class="pitch-area"')
       && html.indexOf('id="tournamentHubPanel"')<html.indexOf('class="hcol hcol-r"')
-      && /<div class="hub-fixture-bottom">\s*<div class="cuproad" id="fixbar"><\/div>/s.test(html),
+      && /<div id="tournamentHubPanel"[^>]*>[\s\S]*?<section class="tg-hub-card">[\s\S]*?<div class="tg-road-wrap">\s*<div class="cuproad" id="fixbar"><\/div>/s.test(html)
+      && !/hub-fixture-bottom/.test(html),
   },
   {
     name: "mobile card market reroll stays visually minimal",

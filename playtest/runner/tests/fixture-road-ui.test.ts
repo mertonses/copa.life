@@ -7,6 +7,7 @@ test.beforeEach(async({page})=>{
     (globalThis as any).setLang("tr");
     document.getElementById("intro")?.classList.add("hidden");
     document.getElementById("hub")?.classList.remove("hidden");
+    document.getElementById("tournamentHubPanel")?.classList.remove("hidden");
     (0,eval)(`fixtures=[
       {opp:"A Spor",res:"W",gf:2,ga:0,events:[{min:71,type:"goal",name:"Uçan"}]},
       {opp:"B Spor",res:"D",gf:1,ga:1,events:[{min:88,type:"goal",name:"Demir"}]},

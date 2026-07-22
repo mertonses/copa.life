@@ -27,5 +27,5 @@ Satın alma makbuzu, kaynak adı veya “fan projesi” ibaresi tek başına yen
 
 - Oyuncu kaynak verisinin üçüncü taraf bir futbol oyunundan geldiği varsayılmaz. Proje sahibinin bağımsız kaynak beyanı kaydedilmiştir.
 - Yayınlanan oyuncu profilleri copa.life'a ait altı adet 0–100 oyun boyutudur; ham 1–20 alanlar ve bireysel sakatlık yatkınlığı yayımlanmaz.
-- Android gerçek kulüp armalarını veya bayrak görsel dosyalarını içermez; jenerik kulüp kısaltmaları ve metin ülke kodları kullanır.
-- Web paketindeki gerçek kulüp armaları ve bayrak dosyaları için yeniden dağıtım kanıtı kayıtlı değildir. Proje sahibi 16 Temmuz 2026 tarihinde yalnız web dağıtımı için açık risk istisnası vermiştir; kayıtlar hukuken temizlenmiş sayılmaz.
+- Android gerçek kulüp armalarını içermez ve jenerik kulüp kısaltmaları kullanır. Ülke bayrakları ise 22 Temmuz 2026 tarihinde proje içinde geometrik SVG olarak yeniden üretilen ve onaylı dosya listesiyle paketlenen birinci taraf varlıklardır.
+- Web paketindeki gerçek kulüp armaları için yeniden dağıtım kanıtı kayıtlı değildir. Proje sahibi 16 Temmuz 2026 tarihinde yalnız web dağıtımı için açık risk istisnası vermiştir; kayıtlar hukuken temizlenmiş sayılmaz.

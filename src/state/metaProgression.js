@@ -323,8 +323,8 @@
       <div class="meta-license-count ${state.career.licenses?"has-license":""}"><span aria-hidden="true">◆</span><small>${tr?"TAKTİK LİSANSI":"TACTICAL LICENCE"}</small><strong>${state.career.licenses}</strong></div>
       ${next?`<div class="meta-next-reward"><span aria-hidden="true">◇</span><p><small>${tr?"SONRAKİ BÜYÜK ÖDÜL":"NEXT MAJOR REWARD"}</small><b>${tr?"Taktik Lisansı":"Tactical Licence"}</b></p><strong>${Math.max(0,next.threshold-state.career.reputation)} ${tr?"itibar kaldı":"reputation left"}</strong></div>`:""}
     </section>
-    <section class="meta-badge-section"><div class="meta-section-heading"><h4>${tr?"ROZETLER":"BADGES"} · ${state.badges.length}/${Object.keys(BADGES).length}</h4>${state.badges.length?`<small>${tr?"Kariyer kilometre taşları":"Career milestones"}</small>`:""}</div><div class="meta-badges">${badgesHTML(tr)}</div></section>
-    <section class="meta-archive"><div class="meta-section-heading"><h4>${tr?"SON KOŞULAR":"RECENT RUNS"}</h4><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small></div>${archiveHTML(tr)}</section>`;
+    <details class="meta-career-disclosure meta-badge-section" open><summary><span>${tr?"ROZETLER":"BADGES"}</span><small>${state.badges.length}/${Object.keys(BADGES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body"><div class="meta-badges">${badgesHTML(tr)}</div></div></details>
+    <details class="meta-career-disclosure meta-archive" open><summary><span>${tr?"SON KOŞULAR":"RECENT RUNS"}</span><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body">${archiveHTML(tr)}</div></details>`;
   }
   function worldHTML(tr){
     return `<section class="meta-world meta-world-panel" id="metaWorldPanel"><div class="meta-world-skeleton" aria-label="${tr?"Dünya sıralaması yükleniyor":"Loading world rankings"}"><i></i><i></i><i></i><i></i></div></section>`;
@@ -342,6 +342,7 @@
     ].map(([id,label])=>`<button type="button" class="${id===active?"active":""}" aria-current="${id===active?"page":"false"}" onclick="CopaMeta.openProgression('${id}')">${label}</button>`).join("")}</nav><div class="meta-tab-panel">${panelHTML(active,tr)}</div></div>`,{dismissOnOverlay:true,label:tr?"Kulüp kariyeri":"Club career"});
     const activeTab=document.querySelector(".meta-progress-modal .meta-tabs button.active");
     if(activeTab)try{activeTab.focus({preventScroll:true});}catch(_){}
+    if(active==="career"&&global.matchMedia&&global.matchMedia("(max-width:620px)").matches)document.querySelectorAll(".meta-progress-modal .meta-career-disclosure").forEach(item=>item.removeAttribute("open"));
     if(active==="world"&&global.GhostClubs&&typeof global.GhostClubs.renderLeaderboard==="function")global.GhostClubs.renderLeaderboard(document.getElementById("metaWorldPanel"));
   }
   function openArchive(){

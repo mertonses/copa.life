@@ -1,21 +1,10 @@
 export const NATIVE_SKIP_PREFIXES = [
   "assets/clubs",
-  "assets/flags",
   "assets/icons/patreon.svg",
   "src/data/logos.js",
   "src/state/diagnostics.js",
   "src/legacy",
 ];
-
-const FLAG_CODES = Object.freeze({
-  DE: "DE",
-  ENGLAND: "EN",
-  ES: "ES",
-  GB: "EN",
-  IT: "IT",
-  JP: "JP",
-  TR: "TR",
-});
 
 export const NATIVE_TEXT_EXTENSIONS = new Set([
   ".html",
@@ -34,14 +23,7 @@ export function isNativeSkipped(relativePath) {
 }
 
 export function transformNativeText(text) {
-  const genericCountryMarkup = text.replace(
-    /<img\s+src=["']assets\/flags\/([^"']+)["']\s+alt=["'][^"']*["'](?:\s+aria-hidden=["']true["'])?\s*>/gi,
-    (_, file) => {
-      const key = String(file).split(/[./]/)[0].toUpperCase();
-      const code = FLAG_CODES[key] || key.slice(0, 3) || "--";
-      return `<span class="generic-country-code" aria-hidden="true">${code}</span>`;
-    },
-  );
+  const nativeText = text;
   const replacements = [
     [/FA Cup/g, "England Cup"],
     [/Copa del Rey/g, "Spain Cup"],
@@ -63,7 +45,7 @@ export function transformNativeText(text) {
   ];
 
   return replacements
-    .reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), genericCountryMarkup)
+    .reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), nativeText)
     .replace(/var CONTACT_FORM_KEY="[^"]*";/g, 'var CONTACT_FORM_KEY="";');
 }
 

@@ -143,12 +143,16 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");
+  await expect(page.locator("#hubBenchSection")).toBeHidden();
   await trigger.click();
   await expect(page.locator("html")).toHaveClass(/native-bench-open/);
   await expect(page.locator("#hubBenchSection")).toBeVisible();
+  expect(await page.locator("#hubBenchSection").evaluate(element=>element.parentElement===document.body)).toBe(true);
   const handled=await page.evaluate(()=>(globalThis as any).CopaMobileExperience.handleBack());
   expect(handled).toBe(true);
   await expect(page.locator("html")).not.toHaveClass(/native-bench-open/);
+  await expect(page.locator("#hubBenchSection")).toBeHidden();
+  expect(await page.locator("#hubBenchSection").evaluate(element=>element.parentElement?.id)).toBe("hubBenchStack");
 });
 
 test("portable save code excludes device-bound online identity and detects corruption",async({page},testInfo)=>{
@@ -531,9 +535,9 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   expect(injuryLayout.parentId).toBe("hubBenchStack");
   expect(injuryLayout.nextId).toBe("hubBenchSection");
   expect(injuryLayout.beforeBench).toBe(true);
-  expect(injuryLayout.height).toBeLessThanOrEqual(58);
+  expect(injuryLayout.height).toBeLessThanOrEqual(phoneProject?170:58);
   expect(injuryLayout.actions).toHaveLength(2);
-  expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=30)).toBe(true);
+  expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=(phoneProject?44:30))).toBe(true);
   expect(injuryLayout.pageOverflow).toBeLessThanOrEqual(1);
   if(mobileOnly(testInfo.project.name)){
     expect(injuryLayout.beforeShop).toBe(true);

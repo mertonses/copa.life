@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy": "deny_public_release_until_cleared",
   "web_only_exception_policy": "explicit_owner_risk_acceptance_does_not_equal_clearance",
-  "reviewed_at": "2026-07-16",
+  "reviewed_at": "2026-07-22",
   "notice": "This inventory is an engineering control, not legal advice.",
   "records": [
     {
@@ -43,17 +43,16 @@
     },
     {
       "id": "country-flags",
-      "title": "Country flag artwork files",
-      "status": "owner_accepted_web_only",
-      "risk": "medium",
+      "title": "First-party country flag SVG set",
+      "status": "cleared",
+      "risk": "low",
       "paths": ["assets/flags/**"],
-      "basis": "The designs are national flags, but the provenance of each bitmap/vector implementation is not recorded.",
-      "distribution_decision": "Keep the existing flag artwork in the web build under an explicit project-owner web-only risk exception. Android and iOS use text country codes and exclude these files.",
-      "distribution_scope": "web_only",
-      "risk_acknowledgement": "The project owner accepts the unresolved artwork-provenance risk for web distribution. This exception is not a licence, permission or legal clearance.",
-      "evidence": "Explicit project-owner direction recorded 2026-07-16: keep web visuals while removing rights-sensitive artwork from native store builds.",
+      "basis": "All bitmap and externally sourced implementations were removed. The seven compact SVG implementations were authored directly in the copa.life repository from geometric primitives and contain no imported artwork or metadata.",
+      "distribution_decision": "Use the first-party SVG set in web, Android and iOS packages. Native checks allow only the approved SVG filenames and reject other files in assets/flags.",
+      "distribution_scope": "web_android_ios",
+      "evidence": "First-party SVG source committed in assets/flags on 2026-07-22; Android package allowlist enforced by tools/check-android-package.mjs and tools/CheckAndroidAab.java.",
       "owner": "copa.life project owner",
-      "reviewed_at": "2026-07-16"
+      "reviewed_at": "2026-07-22"
     }
   ]
 }

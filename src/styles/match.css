@@ -2664,8 +2664,9 @@ html[data-theme="dark"] #hub .pitch-overlay #cardrow .card .v{
 
 /* Opponent squad: compact tactical scouting report. */
 .scout-lineup-modal.scout-report-modal{
-  width:min(700px,calc(100vw - 32px));
-  max-width:700px;
+  width:min(620px,calc(100% - 24px));
+  max-width:620px;
+  box-sizing:border-box;
   max-height:calc(90vh - 2px);
   display:flex;
   flex-direction:column;
@@ -3067,10 +3068,10 @@ html[data-theme="dark"] .scout-report-modal .scout-summary-chips span{
   border-color:var(--border-default);
 }
 @media(max-width:620px){
-  .modal:has(.scout-report-modal){padding:7px}
+  .modal:has(.scout-report-modal){padding:max(7px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-right))}
   .scout-lineup-modal.scout-report-modal{
     width:calc(100vw - 14px);
-    max-width:calc(100vw - 14px);
+    max-width:100%;
     max-height:calc(100svh - 14px);
     border-radius:11px;
   }
@@ -3087,7 +3088,7 @@ html[data-theme="dark"] .scout-report-modal .scout-summary-chips span{
   .scout-report-modal .scout-summary-chips span{font-size:7.5px;padding:4px 7px}
   .scout-report-modal .scout-pitch-title,
   .scout-report-modal .scout-pitch,
-  .scout-legend{width:min(340px,calc(100vw - 42px))!important}
+  .scout-legend{width:min(330px,100%)!important;max-width:100%!important}
   .scout-report-modal .scout-player-card{width:38px;min-height:33px}
   .scout-report-modal .scout-nm{max-width:55px;font-size:7px}
   .scout-report-grid{grid-template-columns:1fr}

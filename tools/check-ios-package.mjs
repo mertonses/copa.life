@@ -18,11 +18,14 @@ const walk = (directory, files = []) => {
 
 if (!fs.existsSync(OUT)) fail("dist-ios is missing; run build:ios first");
 for (const relative of [
-  "assets/clubs", "assets/flags", "assets/icons/patreon.svg", "src/data/logos.js",
+  "assets/clubs", "assets/icons/patreon.svg", "src/data/logos.js",
   "src/state/diagnostics.js", "sw.js",
 ]) {
   if (fs.existsSync(path.join(OUT, relative))) fail(`forbidden iOS artifact: ${relative}`);
 }
+const firstPartyFlags=["TR.svg","IT.svg","ENGLAND.svg","GB.svg","ES.svg","DE.svg","JP.svg"];
+for(const flag of firstPartyFlags)if(!fs.existsSync(path.join(OUT,"assets/flags",flag)))fail(`iOS first-party flag is missing: ${flag}`);
+if(fs.existsSync(path.join(OUT,"assets/flags")))for(const file of walk(path.join(OUT,"assets/flags")))if(!firstPartyFlags.includes(path.basename(file))||path.extname(file).toLowerCase()!==".svg")fail(`unapproved iOS flag artifact: ${path.relative(OUT,file)}`);
 const forbidden = [
   "assets/clubs/", "patreon.com", "FM26", "Football Manager", "injury_proneness",
   "FA Cup", "Copa del Rey", "Coppa Italia", "DFB-Pokal", "Emperor's Cup", "Emperor’s Cup",
@@ -42,8 +45,7 @@ for (const marker of [
 ]) {
   if (!index.includes(marker)) fail(`iOS index missing ${marker}`);
 }
-if (!index.includes('class="generic-country-code"')) fail("iOS index is missing generic country-code visuals");
-if (/<img\s+[^>]*src=["']assets\/flags\//i.test(index)) fail("iOS index still renders flag artwork");
+for(const flag of ["TR.svg","IT.svg","ENGLAND.svg","ES.svg","DE.svg","JP.svg"])if(!index.includes(`assets/flags/${flag}`))fail(`iOS index does not render first-party flag ${flag}`);
 if (!index.includes("Capacitor.Plugins.Browser") || !index.includes('const supportUrl="https://copa.life/support.html"') || !index.includes("plugin.open({url:supportUrl")) {
   fail("iOS support link is not routed through the dedicated support page");
 }
@@ -51,7 +53,7 @@ if (index.includes('plugin.open({url:"https://copa.life/"')) fail("iOS support l
 
 const i18n = path.join(OUT, "src/data/i18n.js");
 const profiles = path.join(OUT, "src/ui/playerProfiles.js");
-if (!fs.existsSync(i18n) || !fs.readFileSync(i18n, "utf8").includes("COPA_IS_NATIVE")) fail("iOS country controls do not use native-safe visuals");
+if (!fs.existsSync(i18n) || !/assets\/flags\/['"]?\+item\.flag/.test(fs.readFileSync(i18n, "utf8"))) fail("iOS country controls do not render first-party flags");
 if (!fs.existsSync(profiles) || !fs.readFileSync(profiles, "utf8").includes("COPA_IS_NATIVE")) fail("iOS player profiles do not suppress native-store artwork");
 const nativeRuntime = path.join(OUT, "src/runtime/nativeApp.js");
 if (!fs.existsSync(nativeRuntime)) fail("iOS native runtime is missing");
@@ -86,4 +88,4 @@ if (failures.length) {
   for (const failure of failures) console.error(`[ios] ${failure}`);
   process.exit(1);
 }
-console.log(`[ios] clean package: ${walk(OUT).length} files; generic rights-safe native content and lifecycle markers verified`);
+console.log(`[ios] clean package: ${walk(OUT).length} files; first-party SVG flags, rights-safe native content and lifecycle markers verified`);

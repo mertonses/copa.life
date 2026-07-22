@@ -43,6 +43,18 @@
 body.reduced-motion .td-group li.is-latest{animation:none}
 @media(prefers-reduced-motion:reduce){.td-group li.is-latest{animation:none}}
 
+.td-group-stage{position:relative;min-width:0}.td-group-nav,.td-swipe-tip{display:none}
+@media(max-width:760px){
+  .td-group-stage{overflow:hidden}.td-groups{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(82%,1fr);grid-template-columns:none;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:0 12% 2px 0}.td-groups::-webkit-scrollbar{display:none}.td-group{scroll-snap-align:center;scroll-snap-stop:always}
+  .td-group-stage::after{position:absolute;top:0;right:0;width:26px;height:calc(100% - 34px);pointer-events:none;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--surface-bg) 90%,transparent));content:""}
+  .td-group-nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px}.td-group-dot{display:grid;min-width:28px;min-height:28px;padding:0;place-items:center;border:1px solid var(--border-subtle);border-radius:999px;background:var(--surface-muted);color:var(--color-slate);font:800 8px/1 var(--mono)}.td-group-dot.is-active{border-color:var(--color-primary);background:color-mix(in srgb,var(--color-primary) 14%,var(--surface-elevated));color:var(--color-primary)}
+  .td-swipe-tip{position:absolute;right:8px;bottom:38px;z-index:5;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;width:min(270px,calc(100% - 16px));box-sizing:border-box;padding:9px 10px;border:1px solid color-mix(in srgb,var(--color-primary) 45%,var(--border-subtle));border-radius:10px;background:color-mix(in srgb,var(--surface-elevated) 96%,transparent);box-shadow:0 8px 28px rgba(10,17,24,.22);transition:opacity .18s,transform .18s}.td-swipe-tip.is-dismissed{opacity:0;transform:translateY(6px);pointer-events:none}.td-swipe-tip p{display:grid;gap:3px;margin:0}.td-swipe-tip b{font-size:10px}.td-swipe-tip small{color:var(--color-slate);font-size:8px;line-height:1.3}.td-swipe-tip>button{min-width:30px;min-height:30px;border:0;background:transparent;color:var(--color-slate);font-size:18px}.td-swipe-hand{font-size:20px;animation:tdSwipeHand 1.4s ease-in-out infinite}
+}
+@keyframes tdSwipeHand{0%,100%{transform:translateX(-2px) rotate(-12deg)}50%{transform:translateX(10px) rotate(4deg)}}
+body.reduced-motion .td-swipe-hand{animation:none}@media(prefers-reduced-motion:reduce){.td-swipe-hand{animation:none}}
+.tg-road-wrap{display:grid;gap:5px;padding:8px 10px;border-bottom:1px solid var(--border-subtle);background:color-mix(in srgb,var(--surface-muted) 62%,transparent)}.tg-road-wrap>span{color:var(--color-slate);font:900 7px/1 var(--mono);letter-spacing:1px}.tg-road-wrap #fixbar.fixture-road-v2{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}.tg-road-wrap #fixbar .fixture-track{gap:5px;padding:2px 0!important}.tg-road-wrap #fixbar .fixture-node{min-height:44px!important;padding:5px!important}.tg-road-wrap #fixbar .fixture-node.is-active{min-height:52px!important}.tg-road-wrap #fixbar .fixture-detail{margin-top:5px!important}
+@media(max-width:760px){.tg-road-wrap{padding:7px 9px}.tg-road-wrap #fixbar .fixture-node{min-width:78px!important}.tg-road-wrap #fixbar .fixture-node.is-active{min-width:98px!important}.tg-road-wrap #fixbar .fixture-trophy{min-width:44px!important}}
+
 /* The draw machine precedes the groups in the DOM so its controls are reachable
    immediately on touch and keyboard. Desktop keeps the original two-column view. */
 .td-machine{grid-column:2;grid-row:1}

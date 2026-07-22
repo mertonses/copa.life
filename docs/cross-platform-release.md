@@ -6,7 +6,7 @@ Oynanış için tek kaynak vardır: kökteki `index.html`, `src/` ve `assets/`. 
 
 Android ve iOS derlemeleri yalnız mağazaya özel, açıkça tanımlanmış dönüşümleri uygular:
 
-- Gerçek kulüp armalarını, bayrak görsel dosyalarını, Patreon varlığını ve web tanılama kodunu dışarıda bırakır; ülke/dil göstergelerini metin kodlarına dönüştürür.
+- Gerçek kulüp armalarını, Patreon varlığını ve web tanılama kodunu dışarıda bırakır. Ülke/dil göstergelerinde yalnız izin envanterindeki birinci taraf SVG bayrak setini paketler; diğer bayrak dosyaları native allowlist tarafından reddedilir.
 - Kupa adlarını jenerik karşılıklarına dönüştürür.
 - Destek bağlantısını Capacitor Browser üzerinden açar.
 - Native yaşam döngüsü ve durum çubuğu köprüsünü ekler.

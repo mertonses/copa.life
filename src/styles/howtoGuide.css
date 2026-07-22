@@ -56,7 +56,7 @@
 .copa-coachmark-x{position:absolute;right:8px;top:7px;border:0;background:transparent;color:var(--color-slate);font-size:18px;cursor:pointer;pointer-events:auto}
 .copa-coachmark-ok{min-height:32px;padding:0 13px;border:0;border-radius:6px;background:var(--color-primary);color:#FFFFFF;font:900 9px/1 var(--mono);letter-spacing:.8px;cursor:pointer;pointer-events:auto}
 @media(max-width:720px){
-  .copa-coachmark{top:max(68px,calc(env(safe-area-inset-top) + 56px));right:12px;bottom:auto}
+  .copa-coachmark{top:auto;right:12px;bottom:calc(var(--mobile-dock-height,72px) + env(safe-area-inset-bottom) + 12px)}
   .howto-guide-v2{width:calc(100vw - 12px)!important;max-height:calc(100dvh - 12px)!important}
   .howto-guide-v2 .howto-mbody{padding:0 10px 10px!important}
   .howto-mode-tabs{padding:9px 10px}
@@ -84,7 +84,4 @@
 @media(prefers-reduced-motion:reduce){
   .howto-path-step.is-active .howto-path-node{transform:none}
   .guide-focus{transition:none}
-}
-@media(max-width:720px),(pointer:coarse){
-  .copa-coachmark{display:none!important}
 }

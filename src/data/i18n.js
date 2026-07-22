@@ -523,11 +523,11 @@ var COPA_LOCALE_UI={
 };
 
 var COPA_LOCALE_BUTTONS=[
- {code:"tr",flag:"TR.png",short:"TR",name:"Türkçe"},
- {code:"en",flag:"GB.png",short:"EN",name:"English"},
- {code:"es",flag:"ES.png",short:"ES",name:"Espa\u00f1ol"},
- {code:"de",flag:"DE.png",short:"DE",name:"Deutsch"},
- {code:"it",flag:"IT.png",short:"IT",name:"Italiano"}
+ {code:"tr",flag:"TR.svg",short:"TR",name:"Türkçe"},
+ {code:"en",flag:"GB.svg",short:"EN",name:"English"},
+ {code:"es",flag:"ES.svg",short:"ES",name:"Espa\u00f1ol"},
+ {code:"de",flag:"DE.svg",short:"DE",name:"Deutsch"},
+ {code:"it",flag:"IT.svg",short:"IT",name:"Italiano"}
 ];
 
 var COPA_HOWTO_TRANSLATIONS={
@@ -575,7 +575,7 @@ function _syncCopaLanguageControls(){
  grid.classList.add("langgrid");
  grid.innerHTML=COPA_LOCALE_BUTTONS.map(function(item){
   var active=item.code===LANG?" on":"";
-  var visual=window.COPA_IS_NATIVE?'<span class="generic-country-code" aria-hidden="true">'+item.short+'</span>':'<img src="assets/flags/'+item.flag+'" alt="" aria-hidden="true"><span>'+item.short+'</span>';
+  var visual='<img src="assets/flags/'+item.flag+'" alt="" aria-hidden="true"><span>'+item.short+'</span>';
   return '<button id="lg'+item.code.toUpperCase()+'" class="sdbtn langbtn'+active+'" type="button" onclick="setLang(\''+item.code+'\')" aria-label="'+item.name+'" aria-pressed="'+(item.code===LANG)+'">'+visual+'</button>';
  }).join("");
 }

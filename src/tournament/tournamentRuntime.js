@@ -50,7 +50,7 @@
     renderDraw();if(typeof root._saveState==="function")root._saveState("draw");
     if(!restoring&&root.CopaAnalytics)root.CopaAnalytics.track("group_draw_started",{country:root.selectedCountry,mode:"manual"});return true;
   }
-  function reveal(count){if(!active()||root.tournament.phase!=="draw")return;root.CopaTournamentEngine.revealNext(root.tournament,count||1);renderDraw();if(typeof root._saveState==="function")root._saveState("draw");}
+  function reveal(count){if(!active()||root.tournament.phase!=="draw")return;const amount=count||1,before=root.tournament.draw.revealIndex,next=root.tournament.draw.entries[before];if(amount===1&&typeof root.sfxDrawPick==="function")root.sfxDrawPick();root.CopaTournamentEngine.revealNext(root.tournament,amount);renderDraw();const complete=root.tournament.draw.completed;if(amount===1&&typeof root.sfxDrawPlace==="function")root.sfxDrawPlace(next&&next.teamId==="player");if((amount>1||complete)&&typeof root.sfxDrawComplete==="function")setTimeout(root.sfxDrawComplete,amount===1?120:0);if(root.CopaMobileExperience)root.CopaMobileExperience.haptic(next&&next.teamId==="player"?[18,28,22]:amount>1?[12,22]:14);if(typeof root._saveState==="function")root._saveState("draw");}
   function finishDraw(){
     if(!active())return;if(!root.tournament.draw.completed)root.CopaTournamentEngine.revealNext(root.tournament,99);
     root.CopaTournamentEngine.completeDraw(root.tournament);syncSchedule();const section=document.getElementById("tournamentDraw");if(section)section.classList.add("hidden");
@@ -72,7 +72,7 @@
     match.ghostOpponent={originalTeamId:opponentId,name:String(ghost.name||original.name),power:Math.max(35,Math.min(115,Math.round(Number(ghost.power)||original.power))),formation:ghost.formation||ghost.ghostMeta&&ghost.ghostMeta.formation||original.formation,style:ghost.style||original.style,ghost:true,ghostId:ghost.ghostId||"",ghostProfile:ghost.ghostProfile||null,ghostMeta:ghost.ghostMeta||null};
     syncSchedule();return true;
   }
-  function renderHub(){const panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());}
+  function renderHub(){const panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());if(root.CopaFixtureRoad)root.CopaFixtureRoad.render();else if(typeof root.renderFixtures==="function")root.renderFixtures();}
   function showOverview(){if(!active()||!root.CopaTournamentUI)return;root.showModal(root.CopaTournamentUI.overviewMarkup(root.tournament,copy()),{dismissOnOverlay:true,label:copy().tournamentOverview});}
   function stage(){if(!active())return"legacy";if(root.tournament.phase==="group")return"group";if(root.tournament.phase==="knockout")return root.tournament.knockout.round;return"complete";}
   root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator});
