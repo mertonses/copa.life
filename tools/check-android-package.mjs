@@ -7,17 +7,22 @@ const failures=[];
 function fail(message){failures.push(message);}
 function walk(directory,files=[]){if(!fs.existsSync(directory))return files;for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())walk(file,files);else files.push(file);}return files;}
 if(!fs.existsSync(OUT))fail("dist-android is missing; run build:android first");
-for(const relative of ["assets/clubs","assets/flags","assets/icons/patreon.svg","src/data/logos.js","src/runtime/productAnalytics.js","src/state/diagnostics.js","sw.js"]){if(fs.existsSync(path.join(OUT,relative)))fail(`forbidden Android artifact: ${relative}`);}
+for(const relative of ["assets/clubs","assets/flags","assets/icons/patreon.svg","src/data/logos.js","src/state/diagnostics.js","sw.js"]){if(fs.existsSync(path.join(OUT,relative)))fail(`forbidden Android artifact: ${relative}`);}
 const textFiles=walk(OUT).filter(file=>/[.](?:html|js|css|json|webmanifest|svg)$/i.test(file)),forbidden=["assets/clubs/","patreon.com","FM26","Football Manager","injury_proneness","FA Cup","Copa del Rey","Coppa Italia","DFB-Pokal","Emperor's Cup","Emperor’s Cup"];
 forbidden.push("api.web3forms.com","cfSubmitBtn","cfMail","openContactForm()","openBugReport()","2eb11e4e-335a-401e-b2e7-104c07ecd4a6");
-forbidden.push("static.cloudflareinsights.com","cloudflareinsights.com","copa-analytics-api","/v1/analytics/events");
+forbidden.push("static.cloudflareinsights.com","cloudflareinsights.com");
 for(const file of textFiles){const text=fs.readFileSync(file,"utf8");for(const needle of forbidden)if(text.includes(needle))fail(`${path.relative(OUT,file)} contains ${needle}`);}
 const generatedGame=path.join(OUT,"src/game/generate.js");
 if(fs.existsSync(generatedGame)){const source=fs.readFileSync(generatedGame,"utf8");for(const needle of ['o.trait="cam"','cam:"Cam Adam"','cam:"Glass"'])if(source.includes(needle))fail(`individual medical tendency leaked into ${path.relative(OUT,generatedGame)}`);}
 const nativeFiles=["android/app/build.gradle","android/capacitor.settings.gradle","android/app/capacitor.build.gradle"].map(file=>path.join(ROOT,file)).filter(fs.existsSync);
-for(const file of nativeFiles){const source=fs.readFileSync(file,"utf8");for(const needle of ["com.android.billingclient","play-services-ads","google-mobile-ads","admob"])if(source.toLowerCase().includes(needle.toLowerCase()))fail(`monetization SDK found in ${path.relative(ROOT,file)}: ${needle}`);}
+for(const file of nativeFiles){const source=fs.readFileSync(file,"utf8");if(source.toLowerCase().includes("com.android.billingclient"))fail(`billing SDK found in ${path.relative(ROOT,file)}`);}
+const appGradle=fs.readFileSync(path.join(ROOT,"android/app/build.gradle"),"utf8"),androidManifest=fs.readFileSync(path.join(ROOT,"android/app/src/main/AndroidManifest.xml"),"utf8"),adsPluginPath=path.join(ROOT,"android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
+for(const marker of ["ads-mobile-sdk:1.2.1","user-messaging-platform:4.0.0","COPA_ADMOB_APP_ID","COPA_ADMOB_INTERSTITIAL_ID","COPA_ADMOB_REWARDED_ID"])if(!appGradle.includes(marker))fail(`Android ad configuration is missing ${marker}`);
+for(const marker of ["com.google.android.gms.ads.APPLICATION_ID","${admobAppId}","com.google.android.gms.permission.AD_ID"])if(!androidManifest.includes(marker))fail(`Android manifest is missing ${marker}`);
+if(!fs.existsSync(adsPluginPath))fail("native CopaAds plugin is missing");else{const adsPlugin=fs.readFileSync(adsPluginPath,"utf8");for(const marker of ["requestConsentInfoUpdate","loadAndShowConsentFormIfRequired","canRequestAds()","showRunEnd","showRewardedReroll","RewardedAd","OnUserEarnedRewardListener","MAX_REWARDED_REROLLS_PER_RUN","showPrivacyOptions","COPA_ADMOB_TEST_MODE","AgeRestrictedTreatment.TEEN","MAX_AD_CONTENT_RATING_T","RUN_END_AD_COOLDOWN_MS","duplicate_run","cooldown"])if(!adsPlugin.includes(marker))fail(`native CopaAds plugin is missing ${marker}`);}
 const index=fs.existsSync(path.join(OUT,"index.html"))?fs.readFileSync(path.join(OUT,"index.html"),"utf8"):"";
-for(const marker of ['meta name="copa-platform" content="android"',"src/data/generic_club_visuals.js","src/runtime/nativeApp.js","privacy.html","terms.html"]){if(!index.includes(marker))fail(`Android index missing ${marker}`);}
+for(const marker of ['meta name="copa-platform" content="android"',"src/data/generic_club_visuals.js","src/runtime/nativeApp.js","src/runtime/productAnalytics.js","copa-analytics-api","privacy.html","terms.html"]){if(!index.includes(marker))fail(`Android index missing ${marker}`);}
+for(const marker of ["src/runtime/nativeAds.js","CopaNativeAds.showRunEnd(window._completedGhostRunKey)"])if(!index.includes(marker))fail(`Android run-end ad hook is missing ${marker}`);
 if(!index.includes('class="generic-country-code"'))fail("Android index is missing generic country-code visuals");
 if(/<img\s+[^>]*src=["']assets\/flags\//i.test(index))fail("Android index still renders flag artwork");
 const androidI18n=path.join(OUT,"src/data/i18n.js"),androidProfiles=path.join(OUT,"src/ui/playerProfiles.js");
@@ -27,8 +32,9 @@ else{
   const profileSource=fs.readFileSync(androidProfiles,"utf8");
   if(!/function nationalTeamInfo\([^)]*\)\{[^}]*flag:""/s.test(profileSource)||!profileSource.includes("countryFlag:nationalTeam.flag")||!profileSource.includes("COPA_IS_NATIVE"))fail("Android player profiles do not suppress native-store artwork");
 }
-const nativeRuntime=path.join(OUT,"src/runtime/nativeApp.js");
+const nativeRuntime=path.join(OUT,"src/runtime/nativeApp.js"),nativeAdsRuntime=path.join(OUT,"src/runtime/nativeAds.js");
 if(fs.existsSync(nativeRuntime)){const source=fs.readFileSync(nativeRuntime,"utf8");if(!source.includes("capacitor.Plugins"))fail("native runtime does not support Capacitor 8 plugin globals");}
+if(!fs.existsSync(nativeAdsRuntime))fail("Android native ad runtime is missing");else{const source=fs.readFileSync(nativeAdsRuntime,"utf8");for(const marker of ["CopaAds","showRunEnd","showRewardedReroll","showPrivacyOptions","privacyOptionsChanged","scheduleInitialize","setTimeout(initialize,8000)"])if(!source.includes(marker))fail(`Android native ad runtime is missing ${marker}`);}
 if(!index.includes("Capacitor.Plugins.Browser")||!index.includes("openNativeSupport")||!index.includes('plugin.open({url:"https://copa.life/"'))fail("Android support link is not routed through the native Browser plugin");
 const platformManifestPath=path.join(OUT,"platform-build.json"),versionPath=path.join(ROOT,"release/android-version.json");
 if(!fs.existsSync(platformManifestPath))fail("Android platform build manifest missing");

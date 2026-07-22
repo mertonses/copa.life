@@ -86,9 +86,7 @@ export function buildNativePackage({
     .replace('<meta name="copa-platform" content="web">', `<meta name="copa-platform" content="${platform}">`)
     .replace(/<script>\s*if\("serviceWorker"in navigator\)[\s\S]*?<\/script>/, "")
     .replace(/<script src="src\/data\/logos\.js[^>]*><\/script>\s*/, "")
-    .replace(/<script src="src\/runtime\/productAnalytics\.js[^>]*><\/script>\s*/, "")
     .replace(/<script src="src\/state\/diagnostics\.js[^>]*><\/script>\s*/, "")
-    .replace(/<meta name="copa-analytics-api"[^>]*>\s*/, "")
     .replace(/<a class="patreonbox[\s\S]*?<\/a>/g, "")
     .replace(/<a class="footer-link" href="https:\/\/www\.patreon\.com[\s\S]*?<\/a>/g, "")
     .replace(
@@ -101,7 +99,10 @@ export function buildNativePackage({
       '<span class="native-version-slot" aria-hidden="true"></span>',
       `<span class="footer-sep" style="display:inline">·</span><span class="footer-link ${platform}-version" aria-label="${versionAriaLabel}">${versionLabel}</span>`,
     )
-    .replace("</body>", `<script src="src/runtime/nativeApp.js?v=${buildInfo.buildVersion}"></script></body>`)
+    .replace(
+      "</body>",
+      `${platform === "android" ? `<script src="src/runtime/nativeAds.js?v=${buildInfo.buildVersion}"></script>` : ""}<script src="src/runtime/nativeApp.js?v=${buildInfo.buildVersion}"></script></body>`,
+    )
     .replaceAll("__COPA_BUILD_VERSION__", buildInfo.buildVersion);
   index = index.replace(LOCAL_ASSET_URL, `$1?v=${buildInfo.buildVersion}`);
   index = index.replace(/\?v=202\d[A-Za-z0-9._-]*/g, `?v=${buildInfo.buildVersion}`);

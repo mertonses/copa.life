@@ -1,6 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, detectSchemaVersion, purgeExpired, routeBucket } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, detectSchemaVersion, purgeExpired, routeBucket, validHistory } from "../src/index.js";
 
 const origin="https://copa.life";
 const formation442=["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"];
@@ -32,6 +32,22 @@ const leaderboardHeaders=(client="GCL-CAREER123",token="GDT-CAREERDELETE12345")=
 const postCareer=(body,client,token)=>exports.default.fetch(new Request("https://ghost.test/v1/leaderboard/runs",{method:"POST",headers:leaderboardHeaders(client,token),body:JSON.stringify(body)}));
 
 describe("Ghost Club Worker",()=>{
+  it("accepts group-stage records and validates qualification semantics",()=>{
+    const history=[
+      {opponent:"A",result:"W",gf:2,ga:0,stage:"group",penalty:null},
+      {opponent:"B",result:"D",gf:1,ga:1,stage:"group",penalty:null},
+      {opponent:"C",result:"L",gf:0,ga:1,stage:"group",penalty:null},
+      ...Array.from({length:3},(_,index)=>({opponent:"",result:"",gf:0,ga:0,stage:["quarterfinal","semifinal","final"][index],penalty:null}))
+    ];
+    const eliminated={reached_round:3,result:{won:false,score:"",end_type:"group_eliminated"},match_history:history,tournament:{format:"groups16_v1",stage:"group",group:{id:"D",rank:3,points:4,gd:1,qualified:false}}};
+    expect(validHistory(eliminated)).toBe(true);
+    expect(validHistory({...eliminated,tournament:{...eliminated.tournament,group:{...eliminated.tournament.group,qualified:true}}})).toBe(false);
+    const qualified={...eliminated,reached_round:4,result:{won:false,score:"1-1 p 3-4",end_type:"quarterfinal_eliminated"},match_history:history.map((match,index)=>index===3?{opponent:"D",result:"L",gf:1,ga:1,stage:"quarterfinal",penalty:[3,4]}:match),tournament:{format:"groups16_v1",stage:"quarterfinal",group:{id:"D",rank:2,points:4,gd:1,qualified:true}}};
+    expect(validHistory(qualified)).toBe(true);
+    qualified.match_history[3]={...qualified.match_history[3],result:"D"};
+    expect(validHistory(qualified)).toBe(false);
+  });
+
   it("uses fixed privacy-safe route buckets for worker metrics",()=>{
     expect(routeBucket("/v1/health")).toBe("health");
     expect(routeBucket("/v1/ghosts/G-ABCDEF123456/report")).toBe("ghost_report");
@@ -226,6 +242,20 @@ describe("Ghost Club Worker",()=>{
     const response=await exports.default.fetch(new Request("https://ghost.test/v1/me/ghosts",{method:"DELETE",headers:{origin,"x-copa-client":"GCL-DELETE1234","x-copa-delete-token":token}}));
     expect(response.status).toBe(200);expect(await response.json()).toMatchObject({ok:true,deleted:1});
     expect(await env.GHOSTS.prepare("SELECT public_id FROM ghost_runs WHERE public_id=?").bind(id).first()).toBeNull();
+  });
+
+  it("credits a group draw in server-owned career reputation",async()=>{
+    const run={schema_version:1,run_id:"run-groupdraw1",cheat_run:false,club:{name:"Draw Athletic",country:"TR"},reached_round:3,result:{won:false,score:"",end_type:"group_eliminated"},match_history:[
+      {opponent:"A",result:"W",gf:2,ga:0,stage:"group",penalty:null},
+      {opponent:"B",result:"D",gf:1,ga:1,stage:"group",penalty:null},
+      {opponent:"C",result:"L",gf:0,ga:1,stage:"group",penalty:null},
+      {opponent:"",result:"",gf:0,ga:0,stage:"quarterfinal",penalty:null},
+      {opponent:"",result:"",gf:0,ga:0,stage:"semifinal",penalty:null},
+      {opponent:"",result:"",gf:0,ga:0,stage:"final",penalty:null}
+    ],tournament:{format:"groups16_v1",stage:"group",group:{id:"A",rank:3,points:4,gd:1,qualified:false}}};
+    const response=await postCareer(run,"GCL-GROUPDRAW1","GDT-GROUPDRAW1234567");
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({reputation:44,profile:{lifetime_reputation:44,total_runs:1}});
   });
 
   it("physically purges expired rows",async()=>{

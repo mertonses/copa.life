@@ -16,5 +16,8 @@
     "@cloudflare/workers-types": "latest",
     "vitest": "latest",
     "wrangler": "latest"
+  },
+  "overrides": {
+    "sharp": "0.35.3"
   }
 }

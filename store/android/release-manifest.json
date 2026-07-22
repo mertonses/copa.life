@@ -3,10 +3,11 @@
   "version_code": 1,
   "version_name": "1.0.0",
   "release_status": "candidate",
+  "store_upload_eligible": false,
   "source": {
-    "build_version": "619c520625d2",
-    "build_fingerprint": "619c520625d2994814b00166f5bf18937ef243b8a7e40bb80e07af7af274be24",
-    "fingerprint": "672f1d7e3f2feaf163a7f3a42293830215587cd63c6575a226b088f330c29d07",
+    "build_version": "617d12591ffa",
+    "build_fingerprint": "617d12591ffad1a8bce6dd39c75101a0273c0b9737868c9a5c0a59b57e7d113d",
+    "fingerprint": "75e07fbafb4a0a2aa8d56691f0971bd25c40d594f503937ed27900c3c7e1f788",
     "commit": null
   },
   "min_sdk": 24,
@@ -14,12 +15,21 @@
   "compile_sdk": 36,
   "signed_aab": {
     "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
-    "bytes": 10447677,
-    "sha256": "20608D37FBC3B623784E15EAD901F5ED54700BA8584A6C55893DCBED71D12E6A"
+    "bytes": 15595813,
+    "sha256": "92249AA1EE03243C51E9F767EFEB797295B3A606E06E0370EEF734569B9E965A"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
+  "admob": {
+    "mode": "production",
+    "production_ids_present": true
+  },
   "permissions": [
-    "android.permission.INTERNET"
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "com.google.android.gms.permission.AD_ID",
+    "android.permission.ACCESS_ADSERVICES_TOPICS",
+    "android.permission.ACCESS_ADSERVICES_AD_ID",
+    "android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
   ],
   "verification": {
     "main_test_suite": "passed",
@@ -28,12 +38,15 @@
     "web_android_parity": "passed",
     "android_package_scan": "passed",
     "signed_aab_signature": "passed",
-    "exact_release_emulator_smoke": "passed",
+    "exact_release_emulator_smoke": "required after candidate build",
     "physical_device_smoke": "required before track promotion"
   },
   "external_prerequisites": [
-    "D-U-N-S and Google Play organization verification",
-    "verified reachable support email (Gmail or custom domain)",
-    "final legal entity name and contact details on privacy and takedown pages"
+    "published AdMob UMP privacy message",
+    "production AdMob rewarded reroll ID",
+    "deployed and verified copa.life app-ads.txt",
+    "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON repository secret",
+    "exact-release emulator smoke",
+    "physical-device smoke before track promotion"
   ]
 }

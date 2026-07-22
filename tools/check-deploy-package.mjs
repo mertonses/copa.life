@@ -63,6 +63,11 @@ if (build.status !== 0) {
 }
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
+if (!distFiles.includes("app-ads.txt")) fail("app-ads.txt is missing from dist");
+const appAds = fs.readFileSync(path.join(DIST, "app-ads.txt"), "utf8").trim();
+if (appAds !== "google.com, pub-7347507737044067, DIRECT, f08c47fec0942fa0") {
+  fail("app-ads.txt does not contain the verified AdMob publisher record");
+}
 const distServiceWorker = fs.readFileSync(path.join(DIST, "sw.js"), "utf8");
 const distIndex = fs.readFileSync(path.join(DIST, "index.html"), "utf8");
 if (distServiceWorker.includes("__COPA_BUILD_VERSION__")) fail("built service worker still contains the version placeholder");

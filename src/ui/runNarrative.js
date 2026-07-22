@@ -160,6 +160,17 @@ function genStoryNarrative(){
         `Hai battuto ${opponent} ${score} in finale e alzato la coppa.`
       )
       :LT("Finali kazanıp kupayı kaldırdın.","You won the final and lifted the cup.","Ganaste la final y levantaste la copa.","Du hast das Finale gewonnen und den Pokal geholt.","Hai vinto la finale e alzato la coppa.");
+  }else if(r.endType==="group_eliminated"){
+    const tournamentState=r.tournament&&r.tournament.format==="groups16_v1"?r.tournament:null,group=tournamentState&&tournamentState.groups.find(item=>item.id===tournamentState.group.playerGroupId),row=group&&group.table.find(item=>item.teamId==="player");
+    endingTitle=LT("Grup aşamasına veda","Group-stage exit","Eliminación en la fase de grupos","Aus in der Gruppenphase","Eliminazione nella fase a gironi");
+    const lastResult=fixture&&fixture.res==="W"?LT("galibiyetle","with a win","con una victoria","mit einem Sieg","con una vittoria"):fixture&&fixture.res==="D"?LT("beraberlikle","with a draw","con un empate","mit einem Remis","con un pareggio"):LT("mağlubiyetle","with a defeat","con una derrota","mit einer Niederlage","con una sconfitta");
+    endingText=row?LT(
+      `Son grup maçını ${lastResult} tamamladın; Grup ${group.id}'yi ${row.points} puan ve ${row.gd>0?"+":""}${row.gd} averajla ${row.rank}. sırada bitirip ilk ikinin dışında kaldın.`,
+      `You finished the last group match ${lastResult}; ${row.points} points and a ${row.gd>0?"+":""}${row.gd} goal difference left you ${row.rank} in Group ${group.id}, outside the top two.`,
+      `Terminaste el último partido ${lastResult}; ${row.points} puntos y ${row.gd>0?"+":""}${row.gd} de diferencia te dejaron ${row.rank}.º en el Grupo ${group.id}, fuera de los dos primeros.`,
+      `Du beendetest das letzte Gruppenspiel ${lastResult}; ${row.points} Punkte und ${row.gd>0?"+":""}${row.gd} Tordifferenz bedeuteten Platz ${row.rank} in Gruppe ${group.id} und damit das Aus.`,
+      `Hai chiuso l'ultima gara ${lastResult}; ${row.points} punti e ${row.gd>0?"+":""}${row.gd} di differenza reti ti hanno lasciato al ${row.rank}º posto nel Gruppo ${group.id}, fuori dalle prime due.`
+    ):LT("İlk iki sıranın dışında kalarak grup aşamasında elendin.","You finished outside the top two and exited in the group stage.","Quedaste fuera de los dos primeros y fuiste eliminado en la fase de grupos.","Du bliebst außerhalb der ersten zwei und schiedest in der Gruppenphase aus.","Hai chiuso fuori dalle prime due e sei uscito nella fase a gironi.");
   }else{
     endingTitle=LT("Turnuvaya veda","Cup exit","Despedida del torneo","Pokalaus","Uscita dalla coppa");
     endingText=opponent&&score
@@ -179,7 +190,7 @@ function genStoryNarrative(){
       );
   }
   const endingEntities=r.endType==="sacked"?[chairName]:(opponent?[opponent]:[]);
-  items.push({kind:r.won?"win":r.endType==="sacked"?"chair":"exit",order:100,importance:100,ending:true,t:endingTitle,d:endingText,entities:endingEntities,tone:r.won?"pos":"neg"});
+  items.push({kind:r.won?"win":r.endType==="sacked"?"chair":"exit",order:100,importance:100,ending:true,t:endingTitle,d:endingText,entities:endingEntities,tone:r.won?"pos":r.endType==="group_eliminated"&&fixture&&fixture.res==="D"?"neutral":"neg"});
   return storyFlowHTML(selectNarrativeEvents(items));
 }
 function financeNarrative(e,endCash){

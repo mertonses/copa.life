@@ -75,6 +75,7 @@ function _lockGhostOpponent(){
   if(window._ghostCheckedRounds.includes(expectedRound))return false;
   if(!window.GhostClubs||!window.GhostClubs.enabled()||window._ghostOpponentUsed||(window.GhostClubs.hasOpponentUsed&&window.GhostClubs.hasOpponentUsed()))return false;
   window._ghostCheckedRounds.push(expectedRound);
+  if(typeof _saveState==="function")_saveState();
   const own=typeof squadPower==="function"?squadPower(round):{power:70};
   _setGhostMatchLock(true);
   window.GhostClubs.findOpponent({round:expectedRound,power:own.power,seed:typeof seedNum!=="undefined"?seedNum:"",excluded:window._ghostSeenIds||[]})
@@ -83,8 +84,63 @@ function _lockGhostOpponent(){
     .finally(()=>{
       _setGhostMatchLock(false);
       const currentBaseline=opponent&&opponent.ghost?opponent:baseline;
-      if(_ghostHubContextActive(expectedRound,currentBaseline))enterHub(true,true);
+      if(_ghostHubContextActive(expectedRound,currentBaseline)){renderFixtures();renderHub();}
     });
+  return true;
+}
+function _chairmanEventKey(type,eventRound,eventChairman){
+  return [chairmanEventRunId||seedNum||"run",eventChairman||(chairman&&chairman.id)||"",Number(eventRound||round),type||""].join(":");
+}
+function _chairmanEventIsActive(event){
+  if(!event||event.status!=="pending"||runEnded)return false;
+  const phase=window.CopaRunState&&window.CopaRunState.phase,hub=$("hub");
+  return Number(event.round)===Number(round)&&event.runId===chairmanEventRunId&&event.chairmanId===(chairman&&chairman.id)&&(phase?phase==="hub":!!(hub&&!hub.classList.contains("hidden")));
+}
+function _resolvePendingChairmanEvent(type,status="resolved"){
+  const event=pendingChairmanEvent;
+  if(!event||(type&&event.type!==type))return false;
+  chairmanEventSeen[event.key]=status;
+  pendingChairmanEvent=null;
+  try{if(typeof _saveState==="function")_saveState();}catch(_){ }
+  return true;
+}
+function prepareChairmanRoundEvent(forceType){
+  if(runEnded||!chairman)return null;
+  if(pendingChairmanEvent&&pendingChairmanEvent.status==="pending")return pendingChairmanEvent;
+  let type=forceType||"";
+  if(!type&&chairman.id==="sansasyoncu"&&round<6&&round%2===1)type="spotlight";
+  else if(!type&&chairman.id==="torpilci"&&round===3&&!eventSeen.nephewDecision)type="nephew";
+  else if(!type&&chairman.id==="cilgin"&&round>=2&&round<6)type="chaos";
+  if(!type)return null;
+  const key=_chairmanEventKey(type,round,chairman.id);
+  if(chairmanEventSeen[key])return null;
+  const eventTrust=budget<-10&&chairTrust>0&&round>1?chairTrust-1:chairTrust;
+  if(type==="chaos"&&eventTrust>0&&rand()>0.45){chairmanEventSeen[key]="skipped";return null;}
+  pendingChairmanEvent={key,type,round:Number(round),chairmanId:chairman.id,runId:chairmanEventRunId,status:"pending"};
+  chairmanEventSeen[key]="pending";
+  if(type==="chaos"&&typeof trackChairmanMetric==="function")trackChairmanMetric("chaosOffers",1);
+  return pendingChairmanEvent;
+}
+function showPendingChairmanEvent(){
+  const event=pendingChairmanEvent;
+  if(!event)return false;
+  if(!_chairmanEventIsActive(event)){
+    const stale=!runEnded&&(event.runId!==chairmanEventRunId||Number(event.round)!==Number(round)||event.chairmanId!==(chairman&&chairman.id));
+    if(stale)_resolvePendingChairmanEvent(event.type,"stale");
+    return false;
+  }
+  const modal=$("modal");
+  if(modal&&!modal.classList.contains("hidden")){setTimeout(showPendingChairmanEvent,300);return true;}
+  if(event.type==="spotlight")showSansSpotlightPicker(event);
+  else if(event.type==="nephew"){
+    const oc=typeof POUT!=="undefined"&&POUT.find(o=>o.id==="nephew");
+    if(oc&&typeof _torpilNephewChoice==="function")_torpilNephewChoice({...oc,down:[62,68]},event);
+  }else if(event.type==="chaos"&&typeof showKaosOffer==="function")showKaosOffer(event);
+  return true;
+}
+function queuePendingChairmanEvent(delay=0){
+  if(!pendingChairmanEvent)return false;
+  setTimeout(showPendingChairmanEvent,Math.max(0,Number(delay)||0));
   return true;
 }
 function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){window._wantFinal=false;round=6;opponent=bracket[round-1];window.CopaRunState&&window.CopaRunState.transition("hub",{force:true,reason:"cheat_final"});setTimeout(()=>playMatch(true),300);return;}if(window._wantSeedResult&&typeof _runSeedResultCheat==="function"){const kind=window._wantSeedResult;window._wantSeedResult="";_runSeedResultCheat(kind);return;}if(window.CopaRunState&&!ghostLocked){const moved=window.CopaRunState.transition("hub",{reason:restoring?"restore":"draft_or_reward_complete"});if(!moved.ok){window.CopaDiagnostics&&window.CopaDiagnostics.capture("state_guard",moved.errors.join(","),"");return;}}clearTimeout(autoTimer);if($("intro"))$("intro").classList.add("hidden");$("ddbanner").classList.add("hidden");$("draft").classList.add("hidden");const _draw=$("tournamentDraw");if(_draw)_draw.classList.add("hidden");$("sim").classList.add("hidden");$("result").classList.add("hidden");$("hub").classList.remove("hidden");
@@ -92,17 +148,17 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
   opponent=opponent||bracket[round-1]||bracket[0]||{name:"Opponent",power:60};
   if(restoring){
+    prepareChairmanRoundEvent();
     if(!currentWeather&&typeof pickWeather==="function")pickWeather();
     if(!oppChar&&typeof assignOppChar==="function")assignOppChar();
     if((!Array.isArray(oppLineup)||!oppLineup.length)&&typeof genOppLineup==="function")genOppLineup();
-    renderFixtures();renderHub();return;
+    renderFixtures();renderHub();if(typeof maybeDraftEvent==="function")maybeDraftEvent();if(typeof _saveState==="function")_saveState();queuePendingChairmanEvent(120);if(!ghostLocked)_lockGhostOpponent();return;
   }
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
   /* Hub is already visible here. Persist its safe checkpoint before an async
      Ghost lookup can delay renderHub(), otherwise an immediate reload may
      recover the last completed-draft checkpoint instead of the hub. */
-  if(typeof _saveState==="function")_saveState();
-  if(!ghostLocked&&_lockGhostOpponent())return;
+  prepareChairmanRoundEvent();
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
   /* Borç güven cezası */
@@ -111,29 +167,36 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
 if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Diplomat: uyumlu kadro — bu maç +1 güç":"Diplomat: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Diplomat: dağınık kadro — bu maç -1 güç":"Diplomat: disjointed squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
   /* Kırmızı kart cezası: askıya alınan oyuncuyu bildir */
-  {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");setTimeout(()=>{showModal(typeof suspendedBlockModalHTML==="function"?suspendedBlockModalHTML(_sn,true):`<div class="scoutmodal suspended-modal"><p><b>${_sn}</b></p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">OK</button></div></div>`);},400);}}
+  {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");setTimeout(()=>_queueSuspendedNotice(_sn,round),400);}}
   /* Sansasyoncu spotlight — her iki turda bir */
-  if(chairman.id==="sansasyoncu"&&round<6&&round%2===1){setTimeout(showSansSpotlightPicker,700);}
-  if(chairman.id==="torpilci"&&round===3&&!eventSeen.torpil_guaranteed){eventSeen.torpil_guaranteed=1;setTimeout(_queueGuaranteedTorpil,760);}
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&!hasSelectedCaptain()&&typeof pickCaptain==="function"){
     setTimeout(()=>{if(!hasSelectedCaptain())pickCaptain();},500);
   }
-  if(chairman.id==="cilgin"&&round<6)setTimeout(showKaosOffer,900);
+  queuePendingChairmanEvent(700);
+  if(typeof _saveState==="function")_saveState();
+  if(!ghostLocked)_lockGhostOpponent();
+}
+function _queueSuspendedNotice(name,expectedRound){
+  if(runEnded||Number(expectedRound)!==Number(round))return;
+  const modal=$("modal");
+  if(modal&&!modal.classList.contains("hidden")){setTimeout(()=>_queueSuspendedNotice(name,expectedRound),450);return;}
+  const hub=$("hub"),phase=window.CopaRunState&&window.CopaRunState.phase;
+  if(!hub||hub.classList.contains("hidden")||pendingMatchResolution||(phase&&phase!=="hub"))return;
+  showModal(typeof suspendedBlockModalHTML==="function"?suspendedBlockModalHTML(name,true):`<div class="scoutmodal suspended-modal"><p><b>${name}</b></p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">OK</button></div></div>`);
 }
 function _queueGuaranteedTorpil(){
-  const modal=$("modal");
-  if(modal&&!modal.classList.contains("hidden")){setTimeout(_queueGuaranteedTorpil,450);return;}
-  const oc=typeof POUT!=="undefined"&&POUT.find(o=>o.id==="nephew");
-  if(oc&&typeof _torpilNephewChoice==="function")_torpilNephewChoice(oc);
+  prepareChairmanRoundEvent("nephew");queuePendingChairmanEvent();
 }
 const _SPOT_COLORS=["var(--status-warning-yellow)","var(--status-success)","var(--status-info)","var(--status-error)","var(--status-warning-orange)","var(--status-critical)"];
-function showSansSpotlightPicker(){
+function showSansSpotlightPicker(expectedEvent){
+  const event=expectedEvent||pendingChairmanEvent;
+  if(!event||event.type!=="spotlight"||!_chairmanEventIsActive(event))return;
   const modalEl=$("modal");
   if(modalEl&&!modalEl.classList.contains("hidden")){setTimeout(showSansSpotlightPicker,500);return;}
   const tr=LANG==="tr", choices=picksBySlot.map((p,i)=>({p,i})).filter(({p})=>p&&!p.injured);
-  if(!choices.length)return;
-  const boost=chairTrust>=3?6:chairTrust<=0?3:5;
+  if(!choices.length){_resolvePendingChairmanEvent("spotlight","skipped_no_eligible_player");return;}
+  const boost=chairTrust>=3?4:chairTrust<=0?2:3;
   const boostColor=boost>=4?"var(--status-success)":boost>=3?"var(--status-warning-yellow)":"var(--status-warning-orange)";
   const ratingColor=v=>typeof ovTextCol==="function"?ovTextCol(v):"var(--status-info-text)";
   const cards=choices.map(({p,i},ci)=>{
@@ -160,6 +223,7 @@ function _spotHover(el,ci){
   return;
 }
 function _pickSansSpotlight(idx,pow,cardEl){
+  if(!pendingChairmanEvent||pendingChairmanEvent.type!=="spotlight"||!_chairmanEventIsActive(pendingChairmanEvent))return;
   sansSpotlightIdx=idx;riskPowerMod+=pow;
   if(typeof trackChairmanMetric==="function")trackChairmanMetric("spotlightSelections",1);
   if(cardEl)cardEl.setAttribute("aria-selected","true");
@@ -167,6 +231,7 @@ function _pickSansSpotlight(idx,pow,cardEl){
   const spotIcon=`<svg viewBox="0 0 16 16" width="11" height="11" fill="#F24A28" style="vertical-align:-.1em;margin-right:2px"><circle cx="8" cy="5" r="3"/><path d="M8 8L2 14L14 14Z" opacity=".7"/></svg>`;
   if(p){pushFeed(spotIcon+" <b>"+shortName(p)+"</b> "+(LANG==="tr"?"medya spotunda \u2014 bu ma\u00e7 +"+pow+" g\u00fc\u00e7":"in the spotlight \u2014 +"+pow+" power this match"),"pres");
   const roundel=$("h"+idx);if(roundel){let badge=roundel.querySelector(".spot-badge");if(!badge){badge=document.createElement("div");badge.className="spot-badge";roundel.appendChild(badge);}badge.textContent="+"+pow;}}
+  _resolvePendingChairmanEvent("spotlight");
 }
 function showPowerGraph(){
   const tr=LANG==="tr";
@@ -191,7 +256,7 @@ function hiddenScoutNote(signal){if(window.CopaHiddenDraft)return CopaHiddenDraf
 function ctxLine(o){const x=L();if(o.hidden){const legacy=o.hiddenTier==="gem"?"positive":o.hiddenTier==="bust"?"negative":"neutral";return hiddenScoutNote(o.scoutSignal||legacy);}if(o.trait==="wonderkid")return x.ctxWonder;if(o.ov>=84)return x.ctxStar;if(o.trait==="buyukmac")return x.ctxBig;if(o.trait==="lider")return x.ctxLead;if(o.age<=20)return x.ctxYoung;if(o.tr)return x.ctxLocal;if(o.age>=32)return x.ctxVet;if(o.ov>=78)return x.ctxForm;return x.ctxSolid;}
 function clearRoundel(idx){const r=$("r"+idx);if(!r)return;r.className="roundel";const pos=slots[idx][0];const sil=typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(pos)]||""):"";r.innerHTML=`${sil}<span class="rp">${L().abbr[pos]||""}</span>`;}
 function updateUndoBtn(){const b=$("undoBtn");if(!b)return;const show=!!(undoData&&!undoUsed);b.classList.toggle("hidden",!show);if(show&&undoData){const nm=undoData.name?undoData.name.trim().split(" ").slice(-1)[0]:"";b.textContent=nm?(LANG==="tr"?`↩ ${nm} transferini geri al`:`↩ Undo ${nm}`):(LANG==="tr"?"↩ Son hamleyi geri al":"↩ Undo last pick");}}
-function undoPick(){if(!undoData||undoUsed)return;const u=undoData;if(u.blockedByHidden){undoData=null;updateUndoBtn();showToast(LT("Gizli Oyuncu seçiminden sonra geri alma kullanılamaz.","Undo cannot be used after selecting a Mystery Player.","No se puede deshacer tras elegir un Jugador Misterioso.","Nach der Wahl eines Mystery-Spielers kann nicht rückgängig gemacht werden.","Non puoi annullare dopo aver scelto un Giocatore Misterioso."),{type:"info",duration:2400});return;}picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();}
+function undoPick(){if(!undoData||undoUsed)return;const u=undoData;if(u.blockedByHidden){undoData=null;updateUndoBtn();showToast(LT("Gizli Oyuncu seçiminden sonra geri alma kullanılamaz.","Undo cannot be used after selecting a Mystery Player.","No se puede deshacer tras elegir un Jugador Misterioso.","Nach der Wahl eines Mystery-Spielers kann nicht rückgängig gemacht werden.","Non puoi annullare dopo aver scelto un Giocatore Misterioso."),{type:"info",duration:2400});return;}picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;if(Number.isFinite(u.legacyCash))legacyCash=u.legacyCash;if(Number.isFinite(u.chairTrust))chairTrust=u.chairTrust;if(Number.isFinite(u.riskPowerMod))riskPowerMod=u.riskPowerMod;if(Number.isFinite(u.sansStarBonusRound))sansStarBonusRound=u.sansStarBonusRound;if(u.econStats)econStats=Object.assign({},u.econStats);if(Number.isInteger(u.feedLength))feed=feed.slice(0,u.feedLength);setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();if(typeof _saveState==="function")_saveState();}
 function toggleCardActive(k){if(invOf(k)<=0)return;if(hasCard(k)){if(typeof cardHasLockedCommitment==="function"&&cardHasLockedCommitment(k)){showToast(LANG==="tr"?"Aktif sözleşme tamamlanmadan kart çıkarılamaz.":"Finish the active contract before removing this card.");return;}cards=cards.filter(c=>c!==k);sfxStamp();renderHub();return;}if(cards.length>=activeCardSlots()){pushFeed((LANG==="tr"?"🃏 aktif kart slotu dolu":"🃏 active card slots full"),"ch");renderFeed();return;}cards.push(k);sfxStamp();renderHub();}
 function cardArt(k){return "assets/cards/"+k+".png";}
 function kindLabel(k){const kind=cardKind(k),m={power:LT("GÜÇ","POWER","POTENCIA","STÄRKE","FORZA"),economy:LT("EKONOMİ","ECONOMY","ECONOMÍA","FINANZEN","ECONOMIA"),risk:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),temporary:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),final:LT("FİNAL","FINAL","FINAL","FINALE","FINALE"),defense:LT("SAVUNMA","DEFENSE","DEFENSA","ABWEHR","DIFESA"),squad:LT("KADRO","SQUAD","PLANTILLA","KADER","ROSA"),injury:LT("SAKATLIK","INJURY","LESIÓN","VERLETZUNG","INFORTUNIO")};const lbl=m[kind]||m.power;if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
@@ -505,7 +570,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
   {const isGhost=!!(opponent&&opponent.ghost),nm=$("oppNm"),metaId="ghostMeta";let meta=$(metaId);if(!meta&&nm&&nm.parentElement){meta=document.createElement("div");meta.id=metaId;meta.className="ghost-meta";nm.parentElement.appendChild(meta);}if(meta){meta.classList.toggle("hidden",!isGhost);meta.textContent="";if(isGhost){const gm=opponent.ghostMeta||{},icon=document.createElement("span"),copy=document.createElement("span"),report=document.createElement("button");icon.setAttribute("aria-hidden","true");icon.innerHTML=window.GhostClubs?window.GhostClubs.ghostIcon():"";copy.textContent=[LANG==="tr"?"Ger\u00e7ek oyuncu run'\u0131":"Real player run",gm.formation,gm.chairman,gm.country,gm.publicId].filter(Boolean).join(" \u00b7 ");report.type="button";report.className="ghost-report-btn";report.textContent=LANG==="tr"?"BU KULÜBÜ BİLDİR":"REPORT CLUB";report.onclick=()=>{window.GhostClubs.reportGhost(gm.publicId).then(result=>{if(result&&result.hidden){if(typeof showToast==="function")showToast(LANG==="tr"?"Kulüp bildirildi ve gizlendi.":"Club reported and hidden.");if(meta)meta.classList.add("hidden");}});};meta.append(icon,copy,report);}}if(isGhost){$("oppLbl").textContent=LANG==="tr"?"HAYALET KUL\u00dcP":"GHOST CLUB";}}
   {$("powHint").textContent=x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
   {const cb=chemBonus(s);const cvClamped=Math.max(-5,Math.min(5,cb.total));$("chemV").textContent=(cvClamped>=0?"+":"")+cvClamped;$("chemList").innerHTML=x.powHint;const hp=$("hubPitch");if(hp){hp.classList.toggle("chem-high",cvClamped>=3);hp.classList.toggle("chem-low",cvClamped<0);}
-   const ct=$("chemTile");if(ct){const cv=cvClamped;const cbg=cv<0?"var(--status-risk)":cv===0?"var(--text-secondary)":cv<=2?"var(--status-info)": "var(--status-success)";ct.classList.add("context-metric");ct.style.setProperty("--metric-accent",cbg);ct.style.background="";[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color="";});}}
+   const ct=$("chemTile");if(ct){const tone=typeof chemMetricTone==="function"?chemMetricTone(cvClamped):"average";const accent=typeof chemMetricColor==="function"?chemMetricColor(cvClamped):"var(--rating-average-text)";ct.classList.add("context-metric");ct.dataset.metricTone=tone;ct.style.setProperty("--metric-accent",accent);ct.style.background="";[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color="";});}}
   /* Kasa tile — rich finance card */
   {const kt=$("kasaTile");if(kt){
     const bv=budget;
@@ -598,7 +663,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     const _basePr=cardPrice(k);
     const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
     const pr=_memDisc?(_basePr<=0?0:Math.max(typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2,Math.ceil(_basePr*0.8))):_basePr;
-    const cant=!canAffordCost(pr),cat=CATMAP[k]||"gorev",pv=simulateShopPower(k);
+    const cant=!(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(pr,"card",{card:k,variant:sv}):canAffordCost(pr)),cat=CATMAP[k]||"gorev",pv=simulateShopPower(k);
     const tradeReady=k!=="kara_borsa"||cards.some(owned=>owned!=="kara_borsa"&&!isInstantCard(owned));
     cardVariant[k]=oldV;
     const d=document.createElement("div");
@@ -624,14 +689,47 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     if(!_benchEl){_benchEl=document.createElement("div");_benchEl.id="hubBenchSection";const _injury=$("injbar"),_anchor=_injury||$("cardrow");if(_injury&&_injury.parentNode)_injury.insertAdjacentElement("afterend",_benchEl);else if(_anchor&&_anchor.parentNode)_anchor.parentNode.insertBefore(_benchEl,_anchor);}
     const _benched=bench.filter(p=>p&&!p.used);
     if(_benched.length){
-      const _maxBench=4;const _benchHdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEKLER":"BENCH"} <span style="opacity:.5;font-weight:600">${_benched.length}/${_maxBench}</span></div>`;
+      const _maxBench=4;const _moveIcon=`<svg class="bench-panel-grip" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1"/><circle cx="9" cy="3" r="1"/><circle cx="3" cy="9" r="1"/><circle cx="9" cy="9" r="1"/></svg>`;const _benchHdr=`<div class="bench-head"><span class="bench-head-label"><svg viewBox="0 0 18 14" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="16" height="10" rx="1.5"/><line x1="1" y1="6" x2="17" y2="6"/><line x1="5" y1="11" x2="5" y2="13"/><line x1="13" y1="11" x2="13" y2="13"/></svg>${_tr?"YEDEKLER":"BENCH"}</span><span class="bench-head-meta"><b>${_benched.length}/${_maxBench}</b>${_moveIcon}</span></div>`;
       const _dragHandle=`<svg viewBox="0 0 8 14" width="7" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><line x1="1" y1="2" x2="7" y2="2"/><line x1="1" y1="5" x2="7" y2="5"/><line x1="1" y1="8" x2="7" y2="8"/><line x1="1" y1="11" x2="7" y2="11"/></svg>`;
-      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=typeof ovTextCol==="function"?ovTextCol(_eff):"var(--status-info-text)";const _inj=p.injured?`<span style="display:inline-flex;align-items:center;font-size:7px;font-family:var(--mono);font-weight:700;padding:1px 3px;border-radius:2px;background:var(--status-critical);color:var(--status-on-critical);margin-left:2px">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span style="color:var(--ink2);opacity:.45;flex-shrink:0">${_dragHandle}</span><span style="font-size:8px;font-weight:700;color:var(--ink2);min-width:24px;letter-spacing:.5px;flex-shrink:0">${_pos}</span><span style="flex:1;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span style="font-size:12px;font-weight:700;color:${_col};flex-shrink:0">${_eff}</span></div>`;}).join("");
-      _benchEl.innerHTML=_benchHdr+`<div style="display:flex;flex-direction:column;gap:4px">${_benchCards}</div>`;
+      const _benchCards=_benched.map((p,bi)=>{const _ov=p.ov||0;const _eff=typeof effOf==="function"?effOf(p):_ov;const _pos=(typeof L==="function"?L().abbr[p.pos]:null)||p.pos||"?";const _col=typeof ovTextCol==="function"?ovTextCol(_eff):"var(--status-info-text)";const _inj=p.injured?`<span class="bench-inj">${_tr?"SAKAT":"INJ"}</span>`:"";return `<div class="bench-row" data-bench-idx="${bi}"><span class="bench-drag">${_dragHandle}</span><span class="bench-pos">${_pos}</span><span class="bench-name">${typeof surOf==="function"?surOf(p):(p.name||"?")}</span>${_inj}<span class="bench-power" style="--bench-power-color:${_col}">${_eff}</span></div>`;}).join("");
+      _benchEl.innerHTML=_benchHdr+`<div class="bench-list">${_benchCards}</div>`;
       if(window.PlayerProfiles)_benchEl.querySelectorAll("[data-bench-idx]").forEach(card=>{const p=_benched[+card.dataset.benchIdx];if(p)PlayerProfiles.bind(card,p);});
     }else{if(_benchEl)_benchEl.innerHTML="";}
   }else if(_benchEl){_benchEl.innerHTML="";}}
-  setBudget();_fixHubVisibleText();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();if(window.CopaTournamentRuntime)window.CopaTournamentRuntime.renderHub();}
+  setBudget();_fixHubVisibleText();renderFixtures();renderFeed();_renderFreeAgents();_initHubDragDrop();_initBenchPanelDrag();if(window.CopaTournamentRuntime)window.CopaTournamentRuntime.renderHub();}
+
+function _benchPanelCanDrag(panel){
+  return !!(panel&&window.matchMedia&&window.matchMedia("(min-width:981px) and (orientation:landscape) and (pointer:fine)").matches&&getComputedStyle(panel).position==="absolute");
+}
+function _clampBenchPanel(panel,next){
+  const area=panel&&panel.closest(".pitch-area");if(!area)return;
+  const inset=10;panel.style.maxHeight=`${Math.max(120,area.clientHeight-inset*2)}px`;
+  const maxX=Math.max(inset,area.clientWidth-panel.offsetWidth-inset),maxY=Math.max(inset,area.clientHeight-panel.offsetHeight-inset);
+  const inlineX=Number.parseFloat(panel.style.left),inlineY=Number.parseFloat(panel.style.top);
+  const fallbackX=Math.max(inset,area.clientWidth-panel.offsetWidth-inset);
+  const x=Math.max(inset,Math.min(maxX,Number.isFinite(next&&next.x)?next.x:(Number.isFinite(inlineX)?inlineX:fallbackX)));
+  const y=Math.max(inset,Math.min(maxY,Number.isFinite(next&&next.y)?next.y:(Number.isFinite(inlineY)?inlineY:inset)));
+  panel.style.left=`${Math.round(x)}px`;panel.style.top=`${Math.round(y)}px`;panel.style.right="auto";
+}
+function _resetBenchPanelPosition(panel){
+  if(!panel)return;panel.style.removeProperty("left");panel.style.removeProperty("top");panel.style.removeProperty("right");panel.style.removeProperty("max-height");panel.classList.remove("bench-panel-dragging");
+}
+function _initBenchPanelDrag(){
+  const panel=document.getElementById("hubBenchSection"),handle=panel&&panel.querySelector(".bench-head");if(!panel||!handle)return;
+  const canDrag=_benchPanelCanDrag(panel);panel.classList.toggle("bench-panel-draggable",canDrag);handle.classList.toggle("bench-move-handle",canDrag);
+  if(!canDrag){handle.removeAttribute("role");handle.removeAttribute("tabindex");handle.removeAttribute("aria-label");handle.removeAttribute("title");_resetBenchPanelPosition(panel);return;}
+  const label=LANG==="tr"?"Yedekler panelini sürükle; ok tuşlarıyla taşı":"Drag the bench panel; use arrow keys to move";
+  handle.setAttribute("role","button");handle.setAttribute("tabindex","0");handle.setAttribute("aria-label",label);handle.setAttribute("title",label);_clampBenchPanel(panel);
+  if(!handle._benchPanelMoveReady){
+    handle._benchPanelMoveReady=true;let drag=null;
+    handle.addEventListener("pointerdown",e=>{if(e.button!==0||!_benchPanelCanDrag(panel))return;e.preventDefault();const left=Number.parseFloat(panel.style.left)||0,top=Number.parseFloat(panel.style.top)||0;drag={id:e.pointerId,x:e.clientX,y:e.clientY,left,top};panel.classList.add("bench-panel-dragging");handle.setPointerCapture(e.pointerId);});
+    handle.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;e.preventDefault();_clampBenchPanel(panel,{x:drag.left+e.clientX-drag.x,y:drag.top+e.clientY-drag.y});});
+    const finish=e=>{if(!drag||drag.id!==e.pointerId)return;drag=null;panel.classList.remove("bench-panel-dragging");if(handle.hasPointerCapture(e.pointerId))handle.releasePointerCapture(e.pointerId);};
+    handle.addEventListener("pointerup",finish);handle.addEventListener("pointercancel",finish);
+    handle.addEventListener("keydown",e=>{if(!_benchPanelCanDrag(panel))return;const step=e.shiftKey?24:10,current={x:Number.parseFloat(panel.style.left)||0,y:Number.parseFloat(panel.style.top)||0};if(e.key==="Home"){e.preventDefault();_resetBenchPanelPosition(panel);_clampBenchPanel(panel);return;}if(e.key==="ArrowLeft")current.x-=step;else if(e.key==="ArrowRight")current.x+=step;else if(e.key==="ArrowUp")current.y-=step;else if(e.key==="ArrowDown")current.y+=step;else return;e.preventDefault();_clampBenchPanel(panel,current);});
+  }
+  if(!window._benchPanelViewportHookReady){window._benchPanelViewportHookReady=true;const refresh=()=>window.requestAnimationFrame(()=>_initBenchPanelDrag());window.addEventListener("resize",refresh,{passive:true});window.addEventListener("orientationchange",refresh,{passive:true});}
+}
 
 function _initHubDragDrop(){
   let _src=null; /* {type:"slot",idx} or {type:"bench",idx} */
@@ -957,7 +1055,7 @@ function buyCard(k,overridePrice){
   const expectedPrice=_memDisc?(_basePr<=0?0:Math.max(floor,Math.ceil(_basePr*0.8))):_basePr;
   if(overridePrice!==undefined&&Number(overridePrice)!==Number(expectedPrice))return;
   const pr=expectedPrice;
-  if(!canAffordCost(pr))return;
+  if(!(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(pr,"card",{card:k,variant:sv}):canAffordCost(pr)))return;
   buyCard.locked=true;
   try{
   const usedLotteryCoupon=typeof lotteryCouponAmount!=="undefined"&&typeof lotteryCouponTurns!=="undefined"&&lotteryCouponAmount>0&&lotteryCouponTurns>0;

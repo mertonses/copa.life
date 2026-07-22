@@ -61,12 +61,14 @@ CI build'leri `GITHUB_SHA`yı, yerel temiz build'ler ise doğrulanmış `git rev
 
 `.github/workflows/android-play.yml` yalnız elle çalıştırılır ve yeni AAB'yi yalnız `internal` test kanalına yükler. Sürüm kodunun ayrıca yazılması gerekir; yanlış sürüm seçimi akışı durdurur. Alpha, beta veya production için yeni paket derlenmez ve aynı sürüm yeniden yüklenmez. Internal'da doğrulanmış sürüm Play Console üzerinden terfi ettirilir; production geçişinde `store/android/promotion-checklist.md` uygulanır.
 
-DUNS ve Play kuruluş doğrulaması tamamlanınca şu GitHub Secrets değerleri eklenir:
+Play kuruluş doğrulaması tamamlandı. CI yüklemesi etkinleştirilmeden önce şu GitHub Secrets değerleri eklenir:
 
 - `ANDROID_UPLOAD_KEYSTORE_BASE64`
 - `ANDROID_UPLOAD_KEYSTORE_PASSWORD`
 - `ANDROID_UPLOAD_KEY_ALIAS`
 - `ANDROID_UPLOAD_KEY_PASSWORD`
+- `COPA_ADMOB_APP_ID`
+- `COPA_ADMOB_INTERSTITIAL_ID`
 - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
 
 Play API otomasyonu kullanılmadan önce ilk AAB Play Console'dan elle yüklenmeli ve paket `life.copa.app` hesapta oluşturulmalıdır. Sonraki yeni sürümler otomatik olarak `internal` kanalına gönderilebilir. Internal'dan sonraki kanal değişiklikleri, test edilmiş aynı versionCode terfi ettirilerek yapılır.

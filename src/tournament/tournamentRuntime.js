@@ -11,6 +11,11 @@
   function copy(){return COPY[root.LANG]||COPY.en;}
   function active(){return root.tournamentFormat==="groups16_v1"&&root.tournament&&root.tournament.format==="groups16_v1";}
   function teamAsOpponent(team){return team?{name:team.name,power:team.power,formation:team.formation,style:team.style,tournamentTeamId:team.id,ghost:team.ghost===true,ghostId:team.ghostId||"",ghostProfile:team.ghostProfile||null,ghostMeta:team.ghostMeta||null}:null;}
+  function opponentForMatch(state,match){
+    if(!match)return null;const opponentId=match.homeId==="player"?match.awayId:match.homeId;
+    if(match.ghostOpponent&&match.ghostOpponent.originalTeamId===opponentId)return Object.assign({},state.teams[opponentId],match.ghostOpponent,{id:opponentId,ghost:true});
+    return state.teams[opponentId]||null;
+  }
   function currentMatch(){return active()?root.CopaTournamentEngine.getCurrentPlayerMatch(root.tournament):null;}
   function syncSchedule(){
     if(!active())return;
@@ -20,22 +25,22 @@
     const stageIndex={quarterfinal:3,semifinal:4,final:5};
     for(const key of Object.keys(stageIndex)){for(const id of state.knockout.slots[key]||[]){const match=state.matches[id];if(match&&(match.homeId==="player"||match.awayId==="player"))byRound[stageIndex[key]]=match;}}
     const oldFixtures=Array.isArray(root.fixtures)?root.fixtures:[];root.bracket=Array.from({length:6},(_,index)=>{
-      const match=byRound[index],other=match&&(match.homeId==="player"?match.awayId:match.homeId),team=other&&state.teams[other];return teamAsOpponent(team)||{name:copy().pending,power:index<3?60:78+index*3,pending:true};
+      const match=byRound[index],team=opponentForMatch(state,match);return teamAsOpponent(team)||{name:copy().pending,power:index<3?60:78+index*3,pending:true};
     });
     root.fixtures=Array.from({length:6},(_,index)=>Object.assign({opp:root.bracket[index].name,res:null,gf:null,ga:null},oldFixtures[index]||{},{opp:root.bracket[index].name,matchId:byRound[index]&&byRound[index].id||""}));
-    const match=currentMatch();if(match){const other=match.homeId==="player"?match.awayId:match.homeId;root.opponent=teamAsOpponent(state.teams[other]);}
+    const match=currentMatch();if(match)root.opponent=teamAsOpponent(opponentForMatch(state,match));
   }
   function aiSimulator(match,state){
     const home=state.teams[match.homeId],away=state.teams[match.awayId],core=root.CopaFinalSimCore;
     if(!core||typeof core.simulateMatch!=="function")return root.CopaTournamentEngine.defaultSimulator(state,match);
-    const tacticForStyle=root.CopaNormalMatch&&root.CopaNormalMatch.tacticForStyle||((style)=>({gegen:"push",kontra:"calm",tiki:"more",uzun:"push",blok:"hold"}[style]||"balanced"));
+    const tacticForStyle=root.CopaNormalMatch&&root.CopaNormalMatch.tacticForStyle||((style)=>({gegen:"push",kontra:"balanced",tiki:"calm",uzun:"more",blok:"hold"}[style]||"balanced"));
     const result=core.simulateMatch({resolution:match.stage==="group"?"regulation":"knockout",seed:root.CopaTournamentEngine.hashSeed(`${state.seed}|ai|${match.id}`),homePower:home.power,awayPower:away.power,tactic:tacticForStyle(home.style),awayTactic:tacticForStyle(away.style)});
     return{score:result.score.slice(),winnerId:result.winner===0?home.id:result.winner===1?away.id:null,decidedBy:result.penalties?"penalties":result.extraTime?"extra_time":"regulation",fairPlay:{home:-(result.stats.yellow[0]+result.stats.red[0]*3),away:-(result.stats.yellow[1]+result.stats.red[1]*3)}};
   }
   function createState(){
     const data=root.countryGameData(root.selectedCountry),power=root.squadPower(1).power;
     root.tournament=root.CopaTournamentEngine.createTournament({seed:root.seedNum,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:data[1],powerBases:data[2]});
-    root.tournamentFormat="groups16_v1";syncSchedule();
+    root.tournamentFormat="groups16_v1";root._roundCompletionTracked=0;syncSchedule();
   }
   function renderDraw(){const app=document.getElementById("tournamentDrawApp");if(root.CopaTournamentUI)root.CopaTournamentUI.renderDraw(app,root.tournament,copy());}
   function startDraw(restoring){
@@ -54,16 +59,18 @@
   }
   function completePlayer(gf,ga,options){
     if(!active())return null;const match=currentMatch();if(!match)return null;const opts=options||{},playerHome=match.homeId==="player",score=playerHome?[Number(gf)||0,Number(ga)||0]:[Number(ga)||0,Number(gf)||0];
-    const winnerId=gf===ga?(opts.playerWon===true?"player":opts.playerWon===false?(playerHome?match.awayId:match.homeId):null):(gf>ga?"player":playerHome?match.awayId:match.homeId);
-    const result=root.CopaTournamentEngine.completePlayerMatch(root.tournament,{score,winnerId,decidedBy:opts.decidedBy||"regulation",fairPlay:opts.fairPlay||{home:0,away:0}},aiSimulator);syncSchedule();
-    if(root.CopaAnalytics)root.CopaAnalytics.track("tournament_match_resolved",{stage:match.stage==="group"?"group":match.round,outcome:gf>ga?"win":gf===ga?"draw":"loss",group_matchday:match.matchday||0,qualified:result.qualified===true?"yes":result.qualified===false?"no":"pending"});
+    const winnerId=match.stage==="group"&&gf===ga?null:gf===ga?(opts.playerWon===true?"player":opts.playerWon===false?(playerHome?match.awayId:match.homeId):null):(gf>ga?"player":playerHome?match.awayId:match.homeId);
+    const suppliedFairPlay=opts.fairPlay||{},fairPlay=("player" in suppliedFairPlay||"opponent" in suppliedFairPlay)?(playerHome?{home:Number(suppliedFairPlay.player)||0,away:Number(suppliedFairPlay.opponent)||0}:{home:Number(suppliedFairPlay.opponent)||0,away:Number(suppliedFairPlay.player)||0}):{home:Number(suppliedFairPlay.home)||0,away:Number(suppliedFairPlay.away)||0};
+    const result=root.CopaTournamentEngine.completePlayerMatch(root.tournament,{score,winnerId,decidedBy:opts.decidedBy||"regulation",fairPlay},aiSimulator);syncSchedule();
+    const outcome=gf===ga&&opts.playerWon!=null?(opts.playerWon?"win":"loss"):(gf>ga?"win":gf===ga?"draw":"loss");
+    if(root.CopaAnalytics)root.CopaAnalytics.track("tournament_match_resolved",{stage:match.stage==="group"?"group":match.round,outcome,decided_by:opts.decidedBy||"regulation",group_matchday:match.matchday||0,qualified:result.qualified===true?"yes":result.qualified===false?"no":"pending"});
     return result;
   }
   function replaceCurrentOpponent(ghost){
     if(!active()||!ghost||root.tournament.phase!=="knockout"||root.tournament.knockout.round==="final")return false;
     const match=currentMatch();if(!match||match.status!=="scheduled")return false;
     const opponentId=match.homeId==="player"?match.awayId:match.homeId,original=root.tournament.teams[opponentId];if(!original)return false;
-    root.tournament.teams[opponentId]=Object.assign({},original,{name:String(ghost.name||original.name),power:Math.max(35,Math.min(115,Math.round(Number(ghost.power)||original.power))),formation:ghost.formation||ghost.ghostMeta&&ghost.ghostMeta.formation||original.formation,style:ghost.style||original.style,ghost:true,ghostId:ghost.ghostId||"",ghostProfile:ghost.ghostProfile||null,ghostMeta:ghost.ghostMeta||null});
+    match.ghostOpponent={originalTeamId:opponentId,name:String(ghost.name||original.name),power:Math.max(35,Math.min(115,Math.round(Number(ghost.power)||original.power))),formation:ghost.formation||ghost.ghostMeta&&ghost.ghostMeta.formation||original.formation,style:ghost.style||original.style,ghost:true,ghostId:ghost.ghostId||"",ghostProfile:ghost.ghostProfile||null,ghostMeta:ghost.ghostMeta||null};
     syncSchedule();return true;
   }
   function renderHub(){const panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());}

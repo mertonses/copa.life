@@ -9,11 +9,11 @@ const COPY={
   it:{last:"ULTIMA PARTITA",yours:"IL TUO XI",opponent:"XI AVVERSARIO",avg:"Media voto",power:"Forza squadra",formation:"Modulo",performance:"Prestazione nell'ultima partita",motm:"UOMO PARTITA",threat:"MIGLIOR AVVERSARIO",won:"VITTORIA",lost:"SCONFITTA",draw:"PAREGGIO",penWon:"VITTORIA AI RIGORI",penLost:"SCONFITTA AI RIGORI",champion:"La finale che ha dato il titolo",exit:"La partita dell'eliminazione",lastValid:"L'ultima partita giocata",goal:"Gol",assist:"Assist",yellow:"Cartellino giallo",red:"Cartellino rosso",injury:"Infortunio",star:"Uomo partita",pen:"Rig."}
 };
 const STAGES={
-  tr:["1. TUR","2. TUR","SON 16","ÇEYREK FİNAL","YARI FİNAL","FİNAL"],
-  en:["ROUND 1","ROUND 2","LAST 16","QUARTER FINAL","SEMI FINAL","FINAL"],
-  es:["1.ª RONDA","2.ª RONDA","OCTAVOS","CUARTOS DE FINAL","SEMIFINAL","FINAL"],
-  de:["1. RUNDE","2. RUNDE","ACHTELFINALE","VIERTELFINALE","HALBFINALE","FINALE"],
-  it:["1° TURNO","2° TURNO","OTTAVI","QUARTI DI FINALE","SEMIFINALE","FINALE"]
+  tr:["GRUP · 1. MAÇ","GRUP · 2. MAÇ","GRUP · 3. MAÇ","ÇEYREK FİNAL","YARI FİNAL","FİNAL"],
+  en:["GROUP · MATCH 1","GROUP · MATCH 2","GROUP · MATCH 3","QUARTER FINAL","SEMI FINAL","FINAL"],
+  es:["GRUPO · PARTIDO 1","GRUPO · PARTIDO 2","GRUPO · PARTIDO 3","CUARTOS DE FINAL","SEMIFINAL","FINAL"],
+  de:["GRUPPE · SPIEL 1","GRUPPE · SPIEL 2","GRUPPE · SPIEL 3","VIERTELFINALE","HALBFINALE","FINALE"],
+  it:["GIRONE · PARTITA 1","GIRONE · PARTITA 2","GIRONE · PARTITA 3","QUARTI DI FINALE","SEMIFINALE","FINALE"]
 };
 
 function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(char){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];});}

@@ -34,6 +34,8 @@ for(const forbidden of ["localStorage","sessionStorage","document.cookie","sessi
   expect(!runtime.includes(forbidden),`analytics runtime contains forbidden identifier/storage marker: ${forbidden}`);
 }
 expect(runtime.includes("globalPrivacyControl")&&runtime.includes("doNotTrack"),"browser privacy signals are not respected");
+expect(runtime.includes("copa_analytics_enabled")&&runtime.includes("nativeOptIn"),"native analytics is not protected by explicit opt-in");
+expect(runtime.includes('new Set(["web","android","ios"])')&&runtime.includes("platform:platform()"),"analytics platform segmentation is missing");
 expect(runtime.includes("schema_version:4")&&worker.includes("[1,2,3,4].includes"),"versioned analytics schema compatibility is missing");
 expect(runtime.includes("power_gap")&&runtime.includes("end_type")&&runtime.includes("model_version"),"coarse final simulation telemetry is missing");
 for(const dimension of ["chairman","formation","style","reward","card_kind","economy_band"]){
@@ -62,12 +64,13 @@ expect(pagesWorkflow.includes("vars.CF_WEB_ANALYTICS_TOKEN"),"Pages workflow doe
 expect(privacy.includes("Toplu kullanım ve performans ölçümü")&&privacy.includes("kullanıcı veya oturum kimliği"),"privacy policy does not disclose aggregate analytics");
 expect(webIndex.includes("src/runtime/productAnalytics.js"),"web artifact is missing product analytics runtime");
 
-for(const forbidden of ["src/runtime/productAnalytics.js","copa-analytics-api","static.cloudflareinsights.com","cloudflareinsights.com","/v1/analytics/events"]){
-  expect(!androidIndex.includes(forbidden),`Android index contains web-only analytics marker: ${forbidden}`);
-  expect(!iosIndex.includes(forbidden),`iOS index contains web-only analytics marker: ${forbidden}`);
+for(const [name,index] of [["Android",androidIndex],["iOS",iosIndex]]){
+  expect(index.includes("src/runtime/productAnalytics.js"),`${name} artifact is missing opt-in product analytics`);
+  expect(index.includes("copa-analytics-api"),`${name} artifact is missing the analytics endpoint`);
+  for(const forbidden of ["static.cloudflareinsights.com","cloudflareinsights.com"])expect(!index.includes(forbidden),`${name} index contains browser beacon marker: ${forbidden}`);
 }
-expect(!fs.existsSync(path.join(ROOT,"dist-android/src/runtime/productAnalytics.js")),"Android artifact contains the web-only analytics runtime");
-expect(!fs.existsSync(path.join(ROOT,"dist-ios/src/runtime/productAnalytics.js")),"iOS artifact contains the web-only analytics runtime");
+expect(fs.existsSync(path.join(ROOT,"dist-android/src/runtime/productAnalytics.js")),"Android artifact is missing the product analytics runtime");
+expect(fs.existsSync(path.join(ROOT,"dist-ios/src/runtime/productAnalytics.js")),"iOS artifact is missing the product analytics runtime");
 
 if(failures.length){for(const failure of failures)console.error(`[analytics] ${failure}`);process.exit(1);}
-console.log("[analytics] privacy-minimised funnel, Worker health reports and alarms passed; Android and iOS artifacts are clean");
+console.log("[analytics] privacy-minimised web funnel and explicit opt-in native platform metrics passed");

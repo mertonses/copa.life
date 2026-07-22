@@ -3,6 +3,7 @@
   "use strict";
   const VERSION=6;
   const KEYS=Object.freeze({primary:"copa_run_v6",backup:"copa_run_v6_last_good",session:"copa_run",legacyPrimary:"copa_run_v5",legacyBackup:"copa_run_v5_last_good"});
+  const durableStorage=global.CopaPlatform&&global.CopaPlatform.storage||global.localStorage;
   const object=value=>!!value&&typeof value==="object"&&!Array.isArray(value);
   const finite=value=>Number.isFinite(Number(value));
   const issue=(code,path)=>({code,path});
@@ -21,12 +22,17 @@
     state.fixtures=Array.isArray(state.fixtures)?state.fixtures:[];
     state.tournament=object(state.tournament)?state.tournament:null;
     state.tournamentFormat=state.tournament&&state.tournament.format==="groups16_v1"?"groups16_v1":"legacy_knockout_v1";
+    state.chairmanEventRunId=typeof state.chairmanEventRunId==="string"?state.chairmanEventRunId:"";
+    state.chairmanEventSeen=object(state.chairmanEventSeen)?state.chairmanEventSeen:{};
+    state.pendingChairmanEvent=object(state.pendingChairmanEvent)?state.pendingChairmanEvent:null;
+    state.sansSpotlightIdx=Number.isInteger(Number(state.sansSpotlightIdx))?Number(state.sansSpotlightIdx):-1;
     if(state.phase==="draft"){
       const draft=object(state.draft)?Object.assign({},state.draft):{};
       draft.remaining=finite(draft.remaining)?Number(draft.remaining):(Array.isArray(state.picks)?state.picks.filter(player=>!player).length:11);
       draft.currentSlot=Number.isInteger(draft.currentSlot)?draft.currentSlot:-1;
       draft.currentOpts=Array.isArray(draft.currentOpts)?draft.currentOpts:[];
       draft.rerollsLeft=finite(draft.rerollsLeft)?Math.max(0,Number(draft.rerollsLeft)):2;
+      draft.rewardedRerollsEarned=finite(draft.rewardedRerollsEarned)?Math.max(0,Math.min(2,Number(draft.rewardedRerollsEarned))):0;
       draft.deadlineH=finite(draft.deadlineH)?Math.max(1,Number(draft.deadlineH)):24;
       draft.usedNames=Array.isArray(draft.usedNames)?draft.usedNames:[];
       state.draft=draft;
@@ -80,6 +86,11 @@
       if(!object(pending)||Number(pending.round)!==Number(value.round)||!Number.isInteger(Number(pending.gf))||!Number.isInteger(Number(pending.ga))||Number(pending.gf)<0||Number(pending.gf)>20||Number(pending.ga)<0||Number(pending.ga)>20)errors.push(issue("invalid_pending_match","pendingMatchResolution"));
     }
     if(value.phase==="reward"&&(Number(value.rewardPendingRound)!==Number(value.round)||Number(value.rewardResolvedRound)===Number(value.round)))errors.push(issue("invalid_pending_reward","rewardPendingRound"));
+    if(value.pendingChairmanEvent){
+      const event=value.pendingChairmanEvent;
+      if(value.phase!=="hub"||!["spotlight","nephew","chaos"].includes(event.type)||event.status!=="pending"||Number(event.round)!==Number(value.round)||event.chairmanId!==value.chairId||event.runId!==value.chairmanEventRunId||typeof event.key!=="string"||!event.key)errors.push(issue("invalid_chairman_event","pendingChairmanEvent"));
+    }
+    if(!Number.isInteger(Number(value.sansSpotlightIdx))||Number(value.sansSpotlightIdx)<-1||Number(value.sansSpotlightIdx)>10)errors.push(issue("invalid_spotlight_index","sansSpotlightIdx"));
     if(value.phase==="draft"){
       if(!object(value.draft))errors.push(issue("missing_draft","draft"));
       else{
@@ -107,15 +118,15 @@
     const state=defaults(payload||{}),result=validate(state);
     if(!result.ok){capture("save_rejected",result.errors.map(error=>error.code).join(","));return{ok:false,errors:result.errors};}
     let raw;try{raw=JSON.stringify(state);}catch(_){return{ok:false,errors:[issue("serialize_failed","")]};}
-    const previous=parse(safeGet(global.localStorage,KEYS.primary));
-    if(previous.state)safeSet(global.localStorage,KEYS.backup,JSON.stringify(previous.state));
-    const local=safeSet(global.localStorage,KEYS.primary,raw);
+    const previous=parse(safeGet(durableStorage,KEYS.primary));
+    if(previous.state)safeSet(durableStorage,KEYS.backup,JSON.stringify(previous.state));
+    const local=safeSet(durableStorage,KEYS.primary,raw);
     const session=safeSet(global.sessionStorage,KEYS.session,raw);
     if(!local&&!session)capture("save_failed","storage_unavailable");
     return{ok:local||session,errors:local||session?[]:[issue("storage_unavailable","")]};
   }
   function read(){
-    const candidates=[["primary",safeGet(global.localStorage,KEYS.primary)],["backup",safeGet(global.localStorage,KEYS.backup)],["session",safeGet(global.sessionStorage,KEYS.session)],["legacy",safeGet(global.localStorage,KEYS.legacyPrimary)],["legacy_backup",safeGet(global.localStorage,KEYS.legacyBackup)]];
+    const candidates=[["primary",safeGet(durableStorage,KEYS.primary)],["backup",safeGet(durableStorage,KEYS.backup)],["session",safeGet(global.sessionStorage,KEYS.session)],["legacy",safeGet(durableStorage,KEYS.legacyPrimary)],["legacy_backup",safeGet(durableStorage,KEYS.legacyBackup)]];
     const rejected=[];
     for(const [source,raw] of candidates){
       if(!raw)continue;
@@ -126,6 +137,7 @@
     if(rejected.length)capture("restore_rejected",rejected.map(item=>item.source+":"+item.errors.map(error=>error.code).join("+")).join(","));
     return{state:null,source:null,rejected};
   }
-  function clear(){safeRemove(global.localStorage,KEYS.primary);safeRemove(global.localStorage,KEYS.backup);safeRemove(global.localStorage,KEYS.legacyPrimary);safeRemove(global.localStorage,KEYS.legacyBackup);safeRemove(global.sessionStorage,KEYS.session);}
-  global.CopaRunPersistence=Object.freeze({VERSION,KEYS,migrate,validate,parse,persist,read,clear});
+  function clear(){safeRemove(durableStorage,KEYS.primary);safeRemove(durableStorage,KEYS.backup);safeRemove(durableStorage,KEYS.legacyPrimary);safeRemove(durableStorage,KEYS.legacyBackup);safeRemove(global.sessionStorage,KEYS.session);}
+  function flush(){return durableStorage&&typeof durableStorage.flush==="function"?durableStorage.flush():Promise.resolve();}
+  global.CopaRunPersistence=Object.freeze({VERSION,KEYS,migrate,validate,parse,persist,read,clear,flush});
 })(window);

@@ -26,12 +26,30 @@ const bytes = fs.readFileSync(aabPath);
 const certificate = fs
   .readFileSync(path.join(ROOT, "release", "android-upload-certificate.sha256"), "utf8")
   .trim();
+const admobTestAppId = "ca-app-pub-3940256099942544~3347511713";
+const admobTestInterstitialId = "ca-app-pub-3940256099942544/1033173712";
+const admobTestRewardedId = "ca-app-pub-3940256099942544/5224354917";
+const admobAppId = String(process.env.COPA_ADMOB_APP_ID || admobTestAppId).trim();
+const admobInterstitialId = String(
+  process.env.COPA_ADMOB_INTERSTITIAL_ID || admobTestInterstitialId,
+).trim();
+const admobRewardedId = String(
+  process.env.COPA_ADMOB_REWARDED_ID || admobTestRewardedId,
+).trim();
+const productionAdmobIdsPresent =
+  /^ca-app-pub-\d{16}~\d{10}$/.test(admobAppId) &&
+  /^ca-app-pub-\d{16}\/\d{10}$/.test(admobInterstitialId) &&
+  /^ca-app-pub-\d{16}\/\d{10}$/.test(admobRewardedId) &&
+  admobAppId !== admobTestAppId &&
+  admobInterstitialId !== admobTestInterstitialId &&
+  admobRewardedId !== admobTestRewardedId;
 
 const manifest = {
   package_id: "life.copa.app",
   version_code: version.versionCode,
   version_name: version.versionName,
-  release_status: "candidate",
+  release_status: productionAdmobIdsPresent ? "candidate" : "local_candidate",
+  store_upload_eligible: productionAdmobIdsPresent && emulatorSmokePassed,
   source: {
     build_version: platformBuild.build_version,
     build_fingerprint: platformBuild.build_fingerprint,
@@ -47,7 +65,18 @@ const manifest = {
     sha256: createHash("sha256").update(bytes).digest("hex").toUpperCase(),
   },
   upload_certificate_sha256: certificate,
-  permissions: previous.permissions || ["android.permission.INTERNET"],
+  admob: {
+    mode: productionAdmobIdsPresent ? "production" : "test",
+    production_ids_present: productionAdmobIdsPresent,
+  },
+  permissions: [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "com.google.android.gms.permission.AD_ID",
+    "android.permission.ACCESS_ADSERVICES_TOPICS",
+    "android.permission.ACCESS_ADSERVICES_AD_ID",
+    "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+  ],
   verification: verified
     ? {
         main_test_suite: "passed",

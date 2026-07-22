@@ -75,12 +75,12 @@ function render(){
   const lastPlayedIndex=Math.max(0,played-1);
   const journey=fixtures.map((f,index)=>{
     const playedNow=!!(f&&f.res),type=f&&f.res==="W"?"win":f&&f.res==="D"?"draw":f&&f.res==="L"?"loss":"none";
-    const isLast=playedNow&&index===lastPlayedIndex,penalty=isLast&&report&&report.penalty;
+    const isLast=playedNow&&index===lastPlayedIndex,penalty=Array.isArray(f&&f.penalty)?f.penalty:(isLast&&report&&report.penalty);
     const roundLabel=(L().rounds&&L().rounds[index])||`${LT("Tur","Round","Ronda","Runde","Turno")} ${index+1}`;
     const score=playedNow?`${f.gf}-${f.ga}`:"";
     const opponent=playedNow&&f.opp?f.opp:LT("Oynanmadı","Unplayed","No jugado","Nicht gespielt","Non giocato");
     const status=playedNow?(resultCopy[f.res]||"") : LT("Oynanmadı","Unplayed","No jugado","Nicht gespielt","Non giocato");
-    const penaltyText=penalty?`${LT("Pen.","Pens","Pen.","Elf.","Rig.")} ${report.penalty[0]}-${report.penalty[1]}`:"";
+    const penaltyText=penalty?`${LT("Pen.","Pens","Pen.","Elf.","Rig.")} ${penalty[0]}-${penalty[1]}`:"";
     const label=playedNow
       ?safe(`${roundLabel}, ${opponent}, ${score}${penaltyText?" · "+penaltyText:""}, ${status}`)
       :safe(`${roundLabel}, ${status}`);
@@ -97,7 +97,7 @@ function render(){
   const insightPrimary=penaltyExit
     ?LT("Normal sürede ayakta kaldın; penaltılar run’ı bitirdi.","You held on in regulation; penalties ended the run.","Resististe en el tiempo reglamentario; los penaltis terminaron el recorrido.","In der regulären Spielzeit gehalten; das Elfmeterschießen beendete den Run.","Hai retto nei tempi regolamentari; i rigori hanno chiuso il percorso.")
     :r&&r.won
-      ?LT("Altı turu geçtin ve kupayı tamamladın.","You cleared all six rounds and completed the cup run.","Superaste las seis rondas y conquistaste la copa.","Du hast alle sechs Runden überstanden und den Pokal gewonnen.","Hai superato tutti i sei turni e conquistato la coppa.")
+      ?LT("Üç grup maçının ardından çeyrek final, yarı final ve finali geçerek kupayı aldın.","After three group matches, you won the quarter-final, semi-final and final to lift the cup.","Tras tres partidos de grupo, ganaste cuartos, semifinal y final para levantar la copa.","Nach drei Gruppenspielen gewannst du Viertelfinale, Halbfinale und Finale und holtest den Pokal.","Dopo tre gare del girone hai vinto quarti, semifinale e finale, conquistando la coppa.")
       :r&&r.endType==="sacked"
         ?LT("Run’ı saha sonucu değil, başkan güveni bitirdi.","Board trust, not a match result, ended the run.","La confianza de la directiva, no un partido, terminó el recorrido.","Das Vorstandsvertrauen, nicht ein Spielergebnis, beendete den Run.","La fiducia della dirigenza, non una partita, ha chiuso il percorso.")
         :played<=2

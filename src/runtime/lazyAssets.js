@@ -36,7 +36,7 @@
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260721-career-contrast1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260722-mastery-compact2";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
     return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260720-career3",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();

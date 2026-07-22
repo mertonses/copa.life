@@ -5,12 +5,12 @@ Bu dosya ilk Android mağaza sürümü için ürün ve beyan kararlarının tek 
 ## İlk sürüm ticari modeli
 
 - Ücretsiz.
-- Reklamsız.
+- Koşu tamamlandıktan sonra Google AdMob tam ekran geçiş reklamı.
 - Uygulama içi satın alma yok.
 - Patreon veya başka bir harici ödeme/bağış bağlantısı yok.
 - Gerçek para ile ödül, bahis veya ücretli rastgele ödül yok.
 
-Android paket kontrolü gerçek kulüp armalarını, Patreon varlık ve bağlantılarını, reklam/ödeme entegrasyonlarını ve eski oyuncu niteliklerini engeller.
+Android paket kontrolü gerçek kulüp armalarını, Patreon varlık ve bağlantılarını, ödeme entegrasyonlarını ve eski oyuncu niteliklerini engeller. Reklam tarafında yalnız sabitlenmiş GMA Next‑Gen ve UMP sürümleri ile yerel `CopaAds` köprüsüne izin verir.
 
 ## İçerik ve marka ayrımı
 
@@ -35,13 +35,21 @@ Ghost Club paylaşımı veya Dünya Kulüpler Sıralaması açılırsa aşağıd
 | Ghost raporu ve nedeni | İsteğe bağlı | Güvenlik, moderasyon ve kötüye kullanım önleme | En çok 90 gün |
 | Herkese açık kulüp profili ve toplu kariyer değerleri | İsteğe bağlı | Dünya sıralaması / uygulama işlevi | Sıralamadan ayrılana veya silene kadar |
 | Tur, galibiyet ve şampiyonluk içeren sıralama koşusu | İsteğe bağlı | Sunucuda puanlama ve kötüye kullanım önleme | Aktif aylık sezon |
+| IP adresi / yaklaşık konum | Run sonu reklam isteğinde | Reklam, ölçüm ve sahtekârlık önleme | Google AdMob politikalarına göre |
+| Uygulama etkileşimleri | Run sonu reklam isteğinde | Reklam, analiz ve ölçüm | Google AdMob politikalarına göre |
+| Tanı ve performans verileri | Reklam SDK'sı çalıştığında | Analiz ve sahtekârlık önleme | Google AdMob politikalarına göre |
+| Cihaz veya diğer kimlikler | Cihazda mevcutsa | Reklam, analiz ve sahtekârlık önleme | Google AdMob politikalarına göre |
 
 - Ghost paylaşımı ve Dünya sıralaması varsayılan olarak kapalıdır.
 - Her özellik için kullanım şartı kabulü ve birbirinden ayrı açık rıza gerekir.
 - Aktarım HTTPS üzerinden yapılır.
 - Kullanıcı ayarlardan tüm Ghost ve sıralama verilerini birlikte silebilir; sıralamadan çıkmak profil ve koşu satırlarını siler.
 - 45 günlük süre dolan Ghost kayıtları günlük sunucu göreviyle D1'den fiziksel olarak silinir.
-- Uygulama reklam kimliği, konum, kişi listesi, fotoğraf, ses veya finansal bilgi istemez.
+- Uygulama kişi listesi, kesin konum, fotoğraf, ses veya finansal bilgi istemez. GMA SDK, cihazda mevcutsa Android reklam kimliğini ve diğer cihaz tanımlayıcılarını işleyebilir.
+- UMP rıza durumu her uygulama açılışında güncellenir; `canRequestAds()` false ise reklam yüklenmez.
+- Gizlilik seçenekleri UMP gerekli gördüğünde uygulama Ayarları içinde görünür.
+- Tüm AdMob istekleri `AgeRestrictedTreatment.TEEN` ve en fazla `MAX_AD_CONTENT_RATING_T` ile sınırlandırılır.
+- Reklam aynı tamamlanan run için tekrar gösterilmez ve cihaz tarafında iki gösterim arasında en az 10 dakika beklenir.
 
 Play Console yanıtları üretim sürümünde Ghost özelliğinin açık olup olmadığına göre verilmelidir. Özellik kapalı yayımlansa bile ileride uzaktan açılacaksa veri beyanı önceden güncellenmelidir.
 
@@ -75,12 +83,13 @@ Mevcut güvenlik katmanları:
 - Android paketindeki Web3Forms iletişim formu ve erişim anahtarı kaldırıldı. Android'deki destek düğmeleri açık web sitesine çıkar; ad, e-posta ve destek mesajı native paket tarafından toplanmaz.
 - Destek URL'si resmi Capacitor Browser bileşeniyle Chrome/Custom Tab akışında açılır. Pixel 3a API 34 emülatöründe eklenti kaydı, destek işlevinin eklenti yolunu kullanması ve `https://copa.life/` VIEW intent'i doğrulandı.
 - Türkçe, İngilizce, İspanyolca, Almanca ve İtalyanca mağaza metinleri ile sürüm notları; Play Console beyan cevapları; 512×512 ikon; dil başına 1024×500 feature graphic, beş telefon ve beş tablet ekran görüntüsü `store/android/` altında hazırlandı.
-- Destek e-postasının özel alan adı taşıması zorunlu değildir. Play Console'a girilecek Gmail veya özel alan adı adresinin doğrulanmış, düzenli izlenen ve destek/takedown taleplerine cevap verebilir olması gerekir; kesin adres henüz beyan dosyasına girilmedi.
+- Android run sonu reklam akışı GMA Next‑Gen 1.2.1 ve UMP 4.0.0 ile eklendi. Geliştirme sürümleri yalnız Google test kimliklerini kullanır; üretim AAB hattı gerçek AdMob kimliklerini zorunlu tutar.
+- Resmî destek, gizlilik ve takedown adresi `support@copa.life` olarak doğrulandı ve beyan dosyalarına işlendi.
 - Android 14 / API 34 Pixel 3a emülatöründe temiz kurulum, splash, çevrimdışı açılış, arka plan-devam, geri tuşuyla küçültme ve Ghost'un varsayılan kapalı/çift rızalı olması doğrulandı. Bu test Capacitor 8 global eklenti uyumsuzluğunu ortaya çıkardı; `src/runtime/nativeApp.js` düzeltilip temiz kurulumda yeniden doğrulandı.
 - Android candidate workflow'u artık her adayda API 34 emülatörü açar, instrumentation testini çalıştırır, gerçek `life.copa.app` paketini başlatır ve crash/ANR, çalışan süreç, odaklanan Activity ve ekran görüntüsünü otomatik doğrular.
 - Ayrı staging D1 veritabanı oluşturuldu; `0001`/`0002` migration'ları uygulandı ve staging Analytics Engine dataset'leri veri alıyor.
 - Haftalık anonim KPI raporu ile 30 dakikalık `profile_open_error` ve Worker 5xx alarmı hazırlandı. Salt-okunur `CLOUDFLARE_ANALYTICS_TOKEN` production ortamına eklendi.
 - İmzalı AAB, bundletool ile gerçek cihaz split APK'larına dönüştürülüp Android 14 / API 34 emülatörüne temiz kuruldu. Soğuk açılış, tam kurulum akışı, hub, çift dokunmalı altı boyutlu oyuncu profili ve çevrimdışı kayıt geri yükleme geçti; safe-area/crash/ANR/OOM gözlenmedi.
 - Devam eden final; dakika, skor, RNG, taktik kararları, oyuncu/top konumu ve olay istatistikleriyle yerel checkpoint'e alınır. Mobil Chromium süreç-kapanma senaryosunda 20. dakikadan sonra yenileme ve aynı final durumuna dönüş otomatik testten geçti. Fiziksel düşük seviye cihaz testi hâlâ manuel yayın kapısıdır.
-- Play Console oturumu açıldı ancak Google hesabında geliştirici hesabı henüz oluşturulmamış. Uygulama kaydı, Data Safety ve kapalı test yüklemesi; hesap türü seçimi, kayıt ücreti, sözleşme ve kimlik doğrulaması tamamlandıktan sonra uygulanabilir.
+- Play Console geliştirici hesabı oluşturuldu; alan adı ve yasal geliştirici bilgileri doğrulandı. Uygulama kaydı açıldı ve kalan mağaza/App Content adımları Console üzerinden tamamlanabilir.
 - Gerçek web armaları proje sahibinin kararıyla web kaynaklarında kalır; lisans kanıtı olmadığı için genel web yayını teknik hak kapısından geçmez. Android ve hukuki sayfa paketi gerçek armaları içermez.

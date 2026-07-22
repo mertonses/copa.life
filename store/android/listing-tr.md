@@ -21,7 +21,7 @@ Her koşuda ülkeni, dizilişini ve başkanını seç. Zar atarak önüne gelen 
 - Bütçe, kadro kimyası ve taktik dengesi
 - Altı boyutlu copa.life oyuncu profilleri
 - Kartlar, maç olayları ve sürpriz gelişmeler
-- Altı turluk kupa yolculuğu
+- Üç grup maçı; ardından çeyrek final, yarı final ve final
 - Açık ve koyu tema
 - Kayıt veya giriş gerektirmeyen oyun deneyimi
 
@@ -34,5 +34,5 @@ copa.life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyo
 - Tür: Oyun
 - Kategori: Spor
 - Fiyat: Ücretsiz
-- Reklam: Yok
+- Reklam: Var — koşu sonunda tam ekran geçiş reklamı ve isteğe bağlı ödüllü yenileme reklamı
 - Uygulama içi satın alma: Yok

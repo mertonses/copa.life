@@ -24,6 +24,7 @@ if (/^(1|true)$/i.test(process.env.PUBLIC_RELEASE || "")) {
 const ROOT_FILES = [
   ".nojekyll",
   "CNAME",
+  "app-ads.txt",
   "favicon.svg",
   "favicon-16x16.png",
   "favicon-32x32.png",

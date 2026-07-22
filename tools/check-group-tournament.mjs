@@ -1,9 +1,18 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import engine from "../src/tournament/tournamentEngine.js";
 
 const pool=Array.from({length:32},(_,index)=>({name:`Club ${String(index+1).padStart(2,"0")}`}));
 const baseOptions={seed:20260721,playerName:"COPA XI",playerPower:74,playerFormation:"4-3-3",playerStyle:"gegen",pool,powerBases:[60,66,72,78,86,94]};
 const supportedFormations=["4-4-2","4-3-3","4-2-3-1","3-5-2","5-3-2","3-4-3","4-5-1","4-3-2-1","4-1-4-1","3-4-1-2"];
+
+{
+  const rootPackage=JSON.parse(fs.readFileSync(new URL("../package.json",import.meta.url),"utf8"));
+  const runnerPackage=JSON.parse(fs.readFileSync(new URL("../playtest/runner/package.json",import.meta.url),"utf8"));
+  assert.match(rootPackage.scripts.test,/check:tournament:balance:matrix/,"release test chain must include the tournament balance matrix");
+  assert.match(runnerPackage.scripts["test:ci"],/group-tournament-ui\.test\.ts/,"browser CI must include the group tournament flow");
+  assert.match(runnerPackage.scripts["test:group"],/fixture-road-ui\.test\.ts/,"focused group suite must cover the fixture road");
+}
 
 function newTournament(seed=baseOptions.seed){return engine.createTournament({...baseOptions,seed});}
 function playGroup(state,scores){
@@ -45,6 +54,8 @@ for(const formation of supportedFormations){
   assert.equal(engine.validate(broken).ok,false,"a corrupt group schedule must be rejected");
   const duplicateDraw=engine.clone(state);duplicateDraw.draw.entries[1].teamId=duplicateDraw.draw.entries[0].teamId;
   assert.equal(engine.validate(duplicateDraw).ok,false,"duplicate draw entries must be rejected");
+  const corruptTable=engine.clone(state);corruptTable.groups[0].table[0].points=99;
+  assert.equal(engine.validate(corruptTable).ok,false,"a table that disagrees with played matches must be rejected");
 }
 
 {
@@ -109,6 +120,7 @@ for(const formation of supportedFormations){
     if(stage!=="final")assert.notEqual(state.phase,"complete");
   }
   assert.equal(state.player.champion,true);assert.equal(state.phase,"complete");
+  assert.equal(engine.validate(state).ok,true,"a completed champion bracket must validate");
   const path=engine.playerSchedule(state);assert.equal(path.length,6);
   const qf=path.find(match=>match.round==="quarterfinal"),playerGroupTeams=new Set(state.groups.find(group=>group.id===groupId).teamIds);
   assert.equal(playerGroupTeams.has(qf.homeId==="player"?qf.awayId:qf.homeId),false,"quarterfinal opponent must come from another group");
@@ -121,6 +133,7 @@ for(const formation of supportedFormations){
     engine.completePlayerMatch(state,{score},item=>engine.defaultSimulator(state,item));
   }
   assert.equal(state.phase,"complete");assert.equal(state.player.exitStage,"group");assert.equal(state.group.qualified,false);
+  assert.equal(engine.validate(state).ok,true,"a completed group exit must validate");
 }
 
 console.log("Group tournament checks passed: deterministic draw, 24-match schedule, standings, qualification and knockout progression.");

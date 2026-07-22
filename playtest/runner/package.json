@@ -7,11 +7,14 @@
     "agent:build": "tsc",
     "agent:run": "node dist/cli.js",
     "test": "playwright test tests/",
-    "test:ci": "playwright test tests/critical-flow.test.ts tests/run-lifecycle.test.ts tests/player-profile-ui.test.ts tests/final-sim-ui.test.ts tests/ghost-club-ui.test.ts tests/mobile-experience.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts tests/free-agent-pricing-ui.test.ts tests/run-end-editorial-ui.test.ts tests/card-contracts-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
+    "test:ci": "playwright test tests/critical-flow.test.ts tests/run-lifecycle.test.ts tests/group-tournament-ui.test.ts tests/player-profile-ui.test.ts tests/final-sim-ui.test.ts tests/ghost-club-ui.test.ts tests/mobile-experience.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts tests/free-agent-pricing-ui.test.ts tests/run-end-editorial-ui.test.ts tests/card-contracts-ui.test.ts tests/reward-risk-flow.test.ts tests/chairman-dynamics.test.ts tests/mastery-badges-ui.test.ts tests/season-story-icons-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
+    "test:group": "playwright test tests/group-tournament-ui.test.ts tests/fixture-road-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
     "test:cross": "playwright test tests/cross-browser-smoke.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts",
     "test:bridge": "playwright test tests/bridge.test.ts",
     "test:session": "playwright test tests/session.test.ts",
-    "assets:store": "node capture-store-assets.mjs"
+    "assets:store": "node capture-store-assets.mjs",
+    "assets:feature": "node capture-store-assets.mjs --feature-only",
+    "assets:promo-video": "node render-promo-videos.mjs"
   },
   "dependencies": {
     "@playwright/test": "^1.44.0",

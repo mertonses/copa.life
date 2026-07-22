@@ -21,7 +21,7 @@ Características:
 - Equilibrio entre presupuesto, química y táctica
 - Perfiles de jugador copa con seis dimensiones
 - Cartas, sucesos de partido y giros imprevisibles
-- Un recorrido de seis rondas hacia la copa
+- Tres partidos de grupo; después, cuartos, semifinal y final
 - Tema claro y oscuro
 - Sin cuenta ni inicio de sesión
 
@@ -34,5 +34,5 @@ copa.life es un juego independiente. No está afiliado ni respaldado por ningún
 - Tipo: Juego
 - Categoría: Deportes
 - Precio: Gratis
-- Anuncios: No
+- Anuncios: Sí — anuncio intersticial a pantalla completa al terminar una partida
 - Compras en la aplicación: No

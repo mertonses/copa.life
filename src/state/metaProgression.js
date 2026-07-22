@@ -135,7 +135,8 @@
   function reputationFor(value){
     const played=integer(value.playedMatches==null?value.round:value.playedMatches,1,6);
     const wins=integer(value.wins,0,6);
-    return 10+played*6+wins*4+(value.personalBest?10:0)+(value.won?25:0);
+    const draws=integer(value.draws,0,6);
+    return 10+played*6+wins*4+draws*2+(value.personalBest?10:0)+(value.won?25:0);
   }
   function recordRun(context){
     const value=object(context)?context:{},result=value.won?"win":value.endType==="sacked"?"sacked":"loss";
@@ -224,13 +225,14 @@
     if(item.round>=6)return {label:tr?"Final":"Final",className:"is-final"};
     return {label:tr?"Elendi":"Out",className:"is-out"};
   }
+  function stageProgress(item,tr){const round=Number(item&&item.round)||0;if(item&&item.endType==="group_eliminated")return tr?"3 grup maçı":"3 group matches";if(round<=3)return tr?`Grup maçı ${round}/3`:`Group match ${round}/3`;if(round===4)return tr?"Çeyrek final":"Quarter-final";if(round===5)return tr?"Yarı final":"Semi-final";return tr?"Final":"Final";}
   function archiveRowsHTML(tr,limit=ARCHIVE_LIMIT){
     return [...state.archive].reverse().slice(0,limit).map(item=>{
       const result=resultMeta(item,tr);
       const date=new Date(item.finishedAt).toLocaleDateString(tr?"tr-TR":"en-GB",{day:"2-digit",month:"short"});
       return `<article class="meta-run-row ${result.className}">
         <span class="meta-run-main"><b>${escapeHTML(item.team)}</b><small>${date} · ${escapeHTML(item.formation)} · #${item.seed}</small></span>
-        <span class="meta-run-result"><b>${result.label}</b><small>${item.endType==="group_eliminated"?(tr?"3 grup maçı":"3 group matches"):`${item.round}/6`} · +${item.reputation} ${tr?"itibar":"rep"} · ${item.cash<0?"-":""}€${Math.abs(item.cash)}M</small></span>
+        <span class="meta-run-result"><b>${result.label}</b><small>${stageProgress(item,tr)} · +${item.reputation} ${tr?"itibar":"rep"} · ${item.cash<0?"-":""}€${Math.abs(item.cash)}M</small></span>
       </article>`;
     }).join("");
   }
@@ -297,7 +299,7 @@
       const result=resultMeta(memory,tr),date=new Date(memory.finishedAt).toLocaleDateString(tr?"tr-TR":"en-GB",{day:"2-digit",month:"short",year:"numeric"});
       return `<article class="meta-memory-card ${result.className}">
         <span class="meta-memory-dot" aria-hidden="true"></span>
-        <div class="meta-memory-run"><small>${date} · ${result.label}</small><b>${escapeHTML(memory.team)}</b><span>${memory.round}/6 · ${escapeHTML(memory.formation)}</span></div>
+        <div class="meta-memory-run"><small>${date} · ${result.label}</small><b>${escapeHTML(memory.team)}</b><span>${stageProgress(memory,tr)} · ${escapeHTML(memory.formation)}</span></div>
         <button type="button" class="${pinned?"is-pinned":""}" onclick="CopaMeta.toggleHallFromUi('${memory.id}','${featured.id}')" aria-label="${tr?"Şöhretler Karması seçimi":"Hall XI selection"}">
           <span aria-hidden="true">${pinned?"★":"☆"}</span><b>${escapeHTML(featured.name)}</b><small>${escapeHTML(featured.pos)} · ${featured.power}</small>
         </button>

@@ -242,6 +242,8 @@
     for(const key of ["quarterfinal","semifinal","final"]){for(const id of state.knockout.slots[key]||[]){const match=state.matches[id];if(match&&(match.homeId==="player"||match.awayId==="player"))matches.push(match);}}
     return matches;
   }
+  const TABLE_FIELDS=["teamId","played","wins","draws","losses","gf","ga","gd","points","fairPlay","rank","qualified"];
+  function tableMatches(actual,expected){return Array.isArray(actual)&&actual.length===expected.length&&actual.every((row,index)=>TABLE_FIELDS.every(field=>row&&row[field]===expected[index][field]));}
   function validate(state){
     const errors=[];
     if(!state||typeof state!=="object")return{ok:false,errors:["not_object"]};
@@ -268,6 +270,7 @@
           if(pairs.size!==6||[1,2,3].some(day=>!days.has(day)||days.get(day).length!==4||new Set(days.get(day)).size!==4))errors.push("invalid_group_schedule");
         }
         if(!Array.isArray(group.table)||group.table.length!==4||new Set(group.table.map(row=>row.teamId)).size!==4||group.table.some(row=>!group.teamIds.includes(row.teamId)))errors.push("invalid_group_table");
+        else if(!tableMatches(group.table,rankGroup(state,group.id)))errors.push("inconsistent_group_table");
       }
       if(assigned.length!==16||new Set(assigned).size!==16||assigned.some(id=>!state.teams[id]))errors.push("invalid_group_assignment");
     }
@@ -277,13 +280,39 @@
     if(groupMatches.length!==24)errors.push("invalid_group_match_count");
     for(const match of state.matches?Object.values(state.matches):[]){
       if(!state.teams[match.homeId]||!state.teams[match.awayId]||match.homeId===match.awayId)errors.push("invalid_match_team");
-      if(match.status==="played"&&(!Array.isArray(match.score)||match.score.length!==2||match.score.some(value=>!Number.isInteger(Number(value))||value<0||value>20)))errors.push("invalid_match_score");
+      if(!["scheduled","played"].includes(match.status))errors.push("invalid_match_status");
+      if(match.ghostOpponent!=null){
+        const ghost=match.ghostOpponent,opponentId=match.homeId==="player"?match.awayId:match.homeId;
+        if(match.stage!=="knockout"||match.round==="final"||(match.homeId!=="player"&&match.awayId!=="player")||!ghost||typeof ghost!=="object"||ghost.originalTeamId!==opponentId||typeof ghost.name!=="string"||!ghost.name.trim()||ghost.name.length>80||!Number.isFinite(Number(ghost.power))||Number(ghost.power)<35||Number(ghost.power)>115||!FORMATIONS.includes(ghost.formation)||!STYLES.includes(ghost.style)||ghost.ghost!==true||(ghost.ghostId&&!/^G-[A-Z0-9]{8,32}$/.test(String(ghost.ghostId))))errors.push("invalid_ghost_override");
+      }
+      if(match.status==="played"){
+        if(!Array.isArray(match.score)||match.score.length!==2||match.score.some(value=>!Number.isInteger(Number(value))||value<0||value>20))errors.push("invalid_match_score");
+        else{
+          const tied=Number(match.score[0])===Number(match.score[1]),expectedWinner=Number(match.score[0])>Number(match.score[1])?match.homeId:Number(match.score[1])>Number(match.score[0])?match.awayId:null;
+          if(match.stage==="group"&&match.winnerId!==(expectedWinner||null))errors.push("invalid_group_winner");
+          if(match.stage==="knockout"&&(![match.homeId,match.awayId].includes(match.winnerId)||!tied&&match.winnerId!==expectedWinner))errors.push("invalid_knockout_winner");
+        }
+        if(!match.fairPlay||![match.fairPlay.home,match.fairPlay.away].every(value=>Number.isFinite(Number(value))&&Number(value)<=0&&Number(value)>=-50))errors.push("invalid_fair_play");
+      }else if(match.score!==null||match.winnerId!==null)errors.push("scheduled_match_has_result");
     }
     if(!["draw","group","knockout","complete"].includes(state.phase))errors.push("invalid_phase");
     if(!state.group||!GROUP_IDS.includes(state.group.playerGroupId)||!state.groups.some(group=>group.id===state.group.playerGroupId&&group.teamIds.includes("player"))||!Number.isInteger(Number(state.group.matchday))||state.group.matchday<1||state.group.matchday>3)errors.push("invalid_player_group");
     if(!state.knockout||!["quarterfinal","semifinal","final"].includes(state.knockout.round)||!Array.isArray(state.knockout.roundMatchIds)||!state.knockout.slots||typeof state.knockout.slots!=="object")errors.push("invalid_knockout");
+    else{
+      const expectedCounts={quarterfinal:4,semifinal:2,final:1};
+      for(const roundName of Object.keys(expectedCounts)){
+        const ids=state.knockout.slots[roundName]||[];
+        if(!Array.isArray(ids)||![0,expectedCounts[roundName]].includes(ids.length)||ids.some(id=>!state.matches[id]||state.matches[id].stage!=="knockout"||state.matches[id].round!==roundName))errors.push("invalid_knockout_slots");
+      }
+      if(state.phase==="knockout"&&(state.knockout.roundMatchIds.length!==expectedCounts[state.knockout.round]||state.knockout.roundMatchIds.some((id,index)=>id!==state.knockout.slots[state.knockout.round][index])))errors.push("invalid_knockout_round");
+      const qf=(state.knockout.slots.quarterfinal||[]).map(id=>state.matches[id]),sf=(state.knockout.slots.semifinal||[]).map(id=>state.matches[id]),fin=(state.knockout.slots.final||[]).map(id=>state.matches[id]);
+      if(sf.length&&qf.length===4&&qf.every(match=>match.status==="played")&&([sf[0].homeId,sf[0].awayId,sf[1].homeId,sf[1].awayId].some((id,index)=>id!==qf[index].winnerId)))errors.push("invalid_semifinal_progression");
+      if(fin.length&&sf.length===2&&sf.every(match=>match.status==="played")&&(fin[0].homeId!==sf[0].winnerId||fin[0].awayId!==sf[1].winnerId))errors.push("invalid_final_progression");
+    }
     if(state.phase!=="draw"&&state.draw&&state.draw.completed!==true)errors.push("incomplete_draw");
     if(state.phase==="knockout"&&(!state.group||state.group.qualified!==true||state.knockout.roundMatchIds.some(id=>!state.matches[id])))errors.push("invalid_knockout_phase");
+    const playerGroup=state.groups&&state.groups.find(group=>group.id===(state.group&&state.group.playerGroupId)),playerRow=playerGroup&&playerGroup.table.find(row=>row.teamId==="player");
+    if(state.group&&state.group.qualified!=null&&playerRow&&playerRow.played===3&&(state.group.qualified!==(playerRow.rank<=2)||Number(state.group.rank)!==Number(playerRow.rank)))errors.push("inconsistent_player_qualification");
     if(state.phase==="complete"&&state.player&&!state.player.eliminated&&!state.player.champion)errors.push("invalid_complete_state");
     return{ok:errors.length===0,errors:[...new Set(errors)]};
   }

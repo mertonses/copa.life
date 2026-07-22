@@ -5,6 +5,7 @@ const match = fs.readFileSync("src/styles/match.css", "utf8");
 const cards = fs.readFileSync("src/styles/cards.css", "utf8");
 const mobile = fs.readFileSync("src/styles/mobileExperience.css", "utf8");
 const mobileScript = fs.readFileSync("src/ui/mobileExperience.js", "utf8");
+const hubScript = fs.readFileSync("src/ui/hub.js", "utf8");
 const chairPicker = fs.readFileSync("src/ui/chairPicker.js", "utf8");
 const chairPickerCss = fs.readFileSync("src/styles/chairPicker.css", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
@@ -15,8 +16,8 @@ const checks = [
     pass: /html,\s*\nbody\{[\s\S]*?overflow-x:hidden/s.test(layout),
   },
   {
-    name: "beta badge remains discreet",
-    pass: /\.brandmark \.logo-beta\{[\s\S]*?font-size:5px;[\s\S]*?letter-spacing:\.25px;/s.test(layout),
+    name: "retired beta badge is absent from the brand chrome",
+    pass: !/logo-beta/.test(layout)&&!/logo-beta/.test(html),
   },
   {
     name: "mobile run chrome omits duplicate slogan and round label",
@@ -131,6 +132,22 @@ const checks = [
     name: "injury notice stays compact directly above the bench",
     pass: /<div class="hub-bench-stack" id="hubBenchStack">\s*<div class="injbar hidden" id="injbar"[\s\S]*<div id="hubBenchSection"><\/div>/s.test(html)
       && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:18px minmax\(0,1fr\) auto;[\s\S]*min-height:44px;[\s\S]*box-shadow:none!important/s.test(layout),
+  },
+  {
+    name: "wide bench is a bounded draggable pitch overlay with a narrow-screen fallback",
+    pass: /<div class="pitch-area">[\s\S]*?<div class="pitch" id="hubPitch"[\s\S]*?<div class="hub-bench-stack" id="hubBenchStack">/s.test(html)
+      && /@media\(min-width:981px\) and \(orientation:landscape\)\{[\s\S]*?#hub \.pitch-area #hubBenchSection\{[\s\S]*?position:absolute;[\s\S]*?top:10px;[\s\S]*?right:10px;[\s\S]*?width:clamp\(202px,27%,232px\)!important;/s.test(layout)
+      && /@media\(max-width:980px\), \(orientation:portrait\)\{[\s\S]*?#hub \.pitch-area #hubBenchSection\{[\s\S]*?position:static;/s.test(layout)
+      && /#hub \.pitch-area #hubBenchSection\.bench-panel-draggable\{[\s\S]*?overflow-y:auto!important;[\s\S]*?overscroll-behavior:contain;/s.test(layout)
+      && /function _initBenchPanelDrag\(\)\{[\s\S]*?bench-panel-draggable[\s\S]*?setPointerCapture/s.test(hubScript)
+      && /class="bench-head"/.test(hubScript)
+      && /class="bench-list"/.test(hubScript),
+  },
+  {
+    name: "cup table follows the pitch and fixture road owns the final full-width row",
+    pass: html.indexOf('id="tournamentHubPanel"')>html.indexOf('class="pitch-area"')
+      && html.indexOf('id="tournamentHubPanel"')<html.indexOf('class="hcol hcol-r"')
+      && /<div class="hub-fixture-bottom">\s*<div class="cuproad" id="fixbar"><\/div>/s.test(html),
   },
   {
     name: "mobile card market reroll stays visually minimal",

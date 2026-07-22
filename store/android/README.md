@@ -34,11 +34,12 @@ Her yerelleştirme klasöründe bir 1024×500 feature graphic, beş 1080×1920 t
 ```powershell
 npm run assets:store
 npm run check:android:store
+npm run assets:store:localization-packs
 npm run android:notes:stamp
 npm run check:android:release
 ```
 
-`assets:store`, son Android web artifact'ini derler ve sabit seed ile beş dilin görsellerini yeniden alır. `asset-manifest.json`, her dosyanın ölçüsünü, boyutunu ve SHA-256 değerini taşır.
+`assets:store`, son Android web artifact'ini derler ve sabit seed ile beş dilin görsellerini yeniden alır. `asset-manifest.json`, her dosyanın ölçüsünü, boyutunu ve SHA-256 değerini taşır. `assets:store:localization-packs`, Play Console'da henüz bulunmayan `es-ES`, `de-DE` ve `it-IT` girişlerini `outputs/google-play-localizations/` altında kopyala-yapıştır metinleri ve yüklemeye hazır görsellerle paketler.
 
 ## Not
 

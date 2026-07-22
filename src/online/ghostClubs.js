@@ -11,6 +11,7 @@
   const ONBOARDING_KEY="copa_online_features_onboarding_v1";
   const CLIENT_KEY="copa_ghost_client_id_v1";
   const DELETE_TOKEN_KEY="copa_ghost_delete_token_v1";
+  const DELETE_PENDING_KEY="copa_ghost_delete_pending_v1";
   const BLOCKED_KEY="copa_ghost_blocked_ids_v1";
   const QUEUE_KEY="copa_ghost_upload_queue_v1";
   const REPORT_QUEUE_KEY="copa_ghost_report_queue_v1";
@@ -30,9 +31,10 @@
     matchChance:{1:.20,2:.24,3:.29,4:.34,5:.38,6:.40}
   });
 
-  const safeGet=(key,fallback)=>{try{const value=localStorage.getItem(key);return value===null?fallback:value;}catch(_){return fallback;}};
-  const safeSet=(key,value)=>{try{localStorage.setItem(key,value);return true;}catch(_){return false;}};
-  const safeRemove=key=>{try{localStorage.removeItem(key);return true;}catch(_){return false;}};
+  const deviceStorage=window.CopaPlatform&&window.CopaPlatform.storage||localStorage;
+  const safeGet=(key,fallback)=>{try{const value=deviceStorage.getItem(key);return value===null?fallback:value;}catch(_){return fallback;}};
+  const safeSet=(key,value)=>{try{deviceStorage.setItem(key,value);return true;}catch(_){return false;}};
+  const safeRemove=key=>{try{deviceStorage.removeItem(key);return true;}catch(_){return false;}};
   function consent(){try{const value=JSON.parse(safeGet(CONSENT_KEY,"null"));return value&&value.version===CONFIG.consentVersion&&value.terms===true&&value.sharing===true?value:null;}catch(_){return null;}}
   const hasConsent=()=>!!consent();
   function leaderboardConsent(){try{const value=JSON.parse(safeGet(LEADERBOARD_CONSENT_KEY,"null"));return value&&value.version===CONFIG.leaderboardConsentVersion&&value.terms===true&&value.public_profile===true?value:null;}catch(_){return null;}}
@@ -215,7 +217,10 @@
     const clubName=cleanClubName(context.teamName||context.clubName||startedRun.clubName||"copa.life XI","copa.life XI");
     const publicId=("G-"+hash([context.seed,clubName,createdAt].join("|")).slice(0,8)).toUpperCase();
     const formation=cleanText(context.formName||context.formation||"4-3-3")||"4-3-3";
-    const result=context.run||context.lastResult||{};
+    const result=context.run||context.lastResult||{},tournamentState=result.tournament||context.tournament||null;
+    const playerGroup=tournamentState&&Array.isArray(tournamentState.groups)?tournamentState.groups.find(group=>group&&group.id===(tournamentState.group&&tournamentState.group.playerGroupId)):null;
+    const playerRow=playerGroup&&Array.isArray(playerGroup.table)?playerGroup.table.find(row=>row&&row.teamId==="player"):null;
+    const tournamentSnapshot=tournamentState&&tournamentState.format==="groups16_v1"?{format:"groups16_v1",stage:tournamentState.player&&tournamentState.player.exitStage||tournamentState.knockout&&tournamentState.knockout.round||tournamentState.phase||"group",group:{id:playerGroup&&playerGroup.id||"",rank:Math.round(Number(playerRow&&playerRow.rank)||0),points:Math.round(Number(playerRow&&playerRow.points)||0),gd:Math.round(Number(playerRow&&playerRow.gd)||0),qualified:!!(tournamentState.group&&tournamentState.group.qualified)}}:null;
     const profile={
       schema_version:CONFIG.schemaVersion,
       game_version:CONFIG.gameVersion,
@@ -239,9 +244,10 @@
       used_cards:(Array.isArray(context.usedRiskCards)?context.usedRiskCards:[]).map(cleanText),
       chairman_effects:{trust:Math.round(bounded(context.chairTrust,0,3)),risk_power:Math.round(bounded(context.riskPowerMod,-30,30))},
       tactics:tacticProfile(context,cards),
-      match_history:(Array.isArray(context.fixtures)?context.fixtures:[]).slice(0,6).map(match=>({opponent:cleanText(match.opp||match.name||""),result:cleanText(match.res||""),gf:Math.round(bounded(match.gf,0,20)),ga:Math.round(bounded(match.ga,0,20))})),
+      match_history:(Array.isArray(context.fixtures)?context.fixtures:[]).slice(0,6).map((match,index)=>({opponent:cleanText(match.opp||match.name||""),result:cleanText(match.res||""),gf:Math.round(bounded(match.gf,0,20)),ga:Math.round(bounded(match.ga,0,20)),stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",penalty:Array.isArray(match.penalty)?match.penalty.slice(0,2).map(value=>Math.round(bounded(value,0,20))):null})),
       reached_round:Math.round(bounded(result.round||context.round,1,6)),
       result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
+      tournament:tournamentSnapshot,
       final_profile:finalProfileSnapshot(context),
       mvp:cleanText(context.motm||context.mvp||""),
       scorers:Array.isArray(context.scorers)?context.scorers.slice(0,8).map(cleanText):[],
@@ -253,13 +259,17 @@
   }
   function normalizeLeaderboardRun(context){
     const safe=context&&typeof context==="object"?context:{},started=readStartedRun(),result=safe.run||{};
-    const fixtures=(Array.isArray(safe.fixtures)?safe.fixtures:[]).slice(0,6).map(match=>({
+    const fixtures=(Array.isArray(safe.fixtures)?safe.fixtures:[]).slice(0,6).map((match,index)=>({
       opponent:cleanText(match&&((match.opp||match.name)||"")),
       result:cleanText(match&&match.res||""),
       gf:Math.round(bounded(match&&match.gf,0,20)),
-      ga:Math.round(bounded(match&&match.ga,0,20))
+      ga:Math.round(bounded(match&&match.ga,0,20)),
+      stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",
+      penalty:Array.isArray(match&&match.penalty)?match.penalty.slice(0,2).map(value=>Math.round(bounded(value,0,20))):null
     }));
-    while(fixtures.length<6)fixtures.push({opponent:"",result:"",gf:0,ga:0});
+    while(fixtures.length<6){const index=fixtures.length;fixtures.push({opponent:"",result:"",gf:0,ga:0,stage:index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final",penalty:null});}
+    const tournamentState=result.tournament||safe.tournament||null,playerGroup=tournamentState&&Array.isArray(tournamentState.groups)?tournamentState.groups.find(group=>group&&group.id===(tournamentState.group&&tournamentState.group.playerGroupId)):null,playerRow=playerGroup&&Array.isArray(playerGroup.table)?playerGroup.table.find(row=>row&&row.teamId==="player"):null;
+    const tournamentSnapshot=tournamentState&&tournamentState.format==="groups16_v1"?{format:"groups16_v1",stage:tournamentState.player&&tournamentState.player.exitStage||tournamentState.knockout&&tournamentState.knockout.round||tournamentState.phase||"group",group:{id:playerGroup&&playerGroup.id||"",rank:Math.round(Number(playerRow&&playerRow.rank)||0),points:Math.round(Number(playerRow&&playerRow.points)||0),gd:Math.round(Number(playerRow&&playerRow.gd)||0),qualified:!!(tournamentState.group&&tournamentState.group.qualified)}}:null;
     return {
       schema_version:1,
       run_id:cleanText(started.id||("run-"+hash([safe.seed,safe.teamName,Date.now()].join("|")))).toLowerCase(),
@@ -267,7 +277,8 @@
       club:{name:cleanClubName(safe.teamName||started.clubName||"copa.life XI","copa.life XI"),country:cleanText(safe.selectedCountry||started.country||"TR").toUpperCase()},
       reached_round:Math.round(bounded(result.won?6:(result.round||safe.round),1,6)),
       result:{won:!!result.won,score:cleanText(result.score||""),end_type:cleanText(result.endType||"")},
-      match_history:fixtures
+      match_history:fixtures,
+      tournament:tournamentSnapshot
     };
   }
   async function flushLeaderboardQueue(){
@@ -277,7 +288,8 @@
     for(const item of items){
       try{
         const response=await fetchWithTimeout(base+"/v1/leaderboard/runs",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId(),"x-copa-leaderboard-consent-version":CONFIG.leaderboardConsentVersion,"x-copa-delete-token":deleteToken()},body:JSON.stringify(item),keepalive:true});
-        if(!response.ok&&response.status!==409&&response.status!==422)remaining.push(item);
+        if(response.status===422){safeSet("copa_leaderboard_last_rejection_v1",JSON.stringify({run_id:item.run_id,at:new Date().toISOString()}));continue;}
+        if(!response.ok&&response.status!==409)remaining.push(item);
       }catch(_){remaining.push(item);}
     }
     saveLeaderboardQueue(remaining);return remaining.length===0;
@@ -408,7 +420,8 @@
       const current=items[0];
       try{
         const res=await fetchWithTimeout(base+"/v1/ghosts",{method:"POST",headers:{"content-type":"application/json","x-copa-client":clientId(),"x-copa-consent-version":CONFIG.consentVersion,"x-copa-delete-token":deleteToken()},body:JSON.stringify(current),keepalive:true});
-        if(!res.ok)break;
+        if(res.status===422){safeSet("copa_ghost_last_rejection_v1",JSON.stringify({run_id:current.run_id||"",at:new Date().toISOString()}));items.shift();continue;}
+        if(!res.ok&&res.status!==409)break;
         items.shift();sent++;
       }catch(_){break;}
     }
@@ -509,8 +522,19 @@
     });
     return onboardingRequest;
   }
-  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,LEADERBOARD_ENABLED_KEY,LEADERBOARD_CONSENT_KEY,LEADERBOARD_QUEUE_KEY,LEADERBOARD_DELETE_PENDING_KEY,ONBOARDING_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
-  async function deleteMyData(){const base=apiBase();saveQueue([]);saveLeaderboardQueue([]);safeSet(SHARING_KEY,"0");safeSet(LEADERBOARD_ENABLED_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});if(!response.ok)return {ok:false,status:response.status};const result=await response.json();if(result&&result.ok)clearLocalGhostData();return result;}catch(_){return {ok:false};}}
+  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,LEADERBOARD_ENABLED_KEY,LEADERBOARD_CONSENT_KEY,LEADERBOARD_QUEUE_KEY,LEADERBOARD_DELETE_PENDING_KEY,DELETE_PENDING_KEY,ONBOARDING_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
+  async function deleteMyData(){
+    const base=apiBase(),owner=clientId(),token=deleteToken();
+    saveQueue([]);saveLeaderboardQueue([]);safeSet(SHARING_KEY,"0");safeSet(LEADERBOARD_ENABLED_KEY,"0");
+    safeSet(DELETE_PENDING_KEY,JSON.stringify({requested_at:new Date().toISOString()}));ensureSetting();
+    if(!base||!navigator.onLine)return {ok:false,offline:true,pending:true};
+    try{
+      const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":owner,"x-copa-delete-token":token}});
+      if(!response.ok)return {ok:false,status:response.status,pending:true};
+      const result=await response.json();if(result&&result.ok){clearLocalGhostData();return result;}return Object.assign({pending:true},result);
+    }catch(_){return {ok:false,pending:true};}
+  }
+  async function flushMyDataDeletion(){return safeGet(DELETE_PENDING_KEY,"")?deleteMyData():{ok:true,pending:false,skipped:true};}
   function withdrawConsent(){safeSet(SHARING_KEY,"0");safeRemove(CONSENT_KEY);saveQueue([]);ensureSetting();}
   async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!/^G-[A-Z0-9]{8,32}$/.test(value))return {ok:false,error:"invalid_id"};if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}blockGhost(value);const requested=cleanText(reason).toLowerCase().slice(0,32),cleanReason=REPORT_REASONS.has(requested)?requested:"other";enqueueReport(value,cleanReason);const result=await flushReportQueue();return {ok:true,hidden:true,pending:result.pending>0,sent:result.sent};}
   function ensureSetting(){
@@ -536,7 +560,7 @@
       let privacy=document.getElementById("ghostSettingPrivacy");if(!privacy){privacy=document.createElement("div");privacy.id="ghostSettingPrivacy";privacy.className="ghost-setting-privacy";}
       if(privacy.parentElement!==privacySlot)privacySlot.appendChild(privacy);
       privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><button type="button" data-ghost-delete>${tr("Çevrimiçi verilerimi sil","Delete my online data")}</button>`;
-      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan Ghost verilerin, Dünya sıralaması profilin ve çevrimiçi koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your shared Ghost data, World ranking profile and online run results?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Çevrimiçi veriler silindi.","Online data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
+      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan Ghost verilerin, Dünya sıralaması profilin ve çevrimiçi koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your shared Ghost data, World ranking profile and online run results?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Çevrimiçi veriler silindi.","Online data deleted."):result.pending?tr("Silme isteği kaydedildi; bağlantı gelince otomatik tamamlanacak.","Deletion is queued and will complete automatically when you reconnect."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
     }
     const on=enabled(),sharing=sharingEnabled(),ranked=leaderboardEnabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle"),shareHeader=document.getElementById("ghostShareSettingHdr"),shareCopy=document.getElementById("ghostShareSettingCopy"),shareButton=document.getElementById("ghostShareToggle"),rankHeader=document.getElementById("leaderboardSettingHdr"),rankCopy=document.getElementById("leaderboardSettingCopy"),rankButton=document.getElementById("leaderboardToggle");
     if(header)header.textContent=tr("GHOST RAKİPLER","GHOST OPPONENTS");
@@ -550,7 +574,7 @@
     if(rankButton){rankButton.classList.toggle("on",ranked);rankButton.setAttribute("aria-pressed",String(ranked));rankButton.innerHTML=`<span aria-hidden="true">◎</span><span>${ranked?tr("SIRALAMADA","RANKED"):tr("KATILMIYOR","NOT JOINED")}</span>`;rankButton.title=tr("Dünya Kulüpler Sıralaması","World Club Ranking");}
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
-  window.addEventListener("online",()=>{flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,leaderboardEnabled,setLeaderboardEnabled,ensureSetting,requestConsent,requestLeaderboardConsent,requestMobileOnboarding,mobileOnboardingComplete,shouldGateMobileOnboarding,hasConsent,hasLeaderboardConsent,withdrawConsent,deleteMyData,deleteLeaderboardData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,recordLeaderboardRun,findOpponent,flushQueue,flushLeaderboardQueue,flushReports:flushReportQueue,renderLeaderboard,joinLeaderboard,ghostIcon,normalizeCompletedRun,normalizeLeaderboardRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
-  setTimeout(()=>{ensureSetting();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();},0);
+  window.addEventListener("online",()=>{flushMyDataDeletion();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,leaderboardEnabled,setLeaderboardEnabled,ensureSetting,requestConsent,requestLeaderboardConsent,requestMobileOnboarding,mobileOnboardingComplete,shouldGateMobileOnboarding,hasConsent,hasLeaderboardConsent,withdrawConsent,deleteMyData,flushMyDataDeletion,deleteLeaderboardData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,recordLeaderboardRun,findOpponent,flushQueue,flushLeaderboardQueue,flushReports:flushReportQueue,renderLeaderboard,joinLeaderboard,ghostIcon,normalizeCompletedRun,normalizeLeaderboardRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
+  setTimeout(()=>{ensureSetting();flushMyDataDeletion();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();},0);
 })();

@@ -36,14 +36,14 @@ public final class CheckAndroidAab {
     private static final List<String> FORBIDDEN_TEXT = List.of(
         "assets/clubs/", "patreon.com", "FM26", "Football Manager",
         "api.web3forms.com", "FA Cup", "Copa del Rey", "Coppa Italia",
-        "DFB-Pokal", "Emperor's Cup", "com.android.billingclient",
-        "play-services-ads", "google-mobile-ads", "admob"
+        "DFB-Pokal", "Emperor's Cup", "com.android.billingclient"
     );
 
     private static final List<String> REQUIRED = List.of(
         PUBLIC + "index.html",
         PUBLIC + "platform-build.json",
         PUBLIC + "src/runtime/nativeApp.js",
+        PUBLIC + "src/runtime/nativeAds.js",
         PUBLIC + "src/data/generic_club_visuals.js",
         PUBLIC + "assets/data/copa/player_profiles.json",
         PUBLIC + "privacy.html",
@@ -141,6 +141,9 @@ public final class CheckAndroidAab {
             String buildVersion = jsonString(packagedBuild, "build_version");
             if (packagedIndex == null || !packagedIndex.contains("src/runtime/nativeApp.js?v=" + buildVersion)) {
                 failures.add("native runtime cache key does not match packaged build version");
+            }
+            if (packagedIndex == null || !packagedIndex.contains("src/runtime/nativeAds.js?v=" + buildVersion)) {
+                failures.add("native ad runtime cache key does not match packaged build version");
             }
             if (packagedIndex == null || !packagedIndex.contains("class=\"generic-country-code\"")) {
                 failures.add("generic Android country-code visuals are missing");

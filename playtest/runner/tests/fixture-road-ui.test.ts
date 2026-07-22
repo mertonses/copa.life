@@ -26,7 +26,7 @@ test("fixture road shows text outcomes, active match, locked futures and rich de
   await expect(page.locator(".fixture-node").nth(0)).toContainText("W · Kazandı");
   await expect(page.locator(".fixture-node").nth(1)).toContainText("D · Berabere");
   await expect(page.locator(".fixture-node.is-active")).toContainText("Sıradaki maç");
-  await expect(page.locator(".fixture-node.is-locked").first()).toContainText("Rakip tur sonrası belli olur");
+  await expect(page.locator(".fixture-node.is-locked").first()).toContainText("Rakip eşleşme sonrası belli olur");
   await expect(page.locator("#fixbar")).not.toContainText("???");
 
   await page.locator(".fixture-node").nth(1).click();

@@ -13,7 +13,11 @@
 .mobile-draft-confirm,
 .mobile-feed-toggle,
 .mobile-tactic-status,
-.mobile-penalty-coach{display:none}
+.mobile-penalty-coach,
+.native-hub-nav,
+.native-bench-trigger,
+.native-bench-backdrop,
+.native-bench-close{display:none}
 
 .mobile-result-disclosure{display:contents}
 .mobile-result-disclosure>summary{display:none}
@@ -24,6 +28,54 @@
     padding-right:var(--copa-safe-right);
     padding-left:var(--copa-safe-left);
   }
+
+  html[data-copa-platform="android"] .native-hub-nav,
+  html[data-copa-platform="ios"] .native-hub-nav{
+    position:sticky;top:var(--copa-safe-top);z-index:70;display:grid;grid-template-columns:repeat(3,1fr);
+    width:min(100% - 20px,620px);margin:0 auto 10px;padding:4px;box-sizing:border-box;
+    border:1px solid var(--border-subtle);border-radius:10px;background:color-mix(in srgb,var(--surface-bg) 94%,transparent);
+    box-shadow:0 4px 14px rgba(10,17,24,.1);backdrop-filter:blur(10px);
+  }
+  html[data-copa-platform="android"] .native-hub-nav button,
+  html[data-copa-platform="ios"] .native-hub-nav button{
+    min-height:38px;border:0;border-radius:7px;background:transparent;color:var(--color-slate);
+    font:800 8px/1 var(--mono);letter-spacing:.7px;cursor:pointer;
+  }
+  html[data-copa-platform="android"] .native-hub-nav button.active,
+  html[data-copa-platform="ios"] .native-hub-nav button.active{
+    background:color-mix(in srgb,var(--color-primary) 13%,var(--surface-muted));color:var(--color-primary);
+  }
+  html[data-copa-platform="android"] #hub .pitch-area .native-bench-trigger,
+  html[data-copa-platform="ios"] #hub .pitch-area .native-bench-trigger{
+    display:flex;width:100%;min-height:42px;align-items:center;justify-content:space-between;margin:8px 0 0;padding:9px 12px;
+    border:1px solid var(--border-subtle);border-radius:8px;background:var(--surface-bg);color:var(--color-ink);
+    font:800 9px/1 var(--mono);letter-spacing:.8px;cursor:pointer;
+  }
+  html[data-copa-platform="android"] #hub .pitch-area .native-bench-trigger::after,
+  html[data-copa-platform="ios"] #hub .pitch-area .native-bench-trigger::after{content:"↑";color:var(--color-primary);font-size:14px}
+  html[data-copa-platform="android"] #hub .pitch-area #hubBenchSection,
+  html[data-copa-platform="ios"] #hub .pitch-area #hubBenchSection{
+    position:fixed!important;z-index:9001!important;right:0!important;bottom:0!important;left:0!important;top:auto!important;
+    display:block!important;width:100%!important;max-width:none!important;max-height:min(70dvh,560px)!important;margin:0!important;
+    padding:14px max(14px,var(--copa-safe-right)) calc(14px + var(--copa-safe-bottom)) max(14px,var(--copa-safe-left))!important;
+    box-sizing:border-box;overflow:auto!important;border-radius:18px 18px 0 0!important;background:var(--surface-bg)!important;
+    color:var(--color-ink)!important;box-shadow:0 -12px 40px rgba(10,17,24,.28)!important;
+    transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;
+  }
+  html.native-bench-open[data-copa-platform="android"] #hub .pitch-area #hubBenchSection,
+  html.native-bench-open[data-copa-platform="ios"] #hub .pitch-area #hubBenchSection{transform:translateY(0);visibility:visible;transition-delay:0s}
+  html[data-copa-platform="android"] #hubBenchSection .native-bench-close,
+  html[data-copa-platform="ios"] #hubBenchSection .native-bench-close{
+    display:grid;width:32px;height:32px;margin-left:auto;place-items:center;border:1px solid var(--border-subtle);border-radius:50%;
+    background:var(--surface-muted);color:var(--color-ink);font:500 20px/1 sans-serif;cursor:pointer;
+  }
+  html[data-copa-platform="android"] .native-bench-backdrop,
+  html[data-copa-platform="ios"] .native-bench-backdrop{
+    position:fixed;z-index:9000;inset:0;display:block;border:0;background:var(--overlay-bg);opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s;
+  }
+  html.native-bench-open[data-copa-platform="android"] .native-bench-backdrop,
+  html.native-bench-open[data-copa-platform="ios"] .native-bench-backdrop{opacity:1;visibility:visible;transition-delay:0s}
+  html.native-bench-open{overflow:hidden}
 
   html.mobile-dock-active body{
     padding-bottom:calc(var(--mobile-dock-height) + 10px);

@@ -142,6 +142,58 @@
     return dock;
   }
 
+  function closeNativeBench(){
+    document.documentElement.classList.remove("native-bench-open");
+    const trigger=document.getElementById("nativeBenchTrigger");
+    if(trigger)trigger.setAttribute("aria-expanded","false");
+  }
+
+  function openNativeBench(){
+    const panel=document.getElementById("hubBenchSection");
+    if(!panel||!panel.children.length)return;
+    document.documentElement.classList.add("native-bench-open");
+    const trigger=document.getElementById("nativeBenchTrigger");
+    if(trigger)trigger.setAttribute("aria-expanded","true");
+    const first=panel.querySelector("button,[tabindex]");
+    if(first)setTimeout(()=>first.focus({preventScroll:true}),80);
+  }
+
+  function ensureNativeHubNavigation(){
+    if(!global.COPA_IS_NATIVE||!isPhoneInteraction())return;
+    const hub=document.getElementById("hub");if(!hub)return;
+    let nav=document.getElementById("nativeHubNav");
+    if(!nav){
+      const tr=languageIsTurkish();
+      nav=document.createElement("nav");nav.id="nativeHubNav";nav.className="native-hub-nav";
+      nav.setAttribute("aria-label",tr?"Oyun bölümleri":"Game sections");
+      nav.innerHTML=`<button type="button" data-native-target="squad">${tr?"KADRO":"SQUAD"}</button><button type="button" data-native-target="match">${tr?"MAÇ":"MATCH"}</button><button type="button" data-native-target="career">${tr?"KARİYER":"CAREER"}</button>`;
+      nav.addEventListener("click",event=>{
+        const button=event.target.closest("button[data-native-target]");if(!button)return;
+        const target=button.dataset.nativeTarget;
+        if(target==="career"){if(global.CopaLazy)global.CopaLazy.openMetaProgression();return;}
+        const node=target==="squad"?hub.querySelector(".pitch-area"):document.getElementById("fixbar");
+        if(node)node.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"});
+        nav.querySelectorAll("button").forEach(item=>item.classList.toggle("active",item===button));
+      });
+      hub.prepend(nav);
+    }
+    const labels=languageIsTurkish()?["KADRO","MAÇ","KARİYER"]:["SQUAD","MATCH","CAREER"];
+    nav.querySelectorAll("button[data-native-target]").forEach((button,index)=>{button.textContent=labels[index]||button.textContent;});
+    const panel=document.getElementById("hubBenchSection"),pitch=hub.querySelector(".pitch-area");
+    if(panel&&pitch){
+      let trigger=document.getElementById("nativeBenchTrigger");
+      if(!trigger){trigger=document.createElement("button");trigger.type="button";trigger.id="nativeBenchTrigger";trigger.className="native-bench-trigger";trigger.setAttribute("aria-controls","hubBenchSection");trigger.addEventListener("click",openNativeBench);panel.parentNode.insertBefore(trigger,panel);}
+      const count=panel.querySelectorAll(".bench-row").length;
+      trigger.textContent=(languageIsTurkish()?"YEDEKLER":"BENCH")+(count?` · ${count}`:"");
+      trigger.classList.toggle("hidden",!panel.children.length);
+      if(!panel.querySelector(".native-bench-close")){
+        const head=panel.querySelector(".bench-head");if(head){const close=document.createElement("button");close.type="button";close.className="native-bench-close";close.setAttribute("aria-label",languageIsTurkish()?"Yedekleri kapat":"Close bench");close.textContent="×";close.addEventListener("click",closeNativeBench);head.appendChild(close);}
+      }
+      let backdrop=document.getElementById("nativeBenchBackdrop");
+      if(!backdrop){backdrop=document.createElement("button");backdrop.type="button";backdrop.id="nativeBenchBackdrop";backdrop.className="native-bench-backdrop";backdrop.setAttribute("aria-label",languageIsTurkish()?"Yedekleri kapat":"Close bench");backdrop.addEventListener("click",closeNativeBench);document.body.appendChild(backdrop);}
+    }
+  }
+
   function restoreMounted(){
     if(!mounted)return;
     const {node,placeholder}=mounted;
@@ -728,6 +780,7 @@
   }
 
   function handleBack(){
+    if(document.documentElement.classList.contains("native-bench-open")){closeNativeBench();return true;}
     if(global.PlayerProfiles&&global.PlayerProfiles.isOpen()){global.PlayerProfiles.close();return true;}
     const consent=document.getElementById("ghostConsentDialog");
     if(consent){consent.remove();return true;}
@@ -829,6 +882,7 @@
     ensureTacticStatus();
     ensureSkipButton();
     ensureNativeShare();
+    ensureNativeHubNavigation();
     syncMatchEvents();
     syncOverlayScroll();
   }
@@ -908,7 +962,7 @@
     if(!isPhoneInteraction())return;
     const target=event.target&&event.target.closest?event.target.closest("button,[role='button'],.shopcard"):null;
     if(!target)return;
-    if(target.id==="startBtn"||target.id==="quickStartBtn"){
+    if(target.id==="startBtn"){
       try{localStorage.setItem("copa_mobile_seen","1");}catch(_){}
     }
     const shout=target.closest(".shoutbtn");
@@ -981,6 +1035,9 @@
     confirmSkip,
     setAsyncState,
     haptic,
+    enhance,
+    openNativeBench,
+    closeNativeBench,
   };
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});

@@ -121,6 +121,49 @@ test("desktop keeps primary actions in their original layout",async({page},testI
   await page.goto("/?desktop-experience=1",{waitUntil:"domcontentloaded"});
   await expect(page.locator("#mobileActionDock")).toBeHidden();
   await expect(page.locator(".v7-cta-stack #startBtn")).toHaveCount(1);
+  await expect(page.locator("#nativeHubNav,#nativeBenchTrigger,#nativeBenchBackdrop")).toHaveCount(0);
+});
+
+test("native phone hub exposes section navigation and a back-safe bench sheet",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"native phone interaction contract");
+  await page.goto("/?native-hub-navigation=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.COPA_IS_NATIVE=true;game.COPA_PLATFORM="android";
+    document.documentElement.dataset.copaPlatform="android";
+    document.querySelector("#intro")?.classList.add("hidden");
+    document.querySelector("#hub")?.classList.remove("hidden");
+    const bench=document.getElementById("hubBenchSection")!;
+    bench.innerHTML='<div class="bench-head"><span class="bench-head-label">YEDEKLER</span></div><div class="bench-list"><button class="bench-row" type="button"><span class="bench-name">Test Yedek</span><b class="bench-power">72</b></button></div>';
+    game.CopaMobileExperience.enhance();
+  });
+  const nav=page.locator("#nativeHubNav");
+  await expect(nav).toBeVisible();
+  await expect(nav.locator("button")).toHaveCount(3);
+  const trigger=page.locator("#nativeBenchTrigger");
+  await expect(trigger).toBeVisible();
+  await expect(trigger).toContainText("1");
+  await trigger.click();
+  await expect(page.locator("html")).toHaveClass(/native-bench-open/);
+  await expect(page.locator("#hubBenchSection")).toBeVisible();
+  const handled=await page.evaluate(()=>(globalThis as any).CopaMobileExperience.handleBack());
+  expect(handled).toBe(true);
+  await expect(page.locator("html")).not.toHaveClass(/native-bench-open/);
+});
+
+test("portable save code excludes device-bound online identity and detects corruption",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"portable mobile transfer contract");
+  await page.goto("/?portable-save-transfer=1",{waitUntil:"domcontentloaded"});
+  const result=await page.evaluate(()=>{
+    localStorage.setItem("copa_theme","dark");
+    localStorage.setItem("copa_ghost_client_id_v1","DEVICE-BOUND");
+    const api=(globalThis as any).CopaTransferSave;
+    const code=api.exportCode(),decoded=api.decode(code);
+    let corruptRejected=false;
+    try{api.decode(code.slice(0,-1)+(code.endsWith("A")?"B":"A"));}catch(_){corruptRejected=true;}
+    return{prefix:code.slice(0,6),theme:decoded.preferences.copa_theme,identity:decoded.preferences.copa_ghost_client_id_v1||"",corruptRejected};
+  });
+  expect(result).toEqual({prefix:"COPA1-",theme:"dark",identity:"",corruptRejected:true});
 });
 
 test("mobile match segments switch presentation without pausing the simulation",async({page},testInfo)=>{
@@ -570,6 +613,82 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   await expect(firstCard).toHaveAttribute("aria-pressed","true");
   await expect(page.locator("#backupApplyBtn")).toBeEnabled();
   await expect(page.locator("#backupApplyBtn")).toContainText(/SEÇİLİ YEDEĞİ AL|CONFIRM REPLACEMENT/);
+});
+
+test("bench stays compact, draggable and height-bounded on wide screens and returns to flow on phones",async({page},testInfo)=>{
+  const isPhone=mobileOnly(testInfo.project.name);
+  test.skip(!["desktop-chromium","mobile-chromium"].includes(testInfo.project.name),"responsive bench contract");
+  await page.goto("/?bench-corner-layout=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{const game=globalThis as any;await game.quickStart();await game.quickAll();});
+  await expect(page.locator("#postClubName")).toBeVisible();
+  await page.locator("#postClubName").fill("Bench Layout FK");
+  await page.evaluate(()=>{const game=globalThis as any;game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  await expect(page.locator("#hub")).toBeVisible();
+  await expect(page.locator("#hubBenchSection .bench-row")).toHaveCount(4);
+
+  const chemistry=await page.evaluate(()=>{
+    const game=globalThis as any,value=Number(document.querySelector("#chemV")?.textContent||0);
+    return{scale:[-5,-2,0,2,5].map(game.chemMetricTone),visibleTone:(document.querySelector("#chemTile") as HTMLElement)?.dataset.metricTone,expectedTone:game.chemMetricTone(value)};
+  });
+  expect(chemistry.scale).toEqual(["worst","weak","average","good","elite"]);
+  expect(chemistry.visibleTone).toBe(chemistry.expectedTone);
+
+  const metrics=await page.evaluate(()=>{
+    const pitch=document.querySelector("#hubPitch") as HTMLElement;
+    const bench=document.querySelector("#hubBenchSection") as HTMLElement;
+    const row=bench.querySelector(".bench-row") as HTMLElement;
+    const pitchRect=pitch.getBoundingClientRect();
+    const benchRect=bench.getBoundingClientRect();
+    const rowRect=row.getBoundingClientRect();
+    return{
+      parentClass:bench.parentElement?.parentElement?.className||"",
+      position:getComputedStyle(bench).position,
+      pitchTop:Math.round(pitchRect.top),
+      pitchRight:Math.round(pitchRect.right),
+      pitchBottom:Math.round(pitchRect.bottom),
+      benchTop:Math.round(benchRect.top),
+      benchRight:Math.round(benchRect.right),
+      benchWidth:Math.round(benchRect.width),
+      rowHeight:Math.round(rowRect.height),
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+    };
+  });
+  expect(metrics.parentClass).toContain("pitch-area");
+  expect(metrics.pageOverflow).toBeLessThanOrEqual(1);
+  if(isPhone){
+    expect(metrics.position).toBe("static");
+    expect(metrics.benchTop).toBeGreaterThanOrEqual(metrics.pitchBottom);
+    await expect(page.locator("#hubBenchSection")).not.toHaveClass(/bench-panel-draggable/);
+    await expect(page.locator("#hubBenchSection .bench-head")).not.toHaveAttribute("tabindex","0");
+  }else{
+    expect(metrics.position).toBe("absolute");
+    expect(metrics.benchTop-metrics.pitchTop).toBeGreaterThanOrEqual(8);
+    expect(metrics.benchTop-metrics.pitchTop).toBeLessThanOrEqual(12);
+    expect(metrics.pitchRight-metrics.benchRight).toBeGreaterThanOrEqual(8);
+    expect(metrics.pitchRight-metrics.benchRight).toBeLessThanOrEqual(12);
+    expect(metrics.benchWidth).toBeLessThanOrEqual(234);
+    expect(metrics.rowHeight).toBeLessThanOrEqual(28);
+    const panel=page.locator("#hubBenchSection"),handle=panel.locator(".bench-head");
+    await expect(panel).toHaveClass(/bench-panel-draggable/);
+    await expect(handle).toHaveAttribute("tabindex","0");
+    const before=await panel.boundingBox();const grip=await handle.boundingBox();
+    expect(before).not.toBeNull();expect(grip).not.toBeNull();
+    await page.mouse.move(grip!.x+grip!.width/2,grip!.y+grip!.height/2);
+    await page.mouse.down();await page.mouse.move(grip!.x+grip!.width/2-120,grip!.y+grip!.height/2+72,{steps:8});await page.mouse.up();
+    const dragged=await page.evaluate(()=>{const pitch=document.querySelector("#hubPitch")!.getBoundingClientRect(),bench=document.querySelector("#hubBenchSection")!.getBoundingClientRect();return{pitch:{left:pitch.left,top:pitch.top,right:pitch.right,bottom:pitch.bottom},bench:{left:bench.left,top:bench.top,right:bench.right,bottom:bench.bottom}};});
+    expect(dragged.bench.left).toBeLessThan(before!.x-80);
+    expect(dragged.bench.top).toBeGreaterThan(before!.y+45);
+    expect(dragged.bench.left).toBeGreaterThanOrEqual(dragged.pitch.left+8);
+    expect(dragged.bench.top).toBeGreaterThanOrEqual(dragged.pitch.top+8);
+    expect(dragged.bench.right).toBeLessThanOrEqual(dragged.pitch.right-8);
+    expect(dragged.bench.bottom).toBeLessThanOrEqual(dragged.pitch.bottom-8);
+
+    await page.evaluate(()=>{const game=globalThis as any,seed=game.bench.find((player:any)=>player&&!player.used);for(let i=0;i<24;i++)game.bench.push({...seed,id:`bench-overflow-${i}`,name:`Extra Bench ${i}`,used:false,bench:true});game.renderHub();});
+    await expect(page.locator("#hubBenchSection .bench-row")).toHaveCount(28);
+    const overflow=await panel.evaluate((element:any)=>({clientHeight:element.clientHeight,scrollHeight:element.scrollHeight,pitchHeight:element.closest(".pitch-area").clientHeight}));
+    expect(overflow.clientHeight).toBeLessThanOrEqual(overflow.pitchHeight-18);
+    expect(overflow.scrollHeight).toBeGreaterThan(overflow.clientHeight);
+  }
 });
 
 test("phone portrait and landscape matrices stay inside the viewport with usable hit areas",async({page},testInfo)=>{

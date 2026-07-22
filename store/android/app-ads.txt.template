@@ -1,0 +1,3 @@
+# Replace PUB_ID with the numeric publisher ID shown in AdMob, then publish this
+# single seller line at https://copa.life/app-ads.txt before production release.
+google.com, pub-PUB_ID, DIRECT, f08c47fec0942fa0

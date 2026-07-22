@@ -11,7 +11,7 @@ Web ve Android'in tek kaynak/parite yapısı, CI aday üretimi ve Play dağıtı
 - Native kabuk: Capacitor 8
 - Gerekli Java kaynak düzeyi: JDK 21
 
-Gerçek kulüp armaları, Patreon bağlantısı/varlığı, reklam ve ödeme SDK'ları Android paketine alınmaz. `npm run check:android` bu ayrımı derlemeden önce zorunlu olarak doğrular.
+Gerçek kulüp armaları, Patreon bağlantısı/varlığı ve ödeme SDK'ları Android paketine alınmaz. Reklam için yalnız GMA Next‑Gen 1.2.1, UMP 4.0.0 ve yerel `CopaAds` köprüsü paketlenir. Run sonu reklamında aynı run tekrarını ve 10 dakikalık yerel gösterim aralığını köprü engeller. `npm run check:android` bu sınırı derlemeden önce doğrular.
 
 ## Web paketini native projeye aktarma
 
@@ -35,6 +35,14 @@ $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 Set-Location android
 .\gradlew.bat :app:assembleDebug
 .\gradlew.bat :app:bundleRelease
+```
+
+Debug ve kirli aday derlemeler Google'ın test AdMob kimliklerini kullanır. Play'e gidecek temiz release öncesinde gerçek kimlikleri ortam değişkeni olarak verin:
+
+```powershell
+$env:COPA_ADMOB_APP_ID = "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
+$env:COPA_ADMOB_INTERSTITIAL_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ"
+npm run android:release:local
 ```
 
 Çıktılar:
@@ -69,4 +77,5 @@ Ardından gerçek cihaz veya kapalı test kanalında şu akışlar manuel denenm
 - Arka plana geçişte oyunun kaydedilmesi ve geri dönüşte devam.
 - Çevrimdışı temel oyun.
 - Ghost özelliğinin varsayılan kapalı olması, çift rıza, raporlama ve veri silme.
+- EEA test coğrafyasında UMP mesajı, Ayarlar'daki reklam gizliliği girişi ve run sonunda test geçiş reklamı.
 - Küçük telefon, uzun ekran ve tablet yerleşimleri.

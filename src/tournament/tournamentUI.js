@@ -2,8 +2,10 @@
 (function(root){
   "use strict";
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+  const HEADER_FULL={tr:{played:"Oynanan",wins:"Galibiyet",draws:"Beraberlik",losses:"Mağlubiyet",gf:"Atılan gol",ga:"Yenilen gol",gd:"Averaj",points:"Puan"},en:{played:"Played",wins:"Wins",draws:"Draws",losses:"Losses",gf:"Goals for",ga:"Goals against",gd:"Goal difference",points:"Points"},es:{played:"Partidos jugados",wins:"Victorias",draws:"Empates",losses:"Derrotas",gf:"Goles a favor",ga:"Goles en contra",gd:"Diferencia de goles",points:"Puntos"},de:{played:"Spiele",wins:"Siege",draws:"Unentschieden",losses:"Niederlagen",gf:"Tore",ga:"Gegentore",gd:"Tordifferenz",points:"Punkte"},it:{played:"Partite giocate",wins:"Vittorie",draws:"Pareggi",losses:"Sconfitte",gf:"Gol fatti",ga:"Gol subiti",gd:"Differenza reti",points:"Punti"}};
   const teamName=(state,id)=>state.teams[id]&&state.teams[id].name||"—";
   const teamPower=(state,id)=>state.teams[id]&&state.teams[id].power||0;
+  const matchTeamName=(state,match,id)=>match&&match.ghostOpponent&&match.ghostOpponent.originalTeamId===id?match.ghostOpponent.name:teamName(state,id);
   function revealedTeamIds(state){return new Set(state.draw.entries.slice(0,state.draw.revealIndex).map(entry=>entry.teamId));}
   function drawGroup(state,group,copy,revealed,latestTeamId){
     const entries=state.draw.entries.filter(entry=>entry.groupId===group.id&&revealed.has(entry.teamId)).sort((a,b)=>a.pot-b.pot);
@@ -23,7 +25,7 @@
         <aside class="td-machine">
           <div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
           <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button>
-          <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
+          <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
           <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost" onclick="fastTournamentDraw()">${esc(copy.quickDraw)}</button>`}</div>
         </aside>
       </div>
@@ -32,7 +34,8 @@
   }
   function tableMarkup(state,group,copy,compact=false){
     const rows=group.table||[];
-    return `<div class="tg-table-wrap"><table class="tg-table"><caption>${esc(copy.group)} ${group.id}</caption><thead><tr><th>#</th><th>${esc(copy.team)}</th><th>${esc(copy.played)}</th><th>${esc(copy.wins)}</th><th>${esc(copy.draws)}</th><th>${esc(copy.losses)}</th>${compact?"":`<th>${esc(copy.gf)}</th><th>${esc(copy.ga)}</th>`}<th>${esc(copy.gd)}</th><th>${esc(copy.points)}</th></tr></thead><tbody>${rows.map(row=>`<tr class="${row.teamId==="player"?"is-player":""} ${row.rank<=2?"is-qualified":""}"><td><span class="tg-rank">${row.rank}</span></td><th scope="row">${esc(teamName(state,row.teamId))}</th><td>${row.played}</td><td>${row.wins}</td><td>${row.draws}</td><td>${row.losses}</td>${compact?"":`<td>${row.gf}</td><td>${row.ga}</td>`}<td>${row.gd>0?"+":""}${row.gd}</td><td><b>${row.points}</b></td></tr>`).join("")}</tbody></table></div>`;
+    const full=HEADER_FULL[root.LANG]||HEADER_FULL.en,head=(short,key)=>`<abbr title="${esc(full[key]||short)}">${esc(short)}</abbr>`;
+    return `<div class="tg-table-wrap"><table class="tg-table"><caption>${esc(copy.group)} ${group.id}</caption><thead><tr><th scope="col">#</th><th scope="col">${esc(copy.team)}</th><th scope="col">${head(copy.played,"played")}</th><th scope="col">${head(copy.wins,"wins")}</th><th scope="col">${head(copy.draws,"draws")}</th><th scope="col">${head(copy.losses,"losses")}</th>${compact?"":`<th scope="col">${head(copy.gf,"gf")}</th><th scope="col">${head(copy.ga,"ga")}</th>`}<th scope="col">${head(copy.gd,"gd")}</th><th scope="col">${head(copy.points,"points")}</th></tr></thead><tbody>${rows.map(row=>`<tr class="${row.teamId==="player"?"is-player":""} ${row.rank<=2?"is-qualified":""}"><td><span class="tg-rank">${row.rank}</span></td><th scope="row">${esc(teamName(state,row.teamId))}</th><td>${row.played}</td><td>${row.wins}</td><td>${row.draws}</td><td>${row.losses}</td>${compact?"":`<td>${row.gf}</td><td>${row.ga}</td>`}<td>${row.gd>0?"+":""}${row.gd}</td><td><b>${row.points}</b></td></tr>`).join("")}</tbody></table></div>`;
   }
   function currentStageCopy(state,copy){
     if(state.phase==="group")return `${copy.groupMatchday} ${state.group.matchday}/3`;
@@ -49,12 +52,12 @@
       container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.group)} ${group.id}</h3></div><div class="tg-stage-chip">${esc(currentStageCopy(state,copy))}</div></header>${tableMarkup(state,group,copy,true)}<footer><span>${playerRow&&playerRow.played?`${playerRow.points} ${esc(copy.points)} · ${playerRow.gd>0?"+":""}${playerRow.gd} ${esc(copy.gd)}`:esc(copy.topTwo)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.allGroups)} →</button></footer></section>`;
     }else{
       const match=root.CopaTournamentEngine&&root.CopaTournamentEngine.getCurrentPlayerMatch(state),opponent=match&&(match.homeId==="player"?match.awayId:match.homeId);
-      container.innerHTML=`<section class="tg-hub-card tg-knockout-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(currentStageCopy(state,copy))}</h3></div><div class="tg-stage-chip">${esc(copy.knockout)}</div></header><div class="tg-next"><span>${esc(copy.nextOpponent)}</span><b>${opponent?esc(teamName(state,opponent)):"—"}</b></div><footer><span>${esc(copy.knockoutRule)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.bracket)} →</button></footer></section>`;
+      container.innerHTML=`<section class="tg-hub-card tg-knockout-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(currentStageCopy(state,copy))}</h3></div><div class="tg-stage-chip">${esc(copy.knockout)}</div></header><div class="tg-next"><span>${esc(copy.nextOpponent)}</span><b>${opponent?esc(matchTeamName(state,match,opponent)):"—"}</b></div><footer><span>${esc(copy.knockoutRule)}</span><button type="button" onclick="showTournamentOverview()">${esc(copy.bracket)} →</button></footer></section>`;
     }
   }
   function knockoutMarkup(state,copy){
     const rounds=[["quarterfinal",copy.quarterfinal],["semifinal",copy.semifinal],["final",copy.final]];
-    return `<div class="tg-bracket">${rounds.map(([key,label])=>`<section><h4>${esc(label)}</h4>${(state.knockout.slots[key]||[]).map(id=>{const match=state.matches[id];if(!match)return"";const score=match.status==="played"?`${match.score[0]}–${match.score[1]}`:"—";return `<div class="tg-bracket-match"><span class="${match.winnerId===match.homeId?"is-winner":""}">${esc(teamName(state,match.homeId))}</span><b>${score}</b><span class="${match.winnerId===match.awayId?"is-winner":""}">${esc(teamName(state,match.awayId))}</span></div>`;}).join("")||`<p>${esc(copy.pending)}</p>`}</section>`).join("")}</div>`;
+    return `<div class="tg-bracket">${rounds.map(([key,label])=>`<section><h4>${esc(label)}</h4>${(state.knockout.slots[key]||[]).map(id=>{const match=state.matches[id];if(!match)return"";const score=match.status==="played"?`${match.score[0]}–${match.score[1]}${match.decidedBy==="penalties"?" p":""}`:"—";return `<div class="tg-bracket-match"><span class="${match.winnerId===match.homeId?"is-winner":""}">${esc(matchTeamName(state,match,match.homeId))}</span><b>${score}</b><span class="${match.winnerId===match.awayId?"is-winner":""}">${esc(matchTeamName(state,match,match.awayId))}</span></div>`;}).join("")||`<p>${esc(copy.pending)}</p>`}</section>`).join("")}</div>`;
   }
   function overviewMarkup(state,copy){
     return `<div class="tg-overview"><header><span>${esc(copy.cupFormat)}</span><h3>${esc(copy.tournamentOverview)}</h3><button onclick="closeModal()" aria-label="${esc(copy.close)}">×</button></header><div class="tg-tabs-copy">${esc(copy.topTwo)}</div><div class="tg-all-groups">${state.groups.map(group=>tableMarkup(state,group,copy,true)).join("")}</div>${knockoutMarkup(state,copy)}<div class="bact"><button class="btn btn-primary" onclick="closeModal()">${esc(copy.close)}</button></div></div>`;

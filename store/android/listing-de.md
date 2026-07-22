@@ -21,7 +21,7 @@ Features:
 - Abwägungen zwischen Budget, Chemie und Taktik
 - Sechsdimensionale copa-Spielerprofile
 - Karten, Spielereignisse und unvorhersehbare Wendungen
-- Ein Pokallauf über sechs Runden
+- Drei Gruppenspiele; danach Viertelfinale, Halbfinale und Finale
 - Helles und dunkles Design
 - Kein Konto und keine Anmeldung erforderlich
 
@@ -34,5 +34,5 @@ copa.life ist ein unabhängiges Spiel. Es ist weder mit Spielern, Vereinen, Lige
 - Typ: Spiel
 - Kategorie: Sport
 - Preis: Kostenlos
-- Werbung: Nein
+- Werbung: Ja — Vollbildanzeige nach einem abgeschlossenen Durchlauf
 - In-App-Käufe: Nein

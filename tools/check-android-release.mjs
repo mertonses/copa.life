@@ -35,12 +35,24 @@ if (!manifest.includes('android:allowBackup="false"')) fail("Android backup must
 if (!manifest.includes('android:usesCleartextTraffic="false"')) fail("cleartext Android traffic must remain disabled");
 if (!manifest.includes('android:screenOrientation="portrait"')) fail("Android orientation contract changed");
 const permissions = [...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map((match) => match[1]);
-if (permissions.length !== 1 || permissions[0] !== "android.permission.INTERNET") {
+const expectedPermissions = new Set(["android.permission.INTERNET", "com.google.android.gms.permission.AD_ID"]);
+if (permissions.length !== expectedPermissions.size || permissions.some((permission) => !expectedPermissions.has(permission))) {
   fail(`unexpected Android permissions: ${permissions.join(", ") || "none"}`);
 }
+for (const marker of ['com.google.android.gms.ads.APPLICATION_ID', '${admobAppId}']) {
+  if (!manifest.includes(marker)) fail(`AdMob manifest configuration is missing ${marker}`);
+}
+const appGradle = read("android/app/build.gradle");
+for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
+  if (!appGradle.includes(marker)) fail(`Android ad dependency/configuration is missing ${marker}`);
+}
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");
-for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCode", "reload()"] ) {
+for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCode", "reload()", "registerPlugin(CopaAdsPlugin.class)"] ) {
   if (!mainActivity.includes(marker)) fail(`native update cache guard is missing ${marker}`);
+}
+const adsPlugin = read("android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
+for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
+  if (!adsPlugin.includes(marker)) fail(`native ad consent/runtime guard is missing ${marker}`);
 }
 
 const filePaths = read("android/app/src/main/res/xml/file_paths.xml");
@@ -77,6 +89,9 @@ if (!/uses:\s*r0adkll\/upload-google-play@[a-f0-9]{40}/.test(playWorkflow)) {
 if (!/tracks:\s*internal/.test(playWorkflow)) fail("automated upload must target internal testing only");
 if (/tracks:\s*(?:production|alpha|beta)/.test(playWorkflow)) {
   fail("automated uploader must not bypass internal testing");
+}
+for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
+  if (!playWorkflow.includes(`secrets.${marker}`)) fail(`Google Play workflow is missing ${marker}`);
 }
 
 const candidateWorkflow = read(".github/workflows/android-candidate.yml");
@@ -125,9 +140,11 @@ const releaseManifestWriter = read("tools/write-android-release-manifest.mjs");
 if (
   !releaseManifestWriter.includes("exact_release_emulator_smoke:") ||
   !releaseManifestWriter.includes('"required after candidate build"') ||
-  !releaseManifestWriter.includes("--emulator-smoke-passed")
+  !releaseManifestWriter.includes("--emulator-smoke-passed") ||
+  !releaseManifestWriter.includes("store_upload_eligible:") ||
+  !releaseManifestWriter.includes("productionAdmobIdsPresent")
 ) {
-  fail("release manifest does not reset exact-release emulator verification after each build");
+  fail("release manifest does not lock emulator and production AdMob upload eligibility after each build");
 }
 
 if (failures.length) {

@@ -6,9 +6,10 @@
   const App=resolvePlugin("App"),StatusBar=resolvePlugin("StatusBar"),SplashScreen=resolvePlugin("SplashScreen");
   if(!App||!StatusBar||!SplashScreen)return;
   function addNativeListener(name,handler){try{const result=App.addListener(name,handler);if(result&&typeof result.catch==="function")result.catch(()=>{});}catch(_){}}
-  function checkpoint(){
+  async function checkpoint(){
     try{if(typeof root._saveState==="function")root._saveState();}catch(_){}
     try{if(root.sim&&typeof root.sim.checkpoint==="function")root.sim.checkpoint();}catch(_){}
+    try{if(root.CopaPlatform&&root.CopaPlatform.storage){await root.CopaPlatform.storage.syncKnown();await root.CopaPlatform.storage.flush();}}catch(_){}
   }
   function closeOverlay(){
     if(root.PlayerProfiles&&root.PlayerProfiles.isOpen()){root.PlayerProfiles.close();return true;}
@@ -23,6 +24,7 @@
   }
   addNativeListener("appStateChange",state=>{if(!state.isActive)checkpoint();root.dispatchEvent(new CustomEvent("copa:native-state",{detail:{active:!!state.isActive}}));});
   addNativeListener("pause",checkpoint);
+  addNativeListener("resume",()=>root.dispatchEvent(new CustomEvent("copa:native-resume")));
   if(root.COPA_PLATFORM==="android")addNativeListener("backButton",event=>{
       if(root.CopaMobileExperience&&typeof root.CopaMobileExperience.handleBack==="function"&&root.CopaMobileExperience.handleBack())return;
       if(closeOverlay())return;
