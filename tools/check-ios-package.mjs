@@ -44,9 +44,10 @@ for (const marker of [
 }
 if (!index.includes('class="generic-country-code"')) fail("iOS index is missing generic country-code visuals");
 if (/<img\s+[^>]*src=["']assets\/flags\//i.test(index)) fail("iOS index still renders flag artwork");
-if (!index.includes("Capacitor.Plugins.Browser") || !index.includes('plugin.open({url:"https://copa.life/"')) {
-  fail("iOS support link is not routed through the native Browser plugin");
+if (!index.includes("Capacitor.Plugins.Browser") || !index.includes('const supportUrl="https://copa.life/support.html"') || !index.includes("plugin.open({url:supportUrl")) {
+  fail("iOS support link is not routed through the dedicated support page");
 }
+if (index.includes('plugin.open({url:"https://copa.life/"')) fail("iOS support link still routes to the public home page");
 
 const i18n = path.join(OUT, "src/data/i18n.js");
 const profiles = path.join(OUT, "src/ui/playerProfiles.js");

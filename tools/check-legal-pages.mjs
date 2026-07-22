@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "dist-legal");
 const REMOTE_BASE = "https://copa-life-legal.pages.dev";
+const MOBILE_SUPPORT_URL = "https://copa.life/support.html";
 const failures = [];
 const required = {
   "privacy.html": ["Gizlilik", "45 gün", "Çevrimiçi verilerimi sil", "ghost-terms-v1", "leaderboard-terms-v1", "Google AdMob", "support@copa.life"],
@@ -23,6 +24,8 @@ function verifyPage(name, text) {
   for (const forbidden of ["assets/clubs", "patreon.com", "api.web3forms.com", "CONTACT_FORM_KEY"]) {
     if (text.includes(forbidden)) fail(`${name} contains ${forbidden}`);
   }
+  if (!text.includes(MOBILE_SUPPORT_URL)) fail(`${name} does not return users to the dedicated support page`);
+  if (text.includes('href="https://copa.life/"')) fail(`${name} still links users to the public home page`);
 }
 
 for (const name of Object.keys(required)) {

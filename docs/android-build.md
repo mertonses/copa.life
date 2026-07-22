@@ -11,7 +11,7 @@ Web ve Android'in tek kaynak/parite yapısı, CI aday üretimi ve Play dağıtı
 - Native kabuk: Capacitor 8
 - Gerekli Java kaynak düzeyi: JDK 21
 
-Gerçek kulüp armaları, Patreon bağlantısı/varlığı ve ödeme SDK'ları Android paketine alınmaz. Reklam için yalnız GMA Next‑Gen 1.2.1, UMP 4.0.0 ve yerel `CopaAds` köprüsü paketlenir. Run sonu reklamında aynı run tekrarını ve 10 dakikalık yerel gösterim aralığını köprü engeller. `npm run check:android` bu sınırı derlemeden önce doğrular.
+Gerçek kulüp armaları, Patreon bağlantısı/varlığı ve ödeme SDK'ları Android paketine alınmaz. Uygulamadaki İletişim ve Hata Raporu düğmeleri ana sayfa yerine ödeme veya bağış yönlendirmesi içermeyen `https://copa.life/support.html` sayfasını açar. Reklam için yalnız GMA Next‑Gen 1.2.1, UMP 4.0.0 ve yerel `CopaAds` köprüsü paketlenir. Run sonu reklamında aynı run tekrarını ve 10 dakikalık yerel gösterim aralığını köprü engeller. `npm run check:android` bu sınırı derlemeden önce doğrular.
 
 ## Web paketini native projeye aktarma
 

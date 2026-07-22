@@ -13,6 +13,7 @@ const ROOT_FILES = [
   "favicon-32x32.png",
   "favicon-48x48.png",
   "faq.html",
+  "support.html",
   "apple-touch-icon.png",
   "web-app-icon-192.png",
   "web-app-icon-512.png",
@@ -91,7 +92,7 @@ export function buildNativePackage({
     .replace(/<a class="footer-link" href="https:\/\/www\.patreon\.com[\s\S]*?<\/a>/g, "")
     .replace(
       /function openContactForm\(\)\{[\s\S]*?^}\r?\nasync function submitContact\(\)\{[\s\S]*?^}\r?\nfunction goLand/m,
-      'function openNativeSupport(){const plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser;if(plugin&&typeof plugin.open==="function"){plugin.open({url:"https://copa.life/",toolbarColor:"#0c2b24"}).catch(()=>{});return;}window.open("https://copa.life/","_blank","noopener");}\nfunction goLand',
+      'function openNativeSupport(){const supportUrl="https://copa.life/support.html";const plugin=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser;if(plugin&&typeof plugin.open==="function"){plugin.open({url:supportUrl,toolbarColor:"#0c2b24"}).catch(()=>{});return;}window.open(supportUrl,"_blank","noopener");}\nfunction goLand',
     )
     .replace(/onclick="openContactForm\(\)"/g, 'onclick="openNativeSupport()"')
     .replace(/onclick="openBugReport\(\)"/g, 'onclick="openNativeSupport()"')

@@ -64,6 +64,16 @@ if (build.status !== 0) {
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
 if (!distFiles.includes("app-ads.txt")) fail("app-ads.txt is missing from dist");
+if (!distFiles.includes("support.html")) fail("dedicated mobile support page is missing from dist");
+else {
+  const supportPage = fs.readFileSync(path.join(DIST, "support.html"), "utf8");
+  for (const forbidden of ["patreon.com", "api.web3forms.com", "checkout", "purchase", "donate"]) {
+    if (supportPage.toLowerCase().includes(forbidden)) fail(`support page contains forbidden commerce marker: ${forbidden}`);
+  }
+  if (!supportPage.includes("mailto:support@copa.life") || !supportPage.includes("copa-life-legal.pages.dev/privacy.html")) {
+    fail("support page is missing the official email or privacy policy link");
+  }
+}
 const appAds = fs.readFileSync(path.join(DIST, "app-ads.txt"), "utf8").trim();
 if (appAds !== "google.com, pub-7347507737044067, DIRECT, f08c47fec0942fa0") {
   fail("app-ads.txt does not contain the verified AdMob publisher record");
