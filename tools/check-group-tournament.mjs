@@ -105,6 +105,28 @@ for(const formation of supportedFormations){
 }
 
 {
+  /* Consecutive random runs must not feel like a fixed bracket. A 20-team pool
+     naturally repeats more clubs than a 40-team pool, so each size has its own
+     overlap ceiling while preserving same-seed replayability above. */
+  const diversity=(poolSize)=>{
+    const localPool=Array.from({length:poolSize},(_,index)=>({name:`Diversity Club ${index+1}`}));
+    const signatures=new Set();let previous=null,overlap=0,identical=0;
+    const samples=900;
+    for(let index=0;index<samples;index++){
+      const state=engine.createTournament({...baseOptions,seed:810000+index,pool:localPool});
+      const names=engine.getPlayerGroup(state).teamIds.filter(id=>id!=="player").map(id=>state.teams[id].name).sort();
+      signatures.add(names.join("|"));
+      if(previous){const common=names.filter(name=>previous.includes(name)).length;overlap+=common;if(common===3)identical++;}
+      previous=names;
+    }
+    return{unique:signatures.size,averageOverlap:overlap/(samples-1),identical};
+  };
+  const broad=diversity(40),compact=diversity(20);
+  assert.ok(broad.unique>=700&&broad.averageOverlap<0.35&&broad.identical===0,`40-team draw diversity regressed: ${JSON.stringify(broad)}`);
+  assert.ok(compact.unique>=580&&compact.averageOverlap<0.65&&compact.identical<=3,`20-team draw diversity regressed: ${JSON.stringify(compact)}`);
+}
+
+{
   /* Three group wins guarantee qualification, then forced knockout wins produce a champion. */
   const state=newTournament();engine.completeDraw(state);
   for(let day=0;day<3;day++){

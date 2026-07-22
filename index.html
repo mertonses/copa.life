@@ -1714,6 +1714,7 @@ function playMatch(skipRisk){if(runEnded||pendingMatchResolution)return;if(windo
       core:window.CopaFinalSimCore,runSeed:seedNum,round,
       opponentId:opponent&&opponent.ghostId,opponentName:opponent&&opponent.name,
       homePower:sp.power,awayPower:opponent.power,style,cards,
+      awayStyle:opponent&&opponent.style,
       ghostProfile:opponent&&opponent.ghostProfile
     });
   }catch(error){
@@ -2346,7 +2347,7 @@ function ensureHtml2Canvas(){
   return window._html2canvasLoading;
 }
 function fb(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){$("copied").textContent=L().copyfail;}document.body.removeChild(ta);}
-function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
+function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();const _seedInput=$("seedInput");if(_seedInput)_seedInput.value="";document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
 
 
 /* ===== v5: categories, identity, helpers ===== */

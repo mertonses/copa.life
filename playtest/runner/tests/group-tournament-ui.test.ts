@@ -15,6 +15,15 @@ const finishDraw=async(page:any)=>{
   await expect(page.locator("#hub")).toBeVisible();
 };
 
+test("a new run does not silently reuse the previous deterministic seed",async({page})=>{
+  await page.goto("/?autotest=1&groups=1",{waitUntil:"domcontentloaded"});
+  const seed=await page.evaluate(()=>{
+    const w=globalThis as any,input=document.getElementById("seedInput") as HTMLInputElement;
+    input.value="424242";w.restart();return input.value;
+  });
+  expect(seed).toBe("");
+});
+
 test("manual draw is resumable and quick draw preserves the predetermined groups",async({page})=>{
   await startDraw(page);
   const original=await page.evaluate(()=>JSON.stringify((globalThis as any).tournament.draw.entries));
