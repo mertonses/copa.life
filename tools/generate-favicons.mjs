@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
-const source = path.resolve(root, process.argv[2] || "favicon.svg");
+const source = path.resolve(root, process.argv[2] || "assets/icons/dice_512.png");
 const outputs = [
   ["favicon-16x16.png", 16],
   ["favicon-32x32.png", 32],
@@ -12,6 +12,7 @@ const outputs = [
   ["web-app-icon-512.png", 512],
   ["assets/icons/icon-192.png", 192],
   ["assets/icons/icon-512.png", 512],
+  ["assets/icons/cl.png", 512],
   ["store/android/graphics/app-icon-512.png", 512],
 ];
 
@@ -30,8 +31,9 @@ async function findPlaywrightCore() {
   return path.join(nodeModules, coreDir.name, "index.mjs");
 }
 
-const sourceSvg = await fs.readFile(source, "utf8");
-const dataUrl = `data:image/svg+xml;base64,${Buffer.from(sourceSvg).toString("base64")}`;
+const sourceBytes = await fs.readFile(source);
+const sourceMime = path.extname(source).toLowerCase() === ".svg" ? "image/svg+xml" : "image/png";
+const dataUrl = `data:${sourceMime};base64,${sourceBytes.toString("base64")}`;
 const { chromium } = await import(`file:///${(await findPlaywrightCore()).replace(/\\/g, "/")}`);
 
 const browser = await chromium.launch({
@@ -51,10 +53,10 @@ try {
     await fs.mkdir(path.dirname(path.resolve(root, fileName)), { recursive: true });
     await page.setViewportSize({ width: size, height: size });
     await page.setContent(
-      `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:${size}px;height:${size}px;background:transparent;overflow:hidden}img{display:block;width:${size}px;height:${size}px}</style></head><body><img id="icon" src="${dataUrl}" alt=""></body></html>`,
+      `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:${size}px;height:${size}px;background:transparent;overflow:hidden}.tile{width:100%;height:100%;border-radius:22%;background:#101D28;display:grid;place-items:center}.tile img{display:block;width:76%;height:76%;object-fit:contain;image-rendering:pixelated}</style></head><body><div class="tile"><img src="${dataUrl}" alt=""></div></body></html>`,
       { waitUntil: "load" },
     );
-    await page.locator("#icon").screenshot({
+    await page.screenshot({
       path: path.resolve(root, fileName),
       omitBackground: true,
     });

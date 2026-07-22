@@ -6,8 +6,8 @@
   },
   "scripts": {
     "postinstall": "node tools/patch-capacitor-safe-area.mjs",
-    "brand:assets": "node tools/apply-brand-palette.mjs && node tools/generate-favicons.mjs favicon.svg && node tools/generate-ios-assets.mjs && node tools/generate-android-assets.mjs",
-    "favicons": "node tools/generate-favicons.mjs favicon.svg",
+    "brand:assets": "node tools/apply-brand-palette.mjs && node tools/generate-favicons.mjs assets/icons/dice_512.png && node tools/generate-ios-assets.mjs && node tools/generate-android-assets.mjs",
+    "favicons": "node tools/generate-favicons.mjs assets/icons/dice_512.png",
     "fix:encoding": "node tools/fix-mojibake.mjs",
     "build:pages": "node tools/build-pages.mjs",
     "build:legal": "node tools/build-legal-pages.mjs",
