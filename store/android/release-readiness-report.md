@@ -6,15 +6,15 @@ Bu dosya `tools/write-android-release-manifest.mjs` tarafından AAB manifestiyle
 ## Güncel aday
 
 - Paket: `life.copa.app`
-- Sürüm: `1.0.2` (`versionCode` 3)
-- Kaynak commit: `3d4fe19572ca13720d0320a2db83b77595e467df`
-- Build sürümü: `3d4fe19572ca`
+- Sürüm: `1.0.3` (`versionCode` 4)
+- Kaynak commit: `30ea47110400f8b94a01978afbe4ff1a1cd31bc6`
+- Build sürümü: `30ea47110400`
 - AAB: `android/app/build/outputs/bundle/release/app-release-signed.aab`
-- Boyut: `15606987` bayt
-- SHA-256: `A024A2DB801E42B05D997287FC5A5F0B61428E66F6F6BB5C1B15A529B1E856C7`
+- Boyut: `15611112` bayt
+- SHA-256: `2D0ED0DF941BEAA5D9F6BF1F17361DB916BFA360F3BFA714DA96F6F40B13DDD9`
 - Upload certificate: `64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56`
-- AdMob modu: `test`
-- Play yüklemeye uygun: **HAYIR**
+- AdMob modu: `production`
+- Play yüklemeye uygun: **EVET**
 
 ## Doğrulama
 
@@ -26,7 +26,7 @@ Bu dosya `tools/write-android-release-manifest.mjs` tarafından AAB manifestiyle
 | `web_android_parity` | passed |
 | `android_package_scan` | passed |
 | `signed_aab_signature` | passed |
-| `exact_release_emulator_smoke` | required after candidate build |
+| `exact_release_emulator_smoke` | passed |
 | `physical_device_smoke` | required before track promotion |
 
 ## Dış hesaplara ve cihazlara bağlı kapılar
