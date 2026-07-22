@@ -24,7 +24,7 @@ Kod tarafı GMA Next‑Gen `1.2.1`, UMP `4.0.0` ve Google test kimlikleriyle haz
 1. Uygulama içinde **Ad units → Add ad unit → Rewarded** seç.
 2. Ad: `draft_reroll_rewarded`.
 3. Ödül miktarı: `1`; ödül adı: `yenileme_hakki`.
-4. Her tamamlanan reklam +1 draft yenilemesi verir; ücretsiz 2 hak korunur ve koşu başına en fazla 2 reklam ödülü alınabilir.
+4. Her tamamlanan reklam +1 draft yenilemesi verir; ücretsiz 1 hak korunur ve koşu başına en fazla 2 reklam ödülü alınabilir.
 5. Oluşan `ca-app-pub-…/…` biçimindeki rewarded **Ad unit ID** değerini kopyala.
 
 Kod tüm istekleri `TEEN` yaş koruması ve en fazla `T` reklam içerik derecesiyle sınırlar; AdMob arayüzünde daha dar bir filtre istersen `PG` seçebilirsin.

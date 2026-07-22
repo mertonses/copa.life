@@ -45,6 +45,7 @@ test.describe("critical mobile run integrity",()=>{
 
   test("rewarded ads add at most two persisted draft rerolls",async({page})=>{
     await startDraft(page);
+    expect(await page.evaluate(()=>{const w=globalThis as any;return{configured:w.DRAFT_REROLLS,left:w.draftRerollsLeft};})).toEqual({configured:1,left:1});
     await page.evaluate(()=>{const w=globalThis as any;w.roll();w.COPA_IS_NATIVE=true;w.COPA_PLATFORM="android";w.__rewardCalls=0;w.CopaNativeAds={showRewardedReroll:async({runKey}:any)=>{w.__rewardCalls++;return{earned:true,earnedCount:w.__rewardCalls,runKey};}};w.draftRerollsLeft=0;w.draftRewardedRerollsEarned=0;w.renderOpts();});
     const reroll=page.locator("#rerollBtn");
     await expect(reroll).toContainText(/Reklam izle|Watch ad/);
