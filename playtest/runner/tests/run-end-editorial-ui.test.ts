@@ -285,8 +285,9 @@ test("chairman picker separates personality from mechanics and collapses safely 
   await expect(modal.locator(".cp-fx-hdr")).toHaveText(["AVANTAJLAR","DEZAVANTAJ","OYUN TARZI"]);
   await expect(modal.locator(".cp-fx-item")).toContainText([
     "Borç limiti €28M — en geniş marj",
-    "Her turda küçük finansal destek gelebilir",
-    "Finalde −2 güç bırakabilir",
+    "Danışma sonuçları çoğunlukla destekleyicidir",
+    "Kartlar €1M daha pahalı",
+    "Pozitif danışma finalde en fazla −2 güç bırakır",
   ]);
   await expect(modal.locator(".cp-playstyle")).toContainText("Kasayı rahatlatır");
   await expect(modal.locator(".cp-sel-btn")).toHaveText("BAŞKANI SEÇ");

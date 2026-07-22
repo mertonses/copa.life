@@ -109,7 +109,9 @@ function finishBalanceTelemetry(won,meta){
  const data=_btLoad();data.runs++;
  const finalReached=!!meta.finalReached;
  Object.keys(run.cards).forEach(key=>{const row=_btCard(data,key);row.runsOwned++;if(finalReached)row.finalReached++;if(won)row.champion++;});
- const cid=String(meta.chairman||run.chairman||"unknown");
+ /* Attribute a run to the chairman selected at kickoff; a late board vote must
+    not rewrite the balance history of the run's original ruleset. */
+ const cid=String(run.chairman||meta.chairman||"unknown");
  const chair=_btChair(data,cid);chair.runs++;if(finalReached)chair.finalReached++;if(won)chair.champion++;if(meta.endType==="sacked")chair.sacked++;
  _btSave(data);balanceTelemetryRun=null;
 }

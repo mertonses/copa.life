@@ -1,4 +1,4 @@
-/* Privacy-minimised, web-only copa.life product funnel events. */
+/* Privacy-minimised copa.life product funnel events; native collection is explicit opt-in. */
 (function(global){
   "use strict";
 
@@ -43,6 +43,7 @@
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
+  const NATIVE_OPT_IN_KEY="copa_analytics_enabled";
   let sessionSent=false;
 
   const metaContent=selector=>{
@@ -53,9 +54,14 @@
   const locale=()=>clean(global.LANG||document.documentElement.lang||navigator.language||"en").slice(0,12).toLowerCase();
   const endpoint=()=>metaContent(API_META).replace(/\/$/,"");
   const privacySignal=()=>navigator.globalPrivacyControl===true||navigator.doNotTrack==="1"||global.doNotTrack==="1";
+  const platform=()=>String(global.COPA_PLATFORM||metaContent("meta[name='copa-platform']")||"web").toLowerCase();
+  const nativeOptIn=()=>{try{return !!(global.CopaPlatform&&global.CopaPlatform.storage&&global.CopaPlatform.storage.getItem(NATIVE_OPT_IN_KEY)==="1");}catch(_){return false;}};
   const enabled=()=>{
-    if(privacySignal()||!PRODUCTION_HOSTS.has(global.location.hostname))return false;
-    if((global.COPA_PLATFORM||metaContent("meta[name='copa-platform']")||"web")!=="web")return false;
+    const current=platform();
+    if(privacySignal())return false;
+    if(current==="web"&&!PRODUCTION_HOSTS.has(global.location.hostname))return false;
+    if((current==="android"||current==="ios")&&!nativeOptIn())return false;
+    if(!new Set(["web","android","ios"]).has(current))return false;
     return /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(endpoint());
   };
 
@@ -83,7 +89,7 @@
     return {
       schema_version:4,
       event:eventName,
-      platform:"web",
+      platform:platform(),
       locale:locale(),
       game_country:country,
       round,
@@ -128,12 +134,28 @@
   }
 
   function startSession(){
-    if(sessionSent)return;
+    if(sessionSent||!enabled())return;
     sessionSent=true;
     track("session_started");
   }
 
-  global.CopaAnalytics=Object.freeze({track,enabled,payloadFor});
+  function setNativeEnabled(value){
+    if(!global.CopaPlatform||!global.CopaPlatform.isNative)return false;
+    global.CopaPlatform.storage.setItem(NATIVE_OPT_IN_KEY,value?"1":"0");
+    installSetting();
+    if(value)startSession();
+    return nativeOptIn();
+  }
+
+  function installSetting(){
+    const slot=document.getElementById("advancedAnalyticsSlot");if(!slot)return;
+    if(!global.CopaPlatform||!global.CopaPlatform.isNative){slot.hidden=true;return;}
+    slot.hidden=false;
+    const tr=global.LANG==="tr",on=nativeOptIn();
+    slot.innerHTML=`<div class="ghost-setting-option"><div class="ghost-setting-header">${tr?"ANONİM KULLANIM ÖLÇÜMÜ":"ANONYMOUS USAGE METRICS"}</div><div class="ghost-setting-copy">${tr?"Kimlik, kulüp adı veya kayıt kodu olmadan toplu oynanış olayları gönderir. İstediğin zaman kapatabilirsin.":"Sends aggregate gameplay events without an identity, club name or save code. You can turn it off at any time."}</div><button class="ghost-setting-toggle${on?" on":""}" type="button" aria-pressed="${on}" onclick="CopaAnalytics.setNativeEnabled(${!on})">${on?(tr?"AÇIK":"ON"):(tr?"KAPALI":"OFF")}</button></div>`;
+  }
+
+  global.CopaAnalytics=Object.freeze({track,enabled,payloadFor,nativeOptIn,setNativeEnabled,installSetting});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startSession,{once:true});
   else queueMicrotask(startSession);
 })(window);

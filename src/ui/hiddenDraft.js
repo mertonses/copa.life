@@ -44,9 +44,9 @@ function quickAll(){
     if(deadlineH>2)deadlineH-=2;
     const pos=slots[index][0],reserve=Math.max(0,(remaining-1)*0.6),debtLimit=typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT,cap=(budget+(typeof legacySpendable==="function"?legacySpendable():0))-reserve-debtLimit;
     let options=draftOptions(pos);
-    if(!options.some(option=>option.price<=cap)){const fallback=fabPlayer(pos,55,61);fallback.price=Math.max(0,Math.min(cap,1));fallback.free=true;options[_draftWorstPublicIndex(options)]=fallback;}
+    if(!options.some(option=>typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(option.price||0,"transfer",Object.assign({},option,{reserve})):option.price<=cap)){const fallback=fabPlayer(pos,55,61);fallback.price=0;fallback.free=true;options[_draftWorstPublicIndex(options)]=fallback;}
     _trackHiddenOffer("auto",options);
-    let affordable=options.filter(option=>canAffordCost((option.price||0)+reserve));
+    let affordable=options.filter(option=>typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(option.price||0,"transfer",Object.assign({},option,{reserve})):canAffordCost((option.price||0)+reserve));
     if(!affordable.length){const fallback=fabPlayer(pos,55,61);fallback.price=0;fallback.free=true;affordable=[fallback];}
     const targeted=affordable.filter(option=>(option.price||0)<=budgetTarget),pool=targeted.length?targeted:affordable,player=pool.reduce((best,option)=>autoScore(option)>autoScore(best)?option:best,pool[0]);
     if(player.hidden)revealPlayer(player,"auto");

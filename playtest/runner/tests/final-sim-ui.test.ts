@@ -14,7 +14,12 @@ const openFinalReadyHub=async(page:any)=>{
   });
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Final Test FK");
-  await page.evaluate(()=>{(globalThis as any).pcGo();});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    // Final-engine coverage should not be terminated by the economy model.
+    game.earn(100);
+    game.pcGo();
+  });
   await expect(page.locator("#hub")).toBeVisible();
 };
 

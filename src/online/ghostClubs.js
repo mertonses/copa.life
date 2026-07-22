@@ -11,6 +11,7 @@
   const ONBOARDING_KEY="copa_online_features_onboarding_v1";
   const CLIENT_KEY="copa_ghost_client_id_v1";
   const DELETE_TOKEN_KEY="copa_ghost_delete_token_v1";
+  const DELETE_PENDING_KEY="copa_ghost_delete_pending_v1";
   const BLOCKED_KEY="copa_ghost_blocked_ids_v1";
   const QUEUE_KEY="copa_ghost_upload_queue_v1";
   const REPORT_QUEUE_KEY="copa_ghost_report_queue_v1";
@@ -30,9 +31,10 @@
     matchChance:{1:.20,2:.24,3:.29,4:.34,5:.38,6:.40}
   });
 
-  const safeGet=(key,fallback)=>{try{const value=localStorage.getItem(key);return value===null?fallback:value;}catch(_){return fallback;}};
-  const safeSet=(key,value)=>{try{localStorage.setItem(key,value);return true;}catch(_){return false;}};
-  const safeRemove=key=>{try{localStorage.removeItem(key);return true;}catch(_){return false;}};
+  const deviceStorage=window.CopaPlatform&&window.CopaPlatform.storage||localStorage;
+  const safeGet=(key,fallback)=>{try{const value=deviceStorage.getItem(key);return value===null?fallback:value;}catch(_){return fallback;}};
+  const safeSet=(key,value)=>{try{deviceStorage.setItem(key,value);return true;}catch(_){return false;}};
+  const safeRemove=key=>{try{deviceStorage.removeItem(key);return true;}catch(_){return false;}};
   function consent(){try{const value=JSON.parse(safeGet(CONSENT_KEY,"null"));return value&&value.version===CONFIG.consentVersion&&value.terms===true&&value.sharing===true?value:null;}catch(_){return null;}}
   const hasConsent=()=>!!consent();
   function leaderboardConsent(){try{const value=JSON.parse(safeGet(LEADERBOARD_CONSENT_KEY,"null"));return value&&value.version===CONFIG.leaderboardConsentVersion&&value.terms===true&&value.public_profile===true?value:null;}catch(_){return null;}}
@@ -520,8 +522,19 @@
     });
     return onboardingRequest;
   }
-  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,LEADERBOARD_ENABLED_KEY,LEADERBOARD_CONSENT_KEY,LEADERBOARD_QUEUE_KEY,LEADERBOARD_DELETE_PENDING_KEY,ONBOARDING_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
-  async function deleteMyData(){const base=apiBase();saveQueue([]);saveLeaderboardQueue([]);safeSet(SHARING_KEY,"0");safeSet(LEADERBOARD_ENABLED_KEY,"0");ensureSetting();if(!base||!navigator.onLine)return {ok:false,offline:true};try{const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":clientId(),"x-copa-delete-token":deleteToken()}});if(!response.ok)return {ok:false,status:response.status};const result=await response.json();if(result&&result.ok)clearLocalGhostData();return result;}catch(_){return {ok:false};}}
+  function clearLocalGhostData(){for(const key of [SHARING_KEY,CONSENT_KEY,LEADERBOARD_ENABLED_KEY,LEADERBOARD_CONSENT_KEY,LEADERBOARD_QUEUE_KEY,LEADERBOARD_DELETE_PENDING_KEY,DELETE_PENDING_KEY,ONBOARDING_KEY,CLIENT_KEY,DELETE_TOKEN_KEY,QUEUE_KEY,REPORT_QUEUE_KEY,RUN_KEY])safeRemove(key);ensureSetting();}
+  async function deleteMyData(){
+    const base=apiBase(),owner=clientId(),token=deleteToken();
+    saveQueue([]);saveLeaderboardQueue([]);safeSet(SHARING_KEY,"0");safeSet(LEADERBOARD_ENABLED_KEY,"0");
+    safeSet(DELETE_PENDING_KEY,JSON.stringify({requested_at:new Date().toISOString()}));ensureSetting();
+    if(!base||!navigator.onLine)return {ok:false,offline:true,pending:true};
+    try{
+      const response=await fetchWithTimeout(base+"/v1/me/ghosts",{method:"DELETE",headers:{"x-copa-client":owner,"x-copa-delete-token":token}});
+      if(!response.ok)return {ok:false,status:response.status,pending:true};
+      const result=await response.json();if(result&&result.ok){clearLocalGhostData();return result;}return Object.assign({pending:true},result);
+    }catch(_){return {ok:false,pending:true};}
+  }
+  async function flushMyDataDeletion(){return safeGet(DELETE_PENDING_KEY,"")?deleteMyData():{ok:true,pending:false,skipped:true};}
   function withdrawConsent(){safeSet(SHARING_KEY,"0");safeRemove(CONSENT_KEY);saveQueue([]);ensureSetting();}
   async function reportGhost(id,reason){const value=String(id||"").toUpperCase();if(!/^G-[A-Z0-9]{8,32}$/.test(value))return {ok:false,error:"invalid_id"};if(!reason){if(!globalThis.confirm(tr("Bu Ghost kulübünü bildirip bir daha göstermemek istiyor musunuz?","Report this Ghost club and never show it again?")))return {ok:false,cancelled:true};reason="other";}blockGhost(value);const requested=cleanText(reason).toLowerCase().slice(0,32),cleanReason=REPORT_REASONS.has(requested)?requested:"other";enqueueReport(value,cleanReason);const result=await flushReportQueue();return {ok:true,hidden:true,pending:result.pending>0,sent:result.sent};}
   function ensureSetting(){
@@ -547,7 +560,7 @@
       let privacy=document.getElementById("ghostSettingPrivacy");if(!privacy){privacy=document.createElement("div");privacy.id="ghostSettingPrivacy";privacy.className="ghost-setting-privacy";}
       if(privacy.parentElement!==privacySlot)privacySlot.appendChild(privacy);
       privacy.innerHTML=`<a href="privacy.html" target="_blank" rel="noopener">${tr("Gizlilik","Privacy")}</a><a href="terms.html" target="_blank" rel="noopener">${tr("Şartlar","Terms")}</a><button type="button" data-ghost-delete>${tr("Çevrimiçi verilerimi sil","Delete my online data")}</button>`;
-      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan Ghost verilerin, Dünya sıralaması profilin ve çevrimiçi koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your shared Ghost data, World ranking profile and online run results?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Çevrimiçi veriler silindi.","Online data deleted."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
+      privacy.querySelector("[data-ghost-delete]").onclick=async()=>{if(!globalThis.confirm(tr("Paylaşılan Ghost verilerin, Dünya sıralaması profilin ve çevrimiçi koşu sonuçların kalıcı olarak silinsin mi?","Permanently delete your shared Ghost data, World ranking profile and online run results?")))return;const result=await deleteMyData();if(typeof window.showToast==="function")window.showToast(result.ok?tr("Çevrimiçi veriler silindi.","Online data deleted."):result.pending?tr("Silme isteği kaydedildi; bağlantı gelince otomatik tamamlanacak.","Deletion is queued and will complete automatically when you reconnect."):tr("Silme işlemi tamamlanamadı.","Deletion could not be completed."));};
     }
     const on=enabled(),sharing=sharingEnabled(),ranked=leaderboardEnabled(),header=document.getElementById("ghostClubSettingHdr"),copy=document.getElementById("ghostClubSettingCopy"),button=document.getElementById("ghostClubToggle"),shareHeader=document.getElementById("ghostShareSettingHdr"),shareCopy=document.getElementById("ghostShareSettingCopy"),shareButton=document.getElementById("ghostShareToggle"),rankHeader=document.getElementById("leaderboardSettingHdr"),rankCopy=document.getElementById("leaderboardSettingCopy"),rankButton=document.getElementById("leaderboardToggle");
     if(header)header.textContent=tr("GHOST RAKİPLER","GHOST OPPONENTS");
@@ -561,7 +574,7 @@
     if(rankButton){rankButton.classList.toggle("on",ranked);rankButton.setAttribute("aria-pressed",String(ranked));rankButton.innerHTML=`<span aria-hidden="true">◎</span><span>${ranked?tr("SIRALAMADA","RANKED"):tr("KATILMIYOR","NOT JOINED")}</span>`;rankButton.title=tr("Dünya Kulüpler Sıralaması","World Club Ranking");}
   }
   function ghostIcon(){return '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V8a5 5 0 0 1 10 0v9l-2-1.5L10 17l-3-1.5z"/><circle cx="8" cy="9" r=".7" fill="currentColor"/><circle cx="12" cy="9" r=".7" fill="currentColor"/></svg>';}
-  window.addEventListener("online",()=>{flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();});
-  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,leaderboardEnabled,setLeaderboardEnabled,ensureSetting,requestConsent,requestLeaderboardConsent,requestMobileOnboarding,mobileOnboardingComplete,shouldGateMobileOnboarding,hasConsent,hasLeaderboardConsent,withdrawConsent,deleteMyData,deleteLeaderboardData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,recordLeaderboardRun,findOpponent,flushQueue,flushLeaderboardQueue,flushReports:flushReportQueue,renderLeaderboard,joinLeaderboard,ghostIcon,normalizeCompletedRun,normalizeLeaderboardRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
-  setTimeout(()=>{ensureSetting();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();},0);
+  window.addEventListener("online",()=>{flushMyDataDeletion();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();});
+  window.GhostClubs=Object.freeze({CONFIG,enabled,setEnabled,sharingEnabled,setSharingEnabled,leaderboardEnabled,setLeaderboardEnabled,ensureSetting,requestConsent,requestLeaderboardConsent,requestMobileOnboarding,mobileOnboardingComplete,shouldGateMobileOnboarding,hasConsent,hasLeaderboardConsent,withdrawConsent,deleteMyData,flushMyDataDeletion,deleteLeaderboardData,reportGhost,blockGhost,blockedIds,beginRun,updateRun,recordCompletedRun,recordLeaderboardRun,findOpponent,flushQueue,flushLeaderboardQueue,flushReports:flushReportQueue,renderLeaderboard,joinLeaderboard,ghostIcon,normalizeCompletedRun,normalizeLeaderboardRun,hasOpponentUsed,markOpponentUsed,canMatch:enabled,canShare:sharingEnabled});
+  setTimeout(()=>{ensureSetting();flushMyDataDeletion();flushQueue();flushReportQueue();flushLeaderboardQueue();flushLeaderboardDeletion();},0);
 })();

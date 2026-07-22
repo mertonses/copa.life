@@ -86,9 +86,7 @@ export function buildNativePackage({
     .replace('<meta name="copa-platform" content="web">', `<meta name="copa-platform" content="${platform}">`)
     .replace(/<script>\s*if\("serviceWorker"in navigator\)[\s\S]*?<\/script>/, "")
     .replace(/<script src="src\/data\/logos\.js[^>]*><\/script>\s*/, "")
-    .replace(/<script src="src\/runtime\/productAnalytics\.js[^>]*><\/script>\s*/, "")
     .replace(/<script src="src\/state\/diagnostics\.js[^>]*><\/script>\s*/, "")
-    .replace(/<meta name="copa-analytics-api"[^>]*>\s*/, "")
     .replace(/<a class="patreonbox[\s\S]*?<\/a>/g, "")
     .replace(/<a class="footer-link" href="https:\/\/www\.patreon\.com[\s\S]*?<\/a>/g, "")
     .replace(

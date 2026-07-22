@@ -1,5 +1,41 @@
 /* Risk/odul draftlari ve tur ici zorluk carpanlari. */
-function maybeDraftEvent(){if(round<2||round>5||eventSeen[round]||runEnded)return;eventSeen[round]=1;if(rand()>0.75)return;const scheduledRound=round;setTimeout(()=>showDraftEvent(scheduledRound),260);}
+var _draftEventTimer=0;
+function _persistDraftEventState(){try{if(typeof _saveState==="function")_saveState();}catch(_){} }
+function _queueDraftEvent(scheduledRound,delay=260){
+  clearTimeout(_draftEventTimer);
+  _draftEventTimer=setTimeout(()=>{
+    _draftEventTimer=0;
+    if(runEnded||Number(scheduledRound)!==Number(round)||eventSeen[scheduledRound]!=="pending")return;
+    const hub=$("hub"),modal=$("modal"),phase=window.CopaRunState&&window.CopaRunState.phase;
+    if(!hub||hub.classList.contains("hidden")||pendingMatchResolution||(phase&&phase!=="hub")){
+      eventSeen[scheduledRound]="expired";
+      _persistDraftEventState();
+      return;
+    }
+    if(modal&&!modal.classList.contains("hidden")){
+      _queueDraftEvent(scheduledRound,450);
+      return;
+    }
+    showDraftEvent(scheduledRound);
+  },delay);
+}
+function maybeDraftEvent(){
+  if(round<2||round>5||runEnded)return;
+  const state=eventSeen[round];
+  if(state==="pending"){
+    _queueDraftEvent(round,80);
+    return;
+  }
+  if(state)return;
+  if(rand()>0.75){
+    eventSeen[round]="skipped";
+    _persistDraftEventState();
+    return;
+  }
+  eventSeen[round]="pending";
+  _persistDraftEventState();
+  _queueDraftEvent(round);
+}
 
 function applyRiskDraftCarryovers(){
   if(round<=1)return;
@@ -103,7 +139,13 @@ function _decisionIcon(name){
 }
 
 function showDraftEvent(scheduledRound){
- if(runEnded||Number(scheduledRound||round)!==Number(round)||$("hub").classList.contains("hidden")||pendingMatchResolution||window.CopaRunState&&window.CopaRunState.phase!=="hub"||!$("modal").classList.contains("hidden"))return;const tr=LANG==="tr";
+ const targetRound=Number(scheduledRound||round);
+ if(runEnded||targetRound!==Number(round)||$("hub").classList.contains("hidden")||pendingMatchResolution||window.CopaRunState&&window.CopaRunState.phase!=="hub")return false;
+ if(!$("modal").classList.contains("hidden")){
+  if(eventSeen[targetRound]==="pending")_queueDraftEvent(targetRound,450);
+  return false;
+ }
+ const tr=LANG==="tr";
  const _bolt=_riskOfferIcon("power"),_case=_riskOfferIcon("fortune"),_dice=_riskOfferIcon("contract"),_band=_riskOfferIcon("grit"),_hand=_riskOfferIcon("safe");
  const gain=tr?"Kazanç":"Gain",cost=tr?"Bedel":"Cost",risk=tr?"Risk":"Risk",note=tr?"Not":"Note";
  const opts=[
@@ -117,5 +159,8 @@ function showDraftEvent(scheduledRound){
  opts.forEach((o,i)=>{h+=_riskOfferHTML(o,i);});
  h+="</div></div>";
  window._draftEvents=opts;showModal(h,{dismissOnOverlay:true,label:tr?"Riskli teklifler":"Risky offers"});
+ eventSeen[targetRound]="shown";
+ _persistDraftEventState();
+ return true;
 }
 function pickDraftEvent(i){const o=i<0?(window._draftEvents&&window._draftEvents.find(x=>x.skip)):(window._draftEvents&&window._draftEvents[i]);if(!o)return;closeModal();o.go();sfxStamp();setBudget();renderHub();showToast(o.n,{type:o.skip?"default":"default"});}

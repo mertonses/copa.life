@@ -3,7 +3,6 @@ export const NATIVE_SKIP_PREFIXES = [
   "assets/flags",
   "assets/icons/patreon.svg",
   "src/data/logos.js",
-  "src/runtime/productAnalytics.js",
   "src/state/diagnostics.js",
   "src/legacy",
 ];

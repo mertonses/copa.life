@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T20:58:35.077Z",
+  "generatedAt": "2026-07-21T23:44:33.228Z",
   "sourceBuild": {
     "schema_version": 1,
     "platform": "android",
@@ -34,8 +34,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 182377,
-      "sha256": "c47ff7e9c8c7e89eece21c2f7cf18937a581457d812a6812847b51135bf8e1f9"
+      "bytes": 88148,
+      "sha256": "f955dd78d0824e6c842d3498baaf4ccdbf714f2d7ea7f1b5e24fc40eca314055"
     },
     {
       "file": "graphics/phone/01-run-setup.jpg",
@@ -122,8 +122,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 182377,
-      "sha256": "c47ff7e9c8c7e89eece21c2f7cf18937a581457d812a6812847b51135bf8e1f9"
+      "bytes": 88148,
+      "sha256": "f955dd78d0824e6c842d3498baaf4ccdbf714f2d7ea7f1b5e24fc40eca314055"
     },
     {
       "file": "graphics/localized/tr-TR/phone/01-run-setup.jpg",
@@ -210,8 +210,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 183391,
-      "sha256": "fee0aaecb9b3b1b8a08f04347d6a8cc8581207740abb4f240cbfa6ab93f6ad4b"
+      "bytes": 89693,
+      "sha256": "83293241a67cc634851f6c6f7d8bcd894b309b6751ecfd99fe5cb90ce02b3718"
     },
     {
       "file": "graphics/localized/en-US/phone/01-run-setup.jpg",
@@ -298,8 +298,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 44761,
-      "sha256": "d478f28d706be50abd8973db4c1d9b4c5875a7e81f6db3ee651c070dfe3faf6e"
+      "bytes": 88924,
+      "sha256": "9662c73147bf8ae17da33e50ea5bac8d05c00cfd81ce56a4161990c5f1ad79c5"
     },
     {
       "file": "graphics/localized/es-ES/phone/01-run-setup.jpg",
@@ -386,8 +386,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 185533,
-      "sha256": "775e77b794c24d01ad00bd561d7922206b747720bde39a4a9c33ee4bb1a02c15"
+      "bytes": 90494,
+      "sha256": "dc0af197ec01b1337c41c65344feb30f4720eab0778b3bb280d421be37a2a38b"
     },
     {
       "file": "graphics/localized/de-DE/phone/01-run-setup.jpg",
@@ -474,8 +474,8 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 184259,
-      "sha256": "90b6950c1b81c61767d463b0926a8f997e6a03c1552bf2a4b032ce9a1b9dd8a1"
+      "bytes": 89679,
+      "sha256": "6d8bb68cfe33fc313a1a67485d549d6d0686119671b28758218aacfab00c16c0"
     },
     {
       "file": "graphics/localized/it-IT/phone/01-run-setup.jpg",

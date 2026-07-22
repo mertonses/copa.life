@@ -168,8 +168,8 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
 
   const body=page.locator(".advanced-body");
   await expect(body).toBeVisible();
-  await expect(body.locator(".advanced-section")).toHaveCount(3);
-  await expect(body.locator(".advanced-section-title")).toHaveText(["RUN AYARLARI","GHOST CLUB","VERİ VE GİZLİLİK"]);
+  await expect(body.locator(".advanced-section")).toHaveCount(4);
+  await expect(body.locator(".advanced-section-title")).toHaveText(["RUN AYARLARI","KAYIT AKTARIMI","GHOST CLUB","VERİ VE GİZLİLİK"]);
   const ghostHelp=page.locator(".advanced-help");
   const ghostHelpToggle=ghostHelp.locator("summary");
   await expect(ghostHelpToggle).toHaveText("?");
@@ -228,7 +228,7 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   expect(layout.ghostSlotBorder).toBe("0px");
 
   await page.evaluate(()=>(globalThis as any).setLang("en"));
-  await expect(page.locator(".advanced-section-title")).toHaveText(["RUN SETTINGS","GHOST CLUB","DATA & PRIVACY"]);
+  await expect(page.locator(".advanced-section-title")).toHaveText(["RUN SETTINGS","SAVE TRANSFER","GHOST CLUB","DATA & PRIVACY"]);
   await expect(page.locator("#seedInput")).toHaveAttribute("placeholder","Generated randomly");
   await expect(privacy.locator("a")).toHaveText(["Privacy","Terms"]);
 });

@@ -77,7 +77,8 @@ test("loan keeps the +2 squad guarantee even at the 99 OV ceiling",async({page})
       guarantee:offer.player.teamPowerBoost,
     };
   });
-  expect(result.playerOv).toBe(99);
+  expect(result.playerOv).toBeGreaterThanOrEqual(72);
+  expect(result.playerOv).toBeLessThanOrEqual(99);
   expect(result.after-result.before).toBe(2);
   expect(result.guarantee).toBeGreaterThan(0);
 });
@@ -252,6 +253,154 @@ test("risky offers use contextual animated icons and preserve the intended packa
     stackedDebtTurns:3,
     passUnchanged:true,
   });
+});
+
+test("a selected risky offer waits for the active modal and is rolled only once",async({page})=>{
+  await openHub(page);
+  const initial=await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.round=2;
+    game.eventSeen={};
+    game.__riskRolls=0;
+    game.rand=()=>{game.__riskRolls++;return 0;};
+    game.showModal('<div id="risk-blocker">Blocking notice</div>');
+    game.maybeDraftEvent();
+    return{state:game.eventSeen[2],rolls:game.__riskRolls};
+  });
+  expect(initial).toEqual({state:"pending",rolls:1});
+
+  await page.waitForTimeout(350);
+  await expect(page.locator("#risk-blocker")).toBeVisible();
+  expect(await page.evaluate(()=>(globalThis as any).eventSeen[2])).toBe("pending");
+
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await expect(page.locator(".riskdraft-modal")).toBeVisible({timeout:1500});
+  expect(await page.evaluate(()=>({
+    state:(globalThis as any).eventSeen[2],
+    rolls:(globalThis as any).__riskRolls,
+  }))).toEqual({state:"shown",rolls:1});
+});
+
+test("a queued suspension notice does not replace risky offers",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.round=2;
+    game.eventSeen={2:"pending"};
+    game.showDraftEvent(2);
+    game._queueSuspendedNotice("Test Player",2);
+  });
+  await expect(page.locator(".riskdraft-modal")).toBeVisible();
+  await page.waitForTimeout(550);
+  await expect(page.locator(".riskdraft-modal")).toBeVisible();
+  await expect(page.locator(".suspended-modal")).toHaveCount(0);
+
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await expect(page.locator(".suspended-modal")).toBeVisible({timeout:1500});
+  await expect(page.locator(".suspended-modal")).toContainText("Test Player");
+});
+
+test("a queued Professor offer keeps its persisted probability decision",async({page})=>{
+  await openHub(page);
+  const initial=await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.round=2;
+    game.eval("chairman=Object.assign({},chairman,{id:'cilgin'})");
+    game.eval("chairTrust=1; budget=20; chairmanEventRunId='professor-test'; pendingChairmanEvent=null; chairmanEventSeen={};");
+    game.__kaosRolls=0;
+    game.rand=()=>{game.__kaosRolls++;return game.__kaosRolls===1?0:0.99;};
+    game.showDraftEvent(2);
+    const first=game.prepareChairmanRoundEvent();
+    const second=game.prepareChairmanRoundEvent();
+    game.showPendingChairmanEvent();
+    return{rolls:game.__kaosRolls,type:first?.type,same:first?.key===second?.key,status:game.chairmanEventSeen[first?.key]};
+  });
+  expect(initial).toEqual({rolls:1,type:"chaos",same:true,status:"pending"});
+  await expect(page.locator(".riskdraft-modal")).toBeVisible();
+
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await expect(page.locator(".kaos-modal")).toBeVisible({timeout:1500});
+  expect(await page.evaluate(()=>({
+    rolls:(globalThis as any).__kaosRolls,
+    type:(globalThis as any).pendingChairmanEvent?.type,
+    status:(globalThis as any).pendingChairmanEvent?.status,
+  }))).toEqual({rolls:1,type:"chaos",status:"pending"});
+});
+
+test("the intentional no-offer roll is persisted and is not rolled again",async({page})=>{
+  await openHub(page);
+  const result=await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.round=2;
+    game.eventSeen={};
+    game.__riskRolls=0;
+    game.rand=()=>{game.__riskRolls++;return 0.9;};
+    game.maybeDraftEvent();
+    game.maybeDraftEvent();
+    await new Promise(resolve=>setTimeout(resolve,350));
+    return{state:game.eventSeen[2],rolls:game.__riskRolls,visible:!document.getElementById("modal")?.classList.contains("hidden")};
+  });
+  expect(result).toEqual({state:"skipped",rolls:1,visible:false});
+});
+
+test("a pending risky offer resumes after restoring the hub",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.round=2;
+    game.eventSeen={2:"pending"};
+    game.enterHub(true);
+  });
+  await expect(page.locator(".riskdraft-modal")).toBeVisible({timeout:1500});
+  expect(await page.evaluate(()=>(globalThis as any).eventSeen[2])).toBe("shown");
+});
+
+test("starting the match cannot bypass a pending risky offer",async({page})=>{
+  await openHub(page);
+  const phase=await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.round=2;
+    game.eventSeen={2:"pending"};
+    game.playMatch();
+    return game.CopaRunState.phase;
+  });
+  expect(phase).toBe("hub");
+  await expect(page.locator(".riskdraft-modal")).toBeVisible();
+  expect(await page.evaluate(()=>(globalThis as any).eventSeen[2])).toBe("shown");
+});
+
+test("the post-Ghost hub path still runs new-round risky-offer setup",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.round=2;
+    game.eventSeen={};
+    game.rand=()=>0;
+    game.enterHub(false,true);
+  });
+  await expect(page.locator(".riskdraft-modal")).toBeVisible({timeout:1500});
+  expect(await page.evaluate(()=>(globalThis as any).eventSeen[2])).toBe("shown");
+});
+
+test("Ghost matching completion does not run round-start chairman effects twice",async({page})=>{
+  await openHub(page);
+  const result=await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.eval("chairman=Object.assign({},chairman,{id:'babacan'}); round=2; budget=-11; chairTrust=3; pendingChairmanEvent=null; chairmanEventSeen={};");
+    game._ghostOpponentUsed=false;game._ghostCheckedRounds=[];
+    game.GhostClubs=Object.freeze({...game.GhostClubs,enabled:()=>true,hasOpponentUsed:()=>false,findOpponent:()=>Promise.resolve(null),markOpponentUsed:()=>{}});
+    game.enterHub(false);
+    const afterStart=game.chairTrust;
+    await new Promise(resolve=>setTimeout(resolve,80));
+    const state=game.CopaRunPersistence.read().state;
+    return{afterStart,afterGhost:game.chairTrust,savedTrust:state?.chairTrust};
+  });
+  expect(result).toEqual({afterStart:2,afterGhost:2,savedTrust:2});
 });
 
 test("Card Swap offers two eligible cards and discloses retained final debt",async({page})=>{

@@ -85,21 +85,22 @@ test("group draw and loss award points correctly and continue the run",async({pa
 test("the tournament overview is responsive and exposes all groups semantically",async({page})=>{
   await startDraw(page);await finishDraw(page);
   const stripLayout=await page.evaluate(()=>{
-    const strip=document.querySelector(".hub-tournament-strip") as HTMLElement;
+    const hubColumns=document.querySelector("#hub .hubcols") as HTMLElement;
+    const pitch=document.querySelector("#hubPitch") as HTMLElement;
     const panel=document.querySelector("#tournamentHubPanel") as HTMLElement;
     const road=document.querySelector("#fixbar") as HTMLElement;
     const rect=(element:HTMLElement)=>{const box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height};};
-    return{viewport:window.innerWidth,strip:rect(strip),panel:rect(panel),road:rect(road),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
+    return{viewport:window.innerWidth,hubColumns:rect(hubColumns),pitch:rect(pitch),panel:rect(panel),road:rect(road),panelParent:panel.parentElement?.className||"",roadParent:road.parentElement?.className||"",overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
   });
-  expect(stripLayout.strip.width).toBeLessThanOrEqual(1149);
   expect(stripLayout.overflow).toBeLessThanOrEqual(1);
-  if(stripLayout.viewport>900){
-    expect(Math.abs(stripLayout.panel.y-stripLayout.road.y)).toBeLessThanOrEqual(80);
-    expect(stripLayout.panel.x).toBeLessThan(stripLayout.road.x);
-    expect(stripLayout.panel.width).toBeLessThan(stripLayout.road.width);
-  }else{
-    expect(stripLayout.panel.y).toBeLessThan(stripLayout.road.y);
-  }
+  expect(stripLayout.panelParent).toContain("hcol-l");
+  expect(stripLayout.roadParent).toContain("hub-fixture-bottom");
+  expect(Math.abs(stripLayout.panel.x-stripLayout.pitch.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stripLayout.panel.width-stripLayout.pitch.width)).toBeLessThanOrEqual(1);
+  expect(stripLayout.panel.y).toBeGreaterThanOrEqual(stripLayout.pitch.y+stripLayout.pitch.height);
+  expect(stripLayout.road.y).toBeGreaterThan(stripLayout.panel.y+stripLayout.panel.height);
+  expect(Math.abs(stripLayout.road.x-stripLayout.hubColumns.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(stripLayout.road.width-stripLayout.hubColumns.width)).toBeLessThanOrEqual(1);
   await page.locator("#tournamentHubPanel button").click();
   await expect(page.locator(".tg-overview")).toBeVisible();
   await expect(page.locator(".tg-all-groups table")).toHaveCount(4);

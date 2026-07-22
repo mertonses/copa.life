@@ -15,6 +15,8 @@
     "build:android": "node tools/build-android.mjs",
     "check:parity": "npm run build:pages && npm run build:android && npm run build:ios && node tools/check-platform-parity.mjs && npm run check:android && npm run check:ios",
     "assets:store": "npm run build:android && npm run assets:store --prefix playtest/runner",
+    "assets:store:feature": "npm run assets:feature --prefix playtest/runner",
+    "assets:store:video": "npm run assets:promo-video --prefix playtest/runner",
     "android:add": "npm run build:android && node tools/capacitor-platform.mjs android add",
     "android:sync": "npm run build:android && npm run check:android && node tools/capacitor-platform.mjs android sync",
     "android:open": "node tools/capacitor-platform.mjs android open",
@@ -88,10 +90,11 @@
     "check:japan": "node tools/check-japan-country.mjs",
     "audit:japan-data": "node tools/audit-japan-player-data.mjs",
     "check:persistence": "node tools/check-run-persistence.mjs",
+    "check:mobile-readiness": "node tools/check-mobile-readiness.mjs",
     "check:tournament": "node tools/check-group-tournament.mjs",
     "check:tournament:balance": "node tools/check-tournament-balance.mjs",
     "check:tournament:balance:matrix": "node tools/check-tournament-balance-matrix.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:store && npm run check:android:release && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:store && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",
@@ -104,6 +107,7 @@
     "@capacitor/browser": "8.0.4",
     "@capacitor/core": "8.4.2",
     "@capacitor/haptics": "8.0.2",
+    "@capacitor/preferences": "8.0.1",
     "@capacitor/splash-screen": "8.0.2",
     "@capacitor/status-bar": "8.0.3"
   }

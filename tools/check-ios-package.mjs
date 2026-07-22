@@ -19,7 +19,7 @@ const walk = (directory, files = []) => {
 if (!fs.existsSync(OUT)) fail("dist-ios is missing; run build:ios first");
 for (const relative of [
   "assets/clubs", "assets/flags", "assets/icons/patreon.svg", "src/data/logos.js",
-  "src/runtime/productAnalytics.js", "src/state/diagnostics.js", "sw.js",
+  "src/state/diagnostics.js", "sw.js",
 ]) {
   if (fs.existsSync(path.join(OUT, relative))) fail(`forbidden iOS artifact: ${relative}`);
 }
@@ -27,7 +27,7 @@ const forbidden = [
   "assets/clubs/", "patreon.com", "FM26", "Football Manager", "injury_proneness",
   "FA Cup", "Copa del Rey", "Coppa Italia", "DFB-Pokal", "Emperor's Cup", "Emperor’s Cup",
   "api.web3forms.com", "cfSubmitBtn", "cfMail", "openContactForm()", "openBugReport()",
-  "static.cloudflareinsights.com", "cloudflareinsights.com", "copa-analytics-api", "/v1/analytics/events",
+  "static.cloudflareinsights.com", "cloudflareinsights.com",
 ];
 for (const file of walk(OUT).filter((value) => /\.(?:html|js|css|json|webmanifest|svg)$/i.test(value))) {
   const text = fs.readFileSync(file, "utf8");
@@ -38,7 +38,7 @@ const indexPath = path.join(OUT, "index.html");
 const index = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf8") : "";
 for (const marker of [
   'meta name="copa-platform" content="ios"', "src/data/generic_club_visuals.js",
-  "src/runtime/nativeApp.js", "privacy.html", "terms.html", "openNativeSupport",
+  "src/runtime/nativeApp.js", "src/runtime/productAnalytics.js", "copa-analytics-api", "privacy.html", "terms.html", "openNativeSupport",
 ]) {
   if (!index.includes(marker)) fail(`iOS index missing ${marker}`);
 }

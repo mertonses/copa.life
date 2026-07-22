@@ -17,7 +17,7 @@ vm.runInContext(`${cardDefsSource}\nthis.__cardDefs=CARDDEFS;`,cardContext);
 const required=["tr","en","es","de","it"];
 const activeCardKeys=Object.keys(cardContext.__cardDefs);
 const critical=[
-  "budget","pickhdr","startBtn","quickStartBtn","rollHint","allBtn","youLbl","oppLbl","shopLbl",
+  "budget","pickhdr","startBtn","rollHint","allBtn","youLbl","oppLbl","shopLbl",
   "squad","matchWin","matchLose","teleHead","cont","presHead","styleHdr","motm","yourXi","oppXi",
   "feedHdr","chairHdr","panicHead","storyHdr","talkSub","powHdr","powHdr2","cupTitle","tcHdr",
   "clubHdr","talkHead","ui.collectionHdr","ui.lockedCard","ui.effect","pos.GK","pos.CB","pos.CM","pos.ST",

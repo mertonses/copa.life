@@ -44,6 +44,40 @@ test("Son Dans uses the safer final-only COMMON and DARK values",async({page})=>
   });
 });
 
+test("Kurban Belli injury cost reads as one natural text flow in a narrow card",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.budget=100;
+    game.shopOffers=["kurban_belli"];
+    game.shopVariants.kurban_belli=1;
+    game.renderHub();
+  });
+
+  const card=page.locator(".cardtile").filter({hasText:"Kurban Belli"});
+  await expect(card).toHaveCount(1);
+  const injuryLine=card.locator(".ct-cost-list li").filter({hasText:"Tur sonunda 2 oyuncu sakatlanır"});
+  await expect(injuryLine).toHaveCount(1);
+  const layout=await injuryLine.evaluate(element=>{
+    const value=element.querySelector(".card-num") as HTMLElement;
+    const rect=element.getBoundingClientRect();
+    const parent=element.parentElement!.getBoundingClientRect();
+    return{
+      display:getComputedStyle(element).display,
+      valueDisplay:getComputedStyle(value).display,
+      width:Math.round(rect.width),
+      parentWidth:Math.round(parent.width),
+      height:Math.round(rect.height),
+      overflow:element.scrollWidth-element.clientWidth,
+    };
+  });
+  expect(layout.display).toBe("block");
+  expect(layout.valueDisplay).toBe("inline");
+  expect(layout.width).toBeLessThanOrEqual(layout.parentWidth);
+  expect(layout.height).toBeLessThanOrEqual(32);
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+});
+
 test("Barikat compares the opponent POWER with your POWER before its own bonus",async({page})=>{
   await openHub(page);
   const values=await page.evaluate(()=>{

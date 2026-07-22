@@ -36,21 +36,30 @@ function chairmanTrustDebtAdjustment(value){
  const trust=Math.max(0,Math.min(3,Math.round(value==null?(typeof chairTrust==="number"?chairTrust:1):value)));
  return trust===3?-4:trust===2?-2:trust===0?3:0;
 }
-function chairmanSackLimit(){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment();if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*3;return lim;}
+function chairmanSackLimitForTrust(value){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment(value);if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*3;return lim;}
+function chairmanSackLimit(){return chairmanSackLimitForTrust();}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -1;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanTransferMultiplier(){return chairman&&chairman.id==="pinti"?0.90:1;}
+function chairmanSpendTrustLoss(cost,context,payload){
+ cost=Math.round(cost||0);payload=payload||{};
+ if(!chairman||cost<=0||typeof chairTrust==="undefined")return 0;
+ if(chairman.id==="pinti"&&(cost>=14||(context==="card"&&((payload.variant||0)===1||cardKind(payload.card)==="risk"))))return 1;
+ if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov&&payload.ov<72&&cost>=6)return 1;
+ return 0;
+}
+function canAffordChairmanSpend(cost,context,payload){
+ payload=payload||{};
+ const loss=chairmanSpendTrustLoss(cost,context,payload),projectedTrust=Math.max(0,(Number(chairTrust)||0)-loss),reserve=Math.max(0,Number(payload.reserve)||0);
+ return budgetAfterCost((Number(cost)||0)+reserve)>=chairmanSackLimitForTrust(projectedTrust);
+}
 function chairmanReactToSpend(cost,context,payload){
  cost=Math.round(cost||0);payload=payload||{};
  if(!chairman||cost<=0||typeof chairTrust==="undefined")return;
  const tr=typeof LANG==="undefined"||LANG==="tr";
- if(chairman.id==="pinti"&&cost>=14){
+ if(chairman.id==="pinti"&&chairmanSpendTrustLoss(cost,context,payload)>0){
   chairTrust=Math.max(0,chairTrust-1);
-  if(typeof pushFeed==="function")pushFeed("🪙 "+(tr?"Pahalı harcama: Pinti Başkan güveni -1":"Expensive spend: Miser trust -1"),"lose");
- }
- if(chairman.id==="pinti"&&context==="card"&&((payload.variant||0)===1||cardKind(payload.card)==="risk")){
-  chairTrust=Math.max(0,chairTrust-1);
-  if(typeof pushFeed==="function")pushFeed(tr?"Pinti: riskli kart g\u00fcveni -1":"Miser: risky card costs 1 trust","lose");
+  if(typeof pushFeed==="function")pushFeed("🪙 "+(tr?"Pinti harcama kuralı: güven -1":"Miser spending rule: trust -1"),"lose");
  }
  if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov>=85&&sansStarBonusRound!==round){
   sansStarBonusRound=round;
