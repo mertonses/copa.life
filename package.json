@@ -17,6 +17,7 @@
     "assets:store": "npm run build:android && npm run assets:store --prefix playtest/runner",
     "assets:store:feature": "npm run assets:feature --prefix playtest/runner",
     "assets:store:video": "npm run assets:promo-video --prefix playtest/runner",
+    "assets:store:localization-packs": "node tools/build-android-localization-packs.mjs",
     "android:add": "npm run build:android && node tools/capacitor-platform.mjs android add",
     "android:sync": "npm run build:android && npm run check:android && node tools/capacitor-platform.mjs android sync",
     "android:open": "node tools/capacitor-platform.mjs android open",
