@@ -108,7 +108,9 @@ test("group draw and loss award points correctly and continue the run",async({pa
 test("the tournament overview is responsive and exposes all groups semantically",async({page})=>{
   await startDraw(page);
   await expect(page.locator(".td-group-dot")).toHaveCount(4);
-  await expect(page.locator(".td-swipe-tip")).toBeVisible();
+  const isMobile=await page.evaluate(()=>window.innerWidth<=760);
+  if(isMobile)await expect(page.locator(".td-swipe-tip")).toBeVisible();
+  else await expect(page.locator(".td-swipe-tip")).toBeHidden();
   await finishDraw(page);
   const stripLayout=await page.evaluate(()=>{
     const hubColumns=document.querySelector("#hub .hubcols") as HTMLElement;

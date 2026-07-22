@@ -1464,7 +1464,7 @@ function _finishPresidentThinking(){
     renderHub();
   }
 }
-function consultPresident(){if(round<4||presCharges<=0)return;closeModal();presCharges--;if(typeof trackChairmanMetric==="function")trackChairmanMetric("consults",1);const _cCost=(chairman.id==="babacan"&&chairTrust>=3)?1:(chairman.id==="sansasyoncu"&&sansMediaPressure>0)?5:3;spend(_cCost,"president");pushFeed("\u{1f3db} "+(LANG==="tr"?"Başkan görüşmesi: -€"+_cCost+"M":"Chairman meeting: -€"+_cCost+"M"),"pres");setBudget();sfxStamp();sfxGrumble();const x=L();const cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="${chairSrc(chairman.id)}" alt="" class="chairphoto bchairphoto" onerror="this.replaceWith(document.createTextNode('${chairman.e}'))">`;showModal(`<div class="bulletin bulletin-editorial pres-decision-modal pres-thinking"><div class="pres-bulletin-head"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="pres-thinking-card"><div class="pres-photo-wrap" id="presMascot">${phimg}</div><div class="pres-kicker">${LANG==="tr"?"BA&#350;KAN KARAR VER&#304;YOR...":"CHAIRMAN IS DECIDING..."}</div><div class="pres-micro">${presidentMoodLine(chairman.id)}</div><div class="pres-dots" aria-hidden="true"><span></span><span></span><span></span></div></div></div>`,{label:x.presHead});setTimeout(_finishPresidentThinking,reduce?0:1050);}
+function consultPresident(){if(round<4||presCharges<=0)return;closeModal();presCharges--;if(typeof trackChairmanMetric==="function")trackChairmanMetric("consults",1);const _cCost=(chairman.id==="babacan"&&chairTrust>=3)?1:(chairman.id==="sansasyoncu"&&sansMediaPressure>0)?5:3;spend(_cCost,"president");pushFeed("\u{1f3db} "+(LANG==="tr"?"Başkan görüşmesi: -€"+_cCost+"M":"Chairman meeting: -€"+_cCost+"M"),"pres");setBudget();sfxStamp();sfxGrumble();const x=L();const cd=x.chair&&x.chair[chairman.id];const phimg=`<img src="${chairSrc(chairman.id)}" alt="" class="chairphoto bchairphoto" onerror="this.replaceWith(document.createTextNode('${chairman.e}'))">`;showModal(`<div class="bulletin bulletin-editorial pres-decision-modal pres-thinking"><div class="pres-bulletin-head"><span>${x.presHead}</span><span>${x.rounds[round-1]}</span></div><div class="pres-thinking-card"><div class="pres-photo-wrap" id="presMascot">${phimg}</div><div class="pres-kicker">${LANG==="tr"?"BA&#350;KAN KARAR VER&#304;YOR...":"CHAIRMAN IS DECIDING..."}</div><div class="pres-micro">${presidentMoodLine(chairman.id)}</div><div class="pres-dots" aria-hidden="true"><span></span><span></span><span></span></div></div></div>`,{label:x.presHead});setTimeout(_finishPresidentThinking,motionReduced()?0:1050);}
 const _consultPresidentBase=consultPresident;
 consultPresident=function(){const before=presCharges;_consultPresidentBase();if(presCharges<before&&typeof _saveState==="function")_saveState();};
 function resolvePresident(){if(runEnded)return;const x=L();let oc=pickOutcome();sfxJingle();
@@ -3437,10 +3437,10 @@ function _takePenalty(dir){
   s.reveal={type:res.type,shot,keeper:keeperDir,byUser,player,keeperName};
   _penSfx("shot_reveal");
   /* result SFX fires when the ball reaches the goal (~ball arc duration), synced to the animation */
-  setTimeout(function(){_penSfx(res.type==="goal"?"goal_scored":res.type==="save"?"goalkeeper_save":res.type==="post"?"post_hit":"shot_missed");},reduce?0:360);
+  setTimeout(function(){_penSfx(res.type==="goal"?"goal_scored":res.type==="save"?"goalkeeper_save":res.type==="post"?"post_hit":"shot_missed");},motionReduced()?0:360);
   s.phase=s.phase==="shoot"?"save":"shoot";
   s.round=Math.max(s.homeShots.length,s.awayShots.length)+1;
-  if(_penIsDone(s)){s.phase="done";setTimeout(function(){_penSfx(_penWinner(s)?"shootout_won":"shootout_lost");},reduce?0:420);}
+  if(_penIsDone(s)){s.phase="done";setTimeout(function(){_penSfx(_penWinner(s)?"shootout_won":"shootout_lost");},motionReduced()?0:420);}
   _renderPenaltyModal();
   _savePenaltyCheckpoint();
 }
