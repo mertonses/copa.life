@@ -1,22 +1,26 @@
 {
   "package_id": "life.copa.app",
-  "version_code": 4,
-  "version_name": "1.0.3",
-  "release_status": "candidate",
+  "version_code": 5,
+  "version_name": "1.1.0",
+  "release_status": "closed_test_submitted",
   "store_upload_eligible": true,
   "source": {
-    "build_version": "30ea47110400",
-    "build_fingerprint": "157e7cb145b217cf8ee1746e7b78f28c8d2ddbb333b74aab6852a0e869983da6",
-    "fingerprint": "533311a88ce50a7a6b6263d891459519f148165f243588db0a1f3c0a3646ece2",
-    "commit": "30ea47110400f8b94a01978afbe4ff1a1cd31bc6"
+    "build_version": "c1bff89877d",
+    "build_fingerprint": "56c2e48cfe994554a563ea8b47dfe176ae30da50c4ea292952e8408133c4de10",
+    "fingerprint": "0e81d5ba59ef132a243c1181a7f0a0c3673adb65c1df0e14373683e7d68c413d",
+    "commit": "c1bff89877d204e191dac2616c1c83f556ef2c2b"
   },
   "min_sdk": 24,
   "target_sdk": 36,
   "compile_sdk": 36,
   "signed_aab": {
-    "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
-    "bytes": 15611112,
-    "sha256": "2D0ED0DF941BEAA5D9F6BF1F17361DB916BFA360F3BFA714DA96F6F40B13DDD9"
+    "file": "signed-android-1.1.0-5/app-release.aab",
+    "bytes": 15569512,
+    "sha256": "A1BA2D8B8F5DDFAF0AFA486D50D774F5F3F67222C32AEFCE82FDE3E7CDA2B989",
+    "artifact_name": "signed-android-1.1.0-5",
+    "artifact_id": 8538441574,
+    "workflow_run": "https://github.com/mertonses/copa.life/actions/runs/29941262601",
+    "expires_at": "2026-08-21T17:17:20Z"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "admob": {
@@ -38,15 +42,15 @@
     "web_android_parity": "passed",
     "android_package_scan": "passed",
     "signed_aab_signature": "passed",
-    "exact_release_emulator_smoke": "passed",
-    "physical_device_smoke": "required before track promotion"
+    "pr_candidate_emulator_smoke": "passed",
+    "exact_signed_release_emulator_smoke": "not recorded for v1.1.0",
+    "physical_device_smoke": "collect through closed testing"
   },
   "external_prerequisites": [
-    "published AdMob UMP privacy message",
-    "production AdMob rewarded reroll ID",
-    "deployed and verified copa.life app-ads.txt",
-    "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON repository secret",
-    "exact-release emulator smoke",
-    "physical-device smoke before track promotion"
+    "confirm published AdMob UMP privacy message",
+    "link the AdMob app to its Google Play listing and obtain AdMob app approval",
+    "add GOOGLE_PLAY_SERVICE_ACCOUNT_JSON for automated internal-track uploads",
+    "reach at least 12 opted-in closed testers and keep the requirement satisfied for 14 days",
+    "record physical-device smoke evidence during closed testing"
   ]
 }

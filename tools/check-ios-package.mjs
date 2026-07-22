@@ -39,6 +39,9 @@ for (const file of walk(OUT).filter((value) => /\.(?:html|js|css|json|webmanifes
 
 const indexPath = path.join(OUT, "index.html");
 const index = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "utf8") : "";
+const infoPlist = fs.readFileSync(path.join(ROOT, "ios/App/App/Info.plist"), "utf8");
+if (!/<key>CFBundleDisplayName<\/key>\s*<string>Copa Life<\/string>/.test(infoPlist)) fail("iOS device name must be Copa Life");
+if (!index.includes("copa.life")) fail("iOS game wordmark must remain copa.life");
 for (const marker of [
   'meta name="copa-platform" content="ios"', "src/data/generic_club_visuals.js",
   "src/runtime/nativeApp.js", "src/runtime/productAnalytics.js", "copa-analytics-api", "privacy.html", "terms.html", "openNativeSupport",

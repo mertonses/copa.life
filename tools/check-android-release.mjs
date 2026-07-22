@@ -14,6 +14,16 @@ const notes = JSON.parse(read("store/android/release-notes.json"));
 if (notes.versionCode !== version.versionCode || notes.versionName !== version.versionName) {
   fail("release notes are stale; edit them and run npm run android:notes:stamp");
 }
+const recordedRelease = JSON.parse(read("store/android/release-manifest.json"));
+if (
+  recordedRelease.version_code !== version.versionCode ||
+  recordedRelease.version_name !== version.versionName
+) {
+  fail("release manifest is stale; record the exact signed AAB for the current Android version");
+}
+if (!read("store/android/release-readiness-report.md").includes(recordedRelease.signed_aab?.sha256 || "__missing__")) {
+  fail("release readiness report does not reference the signed AAB recorded in the release manifest");
+}
 for (const locale of ["tr-TR", "en-US", "es-ES", "de-DE", "it-IT"]) {
   if (!notes.locales?.includes(locale)) fail(`release notes metadata is missing ${locale}`);
 }

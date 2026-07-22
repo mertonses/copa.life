@@ -4,7 +4,7 @@ Bu değerler ilk **Uygulama oluştur** ekranına doğrudan girilebilir.
 
 | Alan | Seçim / değer |
 | --- | --- |
-| Uygulama adı | `copa.life` |
+| Uygulama adı | `Copa Life` |
 | Paket adı | `life.copa.app` |
 | Varsayılan dil | **Türkçe (Türkiye) — tr-TR** |
 | Uygulama veya oyun | **Oyun** |
@@ -22,7 +22,7 @@ Bu değerler ilk **Uygulama oluştur** ekranına doğrudan girilebilir.
 - Uygulama ücretsiz yayımlandıktan sonra aynı paket ücretliye çevrilemez. Ücretli sürüm istenirse yeni paket gerekir.
 - Varsayılan dil daha sonra değiştirilebilir; mevcut içerik ve ürün dili nedeniyle Türkçe seçildi.
 - Paket adı kalıcı kimliktir; `life.copa.app` dışında bir değer girilmemelidir.
-- Uygulama adı 30 karakter sınırının içindedir: `copa.life`.
+- Uygulama adı 30 karakter sınırının içindedir: `Copa Life`.
 
 ## Uygulama oluşturulduktan hemen sonra
 

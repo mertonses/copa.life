@@ -1,6 +1,6 @@
-# copa.life — App Store Türkçe
+# Copa Life — App Store Türkçe
 
-**Ad:** copa.life  
+**Ad:** Copa Life
 **Alt başlık:** Her koşuda yeni bir kadro  
 **Kategori:** Oyunlar / Spor / Strateji
 

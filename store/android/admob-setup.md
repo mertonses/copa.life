@@ -7,7 +7,7 @@ Kod tarafı GMA Next-Gen `1.2.1`, UMP `4.0.0` ve Google test kimlikleriyle hazı
 1. AdMob'da **Apps → Add app** seç.
 2. Platform olarak **Android** seç.
 3. Uygulama henüz mağazada yayınlanmadıysa mağaza sorusunda **No** seç.
-4. Uygulama adı olarak **copa.life**, paket adı olarak **life.copa.app** kullan.
+4. Uygulama adı olarak **Copa Life**, paket adı olarak **life.copa.app** kullan.
 5. Oluşan `ca-app-pub-…~…` biçimindeki **App ID** değerini kaydet.
 
 ## 2. Run sonu geçiş reklamı

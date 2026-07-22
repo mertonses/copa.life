@@ -5,7 +5,7 @@ Web ve Android'in tek kaynak/parite yapısı, CI aday üretimi ve Play dağıtı
 ## Proje ayarları
 
 - Uygulama kimliği: `life.copa.app`
-- Uygulama adı: `copa.life`
+- Uygulama adı: `Copa Life`
 - Minimum SDK: 24
 - Compile / target SDK: 36
 - Native kabuk: Capacitor 8

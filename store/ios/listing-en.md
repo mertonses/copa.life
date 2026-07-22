@@ -1,6 +1,6 @@
-# copa.life — App Store English
+# Copa Life — App Store English
 
-**Name:** copa.life  
+**Name:** Copa Life
 **Subtitle:** A new squad every run  
 **Category:** Games / Sports / Strategy
 

@@ -2,7 +2,7 @@
 
 ## Nome dell'app
 
-copa.life
+Copa Life
 
 ## Descrizione breve
 

@@ -11,7 +11,7 @@
 ## App Store Connect
 
 - [ ] `life.copa.app` bundle kimliğini oluştur
-- [ ] copa.life uygulama kaydını oluştur
+- [ ] Copa Life uygulama kaydını oluştur
 - [ ] iPhone ve iPad ekran görüntülerini gerçek iOS build'inden yükle
 - [ ] Türkçe ve İngilizce liste metinlerini gir
 - [ ] App Privacy cevaplarını build ile karşılaştırıp gir

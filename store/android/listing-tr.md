@@ -2,7 +2,7 @@
 
 ## Uygulama adı
 
-copa.life
+Copa Life
 
 ## Kısa açıklama
 
