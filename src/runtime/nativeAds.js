@@ -29,10 +29,15 @@
     }
     Ads.initialize().then(syncPrivacyButton).catch(()=>syncPrivacyButton({privacyOptionsRequired:false}));
   }
+  function scheduleInitialize(){
+    const defer=()=>setTimeout(initialize,8000);
+    if(document.readyState==="complete")defer();
+    else root.addEventListener("load",defer,{once:true});
+  }
   function showRunEnd(runKey){
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({shown:false,reason:"missing_run_key"});
     return new Promise(resolve=>setTimeout(resolve,900)).then(()=>Ads.showRunEnd({runKey:key})).catch(()=>({shown:false,reason:"native_error"}));
   }
   root.CopaNativeAds=Object.freeze({showRunEnd,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
-  initialize();
+  scheduleInitialize();
 })(window);
