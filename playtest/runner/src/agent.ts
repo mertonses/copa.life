@@ -76,15 +76,23 @@ export class CopaAgent {
     this.session = new SessionManager(this.cfg, resumeId);
     this.issues = new IssueTracker(this.cfg, this.session.sessionId);
     this.coverage = new CoverageTracker();
+    this.coverage.restoreFromRuns(this.session.allRuns());
     this.stagnation = new StagnationDetector(this.cfg.stagnationTimeoutMs);
 
     const deadline = Date.now() + this.cfg.maxSessionDurationMs;
     let runIdx = this.session.runsCompleted;
+    const shouldContinue = () => this.cfg.minRunsPerSession > 0
+      ? this.session.fullRunsCompleted < this.cfg.minRunsPerSession
+      : !this.coverage.isComplete();
 
     await this._launchBrowser();
 
     try {
-      while (runIdx < this.cfg.maxRunsPerSession && Date.now() < deadline && !this.coverage.isComplete()) {
+      while (
+        runIdx < this.cfg.maxRunsPerSession &&
+        Date.now() < deadline &&
+        shouldContinue()
+      ) {
         this.runState = _newRunState(runIdx);
         const outcome = await this._singleRun();
         const snap = await this.bridge.snapshot();
@@ -118,7 +126,10 @@ export class CopaAgent {
 
         runIdx++;
 
-        if (!this.coverage.isComplete() && runIdx < this.cfg.maxRunsPerSession) {
+        if (
+          runIdx < this.cfg.maxRunsPerSession &&
+          shouldContinue()
+        ) {
           // Clear sessionStorage before reload so _tryRestoreState() doesn't
           // restore the previous run's stale state (negative budget, mid-game squad, etc.)
           await this.page.evaluate(() => {
@@ -138,6 +149,11 @@ export class CopaAgent {
             await _wait(800);
           }
         }
+      }
+      if (this.session.fullRunsCompleted < this.cfg.minRunsPerSession) {
+        throw new Error(
+          `Minimum full-run gate failed: ${this.session.fullRunsCompleted}/${this.cfg.minRunsPerSession} completed`,
+        );
       }
     } finally {
       const rpt = this.reports.generateCampaignReport();

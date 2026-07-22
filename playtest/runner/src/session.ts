@@ -62,6 +62,7 @@ export class SessionManager {
   }
 
   get runsCompleted(): number { return this.runs.length; }
+  get fullRunsCompleted(): number { return this.runs.filter(r => r.outcome !== "abandoned").length; }
   get wins(): number { return this.runs.filter(r => r.outcome === "win").length; }
   get losses(): number { return this.runs.filter(r => r.outcome === "loss").length; }
   get sacks(): number { return this.runs.filter(r => r.outcome === "sacked").length; }

@@ -1,0 +1,12 @@
+{
+  "gameUrl": "http://127.0.0.1:5500?autotest=1",
+  "minRunsPerSession": 20,
+  "maxRunsPerSession": 40,
+  "maxSessionDurationMs": 10800000,
+  "screenshotOnIssue": true,
+  "screenshotOnResult": false,
+  "headless": true,
+  "slowMoMs": 0,
+  "thinkTimeMs": { "min": 25, "max": 80 },
+  "stagnationTimeoutMs": 45000
+}

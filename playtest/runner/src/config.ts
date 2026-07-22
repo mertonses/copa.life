@@ -7,6 +7,7 @@ const OUTPUT_ROOT = path.resolve(__dirname, "../../playtest-output");
 const DEFAULTS: AgentConfig = {
   gameUrl: "http://localhost:5500?autotest=1",
   targetChairs: ["babacan", "leydi", "pinti", "sansasyoncu", "torpilci", "cilgin"] as ChairId[],
+  minRunsPerSession: 0,
   maxRunsPerSession: 100,
   maxSessionDurationMs: 8 * 60 * 60 * 1000, // 8 hours
   screenshotOnIssue: true,
@@ -24,7 +25,17 @@ export function loadConfig(configPath?: string): AgentConfig {
   if (!fs.existsSync(cfgFile)) return defaults;
   try {
     const overrides = JSON.parse(fs.readFileSync(cfgFile, "utf-8"));
-    return { ...defaults, ...overrides };
+    const merged = { ...defaults, ...overrides };
+    if (!Number.isInteger(merged.minRunsPerSession) || merged.minRunsPerSession < 0) {
+      throw new Error("minRunsPerSession must be a non-negative integer");
+    }
+    if (!Number.isInteger(merged.maxRunsPerSession) || merged.maxRunsPerSession < 1) {
+      throw new Error("maxRunsPerSession must be a positive integer");
+    }
+    if (merged.minRunsPerSession > merged.maxRunsPerSession) {
+      throw new Error("minRunsPerSession cannot exceed maxRunsPerSession");
+    }
+    return merged;
   } catch (e) {
     console.warn(`[config] Failed to parse ${cfgFile}: ${e}. Using defaults.`);
     return defaults;

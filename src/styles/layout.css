@@ -6836,6 +6836,12 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   white-space:nowrap;
   box-shadow:none!important;
 }
+#hub #shopLbl .shop-label-wrap{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+#hub #shopLbl .shop-label-title{display:inline-flex;align-items:center;gap:5px;min-width:0}
+#hub #shopLbl .shop-reroll-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:58px;min-height:36px;padding:5px 8px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--surface-elevated);color:var(--color-slate);font:800 8px/1 var(--mono);cursor:pointer}
+#hub #shopLbl .shop-reroll-btn.is-rewarded{border-color:color-mix(in srgb,var(--color-primary) 60%,var(--border-subtle));color:var(--color-primary)}
+#hub #shopLbl .shop-reroll-btn:disabled{cursor:default;opacity:.55}
+#hub .hub-bench-stack .injbar .inj-reward-btn{border-color:color-mix(in srgb,var(--color-primary) 60%,var(--border-default))!important;color:var(--color-primary)!important}
 #hub .hub-bench-stack .injbar button:focus-visible{outline:2px solid var(--color-primary)!important;outline-offset:2px}
 @media(max-width:900px){
   #hub .hub-bench-stack{

@@ -49,6 +49,11 @@ function checkImage(relative,width,height,type){
 
 checkImage("graphics/app-icon-512.png",512,512,"png");
 checkImage("graphics/feature-graphic.jpg",1024,500,"jpeg");
+for(const root of ["graphics/play-games-pc",...LOCALES.map(([locale])=>`graphics/localized/${locale}/play-games-pc`)]){
+  checkImage(`${root}/logo-600x400.png`,600,400,"png");
+  checkImage(`${root}/feature-1920x1080.jpg`,1920,1080,"jpeg");
+  for(const file of ["01-run-setup.jpg","02-player-draft.jpg","03-group-draw.jpg","04-match-hub.jpg","05-player-profile.jpg"])checkImage(`${root}/${file}`,1920,1080,"jpeg");
+}
 for(const [locale,listing] of LOCALES){
   const root=`graphics/localized/${locale}`;
   checkImage(`${root}/feature-graphic.jpg`,1024,500,"jpeg");
@@ -84,4 +89,4 @@ if(failures.length){
   failures.forEach(message=>console.error(`[android store] ${message}`));
   process.exit(1);
 }
-console.log("[android store] passed: 5 listings, 5 feature graphics, 25 phone and 25 tablet screenshots");
+console.log("[android store] passed: 5 listings plus localized phone, tablet and Google Play Games on PC assets");

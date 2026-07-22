@@ -21,13 +21,13 @@
     container.innerHTML=`<div class="td-shell">
       <header class="td-head"><div><span class="td-kicker">${esc(copy.ceremony)}</span><h2 id="tournamentDrawTitle">${esc(copy.drawTitle)}</h2><p>${esc(copy.drawLead)}</p></div><div class="td-progress" role="progressbar" aria-valuemin="0" aria-valuemax="16" aria-valuenow="${state.draw.revealIndex}" aria-label="${esc(copy.drawTitle)}"><b>${state.draw.revealIndex}</b><span>/ 16</span><i style="--draw-progress:${state.draw.revealIndex/16}"></i></div></header>
       <div class="td-stage">
-        <div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId)).join("")}</div>
         <aside class="td-machine">
           <div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
           <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button>
           <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
           <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost" onclick="fastTournamentDraw()">${esc(copy.quickDraw)}</button>`}</div>
         </aside>
+        <div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId)).join("")}</div>
       </div>
       <p class="td-rule">${esc(copy.drawRule)}</p>
     </div>`;

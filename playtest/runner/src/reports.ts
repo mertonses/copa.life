@@ -36,6 +36,7 @@ export class ReportGenerator {
       generatedAt: new Date().toISOString(),
       summary: {
         runsCompleted: this.session.runsCompleted,
+        fullRunsCompleted: this.session.fullRunsCompleted,
         wins: this.session.wins,
         losses: this.session.losses,
         sacks: this.session.sacks,
@@ -80,7 +81,7 @@ export class ReportGenerator {
   private _campaignMarkdown(json: {
     sessionId: string;
     generatedAt: string;
-    summary: { runsCompleted: number; wins: number; losses: number; sacks: number; chairsUnlocked: string[]; allChairsUnlocked: boolean; issueCounts: Record<string, number> };
+    summary: { runsCompleted: number; fullRunsCompleted: number; wins: number; losses: number; sacks: number; chairsUnlocked: string[]; allChairsUnlocked: boolean; issueCounts: Record<string, number> };
     issues: Issue[];
     coverage: Record<string, boolean>;
   }): string {
@@ -116,6 +117,7 @@ export class ReportGenerator {
       `| Metric | Value |`,
       `|--------|-------|`,
       `| Runs | ${s.runsCompleted} |`,
+      `| Full runs | ${s.fullRunsCompleted} |`,
       `| Wins | ${s.wins} (${winRate}%) |`,
       `| Losses | ${s.losses} |`,
       `| Sacks | ${s.sacks} |`,
