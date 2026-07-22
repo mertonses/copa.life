@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M10 2.8v14.4"/>
-  <path d="M3.8 6.4l12.4 7.2"/>
-  <path d="M3.8 13.6l12.4-7.2"/>
-  <path d="M10 2.8L8.8 4M10 2.8L11.2 4"/>
-  <path d="M10 17.2L8.8 16M10 17.2L11.2 16"/>
-  <path d="M3.8 6.4l1.7.2M3.8 6.4l.5 1.6"/>
-  <path d="M16.2 13.6l-1.7-.2M16.2 13.6l-.5-1.6"/>
-  <path d="M3.8 13.6l1.7-.2M3.8 13.6l.5-1.6"/>
-  <path d="M16.2 6.4l-1.7.2M16.2 6.4l-.5 1.6"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" viewBox="0 0 20 20"><path d="M10 2.8v14.4"/><path d="M3.8 6.4l12.4 7.2"/><path d="M3.8 13.6l12.4-7.2"/><path d="M10 2.8L8.8 4M10 2.8L11.2 4"/><path d="M10 17.2L8.8 16M10 17.2L11.2 16"/><path d="M3.8 6.4l1.7.2M3.8 6.4l.5 1.6"/><path d="M16.2 13.6l-1.7-.2M16.2 13.6l-.5-1.6"/><path d="M3.8 13.6l1.7-.2M3.8 13.6l.5-1.6"/><path d="M16.2 6.4l-1.7.2M16.2 6.4l-.5 1.6"/></svg>
