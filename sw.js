@@ -81,6 +81,7 @@ const PRECACHE = [
   "/web-app-icon-512.png",
   "/site.webmanifest",
   "/assets/mascot.webp",
+  "/assets/icons/dice_512.png",
   "/assets/icons/cl.png",
   "/assets/icons/copa.png",
   "/assets/flags/TR.svg",
