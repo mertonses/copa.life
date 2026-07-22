@@ -4,8 +4,8 @@ import path from "node:path";
 const ROOT = process.cwd();
 const RES = path.join(ROOT, "android/app/src/main/res");
 const corePath = path.join(ROOT, "playtest/runner/node_modules/playwright-core/index.mjs");
-const sourceIcon = await fs.readFile(path.join(ROOT, "assets/icons/dice_512.png"));
-const dataUrl = `data:image/png;base64,${sourceIcon.toString("base64")}`;
+const sourceSvg = await fs.readFile(path.join(ROOT, "favicon.svg"), "utf8");
+const dataUrl = `data:image/svg+xml;base64,${Buffer.from(sourceSvg).toString("base64")}`;
 const { chromium } = await import(`file:///${corePath.replace(/\\/g, "/")}`);
 
 function pngSize(buffer) {
@@ -32,13 +32,12 @@ try {
     const page = await browser.newPage({ viewport: { width: asset.width, height: asset.height }, deviceScaleFactor: 1 });
     const backgroundOnly = asset.name.includes("background");
     const foreground = asset.name.includes("foreground");
-    const legacy = asset.name === "ic_launcher.png" || asset.name === "ic_launcher_round.png";
-    const logoSize = foreground ? 70 : 76;
+    const logoSize = foreground ? 72 : 100;
     await page.setContent(
-      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${backgroundOnly || legacy ? "#101D28" : "transparent"};display:grid;place-items:center}img{display:${backgroundOnly ? "none" : "block"};width:${logoSize}%;height:${logoSize}%;object-fit:contain;image-rendering:pixelated}</style><img src="${dataUrl}" alt="">`,
+      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${backgroundOnly ? "#101D28" : "transparent"};display:grid;place-items:center}img{display:${backgroundOnly ? "none" : "block"};width:${logoSize}%;height:${logoSize}%;object-fit:contain}</style><img src="${dataUrl}" alt="">`,
       { waitUntil: "load" },
     );
-    await page.screenshot({ path: asset.file, omitBackground: !(backgroundOnly || legacy) });
+    await page.screenshot({ path: asset.file, omitBackground: !backgroundOnly });
     await page.close();
   }
 
@@ -57,7 +56,7 @@ try {
     const page = await browser.newPage({ viewport: { width: asset.width, height: asset.height }, deviceScaleFactor: 1 });
     const logo = Math.round(Math.min(asset.width, asset.height) * 0.34);
     await page.setContent(
-      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${asset.dark ? "#101D28" : "#F3F5F4"};display:grid;place-items:center}img{display:block;width:${logo}px;height:${logo}px;object-fit:contain;image-rendering:pixelated}</style><img src="${dataUrl}" alt="">`,
+      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${asset.dark ? "#101D28" : "#F3F5F4"};display:grid;place-items:center}img{display:block;width:${logo}px;height:${logo}px}</style><img src="${dataUrl}" alt="">`,
       { waitUntil: "load" },
     );
     await page.screenshot({ path: asset.file, omitBackground: false });
