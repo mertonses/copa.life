@@ -10,7 +10,7 @@ fs.mkdirSync(OUT,{recursive:true});
 
 for(const file of PAGES){
   const source=fs.readFileSync(path.join(ROOT,file),"utf8")
-    .replaceAll('href="index.html"','href="https://copa.life/"');
+    .replaceAll('href="index.html"','href="https://copa.life/support.html"');
   fs.writeFileSync(path.join(OUT,file),source,"utf8");
   if(file==="privacy.html")fs.writeFileSync(path.join(OUT,"index.html"),source,"utf8");
 }

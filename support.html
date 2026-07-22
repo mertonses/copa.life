@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>copa.life Support</title>
+  <meta name="description" content="Official support page for the copa.life game.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://copa.life/support.html">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    :root{color-scheme:light dark;--bg:#f4f8f6;--card:#fff;--text:#17332c;--muted:#587068;--line:#d7e3df;--accent:#087f5b;--accent-hover:#066a4c;--soft:#e5f5ef}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{width:min(720px,calc(100% - 32px));margin:0 auto;padding:48px 0 64px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
+    .brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;letter-spacing:-.02em}
+    .brand img{width:42px;height:42px;border-radius:11px}
+    select{min-height:42px;padding:0 36px 0 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit}
+    article{padding:clamp(24px,6vw,44px);border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:0 18px 50px rgba(8,55,42,.08)}
+    h1{margin:0 0 12px;font-size:clamp(30px,7vw,44px);line-height:1.08;letter-spacing:-.035em}
+    .lead{margin:0 0 30px;color:var(--muted);font-size:18px}
+    .action{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;background:var(--accent);color:#fff;text-decoration:none;font-weight:700}
+    .action:hover{background:var(--accent-hover)}
+    .hint{margin:16px 0 0;padding:14px 16px;border-radius:12px;background:var(--soft);color:var(--text)}
+    h2{margin:34px 0 12px;font-size:20px}
+    ul{margin:0;padding-left:22px;color:var(--muted)}
+    li+li{margin-top:8px}
+    nav{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:32px;padding-top:24px;border-top:1px solid var(--line)}
+    nav a{color:var(--accent);font-weight:650}
+    footer{margin-top:22px;text-align:center;color:var(--muted);font-size:14px}
+    [hidden]{display:none!important}
+    @media (prefers-color-scheme:dark){:root{--bg:#0d1815;--card:#14231e;--text:#e7f3ef;--muted:#afc3bc;--line:#2c443c;--accent:#34c997;--accent-hover:#5bd6aa;--soft:#19382e}.action{color:#06281e}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand"><img src="/assets/icons/cl.png" alt="" width="42" height="42">copa.life</div>
+      <label>
+        <span data-i18n="languageLabel" hidden>Language</span>
+        <select id="language" aria-label="Language">
+          <option value="en">English</option>
+          <option value="tr">Türkçe</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+        </select>
+      </label>
+    </header>
+    <article>
+      <h1 data-i18n="title">How can we help?</h1>
+      <p class="lead" data-i18n="lead">For game support, bug reports, privacy requests or data deletion, contact us by email.</p>
+      <a id="emailLink" class="action" href="mailto:support@copa.life?subject=copa.life%20Support" data-i18n="email">Email support</a>
+      <p class="hint"><strong>support@copa.life</strong><br><span data-i18n="reply">Please include your device model, Android or iOS version, and a short description of the issue. Do not include passwords or other sensitive information.</span></p>
+
+      <h2 data-i18n="topicsTitle">What you can contact us about</h2>
+      <ul>
+        <li data-i18n="topicGame">Gameplay and technical problems</li>
+        <li data-i18n="topicBug">Bug reports and accessibility feedback</li>
+        <li data-i18n="topicPrivacy">Privacy and personal data deletion requests</li>
+        <li data-i18n="topicSafety">Inappropriate Ghost Club names and content reports</li>
+      </ul>
+
+      <nav aria-label="Legal information">
+        <a href="https://copa-life-legal.pages.dev/privacy.html" data-i18n="privacy">Privacy policy</a>
+        <a href="https://copa-life-legal.pages.dev/terms.html" data-i18n="terms">Terms of use</a>
+        <a href="https://copa-life-legal.pages.dev/takedown.html" data-i18n="takedown">Content and rights notices</a>
+      </nav>
+    </article>
+    <footer data-i18n="footer">Official support page for the copa.life mobile game.</footer>
+  </main>
+  <script>
+    const COPY={
+      en:{languageLabel:"Language",title:"How can we help?",lead:"For game support, bug reports, privacy requests or data deletion, contact us by email.",email:"Email support",reply:"Please include your device model, Android or iOS version, and a short description of the issue. Do not include passwords or other sensitive information.",topicsTitle:"What you can contact us about",topicGame:"Gameplay and technical problems",topicBug:"Bug reports and accessibility feedback",topicPrivacy:"Privacy and personal data deletion requests",topicSafety:"Inappropriate Ghost Club names and content reports",privacy:"Privacy policy",terms:"Terms of use",takedown:"Content and rights notices",footer:"Official support page for the copa.life mobile game.",subject:"copa.life Support"},
+      tr:{languageLabel:"Dil",title:"Nasıl yardımcı olabiliriz?",lead:"Oyun desteği, hata bildirimi, gizlilik talebi veya veri silme işlemleri için bize e-posta gönderin.",email:"Desteğe e-posta gönder",reply:"Lütfen cihaz modelinizi, Android veya iOS sürümünüzü ve sorunun kısa açıklamasını ekleyin. Parola veya başka hassas bilgiler göndermeyin.",topicsTitle:"Bize hangi konularda ulaşabilirsiniz?",topicGame:"Oynanış ve teknik sorunlar",topicBug:"Hata bildirimleri ve erişilebilirlik geri bildirimleri",topicPrivacy:"Gizlilik ve kişisel veri silme talepleri",topicSafety:"Uygunsuz Ghost Club adları ve içerik bildirimleri",privacy:"Gizlilik politikası",terms:"Kullanım şartları",takedown:"İçerik ve hak bildirimleri",footer:"copa.life mobil oyununun resmî destek sayfası.",subject:"copa.life Destek"},
+      es:{languageLabel:"Idioma",title:"¿Cómo podemos ayudarte?",lead:"Para obtener ayuda con el juego, informar de errores o solicitar privacidad o eliminación de datos, escríbenos por correo electrónico.",email:"Enviar un correo a soporte",reply:"Incluye el modelo de tu dispositivo, la versión de Android o iOS y una breve descripción del problema. No envíes contraseñas ni otros datos sensibles.",topicsTitle:"Motivos de contacto",topicGame:"Problemas técnicos y de juego",topicBug:"Informes de errores y comentarios de accesibilidad",topicPrivacy:"Solicitudes de privacidad y eliminación de datos personales",topicSafety:"Nombres inapropiados de Ghost Clubs e informes de contenido",privacy:"Política de privacidad",terms:"Términos de uso",takedown:"Avisos de contenido y derechos",footer:"Página oficial de soporte del juego móvil copa.life.",subject:"Soporte de copa.life"},
+      de:{languageLabel:"Sprache",title:"Wie können wir helfen?",lead:"Für Spielhilfe, Fehlerberichte, Datenschutzanfragen oder Datenlöschung schreib uns eine E-Mail.",email:"E-Mail an den Support",reply:"Nenne bitte dein Gerätemodell, deine Android- oder iOS-Version und beschreibe das Problem kurz. Sende keine Passwörter oder anderen vertraulichen Informationen.",topicsTitle:"Wobei wir helfen",topicGame:"Spiel- und technische Probleme",topicBug:"Fehlerberichte und Feedback zur Barrierefreiheit",topicPrivacy:"Datenschutz und Löschung personenbezogener Daten",topicSafety:"Unangemessene Ghost-Club-Namen und Inhaltsmeldungen",privacy:"Datenschutzerklärung",terms:"Nutzungsbedingungen",takedown:"Hinweise zu Inhalten und Rechten",footer:"Offizielle Supportseite für das mobile Spiel copa.life.",subject:"copa.life Support"},
+      it:{languageLabel:"Lingua",title:"Come possiamo aiutarti?",lead:"Per assistenza sul gioco, segnalazioni di bug, richieste sulla privacy o cancellazione dei dati, scrivici via email.",email:"Invia un'email all'assistenza",reply:"Indica il modello del dispositivo, la versione di Android o iOS e una breve descrizione del problema. Non inviare password o altre informazioni sensibili.",topicsTitle:"Per cosa puoi contattarci",topicGame:"Problemi tecnici e di gioco",topicBug:"Segnalazioni di bug e feedback sull'accessibilità",topicPrivacy:"Richieste sulla privacy e cancellazione dei dati personali",topicSafety:"Nomi inappropriati dei Ghost Club e segnalazioni di contenuti",privacy:"Informativa sulla privacy",terms:"Termini di utilizzo",takedown:"Segnalazioni su contenuti e diritti",footer:"Pagina di assistenza ufficiale del gioco mobile copa.life.",subject:"Assistenza copa.life"}
+    };
+    const select=document.getElementById("language");
+    function applyLanguage(value){
+      const language=COPY[value]?value:"en",copy=COPY[language];
+      document.documentElement.lang=language;
+      document.title=`copa.life — ${copy.email}`;
+      document.querySelectorAll("[data-i18n]").forEach(element=>{const key=element.dataset.i18n;if(copy[key])element.textContent=copy[key];});
+      document.getElementById("emailLink").href=`mailto:support@copa.life?subject=${encodeURIComponent(copy.subject)}`;
+      select.value=language;
+      select.setAttribute("aria-label",copy.languageLabel);
+      const url=new URL(location.href);url.searchParams.set("lang",language);history.replaceState(null,"",url);
+    }
+    const requested=new URLSearchParams(location.search).get("lang");
+    const initial=COPY[requested]?requested:(COPY[(navigator.language||"").slice(0,2)]?(navigator.language||"").slice(0,2):"en");
+    select.addEventListener("change",()=>applyLanguage(select.value));
+    applyLanguage(initial);
+  </script>
+</body>
+</html>
