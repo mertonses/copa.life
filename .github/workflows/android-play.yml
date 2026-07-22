@@ -1,10 +1,18 @@
-name: Upload Android to Google Play Internal
+name: Build signed Android release
 
 on:
   workflow_dispatch:
     inputs:
+      delivery:
+        description: Build only, or also upload with the Play API
+        required: true
+        default: artifact-only
+        type: choice
+        options:
+          - artifact-only
+          - internal
       status:
-        description: Internal release status
+        description: Play release status when delivery is internal
         required: true
         default: completed
         type: choice
@@ -137,6 +145,7 @@ jobs:
           retention-days: 30
 
       - name: Upload to Google Play internal testing
+        if: ${{ inputs.delivery == 'internal' }}
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
