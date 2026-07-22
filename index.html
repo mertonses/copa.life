@@ -1872,7 +1872,14 @@ function prepareLoanReward(){
   const targetRound=Math.min(6,round+1),before=squadPower(targetRound).power,original=picksBySlot[weakIdx];
   picksBySlot[weakIdx]=player;
   while(player.ov<99&&squadPower(targetRound).power<before+2){player.ov++;player.eff=player.ov;}
-  player.teamPowerBoost=Math.max(0,before+2-squadPower(targetRound).power);
+  let unguaranteedPower=squadPower(targetRound).power;
+  if(unguaranteedPower>=before+2){
+    while(player.ov>72&&unguaranteedPower>=before+2){
+      player.ov--;player.eff=player.ov;
+      unguaranteedPower=squadPower(targetRound).power;
+    }
+  }
+  player.teamPowerBoost=Math.max(0,before+2-unguaranteedPower);
   const after=squadPower(targetRound).power;
   picksBySlot[weakIdx]=original;
   pendingLoanReward={round,weakIdx,displaced,player,before,after};
