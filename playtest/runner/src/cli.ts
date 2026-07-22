@@ -19,6 +19,7 @@ function parseArgs(): { resumeId?: string; configPath?: string; overrides: Recor
     else if (a === "--config" && args[i + 1]) { configPath = args[++i]; }
     else if (a === "--headless") { overrides.headless = true; }
     else if (a === "--url" && args[i + 1]) { overrides.gameUrl = args[++i]; }
+    else if (a === "--min-runs" && args[i + 1]) { overrides.minRunsPerSession = parseInt(args[++i], 10); }
     else if (a === "--max-runs" && args[i + 1]) { overrides.maxRunsPerSession = parseInt(args[++i], 10); }
     else if (a === "--help" || a === "-h") {
       console.log(`
@@ -32,6 +33,7 @@ Options:
   --config <path>        Path to config.json (default: ../../config.json)
   --headless             Run browser in headless mode
   --url <url>            Override game URL (default: http://localhost:5500?autotest=1)
+  --min-runs <n>         Do not stop for completed coverage before n runs
   --max-runs <n>         Maximum runs per session (default: 100)
   --help                 Show this help
 
@@ -55,9 +57,19 @@ Output:
 async function main() {
   const { resumeId, configPath, overrides } = parseArgs();
   const cfg = { ...loadConfig(configPath), ...overrides };
+  if (!Number.isInteger(cfg.minRunsPerSession) || cfg.minRunsPerSession < 0) {
+    throw new Error("--min-runs must be a non-negative integer");
+  }
+  if (!Number.isInteger(cfg.maxRunsPerSession) || cfg.maxRunsPerSession < 1) {
+    throw new Error("--max-runs must be a positive integer");
+  }
+  if (cfg.minRunsPerSession > cfg.maxRunsPerSession) {
+    throw new Error("--min-runs cannot exceed --max-runs");
+  }
 
   console.log(`[copa-agent] Starting ${resumeId ? `(resume: ${resumeId})` : "(new session)"}`);
   console.log(`[copa-agent] URL: ${cfg.gameUrl}`);
+  console.log(`[copa-agent] Min runs: ${cfg.minRunsPerSession}`);
   console.log(`[copa-agent] Max runs: ${cfg.maxRunsPerSession}`);
   console.log(`[copa-agent] Output: ${cfg.outputDir}`);
 

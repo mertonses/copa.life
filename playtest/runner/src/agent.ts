@@ -76,15 +76,23 @@ export class CopaAgent {
     this.session = new SessionManager(this.cfg, resumeId);
     this.issues = new IssueTracker(this.cfg, this.session.sessionId);
     this.coverage = new CoverageTracker();
+    this.coverage.restoreFromRuns(this.session.allRuns());
     this.stagnation = new StagnationDetector(this.cfg.stagnationTimeoutMs);
 
     const deadline = Date.now() + this.cfg.maxSessionDurationMs;
     let runIdx = this.session.runsCompleted;
+    const shouldContinue = () => this.cfg.minRunsPerSession > 0
+      ? this.session.fullRunsCompleted < this.cfg.minRunsPerSession
+      : !this.coverage.isComplete();
 
     await this._launchBrowser();
 
     try {
-      while (runIdx < this.cfg.maxRunsPerSession && Date.now() < deadline && !this.coverage.isComplete()) {
+      while (
+        runIdx < this.cfg.maxRunsPerSession &&
+        Date.now() < deadline &&
+        shouldContinue()
+      ) {
         this.runState = _newRunState(runIdx);
         const outcome = await this._singleRun();
         const snap = await this.bridge.snapshot();
@@ -118,7 +126,10 @@ export class CopaAgent {
 
         runIdx++;
 
-        if (!this.coverage.isComplete() && runIdx < this.cfg.maxRunsPerSession) {
+        if (
+          runIdx < this.cfg.maxRunsPerSession &&
+          shouldContinue()
+        ) {
           // Clear sessionStorage before reload so _tryRestoreState() doesn't
           // restore the previous run's stale state (negative budget, mid-game squad, etc.)
           await this.page.evaluate(() => {
@@ -138,6 +149,11 @@ export class CopaAgent {
             await _wait(800);
           }
         }
+      }
+      if (this.session.fullRunsCompleted < this.cfg.minRunsPerSession) {
+        throw new Error(
+          `Minimum full-run gate failed: ${this.session.fullRunsCompleted}/${this.cfg.minRunsPerSession} completed`,
+        );
       }
     } finally {
       const rpt = this.reports.generateCampaignReport();
@@ -336,7 +352,7 @@ export class CopaAgent {
 
   private async _phaseHubLoop() {
     let guard = 0;
-    const MAX = 40; // safety: 5 rounds × ~8 state checks each
+    const MAX = 120; // safety for draft hand-off, draw, six matches and shootout decisions
 
     while (guard < MAX) {
       guard++;
@@ -344,6 +360,18 @@ export class CopaAgent {
 
       if (s.screen === "result") return;
       if (s.screen === "sim") { await this._waitSimEnd(); continue; }
+      if (s.screen === "draft") {
+        await this.actions.doAction("draft_quick_all");
+        await _wait(1000);
+        continue;
+      }
+      if (s.screen === "draw") {
+        await this.actions.doAction("draw_one");
+        await this.actions.doAction("draw_fast");
+        await this.actions.doAction("draw_finish");
+        await _wait(800);
+        continue;
+      }
       if (s.screen === "modal") { await this._handleModal(s); await _wait(600); continue; }
       if (s.screen === "hub") {
         // Optionally use a shout (15% chance — only if we're not in round 6)
@@ -376,7 +404,7 @@ export class CopaAgent {
 
   private async _waitSimEnd() {
     // Speed up sim to 5× so we observe it but fast
-    await this.actions.doAction("set_sim_speed", 5);
+    await this.actions.doAction("set_sim_speed", 8);
     const deadline = Date.now() + 180_000;
     while (Date.now() < deadline) {
       const s = await this._snap();
@@ -431,6 +459,18 @@ export class CopaAgent {
         // Team talk modal — pick a random option
         await this.actions.doAction("pick_team_talk", _rng(["gaz", "mantik", "sert"]));
         break;
+      case "final_tactic":
+        await this.actions.doAction("pick_final_tactic");
+        break;
+      case "final_card":
+        await this.actions.doAction("start_final_sim");
+        break;
+      case "suspension":
+        await this.actions.doAction("resolve_suspension");
+        break;
+      case "penalty":
+        await this.actions.doAction("advance_penalty");
+        break;
       case "risk_summary":
       case "confirmable":
         // Pre-match risk warning or any primary-button modal — confirm to proceed
@@ -438,8 +478,7 @@ export class CopaAgent {
         break;
       case "risk_draft":
         // Risk/Reward draft event — ordinary player: skip it (dismiss) or accept (confirm)
-        if (Math.random() < 0.4) await this.actions.doAction("confirm_modal");
-        else await this.actions.doAction("dismiss_modal");
+        await this.actions.doAction("dismiss_modal");
         break;
       case "buy_card":
         // Ordinary player: 30% chance to buy when shop modal opens

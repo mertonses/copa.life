@@ -10,6 +10,7 @@ const verified = process.argv.includes("--verified");
 const emulatorSmokePassed = process.argv.includes("--emulator-smoke-passed");
 const aabPath = path.resolve(ROOT, input);
 const manifestPath = path.join(ROOT, "store", "android", "release-manifest.json");
+const reportPath = path.join(ROOT, "store", "android", "release-readiness-report.md");
 
 if (!fs.existsSync(aabPath)) throw new Error(`AAB not found: ${aabPath}`);
 
@@ -98,6 +99,49 @@ const manifest = {
 };
 
 fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+const generatedDate = new Intl.DateTimeFormat("tr-TR", {
+  dateStyle: "long",
+  timeZone: "Europe/Istanbul",
+}).format(new Date());
+const verificationRows = Object.entries(manifest.verification)
+  .map(([key, value]) => `| \`${key}\` | ${value} |`)
+  .join("\n");
+const prerequisites = manifest.external_prerequisites.length
+  ? manifest.external_prerequisites.map((item) => `- [ ] ${item}`).join("\n")
+  : "- [x] Manifestte kayıtlı dış önkoşul yok.";
+const report = `# Android mağaza ve yayın hazırlık raporu
+
+Son güncelleme: **${generatedDate}**
+Bu dosya \`tools/write-android-release-manifest.mjs\` tarafından AAB manifestiyle birlikte otomatik üretilir.
+
+## Güncel aday
+
+- Paket: \`${manifest.package_id}\`
+- Sürüm: \`${manifest.version_name}\` (\`versionCode\` ${manifest.version_code})
+- Kaynak commit: \`${manifest.source.commit || "dirty/uncommitted"}\`
+- Build sürümü: \`${manifest.source.build_version}\`
+- AAB: \`${manifest.signed_aab.file}\`
+- Boyut: \`${manifest.signed_aab.bytes}\` bayt
+- SHA-256: \`${manifest.signed_aab.sha256}\`
+- Upload certificate: \`${manifest.upload_certificate_sha256}\`
+- AdMob modu: \`${manifest.admob.mode}\`
+- Play yüklemeye uygun: **${manifest.store_upload_eligible ? "EVET" : "HAYIR"}**
+
+## Doğrulama
+
+| Kontrol | Durum |
+| --- | --- |
+${verificationRows}
+
+## Dış hesaplara ve cihazlara bağlı kapılar
+
+${prerequisites}
+
+## Terfi kuralı
+
+Kapalı teste veya production'a yalnız bu rapordaki AAB SHA-256 değeri ile manifestteki değer birebir aynıysa geçilir. Kaynak ya da mobil düzeltme değişirse aynı \`versionCode\` yeniden kullanılmaz; sürüm artırılır, temiz committen yeni AAB üretilir ve bu iki dosya yeniden yazılır.
+`;
+fs.writeFileSync(reportPath, report);
 console.log(
-  `Release manifest updated: v${version.versionName}+${version.versionCode}, ${manifest.signed_aab.sha256}`,
+  `Release manifest and readiness report updated: v${version.versionName}+${version.versionCode}, ${manifest.signed_aab.sha256}`,
 );

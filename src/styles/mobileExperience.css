@@ -618,6 +618,17 @@
     width:10px!important;
     height:10px!important;
   }
+  #hub #shopLbl button.shop-reroll-btn{width:auto!important;min-width:64px!important;height:44px!important;min-height:44px!important;padding:6px 8px!important;border-radius:8px!important;flex:0 0 auto!important;font-size:8px!important}
+  #hub #shopLbl button.shop-reroll-btn::after{display:none!important}
+  #hub #shopLbl button.shop-reroll-btn svg{width:14px!important;height:14px!important}
+  #hub .hub-bench-stack .injbar{align-items:flex-start!important;flex-wrap:wrap!important}
+  #hub .hub-bench-stack .injbar .inj-info{flex:1 1 calc(100% - 34px)!important}
+  #hub .hub-bench-stack .injbar .inj-btns{flex:1 0 100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  #hub .hub-bench-stack .injbar .inj-btns button{min-width:0!important;min-height:44px!important;padding:7px 8px!important;white-space:normal!important;font-size:8px!important;line-height:1.2!important}
+  #hub .hub-bench-stack .injbar .inj-reward-btn{grid-column:1/-1!important}
+  #hub .hub-lower-grid>*,#hub .hub-fixture-bottom>*,#hub #collection,#hub #freeagents,#hub .feed{content-visibility:auto;contain-intrinsic-size:auto 360px}
+  #hub .tg-table{font-size:10px!important}
+  #hub .tg-table thead{font-size:9px!important}
   a[href]{
     min-width:44px;
     min-height:44px;

@@ -42,3 +42,26 @@
 @keyframes td-latest-reveal{from{opacity:.25;transform:translateX(8px)}to{opacity:1;transform:none}}
 body.reduced-motion .td-group li.is-latest{animation:none}
 @media(prefers-reduced-motion:reduce){.td-group li.is-latest{animation:none}}
+
+/* The draw machine precedes the groups in the DOM so its controls are reachable
+   immediately on touch and keyboard. Desktop keeps the original two-column view. */
+.td-machine{grid-column:2;grid-row:1}
+.td-groups{grid-column:1;grid-row:1}
+@media(max-width:760px){
+  .td-head{gap:10px}
+  .td-head h2{font-size:24px}
+  .td-head p{font-size:11px}
+  .td-progress{min-width:70px}
+  .td-progress b{font-size:27px}
+  .td-stage{display:flex;flex-direction:column}
+  .td-machine{position:sticky;z-index:4;top:calc(var(--copa-safe-top,0px) + 4px);grid-column:auto;grid-row:auto;min-height:190px;padding:12px;border:1px solid color-mix(in srgb,var(--color-slate) 18%,transparent);background:color-mix(in srgb,var(--bg-card) 96%,var(--color-primary) 4%);box-shadow:0 10px 28px rgba(10,17,24,.12)}
+  .td-ball{width:68px;height:68px;margin:18px 0 12px}
+  .td-ball span{font-size:22px}
+  .td-live{min-height:25px}
+  .td-actions .btn{min-height:46px}
+  .td-groups{grid-column:auto;grid-row:auto;display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:minmax(82%,1fr);gap:10px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;padding:2px 1px 8px}
+  .td-group{scroll-snap-align:start}
+  .td-group li{min-height:39px;font-size:12px}
+  .tg-table th,.tg-table td{font-size:10px}
+  .tg-table thead{font-size:9px}
+}

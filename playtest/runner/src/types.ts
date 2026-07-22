@@ -3,6 +3,7 @@
 export type Screen =
   | "intro"
   | "draft"
+  | "draw"
   | "hub"
   | "sim"
   | "result"
@@ -132,6 +133,7 @@ export interface SessionSummary {
 export interface AgentConfig {
   gameUrl: string;
   targetChairs: ChairId[];
+  minRunsPerSession: number;
   maxRunsPerSession: number;
   maxSessionDurationMs: number;
   screenshotOnIssue: boolean;

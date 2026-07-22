@@ -31,6 +31,9 @@ try {
         if ($env:COPA_ADMOB_INTERSTITIAL_ID -notmatch '^ca-app-pub-\d{16}/\d{10}$' -or $env:COPA_ADMOB_INTERSTITIAL_ID -eq 'ca-app-pub-3940256099942544/1033173712') {
             throw "Set COPA_ADMOB_INTERSTITIAL_ID to the production run-end interstitial unit ID before building a Play release."
         }
+        if ($env:COPA_ADMOB_REWARDED_ID -notmatch '^ca-app-pub-\d{16}/\d{10}$' -or $env:COPA_ADMOB_REWARDED_ID -eq 'ca-app-pub-3940256099942544/5224354917') {
+            throw "Set COPA_ADMOB_REWARDED_ID to the production rewarded unit ID before building a Play release."
+        }
     }
     $env:JAVA_HOME = Find-JdkHome
     if (-not $env:ANDROID_HOME) {

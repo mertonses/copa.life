@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-21T23:44:33.228Z",
+  "generatedAt": "2026-07-22T13:34:25.679Z",
   "sourceBuild": {
     "schema_version": 1,
     "platform": "android",
@@ -556,6 +556,342 @@
       "mime": "image/jpeg",
       "bytes": 169452,
       "sha256": "744b08815abb8c05066abce4a9d3de3592de8a14d0e7ef62f1ff3826a24cda4d"
+    },
+    {
+      "file": "graphics/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 219933,
+      "sha256": "64c0ed5e0467e8710ad5e5453ad6dcd2437121b0b5d65fc6047c06105097a137"
+    },
+    {
+      "file": "graphics/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 156489,
+      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+    },
+    {
+      "file": "graphics/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 184009,
+      "sha256": "b48cdaf981ee03bca0ca7f4b57299ce5b54b3f08b4c2c63defc8d1210b55a1e2"
+    },
+    {
+      "file": "graphics/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 246030,
+      "sha256": "444550a02bab1d570bb6208b6ed27b818a3e36973101d6df36178cb26d676a9d"
+    },
+    {
+      "file": "graphics/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 169702,
+      "sha256": "ee473c11a2b5ca655360aeb6904fc8795508b840a9f1291ca4ceb440367012a6"
+    },
+    {
+      "file": "graphics/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 212311,
+      "sha256": "2075e20bccbd8a42a04e5f717e04e379e3bfe349e997a682608a2a5bcf695165"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 155462,
+      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 175989,
+      "sha256": "c835242332f1c41393bf48e19f773e91fb602ac94cdb77d28170682c12052374"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 249896,
+      "sha256": "342943caddb70ba676df3adf3389ea02e69901b583383c4438474d065a9fffde"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 167130,
+      "sha256": "00df31fe509a8ca65d4fcf8a351d38305bc7ef2fc01c1f194e38617f61b75e18"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 219933,
+      "sha256": "64c0ed5e0467e8710ad5e5453ad6dcd2437121b0b5d65fc6047c06105097a137"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 156489,
+      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 184009,
+      "sha256": "b48cdaf981ee03bca0ca7f4b57299ce5b54b3f08b4c2c63defc8d1210b55a1e2"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 246030,
+      "sha256": "444550a02bab1d570bb6208b6ed27b818a3e36973101d6df36178cb26d676a9d"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 169702,
+      "sha256": "ee473c11a2b5ca655360aeb6904fc8795508b840a9f1291ca4ceb440367012a6"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 231946,
+      "sha256": "badfb14ddf4ab0191e31291847b90496e2adfce4ea4244c1ed6938fd4b2f7c0e"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 155747,
+      "sha256": "1a66a3a512886835338deebb27a3358660855fbb1e4d577c0108e1064fd2d4ed"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 195989,
+      "sha256": "291acc348c41402583cb972d9a5bc37e186a56b34b5ae04fd72eb96e72fff15a"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 259561,
+      "sha256": "7286f2216372cd82638a265a6033c531456cbcf17b5c532e8a2e39e4b229c7d8"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 172738,
+      "sha256": "2c3dec0ddca4c5d91a6502d70b0964d1034487851e03374cdd4df5cbf979fc58"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 239104,
+      "sha256": "f8683833ff5158e117610bf63324cc3f42aa5a50b8e65985364c9bb5d7b42850"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 158881,
+      "sha256": "c373393621de2707a72faf2c7f93335a83f559e36d5a604bcefacf47572763b1"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 205760,
+      "sha256": "1bfd764dc5251c5d662112de03f072c5f4be2ccd6f190dd7f9d0ecd16594bffd"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 245845,
+      "sha256": "ac6f912ed8f6b54b08b237a5acce59b29cbfa36b259d2f00f87a827836a96987"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 158500,
+      "sha256": "9f26eff1483728de6ca7f0c26832154be3f30ff146526d52657aefba2c9969eb"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/01-run-setup.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 223611,
+      "sha256": "9a3f72b4b8c1a870966642cf3e2529ecd184a33b65902f0b7ae73564e8f05f63"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/02-player-draft.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 157401,
+      "sha256": "3665cc8a347b081eca9bdfadbc2d6980f165f9a14e948973c7e9c352ea6a1444"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/03-group-draw.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 199660,
+      "sha256": "77e82bb9b43c83ad6b07dc2d2e81da55c9522212724883d9706dab05130c25c5"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/04-match-hub.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 249036,
+      "sha256": "9b1401f5794f4ad14db600725f4e81696fca31d4fc5effd60a9c486ecb9aec9a"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/05-player-profile.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 169452,
+      "sha256": "744b08815abb8c05066abce4a9d3de3592de8a14d0e7ef62f1ff3826a24cda4d"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/feature-1920x1080.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 514509,
+      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/logo-600x400.png",
+      "width": 600,
+      "height": 400,
+      "mime": "image/png",
+      "bytes": 20656,
+      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
     }
   ]
 }

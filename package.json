@@ -18,6 +18,7 @@
     "assets:store:feature": "npm run assets:feature --prefix playtest/runner",
     "assets:store:video": "npm run assets:promo-video --prefix playtest/runner",
     "assets:store:localization-packs": "node tools/build-android-localization-packs.mjs",
+    "assets:store:pc": "npm run assets:pc --prefix playtest/runner",
     "android:add": "npm run build:android && node tools/capacitor-platform.mjs android add",
     "android:sync": "npm run build:android && npm run check:android && node tools/capacitor-platform.mjs android sync",
     "android:open": "node tools/capacitor-platform.mjs android open",
@@ -34,6 +35,9 @@
     "check:android": "node tools/check-android-package.mjs",
     "check:android:store": "node tools/check-android-store-assets.mjs",
     "check:android:release": "node tools/check-android-release.mjs",
+    "check:rewarded-ads": "node tools/check-rewarded-ads.mjs",
+    "check:play-games-pc": "node tools/check-google-play-games-pc.mjs",
+    "playtest:release20": "node playtest/runner/run-release-session.mjs",
     "check:android:aab": "node tools/run-java.mjs tools/CheckAndroidAab.java android/app/build/outputs/bundle/release/app-release.aab",
     "check:android:signature": "node tools/check-android-signature.mjs android/app/build/outputs/bundle/release/app-release-signed.aab",
     "build:ios": "node tools/build-ios.mjs",
@@ -95,7 +99,7 @@
     "check:tournament": "node tools/check-group-tournament.mjs",
     "check:tournament:balance": "node tools/check-tournament-balance.mjs",
     "check:tournament:balance:matrix": "node tools/check-tournament-balance-matrix.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:android:store && npm run check:android:release && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:rewarded-ads && npm run check:play-games-pc && npm run check:android:store && npm run check:android:release && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

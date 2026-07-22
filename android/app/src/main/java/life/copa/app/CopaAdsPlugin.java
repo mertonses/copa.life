@@ -33,9 +33,12 @@ public class CopaAdsPlugin extends Plugin {
     private static final String PREFS = "copa_ads";
     private static final String LAST_SHOWN_RUN_KEY = "last_shown_run_key";
     private static final String LAST_SHOWN_AT_MS = "last_shown_at_ms";
-    private static final String REWARDED_REROLL_RUN_KEY = "rewarded_reroll_run_key";
-    private static final String REWARDED_REROLL_COUNT = "rewarded_reroll_count";
+    private static final String PLACEMENT_REROLL = "reroll";
+    private static final String PLACEMENT_INJURY = "injury";
+    private static final String PLACEMENT_MARKET = "market";
     private static final int MAX_REWARDED_REROLLS_PER_RUN = 2;
+    private static final int MAX_REWARDED_INJURY_HEALS_PER_RUN = 1;
+    private static final int MAX_REWARDED_MARKET_REROLLS_PER_RUN = 1;
     private static final long RUN_END_AD_COOLDOWN_MS = 10 * 60 * 1000L;
 
     private ConsentInformation consentInformation;
@@ -153,33 +156,49 @@ public class CopaAdsPlugin extends Plugin {
 
     @PluginMethod
     public void showRewardedReroll(PluginCall call) {
+        showRewarded(call, PLACEMENT_REROLL, MAX_REWARDED_REROLLS_PER_RUN);
+    }
+
+    @PluginMethod
+    public void showRewardedInjury(PluginCall call) {
+        showRewarded(call, PLACEMENT_INJURY, MAX_REWARDED_INJURY_HEALS_PER_RUN);
+    }
+
+    @PluginMethod
+    public void showRewardedMarket(PluginCall call) {
+        showRewarded(call, PLACEMENT_MARKET, MAX_REWARDED_MARKET_REROLLS_PER_RUN);
+    }
+
+    private void showRewarded(PluginCall call, String placement, int placementLimit) {
         Activity activity = getActivity();
         String runKey = call.getString("runKey", "").trim();
         if (activity == null || runKey.isEmpty()) {
-            call.resolve(rewardResult(false, "invalid_context", 0));
+            call.resolve(rewardResult(false, "invalid_context", 0, placementLimit, placement));
             return;
         }
         SharedPreferences preferences = getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String storedRunKey = preferences.getString(REWARDED_REROLL_RUN_KEY, "");
-        int earnedCount = runKey.equals(storedRunKey) ? preferences.getInt(REWARDED_REROLL_COUNT, 0) : 0;
-        if (earnedCount >= MAX_REWARDED_REROLLS_PER_RUN) {
-            call.resolve(rewardResult(false, "limit", earnedCount));
+        String runKeyPreference = "rewarded_" + placement + "_run_key";
+        String countPreference = "rewarded_" + placement + "_count";
+        String storedRunKey = preferences.getString(runKeyPreference, "");
+        int earnedCount = runKey.equals(storedRunKey) ? preferences.getInt(countPreference, 0) : 0;
+        if (earnedCount >= placementLimit) {
+            call.resolve(rewardResult(false, "limit", earnedCount, placementLimit, placement));
             return;
         }
         if (!rewardedAdShowing.compareAndSet(false, true)) {
-            call.resolve(rewardResult(false, "already_showing", earnedCount));
+            call.resolve(rewardResult(false, "already_showing", earnedCount, placementLimit, placement));
             return;
         }
         if (consentInformation == null || !consentInformation.canRequestAds()) {
             rewardedAdShowing.set(false);
-            call.resolve(rewardResult(false, "consent_required", earnedCount));
+            call.resolve(rewardResult(false, "consent_required", earnedCount, placementLimit, placement));
             return;
         }
         RewardedAd ad = rewardedAd;
         if (ad == null) {
             rewardedAdShowing.set(false);
             loadRewardedAd();
-            call.resolve(rewardResult(false, "not_ready", earnedCount));
+            call.resolve(rewardResult(false, "not_ready", earnedCount, placementLimit, placement));
             return;
         }
 
@@ -192,7 +211,7 @@ public class CopaAdsPlugin extends Plugin {
                 RewardedAdEventCallback.super.onAdDismissedFullScreenContent();
                 rewardedAdShowing.set(false);
                 if (resolved.compareAndSet(false, true)) {
-                    call.resolve(rewardResult(false, "dismissed", countBeforeShow));
+                    call.resolve(rewardResult(false, "dismissed", countBeforeShow, placementLimit, placement));
                 }
                 loadRewardedAd();
             }
@@ -202,7 +221,7 @@ public class CopaAdsPlugin extends Plugin {
                 RewardedAdEventCallback.super.onAdFailedToShowFullScreenContent(error);
                 rewardedAdShowing.set(false);
                 if (resolved.compareAndSet(false, true)) {
-                    call.resolve(rewardResult(false, "show_failed", countBeforeShow));
+                    call.resolve(rewardResult(false, "show_failed", countBeforeShow, placementLimit, placement));
                 }
                 loadRewardedAd();
             }
@@ -210,13 +229,13 @@ public class CopaAdsPlugin extends Plugin {
         activity.runOnUiThread(() -> ad.show(activity, new OnUserEarnedRewardListener() {
             @Override
             public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
-                int nextCount = Math.min(MAX_REWARDED_REROLLS_PER_RUN, countBeforeShow + 1);
+                int nextCount = Math.min(placementLimit, countBeforeShow + 1);
                 preferences.edit()
-                    .putString(REWARDED_REROLL_RUN_KEY, runKey)
-                    .putInt(REWARDED_REROLL_COUNT, nextCount)
+                    .putString(runKeyPreference, runKey)
+                    .putInt(countPreference, nextCount)
                     .apply();
                 if (resolved.compareAndSet(false, true)) {
-                    call.resolve(rewardResult(true, "earned", nextCount));
+                    call.resolve(rewardResult(true, "earned", nextCount, placementLimit, placement));
                 }
             }
         }));
@@ -313,11 +332,12 @@ public class CopaAdsPlugin extends Plugin {
         return result;
     }
 
-    private JSObject rewardResult(boolean earned, String reason, int earnedCount) {
+    private JSObject rewardResult(boolean earned, String reason, int earnedCount, int placementLimit, String placement) {
         JSObject result = status(reason);
         result.put("earned", earned);
         result.put("earnedCount", earnedCount);
-        result.put("remaining", Math.max(0, MAX_REWARDED_REROLLS_PER_RUN - earnedCount));
+        result.put("remaining", Math.max(0, placementLimit - earnedCount));
+        result.put("placement", placement);
         return result;
     }
 

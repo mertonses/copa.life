@@ -151,7 +151,7 @@ const checks = [
   },
   {
     name: "mobile card market reroll stays visually minimal",
-    pass: /#hub #shopLbl button\[onclick\*="shopReroll"\]\{[\s\S]*width:24px!important;[\s\S]*min-height:24px!important/s.test(mobile)
+    pass: /#hub #shopLbl button\.shop-reroll-btn\{[\s\S]*min-width:64px!important;[\s\S]*min-height:44px!important/s.test(mobile)
       && /button\[onclick\*="shopReroll"\]::after\{[\s\S]*inset:-10px/s.test(mobile),
   },
   {

@@ -2,10 +2,10 @@
  * Coverage matrix: tracks which game states and paths have been tested.
  * All 6 presidents must be unlocked to consider campaign complete.
  */
-import type { ChairId, Screen, AgentConfig } from "./types";
+import type { ChairId, Screen, RunResult } from "./types";
 
 const ALL_CHAIRS: ChairId[] = ["babacan", "leydi", "pinti", "sansasyoncu", "torpilci", "cilgin"];
-const ALL_SCREENS: Screen[] = ["intro", "draft", "hub", "sim", "result"];
+const ALL_SCREENS: Screen[] = ["intro", "draft", "draw", "hub", "sim", "result"];
 const ALL_SHOUTS = ["push", "calm", "hold", "more"];
 
 export interface CoverageMatrix {
@@ -53,6 +53,20 @@ export class CoverageTracker {
   updateFromUnlockedChairs(chairs: ChairId[]) {
     chairs.forEach(c => this.markChair(c));
     this.matrix.allChairsUnlocked = ALL_CHAIRS.every(c => chairs.includes(c));
+  }
+
+  restoreFromRuns(runs: RunResult[]) {
+    for (const run of runs) {
+      if (run.outcome !== "abandoned") {
+        ALL_SCREENS.forEach(screen => this.markScreen(screen));
+        this.markTheme(false);
+      }
+      if (run.chairUsed) this.markChair(run.chairUsed);
+      run.shoutActions.forEach(shout => this.markShout(shout));
+      if (run.rewardChoices.includes("cash")) this.markReward(0);
+      if (run.rewardChoices.includes("loan")) this.markReward(1);
+      if (run.outcome !== "abandoned") this.markOutcome(run.outcome);
+    }
   }
 
   isComplete(): boolean { return this.matrix.allChairsUnlocked; }

@@ -17,6 +17,9 @@ export class SessionManager {
 
   constructor(cfg: AgentConfig, resumeId?: string) {
     this.cfg = cfg;
+    for (const directory of ["sessions", "checkpoints", "screenshots", "telemetry", "issues", "reports", "saves"]) {
+      fs.mkdirSync(path.join(cfg.outputDir, directory), { recursive: true });
+    }
     this.sessionId = resumeId ?? crypto.randomUUID().substring(0, 8);
     this.startTs = Date.now();
 
@@ -59,6 +62,7 @@ export class SessionManager {
   }
 
   get runsCompleted(): number { return this.runs.length; }
+  get fullRunsCompleted(): number { return this.runs.filter(r => r.outcome !== "abandoned").length; }
   get wins(): number { return this.runs.filter(r => r.outcome === "win").length; }
   get losses(): number { return this.runs.filter(r => r.outcome === "loss").length; }
   get sacks(): number { return this.runs.filter(r => r.outcome === "sacked").length; }

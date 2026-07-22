@@ -34,6 +34,7 @@ const manifest = read("android/app/src/main/AndroidManifest.xml");
 if (!manifest.includes('android:allowBackup="false"')) fail("Android backup must remain disabled");
 if (!manifest.includes('android:usesCleartextTraffic="false"')) fail("cleartext Android traffic must remain disabled");
 if (!manifest.includes('android:screenOrientation="portrait"')) fail("Android orientation contract changed");
+if (!manifest.includes('android:resizeableActivity="true"')) fail("Google Play Games on PC resizable activity support is missing");
 const permissions = [...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map((match) => match[1]);
 const expectedPermissions = new Set(["android.permission.INTERNET", "com.google.android.gms.permission.AD_ID"]);
 if (permissions.length !== expectedPermissions.size || permissions.some((permission) => !expectedPermissions.has(permission))) {
@@ -51,7 +52,7 @@ for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCod
   if (!mainActivity.includes(marker)) fail(`native update cache guard is missing ${marker}`);
 }
 const adsPlugin = read("android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
-for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
+for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
   if (!adsPlugin.includes(marker)) fail(`native ad consent/runtime guard is missing ${marker}`);
 }
 
@@ -142,9 +143,11 @@ if (
   !releaseManifestWriter.includes('"required after candidate build"') ||
   !releaseManifestWriter.includes("--emulator-smoke-passed") ||
   !releaseManifestWriter.includes("store_upload_eligible:") ||
-  !releaseManifestWriter.includes("productionAdmobIdsPresent")
+  !releaseManifestWriter.includes("productionAdmobIdsPresent") ||
+  !releaseManifestWriter.includes("release-readiness-report.md") ||
+  !releaseManifestWriter.includes("readiness report updated")
 ) {
-  fail("release manifest does not lock emulator and production AdMob upload eligibility after each build");
+  fail("release manifest/report writer does not lock and synchronize the Android candidate after each build");
 }
 
 if (failures.length) {

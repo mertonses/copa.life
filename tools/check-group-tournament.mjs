@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import engine from "../src/tournament/tournamentEngine.js";
+import core from "../src/sim/finalSimCore.js";
+import normal from "../src/game/normalMatch.js";
+import penalty from "../src/game/penaltyCore.js";
+import resolver from "../src/tournament/matchResolver.js";
 
 const pool=Array.from({length:32},(_,index)=>({name:`Club ${String(index+1).padStart(2,"0")}`}));
 const baseOptions={seed:20260721,playerName:"COPA XI",playerPower:74,playerFormation:"4-3-3",playerStyle:"gegen",pool,powerBases:[60,66,72,78,86,94]};
@@ -124,6 +128,31 @@ for(const formation of supportedFormations){
   const broad=diversity(40),compact=diversity(20);
   assert.ok(broad.unique>=700&&broad.averageOverlap<0.35&&broad.identical===0,`40-team draw diversity regressed: ${JSON.stringify(broad)}`);
   assert.ok(compact.unique>=580&&compact.averageOverlap<0.65&&compact.identical<=3,`20-team draw diversity regressed: ${JSON.stringify(compact)}`);
+}
+
+{
+  /* Quarter- and semi-final draws go straight to the shared penalty rules;
+     only a final draw may enter Golden Goal extra time. */
+  const state=newTournament();engine.completeDraw(state);
+  for(let day=0;day<3;day++){
+    const match=engine.getCurrentPlayerMatch(state),score=match.homeId==="player"?[3,0]:[0,3];
+    engine.completePlayerMatch(state,{score},item=>engine.defaultSimulator(state,item));
+  }
+  const qf=engine.getCurrentPlayerMatch(state);let directPenalty=null;
+  for(let seed=1;seed<10000&&!directPenalty;seed++){
+    const result=resolver.resolveMatch({state,match:qf,core,normal,penalty,seed});
+    if(result.score[0]===result.score[1])directPenalty=result;
+  }
+  assert.ok(directPenalty,"test fixture must exercise a tied quarter-final");
+  assert.equal(directPenalty.decidedBy,"penalties");assert.equal(directPenalty.extraTime,false);
+  assert.ok([qf.homeId,qf.awayId].includes(directPenalty.winnerId));
+
+  const finalMatch={...qf,id:"AUDIT-FINAL",round:"final"};let goldenGoalPath=null;
+  for(let seed=1;seed<10000&&!goldenGoalPath;seed++){
+    const result=resolver.resolveMatch({state,match:finalMatch,core,normal,penalty,seed});
+    if(result.extraTime)goldenGoalPath=result;
+  }
+  assert.ok(goldenGoalPath,"test fixture must exercise a final that reaches Golden Goal");
 }
 
 {

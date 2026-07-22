@@ -2,10 +2,11 @@
    DOM-free by design: the browser playback, Monte Carlo calibration and replay
    tools all share this model. */
 (function(root,factory){
-  const api=factory();
+  const dependency=typeof module==="object"&&module.exports?require("../game/penaltyCore.js"):root&&root.CopaPenaltyCore;
+  const api=factory(dependency);
   if(typeof module==="object"&&module.exports)module.exports=api;
   if(root)root.CopaFinalSimCore=Object.freeze(api);
-})(typeof globalThis!=="undefined"?globalThis:this,function(){
+})(typeof globalThis!=="undefined"?globalThis:this,function(penaltyCore){
   "use strict";
 
   const MODEL_VERSION="copa-final-core-v3";
@@ -415,18 +416,10 @@
       if(winner==null&&score[0]!==score[1])winner=score[0]>score[1]?0:1;
       if(winner==null){
         penalties=true;
-        const penScore=[0,0],penProb=[
-          clamp(0.72+(powers[0]-powers[1])*0.002+(cards[0].includes("sogukkanli_penaltici")?0.055:0),0.58,0.87),
-          clamp(0.72+(powers[1]-powers[0])*0.002+(cards[1].includes("sogukkanli_penaltici")?0.055:0),0.58,0.87)
-        ];
-        for(let index=0;index<5;index++){if(rng.bool(penProb[0]))penScore[0]++;if(rng.bool(penProb[1]))penScore[1]++;}
-        let guard=0;
-        while(penScore[0]===penScore[1]&&guard<16){
-          const home=rng.bool(penProb[0]),away=rng.bool(penProb[1]);
-          if(home)penScore[0]++;if(away)penScore[1]++;guard++;
-        }
+        const shootout=penaltyCore&&typeof penaltyCore.simulateShootout==="function"?penaltyCore.simulateShootout({random:()=>rng.next(),homePower:powers[0],awayPower:powers[1]}):null;
+        const penScore=shootout?shootout.score:[rng.bool(0.5)?5:4,rng.bool(0.5)?4:5];
         if(penScore[0]===penScore[1])penScore[rng.bool(0.5)?0:1]++;
-        winner=penScore[0]>penScore[1]?0:1;
+        winner=shootout?shootout.winner:(penScore[0]>penScore[1]?0:1);
         events.push({minute:120,type:"penalties",side:winner,score:penScore});
       }
     }

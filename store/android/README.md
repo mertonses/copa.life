@@ -29,6 +29,8 @@
 
 Her yerelleştirme klasöründe bir 1024×500 feature graphic, beş 1080×1920 telefon ve beş 1920×1080 tablet görseli bulunur.
 
+Google Play Games on PC için varsayılan ve beş yerel klasörde ayrıca `play-games-pc/` bulunur: 600×400 şeffaf logo, metinsiz 1920×1080 kapak ve beş 1920×1080 ekran görüntüsü. `npm run assets:store:pc` ile yeniden üretilir.
+
 ## Yeniden üretme ve doğrulama
 
 ```powershell
