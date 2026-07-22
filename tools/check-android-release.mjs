@@ -142,9 +142,11 @@ if (
   !releaseManifestWriter.includes('"required after candidate build"') ||
   !releaseManifestWriter.includes("--emulator-smoke-passed") ||
   !releaseManifestWriter.includes("store_upload_eligible:") ||
-  !releaseManifestWriter.includes("productionAdmobIdsPresent")
+  !releaseManifestWriter.includes("productionAdmobIdsPresent") ||
+  !releaseManifestWriter.includes("release-readiness-report.md") ||
+  !releaseManifestWriter.includes("readiness report updated")
 ) {
-  fail("release manifest does not lock emulator and production AdMob upload eligibility after each build");
+  fail("release manifest/report writer does not lock and synchronize the Android candidate after each build");
 }
 
 if (failures.length) {

@@ -3,6 +3,7 @@
 export type Screen =
   | "intro"
   | "draft"
+  | "draw"
   | "hub"
   | "sim"
   | "result"

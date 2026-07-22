@@ -38,6 +38,7 @@
     if (modal && !modal.classList.contains("hidden")) return "modal";
     if (_vis("result")) return "result";
     if (_vis("sim")) return "sim";
+    if (_vis("tournamentDraw")) return "draw";
     if (_vis("hub")) return "hub";
     if (_vis("draft")) return "draft";
     if (_vis("intro")) return "intro";
@@ -67,7 +68,8 @@
       // Classify modal type
       if (m) {
         const t = m.textContent;
-        if (m.querySelector(".stylebtn[onclick*=\"finishRoundReward\"]")) snap.modalType = "reward";
+        if (m.querySelector(".pen-modal")) snap.modalType = "penalty";
+        else if (m.querySelector("[onclick*=\"finishRoundReward\"]")) snap.modalType = "reward";
         else if (m.querySelector(".btn-go[onclick*=\"pcGo\"]") || (m.querySelector(".btn-go") && t.includes("KUPA"))) snap.modalType = "pcgo";
         else if (m.querySelector(".btn-primary[onclick*=\"buyCard\"]")) snap.modalType = "buy_card";
         else if (m.querySelector("[onclick*=\"setCaptain\"]")) snap.modalType = "captain";
@@ -75,8 +77,11 @@
         else if (m.querySelector("[onclick*=\"pickStyle\"]")) snap.modalType = "style_select";
         else if (m.querySelector("[onclick*=\"applyLegacyBet\"]")) snap.modalType = "legacy_bet";
         else if (m.querySelector("[onclick*=\"pickTalk\"]")) snap.modalType = "team_talk";
+        else if (m.querySelector(".stylebtn[onclick*=\"playMatch(true)\"]")) snap.modalType = "final_tactic";
+        else if (m.querySelector("[onclick*=\"startFinalSim2\"]")) snap.modalType = "final_card";
+        else if (m.querySelector(".suspended-modal")) snap.modalType = "suspension";
         else if (t.includes("Risk Özeti") || t.includes("Risk Summary") || t.includes("Maç Öncesi")) snap.modalType = "risk_summary";
-        else if (t.includes("Risk/Ödül") || t.includes("Risk/Reward") || t.includes("Draft")) snap.modalType = "risk_draft";
+        else if (m.querySelector(".riskdraft-modal") || t.includes("Risk/Ödül") || t.includes("Risk/Reward") || t.includes("Draft")) snap.modalType = "risk_draft";
         else if (m.querySelector(".btn-primary") || m.querySelector(".btn-go")) snap.modalType = "confirmable";
         else snap.modalType = "other";
       }
@@ -88,6 +93,11 @@
       snap.cards = _g("cards");
       const sp = _g("squadPower");
       snap.squadPower = typeof sp === "function" ? sp(_g("round")) : null;
+    }
+    if (screen === "draw") {
+      const tournament = _g("tournament");
+      snap.drawRevealIndex = tournament && tournament.draw ? tournament.draw.revealIndex : 0;
+      snap.drawCompleted = !!(tournament && tournament.draw && tournament.draw.completed);
     }
     if (screen === "sim") {
       snap.simScore = _text("simScore");
@@ -106,6 +116,22 @@
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const Actions = {
+
+    /** Tournament draw: reveal one ball, reveal all remaining balls, then enter the group hub. */
+    draw_one() {
+      if (typeof _g("revealTournamentBall") === "function") { _g("revealTournamentBall")(); return { ok: true }; }
+      return { ok: false, reason: "revealTournamentBall not available" };
+    },
+
+    draw_fast() {
+      if (typeof _g("fastTournamentDraw") === "function") { _g("fastTournamentDraw")(); return { ok: true }; }
+      return { ok: false, reason: "fastTournamentDraw not available" };
+    },
+
+    draw_finish() {
+      if (typeof _g("finishTournamentDraw") === "function") { _g("finishTournamentDraw")(); return { ok: true }; }
+      return { ok: false, reason: "finishTournamentDraw not available" };
+    },
 
     /** Intro: click start (uses current formation/chair selection) */
     start_new_game() {
@@ -196,7 +222,11 @@
     set_sim_speed(mult = 2) {
       const requested=Number(mult);
       const engineSpeed=requested>0&&requested<=8?requested*10:requested;
-      if (typeof _g("setSpeed") === "function"&&[5,10,20,40,80].includes(engineSpeed)) { _g("setSpeed")(engineSpeed); return { ok: true, engineSpeed }; }
+      if ([5,10,20,40,80].includes(engineSpeed)) {
+        if (typeof _g("setSpeed") === "function") { _g("setSpeed")(engineSpeed); return { ok: true, engineSpeed }; }
+        const button = document.querySelector(`.spd[data-s="${engineSpeed}"]`);
+        if (button) { button.click(); return { ok: true, engineSpeed, via: "button" }; }
+      }
       return { ok: false, reason: "setSpeed not available" };
     },
 
@@ -275,6 +305,42 @@
       return { ok: false, reason: "pickTalk not found" };
     },
 
+    /** Final: choose an enabled last-move tactic and continue into the final. */
+    pick_final_tactic() {
+      const m = _el("modal");
+      if (!m || m.classList.contains("hidden")) return { ok: false, reason: "no final tactic modal" };
+      const choices = Array.from(m.querySelectorAll('.stylebtn:not(.disabled)[onclick*="playMatch(true)"]'));
+      if (!choices.length) return { ok: false, reason: "no enabled final tactic" };
+      choices[Math.floor(Math.random() * choices.length)].click();
+      return { ok: true, count: choices.length };
+    },
+
+    /** Final card: start the playable Golden Goal final simulation. */
+    start_final_sim() {
+      const m = _el("modal");
+      if (!m || m.classList.contains("hidden")) return { ok: false, reason: "no final card modal" };
+      const button = m.querySelector('[onclick*="startFinalSim2"]');
+      if (!button) return { ok: false, reason: "final start button not found" };
+      button.click();
+      return { ok: true };
+    },
+
+    /** Red-card suspension: open the bench picker and replace the suspended starter. */
+    resolve_suspension() {
+      const m = _el("modal");
+      if (!m || !m.querySelector(".suspended-modal")) return { ok: false, reason: "no suspension modal" };
+      const fix = m.querySelector(".btn-primary");
+      if (!fix) return { ok: false, reason: "fix-lineup button not found" };
+      fix.click();
+      const replacement = document.querySelector("#modal .backup-card");
+      if (!replacement) return { ok: false, reason: "no bench replacement available" };
+      replacement.click();
+      const apply = document.querySelector("#modal #backupApplyBtn");
+      if (!apply || apply.disabled) return { ok: false, reason: "replacement could not be selected" };
+      apply.click();
+      return { ok: true };
+    },
+
     /** Modal: confirm primary action (buy card, etc.) */
     confirm_modal() {
       const m = _el("modal");
@@ -282,6 +348,17 @@
       const btn = m.querySelector(".btn-primary, .btn-go");
       if (btn) { btn.click(); return { ok: true }; }
       return { ok: false, reason: "no confirm button in modal" };
+    },
+
+    /** Penalty modal: make the next direction choice or confirm the completed shootout. */
+    advance_penalty() {
+      const m = _el("modal");
+      if (!m || m.classList.contains("hidden")) return { ok: false, reason: "no penalty modal" };
+      const directions = m.querySelectorAll(".pen-dir-btn");
+      if (directions.length) { directions[Math.floor(Math.random() * directions.length)].click(); return { ok: true }; }
+      const done = m.querySelector(".pen-continue");
+      if (done) { done.click(); return { ok: true }; }
+      return { ok: false, reason: "penalty action not found" };
     },
 
     /** Modal: dismiss / cancel */

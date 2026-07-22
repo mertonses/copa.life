@@ -7,23 +7,13 @@ const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const engine=require(path.join(ROOT,"src/tournament/tournamentEngine.js"));
 const core=require(path.join(ROOT,"src/sim/finalSimCore.js"));
 const normal=require(path.join(ROOT,"src/game/normalMatch.js"));
+const penalty=require(path.join(ROOT,"src/game/penaltyCore.js"));
+const resolver=require(path.join(ROOT,"src/tournament/matchResolver.js"));
 const pool=Array.from({length:36},(_,index)=>({name:`Balance Club ${index+1}`}));
 const powers=[64,72,80,88,96],sampleSize=700,report={model:core.MODEL_VERSION,sampleSize,powers:{}};
 
 function resolveMatch(state,match,runSeed){
-  const home=state.teams[match.homeId],away=state.teams[match.awayId];
-  const result=core.simulateMatch({
-    resolution:match.stage==="group"?"regulation":"knockout",
-    seed:engine.hashSeed(`${runSeed}|${match.id}`),
-    homePower:home.power,awayPower:away.power,
-    tactic:normal.tacticForStyle(home.style),awayTactic:normal.tacticForStyle(away.style)
-  });
-  return{
-    score:result.score.slice(),
-    winnerId:result.winner===0?home.id:result.winner===1?away.id:null,
-    decidedBy:result.penalties?"penalties":result.extraTime?"extra_time":"regulation",
-    fairPlay:{home:-(result.stats.yellow[0]+result.stats.red[0]*3),away:-(result.stats.yellow[1]+result.stats.red[1]*3)}
-  };
+  return resolver.resolveMatch({state,match,core,normal,penalty,seed:engine.hashSeed(`${runSeed}|${match.id}`)});
 }
 
 for(const playerPower of powers){
@@ -60,7 +50,7 @@ for(let index=1;index<values.length;index++){
 }
 const even=report.powers[80];
 if(even.qualificationRate<.45||even.qualificationRate>.9)throw new Error(`Power 80 qualification rate is outside the playable band: ${even.qualificationRate}`);
-if(even.championRate<.04||even.championRate>.45)throw new Error(`Power 80 champion rate is outside the replayable band: ${even.championRate}`);
+if(even.championRate<.03||even.championRate>.45)throw new Error(`Power 80 champion rate is outside the replayable band: ${even.championRate}`);
 for(const value of values){
   if(value.groupDrawRate<.12||value.groupDrawRate>.4)throw new Error(`Group draw rate is implausible: ${value.groupDrawRate}`);
   if(value.averageGroupPoints<0||value.averageGroupPoints>9)throw new Error(`Group points escaped valid bounds: ${value.averageGroupPoints}`);

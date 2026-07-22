@@ -15,6 +15,20 @@ const finishDraw=async(page:any)=>{
   await expect(page.locator("#hub")).toBeVisible();
 };
 
+test("a failed country-player load gives a visible retry and preserves the setup",async({browser})=>{
+  const context=await browser.newContext({baseURL:"http://127.0.0.1:5500",viewport:{width:430,height:932},serviceWorkers:"block"}),page=await context.newPage();let requests=0,allowLoad=false;
+  await page.route("**/*players_england.js*",route=>{requests++;return allowLoad?route.continue():route.abort();});
+  await page.goto("/?autotest=1&groups=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{const w=globalThis as any;w.pickCountry("ENG");w.normalStart();w.pickStyle("gegen");});
+  await expect(page.locator("[data-country-load-error='ENG']")).toBeVisible();
+  await expect(page.locator("#startBtn")).toHaveAttribute("aria-busy","false");
+  await expect(page.locator("#intro")).toBeVisible();
+  allowLoad=true;
+  await page.locator("[data-country-load-error='ENG'] .btn-primary").click();
+  await expect(page.locator("#draft")).toBeVisible();
+  expect(requests).toBeGreaterThanOrEqual(2);await context.close();
+});
+
 test("a new run does not silently reuse the previous deterministic seed",async({page})=>{
   await page.goto("/?autotest=1&groups=1",{waitUntil:"domcontentloaded"});
   const seed=await page.evaluate(()=>{

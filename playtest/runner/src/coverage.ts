@@ -5,7 +5,7 @@
 import type { ChairId, Screen, AgentConfig } from "./types";
 
 const ALL_CHAIRS: ChairId[] = ["babacan", "leydi", "pinti", "sansasyoncu", "torpilci", "cilgin"];
-const ALL_SCREENS: Screen[] = ["intro", "draft", "hub", "sim", "result"];
+const ALL_SCREENS: Screen[] = ["intro", "draft", "draw", "hub", "sim", "result"];
 const ALL_SHOUTS = ["push", "calm", "hold", "more"];
 
 export interface CoverageMatrix {

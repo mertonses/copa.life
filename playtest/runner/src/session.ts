@@ -17,6 +17,9 @@ export class SessionManager {
 
   constructor(cfg: AgentConfig, resumeId?: string) {
     this.cfg = cfg;
+    for (const directory of ["sessions", "checkpoints", "screenshots", "telemetry", "issues", "reports", "saves"]) {
+      fs.mkdirSync(path.join(cfg.outputDir, directory), { recursive: true });
+    }
     this.sessionId = resumeId ?? crypto.randomUUID().substring(0, 8);
     this.startTs = Date.now();
 

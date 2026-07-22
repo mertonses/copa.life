@@ -43,7 +43,7 @@ test.describe("Copa Test Bridge", () => {
 
     expect(snap).toHaveProperty("screen");
     expect(snap).toHaveProperty("ts");
-    expect(["intro", "draft", "hub", "sim", "result", "modal", "unknown"]).toContain(snap.screen);
+    expect(["intro", "draft", "draw", "hub", "sim", "result", "modal", "unknown"]).toContain(snap.screen);
 
   });
 
@@ -60,6 +60,7 @@ test.describe("Copa Test Bridge", () => {
       "start_new_game", "select_formation", "pick_draft_option",
       "open_card", "confirm_modal", "dismiss_modal", "play_match", "shout",
       "select_chair", "pick_reward", "read_shop", "read_deck",
+      "draw_one", "draw_fast", "draw_finish", "advance_penalty", "pick_final_tactic", "start_final_sim", "resolve_suspension",
     ];
     for (const name of expected) {
       expect(actions).toContain(name);

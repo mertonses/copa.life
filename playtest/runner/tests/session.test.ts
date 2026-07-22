@@ -18,6 +18,16 @@ function _tmpDir() {
 }
 
 test.describe("SessionManager", () => {
+  test("creates every output directory on a fresh installation", () => {
+    const root = path.join(os.tmpdir(), `copa-test-empty-${Date.now()}`);
+    fs.mkdirSync(root, { recursive: true });
+    const cfg = { ...loadConfig(), outputDir: root };
+    new SessionManager(cfg);
+    for (const directory of ["sessions", "checkpoints", "screenshots", "telemetry", "issues", "reports", "saves"]) {
+      expect(fs.existsSync(path.join(root, directory))).toBe(true);
+    }
+  });
+
   test("creates a new session and records runs", () => {
     const cfg = { ...loadConfig(), outputDir: _tmpDir() };
     const mgr = new SessionManager(cfg);

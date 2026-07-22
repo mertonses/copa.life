@@ -42,4 +42,9 @@ sandbox.picksBySlot=[replacement,a,c];
 assert.equal(sandbox.api.current(),null,"a benched or replaced captain must not transfer the armband to the incoming player");
 assert.equal(sandbox.api.getIndex(),-1);
 
-console.log("Lineup sync OK: desktop/touch/tap swaps rerender power; captain identity follows the player and clears on replacement.");
+assert.match(html,/openSuspendedBackup\(\$\{idx\}\)/,
+  "the suspension blocker must route the player into a real replacement flow");
+assert.match(html,/old\.injured=false;old\.suspended=false;old\.backupBoost=0/,
+  "replacing a suspended starter must clear the stale suspension state");
+
+console.log("Lineup sync OK: swaps rerender power, captain identity stays coherent, and suspended starters have a working replacement path.");
