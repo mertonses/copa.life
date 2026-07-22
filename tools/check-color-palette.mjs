@@ -8,7 +8,6 @@ const allowed = new Set([
   "#7A858B", "#17242D", "#1F2B34", "#27343C", "#303C44", "#0A1118",
   "#AAB2B3", "#F25F40", "#3A4750", "#68757C",
   "#D6A21F", "#806000", "#1F6B45",
-  "#6B4C72", "#FFF9E9", "#E5DDC9",
 ].map((value) => value.toUpperCase()));
 const roots = ["src/styles", "src/ui", "src/cards"];
 const files = ["index.html", "privacy.html", "terms.html", "src/sim/finalSim.js",
