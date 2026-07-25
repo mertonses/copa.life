@@ -139,7 +139,7 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   });
   const nav=page.locator("#nativeHubNav");
   await expect(nav).toBeVisible();
-  await expect(nav.locator("button")).toHaveCount(3);
+  await expect(nav.locator("button")).toHaveCount(4);
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");
@@ -487,7 +487,7 @@ test("footer keeps its link rail separate from the independent-project note",asy
       links,
     };
   });
-  expect(layout.noteText).toBe("copa.life, bağımsız bir futbol yönetim oyunudur.");
+  expect(layout.noteText).toBe("Copa Life, bağımsız bir futbol yönetim oyunudur.");
   expect(layout.noteTop).toBeGreaterThanOrEqual(layout.rowBottom);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
   if(mobileOnly(testInfo.project.name))expect(layout.links.every(link=>link.width>=44&&link.height>=44)).toBe(true);

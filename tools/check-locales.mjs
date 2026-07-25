@@ -29,6 +29,10 @@ const errors=[];
 for(const language of required){
   if(!context.__locales[language])errors.push(`missing dictionary: ${language}`);
   if(!context.__localeUi[language])errors.push(`missing UI dictionary: ${language}`);
+  const locale=context.__locales[language]||{},ui=context.__localeUi[language]||{};
+  const brandSurfaces=[locale.coverTitle,locale.patreonText,locale.proto,locale.again,locale.ui&&locale.ui.postBand,ui.title];
+  if(locale.coverTitle!=="Copa Life")errors.push(`${language}.coverTitle must be exactly "Copa Life"`);
+  if(brandSurfaces.some(value=>typeof value==="string"&&/copa\.life/i.test(value)))errors.push(`${language} contains a legacy visible copa.life brand`);
 }
 function mechanicNumbers(text){
   return (String(text||"").match(/\d+(?:[.,]\d+)?(?:%|M|\+)?/g)||[])

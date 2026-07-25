@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { validateReleaseNotes } from "./android-release-notes.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const prebuild = process.argv.includes("--prebuild");
 const failures = validateReleaseNotes();
 const read = (relative) => fs.readFileSync(path.join(ROOT, relative), "utf8");
 const exists = (relative) => fs.existsSync(path.join(ROOT, relative));
@@ -15,14 +16,16 @@ if (notes.versionCode !== version.versionCode || notes.versionName !== version.v
   fail("release notes are stale; edit them and run npm run android:notes:stamp");
 }
 const recordedRelease = JSON.parse(read("store/android/release-manifest.json"));
-if (
-  recordedRelease.version_code !== version.versionCode ||
-  recordedRelease.version_name !== version.versionName
-) {
-  fail("release manifest is stale; record the exact signed AAB for the current Android version");
-}
-if (!read("store/android/release-readiness-report.md").includes(recordedRelease.signed_aab?.sha256 || "__missing__")) {
-  fail("release readiness report does not reference the signed AAB recorded in the release manifest");
+if (!prebuild) {
+  if (
+    recordedRelease.version_code !== version.versionCode ||
+    recordedRelease.version_name !== version.versionName
+  ) {
+    fail("release manifest is stale; record the exact signed AAB for the current Android version");
+  }
+  if (!read("store/android/release-readiness-report.md").includes(recordedRelease.signed_aab?.sha256 || "__missing__")) {
+    fail("release readiness report does not reference the signed AAB recorded in the release manifest");
+  }
 }
 for (const locale of ["tr-TR", "en-US", "es-ES", "de-DE", "it-IT"]) {
   if (!notes.locales?.includes(locale)) fail(`release notes metadata is missing ${locale}`);
@@ -165,5 +168,5 @@ if (failures.length) {
   process.exit(1);
 }
 console.log(
-  `[android release] preflight passed for v${version.versionName}+${version.versionCode}; toolchains, notes, permissions, certificate pin and internal-only upload are locked`,
+  `[android release] ${prebuild ? "source preflight" : "recorded release validation"} passed for v${version.versionName}+${version.versionCode}; toolchains, notes, permissions, certificate pin and internal-only upload are locked`,
 );

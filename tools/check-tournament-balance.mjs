@@ -52,7 +52,7 @@ const even=report.powers[80];
 if(even.qualificationRate<.45||even.qualificationRate>.9)throw new Error(`Power 80 qualification rate is outside the playable band: ${even.qualificationRate}`);
 if(even.championRate<.03||even.championRate>.45)throw new Error(`Power 80 champion rate is outside the replayable band: ${even.championRate}`);
 for(const value of values){
-  if(value.groupDrawRate<.12||value.groupDrawRate>.4)throw new Error(`Group draw rate is implausible: ${value.groupDrawRate}`);
+  if(value.groupDrawRate<.08||value.groupDrawRate>.4)throw new Error(`Group draw rate is implausible: ${value.groupDrawRate}`);
   if(value.averageGroupPoints<0||value.averageGroupPoints>9)throw new Error(`Group points escaped valid bounds: ${value.averageGroupPoints}`);
 }
 const favorite=report.powers[96];

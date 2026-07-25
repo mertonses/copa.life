@@ -2317,6 +2317,37 @@ html[data-theme="dark"] .fix.trophy.lit{
   color:var(--text-on-primary)!important;
   border-color:var(--action-primary)!important;
 }
+
+/* Light theme contrast contract: keep the football surface and player tokens
+   readable even when color-mix/backdrop-filter support is limited. */
+html[data-theme="light"] .pitch{
+  border-color:rgba(255,255,255,.82)!important;
+  background:
+    linear-gradient(to bottom,
+      rgba(255,255,255,.045) 0 12.5%,transparent 12.5% 25%,
+      rgba(255,255,255,.045) 25% 37.5%,transparent 37.5% 50%,
+      rgba(255,255,255,.045) 50% 62.5%,transparent 62.5% 75%,
+      rgba(255,255,255,.045) 75% 87.5%,transparent 87.5% 100%),
+    #1F6B45!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 5px 16px rgba(16,29,40,.22)!important;
+}
+html[data-theme="light"] .roundel.full,
+html[data-theme="light"] #hubPitch .roundel.full{
+  background:linear-gradient(180deg,#27343C,#101D28)!important;
+  border-color:rgba(255,255,255,.48)!important;
+  color:#F3F5F4!important;
+  box-shadow:0 4px 9px rgba(10,17,24,.36),inset 0 1px 0 rgba(255,255,255,.1)!important;
+}
+html[data-theme="light"] .roundel.full .rname,
+html[data-theme="light"] .roundel.full .rpos,
+html[data-theme="light"] #hubPitch .roundel.full .rname,
+html[data-theme="light"] #hubPitch .roundel.full .rpos{color:#F3F5F4!important;text-shadow:0 1px 2px #0A1118!important}
+html[data-theme="light"] .roundel.empty{
+  border-color:rgba(243,245,244,.68);
+  background:rgba(16,29,40,.62);
+  color:#F3F5F4;
+}
+html[data-theme="light"] .roundel.empty .rp{color:#F3F5F4}
 html[data-theme="dark"] .fix.trophy svg{stroke:currentColor!important}
 
 html[data-theme="dark"] .riskmodal{

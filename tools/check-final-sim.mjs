@@ -114,7 +114,7 @@ const checks = [
   {
     name: "DOM-free deterministic core drives browser sequence and shot resolution",
     pass:
-      /copa-final-core-v3/.test(core) &&
+      /copa-final-core-v4/.test(core) &&
       /core\.chooseSequence/.test(sim) &&
       /core\.resolveShot/.test(sim) &&
       /finalSimCore\.js/.test(lazy),

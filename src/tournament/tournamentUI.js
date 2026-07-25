@@ -38,6 +38,7 @@
       <header class="td-head"><div><span class="td-kicker">${esc(copy.ceremony)}</span><h2 id="tournamentDrawTitle">${esc(copy.drawTitle)}</h2><p>${esc(copy.drawLead)}</p></div><div class="td-progress" role="progressbar" aria-valuemin="0" aria-valuemax="16" aria-valuenow="${state.draw.revealIndex}" aria-label="${esc(copy.drawTitle)}"><b>${state.draw.revealIndex}</b><span>/ 16</span><i style="--draw-progress:${state.draw.revealIndex/16}"></i></div></header>
       <div class="td-stage">
         <aside class="td-machine">
+          <div id="phaserDrawStage" role="application" aria-label="${esc(copy.drawTitle)}"></div>
           <div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
           <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button>
           <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
@@ -47,6 +48,7 @@
       </div>
       <p class="td-rule">${esc(copy.drawRule)}</p>
     </div>`;bindDrawNavigation(container,last&&last.groupId);
+    if(root.CopaPhaserMoments)root.CopaPhaserMoments.mountDraw(state,copy).catch(()=>{});
   }
   function tableMarkup(state,group,copy,compact=false){
     const rows=group.table||[];

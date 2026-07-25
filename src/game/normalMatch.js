@@ -54,12 +54,22 @@
       Math.round(Number(data.homePower)||0),
       Math.round(Number(data.awayPower)||0)
     ].join("|"));
+    const variance=Math.max(.85,Math.min(1.15,Number(data.homeVariance)||1));
+    const varianceUnit=((hashSeed(`${seed}|chemistry-variance`)%10001)/10000)-.5;
+    const varianceAdjustment=varianceUnit*10*(variance-1);
+    const talk=data.talk&&typeof data.talk==="object"?data.talk:{};
+    const preparation=data.preparation&&typeof data.preparation==="object"?data.preparation:{};
+    const openingBoost=Math.max(-2,Math.min(3,Number(talk.first20)||0))*.35;
+    const preparedOpponent=Math.max(35,(Number(data.awayPower)||0)+(Number(preparation.opponent)||0));
+    let homeTactic=tacticForStyle(data.style);
+    if(Number(talk.tempo)>=2)homeTactic="push";
+    else if(Number(talk.tempo)<=-1)homeTactic="calm";
     return core.simulateMatch({
       resolution:"regulation",
       seed,
-      homePower:data.homePower,
-      awayPower:data.awayPower,
-      tactic:tacticForStyle(data.style),
+      homePower:(Number(data.homePower)||0)+varianceAdjustment+openingBoost,
+      awayPower:preparedOpponent,
+      tactic:homeTactic,
       awayTactic:tacticForStyle(awayStyle),
       cards:cardIds(data.cards),
       awayCards:cardIds(awayCards)

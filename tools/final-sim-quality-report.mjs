@@ -75,7 +75,7 @@ const report={
 };
 const b=report.powerGapBuckets,o=report.overall;
 const checks=[
-  ["shared model version",report.modelVersion==="copa-final-core-v3",report.modelVersion],
+  ["shared model version",report.modelVersion==="copa-final-core-v4",report.modelVersion],
   ["10k real-core sample",report.sampleSize===10_000,report.sampleSize],
   ["same seed and replay are deterministic",deterministic,deterministic],
   ["power gap produces monotonic win rates",
@@ -86,7 +86,7 @@ const checks=[
     Object.values(b).map(value=>value.homeWinRate.toFixed(3)).join(" < ")],
   ["strong-away home win band",b.away_strong.homeWinRate>=0.12&&b.away_strong.homeWinRate<=0.30,b.away_strong.homeWinRate],
   ["even-match home win band",b.even.homeWinRate>=0.46&&b.even.homeWinRate<=0.55,b.even.homeWinRate],
-  ["strong-home win band",b.home_strong.homeWinRate>=0.70&&b.home_strong.homeWinRate<=0.88,b.home_strong.homeWinRate],
+  ["strong-home win band",b.home_strong.homeWinRate>=0.78&&b.home_strong.homeWinRate<=0.91,b.home_strong.homeWinRate],
   ["goals per match",o.goalsPerMatch>=2.30&&o.goalsPerMatch<=3.30,o.goalsPerMatch],
   ["shots per match",o.shotsPerMatch>=14&&o.shotsPerMatch<=24,o.shotsPerMatch],
   ["xG per match",o.xgPerMatch>=2.40&&o.xgPerMatch<=3.50,o.xgPerMatch],

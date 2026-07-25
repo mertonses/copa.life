@@ -14,8 +14,8 @@ html[data-theme="light"]{
   --brand-burgundy:#420102;
   --brand-paper:#F3F5F4;
   --match-green:#4E9B65;
-  --field-grass:color-mix(in srgb,#4E9B65 78%,#101D28);
-  --field-grass-alt:color-mix(in srgb,#4E9B65 68%,#101D28);
+  --field-grass:#1F6B45;
+  --field-grass-alt:#4E9B65;
   --field-line:color-mix(in srgb,#F3F5F4 68%,transparent);
 
   /* Compatibility aliases used by older components. */

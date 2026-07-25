@@ -71,7 +71,7 @@
   }
   async function shareExport(){
     const code=exportCode();
-    if(global.navigator&&typeof global.navigator.share==="function")return global.navigator.share({title:"copa.life",text:code});
+    if(global.navigator&&typeof global.navigator.share==="function")return global.navigator.share({title:"Copa Life",text:code});
     return copyExport();
   }
   function openExport(){

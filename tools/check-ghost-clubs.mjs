@@ -50,7 +50,7 @@ const storage = new Map();
 let fetchCount = 0;
 const snapshot = {
   schema_version: 1, game_version: "2026.07.13", data_version: "2026.07.15-copa1",
-  simulation_version: "copa-final-core-v3", card_schema_version: "2026.07",
+  simulation_version: "copa-final-core-v4", card_schema_version: "2026.07",
   public_ghost_id: "G-TEST1234", squad_power: 74, chemistry: 2, formation: "4-3-3", reached_round: 3,
   club: { name: "Tokyo Athletic", country: "JP" }, chairman: { id: "babacan" }, active_cards: [],
   starting_xi: Array.from({ length: 11 }, (_, index) => ({ name: `Player ${index + 1}`, pos: index ? "OS" : "KL", power: 72 + index % 4 })),

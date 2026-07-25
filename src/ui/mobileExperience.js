@@ -176,18 +176,18 @@
       const tr=languageIsTurkish();
       nav=document.createElement("nav");nav.id="nativeHubNav";nav.className="native-hub-nav";
       nav.setAttribute("aria-label",tr?"Oyun bölümleri":"Game sections");
-      nav.innerHTML=`<button type="button" data-native-target="squad">${tr?"KADRO":"SQUAD"}</button><button type="button" data-native-target="match">${tr?"MAÇ":"MATCH"}</button><button type="button" data-native-target="career">${tr?"KARİYER":"CAREER"}</button>`;
+      nav.innerHTML=`<button type="button" data-native-target="squad">${tr?"KADRO":"SQUAD"}</button><button type="button" data-native-target="match">${tr?"MAÇ":"MATCH"}</button><button type="button" data-native-target="market">${tr?"PAZAR":"MARKET"}</button><button type="button" data-native-target="career">${tr?"KARİYER":"CAREER"}</button>`;
       nav.addEventListener("click",event=>{
         const button=event.target.closest("button[data-native-target]");if(!button)return;
         const target=button.dataset.nativeTarget;
         if(target==="career"){if(global.CopaLazy)global.CopaLazy.openMetaProgression();return;}
-        const node=target==="squad"?hub.querySelector(".pitch-area"):document.getElementById("fixbar");
+        const node=target==="squad"?hub.querySelector(".pitch-area"):target==="market"?document.getElementById("shopcards"):document.getElementById("fixbar");
         if(node)node.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"});
         nav.querySelectorAll("button").forEach(item=>item.classList.toggle("active",item===button));
       });
       hub.prepend(nav);
     }
-    const labels=languageIsTurkish()?["KADRO","MAÇ","KARİYER"]:["SQUAD","MATCH","CAREER"];
+    const labels=languageIsTurkish()?["KADRO","MAÇ","PAZAR","KARİYER"]:["SQUAD","MATCH","MARKET","CAREER"];
     nav.querySelectorAll("button[data-native-target]").forEach((button,index)=>{button.textContent=labels[index]||button.textContent;});
     const panel=document.getElementById("hubBenchSection"),pitch=hub.querySelector(".pitch-area");
     if(panel&&pitch){
@@ -782,7 +782,7 @@
     button.className="btn btn-primary mobile-native-share";
     button.textContent=copy().nativeShare;
     button.addEventListener("click",()=>{
-      const title=document.title||"copa.life";
+      const title=document.title||"Copa Life";
       const result=(document.getElementById("rFinish")||{}).textContent||"";
       const score=(document.getElementById("rLn")||{}).textContent||"";
       global.navigator.share({title,text:[result,score].filter(Boolean).join(" · "),url:global.location.href}).catch(()=>{});
@@ -792,6 +792,7 @@
 
   function handleBack(){
     if(document.documentElement.classList.contains("native-bench-open")){closeNativeBench();return true;}
+    if(global.CopaMobileShell&&global.CopaMobileShell.handleBack())return true;
     if(global.PlayerProfiles&&global.PlayerProfiles.isOpen()){global.PlayerProfiles.close();return true;}
     const consent=document.getElementById("ghostConsentDialog");
     if(consent){consent.remove();return true;}

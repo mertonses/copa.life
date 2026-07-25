@@ -6,7 +6,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const MODEL_VERSION="copa-penalty-core-v1";
+  const MODEL_VERSION="copa-penalty-core-v2";
   const DIRECTIONS=["L","C","R"];
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
   const power=value=>clamp(value,45,98);
@@ -17,16 +17,17 @@
   }
 
   function shotResult(input,random){
-    const data=input&&typeof input==="object"?input:{},shooterPower=power(data.shooterPower),keeperPower=power(data.keeperPower);
+    const data=input&&typeof input==="object"?input:{},shooterPower=power(data.shooterPower);
     const shotDir=DIRECTIONS.includes(data.shotDir)?data.shotDir:"C",keeperDir=DIRECTIONS.includes(data.keeperDir)?data.keeperDir:"C";
     const matched=shotDir===keeperDir;
     const missChance=clamp(0.075-(shooterPower-70)*0.002,0.025,0.14);
     const postChance=clamp(0.035-(shooterPower-75)*0.001,0.015,0.06);
-    const saveChance=matched?clamp(0.48+(keeperPower-shooterPower)*0.006,0.28,0.68):clamp(0.1+(keeperPower-shooterPower)*0.003,0.04,0.22);
     const roll=clamp((typeof random==="function"?random():Math.random()),0,0.999999999);
     if(roll<missChance)return{goal:false,type:"miss",matched};
     if(roll<missChance+postChance)return{goal:false,type:"post",matched};
-    if(roll<missChance+postChance+saveChance)return{goal:false,type:"save",matched};
+    /* Direction is the visual contract: a keeper on the ball's side saves it,
+       while a keeper sent the wrong way cannot produce an invisible save. */
+    if(matched)return{goal:false,type:"save",matched};
     return{goal:true,type:"goal",matched};
   }
 

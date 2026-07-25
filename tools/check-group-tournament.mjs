@@ -19,6 +19,15 @@ const supportedFormations=["4-4-2","4-3-3","4-2-3-1","3-5-2","5-3-2","3-4-3","4-
 }
 
 function newTournament(seed=baseOptions.seed){return engine.createTournament({...baseOptions,seed});}
+
+{
+  const matched=penalty.shotResult({shooterPower:90,keeperPower:60,shotDir:"L",keeperDir:"L"},()=>.99);
+  const wrongWay=penalty.shotResult({shooterPower:60,keeperPower:98,shotDir:"L",keeperDir:"R"},()=>.99);
+  assert.equal(matched.type,"save","matching ball and keeper directions must always be a visible save");
+  assert.equal(matched.goal,false);
+  assert.equal(wrongWay.type,"goal","a keeper sent the wrong way must not make an invisible save");
+}
+
 function playGroup(state,scores){
   for(const score of scores)engine.completePlayerMatch(state,{score},match=>engine.defaultSimulator(state,match));
 }

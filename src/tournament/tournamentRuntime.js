@@ -8,6 +8,8 @@
     de:{ceremony:"LIVE-AUSLOSUNG",drawTitle:"Pokal-Gruppenauslosung",drawLead:"Vier Töpfe. Vier Gruppen. Jede Kugel öffnet einen neuen Weg.",group:"Gruppe",pot:"Topf",remaining:"Teams übrig",drawOne:"Kugel ziehen",quickDraw:"Schnellauslosung",drawComplete:"Auslosung beendet",nextBall:"Die nächste Kugel ist bereit",allDrawn:"Alle Gruppen stehen fest",seeGroup:"MEINE GRUPPE",drawRule:"Jede Gruppe erhält ein Team aus jedem Topf. Die ersten zwei erreichen das Viertelfinale.",tournament:"POKALWEG",team:"Team",played:"Sp",wins:"S",draws:"U",losses:"N",gf:"TF",ga:"TG",gd:"TD",points:"Pkt",groupMatchday:"Gruppenspiel",topTwo:"Die ersten zwei erreichen das Viertelfinale",allGroups:"Alle Gruppen",knockout:"K.-O.",nextOpponent:"Nächster Gegner",knockoutRule:"Remis im Viertel- und Halbfinale gehen direkt ins Elfmeterschießen; im Finale folgen Golden Goal und danach Elfmeter.",bracket:"Turnierbaum",quarterfinal:"Viertelfinale",semifinal:"Halbfinale",final:"Finale",champion:"Champion",eliminated:"Ausgeschieden",pending:"Noch offen",cupFormat:"16 TEAMS · 4 GRUPPEN",tournamentOverview:"Turnierzentrale",close:"Schließen",groupDraw:"Gruppenauslosung",qualified:"Viertelfinale erreicht",groupEliminated:"In der Gruppenphase ausgeschieden",backToTable:"ZUR TABELLE",drawPoint:"REMIS · +1 PUNKT",winPoints:"SIEG · +3 PUNKTE",lossPoints:"NIEDERLAGE · 0 PUNKTE"},
     it:{ceremony:"SORTEGGIO LIVE",drawTitle:"Sorteggio dei gironi",drawLead:"Quattro fasce. Quattro gruppi. Ogni pallina apre una nuova strada.",group:"Gruppo",pot:"Fascia",remaining:"squadre rimaste",drawOne:"Estrai",quickDraw:"Sorteggio rapido",drawComplete:"Sorteggio completato",nextBall:"La prossima pallina è pronta",allDrawn:"Tutti i gruppi sono definiti",seeGroup:"VEDI IL MIO GRUPPO",drawRule:"Ogni gruppo riceve una squadra da ogni fascia. Le prime due vanno ai quarti.",tournament:"CAMMINO DI COPPA",team:"Squadra",played:"G",wins:"V",draws:"N",losses:"P",gf:"GF",ga:"GS",gd:"DR",points:"Pt",groupMatchday:"Gara del girone",topTwo:"Le prime due vanno ai quarti",allGroups:"Tutti i gruppi",knockout:"ELIMINAZIONE",nextOpponent:"Prossimo avversario",knockoutRule:"I pareggi nei quarti e nelle semifinali vanno direttamente ai rigori; in finale si gioca il Golden Goal e poi i rigori.",bracket:"Tabellone",quarterfinal:"Quarti",semifinal:"Semifinale",final:"Finale",champion:"Campione",eliminated:"Eliminato",pending:"Da definire",cupFormat:"16 SQUADRE · 4 GRUPPI",tournamentOverview:"Centro torneo",close:"Chiudi",groupDraw:"Sorteggio gironi",qualified:"Hai raggiunto i quarti",groupEliminated:"Eliminato nella fase a gironi",backToTable:"TORNA ALLA CLASSIFICA",drawPoint:"PAREGGIO · +1 PUNTO",winPoints:"VITTORIA · +3 PUNTI",lossPoints:"SCONFITTA · 0 PUNTI"}
   };
+  const LAST_DRAW_KEY="copa_last_group_draw_v2";
+  let inMemoryLastDraw=null;
   function copy(){return COPY[root.LANG]||COPY.en;}
   function active(){return root.tournamentFormat==="groups16_v1"&&root.tournament&&root.tournament.format==="groups16_v1";}
   function teamAsOpponent(team){return team?{name:team.name,power:team.power,formation:team.formation,style:team.style,tournamentTeamId:team.id,ghost:team.ghost===true,ghostId:team.ghostId||"",ghostProfile:team.ghostProfile||null,ghostMeta:team.ghostMeta||null}:null;}
@@ -36,9 +38,35 @@
     if(!root.CopaTournamentMatchResolver||!root.CopaPenaltyCore)return root.CopaTournamentEngine.defaultSimulator(state,match);
     return root.CopaTournamentMatchResolver.resolveMatch({state,match,core,normal:root.CopaNormalMatch,penalty:root.CopaPenaltyCore,seed:root.CopaTournamentEngine.hashSeed(`${state.seed}|ai|${match.id}`)});
   }
+  function drawEntropy(){
+    try{const values=new Uint32Array(2);root.crypto.getRandomValues(values);return `${values[0]}-${values[1]}`;}catch(_){}
+    return `${Date.now()}-${Math.random()}-${root.performance&&root.performance.now?root.performance.now():0}`;
+  }
+  function readLastDraw(){
+    if(inMemoryLastDraw)return inMemoryLastDraw;
+    try{const value=JSON.parse(root.localStorage.getItem(LAST_DRAW_KEY)||"null");if(value&&value.group&&value.signature)return value;}catch(_){}
+    return null;
+  }
+  function drawIdentity(state){
+    const group=root.CopaTournamentEngine.getPlayerGroup(state);
+    return{
+      group:group.id,
+      signature:group.teamIds.filter(id=>id!=="player").map(id=>state.teams[id].name).sort().join("|")
+    };
+  }
+  function rememberDraw(identity){
+    inMemoryLastDraw=identity;
+    try{root.localStorage.setItem(LAST_DRAW_KEY,JSON.stringify(identity));}catch(_){}
+  }
   function createState(){
     const data=root.countryGameData(root.selectedCountry),power=root.squadPower(1).power;
-    root.tournament=root.CopaTournamentEngine.createTournament({seed:root.seedNum,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:data[1],powerBases:data[2]});
+    const previous=readLastDraw(),base=`${root.seedNum}|${drawEntropy()}`;let candidate=null,identity=null;
+    for(let attempt=0;attempt<256;attempt++){
+      candidate=root.CopaTournamentEngine.createTournament({seed:`${base}|${attempt}`,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:data[1],powerBases:data[2]});
+      identity=drawIdentity(candidate);
+      if(!previous||(identity.group!==previous.group&&identity.signature!==previous.signature))break;
+    }
+    root.tournament=candidate;rememberDraw(identity);
     root.tournamentFormat="groups16_v1";root._roundCompletionTracked=0;syncSchedule();
   }
   function renderDraw(){const app=document.getElementById("tournamentDrawApp");if(root.CopaTournamentUI)root.CopaTournamentUI.renderDraw(app,root.tournament,copy());}
@@ -50,7 +78,21 @@
     renderDraw();if(typeof root._saveState==="function")root._saveState("draw");
     if(!restoring&&root.CopaAnalytics)root.CopaAnalytics.track("group_draw_started",{country:root.selectedCountry,mode:"manual"});return true;
   }
-  function reveal(count){if(!active()||root.tournament.phase!=="draw")return;const amount=count||1,before=root.tournament.draw.revealIndex,next=root.tournament.draw.entries[before];if(amount===1&&typeof root.sfxDrawPick==="function")root.sfxDrawPick();root.CopaTournamentEngine.revealNext(root.tournament,amount);renderDraw();const complete=root.tournament.draw.completed;if(amount===1&&typeof root.sfxDrawPlace==="function")root.sfxDrawPlace(next&&next.teamId==="player");if((amount>1||complete)&&typeof root.sfxDrawComplete==="function")setTimeout(root.sfxDrawComplete,amount===1?120:0);if(root.CopaMobileExperience)root.CopaMobileExperience.haptic(next&&next.teamId==="player"?[18,28,22]:amount>1?[12,22]:14);if(typeof root._saveState==="function")root._saveState("draw");}
+  function reveal(count){
+    if(!active()||root.tournament.phase!=="draw")return;
+    const amount=count||1,before=root.tournament.draw.revealIndex,next=root.tournament.draw.entries[before];
+    const commit=()=>{
+      if(amount===1&&typeof root.sfxDrawPick==="function")root.sfxDrawPick();
+      root.CopaTournamentEngine.revealNext(root.tournament,amount);renderDraw();
+      const complete=root.tournament.draw.completed;
+      if(amount===1&&typeof root.sfxDrawPlace==="function")root.sfxDrawPlace(next&&next.teamId==="player");
+      if((amount>1||complete)&&typeof root.sfxDrawComplete==="function")setTimeout(root.sfxDrawComplete,amount===1?120:0);
+      if(root.CopaMobileExperience)root.CopaMobileExperience.haptic(next&&next.teamId==="player"?[18,28,22]:amount>1?[12,22]:14);
+      if(typeof root._saveState==="function")root._saveState("draw");
+    };
+    if(amount===1&&next&&root.CopaPhaserMoments&&root.CopaPhaserMoments.animateDraw(next,commit))return;
+    commit();
+  }
   function finishDraw(){
     if(!active())return;if(!root.tournament.draw.completed)root.CopaTournamentEngine.revealNext(root.tournament,99);
     root.CopaTournamentEngine.completeDraw(root.tournament);syncSchedule();const section=document.getElementById("tournamentDraw");if(section)section.classList.add("hidden");

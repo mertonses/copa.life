@@ -2,6 +2,20 @@
 /* Kimya: aynı kulüp / uyruk (yerli) / genç çekirdek / veteran pozitif; dağınık kadro negatif.
    Kimya aralığı -5 ile +5'tir. Kartların kendi tavanları korunur; final kartı toplamı ayrıca tavanlanmaz. */
 function chemBonus(s){
+ if(globalThis.CopaChemistry&&typeof globalThis.CopaChemistry.calculate==="function"){
+  const result=globalThis.CopaChemistry.calculate(s,typeof slots!=="undefined"?slots:[],{
+   country:typeof selectedCountry!=="undefined"?selectedCountry:"TR",
+   captainIdx:typeof captainIdx!=="undefined"?captainIdx:-1,
+   style:typeof style!=="undefined"?style:"",
+   round:typeof round!=="undefined"?round:1,
+   lang:typeof LANG!=="undefined"?LANG:"en"
+  });
+  const debt=Math.max(0,Number(typeof cardChemDebt!=="undefined"?cardChemDebt:0)||0);
+  if(debt){result.total=Math.max(-5,result.total-debt);result.parts.push(["CARD",LANG==="tr"?"Kart bedeli":"Card cost",-debt]);}
+  const prep=globalThis.CopaPreparation&&globalThis.CopaPreparation.effects(typeof round!=="undefined"?round:1,typeof opponent!=="undefined"?opponent:null);
+  if(prep&&prep.chemistry){const value=Math.round(prep.chemistry);result.total=Math.max(-5,Math.min(5,result.total+value));result.parts.push(["PREP",LANG==="tr"?"Uyum antrenmanı":"Cohesion drill",value]);}
+  return result;
+ }
  let total=0,parts=[],byc={};
  s.forEach(p=>{if(p.club)byc[p.club]=(byc[p.club]||0)+1;});
  let best="",bn=0,cp=0;
@@ -53,7 +67,11 @@ function powerBreakdown(r,excludedCard){
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
  const uncappedRaw=styleBonus+cardBonus+loanBonus+matchup+risk+trait;
  const captainChem=typeof captainDecisionChemistryForRound==="function"?captainDecisionChemistryForRound(r):0;
- const rawBonus=uncappedRaw+moral+wxBonus+capBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemBonus(s).total+captainChem));
- return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
+ const synergy=globalThis.CopaCardSynergy?globalThis.CopaCardSynergy.calculate(cards):{power:0};
+ const preparation=globalThis.CopaPreparation?globalThis.CopaPreparation.effects(r,typeof opponent!=="undefined"?opponent:null):{power:0};
+ const chemistryResult=chemBonus(s);
+ const synergyBonus=Math.max(-2,Math.min(5,Number(synergy.power)||0)),preparationBonus=Math.max(0,Math.min(4,Number(preparation.power)||0));
+ const rawBonus=uncappedRaw+moral+wxBonus+capBonus+synergyBonus+preparationBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemistryResult.total+captainChem));
+ return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,synergyBonus,preparationBonus,chemistryScore:chemistryResult.score||50,chemistryVariance:chemistryResult.variance||1,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
 }
 function squadPower(r,excludedCard){return powerBreakdown(r,excludedCard);}

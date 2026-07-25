@@ -31,7 +31,7 @@
   }
   function attachToContact(){
     const value=text();if(typeof global.closeModal==="function")global.closeModal();if(typeof global.openContactForm!=="function")return;
-    global.openContactForm();setTimeout(()=>{const field=document.getElementById("cfMsg");if(field)field.value=(field.value?field.value+"\n\n":"")+"--- copa.life diagnostic ---\n"+value;},120);
+    global.openContactForm();setTimeout(()=>{const field=document.getElementById("cfMsg");if(field)field.value=(field.value?field.value+"\n\n":"")+"--- Copa Life diagnostic ---\n"+value;},120);
   }
   global.CopaDiagnostics=Object.freeze({capture,build,text,copy,open,attachToContact,clear:()=>write([])});
   global.openBugReport=open;

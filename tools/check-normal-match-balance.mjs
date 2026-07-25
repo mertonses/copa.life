@@ -54,10 +54,11 @@ const rates=buckets.map(bucket=>report.buckets[bucket.name].homeWinRate);
 expect(rates.every((rate,index)=>index===0||rate>rates[index-1]),"power-gap home win rates are not strictly monotonic");
 expect(report.buckets.even.homeWinRate>=0.32&&report.buckets.even.homeWinRate<=0.38,"even-match regulation home win rate is outside the calibrated band");
 expect(report.buckets.even.drawRate>=0.24&&report.buckets.even.drawRate<=0.35,"even-match draw rate is outside the calibrated band");
-expect(report.buckets.home_strong.homeWinRate>=0.56,"strong home side is not rewarded enough");
-expect(report.buckets.away_strong.homeWinRate<=0.18,"strong away side is not rewarded enough");
-expect(report.buckets.home_dominant.homeWinRate>=0.68,"a 20-point stronger side is upset too often");
-expect(report.buckets.away_dominant.homeWinRate<=0.12,"a 20-point weaker side wins too often");
+expect(report.buckets.home_strong.homeWinRate>=0.66,"strong home side is not rewarded enough");
+expect(report.buckets.away_strong.homeWinRate<=0.12,"strong away side is not rewarded enough");
+expect(report.buckets.home_dominant.homeWinRate>=0.78,"a 20-point stronger side is upset too often");
+expect(report.buckets.home_dominant.awayWinRate<=0.07,"a 20-point favorite still loses too often");
+expect(report.buckets.away_dominant.homeWinRate<=0.07,"a 20-point weaker side wins too often");
 expect(report.buckets.even.goalsPerMatch>=1.75&&report.buckets.even.goalsPerMatch<=2.55,"normal-match goals are outside the calibrated band");
 
 const config={core,runSeed:99,round:4,opponentName:"determinism",homePower:76,awayPower:75,style:"gegen",cards:["kontra"]};
