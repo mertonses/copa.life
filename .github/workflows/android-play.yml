@@ -92,7 +92,7 @@ jobs:
       - name: Validate release source and dependencies
         run: |
           npm run android:version:check
-          npm run check:android:release
+          npm run check:android:release:source
           npm run audit:security
           npm test
           npm run check --prefix services/ghost-club-api

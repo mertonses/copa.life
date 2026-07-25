@@ -6,11 +6,11 @@
     "androidScheme": "https"
   },
   "android": {
-    "backgroundColor": "#f5f0e8",
+    "backgroundColor": "#101D28",
     "allowMixedContent": false
   },
   "ios": {
-    "backgroundColor": "#f5f0e8",
+    "backgroundColor": "#101D28",
     "contentInset": "never",
     "zoomEnabled": false,
     "allowsLinkPreview": false,
@@ -24,13 +24,13 @@
     },
     "SplashScreen": {
       "launchAutoHide": false,
-      "backgroundColor": "#f5f0e8",
+      "backgroundColor": "#101D28",
       "showSpinner": false,
       "launchFadeOutDuration": 220
     },
     "StatusBar": {
       "style": "LIGHT",
-      "backgroundColor": "#f5f0e8",
+      "backgroundColor": "#101D28",
       "overlaysWebView": false
     }
   }

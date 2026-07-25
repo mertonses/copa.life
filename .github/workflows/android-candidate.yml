@@ -94,7 +94,7 @@ jobs:
 
       - name: Verify release configuration and dependency security
         run: |
-          npm run check:android:release
+          npm run check:android:release:source
           npm run audit:security
 
       - name: Validate shared game and services

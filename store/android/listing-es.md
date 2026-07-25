@@ -10,7 +10,7 @@ Crea un equipo distinto en cada partida, define tu táctica y busca la copa.
 
 ## Descripción completa
 
-copa.life es un juego independiente de gestión de plantillas de fútbol con estructura roguelite, basado en tiradas de dados, fichajes y decisiones tácticas.
+Copa Life es un juego independiente de gestión de plantillas de fútbol con estructura roguelite, basado en tiradas de dados, fichajes y decisiones tácticas.
 
 Elige país, formación y presidente para cada partida. Tira los dados, compara candidatos, administra el presupuesto y completa tu once. La química, las tácticas, las cartas, la confianza del presidente y los acontecimientos inesperados hacen que cada camino hacia la copa sea diferente.
 
@@ -27,7 +27,7 @@ Características:
 
 Ghost Clubs es una función en línea opcional. Con tu consentimiento explícito, un club terminado puede aparecer como rival en una futura partida de otro jugador. Puedes denunciar un nombre inapropiado, ocultarlo permanentemente en tu dispositivo y eliminar tus datos de Ghost desde Ajustes. La publicación está desactivada de forma predeterminada.
 
-copa.life es un juego independiente. No está afiliado ni respaldado por ningún jugador, club, liga, federación o competición.
+Copa Life es un juego independiente. No está afiliado ni respaldado por ningún jugador, club, liga, federación o competición.
 
 ## Clasificación
 

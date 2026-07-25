@@ -1,5 +1,5 @@
 .modal:has(.meta-progress-modal),.modal:has(.meta-history-modal){padding:16px}
-.sheet:has(.meta-progress-modal),.sheet:has(.meta-history-modal){overflow:hidden;border-color:color-mix(in srgb,var(--border-subtle) 75%,transparent);background:color-mix(in srgb,var(--surface-elevated) 96%,var(--color-background));box-shadow:0 22px 64px rgba(10,17,24,.34)}
+.sheet:has(.meta-progress-modal),.sheet:has(.meta-history-modal){overflow:hidden;isolation:isolate;border-color:var(--border-default);background:var(--surface-elevated)!important;box-shadow:0 22px 64px rgba(10,17,24,.34);opacity:1}
 .meta-progress-modal,.meta-history-modal{
   --meta-accent:#F25F40;
   --meta-info:#AAB2B3;
@@ -12,7 +12,19 @@
   display:flex;
   flex-direction:column;
   overflow:hidden;
+  background:var(--surface-elevated);
 }
+html[data-theme="light"] .modal:has(.meta-progress-modal),
+html[data-theme="light"] .modal:has(.meta-history-modal){background:rgba(16,29,40,.48);backdrop-filter:blur(4px)}
+html[data-theme="light"] .sheet:has(.meta-progress-modal),
+html[data-theme="light"] .sheet:has(.meta-history-modal),
+html[data-theme="light"] .meta-progress-modal,
+html[data-theme="light"] .meta-history-modal{background:#FFFFFF!important;color:#101D28}
+html[data-theme="light"] .meta-tabs{background:#F3F5F4}
+html[data-theme="light"] .meta-tab-panel>section,
+html[data-theme="light"] .meta-archive,
+html[data-theme="light"] .meta-mastery-section,
+html[data-theme="light"] .meta-career-disclosure{background:#FFFFFF;border-color:#BCC2C2}
 .meta-progress-modal.meta-tab-mastery{--meta-accent:#BCC2C2}
 .meta-progress-modal.meta-tab-museum{--meta-accent:var(--meta-reward)}
 .meta-progress-modal.meta-tab-world{--meta-accent:var(--meta-info)}

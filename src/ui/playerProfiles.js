@@ -37,7 +37,11 @@ const NATIONAL_TEAM_LEVELS={
   "u 19":{label:{tr:"U-19",en:"U-19",es:"Sub-19",de:"U-19",it:"U-19"},code:"U19"}
 };
 
-function t(){return copy[global.LANG]||copy.en;}
+function t(){
+  const source=copy[global.LANG]||copy.en,out={};
+  Object.keys(source).forEach(key=>{out[key]=typeof source[key]==="string"?source[key].replace(/copa\.life/gi,"Copa Life"):source[key];});
+  return out;
+}
 function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[ch]);}
 function number(value){if(value===null||value===undefined||value==="")return null;const result=Number(value);return Number.isFinite(result)?result:null;}
 function playerKey(player){return player&&(player.profileKey||player.profile_key)||[global.selectedCountry||"",player&&player.name||"",player&&player.club||"",player&&player.age||"",player&&player.ov||""].join("|");}

@@ -9,7 +9,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(penaltyCore){
   "use strict";
 
-  const MODEL_VERSION="copa-final-core-v3";
+  const MODEL_VERSION="copa-final-core-v4";
   const REPLAY_VERSION=3;
   const TACTICS=new Set(["balanced","more","push","calm","hold"]);
   const CARDS=new Set(["kanat_akini","kontra","sogukkanli_penaltici"]);
@@ -134,7 +134,7 @@
     const powerGap=clamp(data.powerGap||0,-45,45);
     const delivery=String(data.delivery||data.sequence||"");
     let xg=0.020+Math.max(0,0.17-distance*0.0055)+centrality*0.050;
-    xg+=(shooting-60)*0.0011+(decisions-60)*0.0005+powerGap*0.0005;
+    xg+=(shooting-60)*0.0011+(decisions-60)*0.0005+powerGap*0.00115;
     if(data.inBox)xg+=0.045;
     if(delivery==="CUTBACK")xg+=0.080;
     else if(delivery==="CROSS")xg+=0.025;
@@ -318,9 +318,9 @@
         if(minute>endMinute)break;
         const gap=powers[0]-powers[1];
         const scoreContext=score[0]===score[1]?0:(score[0]<score[1]?0.06:-0.045);
-        const possessionLogit=gap/55+effects[0].possession-effects[1].possession+scoreContext;
+        const possessionLogit=gap/40+effects[0].possession-effects[1].possession+scoreContext;
         const homePossession=1/(1+Math.exp(-possessionLogit));
-        const side=rng.bool(clamp(homePossession,0.23,0.77))?0:1;
+        const side=rng.bool(clamp(homePossession,0.18,0.82))?0:1;
         const other=1-side;
         stats.possession[side]++;
         const tactic=side===0?homeTactic:awayTactic;
@@ -368,7 +368,7 @@
           }
         }
 
-        const attackEdge=(powers[side]-powers[other])/300;
+        const attackEdge=(powers[side]-powers[other])/190;
         let shotChance=0.43+attackEdge+ownEffect.attack+ownEffect.shot-oppEffect.defence;
         if(sequence==="COUNTER"||sequence==="PRESS_RECOVERY")shotChance+=0.055;
         if(sequence==="RECYCLE"||sequence==="LOW_TEMPO")shotChance-=0.085;

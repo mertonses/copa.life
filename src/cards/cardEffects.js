@@ -123,7 +123,8 @@ function useCaptainDecision(){
  const captain=_currentCaptainPlayer(),variant=variantOf("kaptanin_karari"),original=Number(lastTalkResult.delta)||0;
  captainDecisionUsed=true;
  captainDecisionActive={round,variant,playerName:captain.name,penalty:variant===1?3:2,chem:variant===1?1:0};
- talkMod.all=0;
+ talkMod.all=0;talkMod.def=0;talkMod.atk=0;
+ if(window._talkMatchProfile)window._talkMatchProfile=Object.assign({},window._talkMatchProfile,{delta:0,focus:0,first20:0,captainIntervened:true});
  lastTalkResult=Object.assign({},lastTalkResult,{originalDelta:original,delta:0,captainIntervened:true,captain:captain.name});
  pushFeed("© <b>"+shortName(captain)+"</b> "+(LANG==="tr"?"takıma sahip çıktı; konuşma etkisi sıfırlandı.":"stepped in; the negative talk was neutralized."),"pres");
  closeModal();if(typeof renderHub==="function")renderHub();

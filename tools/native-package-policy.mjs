@@ -38,7 +38,7 @@ export function transformNativeText(text) {
     [/Turkish Cup/g, "Türkiye National Cup"],
     [/TURKISH CUP/g, "TÜRKİYE NATIONAL CUP"],
     [/Süper Lig \+ 1\. Lig/g, "Türkiye üst ve alt ligleri"],
-    [/FM26/g, "copa.life"],
+    [/FM26/g, "Copa Life"],
     [/Football Manager/g, "third-party game"],
     [/Patreon/g, "Support"],
     [/url\(["']?\.\.\/\.\.\/assets\/icons\/patreon\.svg["']?\)/gi, "none"],

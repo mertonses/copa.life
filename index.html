@@ -4,10 +4,10 @@
 <meta name="copa-analytics-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
 <meta name="copa-build-version" content="__COPA_BUILD_VERSION__">
 <meta name="copa-platform" content="web">
-<title>copa.life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
+<title>Copa Life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
 <meta name="description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, kart sistemi ve sakatlıklarla ücretsiz tarayıcı futbol menajerlik oyunu.">
 <meta name="keywords" content="copa life, futbol oyunu, tarayıcı futbol oyunu, ücretsiz futbol yönetim oyunu, roguelite futbol, kadro kurma oyunu, free football game, futbol müdürü, ulusal kupa, futbol kart oyunu, football card game">
-<meta name="author" content="copa.life">
+<meta name="author" content="Copa Life">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://copa.life/">
 <link rel="sitemap" type="application/xml" href="/sitemap.xml">
@@ -15,23 +15,23 @@
 <!-- Open Graph (link paylaşımı) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://copa.life/">
-<meta property="og:site_name" content="copa.life">
-<meta property="og:title" content="copa.life – Roguelite Futbol Menajerlik Oyunu">
+<meta property="og:site_name" content="Copa Life">
+<meta property="og:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta property="og:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, ücretsiz tarayıcı futbol oyunu.">
 <meta property="og:image" content="https://copa.life/assets/social.webp">
 <meta property="og:image:type" content="image/webp">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="copa.life – Roguelite Futbol Menajerlik Oyunu">
+<meta property="og:image:alt" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:locale:alternate" content="en_US">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="copa.life – Roguelite Futbol Menajerlik Oyunu">
+<meta name="twitter:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta name="twitter:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, ücretsiz tarayıcı futbol oyunu.">
 <meta name="twitter:image" content="https://copa.life/assets/social.webp">
-<meta name="twitter:image:alt" content="copa.life futbol oyunu">
+<meta name="twitter:image:alt" content="Copa Life futbol oyunu">
 
 <!-- Favicon & PWA -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -39,14 +39,14 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<meta name="theme-color" content="#F3F5F4">
+<meta name="theme-color" content="#101D28">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="rating" content="general">
 <link rel="manifest" href="manifest.json">
 <script>
 /* Apply the saved theme before styles paint so the page never flashes light. */
-(function(){try{var p=localStorage.getItem("copa_theme")||"light";if(p!=="dark"&&p!=="light")p="light";var dark=p==="dark";document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#101D28":"#F3F5F4";}catch(e){}})();
+(function(){try{var p=localStorage.getItem("copa_theme")||"dark";if(p!=="dark"&&p!=="light")p="dark";var dark=p==="dark";document.documentElement.dataset.theme=dark?"dark":"light";document.documentElement.dataset.themePreference=p;var meta=document.querySelector("meta[name='theme-color']");if(meta)meta.content=dark?"#101D28":"#F3F5F4";}catch(e){document.documentElement.dataset.theme="dark";document.documentElement.dataset.themePreference="dark";}})();
 </script>
 <script>
 if("serviceWorker"in navigator){
@@ -59,7 +59,7 @@ if("serviceWorker"in navigator){
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "copa.life",
+  "name": "Copa Life",
   "alternateName": "Copa Life",
   "url": "https://copa.life/"
 }
@@ -68,7 +68,7 @@ if("serviceWorker"in navigator){
 {
   "@context": "https://schema.org",
   "@type": "VideoGame",
-  "name": "copa.life",
+  "name": "Copa Life",
   "description": "Roguelite futbol oyunu. Şans + strateji. 6 ülke, 9000+ oyuncu. Kadro kur, transfer yönet, kupayı kaldır.",
   "url": "https://copa.life",
   "genre": ["Sports", "Strategy", "Simulation"],
@@ -96,6 +96,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260721-rating-scale1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260722-pitch-stack1">
+<link rel="preload" as="style" href="src/styles/mobileGameSystems.css?v=20260726-mobile-game1" onload="this.onload=null;this.rel='stylesheet'">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -107,7 +108,7 @@ if("serviceWorker"in navigator){
 @keyframes slotFillPulse{0%{box-shadow:0 0 0 4px rgba(242,74,40,0.4)}100%{box-shadow:0 0 0 0px rgba(242,74,40,0)}}
 </style>
 <noscript><div style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;line-height:1.6">
-<h1>copa.life — Roguelite futbol. Şans + strateji.</h1>
+<h1>Copa Life — Roguelite futbol. Şans + strateji.</h1>
 <p>Ücretsiz tarayıcı futbol yönetim oyunu. Kadro kur, transfer yönet, kupayı kaldır. 6 ülke: Türkiye, İngiltere, İspanya, İtalya, Almanya ve Japonya. 9000'den fazla gerçek oyuncu ismiyle roguelite futbol deneyimi.</p>
 <h2>COPA REHBERİ</h2>
 <p>Her turda zar at, pozisyona özel oyuncular arasından seç. Takım kimyasını yönet, kartlarla kadroyu güçlendir, sakatlıkları atlatarak kupayı kaldır. Başkan seç: her başkanın farklı bütçe ve taktik avantajları var. 7 farklı diziliş, 6 farklı başkan.</p>
@@ -118,7 +119,7 @@ if("serviceWorker"in navigator){
 <div id="loader"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,.15)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" stroke="#F24A28" stroke-width="4" stroke-linecap="round"/></svg></div>
 <div class="wrap">
   <div class="top"><div class="tools"><div class="howto-wrap" id="howtoWrap"><button class="howto-toggle" id="howtoToggle" type="button" onclick="openHowtoModal()" title="COPA REHBERİ" aria-label="COPA REHBERİ"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> COPA REHBERİ</button><div class="howto-body hidden" id="howtoBody" aria-hidden="true"></div></div><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar" aria-label="Ayarlar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><g><animateTransform attributeName="transform" type="rotate" values="0 12 12;360 12 12" dur="12s" repeatCount="indefinite"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></g></svg></button><div class="settingsdrop hidden" id="settingsDrop"><div class="sd-group"><div class="sd-hdr" id="sdHdrLang">DİL</div><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.svg" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.svg" alt="">EN</button></div></div><div class="sd-group"><div class="sd-hdr" id="sdHdrA11y">ERİŞİLEBİLİRLİK</div><button class="sdbtn sd-full" id="animBtn" onclick="toggleReducedMotion()" title="Animasyonları azalt" aria-label="Animasyonları azalt"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="10" cy="10" r="7.5"/><rect x="7" y="7" width="2.5" height="6" rx=".5" fill="currentColor" stroke="none"/><rect x="10.5" y="7" width="2.5" height="6" rx=".5" fill="currentColor" stroke="none"/></svg><span id="animBtnLbl">ANİMASYON AZALT</span></button></div><div class="sd-group"><div class="sd-hdr" id="sdHdrSound">SES</div><button class="sdbtn sd-full" id="muteBtn" onclick="toggleMute()" title="Ses efektleri" aria-label="Ses efektleri"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg><span id="muteBtnLbl">SES EFEKTLERİ</span></button></div></div></div></div>
-    <div class="logo" aria-label="copa.life"><span class="brandmark"><span class="copa">copa</span><span class="dot brand-icon-dot" aria-hidden="true"><img src="favicon.svg" alt="" decoding="async"></span><span class="life">life</span></span><p id="logoSlogan" style="font-size:9px;font-family:var(--mono);color:var(--color-slate);opacity:.7;margin:2px 0 0;letter-spacing:.4px;text-align:center">kadere meydan okuduğun kadro yönetim oyunu</p></div>
+    <div class="logo" aria-label="Copa Life"><span class="brandmark"><span class="copa">Copa</span><span class="brand-space" aria-hidden="true">&nbsp;</span><span class="life">Life</span></span><p id="logoSlogan" style="font-size:9px;font-family:var(--mono);color:var(--color-slate);opacity:.7;margin:2px 0 0;letter-spacing:.4px;text-align:center">kadere meydan okuduğun kadro yönetim oyunu</p></div>
     <div class="budget" id="budgetBox">
       <div class="budget-top"><div class="l" id="lblBudget">Kasa</div><div class="v" id="budgetV">—</div></div>
       <div class="budget-rows" id="budgetRows"></div>
@@ -239,7 +240,7 @@ if("serviceWorker"in navigator){
         <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
       </div>
     </div>
-    <div class="cover" style="display:none"><picture><source srcset="assets/mascot.webp" type="image/webp"><img class="mascot" alt="copa.life mascot" src="assets/mascot.webp" loading="lazy" decoding="async"></picture><div class="est">EST · 1974</div><div class="crest"></div><h1 id="coverTitle">copa.life</h1><div class="sub2" id="coverSub">Türkiye Ulusal Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
+    <div class="cover" style="display:none"><picture><source srcset="assets/mascot.webp" type="image/webp"><img class="mascot" alt="Copa Life mascot" src="assets/mascot.webp" loading="lazy" decoding="async"></picture><div class="est">EST · 1974</div><div class="crest"></div><h1 id="coverTitle">Copa Life</h1><div class="sub2" id="coverSub">Türkiye Ulusal Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
     <div class="artnote" id="lowryNote" style="display:none"></div>
     <div class="metaline" id="metaline"></div>
     <div class="v7-footer-block">
@@ -332,7 +333,7 @@ if("serviceWorker"in navigator){
     <div class="result-actions">
       <div class="result-row"><button class="btn btn-ghost" id="shareCardBtn" onclick="showShareCard()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="18" height="11" rx="2"/><circle cx="10" cy="9.5" r="2.8"/><path d="M6.5 4L8 1.5h4L13.5 4"/><circle cx="16" cy="6.5" r=".9" fill="currentColor" stroke="none"/></svg><span class="result-action-label" id="shareBtnLbl">PAYLAŞ</span></button><button class="btn btn-ghost" id="statsBtn" onclick="showSeasonStats()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:5px"><rect x="2" y="9" width="3" height="6" rx=".5"><animate attributeName="height" values="6;9;6" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="9;6;9" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="8.5" y="5" width="3" height="10" rx=".5"><animate attributeName="height" values="10;13;10" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="5;2;5" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="15" y="7" width="3" height="8" rx=".5"><animate attributeName="height" values="8;11;8" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="7;4;7" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect></svg><span class="result-action-label" id="statsBtnLbl">Sezon İstatistikleri</span></button></div>
       <div class="copied" id="copied"></div><span id="copyBtn" hidden></span>
-      <button class="btn" id="againBtn" onclick="restartAfterRunAd()">YENİ copa.life TURU</button>
+      <button class="btn" id="againBtn" onclick="restartAfterRunAd()">YENİ COPA LIFE TURU</button>
     </div>
     <a class="patreonbox resultpatreon" href="https://www.patreon.com/c/immgo" target="_blank" rel="noopener"><span class="patreonicon" aria-hidden="true"></span><span id="patreonResultText"></span><b>Patreon</b></a>
   </section>
@@ -383,6 +384,9 @@ try{
 <script src="src/balance/finalCalibration.js?v=20260717-weekly-calibration1"></script>
 <script src="src/runtime/productAnalytics.js?v=20260716-analytics1"></script>
 <script src="src/cards/cardEffects.js?v=20260720-lottery-copy1"></script>
+<script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
+<script src="src/game/chemistry.js?v=20260726-systems1"></script>
+<script src="src/game/preMatchPreparation.js?v=20260726-systems1"></script>
 <script src="src/balance/power.js?v=20260720-explicit-power1"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
@@ -392,6 +396,8 @@ try{
 <script src="src/ui/hub.js?v=20260722-bench-drag1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260720-modal-lock1"></script>
+<script src="src/ui/mobileGameSystems.js?v=20260726-mobile-game1"></script>
+<script src="src/ui/phaserMoments.js?v=20260726-phaser1"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -469,7 +475,7 @@ function _signFreeAgent(ai){
   freeAgentBoughtThisTurn++;
   spend(a.fee,"spent");
   if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(a.fee,"transfer",a.p);
-  const p=a.p;p.used=false;p.bench=true;
+  const p=a.p;p.used=false;p.bench=true;p.joinedRound=round;
   bench.push(p);
   window._freeAgents.splice(ai,1);
   sfxStamp();sfxCoin();
@@ -599,10 +605,10 @@ function renderFeed(){const fc=$("feed");if(!fc)return;if(!feed.length){fc.inner
 
 /* ===== lang / static ===== */
 function _brandAgainHTML(text){
-  const raw=String(text||"YENİ copa.life TURU");
+  const raw=String(text||"YENİ COPA LIFE TURU");
   const esc=s=>s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-  const brand=`<span class="again-brand"><span class="again-copa">copa</span><span class="again-dot">.</span><span class="again-life">life</span></span>`;
-  return esc(raw).replace(/copa\.life/gi,brand);
+  const brand=`<span class="again-brand"><span class="again-copa">Copa</span><span class="again-dot"> </span><span class="again-life">Life</span></span>`;
+  return esc(raw).replace(/copa(?:\.|\s+)life/gi,brand);
 }
 function setCopaHeroTitle(html){
   const tagline=document.querySelector(".v7-tagline");
@@ -638,7 +644,12 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
     ['Scegli il modulo e <mark>il presidente.</mark>','Lancia il dado: <mark>costruisci la rosa</mark> ruolo per ruolo.','Crea la rosa, <mark>potenziala con le carte</mark> e gestisci gli infortuni.','Costruisci la strategia. <mark>La fortuna non basta.</mark>']
   );_updateIntroSummary();
   document.querySelectorAll(".mstep .mt").forEach((el,i)=>{if(mechTexts[i])el.innerHTML=mechTexts[i];});
-  if($("logoSlogan"))$("logoSlogan").textContent=LT("kadere meydan okuduğun kadro yönetim oyunu","the squad management game where you defy fate","el juego de gestión de plantilla donde desafías al destino","das Kadermanagementspiel, in dem du das Schicksal herausforderst","il gioco di gestione rosa in cui sfidi il destino");}
+  if($("logoSlogan"))$("logoSlogan").textContent=LT("kadere meydan okuduğun kadro yönetim oyunu","the squad management game where you defy fate","el juego de gestión de plantilla donde desafías al destino","das Kadermanagementspiel, in dem du das Schicksal herausforderst","il gioco di gestione rosa in cui sfidi il destino");
+  document.title=LANG==="tr"?"Copa Life — Roguelite futbol. Şans + strateji.":"Copa Life — Roguelite football. Luck + strategy.";
+  if($("coverTitle"))$("coverTitle").textContent="Copa Life";
+  if($("protoFoot"))$("protoFoot").innerHTML=$("protoFoot").innerHTML.replace(/copa\.life/gi,"Copa Life");
+  for(const id of ["patreonIntroText","patreonResultText"]){const node=$(id);if(node)node.innerHTML=node.innerHTML.replace(/copa\.life/gi,"Copa Life");}
+}
 function _masteryDisplay(group,key){if(!(window.CopaMeta&&typeof CopaMeta.masteryInfo==="function"))return null;const info=CopaMeta.masteryInfo(group,key);if(!info.count)return null;const prefix=LT("Ustalık","Mastery","Maestría","Meisterschaft","Maestria");return {count:info.count,tier:info.tier,tooltip:`${prefix}: ${info.label} · ${info.count}`};}
 function _formationMasteryBadge(mastery){return mastery?`<span class="setup-mastery tier-${mastery.tier}" title="${mastery.tooltip}" aria-hidden="true"><span class="mastery-star">★</span>${mastery.count}</span>`:"";}
 function requestFormationUnlock(f){
@@ -747,7 +758,7 @@ function applyMeta(){const m=$("metaline");
 function _updateIntroSummary(){const el=$("introSummary");if(!el)return;const chairShort=selectedChairId?chairShortLabel(selectedChairId):"—";const parts=[formName||"—",chairShort,countryDisplayName(selectedCountry,LANG)];const prefix=LT("Seçimin: ","Setup: ","Selección: ","Auswahl: ","Scelta: ");el.innerHTML=`<span style="color:var(--color-slate);font-size:.85em">${prefix}</span>`+parts.map(v=>`<strong>${v}</strong>`).join('<span style="color:var(--color-slate);font-weight:400"> · </span>');}
 function pickForm(f){formName=f;slots=FORMATIONS[f];if(window.CopaAnalytics)window.CopaAnalytics.track("formation_selected",analyticsBalanceProps({formation:f}));buildFormButtons();_updateIntroSummary();_updateTacticalFormation(f);}
 function normalStart(){if(window.GhostClubs&&GhostClubs.shouldGateMobileOnboarding&&GhostClubs.shouldGateMobileOnboarding()){GhostClubs.requestMobileOnboarding().then(()=>normalStart());return;}if(!formName||!unlockedForms.includes(formName))pickForm(unlockedForms[0]||"4-4-2");const x=L();let sb="";Object.keys(STYLES).forEach(k=>{const sd=x.styles[k],mastery=_masteryDisplay("styles",k),badge=mastery?`<span class="style-mastery tier-${mastery.tier}" title="${mastery.tooltip}" aria-hidden="true"><span class="mastery-star">★</span>${mastery.count}</span>`:"",a11y=mastery?`${sd.n}, ${mastery.tooltip}`:sd.n;sb+=`<div class="stylebtn" data-style="${k}" role="button" tabindex="0" aria-label="${a11y}"${mastery?` title="${mastery.tooltip}"`:""} onclick="pickStyle('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickStyle('${k}');}"><div class="ssi">${sd.i}</div><div class="ssm"><div class="sst"><span>${sd.n}</span>${badge}</div><div class="ssd">${sd.d}</div></div></div>`;});showModal(`<div><div class="kithdr">${x.styleHdr}</div><div class="kitsub">${x.styleSub}</div><div class="stylelist">${sb}</div><div class="bact" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeModal()">← ${LANG==="tr"?"GERİ":"BACK"}</button></div></div>`);}
-function pickStyle(k){style=k;if(window.CopaAnalytics)window.CopaAnalytics.track("style_selected",analyticsBalanceProps({style:k}));sfxSeat();closeModal();if(legacyFund>0){showLegacyBetModal();}else{beginDraft();}}
+function pickStyle(k){style=k;if(window.CopaPreparation)CopaPreparation.reset();if(window.CopaChemistry)CopaChemistry.reset();window._talkMatchProfile=null;if(window.CopaAnalytics)window.CopaAnalytics.track("style_selected",analyticsBalanceProps({style:k}));sfxSeat();closeModal();if(legacyFund>0){showLegacyBetModal();}else{beginDraft();}}
 function showLegacyBetModal(){const tr=LANG==="tr";const half=Math.floor(legacyFund/2),betReturn=Math.round(legacyFund*1.5);
 const _lgVault=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17L20 7L36 17"/><rect x="6" y="17" width="28" height="19" rx="2"/><circle cx="20" cy="27" r="6"/><circle cx="20" cy="27" r="2.2" fill="currentColor" stroke="none"/><line x1="20" y1="21" x2="20" y2="19"/><ellipse cx="20" cy="4" rx="3" ry="1.5" fill="currentColor" stroke="none"><animate attributeName="cy" values="3;16;3" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.9;0;0.9" dur="1.6s" repeatCount="indefinite"/></ellipse></svg>`;
 const _lgDice=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g><animateTransform attributeName="transform" type="rotate" values="0 20 20;-14 20 20;10 20 20;-5 20 20;0 20 20" dur="2s" repeatCount="indefinite" keyTimes="0;0.25;0.55;0.8;1"/><rect x="7" y="7" width="26" height="26" rx="4"/><circle cx="14" cy="14" r="2.5" fill="currentColor" stroke="none"/><circle cx="26" cy="14" r="2.5" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2.5" fill="currentColor" stroke="none"/><circle cx="14" cy="26" r="2.5" fill="currentColor" stroke="none"/><circle cx="26" cy="26" r="2.5" fill="currentColor" stroke="none"/></g></svg>`;
@@ -814,6 +825,9 @@ function _setCountryDraftLoading(loading){window._countryDraftLoading=!!loading;
 function retryCountryDraft(){try{closeModal();}catch(_){}return beginDraft();}
 function _showCountryDraftLoadError(country,error){if(window.CopaDiagnostics)window.CopaDiagnostics.capture("country_players_load_failed",String(country||"")+":"+String(error&&error.message||error||"load_failed"),error&&error.stack);showModal(`<div class="scoutmodal" data-country-load-error="${clip(country||"",8)}"><h4>${LT("Oyuncular yüklenemedi","Players could not be loaded","No se pudieron cargar los jugadores","Spieler konnten nicht geladen werden","Impossibile caricare i giocatori")}</h4><p>${LT("Bağlantını kontrol edip tekrar dene. Seçimin ve ayarların korunuyor.","Check your connection and try again. Your selection and settings are preserved.","Comprueba tu conexión e inténtalo de nuevo. Tu selección y ajustes se conservan.","Prüfe deine Verbindung und versuche es erneut. Auswahl und Einstellungen bleiben erhalten.","Controlla la connessione e riprova. Selezione e impostazioni restano salvate.")}</p><div class="bact"><button class="btn btn-primary" onclick="retryCountryDraft()">${LT("TEKRAR DENE","TRY AGAIN","REINTENTAR","ERNEUT VERSUCHEN","RIPROVA")}</button><button class="btn btn-ghost" onclick="closeModal()">${LT("VAZGEÇ","CANCEL","CANCELAR","ABBRECHEN","ANNULLA")}</button></div></div>`,{label:LT("Yükleme hatası","Loading error","Error de carga","Ladefehler","Errore di caricamento")});}
 function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(selectedCountry!=="TR"&&(!Array.isArray(_countryPool)||!_countryPool.length)&&window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function"){if(window._countryDraftPromise)return window._countryDraftPromise;_setCountryDraftLoading(true);const _loadingCountry=selectedCountry,_draftPromise=window.CopaLazy.ensureCountryPlayers(_loadingCountry).then(()=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;return beginDraft();}).catch(error=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;_showCountryDraftLoadError(_loadingCountry,error);return false;});window._countryDraftPromise=_draftPromise;return _draftPromise;}document.body.classList.add("run-active");window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];pendingMatchResolution=null;pendingLoanReward=null;rewardCardSwapState=null;tournament=null;tournamentFormat="groups16_v1";window._rewardPendingRound=0;window._rewardResolvedRound=0;teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;lotteryCouponAmount=0;lotteryCouponTurns=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
+  /* A new run starts unnamed. A random club name is generated only when the
+     player deliberately presses the dice button on the squad postcard. */
+  teamName="";
   draftRewardedRerollsEarned=0;draftRewardInFlight=false;rewardedInjuryHealsEarned=0;injuryRewardInFlight=false;rewardedMarketRerollsEarned=0;shopRewardInFlight=false;
   chairmanEventRunId=String(seedNum)+"-"+Date.now().toString(36);pendingChairmanEvent=null;chairmanEventSeen={};window._kaosOfferRound=0;window._kaosOfferPendingRound=0;
   medicalProtectionTurns=0;
@@ -992,7 +1006,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";const reserve=(rema
 function canOfferRewardedDraftReroll(){return !!(window.COPA_IS_NATIVE&&window.COPA_PLATFORM==="android"&&window.CopaNativeAds&&typeof window.CopaNativeAds.showRewardedReroll==="function"&&draftRewardedRerollsEarned<MAX_REWARDED_DRAFT_REROLLS);}
 async function requestRewardedDraftReroll(){if(draftRewardInFlight||currentSlot<0||draftRerollsLeft>0||!canOfferRewardedDraftReroll())return;draftRewardInFlight=true;renderOpts();let result={earned:false,reason:"native_error"};try{result=await window.CopaNativeAds.showRewardedReroll(chairmanEventRunId);}catch(_){result={earned:false,reason:"native_error"};}draftRewardInFlight=false;if(result&&result.earned){const previous=draftRewardedRerollsEarned,nativeCount=Math.max(previous+1,Number(result.earnedCount)||0);draftRewardedRerollsEarned=Math.min(MAX_REWARDED_DRAFT_REROLLS,nativeCount);draftRerollsLeft+=Math.max(1,draftRewardedRerollsEarned-previous);draftRerollUsed=false;_saveState();if(typeof showToast==="function")showToast(LT("+1 yenileme hakkı kazandın.","You earned +1 reroll.","Has ganado +1 intento.","Du hast +1 Versuch erhalten.","Hai ottenuto +1 tentativo."));}else if(typeof showToast==="function"){const unavailable=result&&result.reason==="not_ready";showToast(unavailable?LT("Reklam henüz hazır değil; biraz sonra tekrar dene.","The ad is not ready yet; try again shortly.","El anuncio aún no está listo; inténtalo de nuevo pronto.","Die Anzeige ist noch nicht bereit; versuche es gleich erneut.","L'annuncio non è ancora pronto; riprova tra poco."):LT("Reklam tamamlanmadı; hak eklenmedi.","The ad was not completed; no reroll was added.","El anuncio no se completó; no se añadió ningún intento.","Die Anzeige wurde nicht abgeschlossen; kein Versuch wurde hinzugefügt.","L'annuncio non è stato completato; nessun tentativo aggiunto."));}renderOpts();}
 function rerollOptions(){if(currentSlot<0)return;if(draftRerollsLeft<=0){requestRewardedDraftReroll();return;}const _hadHidden=currentOpts.some(o=>o&&o.hidden);draftRerollsLeft--;draftRerollUsed=draftRerollsLeft<=0;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6;currentOpts=draftOptions(_pos);const _affordable=o=>typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve:_reserve}):canAffordCost((o.price||0)+_reserve);if(!currentOpts.some(_affordable)){const fp=fabPlayer(_pos,55,61);fp.price=0;fp.free=true;currentOpts[_draftWorstPublicIndex(currentOpts)]=fp;}if(_hadHidden&&typeof trackHiddenDraftMetric==="function")trackHiddenDraftMetric("rerolled",{source:"manual",late:deadlineH<=6});_trackHiddenOffer("reroll",currentOpts);sfxRoll();renderOpts();_saveState();}
-function fillSlot(idx,p){if(!Number.isInteger(idx)||idx<0||idx>=slots.length||!p||filled[idx])return false;const reserve=Math.max(0,(remaining-1)*0.6);if(typeof canAffordChairmanSpend==="function"&&!canAffordChairmanSpend(p.price||0,"transfer",{...p,reserve}))return false;p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;filled[idx]=true;remaining=unfilled().length;if(remaining===0&&window.CopaAnalytics)window.CopaAnalytics.track("xi_completed",analyticsBalanceProps({round:1}));spend(p.price||0,"spent");if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(p.price||0,"transfer",p);setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();return true;}
+function fillSlot(idx,p){if(!Number.isInteger(idx)||idx<0||idx>=slots.length||!p||filled[idx])return false;const reserve=Math.max(0,(remaining-1)*0.6);if(typeof canAffordChairmanSpend==="function"&&!canAffordChairmanSpend(p.price||0,"transfer",{...p,reserve}))return false;p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.joinedRound=p.joinedRound||round;p.eff=effOf(p);picksBySlot[idx]=p;filled[idx]=true;remaining=unfilled().length;if(remaining===0&&window.CopaAnalytics)window.CopaAnalytics.track("xi_completed",analyticsBalanceProps({round:1}));spend(p.price||0,"spent");if(typeof chairmanReactToSpend==="function")chairmanReactToSpend(p.price||0,"transfer",p);setBudget();renderRoundel("r"+idx,p);const _fr=$("r"+idx);if(_fr){_fr.classList.add("slot-filled");setTimeout(()=>{if(_fr)_fr.classList.remove("slot-filled");},900);}_updateSquadSils();return true;}
 function surOf(p){const w=(p.name||"").trim().split(" ");const last=w[w.length-1];if(/^\d+$/.test(last)&&w.length>1)return w[w.length-2];return last;}
 function _ovCol(ov){return ov>=70?"#4E9B65":ov>=55?"#68757C":"#101D28";}
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?"#4E9B65":"rgba(16,29,40,.2)";const s=done?"rgba(104,117,124,.7)":"rgba(16,29,40,.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
@@ -1254,7 +1268,7 @@ function makeSeed(inp){const key=inp?inp.toUpperCase():"";window._runUsesCheatSe
 const BLK="▁▂▃▄▅▆▇█";function sparkPow(){const h=powerHist.filter(v=>v);if(h.length<2)return"";const mn=Math.min.apply(null,h),mx=Math.max.apply(null,h),rg=Math.max(1,mx-mn);return" "+h.map(v=>BLK[Math.min(7,Math.floor((v-mn)/rg*7))]).join("");}
 /* ===== lightweight background music ===== */
 const THEME_KEY="copa_theme";
-let _themePreference="light";
+let _themePreference="dark";
 function _themeUsesDark(pref){return pref==="dark";}
 function _themeLabel(pref){return pref==="light"?LT("AÇIK","LIGHT","CLARO","HELL","CHIARO"):LT("KOYU","DARK","OSCURO","DUNKEL","SCURO");}
 function _themeIcon(pref){const icons={light:"<svg viewBox='0 0 20 20' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><circle cx='10' cy='10' r='3.2'/><path d='M10 1.5v2M10 16.5v2M1.5 10h2M16.5 10h2M4 4l1.5 1.5M14.5 14.5 16 16M16 4l-1.5 1.5M5.5 14.5 4 16'/></svg>",dark:"<svg viewBox='0 0 20 20' width='15' height='15' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round'><path d='M16.4 12.8A7.3 7.3 0 0 1 7.2 3.6 7.4 7.4 0 1 0 16.4 12.8Z'/></svg>"};return icons[pref]||icons.light;}
@@ -1264,7 +1278,7 @@ function refreshThemeSetting(){
   group.querySelectorAll("[data-theme-choice]").forEach(btn=>{const pref=btn.dataset.themeChoice,active=pref===_themePreference,label=_themeLabel(pref);btn.classList.toggle("on",active);btn.setAttribute("aria-pressed",String(active));btn.setAttribute("aria-label",label);btn.title=label;btn.innerHTML=_themeIcon(pref);});
 }
 function applyTheme(pref,persist){
-  _themePreference=["light","dark"].includes(pref)?pref:"light";
+  _themePreference=["light","dark"].includes(pref)?pref:"dark";
   const dark=_themeUsesDark(_themePreference);
   document.documentElement.dataset.theme=dark?"dark":"light";
   document.documentElement.dataset.themePreference=_themePreference;
@@ -1305,7 +1319,7 @@ function ensureMusicSetting(){
 function _getMusic(){if(_musicAudio)return _musicAudio;const a=new Audio();a.preload="none";a.loop=true;a.volume=.16;a.src="assets/audio/ui/ceremonial-pulse-main-loop.ogg?v=20260714-ceremonial1";a.onerror=()=>{_musicEnabled=false;_updateMusicButton();};_musicAudio=a;return a;}
 function toggleMusic(){_musicEnabled=!_musicEnabled;try{localStorage.setItem("copa_music",_musicEnabled?"1":"0");}catch(e){}const a=_getMusic();if(_musicEnabled){a.play().catch(()=>{ /* A browser can reject synthetic clicks; keep the user setting for the next real tap. */ _updateMusicButton();});}else a.pause();_updateMusicButton();}
 document.addEventListener("visibilitychange",()=>{if(!_musicAudio)return;if(document.hidden)_musicAudio.pause();else if(_musicEnabled)_musicAudio.play().catch(()=>{});});
-setTimeout(()=>{try{_themePreference=localStorage.getItem(THEME_KEY)||"light";}catch(e){}_themePreference=document.documentElement.dataset.themePreference||_themePreference;applyTheme(_themePreference,false);try{_musicEnabled=localStorage.getItem("copa_music")==="1";}catch(e){}_updateMusicButton();ensureThemeSetting();ensureMusicSetting();},0);
+setTimeout(()=>{try{_themePreference=localStorage.getItem(THEME_KEY)||"dark";}catch(e){}_themePreference=document.documentElement.dataset.themePreference||_themePreference;applyTheme(_themePreference,false);try{_musicEnabled=localStorage.getItem("copa_music")==="1";}catch(e){}_updateMusicButton();ensureThemeSetting();ensureMusicSetting();},0);
 setTimeout(()=>{if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();},0);
 
 /* ===== settings dropdown ===== */
@@ -1510,6 +1524,29 @@ function talkDecisionIcon(k){
 }
 function teamTalk(){if(talkUsed)return;const x=L(),tr=LANG==="tr";const tone={gaz:"risk",mantik:"safe",sert:"conditional"};const micro={gaz:tr?"Riski b&uuml;y&uuml;t, tempoyu y&uuml;kselt.":"Raise the tempo, accept the risk.",mantik:tr?"Sakin kal, plana sad&#305;k kal.":"Stay calm, stick to the plan.",sert:tr?"Gev&#351;emeye izin verme.":"Allow no slack."};const o=k=>{const t=x.talkOpt[k];return `<button type="button" class="stylebtn talk-choice talk-choice-${tone[k]}" data-talk="${k}" onclick="pickTalk('${k}')"><div class="talk-accent"></div><div class="ssi">${talkDecisionIcon(k)}</div><div class="ssm talk-copy"><div class="sst">${t.n}</div><div class="talk-micro">${micro[k]}</div></div></button>`};showModal(`<div class="talkmodal talkmodal-simple"><div class="talk-head"><div class="kithdr">${x.talkHead}</div><div class="talk-subline">${tr?"Bu ma&ccedil;&#305;n tonunu sen belirle.":"Set the tone for this match."}</div></div><div class="stylelist talk-list">${o("gaz")+o("mantik")+o("sert")}</div><div class="talk-foot">${tr?"Etkisi yaln&#305;zca bu ma&ccedil; s&uuml;rer.":"Applies to this match only."}</div></div>`,{dismissOnOverlay:true,label:x.talkHead});}
 function pickTalk(k){if(talkUsed)return;talkUsed=true;try{sfxTalk(k);}catch(e){}const x=L(),c=talkContext();let d=talkDelta(k,c),backfire=false;if(k==="gaz"&&c.troubled&&rand()<0.25){d=-2;backfire=true;}if(k==="sert"&&c.young&&rand()<0.15){d=-1;backfire=true;}talkMod.all=d;lastTalkResult={key:k,name:x.talkOpt[k].n,delta:d,backfire,young:c.young,veteran:c.veteran,under:c.under};const captainAction=d<0&&typeof canUseCaptainDecision==="function"&&canUseCaptainDecision()?`<button class="btn btn-primary" onclick="useCaptainDecision()">${LANG==="tr"?"KAPTAN ARAYA GİRSİN":"LET THE CAPTAIN STEP IN"}</button>`:"";sfxStamp();pushFeed(" <b>"+x.talkOpt[k].n+"</b> "+(d>=0?"+":"")+d+(backfire?(LANG==="tr"?" · ters tepti":" · backfired"):""),backfire?"lose":"pres");showModal(`<div class="bulletin"><div class="bhead"><span>${x.talkHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot">${talkDecisionIcon(k)}</div><div class="bhl ${d>=0?"up":"down"}">${x.talkOpt[k].n}</div><div class="bbody">${LANG==="tr"?"Bu maçlık moral etkisi. ":"One-match morale effect. "}${backfire?(LANG==="tr"?"Ton ters tepti.": "The tone backfired."):(c.under?x.talkUnder:x.talkFav)}</div><div class="beff ${d>=0?"up":"down"}">${x.talkDelta} ${d>=0?"+":""}${d}</div><div class="bact">${captainAction}<button class="btn ${captainAction?"btn-ghost":"btn-primary"}" onclick="closeModal();renderHub();">${x.presClose}</button></div></div>`);}
+
+/* ===== contextual locker-room talk + preparation ===== */
+function teamTalk(){if(talkUsed)return;if(window.CopaMobileShell)return CopaMobileShell.openTeamTalk();pickTalk("calm");}
+function applyModernTeamTalk(tone,target){
+ if(talkUsed||!window.CopaMobileShell)return;
+ const c=talkContext(),sq=c.sq,context={...c,pressure:chairTrust<=0||round>=5,star:sq.some(p=>effOf(p)>=86),defenceNeed:opponent&&/blok|kontra/i.test(opponent.style||"")};
+ const result=CopaMobileShell.resolveTalk(tone,target,context,rand);
+ talkUsed=true;talkMod={all:target==="all"?result.delta:0,def:target==="defence"?result.delta:0,atk:target==="attack"?result.delta:0};
+ if(target==="youth"||target==="star")talkMod.all=Math.round(result.delta*.7);
+ window._talkMatchProfile=result;lastTalkResult={...result,key:tone,young:c.young,veteran:c.veteran,under:c.under,backfire:result.delta<0};
+ try{sfxTalk(result.delta<0?"sert":"mantik");sfxStamp();}catch(e){}
+ pushFeed(" <b>"+result.name+"</b> · "+result.targetName+" "+(result.delta>=0?"+":"")+result.delta,result.delta<0?"lose":"pres");
+ if(window.CopaMobileExperience)CopaMobileExperience.haptic(result.delta<0?[24,28,24]:[12,20]);
+ _saveState();CopaMobileShell.showTalkResult(result);
+}
+function pickTalk(k){const legacy={gaz:"challenge",mantik:"calm",sert:"discipline"};applyModernTeamTalk(legacy[k]||k,"all");}
+function openPreparation(){if(window.CopaPreparation)CopaPreparation.open(round,opponent);}
+function maybeInjure(){
+ if(round<=1)return;
+ const prepRisk=window.CopaPreparation?CopaPreparation.injuryMultiplier():1,talkRisk=1+Math.max(0,Number(window._talkMatchProfile&&window._talkMatchProfile.injuryRisk)||0);
+ const p=applyRandomInjury((hasCard("temiz_sayfa")?0.049:0.07)*prepRisk*talkRisk);window._talkMatchProfile=null;
+ if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("🩹 <b>"+shortName(p)+"</b> "+(LANG==="tr"?"idmanda sakatlandı":"was injured in training"),"lose");const idx=picksBySlot.indexOf(p);if(idx>=0)renderRoundel("h"+idx,p);}
+}
 
 /* ===== fx / modal ===== */
 const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
@@ -1734,7 +1771,10 @@ function playMatch(skipRisk){if(runEnded||pendingMatchResolution)return;if(windo
       opponentId:opponent&&opponent.ghostId,opponentName:opponent&&opponent.name,
       homePower:sp.power,awayPower:opponent.power,style,cards,
       awayStyle:opponent&&opponent.style,
-      ghostProfile:opponent&&opponent.ghostProfile
+      ghostProfile:opponent&&opponent.ghostProfile,
+      homeVariance:sp.chemistryVariance||1,
+      preparation:window.CopaPreparation?CopaPreparation.effects(round,opponent):null,
+      talk:window._talkMatchProfile||null
     });
   }catch(error){
     window.CopaRunState&&window.CopaRunState.transition("hub",{reason:"match_core_error"});
@@ -1743,6 +1783,8 @@ function playMatch(skipRisk){if(runEnded||pendingMatchResolution)return;if(windo
     return;
   }
   const gf=coreResult.regulationScore[0],ga=coreResult.regulationScore[1];
+  window._penTrainingBonus=window.CopaPreparation?CopaPreparation.penaltyBonus(round):0;
+  if(window.CopaPreparation)CopaPreparation.completeMatch(round,picksBySlot,slots);
   const press=coreResult.stats.pressWins[0],edge=0;
   window._matchRedCard=false;window._redCardPlayerName=null;suspendedSlotIdx=-1;[...picksBySlot,...(bench||[])].forEach(p=>{if(p)p.suspended=false;});lastMatchEvents=makeCoreMatchEvents(coreResult);const win=gf>ga,draw=gf===ga,res=draw?"D":win?"W":"L",_yellow=coreResult.stats.yellow||[0,0],_red=coreResult.stats.red||[0,0],_fairPlay={player:-(Number(_yellow[0])||0)-3*(Number(_red[0])||0),opponent:-(Number(_yellow[1])||0)-3*(Number(_red[1])||0)};lastMatchPerf={power:sp.power,oppPower:opponent.power,cardBonus:sp.cardBonus,gf,ga,win,draw,press,edge,talk:lastTalkResult?Object.assign({},lastTalkResult):null,events:lastMatchEvents.slice(),modelVersion:coreResult.model_version,xg:coreResult.stats.xg.slice(),shots:coreResult.stats.shots.slice(),saves:coreResult.stats.saves.slice(),possession:coreResult.stats.possession.slice(),fairPlay:_fairPlay,replayCode:coreResult.replayCode};lastMatchPerf.note=performanceNote(lastMatchPerf);lastMatchPerf.why=performanceWhy(lastMatchPerf);window.lastMatchRatings=null;_captureLastMatchReportSnapshot({score:[gf,ga],events:lastMatchEvents,homeWon:win,homePower:sp.power,awayPower:opponent.power});fixtures[round-1].res=res;fixtures[round-1].gf=gf;fixtures[round-1].ga=ga;fixtures[round-1].fairPlay=_fairPlay;fixtures[round-1].events=lastMatchEvents.slice();fixtures[round-1].note=lastMatchPerf.note;if(typeof finishCardMatchCommitments==="function")lastMatchPerf.cardContracts=finishCardMatchCommitments(gf,ga,round);const advance=win;window._penSaveChance=draw?1/3:1/3;if(window.CopaAnalytics)window.CopaAnalytics.track("match_completed",analyticsBalanceProps({round,outcome:draw?"draw":win?"win":"loss",model_version:coreResult.model_version,power_gap:analyticsPowerGap(sp.power,opponent.power),tactic:CopaNormalMatch.tacticForStyle(style)}));sfxWhistle();renderFixtures();
   /* Kırmızı kart etkisi: bir sonraki maça taşı */
@@ -2986,6 +3028,14 @@ function _loadHowtoGuide(){
 const _guideIdle=()=>_loadHowtoGuide().then(api=>api.initContextualTips()).catch(()=>{});
 if(typeof requestIdleCallback==="function")requestIdleCallback(_guideIdle,{timeout:2200});else setTimeout(_guideIdle,1600);
 
+/* ===== chemistry graph presentation ===== */
+function showChemBreak(){
+ const tr=LANG==="tr",result=chemBonus(picksBySlot.filter(Boolean)),lines=result.lines||{defence:50,midfield:50,attack:50};
+ const card=(label,value)=>`<div class="chem-line-card" style="--chem-line:${Math.max(0,Math.min(100,value))}%"><span>${label}</span><b>${value}</b><i></i></div>`;
+ const variance=Number(result.variance||1);
+ showModal(`<div class="chem-graph-modal" style="padding:18px;width:min(620px,92vw)"><div class="kithdr">${tr?"KİMYA BAĞLANTILARI":"CHEMISTRY LINKS"}</div><div class="kitsub">${tr?"Takım uyumu gücü ve sonuç oynaklığını birlikte etkiler.":"Cohesion affects both power and result variance."}</div><div style="display:flex;align-items:end;gap:12px;margin:14px 0"><b style="font-size:38px">${result.score||50}</b><span style="color:var(--color-slate);padding-bottom:6px">/100 · ${(result.total||0)>=0?"+":""}${result.total||0} ${tr?"güç":"power"} · ×${variance.toFixed(2)} ${tr?"varyans":"variance"}</span></div><div class="chem-line-grid">${card(tr?"SAVUNMA HATTI":"DEFENSIVE LINE",lines.defence)}${card(tr?"ORTA SAHA":"MIDFIELD",lines.midfield)}${card(tr?"HÜCUM HATTI":"ATTACK LINE",lines.attack)}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${tr?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"Kimya bağlantıları":"Chemistry links"});
+}
+
 /* ===== versioned run persistence ===== */
 function _persistRunState(payload){
   if(!window.CopaRunPersistence)return{ok:false,errors:[{code:"persistence_unavailable"}]};
@@ -3020,6 +3070,7 @@ function _saveState(phaseOverride){
     pendingMatchResolution:_runCheckpointClone(pendingMatchResolution),lastMatchPerf:_runCheckpointClone(lastMatchPerf),lastMatchEvents:_runCheckpointClone(lastMatchEvents),lastMatchReportData:_runCheckpointClone(window.lastMatchReportData),
     postMatchResolvedRound:Number(window._postMatchResolvedRound)||0,rewardPendingRound:Number(window._rewardPendingRound)||0,rewardResolvedRound:Number(window._rewardResolvedRound)||0,
     pendingLoanReward:_runCheckpointClone(pendingLoanReward),rewardCardSwapState:_runCheckpointClone(rewardCardSwapState),loanPlayer:_runCheckpointClone(loanPlayer),
+    preparation:window.CopaPreparation?CopaPreparation.snapshot():null,chemistrySystem:window.CopaChemistry?CopaChemistry.snapshot():null,talkMatchProfile:_runCheckpointClone(window._talkMatchProfile),
     draft:{remaining,currentSlot,currentOpts:(currentOpts||[]).map(p=>p?Object.assign({},p):null),rerollsLeft:draftRerollsLeft,rewardedRerollsEarned:draftRewardedRerollsEarned,deadlineH,usedNames:[...usedNames]}
   });}catch(e){}
 }
@@ -3073,6 +3124,7 @@ function _tryRestoreState(){
     window._postMatchResolvedRound=Number(st.postMatchResolvedRound)||0;window._rewardPendingRound=Number(st.rewardPendingRound)||0;window._rewardResolvedRound=Number(st.rewardResolvedRound)||0;
     pendingLoanReward=st.pendingLoanReward||null;if(pendingLoanReward&&Number.isInteger(Number(pendingLoanReward.weakIdx))&&picksBySlot[Number(pendingLoanReward.weakIdx)])pendingLoanReward.displaced=picksBySlot[Number(pendingLoanReward.weakIdx)];
     rewardCardSwapState=st.rewardCardSwapState||null;loanPlayer=st.loanPlayer||null;_rewardActionLocked=false;_rewardSwapCompletion=false;
+    if(window.CopaPreparation)CopaPreparation.restore(st.preparation);if(window.CopaChemistry)CopaChemistry.restore(st.chemistrySystem);window._talkMatchProfile=st.talkMatchProfile||null;
     runEnded=false;undoData=null;undoUsed=false;autoPlay=false;if(window.GhostClubs&&typeof window.GhostClubs.updateRun==="function")window.GhostClubs.updateRun({seed:seedNum,country:selectedCountry,clubName:teamName,cheatRun:!!window._runUsesCheatSeed,ghostOpponentUsed:!!window._ghostOpponentUsed,ghostOpponentId:window._ghostOpponentId||""});
     if(restorePhase==="draft"){
       const draft=st.draft||{};currentSlot=Number.isInteger(draft.currentSlot)&&!filled[draft.currentSlot]?draft.currentSlot:-1;currentOpts=Array.isArray(draft.currentOpts)?draft.currentOpts.filter(Boolean):[];draftRerollsLeft=Math.max(0,Number(draft.rerollsLeft??DRAFT_REROLLS));draftRewardedRerollsEarned=Math.max(0,Math.min(MAX_REWARDED_DRAFT_REROLLS,Number(draft.rewardedRerollsEarned)||0));draftRewardInFlight=false;draftRerollUsed=draftRerollsLeft<=0;deadlineH=Math.max(1,Number(draft.deadlineH)||24);usedNames.clear();(Array.isArray(draft.usedNames)?draft.usedNames:picksBySlot.filter(Boolean).map(p=>p.name)).forEach(name=>usedNames.add(name));
@@ -3347,7 +3399,7 @@ function _renderPenaltyModal(){
   /* zone highlight: where the ball went + where the keeper dove */
   const goalZoneCls=reveal?(" show-ball "+reveal.type+" ball-"+reveal.shot+" gk-"+reveal.keeper):"";
   /* the goal scene — keeper always faces us; frame with posts, crossbar and net */
-  const goalHtml="<div class=\"pen-goal"+goalZoneCls+"\">"
+  const goalHtml="<div class=\"pen-goal"+goalZoneCls+"\"><div id=\"phaserPenaltyStage\" role=\"application\"></div>"
     +"<div class=\"pen-goalframe\"><span class=\"pen-crossbar\"></span><span class=\"pen-post pen-post-l\"></span><span class=\"pen-post pen-post-r\"></span><div class=\"pen-net\"></div></div>"
     +"<div class=\"pen-zones\" aria-hidden=\"true\"><i class=\"z-L\"></i><i class=\"z-C\"></i><i class=\"z-R\"></i></div>"
     +"<div class=\"pen-spot\" aria-hidden=\"true\"></div>"
@@ -3386,6 +3438,7 @@ function _renderPenaltyModal(){
   const crowdHtml=reveal?"<div class=\"pen-crowd "+reveal.type+"\" aria-hidden=\"true\"></div>":"";
   const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save")+((sudden||s.sudden)?" is-sudden":"");
   showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div><div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\"><b>"+phaseText+"</b></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+actionDock+"</div>",{dismissOnEscape:false});
+  if(window.CopaPhaserMoments)CopaPhaserMoments.mountPenalty(s,reveal).catch(()=>{});
 }
 /* Hover a direction button → highlight the matching goal zone (preview) */
 window._penHoverZone=function(d){const g=document.querySelector(".pen-modal .pen-goal");if(!g)return;g.classList.remove("hover-L","hover-C","hover-R");if(d)g.classList.add("hover-"+d);};
@@ -3421,14 +3474,15 @@ function _takePenalty(dir){
   let shooter,keeper,shot,keeperDir,side,arr,powA,powB,byUser=false;
   if(s.phase==="shoot"){
     shooter=_penActor(s,"home");keeper=s.awayKeeper;shot=dir;keeperDir=_penPick();side=s.home;arr=s.homeShots;byUser=false;
-    powA=s.mode==="final"?(fp.home||_penPower(shooter,75)):_penPower(shooter,(lastMatchPerf&&lastMatchPerf.power)||75);
+    powA=(s.mode==="final"?(fp.home||_penPower(shooter,75)):_penPower(shooter,(lastMatchPerf&&lastMatchPerf.power)||75))+(Number(window._penTrainingBonus)||0);
     powB=s.mode==="final"?(fp.away||_penPower(keeper,75)):_penPower(keeper,(lastMatchPerf&&lastMatchPerf.oppPower)||75);
   }else{
     shooter=_penActor(s,"away");keeper=s.homeKeeper;shot=_penPick();keeperDir=dir;side=s.away;arr=s.awayShots;byUser=true;
     powA=s.mode==="final"?(fp.away||_penPower(shooter,75)):_penPower(shooter,(lastMatchPerf&&lastMatchPerf.oppPower)||75);
-    powB=s.mode==="final"?(fp.home||_penPower(keeper,75)):_penPower(keeper,(lastMatchPerf&&lastMatchPerf.power)||75);
+    powB=(s.mode==="final"?(fp.home||_penPower(keeper,75)):_penPower(keeper,(lastMatchPerf&&lastMatchPerf.power)||75))+(Number(window._penTrainingBonus)||0);
   }
   const res=_penShotResult(powA,powB,shot,keeperDir),item={type:res.type,shot,keeper:keeperDir};
+  if(window.CopaMobileExperience)CopaMobileExperience.haptic(res.type==="goal"?[16,22]:res.type==="save"?[28,18,28]:res.type==="post"?[10,16,10,16]:[8,26]);
   arr.push(item);if(res.goal){if(s.phase==="shoot")s.homeGoals++;else s.awayGoals++;}
   const no=arr.length,player=_penPlayerName(shooter,side);
   const keeperName=_penPlayerName(keeper,LANG==="tr"?"Kaleci":"Keeper");
@@ -3521,8 +3575,10 @@ function applyStorageMigrations(){
 var POOL_TR=POOL;
 function _bootCopaApplication(){
   try{const savedLang=localStorage.getItem("copa.language");if(typeof COPA_SUPPORTED_LANGS!=="undefined"&&COPA_SUPPORTED_LANGS.includes(savedLang)){LANG=savedLang;document.documentElement.lang=savedLang;}}catch(e){}
-  applyStorageMigrations();loadMeta();applyStatic();buildFormButtons();startTacticalBoard();applyMeta();setBudget();startTCentre();$("budgetBox").classList.add("introhide");geoDefaultCountry();_tryRestoreState();
-  try{_themePreference=localStorage.getItem(THEME_KEY)||"light";applyTheme(_themePreference,false);_musicEnabled=localStorage.getItem("copa_music")==="1";_updateMusicButton();if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}
+  applyStorageMigrations();loadMeta();applyStatic();buildFormButtons();startTacticalBoard();applyMeta();setBudget();startTCentre();$("budgetBox").classList.add("introhide");geoDefaultCountry();
+  const savedRun=_readRunState(),manualResume=window.CopaMobileShell&&CopaMobileShell.shouldGateResume(savedRun);
+  if(manualResume)CopaMobileShell.showLanding(savedRun);else if(!_tryRestoreState()&&window.CopaMobileShell&&CopaMobileShell.mobile())CopaMobileShell.showLanding(null);
+  try{_themePreference=localStorage.getItem(THEME_KEY)||"dark";applyTheme(_themePreference,false);_musicEnabled=localStorage.getItem("copa_music")==="1";_updateMusicButton();if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}
 }
 window.CopaBootReady=Promise.resolve(window.CopaPlatform&&window.CopaPlatform.ready).catch(()=>null).then(_bootCopaApplication);
 (function(){try{if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}})();
@@ -3592,6 +3648,6 @@ function _finalTacticBench(benchIdx){
   <a class="footer-link" href="terms.html">Şartlar</a>
   <span class="native-version-slot" aria-hidden="true"></span>
  </div>
-  <span class="rights-note">copa.life, bağımsız bir futbol yönetim oyunudur.</span>
+  <span class="rights-note">Copa Life, bağımsız bir futbol yönetim oyunudur.</span>
 </div>
 </body></html>
