@@ -130,12 +130,49 @@ test("the tournament overview is responsive and exposes all groups semantically"
   expect(stripLayout.road.y+stripLayout.road.height).toBeLessThanOrEqual(stripLayout.panel.y+stripLayout.panel.height+1);
   expect(stripLayout.road.x).toBeGreaterThanOrEqual(stripLayout.panel.x);
   expect(stripLayout.road.width).toBeLessThanOrEqual(stripLayout.panel.width);
-  await page.getByRole("button",{name:/Tüm gruplar|All groups/i}).click();
+  await page.waitForTimeout(500);
+  await page.evaluate(()=>{const w=globalThis as any;w.setCaptain(0);w.closeModal();w.showTournamentOverview();});
   await expect(page.locator(".tg-overview")).toBeVisible();
   await expect(page.locator(".tg-all-groups table")).toHaveCount(4);
   await expect(page.locator(".tg-all-groups tbody tr")).toHaveCount(16);
-  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
-  expect(overflow).toBeLessThanOrEqual(1);
+  const overviewFit=await page.locator(".tg-overview").evaluate((overview:HTMLElement)=>{
+    const shell=overview.closest(".sheet") as HTMLElement,header=overview.querySelector("header") as HTMLElement;
+    const shellRect=shell.getBoundingClientRect(),headerRect=header.getBoundingClientRect();
+    return{
+      pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+      contentOverflow:overview.scrollWidth-overview.clientWidth,
+      shellLeft:shellRect.left,
+      shellRight:shellRect.right,
+      headerLeft:headerRect.left,
+      headerRight:headerRect.right,
+      viewport:innerWidth
+    };
+  });
+  expect(overviewFit.pageOverflow).toBeLessThanOrEqual(1);
+  expect(overviewFit.contentOverflow).toBeLessThanOrEqual(1);
+  expect(overviewFit.shellLeft).toBeGreaterThanOrEqual(-1);
+  expect(overviewFit.shellRight).toBeLessThanOrEqual(overviewFit.viewport+1);
+  expect(overviewFit.headerLeft).toBeGreaterThanOrEqual(overviewFit.shellLeft-1);
+  expect(overviewFit.headerRight).toBeLessThanOrEqual(overviewFit.shellRight+1);
+});
+
+test("ultrawide web draw keeps the Phaser ceremony compact and square",async({browser},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop ultrawide presentation");
+  const context=await browser.newContext({baseURL:"http://127.0.0.1:5500",viewport:{width:2546,height:1298},serviceWorkers:"block"});
+  const page=await context.newPage();
+  await startDraw(page);
+  await expect(page.locator("#phaserDrawStage canvas")).toBeVisible({timeout:15_000});
+  const layout=await page.evaluate(()=>{
+    const shell=document.querySelector(".td-shell") as HTMLElement,stage=document.querySelector("#phaserDrawStage") as HTMLElement,machine=document.querySelector(".td-machine") as HTMLElement;
+    const rect=(element:HTMLElement)=>element.getBoundingClientRect();
+    const shellRect=rect(shell),stageRect=rect(stage),machineRect=rect(machine);
+    return{viewportWidth:innerWidth,shellWidth:shellRect.width,stageWidth:stageRect.width,stageHeight:stageRect.height,machineWidth:machineRect.width,pageOverflow:document.documentElement.scrollWidth-innerWidth};
+  });
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  expect(layout.shellWidth).toBeLessThanOrEqual(layout.viewportWidth*.65);
+  expect(layout.machineWidth).toBeGreaterThanOrEqual(279);
+  expect(Math.abs(layout.stageWidth-layout.stageHeight)).toBeLessThanOrEqual(2);
+  await context.close();
 });
 
 test("three group wins build a valid quarter-final path and the run can reach the trophy",async({page})=>{

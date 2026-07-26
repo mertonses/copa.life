@@ -158,3 +158,28 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   else expect(result.outcomeBackground).toBe("rgb(218, 61, 46)");
   await capture(page,"09-phaser-penalty.png");
 });
+
+test("web preparation board stays inside its modal shell",async({page})=>{
+  await reset(page);
+  await page.goto("/?autotest=1&groups=1&visual=prep-fit",{waitUntil:"domcontentloaded"});
+  await reachDraw(page);
+  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();game.openPreparation();});
+  await expect(page.locator(".prep-modal")).toBeVisible();
+  await expect(page.locator(".prep-drill")).toHaveCount(7);
+  await expectSurfaceFit(page,".prep-modal");
+  const fit=await page.locator(".prep-modal").evaluate((panel:HTMLElement)=>{
+    const shell=panel.closest(".sheet") as HTMLElement,panelRect=panel.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
+    return{
+      panelOverflow:panel.scrollWidth-panel.clientWidth,
+      shellOverflow:shell.scrollWidth-shell.clientWidth,
+      panelLeft:panelRect.left,
+      panelRight:panelRect.right,
+      shellLeft:shellRect.left,
+      shellRight:shellRect.right
+    };
+  });
+  expect(fit.panelOverflow).toBeLessThanOrEqual(1);
+  expect(fit.shellOverflow).toBeLessThanOrEqual(1);
+  expect(fit.panelLeft).toBeGreaterThanOrEqual(fit.shellLeft-1);
+  expect(fit.panelRight).toBeLessThanOrEqual(fit.shellRight+1);
+});
