@@ -3333,7 +3333,7 @@ function _penStatusText(type,byUser){return _penLogWord(type)+"!";}
 function _penHeadline(type,userShot){
   const tr=LANG==="tr";
   if(type==="goal")return userShot?(tr?"GOL!":"GOAL!"):(tr?"RAKİP GOL ATTI":"OPPONENT SCORES");
-  if(type==="save")return userShot?(tr?"RAKİP KURTARDI!":"KEEPER SAVES IT!"):(tr?"KURTARDIN!":"YOU SAVED IT!");
+  if(type==="save")return userShot?(tr?"ŞUTUN KURTARILDI!":"YOUR SHOT WAS SAVED!"):(tr?"KURTARDIN!":"YOU SAVED IT!");
   if(type==="post")return tr?"DİREKTEN DÖNDÜ!":"OFF THE POST!";
   return userShot?(tr?"DIŞARI!":"WIDE!"):(tr?"RAKİP KAÇIRDI!":"THEY MISSED!");
 }

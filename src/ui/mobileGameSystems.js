@@ -20,23 +20,25 @@
     const intro=document.getElementById("intro"),land=document.getElementById("introLand"),setup=document.getElementById("introSetup");
     if(!intro||!land||!setup)return false;
     document.documentElement.classList.add("copa-mobile-game");
+    document.body.classList.remove("mobile-game-setup-open","mobile-game-setup-final");
     document.body.classList.add("mobile-game-landing-open");
     setup.classList.add("hidden");
     let view=document.getElementById("mobileGameLanding");
     if(!view){view=document.createElement("div");view.id="mobileGameLanding";view.className="mobile-game-landing";land.prepend(view);}
     const data=saved?savedSummary(saved):null;
-    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><i></i><i></i><i></i><span></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>Copa <em>Life</em></h1></div>${data?`<article class="mgl-save"><span>${tr()?"SON KOŞU":"LAST RUN"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/6</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki":"Next"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"DEVAM ET":"CONTINUE"}</button>`:""}<button class="btn btn-ghost" onclick="CopaMobileShell.newRun()">${tr()?"YENİ KOŞU":"NEW RUN"}</button></div></div>`;
+    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><i></i><i></i><i></i><span></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>Copa <em>Life</em></h1></div>${data?`<article class="mgl-save"><span>${tr()?"SON KOŞU":"LAST RUN"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/6</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki":"Next"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"DEVAM ET":"CONTINUE"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"YENİ KOŞU":"NEW RUN"}</button></div></div>`;
     land.classList.remove("hidden");intro.classList.remove("hidden");
     return true;
   }
   function escapeHtml(value){const div=document.createElement("div");div.textContent=String(value||"");return div.innerHTML;}
   function continueRun(){
-    document.body.classList.remove("mobile-game-landing-open");
+    document.body.classList.remove("mobile-game-landing-open","mobile-game-setup-open","mobile-game-setup-final");
     const view=document.getElementById("mobileGameLanding");if(view)view.remove();
     if(typeof root._tryRestoreState==="function")root._tryRestoreState();
   }
   function newRun(){
     document.body.classList.remove("mobile-game-landing-open");
+    document.body.classList.add("mobile-game-setup-open");
     if(typeof root._clearState==="function")root._clearState();
     const view=document.getElementById("mobileGameLanding");if(view)view.remove();
     const land=document.getElementById("introLand"),setup=document.getElementById("introSetup");
@@ -58,6 +60,8 @@
   }
   function setSetupStep(value){
     setupStep=Math.max(1,Math.min(3,Number(value)||1));prepareStepper();
+    document.body.classList.toggle("mobile-game-setup-final",setupStep===3);
+    const setup=document.getElementById("introSetup");if(setup)setup.dataset.mobileCurrentStep=String(setupStep);
     document.querySelectorAll("#introSetup [data-mobile-step]").forEach(node=>node.classList.toggle("is-mobile-step-active",Number(node.dataset.mobileStep)===setupStep));
     const nav=document.getElementById("mobileSetupNav"),cta=document.querySelector("#introSetup .v7-cta-stack");
     if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/3*100}%`;if(label)label.textContent=`${setupStep}/3`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===3);}
@@ -101,6 +105,7 @@
     activateRoute(hub.dataset.mobileRoute||activeRoute);
   }
   function enhanceHub(){
+    document.body.classList.remove("mobile-game-setup-open","mobile-game-setup-final");
     const panel=document.querySelector("#hub .hub-action-panel .actionbtns");if(!panel)return;
     if(!document.getElementById("prepBtn")){
       const button=document.createElement("button");button.type="button";button.id="prepBtn";button.className="btn btn-prep";
