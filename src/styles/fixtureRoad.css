@@ -3,6 +3,9 @@
 .fixture-track::before,.fixture-track::after{content:"";position:absolute;left:4%;right:4%;top:35px;height:2px;pointer-events:none}
 .fixture-track::before{background:var(--border-subtle)}
 .fixture-track::after{right:auto;width:92%;background:var(--color-primary);transform:scaleX(var(--fixture-ratio,0));transform-origin:left center;transition:transform .6s ease}
+/* Cards carry their own progression state. A connector running through copy
+   reads as a rendering defect, so keep the road clean. */
+.fixture-track::before,.fixture-track::after{display:none}
 #fixbar .fixture-node{position:relative;z-index:1;min-width:0;min-height:60px!important;display:grid!important;grid-template-columns:26px minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;align-items:center!important;column-gap:6px!important;padding:7px!important;border:1px solid var(--border-subtle)!important;border-radius:8px!important;background:var(--surface-elevated)!important;color:var(--color-ink)!important;box-shadow:none!important;cursor:pointer;scroll-snap-align:center}
 #fixbar .fixture-node .fr{grid-column:1/-1;font:800 7px/1 var(--mono)!important;letter-spacing:.8px;color:var(--color-slate)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fixture-visual{width:26px;height:29px;display:grid;place-items:center;line-height:0}

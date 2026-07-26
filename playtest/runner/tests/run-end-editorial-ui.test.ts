@@ -428,3 +428,27 @@ test("native Android and iOS packages keep the inline result and Club Career lay
   expect(layout.careerWidth).toBeLessThanOrEqual(layout.resultWidth);
   expect(await page.evaluate(()=>(globalThis as any).COPA_PLATFORM)).toBe(isIos?"ios":"android");
 });
+
+test("championship chairman reward previews three candidates before confirmation",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"mobile reward layout");
+  await page.goto("/?chair-unlock-preview=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.unlockedChairs=["babacan"];
+    game.pendingChairChoices=["leydi","pinti","sansasyoncu"];
+    game.showPendingChairUnlock();
+  });
+  const cards=page.locator(".chair-unlock-card");
+  await expect(cards).toHaveCount(3);
+  const positions=await cards.evaluateAll(elements=>elements.map(element=>{
+    const rect=element.getBoundingClientRect();return{top:Math.round(rect.top),width:Math.round(rect.width)};
+  }));
+  expect(new Set(positions.map(item=>item.top)).size).toBe(1);
+  expect(positions.every(item=>item.width>70)).toBe(true);
+  await cards.first().click();
+  await expect(page.locator(".chair-unlock-preview")).toBeVisible();
+  await expect(page.locator(".chair-unlock-effects section")).toHaveCount(2);
+  expect(await page.evaluate(()=>(globalThis as any).unlockedChairs)).toEqual(["babacan"]);
+  await page.locator(".chair-unlock-close").click();
+  await expect(page.locator("#modal")).toBeHidden();
+});

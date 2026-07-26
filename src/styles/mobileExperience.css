@@ -1136,3 +1136,117 @@
   .mobile-action-dock,
   .mobile-sim-tabs button{transition:none!important}
 }
+
+/* Mobile UI integrity pass: four primary actions, opaque sheets and compact
+   match/result surfaces. */
+@media(max-width:760px){
+  html:has(#sim:not(.hidden)),
+  body:has(#sim:not(.hidden)){
+    height:100%;
+    overflow:hidden!important;
+    overscroll-behavior:none;
+  }
+
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    grid-template-rows:48px!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .actionbtns:has(#talkBtn.hidden){
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp,
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn,
+  .mobile-action-dock[data-dock-kind="hub"] #talkBtn,
+  .mobile-action-dock[data-dock-kind="hub"] #playBtn{grid-row:1!important}
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn{order:1!important}
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp{order:2!important}
+  .mobile-action-dock[data-dock-kind="hub"] #talkBtn{order:3!important}
+  .mobile-action-dock[data-dock-kind="hub"] #playBtn{order:4!important}
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn{
+    display:flex!important;flex-direction:column!important;justify-content:center!important;gap:3px!important;
+    padding-inline:2px!important;font-size:8px!important;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn>span{display:none}
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn b{font-size:7.5px!important;white-space:nowrap}
+  .mobile-action-dock[data-dock-kind="hub"] #prepBtn em{height:15px;min-width:22px;font-size:7px}
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp .btn-pres{font-size:0!important}
+  .mobile-action-dock[data-dock-kind="hub"] .presbtngp .btn-pres::after{
+    content:attr(aria-label);font:800 7.5px/1.05 var(--mono);letter-spacing:.35px;white-space:nowrap;
+  }
+  .mobile-action-dock[data-dock-kind="hub"] #playBtn{font-size:8px!important}
+
+  /* Every modal is a visibly separate, fully opaque surface in both themes. */
+  #modal>.sheet:not(.sheet-bare){
+    box-sizing:border-box;
+    background:var(--surface-elevated)!important;
+    color:var(--text-primary)!important;
+    border-color:var(--border-default)!important;
+    box-shadow:0 22px 60px rgba(10,17,24,.48)!important;
+    isolation:isolate;
+  }
+  #modal>.sheet:not(.sheet-bare)>*{max-width:100%;box-sizing:border-box}
+  #modal .chem-graph-modal,
+  #modal .breakdown-modal,
+  #modal .scoutmodal,
+  #modal .meta-progress-modal{background:var(--surface-elevated)!important;color:var(--text-primary)!important}
+
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet{
+    background:#17242D!important;border-color:#3A4750!important;color:#F3F5F4!important;
+  }
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-row{
+    background:#27343C!important;border-color:#3A4750!important;color:#F3F5F4!important;
+  }
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-row:hover{background:#303C44!important}
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-name,
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-power{color:#F3F5F4!important}
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-pos,
+  html[data-theme="dark"] #hubBenchSection.native-bench-sheet .bench-drag{color:#AAB2B3!important}
+
+  .tools #howtoToggle{display:flex!important;align-items:center!important;justify-content:center!important;line-height:0!important}
+  .tools #howtoToggle svg{display:block!important;position:static!important;transform:none!important}
+
+  #sim:not(.hidden){
+    box-sizing:border-box;
+    max-height:calc(100dvh - var(--copa-safe-top) - var(--copa-safe-bottom));
+    overflow:hidden!important;
+    padding-bottom:calc(8px + var(--copa-safe-bottom));
+  }
+  #sim .sim-controls{margin-top:5px!important;padding:7px!important}
+  #sim .speedrow{
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    gap:5px!important;
+    padding:0!important;
+  }
+  #sim .speedrow .sl,#sim .speedrow .spd-sep{display:none!important}
+  #sim .speedrow #pauseBtn,
+  #sim .speedrow .spd,
+  #sim .speedrow .btn-mini{
+    min-width:0!important;width:100%!important;height:44px!important;min-height:44px!important;
+    margin:0!important;padding:6px 3px!important;border-radius:7px!important;
+  }
+  #sim .speedrow #pauseBtn{grid-column:auto!important}
+  #sim .speedrow .btn-mini{font-size:0!important}
+  #sim .speedrow .btn-mini svg{margin:0!important}
+  #sim .shoutrow{margin-bottom:5px!important}
+  #sim .shoutbtn{min-height:42px!important;height:42px!important}
+
+  #result .mobile-result-story-economy>#storyTile,
+  #result .mobile-result-story-economy>#econTile{
+    display:block!important;width:100%!important;min-width:0!important;margin:0!important;
+    border:0!important;border-radius:0!important;box-shadow:none!important;
+  }
+  #result .mobile-result-story-economy>#econTile{border-top:1px solid var(--border-default)!important}
+  #result .mobile-result-story-economy .econsum{margin:0!important;border:0!important;border-radius:0!important}
+  #result .mobile-result-story-economy:not([open])>#storyTile,
+  #result .mobile-result-story-economy:not([open])>#econTile{display:none!important}
+  #result .mobile-result-disclosure>#lineups{background:var(--surface-elevated)!important}
+  #result .mobile-result-disclosure>#lineups .last-match-report,
+  #result .mobile-result-disclosure>#lineups .last-match-report *{max-width:100%;box-sizing:border-box}
+}
+
+@media(max-width:430px) and (max-height:850px){
+  #sim .momentum,#sim .sim-timeline,#sim .radioband{margin-bottom:4px!important}
+  #sim .fieldframe{min-height:240px!important;height:240px!important}
+  #sim .comm{min-height:30px!important;padding-block:4px!important}
+}

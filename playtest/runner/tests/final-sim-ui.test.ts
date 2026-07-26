@@ -105,6 +105,21 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
     return{width:rect.width,height:rect.height};
   }));
   expect(mobileControls.every(control=>control.width>=44&&control.height>=44)).toBe(true);
+  const mobileViewportFit=await page.evaluate(()=>{
+    const sim=document.querySelector("#sim") as HTMLElement;
+    const controls=[...sim.querySelectorAll("button")].map(element=>element.getBoundingClientRect());
+    return{
+      horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
+      simBottom:sim.getBoundingClientRect().bottom,
+      controlsBottom:Math.max(...controls.map(rect=>rect.bottom)),
+      viewportHeight:innerHeight,
+      bodyOverflowY:getComputedStyle(document.body).overflowY,
+    };
+  });
+  expect(mobileViewportFit.horizontalOverflow).toBeLessThanOrEqual(1);
+  expect(mobileViewportFit.simBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
+  expect(mobileViewportFit.controlsBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
+  expect(mobileViewportFit.bodyOverflowY).toBe("hidden");
   await page.evaluate(()=>{(globalThis as any).CopaMobileExperience.setSimView("events");});
   await expect(page.locator("#sim .eventpanel")).toBeVisible();
   const eventHeight=await page.locator("#simGoals .event-tactic").evaluate(element=>element.getBoundingClientRect().height);

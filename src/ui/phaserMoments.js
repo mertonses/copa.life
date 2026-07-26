@@ -68,27 +68,48 @@
     const Phaser=await load();if(!parent.isConnected)return;destroy(penaltyGame);const colors=palette(),phase=state.phase;if(parent.parentElement)parent.parentElement.classList.add("has-phaser");
     penaltyGame=new Phaser.Game(commonConfig(Phaser,parent,720,390,{create(){
       const scene=this,g=scene.add.graphics();
-      g.fillStyle(Phaser.Display.Color.HexStringToColor(colors.background).color,1);g.fillRect(0,0,720,390);
-      g.fillStyle(0x1f6b45,1);g.fillRect(0,220,720,170);
-      for(let y=220;y<390;y+=34){g.fillStyle(y%68===16?0x1f6b45:0x27343c,.45);g.fillRect(0,y,720,34);}
-      g.lineStyle(8,0xf3f5f4,1);g.strokeRect(80,38,560,235);
-      g.lineStyle(1,0xffffff,.18);for(let x=100;x<640;x+=36)g.lineBetween(x,42,x,270);for(let y=70;y<270;y+=32)g.lineBetween(84,y,636,y);
-      const xs={L:172,C:360,R:548};
+      const bg=Phaser.Display.Color.HexStringToColor(colors.background).color,accent=Phaser.Display.Color.HexStringToColor(colors.primary).color;
+      g.fillStyle(bg,1);g.fillRect(0,0,720,390);
+      /* Stadium tiers and floodlight bloom. */
+      g.fillStyle(0x17242d,1);g.fillRect(0,0,720,112);
+      for(let x=18;x<720;x+=34){g.fillStyle(x%68===18?0xf3f5f4:0xaab2b3,.18);g.fillCircle(x,62+(x%3)*5,2.5);}
+      g.fillStyle(0xf3f5f4,.055);g.fillTriangle(42,0,168,238,300,238);g.fillTriangle(678,0,552,238,420,238);
+      /* Pitch with restrained Copa green stripes. */
+      g.fillStyle(0x1f6b45,1);g.fillRect(0,104,720,286);
+      for(let x=0;x<720;x+=120){g.fillStyle(0x4e9b65,.10);g.fillRect(x,104,60,286);}
+      g.lineStyle(2,0xf3f5f4,.28);g.lineBetween(0,334,720,334);g.strokeEllipse(360,390,320,150);
+      /* Goal, net and depth. */
+      const goal={left:82,right:638,top:34,bottom:272};
+      g.fillStyle(0x0a1118,.34);g.fillRect(goal.left+7,goal.top+7,goal.right-goal.left-14,goal.bottom-goal.top-2);
+      g.lineStyle(1,0xf3f5f4,.20);
+      for(let x=goal.left+18;x<goal.right;x+=34)g.lineBetween(x,goal.top+5,x,goal.bottom);
+      for(let y=goal.top+20;y<goal.bottom;y+=28)g.lineBetween(goal.left+5,y,goal.right-5,y);
+      g.lineStyle(8,0xf3f5f4,1);g.lineBetween(goal.left,goal.top,goal.right,goal.top);g.lineBetween(goal.left,goal.top,goal.left,goal.bottom);g.lineBetween(goal.right,goal.top,goal.right,goal.bottom);
+      const xs={L:176,C:360,R:544};
       ["L","C","R"].forEach(dir=>{
-        const zone=scene.add.rectangle(xs[dir],155,176,225,0xffffff,.001).setInteractive({useHandCursor:true});
-        zone.on("pointerover",()=>zone.setFillStyle(Phaser.Display.Color.HexStringToColor(colors.primary).color,.12));
+        const zone=scene.add.rectangle(xs[dir],154,176,224,0xffffff,.001).setInteractive({useHandCursor:true});
+        zone.on("pointerover",()=>zone.setFillStyle(accent,.16));
         zone.on("pointerout",()=>zone.setFillStyle(0xffffff,.001));
         zone.on("pointerup",()=>{if(!reveal&&typeof root._takePenalty==="function")root._takePenalty(dir);});
       });
       const keeperDir=reveal&&reveal.keeper||"C",shotDir=reveal&&reveal.shot||"C";
-      const keeper=scene.add.container(xs[keeperDir],210);
-      const body=scene.add.rectangle(0,5,30,72,Phaser.Display.Color.HexStringToColor(colors.primary).color);const head=scene.add.circle(0,-40,14,0xd6a21f);const arms=g;
-      keeper.add([body,head]);g.lineStyle(13,Phaser.Display.Color.HexStringToColor(colors.primary).color,1);g.lineBetween(xs[keeperDir]-42,190,xs[keeperDir]+42,190);g.lineBetween(xs[keeperDir]-12,238,xs[keeperDir]-38,270);g.lineBetween(xs[keeperDir]+12,238,xs[keeperDir]+38,270);
-      const ball=scene.add.circle(reveal?xs[shotDir]:360,reveal?150:330,13,0xffffff).setStrokeStyle(2,Phaser.Display.Color.HexStringToColor(colors.background).color,1);
-      if(reveal&&!reduced()){ball.setPosition(360,330);keeper.setX(360);scene.tweens.add({targets:ball,x:xs[shotDir],y:reveal.type==="post"?94:150,duration:340,ease:"Cubic.easeOut"});scene.tweens.add({targets:keeper,x:xs[keeperDir],y:keeperDir==="C"?210:198,angle:keeperDir==="L"?-18:keeperDir==="R"?18:0,duration:330,ease:"Sine.easeOut"});}
+      const keeper=scene.add.container(xs[keeperDir],214);
+      const shadow=scene.add.ellipse(0,54,82,13,0x0a1118,.34);
+      const torso=scene.add.polygon(0,4,[-18,-28,18,-28,25,28,-25,28],accent);
+      const shirtMark=scene.add.rectangle(0,-2,12,16,0xf3f5f4,.92);
+      const head=scene.add.circle(0,-45,13,0xd6a21f).setStrokeStyle(2,0x101d28,.65);
+      const armL=scene.add.rectangle(-39,-7,48,11,accent).setAngle(-11),armR=scene.add.rectangle(39,-7,48,11,accent).setAngle(11);
+      const gloveL=scene.add.circle(-62,-2,7,0xf3f5f4),gloveR=scene.add.circle(62,-2,7,0xf3f5f4);
+      const legL=scene.add.rectangle(-13,39,13,42,0x101d28).setAngle(13),legR=scene.add.rectangle(13,39,13,42,0x101d28).setAngle(-13);
+      keeper.add([shadow,legL,legR,torso,shirtMark,armL,armR,gloveL,gloveR,head]);
+      const ball=scene.add.circle(reveal?xs[shotDir]:360,reveal?150:342,13,0xf3f5f4).setStrokeStyle(2,bg,1);
+      scene.add.circle(reveal?xs[shotDir]-3:357,reveal?147:339,3,0x101d28,.78);
+      if(reveal&&!reduced()){ball.setPosition(360,342);keeper.setPosition(360,214);scene.tweens.add({targets:ball,x:xs[shotDir],y:reveal.type==="post"?48:142,duration:360,ease:"Cubic.easeOut"});scene.tweens.add({targets:keeper,x:xs[keeperDir],y:keeperDir==="C"?208:193,angle:keeperDir==="L"?-17:keeperDir==="R"?17:0,duration:350,ease:"Sine.easeOut"});}
       if(reveal&&reveal.type==="goal")scene.time.delayedCall(reduced()?0:350,()=>scene.cameras.main.flash(120,78,155,101));
       if(reveal&&reveal.type==="save")scene.time.delayedCall(reduced()?0:350,()=>scene.cameras.main.shake(reduced()?0:90,.006));
-      scene.add.text(360,365,phase==="shoot"?(root.LANG==="tr"?"ŞUT YÖNÜNÜ SEÇ":"CHOOSE SHOT"):(root.LANG==="tr"?"ATLAYACAĞIN YÖNÜ SEÇ":"CHOOSE DIVE"),{fontFamily:"monospace",fontSize:"13px",fontStyle:"bold",color:"#ffffff"}).setOrigin(.5);
+      const instruction=phase==="shoot"?(root.LANG==="tr"?"KÖŞEYİ SEÇ · ŞUT SENDE":"PICK A CORNER · YOUR KICK"):(root.LANG==="tr"?"KÖŞEYİ SEÇ · KALECİ SENSİN":"PICK A CORNER · YOU ARE THE KEEPER");
+      g.fillStyle(bg,.84);g.fillRoundedRect(210,352,300,29,14);
+      scene.add.text(360,367,instruction,{fontFamily:"monospace",fontSize:"12px",fontStyle:"bold",color:"#f3f5f4",letterSpacing:1}).setOrigin(.5);
     }}));
   }
   root.CopaPhaserMoments={load,mountDraw,animateDraw,mountPenalty,destroyAll(){destroy(drawGame);destroy(penaltyGame);drawGame=null;penaltyGame=null;}};

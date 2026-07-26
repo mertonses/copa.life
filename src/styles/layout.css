@@ -5567,6 +5567,21 @@ html[data-theme="dark"] .risk-offer:hover,html[data-theme="dark"] .risk-offer:fo
 @media (prefers-reduced-motion:reduce){
   .risk-offer,.risk-offer *{animation:none!important;transition-duration:.01ms!important}
 }
+
+/* Risk choices use a single strong pictogram; ambient orbit/spark layers were
+   visually reading as duplicate icons on small screens. */
+@media(max-width:760px){
+  .risk-offer-icon{width:44px;height:44px;border-radius:12px;box-shadow:none!important}
+  .risk-offer-icon .risk-svg{width:34px;height:34px;filter:none}
+  .risk-svg .risk-icon-orbit,
+  .risk-svg .risk-spark,
+  .risk-svg .risk-clock,
+  .risk-svg .risk-clock-hand,
+  .risk-svg .risk-impact,
+  .risk-svg .risk-pulse{display:none}
+  .risk-svg-contract .risk-trophy{display:none}
+  .risk-svg-safe .risk-safe-route,.risk-svg-safe .risk-safe-dot{display:none}
+}
 .bulletin .bmascot .decision-ico{
   width:56px;
   height:56px;

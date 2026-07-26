@@ -619,22 +619,18 @@ canvas{width:100%;height:auto;display:block;border:3px solid #FFFFFF;border-radi
   color:var(--color-slate);
   background:rgba(86,97,106,.06);
 }
-.reward-cash .reward-ico,
-.reward-cash .reward-impact{
-  color:var(--status-positive-text);
-}
-.reward-loan .reward-ico,
-.reward-loan .reward-impact{
-  color:var(--status-positive-text);
+.reward-cash{--reward-accent:#D6A21F}
+.reward-loan{--reward-accent:var(--status-success)}
+.reward-swap{--reward-accent:var(--color-primary)}
+.reward-care{--reward-accent:var(--status-risk)}
+.reward-card .reward-ico,
+.reward-card .reward-impact{color:var(--reward-accent,var(--color-primary))}
+.reward-card .reward-ico{
+  border-color:color-mix(in srgb,var(--reward-accent,var(--color-primary)) 38%,var(--border-subtle));
+  background:color-mix(in srgb,var(--reward-accent,var(--color-primary)) 11%,var(--surface-elevated));
 }
 .reward-loan .reward-meta{
   color:#DA3D2E;
-}
-.reward-swap .reward-ico{
-  color:var(--color-ink);
-}
-.reward-care .reward-ico{
-  color:var(--color-slate);
 }
 .reward-copy{
   display:flex;
@@ -3390,9 +3386,7 @@ html[data-theme="dark"] #sim .shoutbtn.lit{
   background:linear-gradient(135deg,var(--surface-dark),color-mix(in srgb,var(--status-success) 16%,var(--surface-dark)));
 }
 .result .scoreboard.champ .scoreboard-title #rLn{
-  color:var(--text-on-dark);
-  opacity:.86;
-  font-weight:900;
+  display:none;
 }
 .result .scoreboard.champ .big{color:var(--status-positive-text)}
 .result .motm{
@@ -3469,4 +3463,27 @@ html[data-theme="dark"] #sim .shoutbtn.lit{
   #sim .shoutbtn,
   #simTimeline .tl-marker,
   .result .scoreboard{animation:none!important;transition:none!important}
+}
+
+/* Run-end lineup readability on narrow dark screens. */
+@media(max-width:760px){
+  #result .last-match-report{background:var(--surface-elevated);color:var(--text-primary)}
+  #result .lmr-pitch{
+    --lmr-pitch:#1F6B45;
+    min-height:390px;
+    aspect-ratio:auto;
+    background:
+      linear-gradient(90deg,rgba(255,255,255,.025) 50%,rgba(10,17,24,.035) 50%),
+      repeating-linear-gradient(90deg,transparent 0 12.5%,rgba(255,255,255,.025) 12.5% 25%),
+      var(--lmr-pitch);
+  }
+  #result .lmr-token{
+    background:#101D28!important;
+    border-color:rgba(243,245,244,.56)!important;
+    box-shadow:0 4px 12px rgba(10,17,24,.42);
+  }
+  #result .lmr-player.is-away .lmr-token{background:#27343C!important}
+  #result .lmr-name{color:#FFFFFF!important;text-shadow:0 2px 5px #0A1118;font-size:7.5px}
+  #result .lmr-team-head{background:var(--surface-bg)!important;color:var(--text-primary)!important}
+  #result .lmr-team-head>strong{color:var(--text-primary)!important}
 }

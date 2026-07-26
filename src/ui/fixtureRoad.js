@@ -26,7 +26,7 @@
     if(document.querySelector("link[data-copa-fixture-road]"))return;
     const link=document.createElement("link");
     link.rel="stylesheet";
-    link.href="src/styles/fixtureRoad.css?v=20260718-fixture1";
+    link.href="src/styles/fixtureRoad.css?v=20260726-mobile-repair1";
     link.dataset.copaFixtureRoad="1";
     const palette=document.querySelector('link[href*="src/styles/palette.css"]');
     if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);

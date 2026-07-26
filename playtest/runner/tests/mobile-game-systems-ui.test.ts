@@ -95,6 +95,20 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#nativeHubNav button")).toHaveCount(4);
   const coachmark=page.locator(".copa-coachmark");
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
+  await page.locator('#nativeHubNav [data-native-target="match"]').click();
+  await expect(page.locator("#hubPitch")).toBeVisible();
+  await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
+  const actionLayout=await page.locator("#mobileActionDock .actionbtns").evaluate((panel:HTMLElement)=>{
+    const controls=["prepBtn","presBtn","talkBtn","playBtn"].map(id=>document.getElementById(id)!.getBoundingClientRect());
+    return{
+      rows:new Set(controls.map(rect=>Math.round(rect.top))).size,
+      panelOverflow:panel.scrollWidth-panel.clientWidth,
+      widths:controls.map(rect=>Math.round(rect.width)),
+    };
+  });
+  expect(actionLayout.rows).toBe(1);
+  expect(actionLayout.panelOverflow).toBeLessThanOrEqual(1);
+  expect(actionLayout.widths.every(width=>width>=44)).toBe(true);
   await expect(page.locator("#prepBtn")).toBeVisible();
   await page.locator("#prepBtn").click();
   await expect(page.locator(".prep-modal")).toBeVisible();
@@ -137,6 +151,17 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
   await expect(page.locator("#phaserPenaltyStage canvas")).toBeVisible({timeout:15_000});
   await expectSurfaceFit(page,".pen-modal");
+  const directionLayout=await page.locator(".pen-dir-grid").evaluate((grid:HTMLElement)=>{
+    const rects=[...grid.querySelectorAll<HTMLElement>(".pen-dir-btn")].map(button=>button.getBoundingClientRect());
+    return{
+      columns:getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+      rows:new Set(rects.map(rect=>Math.round(rect.top))).size,
+      overflow:grid.scrollWidth-grid.clientWidth,
+    };
+  });
+  expect(directionLayout.columns).toBe(3);
+  expect(directionLayout.rows).toBe(1);
+  expect(directionLayout.overflow).toBeLessThanOrEqual(1);
   await page.locator('.pen-dir-btn[data-dir="L"]').click();
   const result=await page.evaluate(()=>{
     const state=(globalThis as any)._penState,reveal=state.reveal;
@@ -157,6 +182,17 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   if(result.favorable)expect(result.outcomeBackground).toBe("rgb(78, 155, 101)");
   else expect(result.outcomeBackground).toBe("rgb(218, 61, 46)");
   await capture(page,"09-phaser-penalty.png");
+});
+
+test("native run restart returns to the redesigned Copa Life landing",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
+  await reset(page);
+  await page.goto("/?native-game=1&visual=restart-landing",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{const game=globalThis as any;game.CopaMobileShell.newRun();game.restart();});
+  await expect(page.locator("#mobileGameLanding")).toBeVisible();
+  await expect(page.locator("#introSetup")).toBeHidden();
+  await expect(page.locator(".mgl-road li")).toHaveCount(4);
+  await expect(page.locator(".mgl-brand")).toContainText("Copa Life");
 });
 
 test("web preparation board stays inside its modal shell",async({page})=>{
