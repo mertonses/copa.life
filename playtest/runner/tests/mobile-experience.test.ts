@@ -89,7 +89,7 @@ test("narrow hub keeps the action dock at the viewport bottom and clickable afte
   await expect(page.locator("#modal")).toBeVisible();
 });
 
-test("mobile preferences stay opt-in and draft choices expose decision context",async({page},testInfo)=>{
+test("mobile preferences stay opt-in and draft confirmation stays focused",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-preferences=1",{waitUntil:"domcontentloaded"});
   await page.locator("#settingsBtn").click();
@@ -102,7 +102,7 @@ test("mobile preferences stay opt-in and draft choices expose decision context",
   await page.locator("#settingsBtn").click();
 
   await page.evaluate(()=>{(globalThis as any).quickStart();});
-  await expect(page.locator("#mobileDraftContext")).toBeVisible();
+  await expect(page.locator("#mobileDraftContext")).toHaveCount(0);
   await page.evaluate(()=>{(globalThis as any).roll();});
   await expect(page.locator("#optstage")).toBeVisible();
   await expect(page.locator("#opts .opt-forecast")).toHaveCount(3);
@@ -165,9 +165,9 @@ test("portable save code excludes device-bound online identity and detects corru
     const code=api.exportCode(),decoded=api.decode(code);
     let corruptRejected=false;
     try{api.decode(code.slice(0,-1)+(code.endsWith("A")?"B":"A"));}catch(_){corruptRejected=true;}
-    return{prefix:code.slice(0,6),theme:decoded.preferences.copa_theme,identity:decoded.preferences.copa_ghost_client_id_v1||"",corruptRejected};
+    return{prefix:code.slice(0,6),themeIncluded:Object.prototype.hasOwnProperty.call(decoded.preferences,"copa_theme"),identity:decoded.preferences.copa_ghost_client_id_v1||"",corruptRejected};
   });
-  expect(result).toEqual({prefix:"COPA1-",theme:"dark",identity:"",corruptRejected:true});
+  expect(result).toEqual({prefix:"COPA1-",themeIncluded:false,identity:"",corruptRejected:true});
 });
 
 test("mobile match segments switch presentation without pausing the simulation",async({page},testInfo)=>{
