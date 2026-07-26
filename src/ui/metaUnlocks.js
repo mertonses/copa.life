@@ -11,7 +11,7 @@
   function choiceHTML(value){
     const ids=choices(value),x=global.L(),tr=global.LANG==="tr";
     if(!ids.length)return"";
-    return `<div class="chair-unlock-choice"><div class="kithdr">${tr?"YENİ BAŞKANINI SEÇ":"CHOOSE YOUR NEW CHAIRMAN"}</div><div class="kitsub">${tr?"Şampiyonluk ödülü: seçeneklerden biri kalıcı olarak açılır.":"Championship reward: permanently unlock one option."}</div><div class="stylelist">${ids.map(id=>{const data=x.chair&&x.chair[id]||{};return `<button type="button" class="stylebtn" onclick="chooseChairUnlock('${id}')"><img src="${global.chairSrc(id)}" class="unlockphoto" alt="" onerror="this.style.display='none'"><div class="ssm"><div class="sst">${data.n||id}</div><div class="ssd">${data.role||""}</div></div></button>`;}).join("")}</div></div>`;
+    return `<div class="chair-unlock-choice"><div class="kithdr">${tr?"YENİ BAŞKANINI SEÇ":"CHOOSE YOUR NEW CHAIRMAN"}</div><div class="kitsub">${tr?"Önce adaya dokun, oyun tarzını incele; ardından kalıcı seçimini onayla.":"Open a candidate, review the play style, then confirm your permanent choice."}</div><div class="chair-unlock-grid">${ids.map(id=>{const data=x.chair&&x.chair[id]||{};return `<button type="button" class="chair-unlock-card" onclick="previewChairUnlock('${id}')"><img src="${global.chairSrc(id)}" class="unlockphoto" alt="" onerror="this.style.display='none'"><div class="ssm"><div class="sst">${data.n||id}</div><div class="ssd">${data.role||""}</div></div><span>${tr?"İNCELE":"DETAILS"} →</span></button>`;}).join("")}</div></div>`;
   }
   function augmentResult(){
     const result=global.lastResult,container=document.getElementById("rUnlocks");
@@ -37,7 +37,16 @@
     originalApplyMeta();global.buildChairButtons();
     if(global.lastResult&&typeof originalRender==="function")global.renderResult();
     const data=global.L().chair&&global.L().chair[unlocked];
+    global.closeModal();
     global.showToast((global.LANG==="tr"?"Başkan açıldı: ":"Chairman unlocked: ")+(data?data.n:unlocked));
+    return true;
+  };
+  global.previewChairUnlock=function(id){
+    if(!choices(global.pendingChairChoices).includes(id))return false;
+    const x=global.L(),tr=global.LANG==="tr",data=x.chair&&x.chair[id]||{},fx=global.COPA_CHAIR_FX&&global.COPA_CHAIR_FX[id]||{};
+    const lang=tr?"tr":"en",pros=fx.pros&&fx.pros[lang]||[],cons=fx.cons&&fx.cons[lang]||[];
+    const rows=(items,type)=>items.map(item=>`<li class="is-${type}"><span>${type==="pro"?"✓":"−"}</span><b>${item}</b></li>`).join("");
+    global.showModal(`<div class="chair-unlock-preview"><button type="button" class="chair-unlock-close" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">×</button><header><img src="${global.chairSrc(id)}" alt="" onerror="this.style.display='none'"><div><small>${tr?"BAŞKAN ADAYI":"CHAIRMAN CANDIDATE"}</small><h3>${data.n||id}</h3><p>${data.role||""}</p></div></header><div class="chair-unlock-desc">${data.desc||data.hint||""}</div><div class="chair-unlock-effects"><section><h4>${tr?"AVANTAJLAR":"ADVANTAGES"}</h4><ul>${rows(pros,"pro")}</ul></section><section><h4>${tr?"DEZAVANTAJLAR":"DISADVANTAGES"}</h4><ul>${rows(cons,"con")}</ul></section></div><div class="chair-unlock-actions"><button type="button" class="btn btn-ghost" onclick="showPendingChairUnlock()">← ${tr?"ADAYLARA DÖN":"BACK TO CANDIDATES"}</button><button type="button" class="btn btn-primary" onclick="chooseChairUnlock('${id}')">${tr?"BU BAŞKANI SEÇ":"CHOOSE THIS CHAIRMAN"}</button></div></div>`,{dismissOnOverlay:true,label:data.n||id});
     return true;
   };
   global.showPendingChairUnlock=function(){

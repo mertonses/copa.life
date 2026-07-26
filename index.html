@@ -89,14 +89,14 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/layout.css?v=20260722-bench-drag1-mastery1-single-cta1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260722-cost-flow1">
-<link rel="stylesheet" href="src/styles/match.css?v=20260722-story-icons1">
+<link rel="stylesheet" href="src/styles/match.css?v=20260726-mobile-repair1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260719-compact-replay1">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260720-profile-cleanup1">
+<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260726-mobile-repair1">
 <link rel="stylesheet" href="src/styles/palette.css?v=20260721-rating-scale1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260726-web-fit1">
-<link rel="preload" as="style" href="src/styles/mobileGameSystems.css?v=20260726-web-fit1" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="src/styles/mobileGameSystems.css?v=20260726-mobile-repair1" onload="this.onload=null;this.rel='stylesheet'">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -395,9 +395,9 @@ try{
 <script src="src/online/ghostClubs.js?v=20260721-mobile-onboarding1"></script>
 <script src="src/ui/hub.js?v=20260722-bench-drag1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
-<script src="src/ui/mobileExperience.js?v=20260720-modal-lock1"></script>
-<script src="src/ui/mobileGameSystems.js?v=20260726-mobile-game1"></script>
-<script src="src/ui/phaserMoments.js?v=20260726-phaser1"></script>
+<script src="src/ui/mobileExperience.js?v=20260726-mobile-repair1"></script>
+<script src="src/ui/mobileGameSystems.js?v=20260726-mobile-repair1"></script>
+<script src="src/ui/phaserMoments.js?v=20260726-mobile-repair1"></script>
 <script>
 /* Inline override: injPen uses injuryLevel for variable penalty (squad.js may be cached) */
 function injPen(p){if(!p||!p.injured)return 0;return(p.injuryLevel||2)*6;}
@@ -734,6 +734,7 @@ const _CHAIR_FX={
   torpilci:{pros:{tr:["Kartlar €1M daha ucuz","Kabul edilen yeğen her tur +3 gelişir","Yeğen kabulünde €3M destek"],en:["Cards cost €1M less","Accepted nephew develops +3 each round","€3M subsidy when accepting the nephew"]},cons:{tr:["Run'da bir kez zorunlu yeğen kararı","Reddedersen borç limiti €3M daralır","Kabul edersen finalde −1 güç","Borç limiti €16M"],en:["One guaranteed nephew decision per run","Rejection tightens the debt limit by €3M","Accepting costs −1 final power","€16M debt limit"]}},
   cilgin:{pros:{tr:["Borç limiti €29M","Pozitif kaos bonusu çıkabilir","DARK kartları çağırır"],en:["€29M debt limit","Positive chaos bonus can trigger","Draws DARK cards into the market"]},cons:{tr:["Kararlar ve kartlar öngörülemez","Bütçe krizleri €28M toplam kayıpla tavanlanır"],en:["Decisions and cards are unpredictable","Budget-crisis loss is capped at €28M"]}},
 };
+window.COPA_CHAIR_FX=_CHAIR_FX;
 function showChairPopup(id){
   if(!(window.CopaChairPicker&&typeof window.CopaChairPicker.render==="function")){
     if(window.CopaLazy&&typeof window.CopaLazy.ensureChairPicker==="function")window.CopaLazy.ensureChairPicker().then(()=>showChairPopup(id)).catch(()=>{});
@@ -2410,7 +2411,7 @@ function ensureHtml2Canvas(){
 function fb(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){$("copied").textContent=L().copyfail;}document.body.removeChild(ta);}
 let _runRestartInFlight=false;
 async function restartAfterRunAd(){if(_runRestartInFlight)return;_runRestartInFlight=true;const btn=$("againBtn"),original=btn&&btn.innerHTML;if(btn){btn.disabled=true;btn.setAttribute("aria-busy","true");btn.textContent=LT("YENİ RUN HAZIRLANIYOR…","PREPARING NEW RUN…","PREPARANDO NUEVA PARTIDA…","NEUER LAUF WIRD VORBEREITET…","PREPARAZIONE NUOVA PARTITA…");}try{if(window.CopaNativeAds&&typeof window.CopaNativeAds.showRunEnd==="function")await window.CopaNativeAds.showRunEnd(window._completedGhostRunKey);}catch(_){ }finally{_runRestartInFlight=false;if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.innerHTML=original||"";}restart();}}
-function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();const _seedInput=$("seedInput");if(_seedInput)_seedInput.value="";document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}
+function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();const _seedInput=$("seedInput");if(_seedInput)_seedInput.value="";document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");if(window.CopaMobileShell&&CopaMobileShell.gameMode&&CopaMobileShell.gameMode()){CopaMobileShell.showLanding(null);}else{$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}}
 
 
 /* ===== v5: categories, identity, helpers ===== */
@@ -3631,7 +3632,7 @@ function _finalTacticBench(benchIdx){
   pushFeed("⚡ "+(LANG==="tr"?"En iyi yedek sahaya: +2 güç":"Best sub on: +2 power"),"form");
 }
 </script>
-<script src="src/ui/metaUnlocks.js?v=20260720-career2"></script>
+<script src="src/ui/metaUnlocks.js?v=20260726-mobile-repair1"></script>
 <script src="src/ui/faq.js?v=20260720-faq1"></script>
 <div class="global-footer-bar" id="globalFooterBar">
  <div class="footer-links-row">

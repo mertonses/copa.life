@@ -325,6 +325,7 @@ test("hub context and result details stay compact without hiding information",as
   await expect(story).toBeHidden();
   await page.locator(".mobile-result-disclosure>summary").filter({hasText:/SEZON HİKÂYESİ|SEASON STORY/}).click();
   await expect(story).toBeVisible();
+  await expect(page.locator("#econTile")).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   await page.locator(".mobile-result-disclosure>summary").filter({hasText:/KADROLAR|LINEUPS/}).click();
@@ -452,7 +453,8 @@ test("widening a mobile result restores every result section to the desktop flow
     window.dispatchEvent(new Event("resize"));
   });
 
-  await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(4);
+  await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(3);
+  await expect(page.locator(".mobile-result-disclosure").filter({has:page.locator("#storyTile")}).locator("#econTile")).toHaveCount(1);
   await expect(page.locator("#storyTile")).toBeHidden();
 
   await page.setViewportSize({width:1440,height:900});

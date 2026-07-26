@@ -50,3 +50,109 @@ body:has(#modal:not(.hidden)) #toastContainer{z-index:79}
 @media(max-width:410px){.locker-tones{grid-template-columns:1fr}.chem-line-grid{grid-template-columns:1fr}}
 @media(max-width:389px){.prep-drill{grid-template-columns:30px 1fr}}
 body.reduced-motion .mobile-step-progress i,body.reduced-motion .locker-tone{transition:none!important}
+
+/* 2026-07 mobile presentation repair: a deliberate match-night landing and
+   strict single-axis modal layouts. */
+@media(max-width:760px){
+  html.copa-mobile-game .mobile-game-landing{
+    box-sizing:border-box;
+    padding:max(72px,calc(env(safe-area-inset-top) + 58px)) 20px max(18px,calc(env(safe-area-inset-bottom) + 14px));
+    background:
+      linear-gradient(180deg,rgba(10,17,24,.28) 0%,rgba(10,17,24,.62) 54%,#0A1118 100%),
+      radial-gradient(ellipse at 50% 32%,#1F6B45 0%,color-mix(in srgb,#1F6B45 42%,#101D28) 34%,#101D28 72%);
+  }
+  .mgl-atmosphere{inset:0;opacity:1;pointer-events:none}
+  .mgl-atmosphere::before,.mgl-atmosphere::after{content:"";position:absolute;pointer-events:none}
+  .mgl-atmosphere::before{
+    inset:0;
+    background:
+      linear-gradient(118deg,transparent 0 35%,rgba(243,245,244,.035) 35.2% 35.6%,transparent 35.8%),
+      linear-gradient(62deg,transparent 0 35%,rgba(243,245,244,.035) 35.2% 35.6%,transparent 35.8%);
+  }
+  .mgl-atmosphere::after{
+    left:50%;bottom:-18%;width:112%;height:44%;
+    border-radius:50% 50% 0 0;
+    background:repeating-linear-gradient(90deg,#1F6B45 0 30px,color-mix(in srgb,#1F6B45 76%,#101D28) 30px 60px);
+    transform:translateX(-50%) perspective(520px) rotateX(58deg);
+    transform-origin:bottom;
+    box-shadow:0 -18px 70px rgba(78,155,101,.1);
+  }
+  .mgl-atmosphere .mgl-light{
+    position:absolute;top:11%;width:42%;height:48%;
+    border-radius:0;
+    background:linear-gradient(180deg,rgba(243,245,244,.12),transparent 80%);
+    filter:blur(18px);
+    opacity:.42;
+    clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);
+  }
+  .mgl-atmosphere .mgl-light-l{left:-9%;transform:rotate(-10deg)}
+  .mgl-atmosphere .mgl-light-r{right:-9%;transform:rotate(10deg)}
+  .mgl-atmosphere .mgl-tunnel{
+    position:absolute;left:50%;bottom:17%;width:min(82vw,390px);height:49%;
+    border:1px solid rgba(243,245,244,.16);border-bottom:0;
+    transform:translateX(-50%);
+    box-shadow:inset 0 0 80px rgba(10,17,24,.7),0 0 70px rgba(10,17,24,.3);
+  }
+  .mgl-atmosphere .mgl-pitch{
+    position:absolute;left:50%;bottom:4%;width:min(92vw,460px);height:30%;
+    transform:translateX(-50%) perspective(420px) rotateX(59deg);
+    transform-origin:bottom;border:1px solid rgba(243,245,244,.12);
+    background:
+      linear-gradient(90deg,transparent 49.7%,rgba(243,245,244,.12) 49.8% 50.2%,transparent 50.3%),
+      linear-gradient(180deg,transparent 68%,rgba(243,245,244,.12) 68.2% 68.8%,transparent 69%);
+  }
+  .mgl-content{justify-content:space-between;max-width:420px;min-height:0}
+  .mgl-brand{margin:clamp(36px,9vh,92px) 0 0;text-align:left}
+  .mgl-brand small{display:flex;align-items:center;gap:9px;color:#BCC2C2;font-size:8px}
+  .mgl-brand small::before{content:"";width:24px;height:2px;background:var(--color-primary)}
+  .mgl-brand h1{margin:9px 0 0;font-size:clamp(48px,15vw,66px);line-height:.88;letter-spacing:-.065em}
+  .mgl-brand p{max-width:31ch;margin:14px 0 0;color:#E4E8E7;font-size:12px;line-height:1.55}
+  .mgl-road{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    margin:22px 0 auto;padding:0;list-style:none;
+    color:#AAB2B3;font:800 7px/1 var(--mono);letter-spacing:.11em;text-align:center;
+  }
+  .mgl-road li{position:relative;padding-top:18px}
+  .mgl-road li::before{content:"";position:absolute;z-index:2;top:4px;left:50%;width:7px;height:7px;border:2px solid #AAB2B3;border-radius:50%;background:#101D28;transform:translateX(-50%)}
+  .mgl-road li:first-child::before{border-color:var(--color-primary);background:var(--color-primary)}
+  .mgl-road li:not(:last-child)::after{content:"";position:absolute;top:8px;left:calc(50% + 5px);width:calc(100% - 10px);height:1px;background:rgba(243,245,244,.2)}
+  .mgl-bottom{position:relative;z-index:2}
+  .mgl-save{margin:0 0 10px;padding:12px 13px;border-color:rgba(243,245,244,.16);border-radius:10px;background:rgba(10,17,24,.78);box-shadow:0 12px 34px rgba(10,17,24,.32)}
+  .mgl-save h2{font-size:17px}
+  .mgl-actions{gap:7px}
+  .mgl-actions .btn{min-height:52px;border-radius:9px}
+  html.copa-mobile-game body:not(.run-active) .top .tools{gap:6px}
+  html.copa-mobile-game body:not(.run-active) .top .tools>button,
+  html.copa-mobile-game body:not(.run-active) .top .tools #howtoToggle,
+  html.copa-mobile-game body:not(.run-active) .top .tools #settingsBtn{
+    width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;
+    border:1px solid rgba(243,245,244,.18)!important;border-radius:50%!important;
+    background:rgba(10,17,24,.64)!important;color:#F3F5F4!important;box-shadow:none!important;
+  }
+
+  /* The match route contains the match context and the live XI. Never hide it. */
+  #hub[data-mobile-route="match"] .pitch-area>.pitch{display:block!important}
+  #hub .pitch-area,#hub .pitch-area>.pitch{visibility:visible!important;opacity:1!important}
+  #hub .pitch-area>.pitch{min-height:310px}
+
+  .sheet-preparation{box-sizing:border-box;width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;overflow:hidden!important}
+  .prep-modal,.prep-modal *{box-sizing:border-box}
+  .prep-modal{width:100%!important;max-width:100%!important;overflow-x:hidden!important;overscroll-behavior:contain}
+  .prep-grid{width:100%;max-width:100%;overflow:hidden}
+  .prep-drill{width:100%;max-width:100%;overflow:hidden}
+  .prep-levels{min-width:0}
+
+  .pen-modal,.pen-modal *{box-sizing:border-box}
+  .pen-modal{overflow-x:hidden!important;overscroll-behavior:contain}
+  .pen-modal .pen-goal{width:100%!important;max-width:100%!important;height:clamp(160px,31dvh,220px)!important}
+  #phaserPenaltyStage{max-width:100%;overflow:hidden;border-radius:12px}
+  .pen-actors,.pen-dir-grid,.pen-action-dock{width:100%;max-width:100%;min-width:0}
+  .pen-modal .pen-dir-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:380px){
+  .mgl-brand{margin-top:26px}
+  .mgl-brand p{font-size:11px}
+  .mgl-road{margin-top:16px}
+  .mgl-save{padding-block:10px}
+}
+body.reduced-motion .mgl-road li::before{animation:none!important}
