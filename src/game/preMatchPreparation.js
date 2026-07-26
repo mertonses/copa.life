@@ -90,7 +90,7 @@
       const drill=DRILLS[id],streak=state.streaks[id]||0;
       return`<article class="prep-drill" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b><small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
     }).join("");
-    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation"});
+    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
     render();
   }
   root.CopaPreparation={DRILLS,open,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,snapshot,restore,reset,spent};

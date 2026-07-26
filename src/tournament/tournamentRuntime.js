@@ -115,7 +115,7 @@
     syncSchedule();return true;
   }
   function renderHub(){const panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());if(root.CopaFixtureRoad)root.CopaFixtureRoad.render();else if(typeof root.renderFixtures==="function")root.renderFixtures();}
-  function showOverview(){if(!active()||!root.CopaTournamentUI)return;root.showModal(root.CopaTournamentUI.overviewMarkup(root.tournament,copy()),{dismissOnOverlay:true,label:copy().tournamentOverview});}
+  function showOverview(){if(!active()||!root.CopaTournamentUI)return;root.showModal(root.CopaTournamentUI.overviewMarkup(root.tournament,copy()),{dismissOnOverlay:true,label:copy().tournamentOverview,sheetClass:"sheet-tournament-overview"});}
   function stage(){if(!active())return"legacy";if(root.tournament.phase==="group")return"group";if(root.tournament.phase==="knockout")return root.tournament.knockout.round;return"complete";}
   root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator});
   root.startTournamentDraw=startDraw;root.revealTournamentBall=()=>reveal(1);root.fastTournamentDraw=()=>{if(root.CopaAnalytics)root.CopaAnalytics.track("group_draw_skipped",{country:root.selectedCountry,mode:"fast"});reveal(99);};root.finishTournamentDraw=finishDraw;root.showTournamentOverview=showOverview;
