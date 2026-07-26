@@ -14,6 +14,32 @@ const capture=async(page:any,name:string)=>{
   fs.mkdirSync(visualDir,{recursive:true});
   await page.screenshot({path:path.join(visualDir,name),fullPage:true});
 };
+const expectSurfaceFit=async(page:any,selector:string)=>{
+  const result=await page.locator(selector).evaluate((content:HTMLElement)=>{
+    const shell=(content.closest(".sheet")||content) as HTMLElement;
+    const rect=shell.getBoundingClientRect();
+    const visible=(element:HTMLElement)=>{
+      const style=getComputedStyle(element),box=element.getBoundingClientRect();
+      return style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>.1&&box.width>0&&box.height>0;
+    };
+    const clippedControls=Array.from(content.querySelectorAll<HTMLElement>("button,input,select,textarea,a"))
+      .filter(visible)
+      .map(element=>({label:(element.innerText||element.getAttribute("aria-label")||"").trim().slice(0,40),rect:element.getBoundingClientRect()}))
+      .filter(item=>item.rect.left<-1||item.rect.right>innerWidth+1);
+    return{
+      shell:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},
+      viewport:{width:innerWidth,height:innerHeight},
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+      clippedControls,
+    };
+  });
+  expect(result.pageOverflow,`${selector} caused horizontal page overflow`).toBeLessThanOrEqual(1);
+  expect(result.shell.left,`${selector} escaped the left viewport edge`).toBeGreaterThanOrEqual(-1);
+  expect(result.shell.right,`${selector} escaped the right viewport edge`).toBeLessThanOrEqual(result.viewport.width+1);
+  expect(result.shell.top,`${selector} escaped the top viewport edge`).toBeGreaterThanOrEqual(-1);
+  expect(result.shell.bottom,`${selector} escaped the bottom viewport edge`).toBeLessThanOrEqual(result.viewport.height+1);
+  expect(result.clippedControls,`${selector} has horizontally clipped controls`).toEqual([]);
+};
 const reachDraw=async(page:any)=>{
   await page.evaluate(async()=>{const game=globalThis as any;game.CopaMobileShell.newRun();await game.quickStart();if(game._countryDraftPromise)await game._countryDraftPromise;await game.quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
@@ -67,21 +93,40 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
   await expect(page.locator("#hub")).toBeVisible();
   await expect(page.locator("#nativeHubNav button")).toHaveCount(4);
+  const coachmark=page.locator(".copa-coachmark");
+  if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
   await expect(page.locator("#prepBtn")).toBeVisible();
   await page.locator("#prepBtn").click();
   await expect(page.locator(".prep-modal")).toBeVisible();
   await expect(page.locator(".prep-drill")).toHaveCount(7);
+  await expectSurfaceFit(page,".prep-modal");
   await page.locator('.prep-drill[data-drill="finishing"] [data-prep-level="light"]').click();
   await expect(page.locator("[data-prep-status]")).toContainText(/1 (hazırlık puanı|preparation point)/i);
   await capture(page,"04-preparation-board.png");
   await page.locator(".prep-modal .btn-primary").click();
   await page.locator("#talkBtn").click();
   await expect(page.locator(".locker-room-modal")).toBeVisible();
+  await expectSurfaceFit(page,".locker-room-modal");
+  await capture(page,"05-locker-room.png");
   await page.locator('[data-talk-target="attack"]').click();
   await page.locator('[data-tone="believe"]').click();
   await expect(page.locator(".locker-result")).toBeVisible();
+  await expectSurfaceFit(page,".locker-result");
   await expect(page.locator(".locker-result-chips")).toContainText(/Odak|Focus/);
-  await capture(page,"05-locker-room-result.png");
+  await capture(page,"06-locker-room-result.png");
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.setTheme("dark");
+    await game.CopaLazy.openMetaProgression();
+  });
+  await expect(page.locator(".meta-progress-modal")).toBeVisible();
+  await expectSurfaceFit(page,".meta-progress-modal");
+  await capture(page,"07-club-career-dark.png");
+  await page.evaluate(()=>(globalThis as any).setTheme("light"));
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expectSurfaceFit(page,".meta-progress-modal");
+  await capture(page,"08-club-career-light.png");
 });
 
 test("Phaser penalty canvas keeps ball and keeper directions tied to the core result",async({page},testInfo)=>{
@@ -91,9 +136,25 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   await page.evaluate(()=>{const game=globalThis as any;game.CopaMobileShell.newRun();game.quickStart();game._cheatPenaltyLaunch();});
   await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
   await expect(page.locator("#phaserPenaltyStage canvas")).toBeVisible({timeout:15_000});
+  await expectSurfaceFit(page,".pen-modal");
   await page.locator('.pen-dir-btn[data-dir="L"]').click();
-  const result=await page.evaluate(()=>{const state=(globalThis as any)._penState,reveal=state.reveal;return{type:reveal.type,shot:reveal.shot,keeper:reveal.keeper,consistent:reveal.type!=="save"||reveal.shot===reveal.keeper};});
+  const result=await page.evaluate(()=>{
+    const state=(globalThis as any)._penState,reveal=state.reveal;
+    const outcome=document.querySelector<HTMLElement>(".pen-outcome");
+    return{
+      type:reveal.type,shot:reveal.shot,keeper:reveal.keeper,byUser:reveal.byUser,
+      consistent:reveal.type!=="save"||reveal.shot===reveal.keeper,
+      favorable:reveal.type==="goal"?!reveal.byUser:!!reveal.byUser,
+      outcomeClass:outcome?.className||"",
+      outcomeBackground:outcome?getComputedStyle(outcome).backgroundColor:"",
+      success:getComputedStyle(document.documentElement).getPropertyValue("--status-success").trim(),
+      risk:getComputedStyle(document.documentElement).getPropertyValue("--status-risk").trim(),
+    };
+  });
   expect(result.consistent).toBe(true);
   if(result.type==="save")expect(result.shot).toBe(result.keeper);
-  await capture(page,"06-phaser-penalty.png");
+  expect(result.outcomeClass).toContain(result.favorable?"is-positive":"is-negative");
+  if(result.favorable)expect(result.outcomeBackground).toBe("rgb(78, 155, 101)");
+  else expect(result.outcomeBackground).toBe("rgb(218, 61, 46)");
+  await capture(page,"09-phaser-penalty.png");
 });
