@@ -100,9 +100,14 @@ const playWorkflow = read(".github/workflows/android-play.yml");
 if (!/uses:\s*r0adkll\/upload-google-play@[a-f0-9]{40}/.test(playWorkflow)) {
   fail("Google Play action must be pinned to a full commit SHA");
 }
-if (!/tracks:\s*internal/.test(playWorkflow)) fail("automated upload must target internal testing only");
-if (/tracks:\s*(?:production|alpha|beta)/.test(playWorkflow)) {
-  fail("automated uploader must not bypass internal testing");
+if (!/tracks:\s*\$\{\{\s*inputs\.track\s*\}\}/.test(playWorkflow)) {
+  fail("automated upload must use the guarded workflow track input");
+}
+if (!/track:[\s\S]*?default:\s*alpha[\s\S]*?options:[\s\S]*?-\s*alpha[\s\S]*?-\s*internal/.test(playWorkflow)) {
+  fail("automated upload track choices must be limited to closed Alpha and internal testing");
+}
+if (/^\s*-\s*(?:production|beta)\s*$/m.test(playWorkflow) || /tracks:\s*(?:production|beta)/.test(playWorkflow)) {
+  fail("automated uploader must not target production or open Beta");
 }
 for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
   if (!playWorkflow.includes(`secrets.${marker}`)) fail(`Google Play workflow is missing ${marker}`);
@@ -168,5 +173,5 @@ if (failures.length) {
   process.exit(1);
 }
 console.log(
-  `[android release] ${prebuild ? "source preflight" : "recorded release validation"} passed for v${version.versionName}+${version.versionCode}; toolchains, notes, permissions, certificate pin and internal-only upload are locked`,
+  `[android release] ${prebuild ? "source preflight" : "recorded release validation"} passed for v${version.versionName}+${version.versionCode}; toolchains, notes, permissions, certificate pin and test-track-only upload are locked`,
 );

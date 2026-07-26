@@ -19,6 +19,14 @@ on:
         options:
           - completed
           - draft
+      track:
+        description: Google Play test track
+        required: true
+        default: alpha
+        type: choice
+        options:
+          - alpha
+          - internal
       confirm_version_code:
         description: Type the versionCode you intend to upload
         required: true
@@ -134,6 +142,21 @@ jobs:
           node tools/check-android-signature.mjs android/app/build/outputs/bundle/release/app-release.aab
           node tools/write-android-candidate-manifest.mjs android/app/build/outputs/bundle/release/app-release.aab --signed
 
+      - name: Validate Google Play service account
+        if: ${{ inputs.delivery == 'internal' }}
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          test -n "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" || {
+            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is missing. Add a Google Cloud service-account key with Copa Life testing-release permission."
+            exit 1
+          }
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" |
+            jq -e '.type == "service_account" and (.client_email | length > 0) and (.private_key | length > 0)' >/dev/null || {
+              echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not a valid service-account key."
+              exit 1
+            }
+
       - name: Archive signed release candidate
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -151,7 +174,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: life.copa.app
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          tracks: internal
+          tracks: ${{ inputs.track }}
           status: ${{ inputs.status }}
           releaseName: v${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
           whatsNewDirectory: store/android/whatsnew
