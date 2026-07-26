@@ -18,7 +18,7 @@ function resolveMatch(state,match,seed){
 }
 
 function cohort(style){
-  const totals={runs:sampleSize,qualified:0,champion:0,points:0,wins:0,draws:0,losses:0,penaltyDecisions:0,exits:{group:0,quarterfinal:0,semifinal:0,final:0,champion:0}};
+  const totals={runs:sampleSize,qualified:0,champion:0,points:0,wins:0,draws:0,losses:0,penaltyDecisions:0,exits:{group:0,roundof16:0,quarterfinal:0,semifinal:0,final:0,champion:0}};
   for(let run=0;run<sampleSize;run++){
     const seed=engine.hashSeed(`matrix|${style}|${run}`),state=engine.createTournament({seed,playerName:"MATRIX XI",playerPower:80,playerFormation:"4-3-3",playerStyle:style,pool,powerBases:[60,66,72,78,86,94]});
     engine.completeDraw(state);
@@ -54,7 +54,7 @@ for(const style of styles)report.styles[style]=cohort(style);
 const values=Object.values(report.styles),qualification=values.map(value=>value.qualificationRate),champions=values.map(value=>value.championRate);
 for(const [style,value] of Object.entries(report.styles)){
   if(value.qualificationRate<.42||value.qualificationRate>.92)throw new Error(`${style}: qualification rate outside playable band: ${value.qualificationRate}`);
-  if(value.championRate<.01||value.championRate>.22)throw new Error(`${style}: champion rate outside replayable band: ${value.championRate}`);
+  if(value.championRate<.004||value.championRate>.18)throw new Error(`${style}: champion rate outside seven-match replayable band: ${value.championRate}`);
   if(value.groupDrawRate<.12||value.groupDrawRate>.4)throw new Error(`${style}: draw rate outside plausible band: ${value.groupDrawRate}`);
   if(value.averageGroupPoints<3.5||value.averageGroupPoints>7.5)throw new Error(`${style}: average points outside playable band: ${value.averageGroupPoints}`);
 }

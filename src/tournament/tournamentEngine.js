@@ -1,4 +1,4 @@
-/* Deterministic 16-team group + knockout tournament engine.
+/* Deterministic 32-team group + knockout tournament engine.
    The module is DOM-free so draw, standings and bracket rules can be tested in Node. */
 (function(root,factory){
   const api=factory();
@@ -7,8 +7,8 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   "use strict";
 
-  const FORMAT="groups16_v1";
-  const GROUP_IDS=Object.freeze(["A","B","C","D"]);
+  const FORMAT="groups32_v2";
+  const GROUP_IDS=Object.freeze(["A","B","C","D","E","F","G","H"]);
   const GROUP_SCHEDULE=Object.freeze([
     Object.freeze([[0,1],[2,3]]),
     Object.freeze([[0,2],[3,1]]),
@@ -45,11 +45,11 @@
     }
     return result;
   }
-  function powerCurve(bases){
+  function powerCurve(bases,count){
     const values=(Array.isArray(bases)?bases:[]).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
     const low=values[0]||60,high=values[values.length-1]||94,span=Math.max(24,high-low);
-    const fractions=[1,.91,.84,.76,.69,.63,.57,.51,.45,.39,.33,.27,.20,.10,0];
-    return fractions.map(fraction=>Math.round(low+span*fraction));
+    const total=Math.max(1,Number(count)||31);
+    return Array.from({length:total},(_,index)=>Math.round(low+span*(1-index/Math.max(1,total-1))));
   }
   function normalizeTeam(source,index,power,seed){
     const rng=rngFor(`${seed}|profile|${index}|${source.name}`);
@@ -78,13 +78,13 @@
     const input=options&&typeof options==="object"?options:{};
     const seed=hashSeed(input.seed||1),playerName=String(input.playerName||"COPA XI").trim()||"COPA XI";
     const pool=uniquePool(input.pool,playerName);
-    if(pool.length<15)throw new Error("tournament_pool_requires_15_unique_teams");
-    const rng=rngFor(`${seed}|participants`),picked=shuffled(pool,rng).slice(0,15),curve=powerCurve(input.powerBases);
+    if(pool.length<31)throw new Error("tournament_pool_requires_31_unique_teams");
+    const rng=rngFor(`${seed}|participants`),picked=shuffled(pool,rng).slice(0,31),curve=powerCurve(input.powerBases,31);
     const aiTeams=picked.map((team,index)=>normalizeTeam(team,index,curve[index],seed)).sort((a,b)=>b.power-a.power||a.name.localeCompare(b.name));
     const player={id:"player",name:playerName,power:Math.max(35,Math.min(110,Number(input.playerPower)||70)),formation:input.playerFormation||"4-3-3",style:input.playerStyle||"gegen",isPlayer:true,fairPlay:0};
     /* The player's club is the host seed. This preserves the existing early-round
        difficulty curve while the other three top seeds anchor the remaining groups. */
-    const pots=[[player,...aiTeams.slice(0,3)],aiTeams.slice(3,7),aiTeams.slice(7,11),aiTeams.slice(11,15)];
+    const pots=[[player,...aiTeams.slice(0,7)],aiTeams.slice(7,15),aiTeams.slice(15,23),aiTeams.slice(23,31)];
     const groups=GROUP_IDS.map(id=>({id,teamIds:[],matchIds:[],table:[]})),drawEntries=[];
     pots.forEach((pot,potIndex)=>{
       const teams=shuffled(pot,rng),destinations=shuffled(GROUP_IDS,rng);
@@ -102,7 +102,7 @@
       version:1,format:FORMAT,seed,phase:"draw",teams,groups,matches,
       draw:{entries:drawEntries,revealIndex:0,completed:false},
       group:{matchday:1,playerGroupId,qualified:null,rank:null},
-      knockout:{round:"quarterfinal",roundMatchIds:[],slots:{}},
+      knockout:{round:"roundof16",roundMatchIds:[],slots:{}},
       player:{teamId:"player",eliminated:false,champion:false},revision:0
     };
     recomputeTables(state);
@@ -189,13 +189,14 @@
   function createKnockoutMatch(state,id,roundName,homeId,awayId){
     state.matches[id]={id,stage:"knockout",round:roundName,homeId,awayId,status:"scheduled",score:null,winnerId:null,decidedBy:"regulation",fairPlay:{home:0,away:0}};return id;
   }
-  function buildQuarterfinals(state){
+  function buildRoundOf16(state){
     const ranked={};for(const group of state.groups)ranked[group.id]=group.table;
     const slots=[
-      ["QF1","A",0,"B",1],["QF2","C",0,"D",1],["QF3","B",0,"A",1],["QF4","D",0,"C",1]
+      ["R16-1","A",0,"B",1],["R16-2","C",0,"D",1],["R16-3","E",0,"F",1],["R16-4","G",0,"H",1],
+      ["R16-5","B",0,"A",1],["R16-6","D",0,"C",1],["R16-7","F",0,"E",1],["R16-8","H",0,"G",1]
     ];
-    state.knockout.round="quarterfinal";state.knockout.roundMatchIds=slots.map(([id,g1,r1,g2,r2])=>createKnockoutMatch(state,id,"quarterfinal",ranked[g1][r1].teamId,ranked[g2][r2].teamId));
-    state.knockout.slots.quarterfinal=state.knockout.roundMatchIds.slice();state.phase="knockout";
+    state.knockout.round="roundof16";state.knockout.roundMatchIds=slots.map(([id,g1,r1,g2,r2])=>createKnockoutMatch(state,id,"roundof16",ranked[g1][r1].teamId,ranked[g2][r2].teamId));
+    state.knockout.slots.roundof16=state.knockout.roundMatchIds.slice();state.phase="knockout";
   }
   function advanceKnockout(state,simulator){
     const current=state.knockout.round,ids=state.knockout.roundMatchIds,matches=ids.map(id=>state.matches[id]);
@@ -205,7 +206,16 @@
       state.player.eliminated=true;state.phase="complete";state.player.exitStage=current;state.revision++;return;
     }
     if(matches.some(match=>match.status!=="played"))return;
-    if(current==="quarterfinal"){
+    if(current==="roundof16"){
+      const winners=matches.map(match=>match.winnerId);
+      state.knockout.round="quarterfinal";state.knockout.roundMatchIds=[
+        createKnockoutMatch(state,"QF1","quarterfinal",winners[0],winners[1]),
+        createKnockoutMatch(state,"QF2","quarterfinal",winners[2],winners[3]),
+        createKnockoutMatch(state,"QF3","quarterfinal",winners[4],winners[5]),
+        createKnockoutMatch(state,"QF4","quarterfinal",winners[6],winners[7])
+      ];
+      state.knockout.slots.quarterfinal=state.knockout.roundMatchIds.slice();
+    }else if(current==="quarterfinal"){
       const winners=matches.map(match=>match.winnerId);
       state.knockout.round="semifinal";state.knockout.roundMatchIds=[createKnockoutMatch(state,"SF1","semifinal",winners[0],winners[1]),createKnockoutMatch(state,"SF2","semifinal",winners[2],winners[3])];
       state.knockout.slots.semifinal=state.knockout.roundMatchIds.slice();
@@ -226,7 +236,7 @@
       if(day<3){state.group.matchday++;state.revision++;return{ok:true,qualified:null,stage:"group"};}
       const row=getPlayerGroup(state).table.find(item=>item.teamId==="player");state.group.rank=row.rank;state.group.qualified=row.rank<=2;
       if(!state.group.qualified){state.player.eliminated=true;state.player.exitStage="group";state.phase="complete";state.revision++;return{ok:true,qualified:false,rank:row.rank,stage:"group"};}
-      buildQuarterfinals(state);state.revision++;return{ok:true,qualified:true,rank:row.rank,stage:"quarterfinal"};
+      buildRoundOf16(state);state.revision++;return{ok:true,qualified:true,rank:row.rank,stage:"roundof16"};
     }
     if(state.phase==="knockout"){
       if(!recordMatch(state,match.id,result,false))return{ok:false,reason:"already_played"};
@@ -239,7 +249,7 @@
     const matches=[];
     const group=getPlayerGroup(state);
     if(group)matches.push(...group.matchIds.map(id=>state.matches[id]).filter(match=>match.homeId==="player"||match.awayId==="player").sort((a,b)=>a.matchday-b.matchday));
-    for(const key of ["quarterfinal","semifinal","final"]){for(const id of state.knockout.slots[key]||[]){const match=state.matches[id];if(match&&(match.homeId==="player"||match.awayId==="player"))matches.push(match);}}
+    for(const key of ["roundof16","quarterfinal","semifinal","final"]){for(const id of state.knockout.slots[key]||[]){const match=state.matches[id];if(match&&(match.homeId==="player"||match.awayId==="player"))matches.push(match);}}
     return matches;
   }
   const TABLE_FIELDS=["teamId","played","wins","draws","losses","gf","ga","gd","points","fairPlay","rank","qualified"];
@@ -249,11 +259,11 @@
     if(!state||typeof state!=="object")return{ok:false,errors:["not_object"]};
     if(state.format!==FORMAT)errors.push("invalid_format");
     const teams=state.teams&&Object.values(state.teams)||[];
-    if(teams.length!==16)errors.push("invalid_team_count");
+    if(teams.length!==32)errors.push("invalid_team_count");
     if(new Set(teams.map(team=>team.id)).size!==teams.length)errors.push("duplicate_team_id");
     if(teams.some(team=>!team||typeof team.name!=="string"||!team.name.trim()||!Number.isFinite(Number(team.power))||Number(team.power)<35||Number(team.power)>115||!FORMATIONS.includes(team.formation)||!STYLES.includes(team.style)))errors.push("invalid_team_profile");
     if(!state.teams||!state.teams.player||!state.teams.player.isPlayer)errors.push("missing_player");
-    if(!Array.isArray(state.groups)||state.groups.length!==4)errors.push("invalid_group_count");
+    if(!Array.isArray(state.groups)||state.groups.length!==8)errors.push("invalid_group_count");
     else{
       const assigned=[];
       for(const group of state.groups){
@@ -272,12 +282,12 @@
         if(!Array.isArray(group.table)||group.table.length!==4||new Set(group.table.map(row=>row.teamId)).size!==4||group.table.some(row=>!group.teamIds.includes(row.teamId)))errors.push("invalid_group_table");
         else if(!tableMatches(group.table,rankGroup(state,group.id)))errors.push("inconsistent_group_table");
       }
-      if(assigned.length!==16||new Set(assigned).size!==16||assigned.some(id=>!state.teams[id]))errors.push("invalid_group_assignment");
+      if(assigned.length!==32||new Set(assigned).size!==32||assigned.some(id=>!state.teams[id]))errors.push("invalid_group_assignment");
     }
-    if(!state.draw||!Array.isArray(state.draw.entries)||state.draw.entries.length!==16||state.draw.revealIndex<0||state.draw.revealIndex>16)errors.push("invalid_draw");
-    else if(new Set(state.draw.entries.map(entry=>entry.teamId)).size!==16||state.draw.entries.some((entry,index)=>entry.index!==index||!state.teams[entry.teamId]||state.teams[entry.teamId].groupId!==entry.groupId||state.teams[entry.teamId].pot!==entry.pot||!GROUP_IDS.includes(entry.groupId)||entry.pot<1||entry.pot>4))errors.push("invalid_draw_entries");
+    if(!state.draw||!Array.isArray(state.draw.entries)||state.draw.entries.length!==32||state.draw.revealIndex<0||state.draw.revealIndex>32)errors.push("invalid_draw");
+    else if(new Set(state.draw.entries.map(entry=>entry.teamId)).size!==32||state.draw.entries.some((entry,index)=>entry.index!==index||!state.teams[entry.teamId]||state.teams[entry.teamId].groupId!==entry.groupId||state.teams[entry.teamId].pot!==entry.pot||!GROUP_IDS.includes(entry.groupId)||entry.pot<1||entry.pot>4))errors.push("invalid_draw_entries");
     const groupMatches=state.matches&&Object.values(state.matches).filter(match=>match.stage==="group")||[];
-    if(groupMatches.length!==24)errors.push("invalid_group_match_count");
+    if(groupMatches.length!==48)errors.push("invalid_group_match_count");
     for(const match of state.matches?Object.values(state.matches):[]){
       if(!state.teams[match.homeId]||!state.teams[match.awayId]||match.homeId===match.awayId)errors.push("invalid_match_team");
       if(!["scheduled","played"].includes(match.status))errors.push("invalid_match_status");
@@ -297,15 +307,16 @@
     }
     if(!["draw","group","knockout","complete"].includes(state.phase))errors.push("invalid_phase");
     if(!state.group||!GROUP_IDS.includes(state.group.playerGroupId)||!state.groups.some(group=>group.id===state.group.playerGroupId&&group.teamIds.includes("player"))||!Number.isInteger(Number(state.group.matchday))||state.group.matchday<1||state.group.matchday>3)errors.push("invalid_player_group");
-    if(!state.knockout||!["quarterfinal","semifinal","final"].includes(state.knockout.round)||!Array.isArray(state.knockout.roundMatchIds)||!state.knockout.slots||typeof state.knockout.slots!=="object")errors.push("invalid_knockout");
+    if(!state.knockout||!["roundof16","quarterfinal","semifinal","final"].includes(state.knockout.round)||!Array.isArray(state.knockout.roundMatchIds)||!state.knockout.slots||typeof state.knockout.slots!=="object")errors.push("invalid_knockout");
     else{
-      const expectedCounts={quarterfinal:4,semifinal:2,final:1};
+      const expectedCounts={roundof16:8,quarterfinal:4,semifinal:2,final:1};
       for(const roundName of Object.keys(expectedCounts)){
         const ids=state.knockout.slots[roundName]||[];
         if(!Array.isArray(ids)||![0,expectedCounts[roundName]].includes(ids.length)||ids.some(id=>!state.matches[id]||state.matches[id].stage!=="knockout"||state.matches[id].round!==roundName))errors.push("invalid_knockout_slots");
       }
       if(state.phase==="knockout"&&(state.knockout.roundMatchIds.length!==expectedCounts[state.knockout.round]||state.knockout.roundMatchIds.some((id,index)=>id!==state.knockout.slots[state.knockout.round][index])))errors.push("invalid_knockout_round");
-      const qf=(state.knockout.slots.quarterfinal||[]).map(id=>state.matches[id]),sf=(state.knockout.slots.semifinal||[]).map(id=>state.matches[id]),fin=(state.knockout.slots.final||[]).map(id=>state.matches[id]);
+      const r16=(state.knockout.slots.roundof16||[]).map(id=>state.matches[id]),qf=(state.knockout.slots.quarterfinal||[]).map(id=>state.matches[id]),sf=(state.knockout.slots.semifinal||[]).map(id=>state.matches[id]),fin=(state.knockout.slots.final||[]).map(id=>state.matches[id]);
+      if(qf.length&&r16.length===8&&r16.every(match=>match.status==="played")&&qf.some((match,index)=>match.homeId!==r16[index*2].winnerId||match.awayId!==r16[index*2+1].winnerId))errors.push("invalid_quarterfinal_progression");
       if(sf.length&&qf.length===4&&qf.every(match=>match.status==="played")&&([sf[0].homeId,sf[0].awayId,sf[1].homeId,sf[1].awayId].some((id,index)=>id!==qf[index].winnerId)))errors.push("invalid_semifinal_progression");
       if(fin.length&&sf.length===2&&sf.every(match=>match.status==="played")&&(fin[0].homeId!==sf[0].winnerId||fin[0].awayId!==sf[1].winnerId))errors.push("invalid_final_progression");
     }

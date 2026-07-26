@@ -8,6 +8,7 @@
     de:{current:"Nächstes Spiel",scheduled:"Angesetzt",won:"Sieg",draw:"Remis",lost:"Niederlage",locked:"Gesperrt",reveal:"Gegner erscheint, sobald das Duell feststeht",opponent:"Gegner",score:"Ergebnis",penalties:"Elfmeterschießen",event:"Schlüsselmoment",noEvent:"Kein Schlüsselmoment gespeichert",close:"Details schließen",cup:"Pokal",champion:"Meister",progress:"Pokalfortschritt"},
     it:{current:"Prossima partita",scheduled:"In calendario",won:"Vittoria",draw:"Pareggio",lost:"Sconfitta",locked:"Bloccato",reveal:"L'avversario appare quando si definisce l'incrocio",opponent:"Avversario",score:"Risultato",penalties:"Rigori",event:"Momento chiave",noEvent:"Nessun momento chiave registrato",close:"Chiudi dettagli",cup:"Coppa",champion:"Campione",progress:"Progresso coppa"}
   };
+  Object.values(COPY).forEach(item=>{item.reveal="???";});
   const LOCK='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M7 8V6a3 3 0 0 1 6 0v2"/></svg>';
   const CUP='<svg viewBox="0 0 28 32" aria-hidden="true"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15M20 7h4Q24 17 20 15M14 20v6M9 26h10M7 30h14"/></svg>';
   let selected=-1;
@@ -19,7 +20,7 @@
   const currentRound=()=>typeof round!=="undefined"?Math.max(1,Number(round)||1):1;
   const labels=()=>{
     const data=typeof L==="function"?L():{};
-    return data.rounds||["Group · Match 1","Group · Match 2","Group · Match 3","Quarter-final","Semi-final","Final"];
+    return data.rounds||["Group · Match 1","Group · Match 2","Group · Match 3","Round of 16","Quarter-final","Semi-final","Final"];
   };
 
   function ensureStyle(){
@@ -68,7 +69,7 @@
     }
     const list=fixtureList();
     const lastPlayed=list.reduce((last,item,i)=>item&&item.res?i:last,-1);
-    if(index===lastPlayed&&index===5&&typeof keyMoment!=="undefined"&&keyMoment)return keyMoment;
+    if(index===lastPlayed&&index===6&&typeof keyMoment!=="undefined"&&keyMoment)return keyMoment;
     return "";
   }
 
@@ -84,14 +85,14 @@
   function nodeMarkup(fixture,index,roundLabels){
     const c=copy(),played=!!fixture.res,active=!played&&index===currentRound()-1,scheduled=!played&&!active&&!!fixture.matchId,locked=!played&&!active&&!scheduled;
     const state=played?fixture.res:active?"current":scheduled?"scheduled":"locked";
-    const result=played?resultCopy(fixture.res):active?c.current:scheduled?c.scheduled:c.locked;
+    const result=played?resultCopy(fixture.res):c.locked;
     const score=played?`${fixture.gf}–${fixture.ga}`:"";
     const opponent=locked?c.reveal:fixture.opp||c.opponent;
-    const aria=played?`${roundLabels[index]}, ${opponent}, ${score}, ${result}`:active?`${roundLabels[index]}, ${c.current}, ${opponent}`:scheduled?`${roundLabels[index]}, ${c.scheduled}, ${opponent}`:`${roundLabels[index]}, ${c.locked}, ${c.reveal}`;
+    const aria=played?`${roundLabels[index]}, ${opponent}, ${score}, ${result}`:active||scheduled?`${roundLabels[index]}, ${opponent}`:`${roundLabels[index]}, ${c.locked}, ${c.reveal}`;
     return `<button type="button" class="fix fixture-node ${played?"is-played":""} ${active?"cur is-active":""} ${locked?"is-locked":""} ${fixture.res==="W"?"win":fixture.res==="D"?"draw":fixture.res==="L"?"lose":""}" data-fixture-index="${index}" data-fixture-state="${state}" aria-label="${esc(aria)}" aria-expanded="${selected===index}">
       <span class="fr">${esc(roundLabels[index]||String(index+1))}</span>
       <span class="fixture-visual">${opponentVisual(fixture,locked)}</span>
-      <span class="fixture-node-main">${played?`<b class="fs">${esc(score)}</b><em class="fixture-result result-${fixture.res.toLowerCase()}">${fixture.res} · ${esc(result)}</em>`:active?`<b class="fixture-opponent">${esc(opponent)}</b><em class="fixture-result is-current">${esc(c.current)}</em>`:scheduled?`<b class="fixture-opponent">${esc(opponent)}</b><em class="fixture-result">${esc(c.scheduled)}</em>`:`<b class="fixture-reveal">${esc(c.reveal)}</b>`}</span>
+      <span class="fixture-node-main">${played?`<b class="fs">${esc(score)}</b><em class="fixture-result result-${fixture.res.toLowerCase()}">${fixture.res} · ${esc(result)}</em>`:active||scheduled?`<b class="fixture-opponent">${esc(opponent)}</b>`:`<b class="fixture-reveal">${esc(c.reveal)}</b>`}</span>
     </button>`;
   }
 
@@ -102,7 +103,7 @@
     if(locked)return `<div class="fixture-detail-copy"><span>${esc(roundLabels[index])}</span><b>${esc(c.locked)}</b><p>${esc(c.reveal)}</p></div>`;
     const penalty=penaltyScore(fixture,index),event=eventText(fixture,index);
     return `<div class="fixture-detail-copy">
-      <span>${esc(roundLabels[index])} · ${esc(played?resultCopy(fixture.res):active?c.current:c.scheduled)}</span>
+      <span>${esc(roundLabels[index])}${played?` · ${esc(resultCopy(fixture.res))}`:""}</span>
       <b>${esc(fixture.opp||c.opponent)}</b>
       <div class="fixture-detail-stats">
         ${played?`<div><small>${esc(c.score)}</small><strong>${esc(fixture.gf)}–${esc(fixture.ga)}</strong></div>`:""}
@@ -164,7 +165,7 @@
     const root=document.getElementById("fixbar");
     if(!root)return;
     const list=fixtureList(),roundLabels=labels(),played=list.filter(item=>item&&item.res).length;
-    const champion=!!(list[5]&&list[5].res==="W"),progress=Math.round(played/Math.max(1,list.length)*100);
+    const champion=!!(list[6]&&list[6].res==="W"),progress=Math.round(played/Math.max(1,list.length)*100);
     selected=-1;
     root.classList.remove("hidden");
     root.classList.add("fixture-road-v2");

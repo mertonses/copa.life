@@ -56,10 +56,10 @@ function matchPromiseStatusText(){
  return tr?"Maç öncesi söz verilebilir":"A pre-match promise is available";
 }
 function shouldOfferMatchPromise(r){
- return Number(r)<6&&hasCard("mac_sozu")&&(!matchPromiseState||Number(matchPromiseState.round)!==Number(r))&&Number(matchPromisePromptedRound)!==Number(r);
+ return Number(r)<7&&hasCard("mac_sozu")&&(!matchPromiseState||Number(matchPromiseState.round)!==Number(r))&&Number(matchPromisePromptedRound)!==Number(r);
 }
 function declareCleanSheetPromise(){
- if(!hasCard("mac_sozu")||round>=6||matchPromiseState)return false;
+ if(!hasCard("mac_sozu")||round>=7||matchPromiseState)return false;
  matchPromisePromptedRound=round;
  matchPromiseState={round,variant:variantOf("mac_sozu")};
  pushFeed("🤝 <b>"+L().cards.mac_sozu.n+"</b> "+(LANG==="tr"?"Söz: gol yemeyeceğiz.":"Promise: we will keep a clean sheet."),"pres");
@@ -92,7 +92,7 @@ function resolveMatchPromiseAfterScore(gf,ga,r){
  if(matchPromiseState&&Number(matchPromiseState.round)===playedRound){
   const state=matchPromiseState,success=Number(ga)===0,delta=success?(state.variant===1?5:3):(state.variant===1?-3:0);
   matchPromiseState=null;
-  if(playedRound<6&&delta)matchPromiseReward={round:playedRound+1,delta,sourceRound:playedRound};
+  if(playedRound<7&&delta)matchPromiseReward={round:playedRound+1,delta,sourceRound:playedRound};
   const tr=LANG==="tr";
   pushFeed("🤝 <b>"+L().cards.mac_sozu.n+"</b> "+(success?(tr?"söz tutuldu":"promise kept"):(tr?"söz tutulamadı":"promise missed"))+(delta?(tr?" · sonraki maç ":" · next match ")+(delta>0?"+":"")+delta:""),success?"win":"lose");
   result={success,delta,nextRound:playedRound+1};
@@ -115,7 +115,7 @@ function captainDecisionStatusText(){
  if(captainDecisionActive&&captainDecisionActive.round===round)return tr
   ?`Konuşma 0 · kaptan -${captainDecisionActive.penalty}${captainDecisionActive.chem?" · kimya +"+captainDecisionActive.chem:""}`
   :`Talk 0 · captain -${captainDecisionActive.penalty}${captainDecisionActive.chem?" · chemistry +"+captainDecisionActive.chem:""}`;
- if(captainDecisionUsed)return tr?"Bu run kullanıldı":"Used this run";
+ if(captainDecisionUsed)return tr?"Bu tur kullanıldı":"Used this run";
  return tr?"Olumsuz konuşma sonrası hazır":"Ready after a negative team talk";
 }
 function useCaptainDecision(){
@@ -166,7 +166,7 @@ function applyDarkPurchaseRisk(k,variant){
 
 function blackMarketRewardPool(burnKey){
  if(typeof eligibleMarketCardPool==="function")return eligibleMarketCardPool(round,{persistentOnly:true,exclude:["kara_borsa",burnKey]});
- return CARDKEYS.filter(k=>k!=="kara_borsa"&&k!==burnKey&&invOf(k)<=0&&!isInstantCard(k)&&!(cardKind(k)==="final"&&round<5)&&(round<6||cardKind(k)==="final"));
+ return CARDKEYS.filter(k=>k!=="kara_borsa"&&k!==burnKey&&invOf(k)<=0&&!isInstantCard(k)&&!(cardKind(k)==="final"&&round<5)&&(round<7||cardKind(k)==="final"));
 }
 function blackMarketCardPreview(k,v){
  const old=cardVariant[k]||0;cardVariant[k]=v;

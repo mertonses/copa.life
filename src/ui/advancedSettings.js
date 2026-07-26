@@ -5,11 +5,11 @@
   const text=(tr,en,es,de,it)=>typeof global.LT==="function"?global.LT(tr,en,es,de,it):(global.LANG==="tr"?tr:en);
   function refreshCopy(){
     const set=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value;};
-    set("advancedRunTitle",text("RUN AYARLARI","RUN SETTINGS","AJUSTES DEL RUN","RUN-EINSTELLUNGEN","IMPOSTAZIONI RUN"));
+    set("advancedRunTitle",text("TUR AYARLARI","RUN SETTINGS","AJUSTES DEL RUN","RUN-EINSTELLUNGEN","IMPOSTAZIONI RUN"));
     set("advancedGhostTitle","GHOST CLUB");
     set("ghostHelpToggle","?");
     set("ghostHelpCopy",text(
-      "Ghost Club, gerçek oyuncuların tamamladığı run'lardan oluşan rakip havuzudur. Rakip, paylaşım ve Dünya sıralaması birbirinden bağımsızdır; yalnız açtığın özellik veri gönderir.",
+      "Ghost Club, gerçek oyuncuların tamamladığı turlardan oluşan rakip havuzudur. Rakip, paylaşım ve Dünya sıralaması birbirinden bağımsızdır; yalnız açtığın özellik veri gönderir.",
       "Ghost Club is a pool of opponents created from completed runs by real players. Opponents, sharing and the World ranking are independent; only features you enable send data.",
       "Ghost Club es un grupo de rivales creado con partidas terminadas por jugadores reales. Rivales, compartir y clasificación mundial son independientes; solo envían datos las funciones que activas.",
       "Ghost Club ist ein Gegnerpool aus abgeschlossenen Runs echter Spieler. Gegner, Teilen und Weltrangliste sind unabhängig; nur aktivierte Funktionen senden Daten.",
@@ -19,7 +19,7 @@
     set("advancedTransferTitle",text("KAYIT AKTARIMI","SAVE TRANSFER","TRANSFERENCIA DE GUARDADO","SPIELSTAND ÜBERTRAGEN","TRASFERIMENTO SALVATAGGIO"));
     set("saveExportBtn",text("KAYDI DIŞA AKTAR","EXPORT SAVE","EXPORTAR GUARDADO","SPIELSTAND EXPORTIEREN","ESPORTA SALVATAGGIO"));
     set("saveImportBtn",text("KAYDI İÇE AKTAR","IMPORT SAVE","IMPORTAR GUARDADO","SPIELSTAND IMPORTIEREN","IMPORTA SALVATAGGIO"));
-    set("saveTransferHint",text("Web ve mobil arasında koşunu, kariyerini ve tercihlerini taşı. Çevrim içi kimlik ve izinler cihazda kalır.","Move your run, career and preferences between web and mobile. Online identity and permissions stay on the device.","Mueve tu partida, carrera y preferencias entre web y móvil. La identidad y los permisos online permanecen en el dispositivo.","Übertrage Run, Karriere und Einstellungen zwischen Web und Mobil. Online-Identität und Berechtigungen bleiben auf dem Gerät.","Trasferisci run, carriera e preferenze tra web e mobile. Identità e permessi online restano sul dispositivo."));
+    set("saveTransferHint",text("Web ve mobil arasında turunu, kariyerini ve tercihlerini taşı. Çevrim içi kimlik ve izinler cihazda kalır.","Move your run, career and preferences between web and mobile. Online identity and permissions stay on the device.","Mueve tu partida, carrera y preferencias entre web y móvil. La identidad y los permisos online permanecen en el dispositivo.","Übertrage Run, Karriere und Einstellungen zwischen Web und Mobil. Online-Identität und Berechtigungen bleiben auf dem Gerät.","Trasferisci run, carriera e preferenze tra web e mobile. Identità e permessi online restano sul dispositivo."));
     set("seedRandomBtn",text("🎲 Rastgele","🎲 Random","🎲 Aleatorio","🎲 Zufällig","🎲 Casuale"));
     set("seedPasteBtn",text("📋 Yapıştır","📋 Paste","📋 Pegar","📋 Einfügen","📋 Incolla"));
     set("seedHint",text("Aynı seed, aynı başlangıç koşullarını yeniden üretir.","The same seed recreates the same starting conditions.","La misma seed recrea las mismas condiciones iniciales.","Derselbe Seed erzeugt dieselben Startbedingungen.","Lo stesso seed ricrea le stesse condizioni iniziali."));

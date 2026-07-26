@@ -14,9 +14,10 @@ test.describe("run lifecycle and recovery",()=>{
   test("play styles expose their real tradeoffs and use the rebalanced weather effects",async({page})=>{
     await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
     await page.evaluate(()=>{(globalThis as any).setLang("tr");(globalThis as any).normalStart();});
-    await expect(page.locator('[data-style="gegen"] .ssd')).toContainText("+%3,5");
-    await expect(page.locator('[data-style="kontra"] .ssd')).toContainText("yağmurda +1");
-    await expect(page.locator('[data-style="tiki"] .ssd')).toContainText("yağmurda -1");
+    await expect(page.locator('[data-style="gegen"] .ssd')).toContainText("Önde baskı");
+    await expect(page.locator('[data-style="gegen"] .style-impact-value')).toHaveText("+2");
+    await expect(page.locator('[data-style="kontra"] .style-impact-value')).toHaveText("+1–3");
+    await expect(page.locator('[data-style="tiki"] .style-impact-grid')).toContainText("Dar orta sahada zayıf");
     const balance=await page.evaluate(()=>{
       style="kontra";currentWeather={id:"rain"};const counterRain=weatherPowerBonus();
       currentWeather={id:"wind"};const counterWind=weatherPowerBonus();

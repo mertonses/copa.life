@@ -19,7 +19,7 @@ const ANALYTICS_STYLES=new Set(["","gegen","kontra","tiki","uzun","blok"]);
 const ANALYTICS_REWARDS=new Set(["","cash","loan","swap","care"]);
 const ANALYTICS_CARD_KINDS=new Set(["","power","final","risk","instant","contract","other"]);
 const ANALYTICS_ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9","cash_0_9","cash_10_plus"]);
-const ANALYTICS_TOURNAMENT_STAGES=new Set(["","group","quarterfinal","semifinal","final"]);
+const ANALYTICS_TOURNAMENT_STAGES=new Set(["","group","roundof16","quarterfinal","semifinal","final"]);
 const ANALYTICS_DRAW_MODES=new Set(["","manual","fast","complete"]);
 const ANALYTICS_QUALIFICATION_STATES=new Set(["","yes","no","pending"]);
 const GHOST_POSITIONS=new Set(["GK","LB","CB","RB","WB","DM","CM","LM","RM","AM","LW","RW","ST"]);
@@ -70,7 +70,7 @@ function normalizeAnalyticsEvent(value){
   const gameCountry=String(value.game_country||"").toUpperCase();if(!ANALYTICS_COUNTRIES.has(gameCountry))return null;
   const outcome=String(value.outcome||"");if(!ANALYTICS_OUTCOMES.has(outcome))return null;
   const detail=String(value.detail||"");if(!ANALYTICS_DETAILS.has(detail))return null;
-  const round=Math.max(0,Math.min(6,Math.round(Number(value.round)||0)));
+  const round=Math.max(0,Math.min(7,Math.round(Number(value.round)||0)));
   const pagePath=String(value.page_path||"/");if(!/^\/[A-Za-z0-9._/-]{0,63}$/.test(pagePath))return null;
   const appVersion=String(value.app_version||"");if(appVersion&&!/^[A-Za-z0-9._-]{1,64}$/.test(appVersion))return null;
   if(schemaVersion===1)return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion};
@@ -137,10 +137,13 @@ const validPlayer=player=>object(player)&&typeof player.name==="string"&&player.
 const positionKey=players=>players.map(player=>player.pos).sort().join("|");
 const playerKey=player=>[player.name,player.pos,Number(player.power)].join("|");
 function validHistory(snapshot){
-  if(!Array.isArray(snapshot.match_history)||snapshot.match_history.length!==6)return false;
+  if(!Array.isArray(snapshot.match_history)||![6,7].includes(snapshot.match_history.length))return false;
   const reached=Number(snapshot.reached_round),result=object(snapshot.result)?snapshot.result:{};
   if(typeof result.won!=="boolean"||typeof result.end_type!=="string"||result.end_type.length>24||typeof result.score!=="string"||result.score.length>32)return false;
-  const groupFormat=object(snapshot.tournament)&&snapshot.tournament.format==="groups16_v1";
+  const format=object(snapshot.tournament)?snapshot.tournament.format:"";
+  const groupFormat=["groups16_v1","groups32_v2"].includes(format);
+  const currentGroupFormat=format==="groups32_v2";
+  if(currentGroupFormat&&snapshot.match_history.length!==7)return false;
   let played=0;
   for(let index=0;index<snapshot.match_history.length;index++){
     const match=snapshot.match_history[index];
@@ -153,9 +156,10 @@ function validHistory(snapshot){
   }
   if(groupFormat){
     const tournament=snapshot.tournament,group=object(tournament.group)?tournament.group:{};
-    if(played!==reached||reached<3||!["A","B","C","D"].includes(group.id)||!Number.isInteger(Number(group.rank))||group.rank<1||group.rank>4||!Number.isInteger(Number(group.points))||group.points<0||group.points>9||!Number.isInteger(Number(group.gd))||group.gd<-60||group.gd>60||typeof group.qualified!=="boolean")return false;
+    const groupIds=currentGroupFormat?["A","B","C","D","E","F","G","H"]:["A","B","C","D"];
+    if(played!==reached||reached<3||!groupIds.includes(group.id)||!Number.isInteger(Number(group.rank))||group.rank<1||group.rank>4||!Number.isInteger(Number(group.points))||group.points<0||group.points>9||!Number.isInteger(Number(group.gd))||group.gd<-60||group.gd>60||typeof group.qualified!=="boolean")return false;
     for(let index=0;index<reached;index++){
-      const match=snapshot.match_history[index],expectedStage=index<3?"group":index===3?"quarterfinal":index===4?"semifinal":"final";
+      const match=snapshot.match_history[index],expectedStage=index<3?"group":currentGroupFormat?(index===3?"roundof16":index===4?"quarterfinal":index===5?"semifinal":"final"):(index===3?"quarterfinal":index===4?"semifinal":"final");
       if(match.stage!==expectedStage)return false;
       if(index<3){if(match.penalty||match.result==="W"&&Number(match.gf)<=Number(match.ga)||match.result==="D"&&Number(match.gf)!==Number(match.ga)||match.result==="L"&&Number(match.gf)>=Number(match.ga))return false;}
       else{
@@ -171,12 +175,12 @@ function validHistory(snapshot){
     if(!group.qualified||group.rank>2)return false;
     for(let index=3;index<reached-1;index++)if(snapshot.match_history[index].result!=="W")return false;
     const terminal=snapshot.match_history[reached-1];
-    return result.won?reached===6&&terminal.result==="W":reached>=4&&terminal.result==="L";
+    return result.won?reached===(currentGroupFormat?7:6)&&terminal.result==="W":reached>=4&&terminal.result==="L";
   }
   const terminal=snapshot.match_history[reached-1];
   if(result.end_type==="sacked")return !result.won;
   if(!terminal||!["W","L"].includes(terminal.result))return false;
-  return result.won?reached===6&&terminal.result==="W":terminal.result==="L";
+  return result.won?reached===snapshot.match_history.length&&terminal.result==="W":terminal.result==="L";
 }
 function valid(snapshot,{requirePublicId=false}={}){
   if(!object(snapshot)||snapshot.schema_version!==1)return false;if(typeof snapshot.game_version!=="string"||!snapshot.game_version||snapshot.game_version.length>32)return false;if(typeof snapshot.data_version!=="string"||!snapshot.data_version||snapshot.data_version.length>32)return false;
@@ -185,7 +189,7 @@ function valid(snapshot,{requirePublicId=false}={}){
   if(!GHOST_FORMATIONS[snapshot.formation]||positionKey(snapshot.starting_xi)!==GHOST_FORMATIONS[snapshot.formation].slice().sort().join("|"))return false;
   if(new Set(snapshot.starting_xi.map(playerKey)).size!==11)return false;
   if(snapshot.squad!=null&&(!Array.isArray(snapshot.squad)||snapshot.squad.length<11||snapshot.squad.length>18||snapshot.squad.some(player=>!validPlayer(player))||snapshot.starting_xi.some((player,index)=>playerKey(player)!==playerKey(snapshot.squad[index]))))return false;if(snapshot.bench!=null&&(!Array.isArray(snapshot.bench)||snapshot.bench.length>7||snapshot.bench.some(player=>!validPlayer(player))))return false;
-  if(!Number.isFinite(Number(snapshot.squad_power))||snapshot.squad_power<35||snapshot.squad_power>115)return false;if(!Number.isFinite(Number(snapshot.cash))||snapshot.cash<-100||snapshot.cash>250)return false;if(!Number.isInteger(Number(snapshot.reached_round))||snapshot.reached_round<1||snapshot.reached_round>6)return false;
+  if(!Number.isFinite(Number(snapshot.squad_power))||snapshot.squad_power<35||snapshot.squad_power>115)return false;if(!Number.isFinite(Number(snapshot.cash))||snapshot.cash<-100||snapshot.cash>250)return false;if(!Number.isInteger(Number(snapshot.reached_round))||snapshot.reached_round<1||snapshot.reached_round>7)return false;
   if(!Array.isArray(snapshot.active_cards)||snapshot.active_cards.length>35||snapshot.active_cards.some(card=>!object(card)||!GHOST_CARD_IDS.has(card.id)||(card.tier!=="COMMON"&&card.tier!=="DARK"))||new Set(snapshot.active_cards.map(card=>card.id)).size!==snapshot.active_cards.length)return false;
   const average=Math.round(snapshot.starting_xi.reduce((sum,player)=>sum+Number(player.power),0)/11),maxPower=Math.min(115,average+20+Math.min(40,snapshot.active_cards.length*10));
   if(Number(snapshot.squad_power)<average-25||Number(snapshot.squad_power)>maxPower)return false;
@@ -212,16 +216,16 @@ async function handlePost(request,env){
   const now=new Date().toISOString(),eligibleUntil=new Date(Date.now()+45*24*60*60*1000).toISOString(),stored=Object.assign({},snapshot,{public_ghost_id:publicId(),created_at:now,eligible_until:eligibleUntil});stored.integrity=await integrityFor(stored);
   await env.GHOSTS.batch([
     registerClientStatement(env,client,false),
-    env.GHOSTS.prepare("INSERT INTO ghost_runs (public_id, game_version, data_version, reached_round, squad_power, country, created_at, eligible_until, snapshot, integrity, status, owner_hash, client_hash, consent_version, moderation_reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(stored.public_ghost_id,stored.game_version,stored.data_version,Math.round(range(stored.reached_round,1,6)),Math.round(range(stored.squad_power,35,115)),clean(stored.club&&stored.club.country),now,eligibleUntil,JSON.stringify(stored),stored.integrity,moderation.status,owner,client,CONSENT_VERSION,moderation.reason||null)
+    env.GHOSTS.prepare("INSERT INTO ghost_runs (public_id, game_version, data_version, reached_round, squad_power, country, created_at, eligible_until, snapshot, integrity, status, owner_hash, client_hash, consent_version, moderation_reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(stored.public_ghost_id,stored.game_version,stored.data_version,Math.round(range(stored.reached_round,1,7)),Math.round(range(stored.squad_power,35,115)),clean(stored.club&&stored.club.country),now,eligibleUntil,JSON.stringify(stored),stored.integrity,moderation.status,owner,client,CONSENT_VERSION,moderation.reason||null)
   ]);
   return json(request,env,{ok:true,id:stored.public_ghost_id,integrity:stored.integrity,status:moderation.status,eligible_until:eligibleUntil},201);
 }
 
 async function handleMatch(request,env,url){
   if(env.GHOST_READ_LIMITER){const outcome=await env.GHOST_READ_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
-  const power=Math.round(range(url.searchParams.get("power"),35,115)),round=Math.round(range(url.searchParams.get("round"),1,6)),simulationVersion=clean(url.searchParams.get("simulation_version")),cardSchemaVersion=clean(url.searchParams.get("card_schema_version"));
+  const power=Math.round(range(url.searchParams.get("power"),35,115)),round=Math.round(range(url.searchParams.get("round"),1,7)),simulationVersion=clean(url.searchParams.get("simulation_version")),cardSchemaVersion=clean(url.searchParams.get("card_schema_version"));
   if(!/^copa-final-core-v[0-9]{1,3}$/.test(simulationVersion)||!cardSchemaVersion)return json(request,env,{ghost:null},400);
-  const rows=await env.GHOSTS.prepare("SELECT public_id, snapshot FROM ghost_runs WHERE status='eligible' AND eligible_until > ? AND json_extract(snapshot,'$.simulation_version')=? AND json_extract(snapshot,'$.card_schema_version')=? AND reached_round BETWEEN ? AND ? AND squad_power BETWEEN ? AND ? ORDER BY ABS(squad_power-?) ASC, created_at DESC LIMIT 60").bind(new Date().toISOString(),simulationVersion,cardSchemaVersion,Math.max(1,round-1),Math.min(6,round+1),Math.max(35,power-8),Math.min(115,power+8),power).all();
+  const rows=await env.GHOSTS.prepare("SELECT public_id, snapshot FROM ghost_runs WHERE status='eligible' AND eligible_until > ? AND json_extract(snapshot,'$.simulation_version')=? AND json_extract(snapshot,'$.card_schema_version')=? AND reached_round BETWEEN ? AND ? AND squad_power BETWEEN ? AND ? ORDER BY ABS(squad_power-?) ASC, created_at DESC LIMIT 60").bind(new Date().toISOString(),simulationVersion,cardSchemaVersion,Math.max(1,round-1),Math.min(7,round+1),Math.max(35,power-8),Math.min(115,power+8),power).all();
   const excluded=new Set((url.searchParams.get("exclude")||"").split(",").filter(id=>/^G-[A-Z0-9]{8,32}$/.test(id)).slice(0,64));
   const candidates=(rows.results||[]).flatMap(row=>{
     if(excluded.has(row.public_id))return [];
@@ -262,8 +266,8 @@ function normalizeCareerRun(value){
   const played=history.filter(match=>match&&["W","L","D"].includes(String(match.result||""))).length;
   const wins=history.filter(match=>match&&match.result==="W").length;
   const draws=history.filter(match=>match&&match.result==="D").length;
-  if(played<1||played>6||wins+draws>played)return null;
-  const champion=!!result.won&&reached===6;
+  if(played<1||played>7||wins+draws>played)return null;
+  const champion=!!result.won&&reached===history.length;
   return {runId,clubName:String(club.name).trim(),country,reached,result,history,played,wins,draws,champion};
 }
 function publicProfile(row,rank=0){

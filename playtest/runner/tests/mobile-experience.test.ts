@@ -105,7 +105,7 @@ test("mobile preferences stay opt-in and draft choices expose decision context",
   await expect(page.locator("#mobileDraftContext")).toBeVisible();
   await page.evaluate(()=>{(globalThis as any).roll();});
   await expect(page.locator("#optstage")).toBeVisible();
-  await expect(page.locator("#opts .mobile-candidate-impact")).toHaveCount(3);
+  await expect(page.locator("#opts .opt-forecast")).toHaveCount(3);
   const choice=page.locator("#opts .opt:not(.tooexp)").first();
   await choice.click();
   await expect(page.locator("#mobileDraftConfirm")).toBeVisible();
@@ -139,7 +139,7 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   });
   const nav=page.locator("#nativeHubNav");
   await expect(nav).toBeVisible();
-  await expect(nav.locator("button")).toHaveCount(4);
+  await expect(nav.locator("button")).toHaveCount(3);
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");

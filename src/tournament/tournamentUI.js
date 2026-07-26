@@ -7,16 +7,17 @@
   const teamPower=(state,id)=>state.teams[id]&&state.teams[id].power||0;
   const matchTeamName=(state,match,id)=>match&&match.ghostOpponent&&match.ghostOpponent.originalTeamId===id?match.ghostOpponent.name:teamName(state,id);
   function revealedTeamIds(state){return new Set(state.draw.entries.slice(0,state.draw.revealIndex).map(entry=>entry.teamId));}
-  function drawGroup(state,group,copy,revealed,latestTeamId){
+  function drawGroup(state,group,copy,revealed,latestTeamId,currentPot,latestGroupId,complete){
     const entries=state.draw.entries.filter(entry=>entry.groupId===group.id&&revealed.has(entry.teamId)).sort((a,b)=>a.pot-b.pot);
-    return `<article class="td-group${group.id===state.group.playerGroupId?" is-player-group":""}" data-group-id="${esc(group.id)}" aria-label="${esc(copy.group)} ${group.id}">
+    const hasActivePot=entries.some(entry=>entry.pot===currentPot),eligible=!complete&&!hasActivePot,target=latestGroupId===group.id;
+    return `<article class="td-group${group.id===state.group.playerGroupId?" is-player-group":""}${eligible?" is-eligible":""}${target?" is-target":""}${!eligible&&!target&&!complete?" is-muted":""}" data-group-id="${esc(group.id)}" aria-label="${esc(copy.group)} ${group.id}">
       <header><span>${esc(copy.group)} ${group.id}</span><small>${entries.length}/4</small></header>
-      <ol>${[1,2,3,4].map(pot=>{const entry=entries.find(item=>item.pot===pot);return `<li class="${entry&&entry.teamId==="player"?"is-player":""}${entry&&entry.teamId===latestTeamId?" is-latest":""}"><span class="td-pot">${pot}</span><b>${entry?esc(teamName(state,entry.teamId)):"••••••"}</b>${entry?`<em>${teamPower(state,entry.teamId)}</em>`:""}</li>`;}).join("")}</ol>
+      <ol>${[1,2,3,4].map(pot=>{const entry=entries.find(item=>item.pot===pot);return `<li class="${entry&&entry.teamId==="player"?"is-player":""}${entry&&entry.teamId===latestTeamId?" is-latest":""}${pot===currentPot&&!complete?" is-active-pot":""}"><span class="td-pot">${pot}</span><b>${entry?esc(teamName(state,entry.teamId)):"••••••"}</b>${entry?`<em>${teamPower(state,entry.teamId)}</em>`:""}</li>`;}).join("")}</ol>
     </article>`;
   }
   function drawMobileCopy(){
     const tr=root.LANG==="tr";
-    return tr?{swipe:"Gruplar arasında kaydır",hint:"Çekilen topun düştüğü gruba otomatik gideceksin.",close:"İpucunu kapat",groups:"Grup seçimi"}:{swipe:"Swipe between groups",hint:"The view follows the group receiving each ball.",close:"Dismiss tip",groups:"Group selector"};
+    return tr?{swipe:"Gruplar arasında kaydır",hint:"Çekilen topun düştüğü gruba otomatik gideceksin.",close:"İpucunu kapat",groups:"Grup seçimi",last:"SON ÇEKİLEN",hold:"Hızlı kura için basılı tut",reduced:"Azaltılmış hareket açık: geçişler anında tamamlanır."}:{swipe:"Swipe between groups",hint:"The view follows the group receiving each ball.",close:"Dismiss tip",groups:"Group selector",last:"LAST DRAWN",hold:"Hold for quick draw",reduced:"Reduced motion is on: transitions complete instantly."};
   }
   function bindDrawNavigation(container,latestGroupId){
     const strip=container.querySelector(".td-groups"),dots=[...container.querySelectorAll(".td-group-dot")],cards=[...container.querySelectorAll(".td-group")],tip=container.querySelector(".td-swipe-tip"),key="copa.draw.swipe.v1";
@@ -30,24 +31,46 @@
     update();
     if(latestGroupId)requestAnimationFrame(()=>{const card=cards.find(item=>item.dataset.groupId===String(latestGroupId));if(!card)return;strip.scrollTo({left:Math.max(0,card.offsetLeft-(strip.clientWidth-card.clientWidth)/2),behavior:(root.motionReduced&&root.motionReduced())?"auto":"smooth"});setTimeout(update,240);});
   }
+  function bindDrawControls(container){
+    const quick=container.querySelector("[data-hold-draw]"),ball=container.querySelector(".td-ball");
+    const haptic=value=>{if(root.CopaMobileExperience)root.CopaMobileExperience.haptic(value);};
+    if(ball&&!ball.disabled)ball.addEventListener("pointerdown",()=>haptic(7),{passive:true});
+    if(!quick)return;
+    let timer=0,fired=false;
+    const cancel=()=>{
+      if(timer)root.clearTimeout(timer);timer=0;
+      quick.classList.remove("is-holding");quick.setAttribute("aria-pressed","false");
+    };
+    const start=event=>{
+      if(event.type==="keydown"&&![" ","Enter"].includes(event.key))return;
+      event.preventDefault();if(timer||fired)return;
+      fired=false;quick.classList.add("is-holding");quick.setAttribute("aria-pressed","true");haptic(8);
+      timer=root.setTimeout(()=>{timer=0;fired=true;quick.classList.add("is-complete");haptic([12,28,18]);if(typeof root.fastTournamentDraw==="function")root.fastTournamentDraw();},680);
+    };
+    quick.addEventListener("pointerdown",start);quick.addEventListener("pointerup",cancel);quick.addEventListener("pointercancel",cancel);quick.addEventListener("pointerleave",cancel);
+    quick.addEventListener("keydown",start);quick.addEventListener("keyup",cancel);quick.addEventListener("blur",cancel);quick.addEventListener("contextmenu",event=>event.preventDefault());
+  }
   function renderDraw(container,state,copy){
     if(!container||!state)return;
     const revealed=revealedTeamIds(state),next=state.draw.entries[state.draw.revealIndex],last=state.draw.entries[state.draw.revealIndex-1],complete=state.draw.completed;
-    const currentPot=next?next.pot:4,remaining=Math.max(0,16-state.draw.revealIndex);
+    const total=state.draw.entries.length,currentPot=next?next.pot:4,remaining=Math.max(0,total-state.draw.revealIndex);
+    const mobileCopy=drawMobileCopy(),lastName=last&&teamName(state,last.teamId);
     container.innerHTML=`<div class="td-shell">
-      <header class="td-head"><div><span class="td-kicker">${esc(copy.ceremony)}</span><h2 id="tournamentDrawTitle">${esc(copy.drawTitle)}</h2><p>${esc(copy.drawLead)}</p></div><div class="td-progress" role="progressbar" aria-valuemin="0" aria-valuemax="16" aria-valuenow="${state.draw.revealIndex}" aria-label="${esc(copy.drawTitle)}"><b>${state.draw.revealIndex}</b><span>/ 16</span><i style="--draw-progress:${state.draw.revealIndex/16}"></i></div></header>
+      <header class="td-head"><div><span class="td-kicker">${esc(copy.ceremony)}</span><h2 id="tournamentDrawTitle">${esc(copy.drawTitle)}</h2><p>${esc(copy.drawLead)}</p></div><div class="td-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${state.draw.revealIndex}" aria-label="${esc(copy.drawTitle)}"><b>${state.draw.revealIndex}</b><span>/ ${total}</span><i style="--draw-progress:${state.draw.revealIndex/total}"></i></div></header>
       <div class="td-stage">
         <aside class="td-machine">
           <div id="phaserDrawStage" role="application" aria-label="${esc(copy.drawTitle)}"></div>
           <div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
           <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button>
           <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
-          <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost" onclick="fastTournamentDraw()">${esc(copy.quickDraw)}</button>`}</div>
+          ${last?`<div class="td-transfer-band" aria-live="polite"><span>${esc(mobileCopy.last)}</span><b>${esc(lastName)}</b><em>→ ${esc(copy.group)} ${esc(last.groupId)}</em></div>`:""}
+          <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost td-hold-draw" data-hold-draw aria-pressed="false"><span>${esc(copy.quickDraw)}</span><small>${esc(mobileCopy.hold)}</small><i aria-hidden="true"></i></button>`}</div>
+          ${(root.motionReduced&&root.motionReduced())?`<p class="td-motion-note">${esc(mobileCopy.reduced)}</p>`:""}
         </aside>
-        <div class="td-group-stage"><div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId)).join("")}</div><div class="td-group-nav" role="navigation" aria-label="${esc(drawMobileCopy().groups)}">${state.groups.map((group,index)=>`<button type="button" class="td-group-dot${index===0?" is-active":""}" aria-label="${esc(copy.group)} ${group.id}" aria-current="${index===0?"true":"false"}">${esc(group.id)}</button>`).join("")}</div><aside class="td-swipe-tip"><span class="td-swipe-hand" aria-hidden="true">☝</span><p><b>${esc(drawMobileCopy().swipe)}</b><small>${esc(drawMobileCopy().hint)}</small></p><button type="button" aria-label="${esc(drawMobileCopy().close)}">×</button></aside></div>
+        <div class="td-group-stage"><div class="td-groups">${state.groups.map(group=>drawGroup(state,group,copy,revealed,last&&last.teamId,currentPot,last&&last.groupId,complete)).join("")}</div><div class="td-group-nav" role="navigation" aria-label="${esc(mobileCopy.groups)}">${state.groups.map((group,index)=>`<button type="button" class="td-group-dot${index===0?" is-active":""}" aria-label="${esc(copy.group)} ${group.id}" aria-current="${index===0?"true":"false"}">${esc(group.id)}</button>`).join("")}</div><aside class="td-swipe-tip"><span class="td-swipe-hand" aria-hidden="true">☝</span><p><b>${esc(mobileCopy.swipe)}</b><small>${esc(mobileCopy.hint)}</small></p><button type="button" aria-label="${esc(mobileCopy.close)}">×</button></aside></div>
       </div>
       <p class="td-rule">${esc(copy.drawRule)}</p>
-    </div>`;bindDrawNavigation(container,last&&last.groupId);
+    </div>`;bindDrawNavigation(container,last&&last.groupId);bindDrawControls(container);
     if(root.CopaPhaserMoments)root.CopaPhaserMoments.mountDraw(state,copy).catch(()=>{});
   }
   function tableMarkup(state,group,copy,compact=false){
@@ -64,7 +87,7 @@
   function renderHub(container,state,copy){
     if(!container)return;
     const road=()=>`<div class="tg-road-wrap"><span>${esc(root.LANG==="tr"?"FİKSTÜR":"FIXTURES")}</span><div class="cuproad" id="fixbar"></div></div>`;
-    if(!state||state.format!=="groups16_v1"){container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.tournament)}</h3></div></header>${road()}</section>`;container.classList.remove("hidden");return;}
+    if(!state||state.format!=="groups32_v2"){container.innerHTML=`<section class="tg-hub-card"><header><div><span>${esc(copy.tournament)}</span><h3>${esc(copy.tournament)}</h3></div></header>${road()}</section>`;container.classList.remove("hidden");return;}
     container.classList.remove("hidden");
     const group=state.groups.find(item=>item.id===state.group.playerGroupId),playerRow=group&&group.table.find(row=>row.teamId==="player");
     if(state.phase==="group"){
@@ -75,7 +98,7 @@
     }
   }
   function knockoutMarkup(state,copy){
-    const rounds=[["quarterfinal",copy.quarterfinal],["semifinal",copy.semifinal],["final",copy.final]];
+    const rounds=[["roundof16",copy.roundof16||"Round of 16"],["quarterfinal",copy.quarterfinal],["semifinal",copy.semifinal],["final",copy.final]];
     return `<div class="tg-bracket">${rounds.map(([key,label])=>`<section><h4>${esc(label)}</h4>${(state.knockout.slots[key]||[]).map(id=>{const match=state.matches[id];if(!match)return"";const score=match.status==="played"?`${match.score[0]}–${match.score[1]}${match.decidedBy==="penalties"?" p":""}`:"—";return `<div class="tg-bracket-match"><span class="${match.winnerId===match.homeId?"is-winner":""}">${esc(matchTeamName(state,match,match.homeId))}</span><b>${score}</b><span class="${match.winnerId===match.awayId?"is-winner":""}">${esc(matchTeamName(state,match,match.awayId))}</span></div>`;}).join("")||`<p>${esc(copy.pending)}</p>`}</section>`).join("")}</div>`;
   }
   function overviewMarkup(state,copy){

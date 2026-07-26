@@ -143,7 +143,7 @@ assert.equal(ghosts.leaderboardEnabled(),true,"versioned ranking consent must en
 ghosts.beginRun({seed:101,clubName:"Ranked Athletic",country:"TR",cheatRun:false});
 assert.equal(ghosts.recordLeaderboardRun({
   seed:101,teamName:"Ranked Athletic",selectedCountry:"TR",
-  fixtures:Array.from({length:6},(_,index)=>({opp:`Cup ${index+1}`,res:index<3?"W":index===3?"L":null,gf:index<3?2:index===3?1:null,ga:index<3?0:index===3?2:null})),
+  fixtures:Array.from({length:7},(_,index)=>({opp:`Cup ${index+1}`,res:index<3?"W":index===3?"L":null,gf:index<3?2:index===3?1:null,ga:index<3?0:index===3?2:null})),
   run:{won:false,round:4,score:"",endType:""}
 }),true);
 const rankingQueue=JSON.parse(storage.get("copa_leaderboard_queue_v1")||"[]");

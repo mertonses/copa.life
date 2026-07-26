@@ -1460,7 +1460,7 @@ function buildSim(myPow, oppPow) {
       hasCounterCard:typeof hasCard==='function'&&hasCard('kontra'),
       ghostTactics:tid===1&&_ghostProfile&&_ghostProfile.tactics?_ghostProfile.tactics:null,
       goldenActive:typeof goldenGoalMode!=="undefined"&&goldenGoalMode,
-      isFinal:typeof round!=="undefined"&&round>=6,
+      isFinal:typeof round!=="undefined"&&round>=7,
       losing,leading
     };
   }
@@ -1494,7 +1494,7 @@ function buildSim(myPow, oppPow) {
     if((carrier.role==='LW'||carrier.role==='LB'||_isWideLeft(carrier.x))&&rng.bool(0.28))type='WIDE_LEFT';
     if((carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&rng.bool(0.28))type='WIDE_RIGHT';
     const mode=_sequenceMode(type,rng);
-    const profile=_profileForSequence({type,mode},{team,opp,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive,isFinal:typeof round!=="undefined"&&round>=6,losing,leading});
+    const profile=_profileForSequence({type,mode},{team,opp,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive,isFinal:typeof round!=="undefined"&&round>=7,losing,leading});
     tacticalSeq.team=tid;tacticalSeq.type=type;tacticalSeq.mode=mode;tacticalSeq.phase='preparation';tacticalSeq.profile=profile;tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(type==='LOW_TEMPO'||type==='RECYCLE'?10:8,type==='LOW_TEMPO'||type==='RECYCLE'?18:15);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.sequenceCounts[type]=(audit.sequenceCounts[type]||0)+1;
     audit.plannedSequences++;
@@ -1510,7 +1510,7 @@ function buildSim(myPow, oppPow) {
     else if(type==='COUNTER'){audit.counter++;}
     else if(type==='PRESS_RECOVERY'){audit.counter++;audit.pressRecoveries++;}
     else if(type==='SET_PIECE')audit.setPieces++;
-    if((typeof round!=="undefined"&&round>=6)&&(matchTime>70*60||goldenActive))audit.finalPressureEvents++;
+    if((typeof round!=="undefined"&&round>=7)&&(matchTime>70*60||goldenActive))audit.finalPressureEvents++;
     if(matchTime-lastSeqCommTime>22&&rng.bool(type==='LOW_TEMPO'||type==='RECYCLE'?0.28:0.20)){
       lastSeqCommTime=matchTime;
       const msg={
@@ -1846,7 +1846,7 @@ function buildSim(myPow, oppPow) {
       winger.x=bx;winger.y=by;ball.setOwner(winger);
       const side=bx<_PW/2?'WIDE_LEFT':'WIDE_RIGHT';
       tacticalSeq.team=atkTeam;tacticalSeq.type=side;tacticalSeq.mode='cutback';tacticalSeq.phase='preparation';
-      tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:atkTeam===0?teamA:teamB,opp:atkTeam===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[atkTeam]<score[1-atkTeam],leading:score[atkTeam]>score[1-atkTeam]});
+      tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:atkTeam===0?teamA:teamB,opp:atkTeam===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=7,losing:score[atkTeam]<score[1-atkTeam],leading:score[atkTeam]>score[1-atkTeam]});
       tacticalSeq.beat=0;tacticalSeq.until=matchTime+10;tacticalSeq.lastCarrierId=winger.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
       primeBoxRuns(atkTeam,bx,by,side);
       shotCooldown[atkTeam]=Math.min(shotCooldown[atkTeam],5);
@@ -2178,7 +2178,7 @@ function buildSim(myPow, oppPow) {
     _setCarrier(carrier);
     tacticalSeq.team=teamId;tacticalSeq.type=side;tacticalSeq.mode=rng.pick(['overlap','overlap','cutback','cutback','underlap']);
     tacticalSeq.phase='preparation';
-    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
+    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=7,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
     tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(10,16);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.sequenceCounts[side]=(audit.sequenceCounts[side]||0)+1;
     audit.wide++;if(side==='WIDE_LEFT')audit.leftWide++;else audit.rightWide++;
@@ -2224,7 +2224,7 @@ function buildSim(myPow, oppPow) {
     taker.setTarget(taker.x,taker.y);
     _setCarrier(taker);
     tacticalSeq.team=teamId;tacticalSeq.type=side;tacticalSeq.mode='cutback';tacticalSeq.phase='preparation';
-    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
+    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=7,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
     tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,12);tacticalSeq.lastCarrierId=taker.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     audit.setPieces++;
     addWideAttackHeat(teamId,side,.8);
@@ -2246,7 +2246,7 @@ function buildSim(myPow, oppPow) {
     carrier.setTarget(carrier.x,carrier.y);
     _setCarrier(carrier);
     tacticalSeq.team=teamId;tacticalSeq.type=rng.bool(0.35)?'COUNTER':'CENTRAL_TRIANGLE';tacticalSeq.mode='triangle';tacticalSeq.phase='preparation';
-    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=6,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
+    tacticalSeq.profile=_profileForSequence(tacticalSeq,{team:teamId===0?teamA:teamB,opp:teamId===0?teamB:teamA,score,matchTime,fullTimeSec,shout:shapeCfg.shout,goldenActive:goldenGoalMode,isFinal:typeof round!=="undefined"&&round>=7,losing:score[teamId]<score[1-teamId],leading:score[teamId]>score[1-teamId]});
     tacticalSeq.beat=0;tacticalSeq.until=matchTime+rng.rng(8,13);tacticalSeq.lastCarrierId=carrier.id;tacticalSeq.countedOverlap=false;tacticalSeq.countedReset=false;
     shotCooldown[teamId]=Math.min(shotCooldown[teamId],8);
     addHeat(carrier.x,carrier.y,1.4);
@@ -2486,7 +2486,7 @@ function buildSim(myPow, oppPow) {
     if(tvEl){
       const finalLabel=goldenGoalMode?(isTR?"ALTIN GOL · CANLI":"GOLDEN GOAL · LIVE"):(isTR?"KUPA FİNALİ · CANLI":"CUP FINAL · LIVE");
       const liveLabel=isTR?"CANLI MAÇ":"LIVE MATCH";
-      tvEl.textContent=typeof round!=="undefined"&&round>=6?finalLabel:liveLabel;
+      tvEl.textContent=typeof round!=="undefined"&&round>=7?finalLabel:liveLabel;
     }
   }
 

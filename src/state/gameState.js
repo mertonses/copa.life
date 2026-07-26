@@ -1,7 +1,7 @@
 /* Aktif run durumu: bu dosya tur icindeki degisen oyun verilerini tutar. */
 var slots=[],filled=[],picksBySlot=[],remaining=0,currentSlot=-1,budget=BUDGET,currentOpts=[],formName="4-3-3",style="gegen",selectedCountry="TR";
 var round=1,cards=[],cardInv={},cardVariant={},shopOffers=[],shopVariants={},shopPriceChaos={},bracket=[],fixtures=[],opponent=null,lastResult=null,muted=false,autoPlay=false,kit={bg:"#DA3D2E",fg:"#FFFFFF",sec:"#FFFFFF"},talkUsed=false,talkMod={all:0,def:0,atk:0},deadlineH=24,oppXI=[],motm=null,runEnded=false;
-var tournament=null,tournamentFormat="groups16_v1";
+var tournament=null,tournamentFormat="groups32_v2";
 var injuredIdx=-1,medicalProtectionTurns=0,oppLineup=[],weakFlank="C",matchupBonus=0,autoTimer=null,undoData=null,undoUsed=false,lastMatchEvents=[],lastSackReason="";
 var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUsed=false;
 var DRAFT_REROLLS=1,MAX_REWARDED_DRAFT_REROLLS=2,draftRerollsLeft=DRAFT_REROLLS,draftRewardedRerollsEarned=0,draftRewardInFlight=false;

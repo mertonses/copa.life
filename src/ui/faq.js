@@ -9,13 +9,13 @@
       all:"TÜM SSS",close:"KAPAT",back:"OYUNA DÖN",language:"DİL",
       pageDescription:"Copa Life oynanışı, kayıt sistemi, DARK kartlar ve Başkan Güveni hakkında sık sorulan sorular.",
       items:[
-        ["free","Copa Life ücretsiz mi?","Evet. Oyunu ücretsiz oynayabilir ve zorunlu bir hesap oluşturmadan koşuya başlayabilirsin."],
-        ["account","Oynamak için hesap gerekiyor mu?","Hayır. Temel oyun, koşular ve kalıcı açılımlar hesap gerektirmez."],
-        ["run","Bir koşu nasıl ilerliyor?","Ülke, diziliş ve başkanını seç; zarla açılan mevkilerden kadronu kur. Kura sonunda dört takımlı grubunda üç maç oynarsın; ilk ikiye girersen çeyrek final, yarı final ve finale ilerlersin."],
+        ["free","Copa Life ücretsiz mi?","Evet. Oyunu ücretsiz oynayabilir ve zorunlu bir hesap oluşturmadan tura başlayabilirsin."],
+        ["account","Oynamak için hesap gerekiyor mu?","Hayır. Temel oyun, turlar ve kalıcı açılımlar hesap gerektirmez."],
+        ["run","Bir tur nasıl ilerliyor?","Ülke, diziliş ve başkanını seç; zarla açılan mevkilerden kadronu kur. Kura sonunda dört takımlı grubunda üç maç oynarsın; ilk ikiye girersen Son 16, çeyrek final, yarı final ve finale ilerlersin."],
         ["groups","Grup sıralaması nasıl belirleniyor?","Galibiyet 3, beraberlik 1, yenilgi 0 puandır. Eşitlikte sırasıyla puan, genel averaj, atılan gol, eşit takımların kendi aralarındaki sonuç, fair-play ve kura ölçütleri uygulanır."],
         ["trust","Başkan Güveni ne işe yarıyor?","Güven 0–3 arasında değişir. Normal maç galibiyeti güveni artırabilir; bazı kararlar ve DARK kartlar azaltabilir. Güncel güven, başkanın aktif borç eşiğini etkiler."],
         ["dark","DARK kartlar nedir?","DARK kartlar, standart kartların daha güçlü varyantlarıdır. Bu güç daha yüksek ücret, güven kaybı, kimya bedeli veya sonraki turlara taşınan bir sonuçla dengelenir."],
-        ["save","İlerlemem nasıl kaydediliyor?","Koşu kontrol noktaları ve kalıcı açılımlar kullandığın tarayıcıda ya da cihazda yerel olarak saklanır. Site veya uygulama verilerini temizlemek ilerlemeyi silebilir."],
+        ["save","İlerlemem nasıl kaydediliyor?","Tur kontrol noktaları ve kalıcı açılımlar kullandığın tarayıcıda ya da cihazda yerel olarak saklanır. Site veya uygulama verilerini temizlemek ilerlemeyi silebilir."],
         ["ratings","Oyuncu gücü ve maç sonuçları neyi ifade ediyor?","Oyuncu güçleri, etkinlik değerleri ve maç sonuçları Copa Life oyun modelinin simülasyon çıktılarıdır. Eğlence ve oyun dengesi için hazırlanır; gerçek dünya performansı hakkında nesnel bir iddia değildir."],
         ["mobile","Mobilde oynayabilir miyim?","Evet. Oyun mobil tarayıcıya uyumludur ve desteklenen tarayıcılarda ana ekrana eklenebilir. Sunulduğu platformlarda native uygulama paketi de aynı temel oynanışı kullanır."],
         ["support","Bir hata veya öneriyi nasıl iletebilirim?","Web sürümündeki İletişim veya Hata Raporu bağlantısını kullanabilirsin. Ekran görüntüsü, cihaz ve sorunu yeniden oluşturma adımları çözümü hızlandırır."]
@@ -29,7 +29,7 @@
       items:[
         ["free","Is Copa Life free?","Yes. You can play for free and start a run without creating a mandatory account."],
         ["account","Do I need an account to play?","No. The core game, runs and permanent unlocks do not require an account."],
-        ["run","How does a run work?","Choose a country, formation and chairman, then build your squad from positions opened by the dice. After the draw, play three matches in a four-team group; finish in the top two to reach the quarter-final, semi-final and final."],
+        ["run","How does a run work?","Choose a country, formation and chairman, then build your squad from positions opened by the dice. After the draw, play three matches in a four-team group; finish in the top two to reach the round of 16, quarter-final, semi-final and final."],
         ["groups","How are group standings decided?","A win earns 3 points, a draw 1 and a loss 0. Ties are resolved by points, overall goal difference, goals scored, head-to-head results, fair play and finally a seeded lot."],
         ["trust","What does Chairman Trust do?","Trust ranges from 0–3. A normal-match win may raise it, while some decisions and DARK cards may lower it. Current trust changes the chairman’s active debt threshold."],
         ["dark","What are DARK cards?","DARK cards are stronger variants of standard cards. Their extra power is balanced by a higher fee, trust loss, chemistry cost or a consequence that carries into later rounds."],
@@ -47,7 +47,7 @@
       items:[
         ["free","¿Copa Life es gratis?","Sí. Puedes jugar gratis y empezar una partida sin crear una cuenta obligatoria."],
         ["account","¿Necesito una cuenta para jugar?","No. El juego principal, las partidas y los desbloqueos permanentes no requieren una cuenta."],
-        ["run","¿Cómo funciona una partida?","Elige país, formación y presidente y crea la plantilla. Tras el sorteo juegas tres partidos en un grupo de cuatro; termina entre los dos primeros para avanzar a cuartos, semifinal y final."],
+        ["run","¿Cómo funciona una partida?","Elige país, formación y presidente y crea la plantilla. Tras el sorteo juegas tres partidos en un grupo de cuatro; termina entre los dos primeros para avanzar a octavos, cuartos, semifinal y final."],
         ["groups","¿Cómo se decide la clasificación del grupo?","Una victoria da 3 puntos, un empate 1 y una derrota 0. Los empates se resuelven por puntos, diferencia de goles, goles a favor, enfrentamientos directos, juego limpio y, al final, sorteo con semilla."],
         ["trust","¿Para qué sirve la confianza del presidente?","La confianza va de 0 a 3. Una victoria normal puede aumentarla; algunas decisiones y cartas DARK pueden reducirla. La confianza actual modifica el umbral de deuda activo del presidente."],
         ["dark","¿Qué son las cartas DARK?","Son variantes más potentes de las cartas estándar. Su fuerza extra se compensa con un precio mayor, pérdida de confianza, coste de química o una consecuencia para rondas posteriores."],
@@ -65,7 +65,7 @@
       items:[
         ["free","Ist Copa Life kostenlos?","Ja. Du kannst kostenlos spielen und einen Lauf ohne verpflichtendes Konto starten."],
         ["account","Brauche ich ein Konto?","Nein. Das Hauptspiel, Läufe und dauerhafte Freischaltungen benötigen kein Konto."],
-        ["run","Wie läuft ein Durchgang ab?","Wähle Land, Formation und Präsident und baue deinen Kader. Nach der Auslosung spielst du drei Partien in einer Vierergruppe; als Erster oder Zweiter erreichst du Viertelfinale, Halbfinale und Finale."],
+        ["run","Wie läuft ein Durchgang ab?","Wähle Land, Formation und Präsident und baue deinen Kader. Nach der Auslosung spielst du drei Partien in einer Vierergruppe; als Erster oder Zweiter erreichst du Achtelfinale, Viertelfinale, Halbfinale und Finale."],
         ["groups","Wie wird die Gruppentabelle entschieden?","Ein Sieg bringt 3 Punkte, ein Remis 1 und eine Niederlage 0. Bei Gleichstand zählen Punkte, Tordifferenz, erzielte Tore, direkter Vergleich, Fairplay und zuletzt ein gesetztes Los."],
         ["trust","Was bewirkt Präsidentenvertrauen?","Das Vertrauen reicht von 0 bis 3. Ein Sieg in einem normalen Spiel kann es erhöhen; manche Entscheidungen und DARK-Karten können es senken. Der aktuelle Wert verändert die aktive Schuldengrenze des Präsidenten."],
         ["dark","Was sind DARK-Karten?","DARK-Karten sind stärkere Varianten normaler Karten. Die zusätzliche Stärke wird durch höhere Kosten, Vertrauensverlust, Chemiekosten oder Folgen für spätere Runden ausgeglichen."],
@@ -83,7 +83,7 @@
       items:[
         ["free","Copa Life è gratuito?","Sì. Puoi giocare gratis e iniziare una partita senza creare un account obbligatorio."],
         ["account","Serve un account per giocare?","No. Il gioco principale, le partite e gli sblocchi permanenti non richiedono un account."],
-        ["run","Come funziona una partita?","Scegli paese, modulo e presidente e crea la rosa. Dopo il sorteggio giochi tre gare in un gruppo da quattro; chiudi tra le prime due per raggiungere quarti, semifinale e finale."],
+        ["run","Come funziona una partita?","Scegli paese, modulo e presidente e crea la rosa. Dopo il sorteggio giochi tre gare in un gruppo da quattro; chiudi tra le prime due per raggiungere ottavi, quarti, semifinale e finale."],
         ["groups","Come viene decisa la classifica del gruppo?","Una vittoria vale 3 punti, un pareggio 1 e una sconfitta 0. Le parità si risolvono con punti, differenza reti, gol segnati, scontri diretti, fair play e infine sorteggio con seed."],
         ["trust","A cosa serve la fiducia del presidente?","La fiducia va da 0 a 3. Una vittoria normale può aumentarla; alcune decisioni e carte DARK possono ridurla. Il valore attuale modifica la soglia di debito attiva del presidente."],
         ["dark","Cosa sono le carte DARK?","Sono varianti più potenti delle carte standard. La forza extra è bilanciata da un costo maggiore, perdita di fiducia, costo d’intesa o una conseguenza nei turni successivi."],

@@ -82,7 +82,7 @@ function trackBalanceMatchTelemetry(roundNo){
 }
 function trackRewardChoice(kind,roundNo){
  const key=String(kind||"");if(!["cash","loan","swap","care"].includes(key))return;
- const data=_btLoad(),roundKey=String(Math.max(1,Math.min(5,Math.round(Number(roundNo)||1))));
+ const data=_btLoad(),roundKey=String(Math.max(1,Math.min(7,Math.round(Number(roundNo)||1))));
  if(!data.rewards[roundKey])data.rewards[roundKey]={cash:0,loan:0,swap:0,care:0};
  data.rewards[roundKey][key]++;_btSave(data);
 }

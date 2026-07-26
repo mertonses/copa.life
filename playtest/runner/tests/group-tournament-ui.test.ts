@@ -107,7 +107,7 @@ test("group draw and loss award points correctly and continue the run",async({pa
 
 test("the tournament overview is responsive and exposes all groups semantically",async({page})=>{
   await startDraw(page);
-  await expect(page.locator(".td-group-dot")).toHaveCount(4);
+  await expect(page.locator(".td-group-dot")).toHaveCount(8);
   const isMobile=await page.evaluate(()=>window.innerWidth<=760);
   if(isMobile)await expect(page.locator(".td-swipe-tip")).toBeVisible();
   else await expect(page.locator(".td-swipe-tip")).toBeHidden();
@@ -133,8 +133,8 @@ test("the tournament overview is responsive and exposes all groups semantically"
   await page.waitForTimeout(500);
   await page.evaluate(()=>{const w=globalThis as any;w.setCaptain(0);w.closeModal();w.showTournamentOverview();});
   await expect(page.locator(".tg-overview")).toBeVisible();
-  await expect(page.locator(".tg-all-groups table")).toHaveCount(4);
-  await expect(page.locator(".tg-all-groups tbody tr")).toHaveCount(16);
+  await expect(page.locator(".tg-all-groups table")).toHaveCount(8);
+  await expect(page.locator(".tg-all-groups tbody tr")).toHaveCount(32);
   const overviewFit=await page.locator(".tg-overview").evaluate((overview:HTMLElement)=>{
     const shell=overview.closest(".sheet") as HTMLElement,header=overview.querySelector("header") as HTMLElement;
     const shellRect=shell.getBoundingClientRect(),headerRect=header.getBoundingClientRect();
@@ -175,7 +175,7 @@ test("ultrawide web draw keeps the Phaser ceremony compact and square",async({br
   await context.close();
 });
 
-test("three group wins build a valid quarter-final path and the run can reach the trophy",async({page})=>{
+test("three group wins build a valid round-of-16 path and the tour can reach the trophy",async({page})=>{
   await startDraw(page);await finishDraw(page);
   await page.evaluate(()=>{const w=globalThis as any;w.setCaptain(0);w.closeModal();(0,eval)("budget=30;chairTrust=2");});
   const forceWinWithReward=async()=>{
@@ -191,14 +191,14 @@ test("three group wins build a valid quarter-final path and the run can reach th
   };
   await forceWinWithReward();await forceWinWithReward();await forceWinWithReward();
   let state=await page.evaluate(()=>{const w=globalThis as any;return{round:w.round,phase:w.tournament.phase,stage:w.tournament.knockout.round,rank:w.tournament.group.rank,qualified:w.tournament.group.qualified,opponent:w.opponent&&w.opponent.name};});
-  expect(state).toMatchObject({round:4,phase:"knockout",stage:"quarterfinal",rank:1,qualified:true});
+  expect(state).toMatchObject({round:4,phase:"knockout",stage:"roundof16",rank:1,qualified:true});
   expect(state.opponent).toBeTruthy();
   const ghostSwap=await page.evaluate(()=>{const w=globalThis as any,match=w.CopaTournamentRuntime.currentMatch(),opponentId=match.homeId==="player"?match.awayId:match.homeId,originalName=w.tournament.teams[opponentId].name,ok=w.CopaTournamentRuntime.replaceCurrentOpponent({name:"Community Ghost",power:81,ghost:true,ghostId:"G-TOURNAMENTTEST",ghostMeta:{formation:"4-2-3-1"},ghostProfile:{lineup:[]}});return{ok,name:w.opponent.name,ghost:w.opponent.ghost,formation:w.opponent.formation,originalPreserved:w.tournament.teams[opponentId].name===originalName,valid:w.CopaTournamentEngine.validate(w.tournament).ok};});
   expect(ghostSwap).toEqual({ok:true,name:"Community Ghost",ghost:true,formation:"4-2-3-1",originalPreserved:true,valid:true});
-  await forceWinWithReward();await forceWinWithReward();
+  await forceWinWithReward();await forceWinWithReward();await forceWinWithReward();
   state=await page.evaluate(()=>{const w=globalThis as any;return{round:w.round,phase:w.tournament.phase,stage:w.tournament.knockout.round,current:w.CopaTournamentRuntime.currentMatch()?.id};});
-  expect(state).toEqual({round:6,phase:"knockout",stage:"final",current:"F1"});
+  expect(state).toEqual({round:7,phase:"knockout",stage:"final",current:"F1"});
   await page.evaluate(()=>{const w=globalThis as any;w.endRun(true,"2–0","champion");});
   await expect(page.locator("#result")).toBeVisible();
-  expect(await page.evaluate(()=>{const w=globalThis as any;return{champion:w.lastResult.tournament.player.champion,phase:w.lastResult.tournament.phase,schedule:w.CopaTournamentEngine.playerSchedule(w.lastResult.tournament).length,score:[w.fixtures[5].gf,w.fixtures[5].ga]};})).toEqual({champion:true,phase:"complete",schedule:6,score:[2,0]});
+  expect(await page.evaluate(()=>{const w=globalThis as any;return{champion:w.lastResult.tournament.player.champion,phase:w.lastResult.tournament.phase,schedule:w.CopaTournamentEngine.playerSchedule(w.lastResult.tournament).length,score:[w.fixtures[6].gf,w.fixtures[6].ga]};})).toEqual({champion:true,phase:"complete",schedule:7,score:[2,0]});
 });

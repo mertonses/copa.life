@@ -21,7 +21,7 @@
     state.bracket=Array.isArray(state.bracket)?state.bracket:[];
     state.fixtures=Array.isArray(state.fixtures)?state.fixtures:[];
     state.tournament=object(state.tournament)?state.tournament:null;
-    state.tournamentFormat=state.tournament&&state.tournament.format==="groups16_v1"?"groups16_v1":"legacy_knockout_v1";
+    state.tournamentFormat=state.tournament&&state.tournament.format==="groups32_v2"?"groups32_v2":"legacy_knockout_v1";
     state.chairmanEventRunId=typeof state.chairmanEventRunId==="string"?state.chairmanEventRunId:"";
     state.chairmanEventSeen=object(state.chairmanEventSeen)?state.chairmanEventSeen:{};
     state.pendingChairmanEvent=object(state.pendingChairmanEvent)?state.pendingChairmanEvent:null;
@@ -60,7 +60,7 @@
     if(!["draft","draw","hub","match","reward"].includes(value.phase))errors.push(issue("invalid_phase","phase"));
     if(!finite(value.savedAt)||Number(value.savedAt)<=0)errors.push(issue("invalid_timestamp","savedAt"));
     if(!Array.isArray(value.picks)||value.picks.length!==11)errors.push(issue("invalid_picks","picks"));
-    if(!Number.isInteger(Number(value.round))||Number(value.round)<1||Number(value.round)>6)errors.push(issue("invalid_round","round"));
+    if(!Number.isInteger(Number(value.round))||Number(value.round)<1||Number(value.round)>7)errors.push(issue("invalid_round","round"));
     if(!finite(value.budget)||Number(value.budget)<-250||Number(value.budget)>1000)errors.push(issue("invalid_budget","budget"));
     if(!finite(value.seedNum))errors.push(issue("invalid_seed","seedNum"));
     if(!Number.isInteger(Number(value.rngCalls))||Number(value.rngCalls)<0||Number(value.rngCalls)>2_000_000)errors.push(issue("invalid_rng_calls","rngCalls"));
@@ -76,8 +76,9 @@
       if(value.cards.length>35||new Set(value.cards).size!==value.cards.length)errors.push(issue("invalid_cards","cards"));
       if(global.CARDDEFS&&value.cards.some(key=>typeof key!=="string"||!global.CARDDEFS[key]))errors.push(issue("unknown_card","cards"));
     }else errors.push(issue("invalid_cards","cards"));
-    if(Array.isArray(value.fixtures)&&value.fixtures.length&&value.fixtures.length!==6)errors.push(issue("invalid_fixtures","fixtures"));
-    if(value.tournamentFormat==="groups16_v1"){
+    if(Array.isArray(value.fixtures)&&value.fixtures.length&&!([6,7].includes(value.fixtures.length)))errors.push(issue("invalid_fixtures","fixtures"));
+    if(value.tournamentFormat==="groups32_v2"){
+      if(Array.isArray(value.fixtures)&&value.fixtures.length!==7)errors.push(issue("invalid_tournament_fixtures","fixtures"));
       if(!object(value.tournament))errors.push(issue("missing_tournament","tournament"));
       else if(global.CopaTournamentEngine){const checked=global.CopaTournamentEngine.validate(value.tournament);if(!checked.ok)errors.push(issue("invalid_tournament","tournament"));}
       if(value.phase==="draw"&&(!value.tournament||value.tournament.phase!=="draw"))errors.push(issue("invalid_draw_phase","tournament.phase"));
@@ -85,7 +86,8 @@
     }else if(value.tournamentFormat!=="legacy_knockout_v1")errors.push(issue("invalid_tournament_format","tournamentFormat"));
     if(value.phase==="match"){
       const pending=value.pendingMatchResolution;
-      if(!object(pending)||Number(pending.round)!==Number(value.round)||!Number.isInteger(Number(pending.gf))||!Number.isInteger(Number(pending.ga))||Number(pending.gf)<0||Number(pending.gf)>20||Number(pending.ga)<0||Number(pending.ga)>20)errors.push(issue("invalid_pending_match","pendingMatchResolution"));
+      const liveFinal=Number(value.round)===7;
+      if(!liveFinal&&(!object(pending)||Number(pending.round)!==Number(value.round)||!Number.isInteger(Number(pending.gf))||!Number.isInteger(Number(pending.ga))||Number(pending.gf)<0||Number(pending.gf)>20||Number(pending.ga)<0||Number(pending.ga)>20))errors.push(issue("invalid_pending_match","pendingMatchResolution"));
     }
     if(value.phase==="reward"&&(Number(value.rewardPendingRound)!==Number(value.round)||Number(value.rewardResolvedRound)===Number(value.round)))errors.push(issue("invalid_pending_reward","rewardPendingRound"));
     if(value.pendingChairmanEvent){

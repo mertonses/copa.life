@@ -164,7 +164,7 @@ for(const theme of ["light","dark"] as const){
     await expectReadable(page,`${theme} suspended-player warning`);
     await page.evaluate(()=>(globalThis as any).closeModal());
 
-    await page.evaluate(async()=>{const global=globalThis as any;await global.CopaLazy.ensureMetaProgression();global.showModal(`<div class="meta-progress-modal" style="min-width:0;padding:16px"><article class="meta-run-row is-out"><span class="meta-run-main"><b>TEST FK</b><small>21 Tem · 4-3-3</small></span><span class="meta-run-result"><b>Elendi</b><small>4/6 · +46 itibar</small></span></article></div>`);});
+    await page.evaluate(async()=>{const global=globalThis as any;await global.CopaLazy.ensureMetaProgression();global.showModal(`<div class="meta-progress-modal" style="min-width:0;padding:16px"><article class="meta-run-row is-out"><span class="meta-run-main"><b>TEST FK</b><small>21 Tem · 4-3-3</small></span><span class="meta-run-result"><b>Elendi</b><small>4/7 · +46 itibar</small></span></article></div>`);});
     await expect(page.locator(".meta-run-row.is-out .meta-run-result>b")).toHaveText("Elendi");
     await expectReadable(page,`${theme} career eliminated status`);
     await page.evaluate(()=>(globalThis as any).closeModal());

@@ -22,7 +22,7 @@
     if(target==="draft"&&!draftShape())errors.push("invalid_draft_shape");
     if(["draw","hub","match","reward"].includes(target)&&!completeXI())errors.push("incomplete_starting_xi");
     if(target==="draw"&&global.CopaTournamentEngine&&(!global.tournament||!global.CopaTournamentEngine.validate(global.tournament).ok))errors.push("invalid_tournament");
-    if(typeof global.round!=="undefined"&&target!=="intro"&&(!Number.isInteger(global.round)||global.round<1||global.round>6))errors.push("invalid_round");
+    if(typeof global.round!=="undefined"&&target!=="intro"&&(!Number.isInteger(global.round)||global.round<1||global.round>7))errors.push("invalid_round");
     return{ok:errors.length===0,errors,phase:target};
   }
   function transition(next,options){

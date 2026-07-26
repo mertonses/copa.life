@@ -189,7 +189,7 @@ describe("Ghost Club Worker",()=>{
     expect(normalizeAnalyticsEvent({...finalEvent,schema_version:3,chairman:"babacan"})).toMatchObject({event:"final_sim_completed",schemaVersion:3,chairman:"babacan"});
     const tournamentEvent={...balanceEvent,schema_version:4,event:"tournament_match_resolved",tournament_stage:"group",draw_mode:"",qualification:"yes",group_matchday:3};
     expect(normalizeAnalyticsEvent(tournamentEvent)).toMatchObject({event:"tournament_match_resolved",schemaVersion:4,tournamentStage:"group",qualification:"yes",groupMatchday:3});
-    expect(normalizeAnalyticsEvent({...tournamentEvent,tournament_stage:"round-of-16"})).toBeNull();
+    expect(normalizeAnalyticsEvent({...tournamentEvent,tournament_stage:"roundof16"})).toMatchObject({tournamentStage:"roundof16"});
     expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });
 

@@ -65,3 +65,7 @@
   .fixture-track::after{transition:none}
   .fixture-trophy.is-near .fixture-trophy-ring{animation:none}
 }
+.fixture-node[data-fixture-state="current"] .fixture-result,
+.fixture-node[data-fixture-state="scheduled"] .fixture-result{display:none!important}
+.fixture-node[data-fixture-state="locked"] .fixture-reveal{font-size:13px!important;letter-spacing:.2em!important;color:var(--color-slate)!important}
+.fixture-road-v2{padding:10px;border:1px solid var(--border-subtle);border-radius:12px;background:color-mix(in srgb,var(--surface-elevated) 94%,transparent)}
