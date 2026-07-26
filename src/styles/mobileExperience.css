@@ -9,7 +9,6 @@
 .mobile-action-dock,
 .mobile-sim-tabs,
 .mobile-network-banner,
-.mobile-draft-context,
 .mobile-draft-confirm,
 .mobile-feed-toggle,
 .mobile-tactic-status,
@@ -790,6 +789,9 @@
     background:var(--surface-primary-soft);
     color:var(--color-ink);
   }
+  .mobile-text-scale-label{margin:7px 0 5px;color:var(--color-slate);font:900 8px/1 var(--mono);letter-spacing:.7px}
+  .mobile-text-scale{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-bottom:6px}
+  .mobile-text-scale .sdbtn{min-width:0;min-height:44px;padding:6px 3px;font-size:8px;white-space:normal;text-align:center}
 
   /* The landing board is part of the story on mobile too; layout.css scales it. */
   .tactical-board{display:grid!important}
@@ -828,38 +830,6 @@
   #introLand .mt{margin:0!important;font-size:10px!important;line-height:1.25!important}
   #introLand .mt small{margin-top:3px!important;font-size:8.5px!important;line-height:1.3!important}
 
-  .mobile-draft-context{
-    position:sticky;
-    z-index:20;
-    top:calc(4px + var(--copa-safe-top));
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    margin:0 0 8px;
-    padding:8px 9px;
-    border:1px solid var(--border-default);
-    border-radius:9px;
-    background:color-mix(in srgb,var(--surface-bg) 96%,transparent);
-    box-shadow:0 3px 10px rgba(10,17,24,.08);
-  }
-  .mobile-draft-kicker{
-    flex:0 0 auto;
-    color:var(--color-slate);
-    font:900 9px/1 var(--mono);
-    letter-spacing:.8px;
-  }
-  .mobile-draft-context>div{display:flex;min-width:0;gap:4px;overflow-x:auto;scrollbar-width:none}
-  .mobile-draft-context>div::-webkit-scrollbar{display:none}
-  .mobile-draft-context b{
-    flex:0 0 auto;
-    padding:5px 7px;
-    border-radius:6px;
-    background:var(--surface-muted);
-    color:var(--color-ink);
-    font:800 9px/1 var(--mono);
-    white-space:nowrap;
-  }
   .mobile-candidate-impact{
     display:block;
     margin-top:4px;
@@ -947,7 +917,7 @@
     padding:3px 6px;
     border-radius:999px;
     background:var(--color-primary);
-    color:var(--color-ink);
+    color:#101D28;
     font:900 8px/1 var(--mono);
     letter-spacing:.4px;
   }
@@ -1093,6 +1063,16 @@
   .scout-report-modal .scout-nm{font-size:9px!important}
   .scout-report-modal,.scout-report-modal *{max-width:100%;box-sizing:border-box}.scout-report-modal .scout-node[role="button"]{min-width:0!important;min-height:0!important}.scout-report-modal .scout-report-grid{grid-template-columns:1fr!important}.scout-report-modal .scout-derived{margin-top:10px}.scout-report-modal .scout-insight-card{padding:9px}.scout-report-modal .scout-key-row{grid-template-columns:minmax(62px,.9fr) minmax(0,1.2fr) auto;gap:5px}.scout-report-modal .scout-watch-card li{font-size:8px}
   button,[role="button"],.shopcard{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:not(:disabled):active,.shopcard:active{filter:brightness(.94);transition-duration:60ms!important}.mobile-action-dock button:not(:disabled):active{transform:translateY(1px)}
+  :is(#settingsDrop .sdbtn,.mobile-sim-tabs button,.speedrow .spd,.prep-level,.locker-target,.locker-tone,.pen-dir-btn){min-height:48px!important}
+  .mtile-info,.vsscout,.fixture-detail-close{min-width:44px!important;min-height:44px!important}
+
+  html{--copa-mobile-text-scale:1}
+  html[data-copa-text-scale="115"]{--copa-mobile-text-scale:1.15}
+  html[data-copa-text-scale="130"]{--copa-mobile-text-scale:1.3}
+  html[data-copa-text-scale]:not([data-copa-text-scale="100"]) :is(.mh,.ms,.kasa-sub,.dd-label,.opt-name,.simstats,.simstate,.comm,.radioband,.stat .l,.stat .v,.verdict,.result-action-label,.seedbox,.prep-status,.locker-tone small,.mobile-pref-label,.mobile-pref-state,.feeditem){
+    font-size:calc(9.5px * var(--copa-mobile-text-scale))!important;
+    line-height:1.35!important;
+  }
 
   html.copa-battery-saver *,
   html.copa-battery-saver *::before,

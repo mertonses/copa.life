@@ -28,6 +28,10 @@ expect(index.includes("src/state/transferSave.js"),"portable save transfer runti
 expect(nativeApp.includes("syncKnown")&&nativeApp.includes('addNativeListener("resume"'),"native lifecycle checkpoint/resume bridge is incomplete");
 expect(mobile.includes("ensureNativeHubNavigation")&&mobile.includes("openNativeBench")&&mobile.includes("closeNativeBench"),"native navigation or bench sheet is missing");
 expect(mobileCss.includes('data-copa-platform="android"')&&mobileCss.includes("native-bench-open"),"native-only responsive styles are missing");
+expect(mobile.includes("copa_mobile_text_scale")&&mobile.includes("data-mobile-text-scale")&&mobile.includes("setTextScale:writeTextScale"),"comfortable Android text sizing is missing");
+expect(mobileCss.includes('data-copa-text-scale="115"')&&mobileCss.includes('data-copa-text-scale="130"')&&mobileCss.includes("min-height:48px"),"Android text scaling or comfortable touch targets are missing");
+expect(index.includes('aria-expanded="false"')&&index.includes('aria-haspopup="true"'),"settings disclosure semantics are missing");
+expect(mobile.includes("CopaMatchAnalysis.isOpen()")&&nativeApp.includes("CopaMatchAnalysis.isOpen()"),"Android back handling does not prioritize match analysis");
 expect(analytics.includes("nativeOptIn")&&analytics.includes("copa_analytics_enabled")&&analytics.includes("platform:platform()"),"native platform analytics is not explicit opt-in or segmented");
 expect(privacyManifest.includes("NSPrivacyAccessedAPICategoryUserDefaults")&&privacyManifest.includes("CA92.1"),"iOS UserDefaults privacy reason is missing");
 
@@ -80,10 +84,12 @@ expect(transferSandbox.CopaRunPersistence.validate(run).ok,"mobile transfer test
 transferSandbox.CopaRunPersistence.persist(run);
 transferStorage.setItem("kupayolu",JSON.stringify({b:4,r:2}));
 transferStorage.setItem("copa_theme","dark");
+transferStorage.setItem("copa_mobile_text_scale","130");
 transferStorage.setItem("copa_ghost_client_id_v1","must-not-transfer");
 const code=transferSandbox.CopaTransferSave.exportCode();
 const decoded=transferSandbox.CopaTransferSave.decode(code);
 expect(decoded.run.savedAt===run.savedAt&&decoded.meta.kupayolu,"full transfer omitted run or career data");
+expect(decoded.preferences.copa_mobile_text_scale==="130","comfortable text size was omitted from portable save");
 expect(!Object.hasOwn(decoded.preferences,"copa_ghost_client_id_v1"),"online device identity leaked into portable save");
 let corruptRejected=false;
 try{transferSandbox.CopaTransferSave.decode(code.slice(0,-1)+(code.endsWith("A")?"B":"A"));}catch(_){corruptRejected=true;}

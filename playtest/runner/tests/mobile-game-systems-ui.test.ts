@@ -47,6 +47,15 @@ const reachDraw=async(page:any)=>{
   await expect(page.locator(".pc-mini-pitch .pc-mini-player")).toHaveCount(11);
   expect(await page.locator(".pc-warning").count()).toBeGreaterThanOrEqual(1);
   await expectSurfaceFit(page,".postcard");
+  const squadVisuals=await page.evaluate(()=>{
+    const pitch=getComputedStyle(document.querySelector<HTMLElement>(".pc-mini-pitch")!);
+    const warnings=[...document.querySelectorAll<HTMLElement>(".pc-warning")].map(node=>getComputedStyle(node).backgroundColor);
+    const ratings=[...document.querySelectorAll<HTMLElement>(".pc-mini-player b")].map(node=>getComputedStyle(node).color);
+    return{pitch: `${pitch.backgroundColor} ${pitch.backgroundImage}`,warnings,ratings:[...new Set(ratings)]};
+  });
+  expect(squadVisuals.pitch).toMatch(/31, 107, 69|radial-gradient/);
+  expect(squadVisuals.warnings.every((value:string)=>value!=="rgba(0, 0, 0, 0)")).toBe(true);
+  expect(squadVisuals.ratings.length).toBeGreaterThan(1);
   await page.locator("#postClubName").fill("Mobil Test FK");
   await page.evaluate(()=>(globalThis as any).pcGo());
   await expect(page.locator("#tournamentDraw")).toBeVisible();
@@ -65,33 +74,65 @@ test("native landing and three-step setup read as a mobile game",async({page},te
   await page.locator('#mobileGameLanding button[onclick*="newRun"]').click();
   await expect(page.locator('#introSetup [data-mobile-step="1"]')).toBeVisible();
   await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeHidden();
+  await expect(page.locator("#countryPick .country-name")).toHaveCount(6);
+  expect(await page.locator("#countryPick button").evaluateAll(buttons=>buttons.every(button=>button.querySelectorAll(".country-name").length===1))).toBe(true);
   const next=page.locator("[data-step-next]");
   await expect(next).toHaveCount(1);
   await next.click();
   await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeVisible();
+  await expect(page.locator(".formation-card-kicker")).toHaveCount(0);
+  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeVisible();
   await next.click();
   await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
   await expect(page.locator("#startBtn")).toBeVisible();
+  await page.locator("#startBtn").click();
+  await expect(page.locator(".style-select-modal")).toBeVisible();
+  await expect(page.locator(".style-impact-grid span")).toHaveCount(10);
+  expect(await page.locator(".style-impact-grid span").evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).backgroundColor!=="rgba(0, 0, 0, 0)"))).toBe(true);
+  await expectSurfaceFit(page,".style-select-modal");
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await page.evaluate(()=>(globalThis as any).showModal(`<div class="formation-unlock-modal"><div class="kithdr">TAKTİK LİSANSI</div><div class="kitsub">5-3-2 dizilişini kalıcı aç. İki tur arasında yalnız bir lisans kullanılabilir.</div><div class="bact"><button class="btn btn-primary">DİZİLİŞİ AÇ</button><button class="btn btn-ghost">VAZGEÇ</button></div></div>`));
+  await expectSurfaceFit(page,".formation-unlock-modal");
+  const licenseControls=await page.locator(".formation-unlock-modal").evaluate((modal:HTMLElement)=>{
+    const copy=modal.querySelector(".kitsub")!.getBoundingClientRect(),buttons=[...modal.querySelectorAll("button")].map(node=>node.getBoundingClientRect());
+    return{separated:buttons[0].top>=copy.bottom,nonOverlapping:buttons[1].top>=buttons[0].bottom};
+  });
+  expect(licenseControls).toEqual({separated:true,nonOverlapping:true});
   await capture(page,"02-native-setup-step3.png");
 });
 
-test("draft candidates compare three options inside a one-thumb control zone",async({page},testInfo)=>{
+test("draft candidates keep only the two useful quick actions",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.goto("/?native-game=1&visual=draft-controls",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{const game=globalThis as any;game.CopaMobileShell.newRun();await game.quickStart();if(game._countryDraftPromise)await game._countryDraftPromise;});
   await expect(page.locator("#draftThumbDock")).toBeVisible();
-  await expect(page.locator("#draftThumbDock [data-draft-filter]")).toHaveCount(6);
+  await expect(page.locator("#mobileDraftContext")).toHaveCount(0);
+  await expect(page.locator("#draftThumbDock .draft-thumb-head,#draftThumbDock [data-draft-filter]")).toHaveCount(0);
+  await expect(page.locator("#draftThumbDock button")).toHaveCount(2);
   await expect(page.locator("#draftThumbDock #allBtn")).toBeVisible();
   await expect(page.locator("#draftThumbDock #undoBtn")).toBeHidden();
-  await page.locator('[data-draft-filter="FWD"]').click();
+  const cashSurfaces=await page.locator("#draftKasaTile").evaluate((tile:HTMLElement)=>{
+    const states=["kasa-rich","kasa-positive","kasa-zero","kasa-debt","kasa-deep-debt"];
+    return states.map(state=>{
+      tile.classList.remove(...states);tile.classList.add(state);
+      const style=getComputedStyle(tile);
+      return style.backgroundImage+"|"+style.backgroundColor;
+    });
+  });
+  expect(new Set(cashSurfaces).size).toBe(5);
+  await page.evaluate(()=>(globalThis as any).setBudget());
   await page.locator("#rollBtn").click();
   await expect(page.locator("#opts .opt")).toHaveCount(3);
   await expect(page.locator("#opts .opt-forecast")).toHaveCount(3);
-  expect(await page.evaluate(()=>{const game=globalThis as any;return game.posGroup(game.slots[game.currentSlot][0]);})).toBe("FWD");
+  expect(await page.evaluate(()=>(globalThis as any)._draftPositionFilter)).toBe("ALL");
   const gallery=await page.locator("#opts").evaluate((element:HTMLElement)=>({overflow:element.scrollWidth-element.clientWidth,pageOverflow:document.documentElement.scrollWidth-innerWidth,columns:getComputedStyle(element).gridAutoColumns}));
   expect(gallery.overflow).toBeGreaterThan(0);
   expect(gallery.pageOverflow).toBeLessThanOrEqual(1);
+  await page.locator("#opts .opt").first().click();
+  await expect(page.locator("#draftThumbDock #undoBtn")).toBeVisible();
+  await expect(page.locator("#draftThumbDock #undoBtn")).toContainText(/geri al|undo/i);
+  await expect(page.locator("#draftThumbDock")).toHaveClass(/has-undo/);
   await capture(page,"03-draft-candidate-gallery.png");
 });
 
@@ -100,6 +141,17 @@ test("Phaser draw ceremony reveals a ball and preserves accessible controls",asy
   await reset(page);
   await page.goto("/?native-game=1&visual=draw",{waitUntil:"domcontentloaded"});
   await reachDraw(page);
+  const foreignClubs=await page.evaluate(()=>{
+    const game=globalThis as any,data=game.countryGameData(game.selectedCountry);
+    const domestic=new Set((data[1]||[]).map((name:any)=>String(name).trim().toLocaleLowerCase()));
+    for(const player of data[0]||[]){
+      const club=Array.isArray(player)?player[3]:player?.club||player?.team;
+      if(club)domestic.add(String(club).trim().toLocaleLowerCase());
+    }
+    const label=game.countryDisplayName(game.selectedCountry,game.LANG).toLocaleLowerCase();
+    return Object.values(game.tournament.teams).filter((team:any)=>team.id!=="player").map((team:any)=>team.name).filter((name:string)=>!domestic.has(name.trim().toLocaleLowerCase())&&!name.toLocaleLowerCase().startsWith(label+" "));
+  });
+  expect(foreignClubs).toEqual([]);
   await expect(page.locator("#phaserDrawStage canvas")).toBeVisible({timeout:15_000});
   await expect(page.locator(".td-group")).toHaveCount(8);
   await expect(page.locator(".td-group.is-eligible")).toHaveCount(8);
@@ -138,9 +190,24 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await reachDraw(page);
   await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
   await expect(page.locator("#hub")).toBeVisible();
+  await expect(page.locator("#feedwrap")).toBeVisible();
+  expect(await page.locator("#feedwrap").evaluate(node=>node.parentElement?.classList.contains("hcol-l"))).toBe(true);
+  const versusLayout=await page.locator(".vsbar").evaluate((bar:HTMLElement)=>{
+    const youCrest=bar.querySelector<HTMLElement>(".you .vs-crest")!.getBoundingClientRect(),youText=bar.querySelector<HTMLElement>(".you .vs-ti")!.getBoundingClientRect();
+    const oppCrest=bar.querySelector<HTMLElement>(".opp .vs-crest")!.getBoundingClientRect(),oppText=bar.querySelector<HTMLElement>(".opp .vs-ti")!.getBoundingClientRect();
+    return{youOrdered:youCrest.right<=youText.left+1,oppOrdered:oppText.right<=oppCrest.left+1,scoutInMiddle:!!bar.querySelector(".mid>.vsscout")};
+  });
+  expect(versusLayout).toEqual({youOrdered:true,oppOrdered:true,scoutInMiddle:true});
+  expect(await page.locator(".context-metric").evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).backgroundColor!=="rgba(0, 0, 0, 0)"||getComputedStyle(node).backgroundImage!=="none"))).toBe(true);
   await expect(page.locator("#nativeHubNav button")).toHaveCount(3);
   const coachmark=page.locator(".copa-coachmark");
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
+  await page.locator(".kasa-detail-btn").click();
+  await expect(page.locator(".cash-info-modal")).toBeVisible();
+  await expect(page.locator(".cash-info-modal .context-number")).toHaveCount(4);
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await page.locator("#presBtn").click();
+  await expect(page.locator("#toastContainer")).toContainText(/quarter-final|çeyrek final/i);
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
   await expect(page.locator("#hubPitch")).toBeVisible();
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
@@ -184,9 +251,10 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expectSurfaceFit(page,".meta-progress-modal");
   await capture(page,"07-club-career-dark.png");
   await page.evaluate(()=>(globalThis as any).setTheme("light"));
-  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme","dark");
+  await expect(page.locator("#themeSetting")).toHaveCount(0);
   await expectSurfaceFit(page,".meta-progress-modal");
-  await capture(page,"08-club-career-light.png");
+  await capture(page,"08-club-career-dark-only.png");
 });
 
 test("Phaser penalty canvas keeps ball and keeper directions tied to the core result",async({page},testInfo)=>{

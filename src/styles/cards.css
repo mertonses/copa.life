@@ -823,24 +823,27 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
 #hub .cardtile.is-dark{
   background:linear-gradient(180deg,#1F2B34 0%,#17242D 100%);
   color:#FFFFFF;
-  border-color:color-mix(in srgb,var(--brand-burgundy) 72%,#17242D);
-  box-shadow:0 0 0 1px color-mix(in srgb,#17242D 72%,var(--border-subtle)),0 3px 10px rgba(16,29,40,.18);
+  border-color:#0A1118;
+  box-shadow:0 0 0 1px #0A1118,0 3px 10px rgba(10,17,24,.24);
 }
 #hub .cardtile.is-dark:hover:not(.cant){
-  border-color:var(--brand-burgundy);
-  box-shadow:0 0 0 2px color-mix(in srgb,#17242D 76%,var(--border-subtle)),0 8px 20px rgba(16,29,40,.24);
+  border-color:#0A1118;
+  box-shadow:0 0 0 2px #0A1118,0 8px 20px rgba(10,17,24,.3);
 }
 #hub .cardtile.is-dark .ct-head{
-  background:color-mix(in srgb,#101D28 78%,var(--brand-burgundy));
+  background:#0A1118;
   color:#FFFFFF;
-  border-left-color:var(--brand-burgundy);
+  border-left-color:#0A1118;
   border-bottom-color:rgba(255,255,255,.18);
 }
 #hub .cardtile.is-dark .ct-darkflag{
-  background:var(--brand-burgundy);
+  background:#0A1118;
   color:#FFFFFF;
   border-color:rgba(255,255,255,.52);
 }
+#hub .cardtile.is-common{border-color:#BCC2C2}
+#hub .cardtile.is-common .ct-head{background:#E4E8E7;color:#101D28;border-left-color:#E4E8E7}
+#hub .cardtile.is-common .ct-rar{background:#E4E8E7!important;color:#101D28!important;border-color:#AAB2B3!important}
 #hub .cardtile.is-dark .ct-titlegroup .ct-art{
   background:rgba(255,255,255,.06);
   border-color:rgba(255,255,255,.22);

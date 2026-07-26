@@ -6,7 +6,7 @@
   const SCHEMA=1;
   const MAX_CODE_LENGTH=3_000_000;
   const META_KEYS=["kupayolu","copa_meta_progression_v1","copa_cardmem","copa_mvp"];
-  const PREFERENCE_KEYS=["copa.language","copa_country","copa_theme","copa_music","copa_sfx","copa_spd","copa_reduced_motion","copa_mobile_haptics","copa_mobile_battery","copa_mobile_smart_speed","copa_mobile_confirm_pick","copa_mobile_field_focus"];
+  const PREFERENCE_KEYS=["copa.language","copa_country","copa_music","copa_sfx","copa_spd","copa_reduced_motion","copa_mobile_haptics","copa_mobile_battery","copa_mobile_smart_speed","copa_mobile_confirm_pick","copa_mobile_field_focus","copa_mobile_text_scale"];
   const storage=global.CopaPlatform&&global.CopaPlatform.storage||global.localStorage;
   const get=key=>{try{return storage&&storage.getItem(key);}catch(_){return null;}};
   const set=(key,value)=>{try{return storage&&storage.setItem(key,String(value));}catch(_){return false;}};

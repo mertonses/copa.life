@@ -75,8 +75,18 @@
     enhanceSetupChoices();
   }
   function enhanceSetupChoices(){
-    document.querySelectorAll("#countryPick button").forEach(button=>{button.classList.add("mobile-country-card");const name=button.childNodes[button.childNodes.length-1];if(name&&name.nodeType===3){const label=document.createElement("span");label.className="country-name";label.textContent=name.textContent.trim();name.replaceWith(label);}});
-    document.querySelectorAll("#formpick .fbtn").forEach(button=>{button.classList.add("mobile-formation-card");if(!button.querySelector(".formation-card-kicker"))button.insertAdjacentHTML("afterbegin",`<span class="formation-card-kicker">${tr()?"TAKTİK TAHTASI":"TACTICAL BOARD"}</span>`);});
+    document.querySelectorAll("#countryPick button").forEach(button=>{
+      button.classList.add("mobile-country-card");
+      const textNodes=[...button.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
+      let label=button.querySelector(".country-name");
+      if(!label){label=document.createElement("span");label.className="country-name";button.appendChild(label);}
+      if(textNodes.length)label.textContent=textNodes[textNodes.length-1].textContent.trim();
+      textNodes.forEach(node=>node.remove());
+    });
+    document.querySelectorAll("#formpick .fbtn").forEach(button=>{
+      button.classList.add("mobile-formation-card");
+      button.querySelectorAll(".formation-card-kicker").forEach(node=>node.remove());
+    });
     document.querySelectorAll("#chairpick .chairbtn").forEach(button=>{
       button.classList.add("mobile-chair-card");
       if(button.querySelector(".chair-mobile-meta"))return;
@@ -236,40 +246,18 @@
     const captainAction=!good&&typeof root.canUseCaptainDecision==="function"&&root.canUseCaptainDecision()?`<button class="btn btn-primary" onclick="useCaptainDecision()">${tr()?"KAPTAN ARAYA GİRSİN":"LET THE CAPTAIN STEP IN"}</button>`:"";
     root.showModal(`<div class="locker-result ${good?"is-good":"is-bad"}"><div class="locker-reaction" aria-hidden="true">${good?"↑":"↓"}</div><span>${tr()?"SOYUNMA ODASI":"LOCKER ROOM"}</span><h3>${result.name} · ${result.targetName}</h3><div class="locker-result-chips"><b>${tr()?"Odak":"Focus"} ${result.focus>=0?"+":""}${result.focus}</b><b>${tr()?"İlk 20 dk":"First 20"} ${result.first20>=0?"+":""}${result.first20}</b>${result.injuryRisk?`<b>${tr()?"Sakatlık riski":"Injury risk"} +${Math.round(result.injuryRisk*100)}%</b>`:""}</div>${captainAction}<button class="btn ${captainAction?"btn-ghost":"btn-primary"}" onclick="closeModal();renderHub()">${tr()?"MAÇA HAZIR":"READY"}</button></div>`,{label:tr()?"Konuşma sonucu":"Talk result"});
   }
-  const DRAFT_FILTERS={
-    ALL:["TÜMÜ","ALL"],
-    GK:["KALE","GOAL"],
-    DEF:["SAVUNMA","DEFENCE"],
-    MID:["ORTA SAHA","MIDFIELD"],
-    WNG:["KANAT","WINGS"],
-    FWD:["HÜCUM","ATTACK"]
-  };
-  function setDraftPositionFilter(key,silent){
-    const next=DRAFT_FILTERS[key]?key:"ALL",dock=document.getElementById("draftThumbDock");
-    root._draftPositionFilter=next;
-    if(dock)dock.querySelectorAll("[data-draft-filter]").forEach(button=>{
-      const active=button.dataset.draftFilter===next;
-      button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
-    });
-    if(!silent&&root.CopaMobileExperience)root.CopaMobileExperience.haptic(8);
-    const label=DRAFT_FILTERS[next][tr()?0:1];
-    if(!silent&&typeof root.showToast==="function")root.showToast((tr()?"Mevki filtresi: ":"Position filter: ")+label);
-  }
   function enhanceDraftControls(){
     const dock=document.getElementById("draftThumbDock"),rollButtons=document.getElementById("rollbtns");
     if(!dock||!rollButtons)return;
     if(!dock.dataset.ready){
       dock.dataset.ready="1";
-      dock.innerHTML=`<div class="draft-thumb-head"><span>${tr()?"TEK BAŞPARMAK KONTROLÜ":"ONE-THUMB CONTROL"}</span><small>${tr()?"Mevki seç, geri al veya kadroyu tamamla":"Filter, undo or complete the XI"}</small></div><div class="draft-position-filters" role="group" aria-label="${tr()?"Mevki filtresi":"Position filter"}">${Object.keys(DRAFT_FILTERS).map(key=>`<button type="button" data-draft-filter="${key}" aria-pressed="${key==="ALL"?"true":"false"}" class="${key==="ALL"?"active":""}">${DRAFT_FILTERS[key][tr()?0:1]}</button>`).join("")}</div><div class="draft-quick-actions"></div>`;
-      dock.addEventListener("click",event=>{const button=event.target.closest("[data-draft-filter]");if(button)setDraftPositionFilter(button.dataset.draftFilter);});
+      dock.innerHTML='<div class="draft-quick-actions"></div>';
     }
     const actions=dock.querySelector(".draft-quick-actions");
     ["allBtn","undoBtn"].forEach(id=>{const element=document.getElementById(id);if(element&&element.parentElement!==actions)actions.appendChild(element);});
-    const slider=document.querySelector(".autofill-wrap");if(slider&&slider.parentElement!==actions)actions.appendChild(slider);
     const undo=document.getElementById("undoBtn"),auto=document.getElementById("allBtn");
     if(undo)undo.style.cssText="";if(auto)auto.style.cssText="";
-    if(!root._draftPositionFilter)root._draftPositionFilter="ALL";
-    setDraftPositionFilter(root._draftPositionFilter,true);
+    root._draftPositionFilter="ALL";
   }
   function init(){
     if(gameMode())document.documentElement.classList.add("copa-mobile-game");
@@ -288,6 +276,6 @@
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
-  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,setDraftPositionFilter,openCard,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,init};
+  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCard,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,init};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })(window);

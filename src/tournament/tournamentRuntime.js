@@ -65,25 +65,36 @@
   }
   function createState(){
     const data=root.countryGameData(root.selectedCountry),power=root.squadPower(1).power;
-    /* A 32-team Copa needs a wider field than several domestic datasets provide.
-       Keep the selected league first, then fill the remaining pots from the other
-       supported leagues. The engine still deduplicates names deterministically. */
-    const countryOrder=[root.selectedCountry,"TR","IT","ENG","ES","DE","JP"].filter((code,index,list)=>code&&list.indexOf(code)===index);
-    const tournamentPool=countryOrder.flatMap(code=>{
-      try{const countryData=root.countryGameData(code);return Array.isArray(countryData&&countryData[1])?countryData[1]:[];}catch(_){return[];}
-    });
+    /* A national cup must remain national. Small country datasets are completed
+       with domestic reserve clubs instead of silently importing foreign teams. */
+    const tournamentPool=Array.isArray(data&&data[1])?data[1].slice():[];
+    const playerClubs=(Array.isArray(data&&data[0])?data[0]:[]).map(player=>{
+      if(!player)return"";
+      if(typeof player==="object"&&!Array.isArray(player))return player.club||player.team||"";
+      return Array.isArray(player)?player[3]||"":"";
+    }).filter(Boolean);
+    playerClubs.forEach(club=>tournamentPool.push(club));
+    const domesticLabel=typeof root.countryDisplayName==="function"?root.countryDisplayName(root.selectedCountry,root.LANG):root.selectedCountry;
+    const existing=new Set(tournamentPool.map(name=>String(name||"").trim().toLocaleLowerCase()).filter(Boolean));
+    for(let index=1;existing.size<31;index++){
+      const name=`${domesticLabel} ${root.LANG==="tr"?"Bölgesel Kulüp":"Regional Club"} ${String(index).padStart(2,"0")}`;
+      const key=name.toLocaleLowerCase();if(existing.has(key))continue;
+      existing.add(key);tournamentPool.push(name);
+    }
     const previous=readLastDraw(),base=`${root.seedNum}|${drawEntropy()}`;let candidate=null,identity=null;
     for(let attempt=0;attempt<256;attempt++){
       candidate=root.CopaTournamentEngine.createTournament({seed:`${base}|${attempt}`,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:tournamentPool,powerBases:data[2]});
       identity=drawIdentity(candidate);
       if(!previous||(identity.group!==previous.group&&identity.signature!==previous.signature))break;
     }
+    candidate.countryCode=root.selectedCountry;
     root.tournament=candidate;rememberDraw(identity);
     root.tournamentFormat="groups32_v2";root._roundCompletionTracked=0;syncSchedule();
   }
   function renderDraw(){const app=document.getElementById("tournamentDrawApp");if(root.CopaTournamentUI)root.CopaTournamentUI.renderDraw(app,root.tournament,copy());}
   function startDraw(restoring){
-    if(!root.CopaTournamentEngine)return false;if(!active())createState();
+    if(!root.CopaTournamentEngine)return false;
+    if(!active()||(root.tournament.phase==="draw"&&root.tournament.countryCode!==root.selectedCountry))createState();
     if(root.CopaRunState&&root.CopaRunState.phase!=="draw"){const moved=root.CopaRunState.transition("draw",{reason:restoring?"restore_draw":"squad_complete"});if(!moved.ok)return false;}
     for(const id of ["intro","draft","hub","sim","result"]){const element=document.getElementById(id);if(element)element.classList.add("hidden");}
     const section=document.getElementById("tournamentDraw");if(section)section.classList.remove("hidden");

@@ -2630,7 +2630,8 @@ function buildSim(myPow, oppPow) {
     calcRatings();
     if(typeof window._captureLastMatchReportSnapshot==="function")window._captureLastMatchReportSnapshot({
       score:[score[0],score[1]],events:goalEvents.slice(),homeWon:won,homeRatings:window.lastMatchRatings,
-      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:window.motm
+      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:window.motm,
+      analysis:{power:myPow,oppPower:oppPow,xg:stats.xg.slice(),shots:stats.shots.slice(),saves:stats.saves.slice(),possession:stats.possession.slice(),decisionCount:decisionLog.length,tactic:shoutMode||"balanced"}
     });
     _dom("simScore",sc);
     setTimeout(()=>endRun(won,sc),900);
@@ -2710,7 +2711,8 @@ function buildSim(myPow, oppPow) {
     calcRatings();
     if(typeof window._captureLastMatchReportSnapshot==="function")window._captureLastMatchReportSnapshot({
       score:[score[0],score[1]],events:goalEvents.slice(),homeWon:false,homeRatings:window.lastMatchRatings,
-      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:null
+      homeSlots:_fmA,awaySlots:_fmB,awayFormation:_ghostFormation||"4-3-3",isFinal:true,motm:null,
+      analysis:{power:myPow,oppPower:oppPow,xg:stats.xg.slice(),shots:stats.shots.slice(),saves:stats.saves.slice(),possession:stats.possession.slice(),decisionCount:decisionLog.length,tactic:shoutMode||"balanced"}
     });
     _dom("simState",isTR?"PENALTILAR":"PENALTIES");
     const stateEl=document.getElementById("simState");if(stateEl)stateEl.classList.remove("is-golden");

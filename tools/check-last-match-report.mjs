@@ -4,12 +4,20 @@ import vm from "node:vm";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const read = file => fs.readFileSync(path.join(ROOT, file), "utf8");
-const context = { console };
+const context = {
+  console,
+  document: {
+    addEventListener() {},
+    getElementById() { return null; },
+  },
+};
 context.window = context;
+context.LANG = "tr";
 context.groupOf = pos => pos === "GK" ? "GK" : ["CB", "LB", "RB", "WB"].includes(pos) ? "DEF" : ["ST", "LW", "RW"].includes(pos) ? "FWD" : "MID";
 vm.createContext(context);
 vm.runInContext(read("src/data/formations.js"), context);
 vm.runInContext(read("src/ui/lastMatchReport.js"), context);
+vm.runInContext(read("src/ui/matchAnalysis.js"), context);
 
 const api = context.LastMatchReport;
 if (!api) throw new Error("LastMatchReport global API yüklenmedi");
@@ -63,12 +71,29 @@ const report = api.capture({
   homeRatings: [{ name: "Home Player 1", rating: 8.4 }],
   seed: 1234,
   motm: "Home Player 10",
+  analysis: {
+    power: 83,
+    oppPower: 81,
+    xg: [2.8, 1.1],
+    shots: [13, 7],
+    saves: [2, 4],
+    cardBonus: 2,
+  },
 });
 if (!report || report.home.length !== 11 || report.away.length !== 11) throw new Error("Son maç ilk 11 snapshot'ı eksik");
 if (report.home[0].rating !== 8.4 || report.home[0].rating === report.home[0].player.ov) throw new Error("Maç rating'i OVR'dan ayrı korunmuyor");
 if (!report.home.every(item => item.rating >= 4.5 && item.rating <= 9.5) || !report.away.every(item => item.rating >= 4.5 && item.rating <= 9.5)) throw new Error("Maç rating aralığı geçersiz");
 if (report.home[8].stats.goals !== 1 || report.home[9].stats.goals !== 2 || report.away[9].stats.goals !== 1 || report.home[3].stats.yellow !== 1) throw new Error("Gerçek event verisi oyunculara bağlanmadı");
 if (report.motm.name !== "Home Player 10") throw new Error("Maçın oyuncusu snapshot'a bağlanmadı");
+if (report.version !== 2 || report.analysis.cardBonus !== 2) throw new Error("Maç analizi snapshot verisi korunmadı");
+
+const analysisApi = context.CopaMatchAnalysis;
+if (!analysisApi) throw new Error("CopaMatchAnalysis global API yüklenmedi");
+const reasons = analysisApi.build(report, null);
+if (reasons.length !== 3) throw new Error(`Maç analizi üç neden üretmedi: ${reasons.length}`);
+if (reasons.map(item => item.key).join(",") !== "expectation,turning,decision") throw new Error("Maç analizi neden sırası tutarsız");
+if (!reasons.every(item => item.label && item.text)) throw new Error("Maç analizi boş neden üretti");
+if (!analysisApi.triggerHTML().includes('aria-haspopup="dialog"')) throw new Error("Maç analizi erişilebilir tetikleyicisi eksik");
 
 api.setPenalty("2–2", "5-4", true);
 if (report.score.join("-") !== "2-2" || report.penalty.join("-") !== "5-4" || !report.homeWon) throw new Error("Penaltı sonucu son maç raporuna eklenmedi");
@@ -87,8 +112,9 @@ const index = read("index.html");
 const lazyAssets = read("src/runtime/lazyAssets.js");
 const finalSim = read("src/sim/finalSim.js");
 const css = read("src/styles/match.css");
+const analysisCss = read("src/styles/matchAnalysis.css");
 const sw = read("sw.js");
-for (const marker of ["src/ui/lastMatchReport.js", "_captureLastMatchReportSnapshot", "LastMatchReport.render", "LastMatchReport.setPenalty"]) {
+for (const marker of ["src/ui/lastMatchReport.js", "src/ui/matchAnalysis.js", "_captureLastMatchReportSnapshot", "LastMatchReport.render", "LastMatchReport.setPenalty", "CopaMatchAnalysis.mountResultEntry"]) {
   if (!(index + lazyAssets).includes(marker)) throw new Error(`Run sonu bağlantısı eksik: ${marker}`);
 }
 for (const marker of ["homeRatings:window.lastMatchRatings", "homeSlots:_fmA", "awaySlots:_fmB"]) {
@@ -98,5 +124,9 @@ for (const marker of [".last-match-report", ".lmr-pitch", ".lmr-player", ".lmr-h
   if (!css.includes(marker)) throw new Error(`Son maç responsive/dark stili eksik: ${marker}`);
 }
 if (!sw.includes('/src/ui/lastMatchReport.js')) throw new Error("Son maç raporu Service Worker önbelleğine eklenmedi");
+for (const marker of [".match-analysis-trigger", ".match-analysis-dialog", ".match-analysis-reason", "@media(max-width:760px)"]) {
+  if (!analysisCss.includes(marker)) throw new Error(`Maç analizi responsive stili eksik: ${marker}`);
+}
+if (!sw.includes("/src/ui/matchAnalysis.js") || !sw.includes("/src/styles/matchAnalysis.css")) throw new Error("Maç analizi Service Worker önbelleğine eklenmedi");
 
-console.log("Last-match report checks passed: mirrored 22-player pitch, event ratings, penalties, profiles and responsive UI.");
+console.log("Last-match report checks passed: pitch, ratings, penalties, profiles and three-factor match analysis.");

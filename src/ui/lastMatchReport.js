@@ -76,7 +76,8 @@ function capture(input){
   const homeFormation=value.homeFormation||"4-3-3",awayFormation=value.awayFormation||"4-3-3";
   const homeSlots=Array.isArray(value.homeSlots)&&value.homeSlots.length?value.homeSlots:formationSlots(homeFormation,[]),awaySlots=Array.isArray(value.awaySlots)&&value.awaySlots.length?value.awaySlots:formationSlots(awayFormation,[]);
   const seed=Number(value.seed)||0,home=buildSide(homePlayers,homeSlots,events,"home",score,seed,value.homeRatings),away=buildSide(awayPlayers,awaySlots,events,"away",score,seed+97,value.awayRatings);
-  const report={version:1,round:Math.max(1,Number(value.round)||1),isFinal:!!value.isFinal||Number(value.round)>=7,homeName:String(value.homeName||"XI"),awayName:String(value.awayName||"Opponent"),homeFormation:homeFormation,awayFormation:awayFormation,homePower:finite(value.homePower),awayPower:finite(value.awayPower),score:score,penalty:null,homeWon:value.homeWon==null?score[0]>score[1]:!!value.homeWon,events:events,home:home,away:away,homeAverage:average(home),awayAverage:average(away)};
+  const analysis=value.analysis&&typeof value.analysis==="object"?JSON.parse(JSON.stringify(value.analysis)):null;
+  const report={version:2,round:Math.max(1,Number(value.round)||1),isFinal:!!value.isFinal||Number(value.round)>=7,homeName:String(value.homeName||"XI"),awayName:String(value.awayName||"Opponent"),homeFormation:homeFormation,awayFormation:awayFormation,homePower:finite(value.homePower),awayPower:finite(value.awayPower),score:score,penalty:null,homeWon:value.homeWon==null?score[0]>score[1]:!!value.homeWon,events:events,home:home,away:away,homeAverage:average(home),awayAverage:average(away),analysis:analysis};
   const namedMotm=String(value.motm||"");report.motm=home.concat(away).find(function(item){return namedMotm&&nameMatches(item.name,namedMotm);})||bestOf(home.concat(away));report.bestOpponent=bestOf(away);
   global.lastMatchReportData=report;return report;
 }
