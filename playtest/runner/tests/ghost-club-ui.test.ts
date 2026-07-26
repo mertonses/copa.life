@@ -169,7 +169,7 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   const body=page.locator(".advanced-body");
   await expect(body).toBeVisible();
   await expect(body.locator(".advanced-section")).toHaveCount(4);
-  await expect(body.locator(".advanced-section-title")).toHaveText(["RUN AYARLARI","KAYIT AKTARIMI","GHOST CLUB","VERİ VE GİZLİLİK"]);
+  await expect(body.locator(".advanced-section-title")).toHaveText(["TUR AYARLARI","KAYIT AKTARIMI","GHOST CLUB","VERİ VE GİZLİLİK"]);
   const ghostHelp=page.locator(".advanced-help");
   const ghostHelpToggle=ghostHelp.locator("summary");
   await expect(ghostHelpToggle).toHaveText("?");
@@ -177,7 +177,7 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   await expect(page.locator("#ghostHelpCopy")).toBeHidden();
   await ghostHelpToggle.click();
   await expect(page.locator("#ghostHelpCopy")).toBeVisible();
-  await expect(page.locator("#ghostHelpCopy")).toHaveText("Ghost Club, gerçek oyuncuların tamamladığı run'lardan oluşan rakip havuzudur. Rakip, paylaşım ve Dünya sıralaması birbirinden bağımsızdır; yalnız açtığın özellik veri gönderir.");
+  await expect(page.locator("#ghostHelpCopy")).toHaveText("Ghost Club, gerçek oyuncuların tamamladığı turlardan oluşan rakip havuzudur. Rakip, paylaşım ve Dünya sıralaması birbirinden bağımsızdır; yalnız açtığın özellik veri gönderir.");
   await ghostHelpToggle.click();
   await expect(page.locator("#seedInput")).toHaveValue("");
   await expect(page.locator("#seedInput")).toHaveAttribute("placeholder","Rastgele oluşturulur");
@@ -191,13 +191,13 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   await expect(page.locator("#ghostClubSetting .ghost-setting-option")).toHaveCount(3);
   expect(await page.locator("#ghostClubSetting .ghost-setting-option").first().locator(":scope > *").evaluateAll(nodes=>nodes.map(node=>node.id))).toEqual(["ghostClubSettingHdr","ghostClubToggle","ghostClubSettingCopy"]);
   await expect(page.locator("#ghostClubSettingHdr")).toHaveText("GHOST RAKİPLER");
-  await expect(page.locator("#ghostClubSettingCopy")).toHaveText("Bu run uygun bir Ghost rakiple eşleşilebilir.");
-  await expect(page.locator("#ghostShareSettingCopy")).toHaveText("Kulübün run sonunda Ghost havuzuna katılmaz.");
-  await expect(page.locator("#leaderboardSettingCopy")).toHaveText("Kulüp profilin yayınlanmaz ve koşuların sıralamaya gönderilmez.");
+  await expect(page.locator("#ghostClubSettingCopy")).toHaveText("Bu tur uygun bir Ghost rakiple eşleşilebilir.");
+  await expect(page.locator("#ghostShareSettingCopy")).toHaveText("Kulübün tur sonunda Ghost havuzuna katılmaz.");
+  await expect(page.locator("#leaderboardSettingCopy")).toHaveText("Kulüp profilin yayınlanmaz ve turların sıralamaya gönderilmez.");
   await page.locator("#ghostClubToggle").click();
   await expect(page.locator("#ghostClubToggle")).toHaveAttribute("aria-pressed","false");
-  await expect(page.locator("#ghostClubSettingCopy")).toHaveText("Bu run uygun bir Ghost rakiple eşleşemez.");
-  await expect(page.locator("#ghostShareSettingCopy")).toHaveText("Kulübün run sonunda Ghost havuzuna katılmaz.");
+  await expect(page.locator("#ghostClubSettingCopy")).toHaveText("Bu tur uygun bir Ghost rakiple eşleşemez.");
+  await expect(page.locator("#ghostShareSettingCopy")).toHaveText("Kulübün tur sonunda Ghost havuzuna katılmaz.");
 
   const privacy=page.locator("#advancedPrivacySlot #ghostSettingPrivacy");
   await expect(privacy).toBeVisible();

@@ -2,18 +2,18 @@
 "use strict";
 
 const COPY={
-  tr:{last:"SON MAÇ",yours:"SENİN 11'İN",opponent:"RAKİP 11",avg:"Ort. Rating",power:"Takım Gücü",formation:"Diziliş",performance:"Son maç performansı",motm:"MAÇIN OYUNCUSU",threat:"EN ETKİLİ RAKİP",won:"GALİBİYET",lost:"MAĞLUBİYET",draw:"BERABERLİK",penWon:"PENALTILARLA GALİBİYET",penLost:"PENALTILARLA MAĞLUBİYET",champion:"Şampiyonluğu getiren final",exit:"Kupaya veda ettiğin maç",lastValid:"Run'ın son oynanan maçı",goal:"Gol",assist:"Asist",yellow:"Sarı kart",red:"Kırmızı kart",injury:"Sakatlık",star:"Maçın oyuncusu",pen:"Pen."},
+  tr:{last:"SON MAÇ",yours:"SENİN 11'İN",opponent:"RAKİP 11",avg:"Ort. Rating",power:"Takım Gücü",formation:"Diziliş",performance:"Son maç performansı",motm:"MAÇIN OYUNCUSU",threat:"EN ETKİLİ RAKİP",won:"GALİBİYET",lost:"MAĞLUBİYET",draw:"BERABERLİK",penWon:"PENALTILARLA GALİBİYET",penLost:"PENALTILARLA MAĞLUBİYET",champion:"Şampiyonluğu getiren final",exit:"Kupaya veda ettiğin maç",lastValid:"Turun son oynanan maçı",goal:"Gol",assist:"Asist",yellow:"Sarı kart",red:"Kırmızı kart",injury:"Sakatlık",star:"Maçın oyuncusu",pen:"Pen."},
   en:{last:"LAST MATCH",yours:"YOUR XI",opponent:"OPPONENT XI",avg:"Avg. Rating",power:"Team Power",formation:"Formation",performance:"Last-match performance",motm:"PLAYER OF THE MATCH",threat:"TOP OPPONENT",won:"WIN",lost:"DEFEAT",draw:"DRAW",penWon:"WIN ON PENALTIES",penLost:"DEFEAT ON PENALTIES",champion:"The final that delivered the title",exit:"The match that ended your cup run",lastValid:"The run's last played match",goal:"Goal",assist:"Assist",yellow:"Yellow card",red:"Red card",injury:"Injury",star:"Player of the match",pen:"Pens"},
   es:{last:"ÚLTIMO PARTIDO",yours:"TU XI",opponent:"XI RIVAL",avg:"Nota media",power:"Fuerza",formation:"Formación",performance:"Rendimiento del último partido",motm:"JUGADOR DEL PARTIDO",threat:"RIVAL MÁS DESTACADO",won:"VICTORIA",lost:"DERROTA",draw:"EMPATE",penWon:"VICTORIA EN PENALTIS",penLost:"DERROTA EN PENALTIS",champion:"La final que dio el título",exit:"El partido de la eliminación",lastValid:"Último partido disputado",goal:"Gol",assist:"Asistencia",yellow:"Tarjeta amarilla",red:"Tarjeta roja",injury:"Lesión",star:"Jugador del partido",pen:"Pen."},
   de:{last:"LETZTES SPIEL",yours:"DEINE ELF",opponent:"GEGNERISCHE ELF",avg:"Ø Bewertung",power:"Teamstärke",formation:"Formation",performance:"Leistung im letzten Spiel",motm:"SPIELER DES SPIELS",threat:"STÄRKSTER GEGNER",won:"SIEG",lost:"NIEDERLAGE",draw:"REMIS",penWon:"SIEG IM ELFERSCHIESSEN",penLost:"NIEDERLAGE IM ELFERSCHIESSEN",champion:"Das Finale zum Titel",exit:"Das Ausscheidungsspiel",lastValid:"Das letzte gespielte Match",goal:"Tor",assist:"Vorlage",yellow:"Gelbe Karte",red:"Rote Karte",injury:"Verletzung",star:"Spieler des Spiels",pen:"Elf."},
   it:{last:"ULTIMA PARTITA",yours:"IL TUO XI",opponent:"XI AVVERSARIO",avg:"Media voto",power:"Forza squadra",formation:"Modulo",performance:"Prestazione nell'ultima partita",motm:"UOMO PARTITA",threat:"MIGLIOR AVVERSARIO",won:"VITTORIA",lost:"SCONFITTA",draw:"PAREGGIO",penWon:"VITTORIA AI RIGORI",penLost:"SCONFITTA AI RIGORI",champion:"La finale che ha dato il titolo",exit:"La partita dell'eliminazione",lastValid:"L'ultima partita giocata",goal:"Gol",assist:"Assist",yellow:"Cartellino giallo",red:"Cartellino rosso",injury:"Infortunio",star:"Uomo partita",pen:"Rig."}
 };
 const STAGES={
-  tr:["GRUP · 1. MAÇ","GRUP · 2. MAÇ","GRUP · 3. MAÇ","ÇEYREK FİNAL","YARI FİNAL","FİNAL"],
-  en:["GROUP · MATCH 1","GROUP · MATCH 2","GROUP · MATCH 3","QUARTER FINAL","SEMI FINAL","FINAL"],
-  es:["GRUPO · PARTIDO 1","GRUPO · PARTIDO 2","GRUPO · PARTIDO 3","CUARTOS DE FINAL","SEMIFINAL","FINAL"],
-  de:["GRUPPE · SPIEL 1","GRUPPE · SPIEL 2","GRUPPE · SPIEL 3","VIERTELFINALE","HALBFINALE","FINALE"],
-  it:["GIRONE · PARTITA 1","GIRONE · PARTITA 2","GIRONE · PARTITA 3","QUARTI DI FINALE","SEMIFINALE","FINALE"]
+  tr:["GRUP · 1. MAÇ","GRUP · 2. MAÇ","GRUP · 3. MAÇ","SON 16","ÇEYREK FİNAL","YARI FİNAL","FİNAL"],
+  en:["GROUP · MATCH 1","GROUP · MATCH 2","GROUP · MATCH 3","ROUND OF 16","QUARTER FINAL","SEMI FINAL","FINAL"],
+  es:["GRUPO · PARTIDO 1","GRUPO · PARTIDO 2","GRUPO · PARTIDO 3","OCTAVOS","CUARTOS DE FINAL","SEMIFINAL","FINAL"],
+  de:["GRUPPE · SPIEL 1","GRUPPE · SPIEL 2","GRUPPE · SPIEL 3","ACHTELFINALE","VIERTELFINALE","HALBFINALE","FINALE"],
+  it:["GIRONE · PARTITA 1","GIRONE · PARTITA 2","GIRONE · PARTITA 3","OTTAVI","QUARTI DI FINALE","SEMIFINALE","FINALE"]
 };
 
 function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(char){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];});}
@@ -76,7 +76,7 @@ function capture(input){
   const homeFormation=value.homeFormation||"4-3-3",awayFormation=value.awayFormation||"4-3-3";
   const homeSlots=Array.isArray(value.homeSlots)&&value.homeSlots.length?value.homeSlots:formationSlots(homeFormation,[]),awaySlots=Array.isArray(value.awaySlots)&&value.awaySlots.length?value.awaySlots:formationSlots(awayFormation,[]);
   const seed=Number(value.seed)||0,home=buildSide(homePlayers,homeSlots,events,"home",score,seed,value.homeRatings),away=buildSide(awayPlayers,awaySlots,events,"away",score,seed+97,value.awayRatings);
-  const report={version:1,round:Math.max(1,Number(value.round)||1),isFinal:!!value.isFinal||Number(value.round)>=6,homeName:String(value.homeName||"XI"),awayName:String(value.awayName||"Opponent"),homeFormation:homeFormation,awayFormation:awayFormation,homePower:finite(value.homePower),awayPower:finite(value.awayPower),score:score,penalty:null,homeWon:value.homeWon==null?score[0]>score[1]:!!value.homeWon,events:events,home:home,away:away,homeAverage:average(home),awayAverage:average(away)};
+  const report={version:1,round:Math.max(1,Number(value.round)||1),isFinal:!!value.isFinal||Number(value.round)>=7,homeName:String(value.homeName||"XI"),awayName:String(value.awayName||"Opponent"),homeFormation:homeFormation,awayFormation:awayFormation,homePower:finite(value.homePower),awayPower:finite(value.awayPower),score:score,penalty:null,homeWon:value.homeWon==null?score[0]>score[1]:!!value.homeWon,events:events,home:home,away:away,homeAverage:average(home),awayAverage:average(away)};
   const namedMotm=String(value.motm||"");report.motm=home.concat(away).find(function(item){return namedMotm&&nameMatches(item.name,namedMotm);})||bestOf(home.concat(away));report.bestOpponent=bestOf(away);
   global.lastMatchReportData=report;return report;
 }
@@ -108,7 +108,7 @@ function powerTone(value){return value>=85?"strong":value>=75?"decent":value>=60
 function teamHeader(side,label,name,formation,avg,power,copy){
   return '<div class="lmr-team-head is-'+side+'"><span>'+esc(label)+'</span><strong>'+esc(name)+'</strong><small>'+esc(copy.avg)+' <b class="is-'+ratingTone(avg||0)+'">'+(avg==null?'—':avg.toFixed(1))+'</b> · '+esc(copy.formation)+' '+esc(formation)+(power==null?'':' · '+esc(copy.power)+' <b class="is-'+powerTone(power)+'">'+Math.round(power)+'</b>')+'</small></div>';
 }
-function stageFor(report,lang){const list=STAGES[lang]||STAGES.en;return list[Math.max(0,Math.min(5,report.round-1))]||COPY[lang].last;}
+function stageFor(report,lang){const list=STAGES[lang]||STAGES.en;return list[Math.max(0,Math.min(6,report.round-1))]||COPY[lang].last;}
 function outcomeFor(report,copy){if(report.penalty)return report.homeWon?copy.penWon:copy.penLost;if(report.score[0]===report.score[1])return copy.draw;return report.homeWon?copy.won:copy.lost;}
 function sublineFor(report,copy,result){if(result&&result.endType==="sacked")return copy.lastValid;if(report.isFinal&&report.homeWon)return copy.champion;if(!report.homeWon)return copy.exit;return copy.lastValid;}
 function summaryCard(label,item,copy,side){if(!item)return"";return '<button type="button" class="lmr-highlight" data-lmr-summary-team="'+side+'" data-lmr-summary-index="'+item.index+'"><span>'+esc(label)+'</span><strong>'+esc(item.name)+'</strong><b class="is-'+ratingTone(item.rating)+'">'+item.rating.toFixed(1)+'</b></button>';}

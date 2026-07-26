@@ -171,24 +171,28 @@
   function ensureNativeHubNavigation(){
     if(!global.COPA_IS_NATIVE||!isPhoneInteraction())return;
     const hub=document.getElementById("hub");if(!hub)return;
+    if(global.CopaMobileShell&&typeof global.CopaMobileShell.enhanceHub==="function")global.CopaMobileShell.enhanceHub();
     let nav=document.getElementById("nativeHubNav");
     if(!nav){
       const tr=languageIsTurkish();
       nav=document.createElement("nav");nav.id="nativeHubNav";nav.className="native-hub-nav";
       nav.setAttribute("aria-label",tr?"Oyun bölümleri":"Game sections");
-      nav.innerHTML=`<button type="button" data-native-target="squad">${tr?"KADRO":"SQUAD"}</button><button type="button" data-native-target="match">${tr?"MAÇ":"MATCH"}</button><button type="button" data-native-target="market">${tr?"PAZAR":"MARKET"}</button><button type="button" data-native-target="career">${tr?"KARİYER":"CAREER"}</button>`;
+      nav.innerHTML=`<button type="button" data-native-target="match">${tr?"MAÇ":"MATCH"}</button><button type="button" data-native-target="market">${tr?"PAZAR":"MARKET"}</button><button type="button" data-native-target="career">${tr?"KARİYER":"CAREER"}</button>`;
       nav.addEventListener("click",event=>{
         const button=event.target.closest("button[data-native-target]");if(!button)return;
         const target=button.dataset.nativeTarget;
+        if(global.CopaMobileShell&&typeof global.CopaMobileShell.activateRoute==="function"){global.CopaMobileShell.activateRoute(target);return;}
         if(target==="career"){if(global.CopaLazy)global.CopaLazy.openMetaProgression();return;}
-        const node=target==="squad"?hub.querySelector(".pitch-area"):target==="market"?document.getElementById("shopcards"):document.getElementById("fixbar");
+        const node=target==="market"?document.getElementById("shopcards"):document.getElementById("fixbar");
         if(node)node.scrollIntoView({behavior:readPreference("battery")?"auto":"smooth",block:"start"});
         nav.querySelectorAll("button").forEach(item=>item.classList.toggle("active",item===button));
       });
       hub.prepend(nav);
     }
-    const labels=languageIsTurkish()?["KADRO","MAÇ","PAZAR","KARİYER"]:["SQUAD","MATCH","MARKET","CAREER"];
-    nav.querySelectorAll("button[data-native-target]").forEach((button,index)=>{button.textContent=labels[index]||button.textContent;});
+    if(!(global.CopaMobileShell&&typeof global.CopaMobileShell.activateRoute==="function")){
+      const labels=languageIsTurkish()?["MAÇ","PAZAR","KARİYER"]:["MATCH","MARKET","CAREER"];
+      nav.querySelectorAll("button[data-native-target]").forEach((button,index)=>{button.textContent=labels[index]||button.textContent;});
+    }
     const panel=document.getElementById("hubBenchSection"),pitch=hub.querySelector(".pitch-area");
     if(panel&&pitch){
       let trigger=document.getElementById("nativeBenchTrigger");
@@ -507,6 +511,10 @@
       .map(numericText).filter(Number.isFinite);
     const average=squadValues.length?Math.round(squadValues.reduce((a,b)=>a+b,0)/squadValues.length):null;
     options.forEach(option=>{
+      if(option.querySelector(".opt-forecast")){
+        option.querySelector(".mobile-candidate-impact")?.remove();
+        return;
+      }
       let impact=option.querySelector(".mobile-candidate-impact");
       if(!impact){
         impact=document.createElement("span");
@@ -557,7 +565,8 @@
   function requestDraftConfirmation(option){
     closeDraftConfirmation();
     const c=copy(),name=(option.querySelector(".pn")||{}).textContent||c.candidates;
-    const meta=(option.querySelector(".mobile-candidate-impact")||{}).textContent||"";
+    const forecast=[...option.querySelectorAll(".opt-forecast>span")].map(item=>(item.querySelector("em")||{}).textContent||"");
+    const meta=forecast.length>=2?`${c.cashAfter} ${forecast[0]} · ${c.squadAverage} ${forecast[1]}`:((option.querySelector(".mobile-candidate-impact")||{}).textContent||"");
     const bar=document.createElement("div");
     bar.id="mobileDraftConfirm";
     bar.className="mobile-draft-confirm";
@@ -674,6 +683,7 @@
     if(!story||!economy||story.closest(".mobile-result-disclosure")||economy.closest(".mobile-result-disclosure"))return;
     const details=document.createElement("details");
     details.className="mobile-result-disclosure mobile-result-story-economy";
+    details.open=true;
     const summary=document.createElement("summary");
     summary.textContent=copy().resultStory+" + "+copy().resultEconomy;
     story.before(details);

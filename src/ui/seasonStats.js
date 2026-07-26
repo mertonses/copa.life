@@ -13,7 +13,7 @@ function render(){
   }
 
   const r=lastResult||{},e=r.econ||econStats||{},s=picksBySlot.filter(Boolean);
-  const tournamentState=r.tournament&&r.tournament.format==="groups16_v1"?r.tournament:null;
+  const tournamentState=r.tournament&&r.tournament.format==="groups32_v2"?r.tournament:null;
   const playerGroup=tournamentState&&tournamentState.groups.find(group=>group.id===tournamentState.group.playerGroupId);
   const playerGroupRow=playerGroup&&playerGroup.table.find(row=>row.teamId==="player");
   const safe=value=>String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
@@ -59,7 +59,7 @@ function render(){
       ?LT("Grup ve eleme yolculuğu kupayla tamamlandı.","The group and knockout journey ended with the trophy.","El camino por grupos y eliminatorias terminó con el trofeo.","Die Reise durch Gruppen- und K.-o.-Phase endete mit dem Pokal.","Il percorso tra girone ed eliminazione diretta si è concluso con il trofeo.")
       :r&&r.endType==="sacked"
         ?LT("Başkan güveni tükendi.","Board trust ran out.","La confianza de la directiva se agotó.","Das Vertrauen des Vorstands war aufgebraucht.","La fiducia della dirigenza si è esaurita.")
-        :LT(`${reached} aşamasında run sona erdi.`,`The run ended in ${reached}.`,`El recorrido terminó en ${reached}.`,`Der Run endete in ${reached}.`,`Il percorso si è concluso in ${reached}.`);
+        :LT(`${reached} aşamasında tur sona erdi.`,`The run ended in ${reached}.`,`El recorrido terminó en ${reached}.`,`Der Run endete in ${reached}.`,`Il percorso si è concluso in ${reached}.`);
   if(r&&r.endType==="group_eliminated"&&playerGroupRow)heroDetail=LT(`Grup ${playerGroup.id} · ${playerGroupRow.rank}. sıra · ${playerGroupRow.points} puan · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} averaj`,`Group ${playerGroup.id} · rank ${playerGroupRow.rank} · ${playerGroupRow.points} points · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} goal difference`,`Grupo ${playerGroup.id} · ${playerGroupRow.rank}.º · ${playerGroupRow.points} puntos · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} de diferencia`,`Gruppe ${playerGroup.id} · Platz ${playerGroupRow.rank} · ${playerGroupRow.points} Punkte · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} Tordifferenz`,`Gruppo ${playerGroup.id} · ${playerGroupRow.rank}º · ${playerGroupRow.points} punti · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} differenza reti`);
   const resultCopy={
     W:LT("Galibiyet","Win","Victoria","Sieg","Vittoria"),
@@ -91,27 +91,27 @@ function render(){
   const hasPlayerStory=played>=3&&runMVP!=="—";
   const playerStory=hasPlayerStory?`<button type="button" class="ss-player-spotlight" id="ssPlayerSpotlight">
     <span aria-hidden="true">★</span>
-    <div><small>${LT("ÖNE ÇIKAN OYUNCU","PLAYER SPOTLIGHT","JUGADOR DESTACADO","SPIELER-FOKUS","GIOCATORE IN EVIDENZA")}</small><b>${safe(runMVP)}</b><em>${topScorer&&topScorer[0]===runMVP?LT(`${topScorer[1]} gol · Run yıldızı`,`${topScorer[1]} goals · Run star`,`${topScorer[1]} goles · Estrella`,`${topScorer[1]} Tore · Run-Star`,`${topScorer[1]} gol · Stella del percorso`):LT("Run yıldızı","Run star","Estrella del recorrido","Star des Runs","Stella del percorso")}</em></div>
+    <div><small>${LT("ÖNE ÇIKAN OYUNCU","PLAYER SPOTLIGHT","JUGADOR DESTACADO","SPIELER-FOKUS","GIOCATORE IN EVIDENZA")}</small><b>${safe(runMVP)}</b><em>${topScorer&&topScorer[0]===runMVP?LT(`${topScorer[1]} gol · Tur yıldızı`,`${topScorer[1]} goals · Run star`,`${topScorer[1]} goles · Estrella`,`${topScorer[1]} Tore · Run-Star`,`${topScorer[1]} gol · Stella del percorso`):LT("Tur yıldızı","Run star","Estrella del recorrido","Star des Runs","Stella del percorso")}</em></div>
   </button>`:"";
 
   const insightPrimary=penaltyExit
-    ?LT("Normal sürede ayakta kaldın; penaltılar run’ı bitirdi.","You held on in regulation; penalties ended the run.","Resististe en el tiempo reglamentario; los penaltis terminaron el recorrido.","In der regulären Spielzeit gehalten; das Elfmeterschießen beendete den Run.","Hai retto nei tempi regolamentari; i rigori hanno chiuso il percorso.")
+    ?LT("Normal sürede ayakta kaldın; penaltılar turu bitirdi.","You held on in regulation; penalties ended the run.","Resististe en el tiempo reglamentario; los penaltis terminaron el recorrido.","In der regulären Spielzeit gehalten; das Elfmeterschießen beendete den Run.","Hai retto nei tempi regolamentari; i rigori hanno chiuso il percorso.")
     :r&&r.won
-      ?LT("Üç grup maçının ardından çeyrek final, yarı final ve finali geçerek kupayı aldın.","After three group matches, you won the quarter-final, semi-final and final to lift the cup.","Tras tres partidos de grupo, ganaste cuartos, semifinal y final para levantar la copa.","Nach drei Gruppenspielen gewannst du Viertelfinale, Halbfinale und Finale und holtest den Pokal.","Dopo tre gare del girone hai vinto quarti, semifinale e finale, conquistando la coppa.")
+      ?LT("Üç grup maçının ardından Son 16, çeyrek final, yarı final ve finali geçerek kupayı aldın.","After three group matches, you won the round of 16, quarter-final, semi-final and final to lift the cup.","Tras tres partidos de grupo, ganaste octavos, cuartos, semifinal y final para levantar la copa.","Nach drei Gruppenspielen gewannst du Achtelfinale, Viertelfinale, Halbfinale und Finale und holtest den Pokal.","Dopo tre gare del girone hai vinto ottavi, quarti, semifinale e finale, conquistando la coppa.")
       :r&&r.endType==="sacked"
-        ?LT("Run’ı saha sonucu değil, başkan güveni bitirdi.","Board trust, not a match result, ended the run.","La confianza de la directiva, no un partido, terminó el recorrido.","Das Vorstandsvertrauen, nicht ein Spielergebnis, beendete den Run.","La fiducia della dirigenza, non una partita, ha chiuso il percorso.")
+        ?LT("Turu saha sonucu değil, başkan güveni bitirdi.","Board trust, not a match result, ended the run.","La confianza de la directiva, no un partido, terminó el recorrido.","Das Vorstandsvertrauen, nicht ein Spielergebnis, beendete den Run.","La fiducia della dirigenza, non una partita, ha chiuso il percorso.")
         :played<=2
           ?LT("Erken elenme, bir sonraki denemede daha güvenli başlangıç değerini öne çıkarıyor.","The early exit makes a safer opening setup the priority next time.","La eliminación temprana prioriza un inicio más seguro en el próximo intento.","Das frühe Aus macht einen sichereren Start im nächsten Run zur Priorität.","L'uscita precoce rende prioritario un avvio più sicuro nel prossimo tentativo.")
           :gd<0
-            ?LT("Run boyunca yenilen goller hücum üretimini aştı.","Goals conceded outpaced your attacking output.","Los goles recibidos superaron tu producción ofensiva.","Die Gegentore übertrafen deine Offensivleistung.","I gol subiti hanno superato la produzione offensiva.")
-            :LT("Run sonucu dar farklarla şekillendi; ana yapı rekabetçi kaldı.","Fine margins shaped the run; the core setup stayed competitive.","Los pequeños márgenes definieron el recorrido; la base siguió siendo competitiva.","Kleine Unterschiede entschieden den Run; die Grundstruktur blieb konkurrenzfähig.","I piccoli margini hanno deciso il percorso; la struttura è rimasta competitiva.");
+            ?LT("Tur boyunca yenilen goller hücum üretimini aştı.","Goals conceded outpaced your attacking output.","Los goles recibidos superaron tu producción ofensiva.","Die Gegentore übertrafen deine Offensivleistung.","I gol subiti hanno superato la produzione offensiva.")
+            :LT("Tur sonucu dar farklarla şekillendi; ana yapı rekabetçi kaldı.","Fine margins shaped the run; the core setup stayed competitive.","Los pequeños márgenes definieron el recorrido; la base siguió siendo competitiva.","Kleine Unterschiede entschieden den Run; die Grundstruktur blieb konkurrenzfähig.","I piccoli margini hanno deciso il percorso; la struttura è rimasta competitiva.");
   const insightAction=net<0
     ?LT(`En açık gelişim alanı ${money(Math.abs(spent+president))} toplam harcama.`,`The clearest improvement area is ${money(Math.abs(spent+president))} in total spending.`,`La mejora más clara está en los ${money(Math.abs(spent+president))} de gasto total.`,`Das klarste Verbesserungspotenzial liegt bei ${money(Math.abs(spent+president))} Gesamtausgaben.`,`L'area di miglioramento più chiara sono i ${money(Math.abs(spent+president))} di spesa totale.`)
     :(e.injuries||0)===0
       ?LT("Sakatlıksız kadro yönetimi korunmaya değer.","The injury-free squad management is worth preserving.","Vale la pena mantener la gestión sin lesiones.","Das verletzungsfreie Kadermanagement sollte beibehalten werden.","Vale la pena mantenere la gestione senza infortuni.")
       :gd>0
         ?LT(`${gd>0?"+":""}${gd} gol farkı hücum dengesinin çalıştığını gösteriyor.`,`A ${gd>0?"+":""}${gd} goal difference shows the attacking balance worked.`,`La diferencia de ${gd>0?"+":""}${gd} muestra que el equilibrio ofensivo funcionó.`,`Die Tordifferenz von ${gd>0?"+":""}${gd} zeigt eine funktionierende Offensivbalance.`,`La differenza reti di ${gd>0?"+":""}${gd} mostra che l'equilibrio offensivo ha funzionato.`)
-        :LT("Sonraki run’da kadro gücü ile harcama dengesini birlikte izle.","Track squad power and spending together in the next run.","Controla juntos la fuerza de plantilla y el gasto en el próximo intento.","Behalte im nächsten Run Kaderstärke und Ausgaben gemeinsam im Blick.","Nel prossimo percorso osserva insieme forza della rosa e spesa.");
+        :LT("Sonraki turda kadro gücü ile harcama dengesini birlikte izle.","Track squad power and spending together in the next run.","Controla juntos la fuerza de plantilla y el gasto en el próximo intento.","Behalte im nächsten Run Kaderstärke und Ausgaben gemeinsam im Blick.","Nel prossimo percorso osserva insieme forza della rosa e spesa.");
 
   const allFlowValues=[0,startCash,startCash+earned,endCash];
   const flowMin=Math.min(...allFlowValues),flowMax=Math.max(...allFlowValues);
@@ -125,7 +125,7 @@ function render(){
   const afterEarn=startCash+earned;
   const totalCost=spent+president;
   const waterfall=`<svg class="ss-waterfall" viewBox="0 0 680 180" role="img" aria-labelledby="ssWaterfallTitle ssWaterfallDesc">
-    <title id="ssWaterfallTitle">${LT("Run ekonomisi şelale grafiği","Run economy waterfall chart","Gráfico de cascada de la economía","Wasserfalldiagramm der Run-Wirtschaft","Grafico a cascata dell'economia")}</title>
+    <title id="ssWaterfallTitle">${LT("Tur ekonomisi şelale grafiği","Run economy waterfall chart","Gráfico de cascada de la economía","Wasserfalldiagramm der Run-Wirtschaft","Grafico a cascata dell'economia")}</title>
     <desc id="ssWaterfallDesc">${safe(LT(`Başlangıç ${money(startCash)}, gelir ${signed(earned)}, harcama ${money(-totalCost)}, kapanış ${money(endCash)}.`,`Starting cash ${money(startCash)}, income ${signed(earned)}, spending ${money(-totalCost)}, ending cash ${money(endCash)}.`,`Caja inicial ${money(startCash)}, ingresos ${signed(earned)}, gastos ${money(-totalCost)}, caja final ${money(endCash)}.`,`Startkasse ${money(startCash)}, Einnahmen ${signed(earned)}, Ausgaben ${money(-totalCost)}, Endkasse ${money(endCash)}.`,`Cassa iniziale ${money(startCash)}, entrate ${signed(earned)}, spese ${money(-totalCost)}, cassa finale ${money(endCash)}.`))}</desc>
     <line class="ss-waterfall-zero" x1="24" y1="${flowY(0).toFixed(1)}" x2="656" y2="${flowY(0).toFixed(1)}"></line>
     ${flowBar(38,0,startCash,"start",0)}
@@ -147,13 +147,13 @@ function render(){
   const groupRecap=played>=3&&tournamentState&&playerGroup&&window.CopaTournamentUI&&window.CopaTournamentRuntime?`<details class="ss-group-recap"><summary><span>${LT("GRUP AŞAMASI","GROUP STAGE","FASE DE GRUPOS","GRUPPENPHASE","FASE A GIRONI")}</span><b>${playerGroupRow?`${playerGroupRow.rank}. · ${playerGroupRow.points} ${window.CopaTournamentRuntime.copy().points} · ${playerGroupRow.gd>0?"+":""}${playerGroupRow.gd} ${window.CopaTournamentRuntime.copy().gd}`:""}</b></summary><div class="ss-group-table">${window.CopaTournamentUI.tableMarkup(tournamentState,playerGroup,window.CopaTournamentRuntime.copy(),true)}</div></details>`:"";
   const html=`<div class="season-stats-modal ${played<=2?"is-short-run":played>=5?"is-deep-run":"is-mid-run"}">
     <header class="ss-head">
-      <div><span class="ss-kicker">${LT("SEZON İSTATİSTİKLERİ","SEASON STATISTICS","ESTADÍSTICAS DE TEMPORADA","SAISONSTATISTIK","STATISTICHE STAGIONALI")}</span><h3>${safe(teamName||"XI")} <small>${safe(formName)}</small></h3><p>${LT("Run","Run","Recorrido","Run","Percorso")} #${String(seedNum).padStart(4,"0")}</p></div>
+      <div><span class="ss-kicker">${LT("SEZON İSTATİSTİKLERİ","SEASON STATISTICS","ESTADÍSTICAS DE TEMPORADA","SAISONSTATISTIK","STATISTICHE STAGIONALI")}</span><h3>${safe(teamName||"XI")} <small>${safe(formName)}</small></h3><p>${LT("Tur","Run","Recorrido","Run","Percorso")} #${String(seedNum).padStart(4,"0")}</p></div>
       <button class="ss-close" type="button" onclick="closeModal()" aria-label="${LT("Kapat","Close","Cerrar","Schließen","Chiudi")}">×</button>
     </header>
     <div class="ss-body">
       <section class="ss-hero ${resultTone}">
         <div><span>${outcomeLabel}</span><h4>${heroTitle}</h4><p>${safe(heroDetail)}</p></div>
-        <b class="ss-progress-badge">${played}<small>/6</small></b>
+        <b class="ss-progress-badge">${played}<small>/7</small></b>
       </section>
       ${groupRecap}
 
@@ -171,7 +171,7 @@ function render(){
 
       <div class="ss-panels">
         <section class="ss-panel is-active" id="ssPanelSummary" role="tabpanel" aria-labelledby="ssTabSummary" data-ss-panel="summary">
-          <div class="ss-journey-track" style="--ss-progress:${played>1?Math.round((played-1)/5*100):0}%">${journey}</div>
+          <div class="ss-journey-track" style="--ss-progress:${played>1?Math.round((played-1)/6*100):0}%">${journey}</div>
           <div class="ss-journey-detail" id="ssJourneyDetail" aria-live="polite"></div>
         </section>
 
@@ -182,7 +182,7 @@ function render(){
             <span id="ssMatchOpponent">—</span>
           </div>
           <p class="ss-match-caption" id="ssMatchCaption"></p>
-          <div class="ss-goal-balance" aria-label="${LT("Run gol dengesi","Run goal balance","Balance de goles","Torbilanz","Bilancio gol")}">
+          <div class="ss-goal-balance" aria-label="${LT("Tur gol dengesi","Run goal balance","Balance de goles","Torbilanz","Bilancio gol")}">
             <div><span>${LT("ATILAN","FOR","A FAVOR","TORE","FATTI")}</span><i><em class="for" data-ss-goal-width="${Math.round(goals/Math.max(goals,conceded,1)*100)}"></em></i><b>${goals}</b></div>
             <div><span>${LT("YENİLEN","AGAINST","EN CONTRA","GEGENTORE","SUBITI")}</span><i><em class="against" data-ss-goal-width="${Math.round(conceded/Math.max(goals,conceded,1)*100)}"></em></i><b>${conceded}</b></div>
           </div>
@@ -205,7 +205,7 @@ function render(){
       </div>
 
       <div class="ss-takeaway ${net<0||penaltyExit?"negative":"positive"}">
-        <i aria-hidden="true"></i><p><b>${LT("RUN ÖZETİ","RUN TAKEAWAY","CLAVE DEL RECORRIDO","RUN-FAZIT","SINTESI DEL PERCORSO")}</b> ${safe(insightPrimary)} ${safe(insightAction)}</p>
+        <i aria-hidden="true"></i><p><b>${LT("TUR ÖZETİ","RUN TAKEAWAY","CLAVE DEL RECORRIDO","RUN-FAZIT","SINTESI DEL PERCORSO")}</b> ${safe(insightPrimary)} ${safe(insightAction)}</p>
       </div>
     </div>
   </div>`;

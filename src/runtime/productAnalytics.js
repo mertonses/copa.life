@@ -37,7 +37,7 @@
   const REWARDS=new Set(["","cash","loan","swap","care"]);
   const CARD_KINDS=new Set(["","power","final","risk","instant","contract","other"]);
   const ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9","cash_0_9","cash_10_plus"]);
-  const TOURNAMENT_STAGES=new Set(["","group","quarterfinal","semifinal","final"]);
+  const TOURNAMENT_STAGES=new Set(["","group","roundof16","quarterfinal","semifinal","final"]);
   const DRAW_MODES=new Set(["","manual","fast","complete"]);
   const QUALIFICATION_STATES=new Set(["","yes","no","pending"]);
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);

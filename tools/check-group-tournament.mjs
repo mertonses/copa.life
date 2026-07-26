@@ -50,8 +50,8 @@ for(const formation of supportedFormations){
 {
   const state=newTournament();
   assert.equal(engine.validate(state).ok,true);
-  assert.equal(Object.keys(state.teams).length,16);
-  assert.equal(Object.values(state.matches).filter(match=>match.stage==="group").length,24);
+  assert.equal(Object.keys(state.teams).length,32);
+  assert.equal(Object.values(state.matches).filter(match=>match.stage==="group").length,48);
   for(const group of state.groups){
     assert.equal(group.teamIds.length,4);
     assert.equal(group.matchIds.length,6);
@@ -118,7 +118,7 @@ for(const formation of supportedFormations){
 }
 
 {
-  /* Consecutive random runs must not feel like a fixed bracket. A 20-team pool
+  /* Consecutive random runs must not feel like a fixed bracket. A 36-team pool
      naturally repeats more clubs than a 40-team pool, so each size has its own
      overlap ceiling while preserving same-seed replayability above. */
   const diversity=(poolSize)=>{
@@ -134,9 +134,9 @@ for(const formation of supportedFormations){
     }
     return{unique:signatures.size,averageOverlap:overlap/(samples-1),identical};
   };
-  const broad=diversity(40),compact=diversity(20);
+  const broad=diversity(48),compact=diversity(36);
   assert.ok(broad.unique>=700&&broad.averageOverlap<0.35&&broad.identical===0,`40-team draw diversity regressed: ${JSON.stringify(broad)}`);
-  assert.ok(compact.unique>=580&&compact.averageOverlap<0.65&&compact.identical<=3,`20-team draw diversity regressed: ${JSON.stringify(compact)}`);
+  assert.ok(compact.unique>=580&&compact.averageOverlap<0.65&&compact.identical<=3,`36-team draw diversity regressed: ${JSON.stringify(compact)}`);
 }
 
 {
@@ -172,16 +172,16 @@ for(const formation of supportedFormations){
     const resolution=engine.completePlayerMatch(state,{score},item=>engine.defaultSimulator(state,item));
     if(day<2)assert.equal(resolution.qualified,null);else assert.equal(resolution.qualified,true);
   }
-  assert.equal(state.phase,"knockout");assert.equal(state.knockout.round,"quarterfinal");
+  assert.equal(state.phase,"knockout");assert.equal(state.knockout.round,"roundof16");
   const groupId=state.group.playerGroupId;
-  for(const stage of ["quarterfinal","semifinal","final"]){
+  for(const stage of ["roundof16","quarterfinal","semifinal","final"]){
     const match=engine.getCurrentPlayerMatch(state);assert.ok(match);const score=match.homeId==="player"?[2,0]:[0,2];
     engine.completePlayerMatch(state,{score,winnerId:"player"},item=>engine.defaultSimulator(state,item));
     if(stage!=="final")assert.notEqual(state.phase,"complete");
   }
   assert.equal(state.player.champion,true);assert.equal(state.phase,"complete");
   assert.equal(engine.validate(state).ok,true,"a completed champion bracket must validate");
-  const path=engine.playerSchedule(state);assert.equal(path.length,6);
+  const path=engine.playerSchedule(state);assert.equal(path.length,7);
   const qf=path.find(match=>match.round==="quarterfinal"),playerGroupTeams=new Set(state.groups.find(group=>group.id===groupId).teamIds);
   assert.equal(playerGroupTeams.has(qf.homeId==="player"?qf.awayId:qf.homeId),false,"quarterfinal opponent must come from another group");
 }
@@ -196,4 +196,4 @@ for(const formation of supportedFormations){
   assert.equal(engine.validate(state).ok,true,"a completed group exit must validate");
 }
 
-console.log("Group tournament checks passed: deterministic draw, 24-match schedule, standings, qualification and knockout progression.");
+console.log("Group tournament checks passed: deterministic draw, 48-match schedule, standings, qualification and round-of-16 progression.");

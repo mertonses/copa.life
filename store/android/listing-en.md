@@ -21,7 +21,7 @@ Features:
 - Budget, squad chemistry, and tactical trade-offs
 - Six-dimensional Copa Life player profiles
 - Cards, match events, and unpredictable turns
-- Three group matches followed by quarter-final, semi-final and final
+- Three group matches followed by the round of 16, quarter-final, semi-final and final
 - Light and dark themes
 - No account or sign-in required
 

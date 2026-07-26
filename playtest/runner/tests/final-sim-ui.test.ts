@@ -3,14 +3,16 @@ import { test, expect } from "@playwright/test";
 test.use({serviceWorkers:"block"});
 
 const openFinalReadyHub=async(page:any)=>{
+  await page.addInitScript(()=>localStorage.setItem("copa.guide.context.v2",JSON.stringify({setup:1,draft:1,hub:1})));
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const global=globalThis as any;
     global.GhostClubs=Object.freeze({...global.GhostClubs,findOpponent:()=>new Promise(()=>{})});
     const input=document.querySelector("#seedInput") as HTMLInputElement;
-    input.value="COPAFINALE2026";
-    global.normalStart();
-    global.pickStyle("gegen");
+    input.value="COPA-FINAL-E2E-2026";
+    await global.quickStart();
+    if(global._countryDraftPromise)await global._countryDraftPromise;
+    await global.quickAll();
   });
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Final Test FK");
@@ -19,6 +21,19 @@ const openFinalReadyHub=async(page:any)=>{
     // Final-engine coverage should not be terminated by the economy model.
     game.earn(100);
     game.pcGo();
+    game.fastTournamentDraw();
+    game.finishTournamentDraw();
+    for(let index=0;index<6;index++){
+      const resolved=game.CopaTournamentRuntime.completePlayer(2,0,{});
+      if(!resolved)throw new Error(`Unable to resolve tournament match ${index+1}`);
+      Object.assign(game.fixtures[index],{res:"W",gf:2,ga:0});
+    }
+    game.round=7;
+    game.opponent=game.bracket[6];
+    game.CopaTournamentRuntime.renderHub();
+    game.renderHub();
+    game.setCaptain(0);
+    game.closeModal();
   });
   await expect(page.locator("#hub")).toBeVisible();
 };
@@ -37,8 +52,8 @@ test("final seed creates a complete, deterministic final-ready hub",async({page}
       round:global.round,
       complete:global.hasCompleteStartingXI(),
       opponent:global.opponent?.name,
-      finalOpponent:global.bracket?.[5]?.name,
-      previousResults:global.fixtures?.slice(0,5).map((fixture:any)=>fixture.res),
+      finalOpponent:global.bracket?.[6]?.name,
+      previousResults:global.fixtures?.slice(0,6).map((fixture:any)=>fixture.res),
       matchupOverflow:bar.scrollWidth-bar.clientWidth,
       opponentInsideMatchup:opponentRect.left>=barRect.left-1&&opponentRect.right<=barRect.right+1,
     };
@@ -46,11 +61,11 @@ test("final seed creates a complete, deterministic final-ready hub",async({page}
   expect(state.finalOpponent).toBeTruthy();
   expect(state).toEqual({
     phase:"hub",
-    round:6,
+    round:7,
     complete:true,
     opponent:state.finalOpponent,
     finalOpponent:state.finalOpponent,
-    previousResults:["W","W","W","W","W"],
+    previousResults:["W","W","W","W","W","W"],
     matchupOverflow:0,
     opponentInsideMatchup:true,
   });

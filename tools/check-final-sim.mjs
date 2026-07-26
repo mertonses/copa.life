@@ -92,7 +92,7 @@ const checks = [
   },
   {
     name: "final test seed creates a final-ready hub",
-    pass: /const _jumpToFinal=!!window\._wantFinal/.test(index) && /round=6;opponent=bracket\[5\]/.test(index),
+    pass: /const _jumpToFinal=!!window\._wantFinal/.test(index) && /round=7;opponent=bracket\[6\]/.test(index),
   },
   {
     name: "pause state synchronizes visual and accessible controls",

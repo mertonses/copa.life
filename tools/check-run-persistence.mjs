@@ -62,8 +62,15 @@ expect(!api.validate({...pendingMatch,pendingMatchResolution:null}).ok,"Checkpoi
 const pendingReward={...migrated,phase:"reward",rewardPendingRound:2,rewardResolvedRound:0};
 expect(api.validate(pendingReward).ok,"Bekleyen ödül aşaması doğrulanamadı");
 expect(!api.validate({...pendingReward,rewardResolvedRound:2}).ok,"Çözülmüş ödül tekrar bekleyen kabul edildi");
-const groupTournament=sandbox.CopaTournamentEngine.createTournament({seed:42,playerName:"COPA XI",playerPower:74,pool:Array.from({length:20},(_,index)=>`Club ${index}`),powerBases:[60,66,72,78,86,94]});
-const drawState={...migrated,phase:"draw",round:1,tournamentFormat:"groups16_v1",tournament:groupTournament};
+const groupTournament=sandbox.CopaTournamentEngine.createTournament({seed:42,playerName:"COPA XI",playerPower:74,pool:Array.from({length:36},(_,index)=>`Club ${index}`),powerBases:[60,66,72,78,86,94]});
+const drawState={
+  ...migrated,
+  phase:"draw",
+  round:1,
+  tournamentFormat:"groups32_v2",
+  tournament:groupTournament,
+  fixtures:Array.from({length:7},()=>({opp:"",res:null,gf:null,ga:null}))
+};
 expect(api.validate(drawState).ok,"Grup kurası checkpoint'i doğrulanamadı");
 expect(!api.validate({...drawState,tournament:{...groupTournament,groups:[]}}).ok,"Bozuk turnuva grafiği kabul edildi");
 expect(api.persist(migrated).ok,"Doğrulanmış kayıt yazılamadı");
@@ -73,7 +80,7 @@ expect(api.read().source==="session","Bozuk primary kaydında geçerli session f
 vm.runInNewContext(finalPersistence,sandbox,{filename:"finalSimPersistence.js"});
 const finalApi=sandbox.CopaFinalSimPersistence;
 const checkpoint={
-  modelVersion:"copa-final-core-v2",runSeed:42,round:6,homePower:76,awayPower:74,
+  modelVersion:"copa-final-core-v2",runSeed:42,round:7,homePower:76,awayPower:74,
   match:{
     rngState:12345,matchTime:1234,score:[1,0],stats:{shots:[4,3]},
     teams:[Array.from({length:11},()=>({x:1,y:1})),Array.from({length:11},()=>({x:1,y:1}))],

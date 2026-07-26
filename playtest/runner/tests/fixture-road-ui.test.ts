@@ -14,7 +14,8 @@ test.beforeEach(async({page})=>{
       {opp:"C Spor",res:null,gf:null,ga:null},
       {opp:"D Spor",res:null,gf:null,ga:null},
       {opp:"E Spor",res:null,gf:null,ga:null},
-      {opp:"F Spor",res:null,gf:null,ga:null}
+      {opp:"F Spor",res:null,gf:null,ga:null},
+      {opp:"G Spor",res:null,gf:null,ga:null}
     ];round=3;selectedCountry="TR";`);
     (globalThis as any).lastMatchReportData={penalty:[5,4]};
     (globalThis as any).renderFixtures();
@@ -23,12 +24,12 @@ test.beforeEach(async({page})=>{
 });
 
 test("fixture road shows text outcomes, active match, locked futures and rich details",async({page})=>{
-  await expect(page.locator(".fixture-node")).toHaveCount(6);
+  await expect(page.locator(".fixture-node")).toHaveCount(7);
   await expect(page.locator(".fixture-node").nth(0)).toContainText("W · Kazandı");
   await expect(page.locator(".fixture-node").nth(1)).toContainText("D · Berabere");
-  await expect(page.locator(".fixture-node.is-active")).toContainText("Sıradaki maç");
-  await expect(page.locator(".fixture-node.is-locked").first()).toContainText("Rakip eşleşme sonrası belli olur");
-  await expect(page.locator("#fixbar")).not.toContainText("???");
+  await expect(page.locator(".fixture-node.is-active")).not.toContainText("Sıradaki maç");
+  await expect(page.locator(".fixture-node.is-locked").first()).toContainText("???");
+  await expect(page.locator("#fixbar")).toContainText("???");
 
   await page.locator(".fixture-node").nth(1).click();
   await expect(page.locator("#fixtureDetail")).toContainText("B Spor");
@@ -70,7 +71,7 @@ test("mobile road snaps and automatically centers the active round",async({page}
 });
 
 test("winning the final lights the trophy node",async({page})=>{
-  await page.evaluate(()=>(0,eval)(`fixtures.forEach((item,index)=>{item.res="W";item.gf=2;item.ga=index===5?1:0;});round=6;renderFixtures();`));
+  await page.evaluate(()=>(0,eval)(`fixtures.forEach((item,index)=>{item.res="W";item.gf=2;item.ga=index===6?1:0;});round=7;renderFixtures();`));
   await expect(page.locator(".fixture-trophy")).toHaveClass(/is-champion/);
   await expect(page.locator(".fixture-trophy")).toHaveAttribute("aria-label","Şampiyon");
 });

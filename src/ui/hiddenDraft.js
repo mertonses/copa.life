@@ -58,7 +58,7 @@ function quickAll(){
   renderDraftExtra();updateDeadline();sfxRoll();_saveState();
   if(!hasCompleteStartingXI()){loadRollStage();return;}
   buildBench();$("ddbanner").classList.add("hidden");
-  setTimeout(()=>{if(reuseClub)reuseClub=false;showPostcard(typeof tournamentFormat!=="undefined"&&tournamentFormat==="groups16_v1"&&typeof startTournamentDraw==="function"?startTournamentDraw:enterHub);},350);
+  setTimeout(()=>{if(reuseClub)reuseClub=false;showPostcard(typeof tournamentFormat!=="undefined"&&tournamentFormat==="groups32_v2"&&typeof startTournamentDraw==="function"?startTournamentDraw:enterHub);},350);
 }
 
 global.CopaHiddenDraft=Object.freeze({scoutNote,revealPlayer,requestChoose,quickAll});

@@ -73,7 +73,7 @@
   }
   function cleanArchiveEntry(value){
     if(!object(value))return null;
-    const seed=integer(value.seed,0,4294967295),round=integer(value.round,1,6);
+    const seed=integer(value.seed,0,4294967295),round=integer(value.round,1,7);
     const id=/^run-[a-z0-9]{4,32}$/.test(String(value.id||""))?String(value.id):"run-"+hash([seed,round,value.finishedAt||""].join("|"));
     const result=["win","loss","sacked"].includes(value.result)?value.result:"loss";
     const country=COUNTRIES.has(value.country)?value.country:"TR";
@@ -133,9 +133,9 @@
   const lockedFormationCount=()=>Array.isArray(global.FORMORDER)?global.FORMORDER.filter(item=>!(global.unlockedForms||[]).includes(item)).length:0;
 
   function reputationFor(value){
-    const played=integer(value.playedMatches==null?value.round:value.playedMatches,1,6);
-    const wins=integer(value.wins,0,6);
-    const draws=integer(value.draws,0,6);
+    const played=integer(value.playedMatches==null?value.round:value.playedMatches,1,7);
+    const wins=integer(value.wins,0,7);
+    const draws=integer(value.draws,0,7);
     return 10+played*6+wins*4+draws*2+(value.personalBest?10:0)+(value.won?25:0);
   }
   function recordRun(context){
@@ -154,7 +154,7 @@
       id:"run-"+hash([value.seed,value.metaRun,value.country,value.team].join("|")),
       finishedAt:new Date().toISOString(),seed:value.seed,team:value.team,country:value.country,
       formation:value.formation,style:value.style,chairman:value.chairman,identity:value.identity,
-      round:value.won?6:value.round,result,power:value.power,cards:value.cards,cash:value.cash,
+      round:value.won?7:value.round,result,power:value.power,cards:value.cards,cash:value.cash,
       score:value.score,ghost:value.ghost,reputation,endType:value.endType
     });
     if(!entry)return null;
@@ -166,7 +166,7 @@
     increment(state.mastery.styles,entry.style);
     increment(state.mastery.formations,entry.formation);
     increment(state.mastery.chairmen,entry.chairman);
-    addBadge("first_run");if(entry.round>=6)addBadge("finalist");if(entry.result==="win")addBadge("champion");
+    addBadge("first_run");if(entry.round>=7)addBadge("finalist");if(entry.result==="win")addBadge("champion");
     if(entry.cash>=0)addBadge("clean_books");if(entry.cards>=5)addBadge("collector");if(entry.ghost)addBadge("ghost_match");
     if(Object.keys(state.mastery.styles).filter(key=>state.mastery.styles[key]>0).length>=STYLES.size)addBadge("six_styles");
     state.archive=state.archive.filter(item=>item.id!==entry.id).concat(entry).slice(-ARCHIVE_LIMIT);
@@ -222,10 +222,10 @@
     if(item.result==="win")return {label:tr?"Şampiyon":"Champion",className:"is-win"};
     if(item.result==="sacked")return {label:tr?"Kovuldu":"Sacked",className:"is-sacked"};
     if(item.endType==="group_eliminated")return {label:tr?"Grupta Elendi":"Group Exit",className:"is-out"};
-    if(item.round>=6)return {label:tr?"Final":"Final",className:"is-final"};
+    if(item.round>=7)return {label:tr?"Final":"Final",className:"is-final"};
     return {label:tr?"Elendi":"Out",className:"is-out"};
   }
-  function stageProgress(item,tr){const round=Number(item&&item.round)||0;if(item&&item.endType==="group_eliminated")return tr?"3 grup maçı":"3 group matches";if(round<=3)return tr?`Grup maçı ${round}/3`:`Group match ${round}/3`;if(round===4)return tr?"Çeyrek final":"Quarter-final";if(round===5)return tr?"Yarı final":"Semi-final";return tr?"Final":"Final";}
+  function stageProgress(item,tr){const round=Number(item&&item.round)||0;if(item&&item.endType==="group_eliminated")return tr?"3 grup maçı":"3 group matches";if(round<=3)return tr?`Grup maçı ${round}/3`:`Group match ${round}/3`;if(round===4)return tr?"Son 16":"Round of 16";if(round===5)return tr?"Çeyrek final":"Quarter-final";if(round===6)return tr?"Yarı final":"Semi-final";return tr?"Final":"Final";}
   function archiveRowsHTML(tr,limit=ARCHIVE_LIMIT){
     return [...state.archive].reverse().slice(0,limit).map(item=>{
       const result=resultMeta(item,tr);
@@ -237,7 +237,7 @@
     }).join("");
   }
   function archiveHTML(tr){
-    if(!state.archive.length)return `<div class="meta-inline-empty">${tr?"İlk tamamlanan koşun burada görünecek.":"Your first completed run will appear here."}</div>`;
+    if(!state.archive.length)return `<div class="meta-inline-empty">${tr?"İlk tamamlanan turun burada görünecek.":"Your first completed run will appear here."}</div>`;
     const visible=Math.min(5,state.archive.length);
     return `<div class="meta-run-list">${archiveRowsHTML(tr,visible)}</div>${state.archive.length>visible?`<button class="meta-see-all" type="button" onclick="CopaMeta.openArchive()">${tr?"Tüm kariyer geçmişi":"View full career history"} <span aria-hidden="true">→</span></button>`:""}`;
   }
@@ -260,7 +260,7 @@
   }
   function masteryGroupHTML(group,tr){
     const entries=Object.entries(state.mastery[group]).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-    if(!entries.length)return `<div class="meta-inline-empty">${tr?"İlk tamamlanan koşudan sonra oluşur.":"Appears after your first completed run."}</div>`;
+    if(!entries.length)return `<div class="meta-inline-empty">${tr?"İlk tamamlanan turdan sonra oluşur.":"Appears after your first completed run."}</div>`;
     return entries.map(([key,count])=>{
       const progress=masteryProgress(count),current=tierLabel(count,tr);
       const next=progress.next==null?(tr?"En yüksek kademe":"Highest tier"):tierLabel(progress.target,tr);
@@ -292,7 +292,7 @@
   }
   function museumHTML(tr){
     const hall=hallEntries();
-    if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div><section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir koşuyu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
+    if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div><section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir turu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
     const hallHTML=hall.length?hall.map(({memory,player})=>`<div class="meta-hall-player"><span>${escapeHTML(player.pos)}</span><b>${escapeHTML(player.name)}</b><small>${player.power} · ${escapeHTML(memory.team)}</small></div>`).join(""):`<div class="meta-inline-empty">${tr?"Hatıralarındaki oyuncuları yıldızlayarak kendi 11'ini kur.":"Star players from your memories to build your own XI."}</div>`;
     const memories=[...state.museum.memories].reverse().map(memory=>{
       const featured=memory.players[memory.featuredIndex]||memory.players[0],pinned=state.museum.hall.some(item=>item.runId===memory.id&&item.playerId===featured.id);
@@ -324,13 +324,13 @@
       ${next?`<div class="meta-next-reward"><span aria-hidden="true">◇</span><p><small>${tr?"SONRAKİ BÜYÜK ÖDÜL":"NEXT MAJOR REWARD"}</small><b>${tr?"Taktik Lisansı":"Tactical Licence"}</b></p><strong>${Math.max(0,next.threshold-state.career.reputation)} ${tr?"itibar kaldı":"reputation left"}</strong></div>`:""}
     </section>
     <details class="meta-career-disclosure meta-badge-section" open><summary><span>${tr?"ROZETLER":"BADGES"}</span><small>${state.badges.length}/${Object.keys(BADGES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body"><div class="meta-badges">${badgesHTML(tr)}</div></div></details>
-    <details class="meta-career-disclosure meta-archive" open><summary><span>${tr?"SON KOŞULAR":"RECENT RUNS"}</span><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body">${archiveHTML(tr)}</div></details>`;
+    <details class="meta-career-disclosure meta-archive" open><summary><span>${tr?"SON TURLAR":"RECENT RUNS"}</span><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body">${archiveHTML(tr)}</div></details>`;
   }
   function worldHTML(tr){
     return `<section class="meta-world meta-world-panel" id="metaWorldPanel"><div class="meta-world-skeleton" aria-label="${tr?"Dünya sıralaması yükleniyor":"Loading world rankings"}"><i></i><i></i><i></i><i></i></div></section>`;
   }
   function panelHTML(tab,tr){
-    if(tab==="mastery")return `<div class="meta-mastery-intro"><span aria-hidden="true">◎</span><p><b>${tr?"Deneyim kalıcıdır, güç sağlamaz.":"Experience is permanent, but grants no power."}</b><small>${tr?"Her tamamlanan koşu bir sonraki ustalık kademesine ilerletir.":"Every completed run advances the next mastery tier."}</small></p></div>${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}`;
+    if(tab==="mastery")return `<div class="meta-mastery-intro"><span aria-hidden="true">◎</span><p><b>${tr?"Deneyim kalıcıdır, güç sağlamaz.":"Experience is permanent, but grants no power."}</b><small>${tr?"Her tamamlanan tur bir sonraki ustalık kademesine ilerletir.":"Every completed run advances the next mastery tier."}</small></p></div>${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}`;
     if(tab==="museum")return museumHTML(tr);
     if(tab==="world")return worldHTML(tr);
     return careerHTML(tr);
@@ -347,7 +347,7 @@
   }
   function openArchive(){
     const tr=global.LANG==="tr";
-    global.showModal(`<div class="meta-history-modal"><header class="meta-progress-head"><div><div class="kithdr">${tr?"Kariyer Geçmişi":"Career History"}</div><div class="kitsub">${state.archive.length} ${tr?"tamamlanmış koşu":"completed runs"}</div></div><button class="meta-close" type="button" onclick="CopaMeta.openProgression('career')" aria-label="${tr?"Kariyere dön":"Back to career"}">×</button></header><div class="meta-history-list">${archiveRowsHTML(tr)}</div><button class="meta-history-back" type="button" onclick="CopaMeta.openProgression('career')">← ${tr?"Kariyere dön":"Back to career"}</button></div>`,{dismissOnOverlay:true,label:tr?"Kariyer geçmişi":"Career history"});
+    global.showModal(`<div class="meta-history-modal"><header class="meta-progress-head"><div><div class="kithdr">${tr?"Kariyer Geçmişi":"Career History"}</div><div class="kitsub">${state.archive.length} ${tr?"tamamlanmış tur":"completed runs"}</div></div><button class="meta-close" type="button" onclick="CopaMeta.openProgression('career')" aria-label="${tr?"Kariyere dön":"Back to career"}">×</button></header><div class="meta-history-list">${archiveRowsHTML(tr)}</div><button class="meta-history-back" type="button" onclick="CopaMeta.openProgression('career')">← ${tr?"Kariyere dön":"Back to career"}</button></div>`,{dismissOnOverlay:true,label:tr?"Kariyer geçmişi":"Career history"});
   }
   function toggleHallFromUi(runId,playerId){
     const before=state.museum.hall.length,ok=toggleHallPlayer(runId,playerId),tr=global.LANG==="tr";
@@ -366,7 +366,7 @@
   function coreSnapshot(){
     return {
       forms:(global.FORMORDER||[]).filter(item=>(global.unlockedForms||[]).includes(item)),
-      best:integer(global.metaBest,0,6),runs:integer(global.metaRuns,0,1000000),
+      best:integer(global.metaBest,0,7),runs:integer(global.metaRuns,0,1000000),
       chairs:(global.CHAIR_ORDER||[]).filter(item=>(global.unlockedChairs||[]).includes(item)),
       selected:String(global.selectedChairId||"babacan"),pending:Array.isArray(global.pendingChairChoices)?global.pendingChairChoices:[],
       elite:!!global.eliteBonus,legacy:integer(global.legacyFund,0,20)
@@ -389,7 +389,7 @@
     const chairs=(Array.isArray(core.chairs)?core.chairs:[]).filter(item=>(global.CHAIR_ORDER||[]).includes(item));
     global.unlockedForms=(global.FORMORDER||[]).filter(item=>(global.DEFAULT_FORMS||[]).includes(item)||forms.includes(item)||(global.unlockedForms||[]).includes(item));
     global.unlockedChairs=(global.CHAIR_ORDER||[]).filter(item=>item==="babacan"||chairs.includes(item)||(global.unlockedChairs||[]).includes(item));
-    global.metaBest=Math.max(integer(global.metaBest,0,6),integer(core.best,0,6));
+    global.metaBest=Math.max(integer(global.metaBest,0,7),integer(core.best,0,7));
     global.metaRuns=Math.max(integer(global.metaRuns,0,1000000),integer(core.runs,0,1000000));
     global.eliteBonus=!!(global.eliteBonus||core.elite);global.legacyFund=Math.max(integer(global.legacyFund,0,20),integer(core.legacy,0,20));
     if(global.unlockedChairs.includes(core.selected))global.selectedChairId=core.selected;
@@ -413,7 +413,7 @@
   function fallbackCopy(value,done){const input=document.createElement("textarea");input.value=value;input.style.position="fixed";input.style.opacity="0";document.body.appendChild(input);input.select();document.execCommand("copy");input.remove();done();}
   function openExport(){
     const tr=global.LANG==="tr",code=exportCode();
-    global.showModal(`<div class="meta-transfer-modal"><div class="kithdr">${tr?"İLERLEMEYİ DIŞA AKTAR":"EXPORT PROGRESS"}</div><div class="kitsub">${tr?"Kod aktif koşuyu ve cihazına bağlı çevrimiçi Ghost/Dünya kimliğini içermez. Güvenli bir yerde sakla.":"The code excludes the active run and your device-bound online Ghost/World identity. Store it somewhere safe."}</div><textarea id="metaExportCode" readonly>${code}</textarea><div class="bact"><button class="btn btn-primary" onclick="CopaMeta.copyExport()">${tr?"KODU KOPYALA":"COPY CODE"}</button><button class="btn btn-ghost" onclick="CopaMeta.downloadExport()">${tr?"DOSYA İNDİR":"DOWNLOAD FILE"}</button><button class="btn btn-ghost" onclick="CopaMeta.openProgression()">${tr?"GERİ":"BACK"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"İlerlemeyi dışa aktar":"Export progress"});
+    global.showModal(`<div class="meta-transfer-modal"><div class="kithdr">${tr?"İLERLEMEYİ DIŞA AKTAR":"EXPORT PROGRESS"}</div><div class="kitsub">${tr?"Kod aktif turu ve cihazına bağlı çevrimiçi Ghost/Dünya kimliğini içermez. Güvenli bir yerde sakla.":"The code excludes the active run and your device-bound online Ghost/World identity. Store it somewhere safe."}</div><textarea id="metaExportCode" readonly>${code}</textarea><div class="bact"><button class="btn btn-primary" onclick="CopaMeta.copyExport()">${tr?"KODU KOPYALA":"COPY CODE"}</button><button class="btn btn-ghost" onclick="CopaMeta.downloadExport()">${tr?"DOSYA İNDİR":"DOWNLOAD FILE"}</button><button class="btn btn-ghost" onclick="CopaMeta.openProgression()">${tr?"GERİ":"BACK"}</button></div></div>`,{dismissOnOverlay:true,label:tr?"İlerlemeyi dışa aktar":"Export progress"});
   }
   function copyExport(){const code=exportCode();copy(code,()=>global.showToast(global.LANG==="tr"?"İlerleme kodu kopyalandı.":"Progress code copied."));}
   function downloadExport(){const blob=new Blob([exportCode()],{type:"text/plain;charset=utf-8"}),link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="copa-life-progress.copa";link.click();setTimeout(()=>URL.revokeObjectURL(link.href),0);}
@@ -429,6 +429,7 @@
 
   global.CopaMeta=Object.freeze({
     recordRun,getState:()=>JSON.parse(JSON.stringify(state)),careerSummary,careerLevel,levelThreshold,masteryInfo,
+    renderPanelHTML:(tab="career")=>panelHTML(["career","mastery","museum","world"].includes(tab)?tab:"career",global.LANG==="tr"),
     requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,
     exportCode,importCode,openProgression,openArchive,openExport,openImport,copyExport,downloadExport,submitImport,installControl
   });

@@ -136,14 +136,14 @@ function genStoryNarrative(){
       ),entities:[name],tone:"neg"
     });
   }
-  const roundLabel=x.rounds&&x.rounds[Math.max(0,(r.won?6:r.round)-1)]||String(r.round||"");
+  const roundLabel=x.rounds&&x.rounds[Math.max(0,(r.won?7:r.round)-1)]||String(r.round||"");
   const opponent=fixture&&fixture.opp,score=r.score||(fixture&&fixture.gf!=null?`${fixture.gf}-${fixture.ga}`:"");
   const chairId=r.chairmanId||(chairman&&chairman.id),chairName=chairId&&x.chair&&x.chair[chairId]?x.chair[chairId].n:"Başkan";
   let endingTitle,endingText;
   if(r.endType==="sacked"){
     endingTitle=LT("Başkanın kararı","The chairman's call","La decisión presidencial","Entscheidung des Präsidenten","La decisione del presidente");
     endingText=LT(
-      `Kasa ${runMoney(r.budgetAtEnd)} seviyesine düşünce ${chairName} run'ı sona erdirdi.`,
+      `Kasa ${runMoney(r.budgetAtEnd)} seviyesine düşünce ${chairName} turu sona erdirdi.`,
       `${chairName} ended the run when funds fell to ${runMoney(r.budgetAtEnd)}.`,
       `${chairName} terminó el run cuando la caja cayó a ${runMoney(r.budgetAtEnd)}.`,
       `${chairName} beendete den Run, als die Kasse auf ${runMoney(r.budgetAtEnd)} fiel.`,
@@ -161,7 +161,7 @@ function genStoryNarrative(){
       )
       :LT("Finali kazanıp kupayı kaldırdın.","You won the final and lifted the cup.","Ganaste la final y levantaste la copa.","Du hast das Finale gewonnen und den Pokal geholt.","Hai vinto la finale e alzato la coppa.");
   }else if(r.endType==="group_eliminated"){
-    const tournamentState=r.tournament&&r.tournament.format==="groups16_v1"?r.tournament:null,group=tournamentState&&tournamentState.groups.find(item=>item.id===tournamentState.group.playerGroupId),row=group&&group.table.find(item=>item.teamId==="player");
+    const tournamentState=r.tournament&&r.tournament.format==="groups32_v2"?r.tournament:null,group=tournamentState&&tournamentState.groups.find(item=>item.id===tournamentState.group.playerGroupId),row=group&&group.table.find(item=>item.teamId==="player");
     endingTitle=LT("Grup aşamasına veda","Group-stage exit","Eliminación en la fase de grupos","Aus in der Gruppenphase","Eliminazione nella fase a gironi");
     const lastResult=fixture&&fixture.res==="W"?LT("galibiyetle","with a win","con una victoria","mit einem Sieg","con una vittoria"):fixture&&fixture.res==="D"?LT("beraberlikle","with a draw","con un empate","mit einem Remis","con un pareggio"):LT("mağlubiyetle","with a defeat","con una derrota","mit einer Niederlage","con una sconfitta");
     endingText=row?LT(
@@ -195,7 +195,7 @@ function genStoryNarrative(){
 }
 function financeNarrative(e,endCash){
   const spent=Number(e.spent)||0,earned=Number(e.earned)||0;
-  if(spent>earned+25)return LT("Transfer ve kart harcamaları run boyunca bütçeyi zorladı.","Transfer and card spending strained the budget throughout the run.","Los fichajes y las cartas presionaron el presupuesto durante todo el run.","Transfers und Karten belasteten das Budget über den gesamten Run.","Trasferimenti e carte hanno messo sotto pressione il budget per tutto il run.");
+  if(spent>earned+25)return LT("Transfer ve kart harcamaları tur boyunca bütçeyi zorladı.","Transfer and card spending strained the budget throughout the run.","Los fichajes y las cartas presionaron el presupuesto durante todo el run.","Transfers und Karten belasteten das Budget über den gesamten Run.","Trasferimenti e carte hanno messo sotto pressione il budget per tutto il run.");
   if(endCash<0&&spent>earned)return LT("Turnuva gelirleri harcamaları karşılamaya yetmedi.","Tournament income was not enough to cover the spending.","Los ingresos del torneo no bastaron para cubrir los gastos.","Die Turniereinnahmen reichten nicht für die Ausgaben.","I ricavi del torneo non sono bastati a coprire le spese.");
   if(spent>earned&&endCash>=0)return LT("Agresif yatırımlara rağmen kasayı ayakta tuttun.","The club stayed afloat despite aggressive investment.","El club se mantuvo a flote pese a las inversiones agresivas.","Trotz aggressiver Investitionen blieb der Club zahlungsfähig.","Il club è rimasto in piedi nonostante gli investimenti aggressivi.");
   if(earned>=spent&&endCash>=0)return LT("Dengeli ekonomi sayesinde ayakta kaldın.","A balanced economy kept the club standing.","Una economía equilibrada mantuvo al club en pie.","Eine ausgeglichene Wirtschaft hielt den Club stabil.","Un'economia equilibrata ha tenuto in piedi il club.");

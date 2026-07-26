@@ -37,18 +37,18 @@
       g.fillStyle(Phaser.Display.Color.HexStringToColor(colors.panel).color,.98);g.fillRoundedRect(20,18,380,384,24);
       g.lineStyle(1,Phaser.Display.Color.HexStringToColor(colors.slate).color,.45);g.strokeRoundedRect(20,18,380,384,24);
       scene.add.text(40,38,`${copy.pot} ${next?next.pot:4}`,{fontFamily:"monospace",fontSize:"14px",fontStyle:"bold",color:colors.primary});
-      scene.add.text(380,38,`${state.draw.revealIndex}/16`,{fontFamily:"monospace",fontSize:"14px",fontStyle:"bold",color:colors.text}).setOrigin(1,0);
-      const groupY=94;["A","B","C","D"].forEach((id,index)=>{
-        const x=72+index*92,group=state.groups[index],count=revealed.filter(entry=>entry.groupId===id).length;
+      scene.add.text(380,38,`${state.draw.revealIndex}/${state.draw.entries.length}`,{fontFamily:"monospace",fontSize:"14px",fontStyle:"bold",color:colors.text}).setOrigin(1,0);
+      (state.groups||[]).forEach((group,index)=>{
+        const id=group.id,column=index%4,row=Math.floor(index/4),x=72+column*92,groupY=88+row*60,count=revealed.filter(entry=>entry.groupId===id).length;
         const active=group&&group.teamIds.includes("player");
-        g.fillStyle(Phaser.Display.Color.HexStringToColor(active?colors.primary:colors.slate).color,active?.28:.16);g.fillRoundedRect(x-35,groupY-18,70,56,12);
-        scene.add.text(x,groupY,id,{fontFamily:"Inter, sans-serif",fontSize:"19px",fontStyle:"bold",color:colors.text}).setOrigin(.5);
-        scene.add.text(x,groupY+24,`${count}/4`,{fontFamily:"monospace",fontSize:"10px",color:"#BCC2C2"}).setOrigin(.5);
+        g.fillStyle(Phaser.Display.Color.HexStringToColor(active?colors.primary:colors.slate).color,active?.28:.16);g.fillRoundedRect(x-35,groupY-17,70,52,11);
+        scene.add.text(x,groupY-1,id,{fontFamily:"Inter, sans-serif",fontSize:"17px",fontStyle:"bold",color:colors.text}).setOrigin(.5);
+        scene.add.text(x,groupY+21,`${count}/4`,{fontFamily:"monospace",fontSize:"9px",color:"#BCC2C2"}).setOrigin(.5);
       });
-      g.lineStyle(2,0xffffff,.14);g.lineBetween(50,172,370,172);
-      const ball=scene.add.circle(210,255,67,Phaser.Display.Color.HexStringToColor(colors.primary).color).setStrokeStyle(3,0xffffff,.72).setInteractive({useHandCursor:true});
-      scene.add.circle(187,228,11,0xffffff,.24);scene.add.text(210,252,next?String(next.pot):"✓",{fontFamily:"Inter, sans-serif",fontSize:"34px",fontStyle:"bold",color:"#ffffff"}).setOrigin(.5);
-      const hint=scene.add.text(210,344,next?(copy.nextBall||"Next ball"):(copy.drawComplete||"Complete"),{fontFamily:"Inter, sans-serif",fontSize:"13px",color:"#E4E8E7"}).setOrigin(.5);
+      g.lineStyle(2,0xffffff,.14);g.lineBetween(50,205,370,205);
+      const ball=scene.add.circle(210,278,57,Phaser.Display.Color.HexStringToColor(colors.primary).color).setStrokeStyle(3,0xffffff,.72).setInteractive({useHandCursor:true});
+      scene.add.circle(191,256,10,0xffffff,.24);scene.add.text(210,276,next?String(next.pot):"✓",{fontFamily:"Inter, sans-serif",fontSize:"31px",fontStyle:"bold",color:"#ffffff"}).setOrigin(.5);
+      const hint=scene.add.text(210,359,next?(copy.nextBall||"Next ball"):(copy.drawComplete||"Complete"),{fontFamily:"Inter, sans-serif",fontSize:"12px",color:"#E4E8E7"}).setOrigin(.5);
       let downY=0;ball.on("pointerdown",pointer=>{downY=pointer.y;});ball.on("pointerup",pointer=>{if(!drawBusy&&next&&(downY-pointer.y>18||Math.abs(downY-pointer.y)<=18))root.revealTournamentBall();});
       if(!reduced()&&next)scene.tweens.add({targets:ball,scale:1.045,duration:800,yoyo:true,repeat:-1,ease:"Sine.easeInOut"});
       scene.copa={ball,hint};
@@ -60,7 +60,7 @@
     const done=()=>{drawBusy=false;callback();};
     actor.hint.setText(entry&&entry.teamId==="player"?(root.LANG==="tr"?"SENİN KULÜBÜN":"YOUR CLUB"):entry&&entry.name||"");
     if(reduced()){setTimeout(done,80);return true;}
-    scene.tweens.add({targets:actor.ball,y:185,scale:1.18,angle:12,duration:330,ease:"Back.easeOut",yoyo:true,hold:240,onComplete:done});
+    scene.tweens.add({targets:actor.ball,y:220,scale:1.18,angle:12,duration:330,ease:"Back.easeOut",yoyo:true,hold:240,onComplete:done});
     return true;
   }
   async function mountPenalty(state,reveal){

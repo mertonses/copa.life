@@ -119,8 +119,8 @@ const fixtureRoadSource=fs.readFileSync(new URL("../src/ui/fixtureRoad.js",impor
 const tournamentSource=fs.readFileSync(new URL("../src/tournament/tournamentRuntime.js",import.meta.url),"utf8");
 const tournamentWindow={LANG:"en"};tournamentWindow.window=tournamentWindow;
 const tournamentContext={window:tournamentWindow};vm.createContext(tournamentContext);vm.runInContext(tournamentSource,tournamentContext);
-const tournamentKeys=["ceremony","drawTitle","drawRule","tournament","team","played","wins","draws","losses","gd","points","groupMatchday","topTwo","allGroups","knockoutRule","quarterfinal","semifinal","final","groupEliminated","drawPoint","winPoints","lossPoints"];
-const tournamentLocalizedText=new Set(["ceremony","drawTitle","drawRule","tournament","groupMatchday","topTwo","allGroups","knockoutRule","quarterfinal","semifinal","groupEliminated","drawPoint","winPoints","lossPoints"]);
+const tournamentKeys=["ceremony","drawTitle","drawRule","tournament","team","played","wins","draws","losses","gd","points","groupMatchday","topTwo","allGroups","knockoutRule","roundof16","quarterfinal","semifinal","final","groupEliminated","drawPoint","winPoints","lossPoints"];
+const tournamentLocalizedText=new Set(["ceremony","drawTitle","drawRule","tournament","groupMatchday","topTwo","allGroups","knockoutRule","roundof16","quarterfinal","semifinal","groupEliminated","drawPoint","winPoints","lossPoints"]);
 const tournamentEnglish=tournamentWindow.CopaTournamentRuntime.copy();
 for(const language of required){
   tournamentWindow.LANG=language;const copy=tournamentWindow.CopaTournamentRuntime.copy();
@@ -141,10 +141,10 @@ for(const marker of ["SEZON İSTATİSTİKLERİ","SEASON STATISTICS","ESTADÍSTIC
 for(const marker of ["GRUP · 1. MAÇ","GROUP · MATCH 1","GRUPO · PARTIDO 1","GRUPPE · SPIEL 1","GIRONE · PARTITA 1"]){
   if(!lastMatchSource.includes(marker))errors.push(`last-match group-stage marker missing: ${marker}`);
 }
-for(const legacy of ["SON 16","LAST 16","OCTAVOS","ACHTELFINALE","OTTAVI"]){
-  if(lastMatchSource.includes(legacy)||fixtureRoadSource.includes(legacy))errors.push(`legacy direct-knockout stage remains in match UI: ${legacy}`);
+for(const requiredStage of ["SON 16","ROUND OF 16","OCTAVOS","ACHTELFINALE","OTTAVI"]){
+  if(!lastMatchSource.includes(requiredStage)&&!fixtureRoadSource.includes(requiredStage))errors.push(`round-of-16 stage is missing from match UI: ${requiredStage}`);
 }
-if(!fixtureRoadSource.includes('Group · Match 1'))errors.push("fixture road fallback still assumes a direct-knockout format");
+if(!fixtureRoadSource.includes('Group · Match 1'))errors.push("fixture road fallback is missing the first group match");
 
 if(errors.length){
   console.error("Locale check failed:\n- "+errors.join("\n- "));

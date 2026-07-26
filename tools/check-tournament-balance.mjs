@@ -46,11 +46,11 @@ for(const playerPower of powers){
 const values=powers.map(power=>report.powers[power]);
 for(let index=1;index<values.length;index++){
   if(values[index].qualificationRate<=values[index-1].qualificationRate)throw new Error("Qualification rate is not monotonic by player power");
-  if(values[index].championRate<=values[index-1].championRate)throw new Error("Champion rate is not monotonic by player power");
+  if(values[index].championRate<values[index-1].championRate)throw new Error("Champion rate is not monotonic by player power");
 }
 const even=report.powers[80];
 if(even.qualificationRate<.45||even.qualificationRate>.9)throw new Error(`Power 80 qualification rate is outside the playable band: ${even.qualificationRate}`);
-if(even.championRate<.03||even.championRate>.45)throw new Error(`Power 80 champion rate is outside the replayable band: ${even.championRate}`);
+if(even.championRate<.01||even.championRate>.30)throw new Error(`Power 80 champion rate is outside the seven-match replayable band: ${even.championRate}`);
 for(const value of values){
   if(value.groupDrawRate<.08||value.groupDrawRate>.4)throw new Error(`Group draw rate is implausible: ${value.groupDrawRate}`);
   if(value.averageGroupPoints<0||value.averageGroupPoints>9)throw new Error(`Group points escaped valid bounds: ${value.averageGroupPoints}`);

@@ -95,7 +95,7 @@ async function assertSharedLayout(page:Page){
   await expect(modal.locator(".ss-summary-metrics>div")).toHaveCount(3);
   await expect(modal.locator(".ss-tab")).toHaveCount(3);
   await expect(modal.locator(".ss-panel")).toHaveCount(3);
-  await expect(modal.locator(".ss-journey-node")).toHaveCount(6);
+  await expect(modal.locator(".ss-journey-node")).toHaveCount(7);
   await expect(modal.locator(".ss-takeaway")).toHaveCount(1);
   await expect(modal.locator(".ss-kpi,.ss-empty,.ss-insights")).toHaveCount(0);
   await expect(modal.locator('[data-ss-panel="summary"]')).toBeVisible();
@@ -146,13 +146,13 @@ test("short penalty run removes empty player panels and repeated stats",async({p
   const modal=page.locator(".season-stats-modal");
   await expect(modal.locator(".ss-player-spotlight,.ss-empty,.ss-kpi,.ss-insights")).toHaveCount(0);
   await expect(modal.locator(".ss-hero")).toHaveClass(/stat-negative/);
-  await expect(modal.locator(".ss-progress-badge")).toHaveText("1/6");
+  await expect(modal.locator(".ss-progress-badge")).toHaveText("1/7");
   await expect(modal.locator(".ss-journey-detail")).toContainText(/(?:Pen\.|Pens) 3-4/);
   const layout=await modal.evaluate(element=>{
     const body=element.querySelector(".ss-body") as HTMLElement;
     return{height:Math.round(element.getBoundingClientRect().height),bodyVertical:body.scrollHeight-body.clientHeight};
   });
-  expect(layout.height).toBeLessThanOrEqual(560);
+  expect(layout.height).toBeLessThanOrEqual(562);
   expect(layout.bodyVertical).toBeLessThanOrEqual(2);
   expect(errors).toEqual([]);
 });

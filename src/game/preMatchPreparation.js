@@ -22,8 +22,8 @@
     ensureRound(round||state.round);
     if(!DRILLS[id])return false;
     const level=intensity==="intense"?"intense":"light",cost=level==="intense"?2:1;
-    const next=state.choices.filter(item=>item.id!==id);
-    if(next.reduce((sum,item)=>sum+(item.intensity==="intense"?2:1),0)+cost>2)return false;
+    let next=state.choices.filter(item=>item.id!==id);
+    if(next.reduce((sum,item)=>sum+(item.intensity==="intense"?2:1),0)+cost>2)next=[];
     next.push({id,intensity:level});state.choices=next;state.lastEffects=null;render();return true;
   }
   function clear(id){state.choices=state.choices.filter(item=>item.id!==id);state.lastEffects=null;render();}
@@ -69,7 +69,7 @@
   function reset(){restore(null);}
   function button(id,intensity,label){
     const active=state.choices.some(item=>item.id===id&&item.intensity===intensity);
-    return`<button type="button" class="prep-level${active?" active":""}" data-prep-level="${intensity}" onclick="CopaPreparation.select('${id}','${intensity}')">${label}</button>`;
+    return`<button type="button" class="prep-level${active?" active":""}" data-prep-level="${intensity}" data-prep-drill="${id}" onclick="CopaPreparation.select('${id}','${intensity}')">${label}</button>`;
   }
   function render(){
     const panel=document.querySelector(".prep-modal");if(!panel)return;
@@ -80,7 +80,7 @@
     panel.querySelectorAll("[data-drill]").forEach(card=>{
       const id=card.dataset.drill,chosen=state.choices.find(item=>item.id===id);
       card.classList.toggle("active",!!chosen);
-      card.querySelectorAll(".prep-level").forEach(button=>button.classList.toggle("active",!!chosen&&button.textContent===(chosen.intensity==="intense"?(tr()?"YOĞUN · 2":"INTENSE · 2"):(tr()?"HAFİF · 1":"LIGHT · 1"))));
+      card.querySelectorAll(".prep-level").forEach(button=>button.classList.toggle("active",!!chosen&&button.dataset.prepLevel===chosen.intensity));
     });
   }
   function open(round,opponent){
@@ -90,7 +90,7 @@
       const drill=DRILLS[id],streak=state.streaks[id]||0;
       return`<article class="prep-drill" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b><small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
     }).join("");
-    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
+    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><div class="prep-title-row"><div><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></div><button type="button" class="prep-help" aria-expanded="false" onclick="const note=this.closest('.prep-modal').querySelector('.prep-help-note');note.hidden=!note.hidden;this.setAttribute('aria-expanded',String(!note.hidden))">?</button></div><aside class="prep-help-note" hidden>${tr()?"Toplam 2 puanın var. İki farklı hafif çalışma veya tek bir yoğun çalışma seçebilirsin. Dolu bir plan varken başka seçeneğe dokunursan plan yeni seçime geçer.":"You have 2 points: choose two light drills or one intense drill. Selecting another drill when the plan is full replaces the plan."}</aside></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
     render();
   }
   root.CopaPreparation={DRILLS,open,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,snapshot,restore,reset,spent};

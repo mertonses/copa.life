@@ -21,7 +21,7 @@ Her koşuda ülkeni, dizilişini ve başkanını seç. Zar atarak önüne gelen 
 - Bütçe, kadro kimyası ve taktik dengesi
 - Altı boyutlu Copa Life oyuncu profilleri
 - Kartlar, maç olayları ve sürpriz gelişmeler
-- Üç grup maçı; ardından çeyrek final, yarı final ve final
+- Üç grup maçı; ardından Son 16, çeyrek final, yarı final ve final
 - Açık ve koyu tema
 - Kayıt veya giriş gerektirmeyen oyun deneyimi
 

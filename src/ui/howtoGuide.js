@@ -15,7 +15,7 @@
   const COPY={
     tr:{
       title:"COPA REHBERİ",sub:"COPA'YI İKİ DAKİKADA ÖĞREN",quick:"Hızlı Başlangıç",detail:"Detaylı Rehber",
-      quickLead:"Üç fikri bil; ilk run'ını oynarken gerisini keşfet.",back:"OYUNA DÖN",close:"Kapat",
+      quickLead:"Üç fikri bil; ilk turunu oynarken gerisini keşfet.",back:"OYUNA DÖN",close:"Kapat",
       quickItems:[
         ["Kadroyu kur","Diziliş ve başkanını seç; her mevki için gelen üç adaydan bütçene uyanı al."],
         ["Gücü doğru oku","Takım gücü temel seviyedir. Kimya, kartlar ve maç koşulları bunun üstüne eklenir."],
@@ -38,7 +38,7 @@
       },
       actions:{formation:"Diziliş ekranına git",market:"Kart pazarını göster",unavailable:"Bu aksiyon ilgili oyun ekranında açılır."},
       tips:{
-        setup:["İLK RUN İPUCU","Diziliş, dolduracağın mevkileri belirler. Başkan ise bütçe ve borç alanını değiştirir."],
+        setup:["İLK TUR İPUCU","Diziliş, dolduracağın mevkileri belirler. Başkan ise bütçe ve borç alanını değiştirir."],
         draft:["İLK ZAR","Her atış bir mevkiyi belirler ve 2 saat harcar. Animasyonlar kapalıysa sonuç yine kısa bir titreşim ve zar yüzüyle gösterilir."],
         hub:["MAÇ MERKEZİ","Kimya kutusuna dokunarak güç katkısını; kartlarda ise para dışındaki riskleri görebilirsin."],
         bench:["YEDEK KULÜBESİ","Yedekler düğmesi kadroyu alt panelde açar. Android geri tuşu paneli kapatır."],
