@@ -32,7 +32,7 @@ expect(/Math\.min\(variantOf\("cift_forvet"\)===1\?8:4/.test(read("src/cards/car
 expect(/Math\.min\(v===1\?12:9,cbs\*\(v===1\?4:3\)\)/.test(files.effects),"The Bus card-specific cap is missing");
 expect(/Math\.max\(-5,Math\.min\(5,total\)\)/.test(files.power),"chemistry engine is not clamped to -5/+5");
 expect(/Math\.max\(-5,Math\.min\(5,cb\.total\)\)/.test(files.hub),"chemistry HUD is not clamped to -5/+5");
-expect(/Kimya: -5 ile \+5 güç/.test(files.html)&&/Chemistry: -5 to \+5 power/.test(files.html),"power info still documents the old chemistry range");
+expect(/\$\{tr\?"Kimya":"Chemistry"\}: <b class="context-number is-range">−5 … \+5<\/b> \$\{tr\?"güç":"power"\}/.test(files.html),"power info does not document the -5/+5 chemistry range");
 expect(/COMMON final cezasının %50'sini, en fazla 6 gücü telafi eder/.test(files.html)&&/DARK offsets 65%, up to 10/.test(files.html),"fallback Crisis Management copy is stale");
 expect(!/final_provasi\s*:\s*4/.test(files.effects),"Son Koz DARK still cancels its own final-only bonus");
 expect(/final_provasi:\{chance:0\.25,cash:3\}/.test(files.effects),"Son Koz DARK purchase risk is not 25% / EUR3M");
