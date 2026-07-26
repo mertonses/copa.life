@@ -33,6 +33,7 @@
     smartSpeed:"copa_mobile_smart_speed",
     confirmPick:"copa_mobile_confirm_pick",
     fieldFocus:"copa_mobile_field_focus",
+    textScale:"copa_mobile_text_scale",
   };
 
   function languageIsTurkish(){
@@ -46,9 +47,8 @@
       online:"Bağlantı geri geldi",retry:"Yeniden dene",settings:"MOBİL DENEYİM",
       haptics:"DOKUNUŞ TİTREŞİMİ",battery:"PİL TASARRUFU",
       smartSpeed:"AKILLI MAÇ HIZI",confirmPick:"OYUNCU SEÇİMİNİ ONAYLA",
-      fieldFocus:"YATAYDA SAHA ODAĞI",
+      fieldFocus:"YATAYDA SAHA ODAĞI",textSize:"METİN BOYUTU",textSizes:["STANDART","RAHAT","BÜYÜK"],
       on:"AÇIK",off:"KAPALI",
-      draft:"DRAFT DURUMU",remaining:"Kadro",budget:"Kasa",deadline:"Süre",
       candidates:"Aday seçimi",squadAverage:"Kadro ort.",cashAfter:"Kasa sonra",
       economical:"Bütçe",balanced:"Dengeli",strong:"Güçlü",elite:"Elit",
       addPlayer:"KADROYA EKLE",cancel:"VAZGEÇ",
@@ -72,9 +72,8 @@
       online:"Connection restored",retry:"Retry",settings:"MOBILE EXPERIENCE",
       haptics:"TOUCH HAPTICS",battery:"BATTERY SAVER",
       smartSpeed:"SMART MATCH SPEED",confirmPick:"CONFIRM PLAYER PICKS",
-      fieldFocus:"LANDSCAPE PITCH FOCUS",
+      fieldFocus:"LANDSCAPE PITCH FOCUS",textSize:"TEXT SIZE",textSizes:["STANDARD","COMFORT","LARGE"],
       on:"ON",off:"OFF",
-      draft:"DRAFT STATUS",remaining:"Squad",budget:"Cash",deadline:"Time",
       candidates:"Candidate choice",squadAverage:"Squad avg.",cashAfter:"Cash after",
       economical:"Budget",balanced:"Balanced",strong:"Strong",elite:"Elite",
       addPlayer:"ADD TO SQUAD",cancel:"CANCEL",
@@ -101,6 +100,16 @@
 
   function writePreference(key,value){
     try{localStorage.setItem(PREF_KEYS[key],value?"1":"0");}catch(_){}
+    applyPreferences();
+  }
+
+  function readTextScale(){
+    try{const value=localStorage.getItem(PREF_KEYS.textScale);return ["100","115","130"].includes(value)?value:"100";}catch(_){return"100";}
+  }
+
+  function writeTextScale(value){
+    const scale=["100","115","130"].includes(String(value))?String(value):"100";
+    try{localStorage.setItem(PREF_KEYS.textScale,scale);}catch(_){}
     applyPreferences();
   }
 
@@ -344,6 +353,7 @@
     root.classList.toggle("copa-smart-speed",readPreference("smartSpeed"));
     root.classList.toggle("copa-confirm-picks",readPreference("confirmPick"));
     root.classList.toggle("copa-field-focus",readPreference("fieldFocus"));
+    root.dataset.copaTextScale=readTextScale();
     const c=copy();
     [
       ["haptics","mobileHapticBtn"],
@@ -360,6 +370,11 @@
       const state=button.querySelector(".mobile-pref-state");
       if(state)state.textContent=active?c.on:c.off;
     });
+    document.querySelectorAll("[data-mobile-text-scale]").forEach(button=>{
+      const active=button.dataset.mobileTextScale===readTextScale();
+      button.classList.toggle("on",active);
+      button.setAttribute("aria-pressed",String(active));
+    });
   }
 
   function ensurePreferences(){
@@ -370,6 +385,24 @@
     group.innerHTML='<div class="sd-hdr mobile-pref-hdr"></div>';
     const header=group.querySelector(".mobile-pref-hdr");
     if(header)header.textContent=c.settings;
+    const textLabel=document.createElement("div");
+    textLabel.className="mobile-text-scale-label";
+    textLabel.id="mobileTextScaleLabel";
+    textLabel.textContent=c.textSize;
+    const textScale=document.createElement("div");
+    textScale.className="mobile-text-scale";
+    textScale.setAttribute("role","group");
+    textScale.setAttribute("aria-labelledby","mobileTextScaleLabel");
+    ["100","115","130"].forEach((value,index)=>{
+      const button=document.createElement("button");
+      button.type="button";
+      button.className="sdbtn";
+      button.dataset.mobileTextScale=value;
+      button.textContent=c.textSizes[index];
+      button.addEventListener("click",()=>writeTextScale(value));
+      textScale.appendChild(button);
+    });
+    group.append(textLabel,textScale);
     [
       ["haptics","mobileHapticBtn",c.haptics],
       ["battery","mobileBatteryBtn",c.battery],
@@ -404,6 +437,9 @@
     };
     const header=document.querySelector(".mobile-pref-hdr");
     if(header)header.textContent=c.settings;
+    const textLabel=document.getElementById("mobileTextScaleLabel");
+    if(textLabel)textLabel.textContent=c.textSize;
+    document.querySelectorAll("[data-mobile-text-scale]").forEach((button,index)=>{button.textContent=c.textSizes[index]||c.textSizes[0];});
     Object.entries(labels).forEach(([id,label])=>{
       const node=document.querySelector("#"+id+" .mobile-pref-label");
       if(node)node.textContent=label;
@@ -472,30 +508,6 @@
     if(!mechanics)return;
     mechanics.classList.remove("mobile-collapsed");
     document.getElementById("mobileMechanicsToggle")?.remove();
-  }
-
-  function ensureDraftContext(){
-    const draft=document.getElementById("draft");
-    const hint=document.getElementById("rollHint");
-    if(!draft||!hint)return null;
-    let bar=document.getElementById("mobileDraftContext");
-    if(!bar){
-      bar=document.createElement("div");
-      bar.id="mobileDraftContext";
-      bar.className="mobile-draft-context";
-      bar.setAttribute("role","status");
-      bar.setAttribute("aria-live","polite");
-      bar.innerHTML='<span class="mobile-draft-kicker"></span><div><b data-draft-context="squad"></b><b data-draft-context="cash"></b><b data-draft-context="time"></b></div>';
-      hint.before(bar);
-    }
-    const c=copy(),squad=(document.getElementById("ddSub")||{}).textContent||"—";
-    const cash=(document.getElementById("budgetV")||{}).textContent||"—";
-    const deadline=(document.getElementById("ddClock")||{}).textContent||"—";
-    bar.querySelector(".mobile-draft-kicker").textContent=c.draft;
-    bar.querySelector('[data-draft-context="squad"]').textContent=c.remaining+" · "+squad.replace(/^.*?\s(?=\d+\/\d+$)/,"");
-    bar.querySelector('[data-draft-context="cash"]').textContent=c.budget+" · "+cash;
-    bar.querySelector('[data-draft-context="time"]').textContent=c.deadline+" · "+deadline;
-    return bar;
   }
 
   function numericText(element){
@@ -817,13 +829,20 @@
   }
 
   function handleBack(){
+    if(global.CopaMatchAnalysis&&global.CopaMatchAnalysis.isOpen()){global.CopaMatchAnalysis.close();return true;}
     if(document.documentElement.classList.contains("native-bench-open")){closeNativeBench();return true;}
     if(global.CopaMobileShell&&global.CopaMobileShell.handleBack())return true;
     if(global.PlayerProfiles&&global.PlayerProfiles.isOpen()){global.PlayerProfiles.close();return true;}
     const consent=document.getElementById("ghostConsentDialog");
     if(consent){consent.remove();return true;}
     const settings=document.getElementById("settingsDrop");
-    if(settings&&!settings.classList.contains("hidden")){settings.classList.add("hidden");return true;}
+    if(settings&&!settings.classList.contains("hidden")){
+      settings.classList.add("hidden");
+      const settingsButton=document.getElementById("settingsBtn");
+      settingsButton?.setAttribute("aria-expanded","false");
+      settingsButton?.focus({preventScroll:true});
+      return true;
+    }
     if(closeDraftConfirmation())return true;
     const modal=document.getElementById("modal");
     if(isVisible(modal)){
@@ -909,7 +928,7 @@
     syncPreferenceLanguage();
     ensureNetworkBanner();
     ensureIntroGuide();
-    ensureDraftContext();
+    document.getElementById("mobileDraftContext")?.remove();
     enhanceDraftCandidates();
     ensureAutoFillPresets();
     ensureScrollAffordances();
@@ -1076,6 +1095,7 @@
     enhance,
     openNativeBench,
     closeNativeBench,
+    setTextScale:writeTextScale,
   };
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});

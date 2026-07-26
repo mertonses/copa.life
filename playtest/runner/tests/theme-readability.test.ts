@@ -61,7 +61,7 @@ async function expectReadable(page:Page,label:string){
   expect(failures,`${label}: ${JSON.stringify(failures,null,2)}`).toEqual([]);
 }
 
-for(const theme of ["light","dark"] as const){
+for(const theme of ["dark"] as const){
   test(`${theme} theme keeps settings, popups, tooltips and profiles readable`,async({page})=>{
     const errors:string[]=[];
     page.on("pageerror",error=>errors.push(error.message));
@@ -110,7 +110,7 @@ for(const theme of ["light","dark"] as const){
     });
     expect(formationColors.buttonBorder).toBe("rgb(242, 74, 40)");
     expect(formationColors.previewColor).toBe("rgb(243, 245, 244)");
-    expect(formationColors.previewBackground).toBe(theme==="light"?"rgb(16, 29, 40)":"rgb(48, 60, 68)");
+    expect(formationColors.previewBackground).toBe("rgb(48, 60, 68)");
     await expectReadable(page,`${theme} formation hover`);
 
     await page.locator("#settingsBtn").click();
@@ -185,7 +185,7 @@ for(const theme of ["light","dark"] as const){
   });
 }
 
-test("both themes remain readable on the mobile hub and decision modal",async({page},testInfo)=>{
+test("the dark-only theme remains readable on the mobile hub and decision modal",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="mobile-chromium","phone theme audit");
   await page.goto("/?mobile-theme-audit=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
@@ -195,7 +195,7 @@ test("both themes remain readable on the mobile hub and decision modal",async({p
   await expect(page.locator("#hub")).toBeVisible();
   await page.evaluate(()=>{(globalThis as any).setCaptain(0);(globalThis as any).closeModal();});
 
-  for(const theme of ["light","dark"] as const){
+  for(const theme of ["dark"] as const){
     await setTheme(page,theme);
     await expectReadable(page,`${theme} mobile hub`);
     await page.evaluate(()=>{(globalThis as any).showPowerInfo();});
@@ -209,7 +209,7 @@ test("both themes remain readable on the mobile hub and decision modal",async({p
   }
 });
 
-for(const theme of ["light","dark"] as const){
+for(const theme of ["dark"] as const){
   test(`${theme} semantic metrics and football fields keep their intended meaning`,async({page},testInfo)=>{
     test.skip(testInfo.project.name==="mobile-chromium","desktop semantic audit");
     await page.goto(`/?semantic-audit=${theme}`,{waitUntil:"domcontentloaded"});

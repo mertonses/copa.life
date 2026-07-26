@@ -12,10 +12,11 @@
     try{if(root.CopaPlatform&&root.CopaPlatform.storage){await root.CopaPlatform.storage.syncKnown();await root.CopaPlatform.storage.flush();}}catch(_){}
   }
   function closeOverlay(){
+    if(root.CopaMatchAnalysis&&root.CopaMatchAnalysis.isOpen()){root.CopaMatchAnalysis.close();return true;}
     if(root.PlayerProfiles&&root.PlayerProfiles.isOpen()){root.PlayerProfiles.close();return true;}
     const onboarding=document.getElementById("onlineFeaturesOnboarding");if(onboarding)return true;
     const consent=document.getElementById("ghostConsentDialog");if(consent){consent.remove();return true;}
-    const settings=document.getElementById("settingsDrop");if(settings&&!settings.classList.contains("hidden")){settings.classList.add("hidden");return true;}
+    const settings=document.getElementById("settingsDrop");if(settings&&!settings.classList.contains("hidden")){settings.classList.add("hidden");document.getElementById("settingsBtn")?.setAttribute("aria-expanded","false");return true;}
     const modal=document.getElementById("modal");if(modal&&!modal.classList.contains("hidden")){
       if(modal.dataset.dismissOnEscape==="false")return true;
       if(typeof root.closeModal==="function"){root.closeModal();return true;}

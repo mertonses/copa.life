@@ -76,7 +76,11 @@
     return loadScriptOnce(source[0],source[1],()=>Array.isArray(global[source[2]])&&global[source[2]].length>0);
   }
   function ensureLastMatchReport(){
-    return loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260721-round-names1",()=>!!global.LastMatchReport).then(()=>global.LastMatchReport);
+    return Promise.all([
+      loadStyleOnce("match-analysis-style","src/styles/matchAnalysis.css?v=20260726-analysis1",'link[href*="matchAnalysis.css"]'),
+      loadScriptOnce("last-match-report","src/ui/lastMatchReport.js?v=20260726-analysis1",()=>!!global.LastMatchReport),
+      loadScriptOnce("match-analysis","src/ui/matchAnalysis.js?v=20260726-analysis1",()=>!!global.CopaMatchAnalysis)
+    ]).then(()=>global.LastMatchReport);
   }
   function warmRunReports(){
     return Promise.all([ensureScoutReport(),ensureLastMatchReport()]);
