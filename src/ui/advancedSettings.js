@@ -57,5 +57,31 @@
       if(typeof global.showToast==="function")global.showToast(text("Panodan seed okunamadı.","Could not read a seed from the clipboard.","No se pudo leer la seed del portapapeles.","Seed konnte nicht aus der Zwischenablage gelesen werden.","Impossibile leggere il seed dagli appunti."));
     }
   }
-  global.CopaAdvancedSettings=Object.freeze({ensureMarkup,refreshCopy,randomizeSeedInput,pasteSeedInput});
+  function close(){
+    const layer=document.getElementById("advancedSettingsLayer");if(!layer)return;
+    const body=layer.querySelector(".advanced-body"),placeholder=document.getElementById("advancedSettingsPlaceholder"),trigger=layer._trigger;
+    if(body&&placeholder)placeholder.replaceWith(body);
+    if(body)body.classList.add("hidden");
+    document.body.classList.remove("advanced-settings-open");document.removeEventListener("keydown",layer._onKey);layer.remove();
+    if(trigger&&typeof trigger.focus==="function")trigger.focus({preventScroll:true});
+  }
+  function open(){
+    const existing=document.getElementById("advancedSettingsLayer");if(existing)return existing;
+    const body=document.querySelector(".advanced-body[data-advanced-settings]");if(!body)return null;
+    const trigger=document.activeElement,settings=document.getElementById("settingsDrop"),settingsButton=document.getElementById("settingsBtn");
+    if(settings)settings.classList.add("hidden");if(settingsButton)settingsButton.setAttribute("aria-expanded","false");
+    ensureMarkup(body);
+    const tr=global.LANG==="tr",placeholder=document.createElement("span"),layer=document.createElement("div"),card=document.createElement("section"),content=document.createElement("div");
+    placeholder.id="advancedSettingsPlaceholder";placeholder.hidden=true;body.replaceWith(placeholder);
+    layer.id="advancedSettingsLayer";layer.className="advanced-settings-layer";layer.setAttribute("role","presentation");
+    card.className="advanced-settings-sheet";card.setAttribute("role","dialog");card.setAttribute("aria-modal","true");card.setAttribute("aria-labelledby","advancedSettingsTitle");
+    card.innerHTML=`<header><div><small>${tr?"OYUN AYARLARI":"GAME SETTINGS"}</small><h2 id="advancedSettingsTitle">${tr?"GELİŞMİŞ AYARLAR":"ADVANCED SETTINGS"}</h2></div><button type="button" class="advanced-settings-close" onclick="CopaLazy.closeAdvancedSettings()" aria-label="${tr?"Kapat":"Close"}">×</button></header>`;
+    content.className="advanced-settings-content";body.classList.remove("hidden");content.appendChild(body);card.appendChild(content);
+    const actions=document.createElement("footer");actions.innerHTML=`<button type="button" class="btn btn-go" onclick="CopaLazy.closeAdvancedSettings()">${tr?"TAMAM":"DONE"}</button>`;card.appendChild(actions);
+    layer.appendChild(card);layer._trigger=trigger;layer._onKey=e=>{if(e.key==="Escape")close();};
+    layer.addEventListener("click",e=>{if(e.target===layer)close();});document.addEventListener("keydown",layer._onKey);
+    document.body.appendChild(layer);document.body.classList.add("advanced-settings-open");requestAnimationFrame(()=>card.querySelector("button")?.focus({preventScroll:true}));
+    return layer;
+  }
+  global.CopaAdvancedSettings=Object.freeze({ensureMarkup,refreshCopy,randomizeSeedInput,pasteSeedInput,open,close});
 })(window);

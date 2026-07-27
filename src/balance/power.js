@@ -1,6 +1,6 @@
 /* Takim gucu, kimya ve kart bonusu hesaplari. */
 /* Kimya: aynı kulüp / uyruk (yerli) / genç çekirdek / veteran pozitif; dağınık kadro negatif.
-   Kimya aralığı -5 ile +5'tir. Kartların kendi tavanları korunur; final kartı toplamı ayrıca tavanlanmaz. */
+   Kimya aralığı -5 ile +5'tir. Birden fazla final kartı azalan getirili uygulanır. */
 function chemBonus(s){
  if(globalThis.CopaChemistry&&typeof globalThis.CopaChemistry.calculate==="function"){
   const result=globalThis.CopaChemistry.calculate(s,typeof slots!=="undefined"?slots:[],{
@@ -52,16 +52,17 @@ function powerBreakdown(r,excludedCard){
  const starImpact=Math.min(2.5,s.map(effOf).sort((a,b)=>b-a).slice(0,2).reduce((sum,value)=>sum+Math.max(0,value-86)*.16,0));
  const styleBonus=STYLES[style].eff(s);
  const loanBonus=s.reduce((sum,p)=>sum+(p&&p.loan?Math.max(0,Number(p.teamPowerBoost)||0):0),0);
- let cardBonus=0,finalCardRaw=0;
- cards.forEach(k=>{if(k===excludedCard)return;const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final")finalCardRaw+=v;else cardBonus+=v;});
- const finalCardApplied=r>=6?finalCardRaw:0;
+ let cardBonus=0,finalCardRaw=0,finalCardValues=[];
+ cards.forEach(k=>{if(k===excludedCard)return;const v=cardEff(k,s,r);if(r>=6&&typeof cardKind==="function"&&cardKind(k)==="final"){finalCardRaw+=v;finalCardValues.push(v);}else cardBonus+=v;});
+ finalCardValues.sort((a,b)=>Math.abs(b)-Math.abs(a));
+ const finalCardApplied=r>=6?finalCardValues.reduce((sum,value,index)=>sum+value*(index===0?1:index===1?.7:.4),0):0;
  cardBonus+=finalCardApplied;
  const promiseBonus=typeof matchPromisePowerForRound==="function"?matchPromisePowerForRound(r):0;
  cardBonus+=promiseBonus;
  const matchup=matchupBonus;
  const risk=riskPowerMod+tempPrimePenalty+shortCampPenalty-(r>=6?finalPenalty:0);
  let trait=0;s.forEach(p=>{if(p.trait&&TRAITS[p.trait])trait+=TRAITS[p.trait].pw();});
- const moral=talkMod.all+talkMod.def*Math.min(2,cnt(s,DEFP)/4)+talkMod.atk*Math.min(2,cnt(s,FWDP)/3);
+ const moral=(talkMod.all+talkMod.def*Math.min(2,cnt(s,DEFP)/4)+talkMod.atk*Math.min(2,cnt(s,FWDP)/3))*.75;
  const wxBonus=typeof weatherPowerBonus==="function"?weatherPowerBonus():0;
  const cap=typeof _currentCaptainPlayer==="function"?_currentCaptainPlayer():(typeof captainIdx!=="undefined"&&captainIdx>=0?picksBySlot[captainIdx]:null);
  const capBonus=cap?(cap.injured?-3:(cap.trait==="lider"?3:cap.trait==="wonderkid"?2:cap.age>=32?2:1)):0;
@@ -72,6 +73,6 @@ function powerBreakdown(r,excludedCard){
  const chemistryResult=chemBonus(s);
  const synergyBonus=Math.max(-2,Math.min(5,Number(synergy.power)||0)),preparationBonus=Math.max(0,Math.min(4,Number(preparation.power)||0));
  const rawBonus=uncappedRaw+moral+wxBonus+capBonus+synergyBonus+preparationBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemistryResult.total+captainChem));
- return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:0,matchup,risk,trait,moral,synergyBonus,preparationBonus,chemistryScore:chemistryResult.score||50,chemistryVariance:chemistryResult.variance||1,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
+ return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:finalCardRaw-finalCardApplied,matchup,risk,trait,moral,synergyBonus,preparationBonus,chemistryScore:chemistryResult.score||50,chemistryVariance:chemistryResult.variance||1,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
 }
 function squadPower(r,excludedCard){return powerBreakdown(r,excludedCard);}

@@ -38,6 +38,10 @@
     const c=copy();
     return result==="W"?c.won:result==="D"?c.draw:result==="L"?c.lost:"";
   }
+  function fixtureLabel(index,roundLabels){
+    const label=String(roundLabels[index]||index+1);
+    return index<3?label.replace(/^.*?·\s*/,""):label;
+  }
 
   function opponentVisual(fixture,hidden){
     if(hidden)return `<span class="fixture-lock">${LOCK}</span>`;
@@ -88,9 +92,10 @@
     const result=played?resultCopy(fixture.res):c.locked;
     const score=played?`${fixture.gf}–${fixture.ga}`:"";
     const opponent=locked?c.reveal:fixture.opp||c.opponent;
-    const aria=played?`${roundLabels[index]}, ${opponent}, ${score}, ${result}`:active||scheduled?`${roundLabels[index]}, ${opponent}`:`${roundLabels[index]}, ${c.locked}, ${c.reveal}`;
+    const label=fixtureLabel(index,roundLabels);
+    const aria=played?`${label}, ${opponent}, ${score}, ${result}`:active||scheduled?`${label}, ${opponent}`:`${label}, ${c.locked}, ${c.reveal}`;
     return `<button type="button" class="fix fixture-node ${played?"is-played":""} ${active?"cur is-active":""} ${locked?"is-locked":""} ${fixture.res==="W"?"win":fixture.res==="D"?"draw":fixture.res==="L"?"lose":""}" data-fixture-index="${index}" data-fixture-state="${state}" aria-label="${esc(aria)}" aria-expanded="${selected===index}">
-      <span class="fr">${esc(roundLabels[index]||String(index+1))}</span>
+      <span class="fr">${esc(label)}</span>
       <span class="fixture-visual">${opponentVisual(fixture,locked)}</span>
       <span class="fixture-node-main">${played?`<b class="fs">${esc(score)}</b><em class="fixture-result result-${fixture.res.toLowerCase()}">${fixture.res} · ${esc(result)}</em>`:active||scheduled?`<b class="fixture-opponent">${esc(opponent)}</b>`:`<b class="fixture-reveal">${esc(c.reveal)}</b>`}</span>
     </button>`;
@@ -100,10 +105,11 @@
     const list=fixtureList(),fixture=list[index],c=copy(),roundLabels=labels();
     if(!fixture)return"";
     const played=!!fixture.res,active=!played&&index===currentRound()-1,scheduled=!played&&!active&&!!fixture.matchId,locked=!played&&!active&&!scheduled;
-    if(locked)return `<div class="fixture-detail-copy"><span>${esc(roundLabels[index])}</span><b>${esc(c.locked)}</b><p>${esc(c.reveal)}</p></div>`;
+    const label=fixtureLabel(index,roundLabels);
+    if(locked)return `<div class="fixture-detail-copy"><span>${esc(label)}</span><b>${esc(c.locked)}</b><p>${esc(c.reveal)}</p></div>`;
     const penalty=penaltyScore(fixture,index),event=eventText(fixture,index);
     return `<div class="fixture-detail-copy">
-      <span>${esc(roundLabels[index])}${played?` · ${esc(resultCopy(fixture.res))}`:""}</span>
+      <span>${esc(label)}${played?` · ${esc(resultCopy(fixture.res))}`:""}</span>
       <b>${esc(fixture.opp||c.opponent)}</b>
       <div class="fixture-detail-stats">
         ${played?`<div><small>${esc(c.score)}</small><strong>${esc(fixture.gf)}–${esc(fixture.ga)}</strong></div>`:""}

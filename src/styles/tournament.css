@@ -152,3 +152,17 @@ body.reduced-motion .td-group{transition:none!important}
   .td-transfer-band,.td-hold-draw.is-holding>i{animation:none!important}
   .td-group{transition:none!important}
 }
+
+/* The promotion places read as two separate containers at a glance. */
+.tg-table{border-collapse:separate;border-spacing:0 3px}
+.tg-table tbody tr.is-qualified>td,.tg-table tbody tr.is-qualified>th{border-bottom:0}
+.tg-table tbody tr.is-qualified-first>td,.tg-table tbody tr.is-qualified-first>th{background:color-mix(in srgb,var(--status-success) 22%,var(--surface-bg))}
+.tg-table tbody tr.is-qualified-second>td,.tg-table tbody tr.is-qualified-second>th{background:color-mix(in srgb,var(--risk-fortune) 24%,var(--surface-bg))}
+.tg-table tbody tr.is-qualified-first>td:first-child,.tg-table tbody tr.is-qualified-second>td:first-child{border-radius:9px 0 0 9px;box-shadow:inset 3px 0 var(--status-success)}
+.tg-table tbody tr.is-qualified-second>td:first-child{box-shadow:inset 3px 0 var(--risk-fortune)}
+.tg-table tbody tr.is-qualified-first>td:last-child,.tg-table tbody tr.is-qualified-first>th:last-child,.tg-table tbody tr.is-qualified-second>td:last-child,.tg-table tbody tr.is-qualified-second>th:last-child{border-radius:0 9px 9px 0}
+.tg-table tbody tr.is-qualified-first .tg-rank{background:var(--status-success);color:var(--color-ink);font-weight:900}
+.tg-table tbody tr.is-qualified-second .tg-rank{background:var(--risk-fortune);color:var(--color-ink);font-weight:900}
+.tg-qualification-note{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.tg-roundof16-badge{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:6px;background:#FFFFFF;color:#0A1118;font:900 8px/1 var(--mono);letter-spacing:.07em;box-shadow:0 3px 10px color-mix(in srgb,var(--color-ink) 12%,transparent)}
+.tg-qualification-note small{flex-basis:100%;color:var(--color-slate);font:800 7px/1 var(--mono)}

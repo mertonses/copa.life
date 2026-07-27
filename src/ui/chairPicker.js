@@ -4,27 +4,27 @@
   const presentation={
     babacan:{
       tag:{tr:"Ekonomi",en:"Economy",es:"Economía",de:"Finanzen",it:"Economia"},
-      style:{tr:"Kasayı rahatlatır; geniş borç marjıyla ilerleyip final riskini yönetmek isteyenlere uygundur.",en:"Relieves the budget; suits players who want a wide debt margin and can manage the final risk.",es:"Alivia la economía; ideal para quien aprovecha un amplio margen de deuda y controla el riesgo de la final.",de:"Entlastet die Finanzen; passend für breite Kreditspielräume und kontrolliertes Finalrisiko.",it:"Alleggerisce il bilancio; ideale per chi sfrutta un ampio margine di debito e gestisce il rischio finale."}
+      style:{tr:"Geniş borç limitiyle rahat harcama yaparsın. Finalde borcu kontrol etmen gerekir.",en:"A wide debt limit lets you spend freely. You must control debt before the final.",es:"Un límite de deuda amplio permite gastar con libertad. Controla la deuda antes de la final.",de:"Ein hohes Schuldenlimit gibt dir mehr Spielraum. Vor dem Finale musst du die Schulden senken.",it:"Un ampio limite debiti offre più libertà. Controlla il debito prima della finale."}
     },
     leydi:{
       tag:{tr:"Dengeli",en:"Balanced",es:"Equilibrio",de:"Ausgewogen",it:"Equilibrio"},
-      style:{tr:"Draftta yerli adaylara öncelik verir; toplam kimyaya göre maçlık +1 ya da -1 güç uygular.",en:"Prioritises local draft candidates and applies +1 or -1 match power from total chemistry.",es:"Premia las plantillas equilibradas basadas en jugadores locales y química positiva.",de:"Belohnt ausgewogene Kader mit einheimischen Spielern und positiver Chemie.",it:"Premia le rose equilibrate costruite su giocatori locali e chimica positiva."}
+      style:{tr:"Yerli oyuncular daha sık gelir. Yüksek kimya takımı güçlendirir.",en:"Local players appear more often. Strong chemistry boosts the team.",es:"Aparecen más jugadores locales. Una buena química fortalece al equipo.",de:"Einheimische Spieler erscheinen häufiger. Gute Chemie stärkt das Team.",it:"I giocatori locali appaiono più spesso. Una buona chimica rafforza la squadra."}
     },
     pinti:{
       tag:{tr:"Ekonomi",en:"Economy",es:"Economía",de:"Finanzen",it:"Economia"},
-      style:{tr:"Transfer indirimi ve tur birikimi sağlar; premium kartları kaldırmaz, ek fiyatla sunar.",en:"Offers transfer discounts and round savings; premium cards remain available with a surcharge.",es:"Favorece una partida controlada y barata basada en descuentos y caja positiva.",de:"Fördert einen kontrollierten, günstigen Run mit Rabatten und positiver Kasse.",it:"Favorisce una run controllata e a basso costo, basata su sconti e cassa positiva."}
+      style:{tr:"Transferleri ucuza alır ve para biriktirir. Pahalı kartlar ek ücretlidir.",en:"Transfers cost less and savings grow each round. Premium cards cost extra.",es:"Los fichajes cuestan menos y ahorras cada ronda. Las cartas premium cuestan más.",de:"Transfers sind günstiger und du sparst jede Runde. Premiumkarten kosten extra.",it:"I trasferimenti costano meno e risparmi ogni turno. Le carte premium costano di più."}
     },
     sansasyoncu:{
       tag:{tr:"Risk",en:"Risk",es:"Riesgo",de:"Risiko",it:"Rischio"},
-      style:{tr:"Yıldız transferlerinden kısa vadeli güç üretir; pahalı pazarı yönetebilenlere uygundur.",en:"Turns star signings into short-term power; suits players who can manage an expensive market.",es:"Convierte los fichajes estrella en poder inmediato; exige controlar un mercado caro.",de:"Macht Startransfers zu kurzfristiger Stärke und verlangt Kontrolle über einen teuren Markt.",it:"Trasforma gli acquisti stellari in potenza immediata e richiede di gestire un mercato costoso."}
+      style:{tr:"Yıldız transferleri hemen güç verir. Pazar daha pahalıdır.",en:"Star signings give immediate power. The market is more expensive.",es:"Los fichajes estrella dan poder inmediato. El mercado es más caro.",de:"Startransfers geben sofort Stärke. Der Markt ist teurer.",it:"Gli acquisti stellari danno forza immediata. Il mercato è più caro."}
     },
     torpilci:{
       tag:{tr:"Risk",en:"Risk",es:"Riesgo",de:"Risiko",it:"Rischio"},
-      style:{tr:"Zorunlu kadro kararlarını gelişim ve destekle dengeleyen yüksek riskli bir yol sunar.",en:"Offers a high-risk route that balances forced squad choices with development and support.",es:"Ofrece una vía de alto riesgo que compensa decisiones forzadas con desarrollo y apoyo.",de:"Bietet einen riskanten Weg, der erzwungene Kaderentscheidungen mit Entwicklung und Hilfe ausgleicht.",it:"Offre una strada ad alto rischio che bilancia scelte forzate, crescita e sostegno."}
+      style:{tr:"Bazı kadro kararları zorunludur. Destek ve gelişim ödülleri riski dengeler.",en:"Some squad choices are forced. Support and development rewards balance the risk.",es:"Algunas decisiones de plantilla son obligatorias. Las recompensas equilibran el riesgo.",de:"Manche Kaderentscheidungen sind erzwungen. Entwicklung und Hilfe gleichen das Risiko aus.",it:"Alcune scelte di rosa sono obbligate. Crescita e aiuti bilanciano il rischio."}
     },
     cilgin:{
       tag:{tr:"Kaos",en:"Chaos",es:"Caos",de:"Chaos",it:"Caos"},
-      style:{tr:"Geniş borç marjını öngörülemez krizlerle takas eder ve DARK kartları oyuna çağırır.",en:"Trades a wide debt margin for unpredictable crises and draws DARK cards into the run.",es:"Propone un juego caótico que cambia un amplio margen de deuda por crisis imprevisibles.",de:"Tauscht einen breiten Kreditspielraum gegen unvorhersehbare Krisen und maximales Chaos.",it:"Scambia un ampio margine di debito con crisi imprevedibili e una gestione caotica."}
+      style:{tr:"Borç limiti geniştir ama krizler öngörülemez. DARK kartlar daha sık gelir.",en:"The debt limit is wide but crises are unpredictable. DARK cards appear more often.",es:"El límite de deuda es amplio pero las crisis son imprevisibles. Aparecen más cartas DARK.",de:"Das Schuldenlimit ist hoch, Krisen sind aber unberechenbar. DARK-Karten erscheinen häufiger.",it:"Il limite debiti è ampio ma le crisi sono imprevedibili. Le carte DARK appaiono più spesso."}
     }
   };
 
@@ -34,7 +34,6 @@
     pros:{tr:"AVANTAJLAR",en:"ADVANTAGES",es:"VENTAJAS",de:"VORTEILE",it:"VANTAGGI"},
     cons:{tr:"DEZAVANTAJ",en:"DISADVANTAGE",es:"DESVENTAJA",de:"NACHTEIL",it:"SVANTAGGIO"},
     play:{tr:"OYUN TARZI",en:"PLAY STYLE",es:"ESTILO DE JUEGO",de:"SPIELSTIL",it:"STILE DI GIOCO"},
-    mechanics:{tr:"MEKANİK PROFİL",en:"MECHANICAL PROFILE",es:"PERFIL MECÁNICO",de:"MECHANISCHES PROFIL",it:"PROFILO MECCANICO"},
     close:{tr:"Kapat",en:"Close",es:"Cerrar",de:"Schließen",it:"Chiudi"},
     select:{tr:"BAŞKANI SEÇ",en:"SELECT CHAIRMAN",es:"ELEGIR PRESIDENTE",de:"PRÄSIDENT WÄHLEN",it:"SCEGLI PRESIDENTE"}
   };
@@ -47,12 +46,11 @@
   }
   function render(model){
     const lang=model.lang||"en",meta=presentation[model.id]||presentation.leydi;
-    const playstyleOpen=!(global.matchMedia&&global.matchMedia("(max-width: 720px)").matches);
     const prev=model.total>1?`<button class="cp-nav-btn cp-nav-prev" onclick="showChairPopup('${model.prevId}')" aria-label="${read(labels.prev,lang)}"><span aria-hidden="true">←</span><small>${read(labels.prev,lang)}</small></button>`:`<span class="cp-nav-spacer" aria-hidden="true"></span>`;
     const next=model.total>1?`<button class="cp-nav-btn cp-nav-next" onclick="showChairPopup('${model.nextId}')" aria-label="${read(labels.next,lang)}"><small>${read(labels.next,lang)}</small><span aria-hidden="true">→</span></button>`:`<span class="cp-nav-spacer" aria-hidden="true"></span>`;
-    const effects=effectGroup(read(labels.pros,lang),"pro",model.pros,"✓")+effectGroup(read(labels.cons,lang),"con",model.cons,"−");
+    const effects=effectGroup(read(labels.pros,lang),"pro",model.pros.slice(0,1),"✓")+effectGroup(read(labels.cons,lang),"con",model.cons.slice(0,1),"−");
     const image=`<img src="${model.image}" alt="${model.name}" class="cpphoto" loading="eager" decoding="async" onerror="this.style.display='none'">`;
-    return`<div class="chairpopup chair-picker-modal" data-chair-id="${model.id}"><div class="cp-top-controls"><span class="cp-counter">${model.index+1} / ${model.total}</span><button class="cp-close" onclick="closeModal()" aria-label="${read(labels.close,lang)}">×</button></div><div class="cp-layout"><section class="cp-persona" aria-label="${model.name}"><div class="cp-portrait-frame">${image}</div><div class="cp-persona-copy"><div class="chairpopup-name">${model.name}</div><div class="cp-persona-role">${model.role}</div><div class="chairpopup-desc">${model.desc}</div></div><strong class="cp-role-badge">${read(meta.tag,lang)}</strong></section><section class="cp-mechanics"><div class="cp-mechanics-head"><span>${read(labels.mechanics,lang)}</span></div><div class="cp-fx">${effects}</div><details class="cp-playstyle"${playstyleOpen?" open":""}><summary><span class="cp-fx-hdr">${read(labels.play,lang)}</span></summary><p>${read(meta.style,lang)}</p></details></section></div><div class="cp-bot-row">${prev}<div class="cp-action-stack"><button class="cp-sel-btn" onclick="confirmChair('${model.id}')">${read(labels.select,lang)}</button></div>${next}</div></div>`;
+    return`<div class="chairpopup chair-picker-modal" data-chair-id="${model.id}"><div class="cp-top-controls"><span class="cp-counter">${model.index+1} / ${model.total}</span><button class="cp-close" onclick="closeModal()" aria-label="${read(labels.close,lang)}">×</button></div><div class="cp-layout"><section class="cp-persona" aria-label="${model.name}"><div class="cp-portrait-frame">${image}</div><div class="cp-persona-copy"><div class="chairpopup-name">${model.name}</div><div class="cp-persona-role">${model.role}</div></div><strong class="cp-role-badge">${read(meta.tag,lang)}</strong></section><section class="cp-mechanics"><div class="cp-fx">${effects}</div><div class="cp-playstyle"><span class="cp-fx-hdr">${read(labels.play,lang)}</span><p>${read(meta.style,lang)}</p></div></section></div><div class="cp-bot-row">${prev}<div class="cp-action-stack"><button class="cp-sel-btn" onclick="confirmChair('${model.id}')">${read(labels.select,lang)}</button></div>${next}</div></div>`;
   }
 
   global.CopaChairPicker=Object.freeze({render});

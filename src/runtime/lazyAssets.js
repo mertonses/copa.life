@@ -25,12 +25,12 @@
     pending.set(key,promise);return promise;
   }
   function ensureMatchCore(){
-    return loadScriptOnce("final-sim-core","src/sim/finalSimCore.js?v=20260718-shared-core1",()=>!!(global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION))
+    return loadScriptOnce("final-sim-core","src/sim/finalSimCore.js?v=20260727-balance-v5",()=>!!(global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION))
       .then(()=>loadScriptOnce("normal-match","src/game/normalMatch.js?v=20260718-shared-core1",()=>!!global.CopaNormalMatch));
   }
   function ensureFinalSim(){
     return ensureMatchCore()
-      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260720-final-ui-optimization1",()=>typeof global.buildSim==="function")).then(()=>{
+      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260727-balance-v5",()=>typeof global.buildSim==="function")).then(()=>{
       if(typeof global._copaSimPauseUi==="function")global.simPause=global._copaSimPauseUi;
     });
   }
@@ -48,13 +48,13 @@
   function ensureChairPicker(){
     return Promise.all([
       loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260721-chair-contrast1",'link[href*="chairPicker.css"]'),
-      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260721-chair-contrast1",()=>!!global.CopaChairPicker)
+      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260727-compact-chair2",()=>!!global.CopaChairPicker)
     ]).then(()=>global.CopaChairPicker);
   }
   function ensureAdvancedSettings(){
     return Promise.all([
-      loadStyleOnce("advanced-settings-style","src/styles/advancedSettings.css?v=20260720-ghost-help1",'link[href*="advancedSettings.css"]'),
-      loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260720-ghost-help1",()=>!!global.CopaAdvancedSettings)
+      loadStyleOnce("advanced-settings-style","src/styles/advancedSettings.css?v=20260727-sheet1",'link[href*="advancedSettings.css"]'),
+      loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260727-sheet1",()=>!!global.CopaAdvancedSettings)
     ]).then(()=>global.CopaAdvancedSettings);
   }
   function ensureScoutReport(){
@@ -90,8 +90,14 @@
     const open=body.classList.contains("hidden"),apply=()=>{body.classList.toggle("hidden",!open);button.classList.toggle("open",open);button.setAttribute("aria-expanded",String(open));};
     if(!open){apply();return Promise.resolve();}return ensureAdvancedSettings().then(api=>{api.ensureMarkup(body);apply();}).catch(apply);
   }
+  function closeAdvancedSettings(){
+    if(global.CopaAdvancedSettings)global.CopaAdvancedSettings.close();
+  }
+  function openAdvancedSettings(){
+    return ensureAdvancedSettings().then(api=>api.open());
+  }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openMetaProgression});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression});
   global.addEventListener("load",()=>{
     const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression()]).catch(()=>{});};
     if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(warm,{timeout:1500});

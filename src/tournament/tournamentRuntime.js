@@ -116,8 +116,8 @@
       if(root.CopaMobileExperience)root.CopaMobileExperience.haptic(next&&next.teamId==="player"?[18,28,22]:amount>1?[12,22]:14);
       if(typeof root._saveState==="function")root._saveState("draw");
     };
-    const reduced=typeof root.motionReduced==="function"&&root.motionReduced();
-    if(!reduced&&amount===1&&next&&root.CopaPhaserMoments&&root.CopaPhaserMoments.animateDraw(next,commit))return;
+    /* A draw is a decision, not a loading screen. Commit immediately; CSS keeps
+       the placement readable without blocking the next tap. */
     commit();
   }
   function finishDraw(){

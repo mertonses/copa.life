@@ -16,7 +16,7 @@ const variants={
   late_hold:{decisions:[{minute:70,tactic:"hold",duration:12}]},
   wing_card:{cards:["kanat_akini"]},
   counter_card:{cards:["kontra"]},
-  positive_talk:{teamTalk:3}
+  positive_talk:{teamTalk:2}
 };
 const blank=()=>({winRate:0,shots:0,goalsFor:0,goalsAgainst:0,xg:0,cards:0,pressWins:0,wide:0,counters:0,possession:0});
 const report={modelVersion:core.MODEL_VERSION,sampleSizePerVariant:MATCHES,deltas:{}};
@@ -64,9 +64,9 @@ const checks=[
   ["press increases discipline risk",d.push.cards>0.20,d.push.cards],
   ["calm improves possession",d.calm.possession>0.30,d.calm.possession],
   ["calm reduces cards",d.calm.cards<-0.08,d.calm.cards],
-  ["calm reduces shot volume",d.calm.shots<-0.50,d.calm.shots],
+  ["calm preserves attacking viability",d.calm.shots>-0.35&&d.calm.goalsAgainst<-0.05,d.calm.shots],
   ["hold reduces conceded goals",d.hold.goalsAgainst<-0.06,d.hold.goalsAgainst],
-  ["hold sacrifices attack",d.hold.shots<-1,d.hold.shots],
+  ["hold trades some attack without becoming a trap",d.hold.shots<-.35&&d.hold.shots>-1,d.hold.shots],
   ["12-minute surge changes attacking volume",d.late_more.shots>0.05,d.late_more.shots],
   ["12-minute press changes recoveries",d.late_push.pressWins>0.25,d.late_push.pressWins],
   ["12-minute calm changes possession",d.late_calm.possession>0.05,d.late_calm.possession],
@@ -78,7 +78,7 @@ const checks=[
   ["wing card is not direct pay-to-win",Math.abs(d.wing_card.winRate)<0.05,d.wing_card.winRate],
   ["counter card changes routes",d.counter_card.counters>0.20,d.counter_card.counters],
   ["counter card is not direct pay-to-win",Math.abs(d.counter_card.winRate)<0.05,d.counter_card.winRate],
-  ["positive talk gives a bounded lift",d.positive_talk.winRate>0.02&&d.positive_talk.winRate<0.10,d.positive_talk.winRate]
+  ["positive talk gives a bounded lift",d.positive_talk.winRate>0.02&&d.positive_talk.winRate<0.07,d.positive_talk.winRate]
 ];
 let failed=false;
 for(const [name,ok,value] of checks){

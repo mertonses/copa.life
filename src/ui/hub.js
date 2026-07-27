@@ -1,4 +1,3 @@
-/* Hub ekrani: kadro/guc/kimya/koleksiyon/pazar render, kart aktif/pasif, oto-oyna. */
 var collFilter="all";
 
 function _breakdownValueClass(raw,neutralBase=false){
@@ -155,20 +154,13 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
     renderFixtures();renderHub();if(typeof maybeDraftEvent==="function")maybeDraftEvent();if(typeof _saveState==="function")_saveState();queuePendingChairmanEvent(120);if(!ghostLocked)_lockGhostOpponent();return;
   }
   opponent=bracket[round-1];talkUsed=false;talkMod={all:0,def:0,atk:0};lastTalkResult=null;cardsBoughtThisTurn=0;freeAgentBoughtThisTurn=0;shopRerolledThisTurn=0;
-  /* Hub is already visible here. Persist its safe checkpoint before an async
-     Ghost lookup can delay renderHub(), otherwise an immediate reload may
-     recover the last completed-draft checkpoint instead of the hub. */
   prepareChairmanRoundEvent();
   if(typeof pickWeather==="function")pickWeather();
   if(typeof applyRiskDraftCarryovers==="function")applyRiskDraftCarryovers();
-  /* Borç güven cezası */
   if(budget<-10&&chairTrust>0&&round>1){chairTrust--;pushFeed("📉 "+(LANG==="tr"?"Başkan güveni azaldı ("+chairTrust+"/3)":"Chairman confidence drops ("+chairTrust+"/3)"),"lose");}
-  /* Adalet: oyuncu milliyetini ikinci kez saymak yerine toplam kimyayı ödüllendirir. */
 if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Diplomat: uyumlu kadro — bu maç +1 güç":"Diplomat: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Diplomat: dağınık kadro — bu maç -1 güç":"Diplomat: disjointed squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
-  /* Kırmızı kart cezası: askıya alınan oyuncuyu bildir */
   {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");setTimeout(()=>_queueSuspendedNotice(_sn,round),400);}}
-  /* Sansasyoncu spotlight — her iki turda bir */
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&!hasSelectedCaptain()&&typeof pickCaptain==="function"){
     setTimeout(()=>{if(!hasSelectedCaptain())pickCaptain();},500);
@@ -327,7 +319,6 @@ CARD_SVGS.mac_sozu=`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" s
 CARD_SVGS.kaptanin_karari=`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="15" r="7"/><path d="M10 41c1-10 6-15 14-15s13 5 14 15"/><path d="M16 31l8 7 8-7"/><path d="M24 26v12"/><path d="M35 8l4 4-4 4"/><path d="M39 12H28" opacity=".65"/></svg>`;
 function simulateEquipPower(k){const before=squadPower(round).power,instant=instantShopPowerDelta(k);if(instant!==null)return{before,after:before+instant,delta:instant};const oldInv=cardInv[k]||0,oldCards=cards.slice();cardInv[k]=1;if(!oldCards.includes(k)&&!isInstantCard(k)&&cards.length<activeCardSlots())cards=oldCards.concat(k);const after=squadPower(round).power;cardInv[k]=oldInv;cards=oldCards;return{before,after,delta:after-before};}
 function simulateCardCopyPower(k){return simulateEquipPower(k);}
-/* Shop variant simülasyonu: geçici olarak shopVariants variant'ını ata */
 function simulateShopPower(k){const sv=shopVariants[k]||0,old=cardVariant[k]||0;cardVariant[k]=sv;const r=simulateEquipPower(k);cardVariant[k]=old;return r;}
 function variantDesc(d,v){
   if(!d)return d;
@@ -368,14 +359,10 @@ function displayCardTerms(txt){
     .replace(/\bGOLDEN\b/g,"COMMON")
     .replace(/\bALTIN\b/g,"COMMON")
     .replace(/\bKARA\b/g,"DARK")
-    // Historical copy can contain legacy rating terms. The product-facing
-    // label is always Güç / Power, while the underlying numeric stat stays intact.
     .replace(/\bOVR\b/gi,LANG==="tr"?"Güç":"Power")
     .replace(/\bOV\b/gi,LANG==="tr"?"Güç":"Power");
 }
 function escapeCardText(txt){
-  // Use a named apostrophe entity: the numeric form was later matched as a card
-  // number and split into markup, leaving a literal &#39; visible in the UI.
   return String(txt||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&apos;"}[ch]));
 }
 function cardNumberTone(token){
@@ -455,8 +442,6 @@ function shopCardDesc(k,raw,variantOverride){
     vur_igneyi:()=>sv===1?(tr?"2 sakat oyuncuyu iyileştirir. %25 ihtimal -€6M ek masraf. Sakat yoksa kart iade edilir.":"Heals 2 injured players. 25% chance -€6M extra cost. Refunded if no one is injured."):(tr?"1 sakat oyuncuyu iyileştirir. Sakat yoksa kart iade edilir.":"Heals 1 injured player. Refunded if no one is injured."),
     kasiga_para:()=>sv===1?(tr?"Rakip -8 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%50, güven -1.":"Opponent -8 power. Next market closes; the next open market has +50% prices, trust -1."):(tr?"Rakip -4 güç. Gelecek pazar kapalı; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Next market closes; the next open market has +25% prices.")
   };
-  // These two cards spend team resources as well as applying their match effect.
-  // Keep the text here in sync with CARD_COST_META, rather than hiding the price in a tooltip.
   specific.yildiz_krizi=()=>sv===1?(tr?"Bu maç +4 güç. Kimya -2; %20 ihtimal -€4M medya cezası.":"+4 power this match. Chemistry -2; 20% chance of a €4M media fine."):(tr?"Bu maç +3 güç. Kimya -1.":"+3 power this match. Chemistry -1.");
   specific.kasiga_para=()=>sv===1?(tr?"Rakip -8 güç. Kimya -1, güven -1; sonraki açık pazarda fiyatlar +%50.":"Opponent -8 power. Chemistry -1, trust -1; next open market prices +50%."):(tr?"Rakip -4 güç. Kimya -1; sonraki açık pazarda fiyatlar +%25.":"Opponent -4 power. Chemistry -1; next open market prices +25%.");
   specific.kara_borsa=()=>sv===1?(tr?"Bir kart yak; tur havuzundan 4 kart gör, 2'sini seç. %25 ihtimal -€8M ceza.":"Burn one card; see 4 cards from the round pool and choose 2. 25% chance of an €8M fine."):(tr?"Bir kart yak; tur havuzundan 3 COMMON kart gör, 1'ini seç.":"Burn one card; see 3 COMMON cards from the round pool and choose 1.");
@@ -547,7 +532,7 @@ function syncPintiSavingsWidget(){
 function renderDebtWarning(){const el=$("debtWarn");if(el){el.className="debtwarn hidden";el.textContent="";}const clash=document.getElementById("cardClashWarn");if(clash)clash.remove();}
 function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptainPlayer();try{if(typeof _saveState==="function")_saveState();}catch(e){}const x=L(),sp=squadPower(round),s=picksBySlot.filter(Boolean);
   $("roundtag").textContent=x.rounds[round-1]+" · "+x.vsword+" "+opponent.name;
-  {const wm=$("vsMid");if(wm){const we=currentWeather?currentWeather.e:"";const wn=currentWeather?(LANG==="tr"?currentWeather.tr:currentWeather.en):"";const bases=[8000,14000,22000,34000,52000,75000,90000];const b=bases[Math.min(6,round-1)];const aud=Math.round(b*(0.65+Math.min(0.33,Math.max(0,(sp.power-(opponent?opponent.power:0))/100)))/1000)*1000;wm.innerHTML=`<div class="vs-vs">VS</div><button class="vsscout" id="scoutBtn" onclick="openScout()" title="${x.scout}"><svg class="vsscout-animated" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="vsscout-ring" cx="8.5" cy="8.5" r="5.5"/><path d="m12.5 12.5 5 5"/><path class="vsscout-scan" d="M5.2 8.5h6.6"/></svg><span id="scoutLbl">${LANG==="tr"?"GÖR":"SCOUT"}</span></button>${we?`<div class="vsweather">${we} ${wn}</div>`:"<div class='vsweather'></div>"}<div class="vsaud"><svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="10"><circle cx="6" cy="4.5" r="2.8"/><circle cx="14" cy="4.5" r="2.8"/><path d="M1 13Q1 9 6 9Q11 9 11 13"/><path d="M13 9.5Q17 9 18.5 13" stroke-opacity=".5"/></svg> ${(aud/1000).toFixed(0)}K ${LANG==="tr"?"seyirci":"fans"}</div>`;}}
+  {const wm=$("vsMid");if(wm){const we=currentWeather?currentWeather.e:"";const wn=currentWeather?(LANG==="tr"?currentWeather.tr:currentWeather.en):"";const aud=matchAttendance(round,sp.power,opponent?opponent.power:0);wm.innerHTML=`<div class="vs-vs">VS</div>${we?`<div class="vsweather">${we} ${wn}</div>`:"<div class='vsweather'></div>"}<div class="vsaud"><svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="10"><circle cx="6" cy="4.5" r="2.8"/><circle cx="14" cy="4.5" r="2.8"/><path d="M1 13Q1 9 6 9Q11 9 11 13"/><path d="M13 9.5Q17 9 18.5 13" stroke-opacity=".5"/></svg> ${(aud/1000).toFixed(0)}K ${LANG==="tr"?"seyirci":"fans"}</div>`;const scouts=[...document.querySelectorAll("#scoutBtn")];let scout=scouts.shift();scouts.forEach(node=>node.remove());if(!scout){scout=document.createElement("button");scout.type="button";scout.className="vsscout";scout.id="scoutBtn";scout.onclick=openScout;scout.innerHTML=`<svg class="vsscout-animated" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="vsscout-ring" cx="8.5" cy="8.5" r="5.5"/><path d="m12.5 12.5 5 5"/><path class="vsscout-scan" d="M5.2 8.5h6.6"/></svg><span id="scoutLbl"></span>`;}const scoutLabel=scout.querySelector("#scoutLbl");if(scoutLabel)scoutLabel.textContent=LANG==="tr"?"GÖR":"SCOUT";scout.title=x.scout;const oppSide=document.querySelector("#hub .vsbar .side.opp");if(oppSide)oppSide.insertBefore(scout,oppSide.querySelector(".vs-crest-col")||null);}}
   {const mkShield=(bg,border,fg,lbl)=>{const sec=border||fg;return `<svg viewBox="0 0 44 52" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
     <defs><clipPath id="sc"><path d="M22 2L41 9L41 28Q41 44 22 50Q3 44 3 28L3 9Z"/></clipPath></defs>
     <path d="M22 2L41 9L41 28Q41 44 22 50Q3 44 3 28L3 9Z" fill="${bg}"/>
@@ -570,13 +555,10 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
   {$("powHint").textContent=x.powHint;}$("chemHdr").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="vertical-align:-.1em;margin-right:3px"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"/><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M17 10h2a2 2 0 0 1 2 2v1"/><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M3 13v-1a2 2 0 0 1 2 -2h2"/></svg>${x.chem.hdr}`;
   {const cb=chemBonus(s);const cvClamped=Math.max(-5,Math.min(5,cb.total));$("chemV").textContent=(cvClamped>=0?"+":"")+cvClamped;$("chemList").innerHTML=x.powHint;const hp=$("hubPitch");if(hp){hp.classList.toggle("chem-high",cvClamped>=3);hp.classList.toggle("chem-low",cvClamped<0);}
    const ct=$("chemTile");if(ct){const tone=typeof chemMetricTone==="function"?chemMetricTone(cvClamped):"average";const accent=typeof chemMetricColor==="function"?chemMetricColor(cvClamped):"var(--rating-average-text)";ct.classList.add("context-metric");ct.dataset.metricTone=tone;ct.style.setProperty("--metric-accent",accent);ct.style.background="";[ct.querySelector(".mh"),ct.querySelector(".mv"),ct.querySelector(".ms")].forEach(el=>{if(el)el.style.color="";});}}
-  /* Kasa tile — rich finance card */
   {const kt=$("kasaTile");if(kt){
     const bv=budget;
     const tr2=LANG==="tr";
-    /* debt limit for active chairman */
     const debtLim=chairman&&typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT;
-    /* background state */
     const nearLimit=debtLim&&bv<0&&(bv<=-18||Math.abs(bv)>=Math.abs(debtLim)*0.62);
     let statusLabel,subText,kasaState;
     if(nearLimit){
@@ -598,19 +580,19 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     }
     kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");
     kt.classList.add(kasaState);
+    const kasaAccent=kasaState==="kasa-deep-debt"?"var(--status-critical)":kasaState==="kasa-debt"?"var(--status-risk)":kasaState==="kasa-zero"?"var(--status-warning)":kasaState==="kasa-positive"?"var(--status-info)":"var(--status-success)";
+    kt.classList.add("context-metric");kt.style.setProperty("--metric-accent",kasaAccent);
     kt.style.background="";kt.style.color="";kt.style.borderColor="";
     subText="";
     const vEl=$("kasaV");if(vEl)vEl.textContent=(bv>=0?"+":"−")+"€"+Math.abs(bv)+"M";
     const subEl=$("kasaSub");if(subEl)subEl.textContent=subText;
     const stEl=$("kasaStatus");if(stEl){stEl.textContent=statusLabel;stEl.style.background="";stEl.style.color="";}
     const dEl=$("kasaDebt");if(dEl)dEl.textContent="−€"+Math.abs(debtLim)+"M";
-    /* progress bar marker */
     const _total=Math.abs(debtLim)+30;const _pos=Math.max(0,Math.min(1,(bv-debtLim)/_total));
     const marker=$("kasaBarMarker");if(marker)marker.style.left=(_pos*100).toFixed(1)+"%";
     const zero=$("kasaZero");if(zero)zero.style.left=(Math.abs(debtLim)/_total*100).toFixed(1)+"%";
   }}
-  /* Başkan Güveni tile */
-  {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"var(--status-success)":tv>=2?"var(--status-info)":tv>=1?"var(--status-risk)":"var(--status-critical)";const tfg="var(--color-ink)";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.classList.add("context-metric");tt.style.setProperty("--metric-accent",tbg);tt.style.background="";const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tv>=3?"var(--status-positive-text)":tv>=2?"var(--status-info-text)":"var(--status-negative-text)";trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"dengede":"steady"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
+  {const tt=$("trustTile");if(tt){const tv=typeof chairTrust!=="undefined"?chairTrust:3;const tbg=tv>=3?"var(--status-success)":tv>=2?"var(--status-warning)":tv>=1?"var(--status-risk)":"var(--status-critical)";const tfg="var(--color-ink)";const tdots="●".repeat(tv)+"○".repeat(Math.max(0,3-tv));tt.classList.add("context-metric");tt.style.setProperty("--metric-accent",tbg);tt.style.background="";const trustV=$("trustV"),trustHint=$("trustHint");if(trustV){trustV.textContent=tdots;trustV.style.color=tv>=3?"var(--status-positive-text)":tv>=2?"var(--status-warning-text)":"var(--status-negative-text)";trustV.style.fontSize="14px";trustV.style.letterSpacing="4px";}const th=$("trustHdr");if(th)th.style.color=tfg;if(trustHint){trustHint.textContent=tv>=3?(LANG==="tr"?"güvende":"secure"):tv>=2?(LANG==="tr"?"dengede":"steady"):tv>=1?(LANG==="tr"?"kırılgan":"fragile"):(LANG==="tr"?"tehlikede":"at risk");trustHint.style.color=tfg;}}}
   {const info=$("trustInfoBtn");if(info){const label=LT("Başkan güveni nasıl çalışır?","How does chairman trust work?","¿Cómo funciona la confianza del presidente?","Wie funktioniert das Vertrauen des Präsidenten?","Come funziona la fiducia del presidente?");info.title=label;info.setAttribute("aria-label",label);}}
   {const pv=sp.power,oppPv=opponent?opponent.power:0;const pt=$("powTile");if(pt){
     const pbg=typeof ovCol==="function"?ovCol(pv):"var(--status-info)";
@@ -631,6 +613,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
   $("playBtn").innerHTML=round>=7?x.playFinal:x.play;
   {const tb=$("talkBtn");if(tb){const talkIcon=`<svg class="talk-ico" viewBox="0 0 24 18" width="19" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3.5h13a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H10l-5 3v-3H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path class="talk-wave" d="M7 7.5h7"/><path class="talk-wave talk-wave-2" d="M7 10h4"/></svg>`;tb.classList.remove("hidden");tb.disabled=!!talkUsed;tb.classList.toggle("used",!!talkUsed);tb.setAttribute("aria-disabled",talkUsed?"true":"false");tb.title=talkUsed?(LANG==="tr"?"Bu tur konuşma kullanıldı":"Team talk already used this round"):"";tb.innerHTML=talkIcon+`<span>${LANG==="tr"?"TAKIMA KONUŞ":"TEAM TALK"}</span>`;}}
   renderDebtWarning();syncPintiSavingsWidget();renderInjbar();
+  {const strip=document.getElementById("matchRiskStrip");if(strip)strip.remove();}
   /* Oyun anlayışı + kaptan → pitch overlay */
   {const po=$("pitchOverlay");if(po){po.innerHTML="";const oe0=document.createElement("div");oe0.className="card style overlay-chip";oe0.innerHTML=`${x.styles[style].i} <b>${x.styles[style].n}</b>`;po.appendChild(oe0);if(captainIdx>=0&&picksBySlot[captainIdx]){const cp=picksBySlot[captainIdx];const injured=cp.injured;const isLider=cp.trait==="lider";const isWonder=cp.trait==="wonderkid";const capBonusVal=injured?-3:(isLider?3:isWonder?2:cp.age>=32?2:1);const capTag=injured?(LANG==="tr"?"SAKAT":"INJ."):(isLider?(LANG==="tr"?"LİDER":"LDR"):"");const dc=document.createElement("div");dc.className="card style cap-chip overlay-chip"+(injured?" cap-inj":"")+(isLider?" cap-lider":"");dc.innerHTML=`<svg viewBox="0 0 12 9" width="11" height="8" fill="currentColor" style="margin-right:3px"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg><b>${surOf(cp)}</b>${capTag?`<span class="tier">${capTag}</span>`:""}<span class="v">${capBonusVal>=0?"+":""}${capBonusVal}</span>`;po.appendChild(dc);}}}
   let cr=null;{const po2=$("pitchOverlay");if(po2){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";po2.appendChild(cr);}else{cr=$("cardrow");if(!cr){cr=document.createElement("div");cr.id="cardrow";cr.className="cardrow";}}}cr.innerHTML="";
@@ -649,6 +632,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
   }
   window._flashInsufficient=_flashInsufficient;
   const sc=$("shopcards");sc.innerHTML="";
+  {let marketHead=document.getElementById("marketDecisionHeader");if(!marketHead){marketHead=document.createElement("section");marketHead.id="marketDecisionHeader";marketHead.className="market-decision-head";sc.parentElement.insertBefore(marketHead,sc);}const spentNow=Number(typeof econStats!=="undefined"&&econStats&&econStats.spent)||0,debt=typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT,conditions=LANG==="tr"?["YERLİ OYUNCU HAFTASI","FORVET BOLLUĞU","DARK KART BASKISI","DENGELİ PİYASA"]:["LOCAL PLAYER WEEK","FORWARD SURPLUS","DARK CARD PRESSURE","BALANCED MARKET"],marketTone=(round-1)%conditions.length,activeFilter=window._marketFilter||"impact";marketHead.dataset.marketTone=marketTone;marketHead.dataset.cashTone=budget<0?"risk":"good";marketHead.innerHTML=`<div class="market-condition"><small>${LANG==="tr"?"BU TUR":"THIS ROUND"}</small><b>${conditions[marketTone]}</b></div><div class="market-money"><span>${LANG==="tr"?"Kasa":"Cash"} <b>${runMoney(budget)}</b></span><span>${LANG==="tr"?"Borç limiti":"Debt limit"} <b>${runMoney(debt)}</b></span><span>${LANG==="tr"?"Harcanan":"Spent"} <b>€${spentNow}M</b></span></div><div class="market-filters">${[["impact",LANG==="tr"?"İlk 11 etkisi":"XI impact"],["position",LANG==="tr"?"Mevki":"Position"],["price",LANG==="tr"?"Fiyat":"Price"],["chem",LANG==="tr"?"Kimya":"Chemistry"]].map(([id,label])=>`<button type="button" class="${activeFilter===id?"on":""}" onclick="window._marketFilter='${id}';renderHub()">${label}</button>`).join("")}</div>`;}
   if(typeof lotteryCouponAmount!=="undefined"&&typeof lotteryCouponTurns!=="undefined"&&lotteryCouponAmount>0&&lotteryCouponTurns>0){
     const coupon=document.createElement("div");
     const couponRounds=Math.min(2,lotteryCouponTurns);
@@ -680,7 +664,8 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     const _costLines=typeof cardCostLines==="function"?cardCostLines(k,sv):[];
     const _costList=_costLines.length?`<ul class="ct-cost-list">${_costLines.map(line=>`<li>${formatCardDesc(line)}</li>`).join("")}</ul>`:"";
     const _syn=window.CopaCardSynergy?CopaCardSynergy.preview(cards,k):null;
-    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="ct-desc">${desc}</div><div class="ct-contract">${cardContractType(k)}</div>${_syn?`<div class="synergy-preview">${LANG==="tr"?_syn.tr:_syn.en}</div>`:""}</div><div class="ct-foot ct-foot-cost">${_costList}</div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
+    const _powerDelta=(pv&&Number(pv.delta))||0,_cashAfter=budget-pr;
+    d.innerHTML=`<div class="ct-head">${_darkBadge}<span class="ct-price ct-head-price ${pr<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="ct-body"><div class="ct-titlegroup"><span class="ct-art" aria-hidden="true">${CARD_SVGS[k]||cd.i}</span><div class="ct-name">${cd.n}</div></div><div class="market-card-impact"><span>${LANG==="tr"?"İlk 11":"Starting XI"} <b class="${_powerDelta>=0?"is-positive":"is-negative"}">${_powerDelta>=0?"+":""}${_powerDelta}</b></span><span>${LANG==="tr"?"Kasa sonrası":"Cash after"} <b class="${_cashAfter<0?"is-negative":""}">${runMoney(_cashAfter)}</b></span></div><div class="ct-desc">${desc}</div></div><div class="ct-foot"><span class="ct-contract">${cardContractType(k)}${_darkPenBadge}</span><button type="button" class="ct-detail" onclick="event.stopPropagation();CopaMobileShell.openMarketCard(this)">${LANG==="tr"?"DETAY":"DETAIL"}</button></div><div class="ct-detail-data" hidden>${_costList}${_syn?`<div class="synergy-preview">${LANG==="tr"?_syn.tr:_syn.en}</div>`:""}</div><div class="insufficient-pop" aria-hidden="true">${LANG==="tr"?"Kasa yetersiz":"Insufficient funds"}</div>`;
     d.onclick=()=>!tradeReady?_flashInsufficient(d,LANG==="tr"?"Yakacak kart yok":"No card to burn"):cant?_flashInsufficient(d):confirmBuyCard(k,pr);
     sc.appendChild(d);
   });

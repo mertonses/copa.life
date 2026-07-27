@@ -24,8 +24,8 @@ expect(/VARIANT_PRICE_MOD=\[1\.0,1\.25\]/.test(files.prices),"DARK price multipl
 expect(/FINAL_DEBT_CAP=30/.test(files.config),"final risk safety cap is not 30");
 expect(!/FINAL_CARD_POWER_CAP/.test(files.config),"aggregate final-card power cap still exists");
 expect(/Math\.min\(amount,Math\.max\(0,FINAL_DEBT_CAP-before\)\)/.test(files.config),"final risk overflow guard is disconnected");
-expect(/const finalCardApplied=r>=6\?finalCardRaw:0/.test(files.power),"aggregate final-card power is not applied in full");
-expect(!/Math\.min\([^\n]*finalCardRaw|Math\.min\([^\n]*finalCardApplied/.test(files.power),"aggregate final-card power is capped in the power engine");
+expect(/index===0\?1:index===1\?\.7:\.4/.test(files.power),"final-card stack does not use diminishing returns");
+expect(!/Math\.min\([^\n]*finalCardRaw|Math\.min\([^\n]*finalCardApplied/.test(files.power),"final-card stack uses a hard cap instead of diminishing returns");
 expect(/Math\.min\(v===1\?5:3,sub70\)/.test(read("src/cards/cardDefs.js")),"Anadolu Express card-specific cap is missing");
 expect(/Math\.min\(v\?6:4,n\*\(v\?2:1\)\)/.test(read("src/cards/cardDefs.js")),"Wing Surge card-specific cap is missing");
 expect(/Math\.min\(variantOf\("cift_forvet"\)===1\?8:4/.test(read("src/cards/cardDefs.js")),"Two Strikers card-specific cap is missing");
@@ -51,6 +51,9 @@ expect(/clampFreeAgentFee\(p\.ov,round,adjustedFee\)/.test(files.html),"free-age
 expect(/Math\.min\(24,band\[1\]/.test(files.core),"free-agent EUR24M cap is missing");
 expect(/playerMarketValue/.test(files.core)&&/chairmanTransferMultiplier/.test(files.generate),"draft valuation or chairman transfer modifier is disconnected");
 expect(/installmentTurns>0/.test(files.economy),"installment offers can overwrite an outstanding payment plan");
+expect(/shopOffers\.some\(offerAffordable\)/.test(files.economy)&&/\["son_kredi","taksit_transfer","primler_yatinca"\]/.test(files.economy),"market does not guarantee a legal zero-upfront decision when regular offers are unaffordable");
+expect(/\[0,4,5,6,7,8\]\[round\]/.test(files.html),"win-reward cash curve is not using the reduced progression");
+expect(/const prizes=\[0,3,4,5\]/.test(files.html),"group-stage exit bonus still creates an outsized cash spike");
 expect(/legacyFund=Math\.min\(20/.test(files.html),"Legacy Vault total cap is not normalized to EUR20M");
 expect(/Math\.min\(8,Math\.floor\(finalCashTotal\*0\.30\)\)/.test(files.html),"Legacy Vault carry-over is not 30% capped at EUR8M");
 expect(/trackBalanceMatchTelemetry/.test(files.telemetry)&&/matchPowerTotal/.test(files.telemetry),"per-match card power telemetry is missing");
@@ -109,8 +112,9 @@ vm.createContext(finalStackContext);
 vm.runInContext(files.power,finalStackContext,{filename:"src/balance/power.js"});
 const finalStack=finalStackContext.powerBreakdown(6);
 expect(finalStack.finalCardRaw===24,"final-card stack fixture did not exceed the former 18-power cap");
-expect(finalStack.finalCardApplied===24,"final-card stack is still being reduced to the former aggregate cap");
-expect(finalStack.cardBonus===26,"non-final and final card power are not combined without an aggregate cap");
+expect(finalStack.finalCardApplied===21,"second final card is not applied at 70% value");
+expect(finalStack.finalCardOverflow===3,"diminishing final-card value is not reported");
+expect(finalStack.cardBonus===23,"normal and diminishing final-card power are not combined correctly");
 
 if(failures.length){console.error(failures.join("\n"));process.exit(1);}
-console.log("Economy balance OK: card caps, uncapped final stack, final-risk guard, and -5/+5 chemistry verified.");
+console.log("Economy balance OK: card caps, diminishing final stack, final-risk guard, and -5/+5 chemistry verified.");

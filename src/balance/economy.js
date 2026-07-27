@@ -51,4 +51,24 @@ function newShopOffers(){
      }
    }
  }
+ /* A market visit must always contain at least one legal decision. When both
+    regular offers are blocked by the chairman/debt guard, replace the second
+    slot with a zero-upfront-cost economy offer instead of inflating the budget. */
+ const offerAffordable=k=>{
+   const old=cardVariant[k]||0;cardVariant[k]=shopVariants[k]||0;
+   const price=cardPrice(k);cardVariant[k]=old;
+   return typeof canAffordChairmanSpend==="function"
+     ?canAffordChairmanSpend(price,"card",{card:k,variant:shopVariants[k]||0})
+     :canAffordCost(price);
+ };
+ if(shopOffers.length&&!shopOffers.some(offerAffordable)){
+   const safety=["son_kredi","taksit_transfer","primler_yatinca"].find(k=>cardMarketEligible(k,round));
+   if(safety){
+     const removed=shopOffers[shopOffers.length-1];
+     if(removed!==safety){delete shopVariants[removed];delete shopPriceChaos[removed];}
+     shopOffers[shopOffers.length-1]=safety;
+     shopVariants[safety]=0;
+     shopVariantLock[safety]=0;
+   }
+ }
 }

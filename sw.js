@@ -17,6 +17,7 @@ const PRECACHE = [
   "/src/styles/faq.css",
   "/src/styles/tournament.css",
   "/src/data/i18n.js",
+  "/src/data/regenNames.js",
   "/src/data/players.js",
   "/src/data/players_england.js",
   "/src/data/players_spain.js",
