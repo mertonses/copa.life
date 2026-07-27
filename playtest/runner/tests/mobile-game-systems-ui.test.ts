@@ -267,7 +267,7 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.goto("/?native-game=1&visual=penalties",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{const game=globalThis as any;game.CopaMobileShell.newRun();game.quickStart();game._cheatPenaltyLaunch();});
+  await page.evaluate(async()=>{const game=globalThis as any;game.CopaMobileShell.newRun();await game.quickStart();game._cheatPenaltyLaunch();});
   await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
   await expect(page.locator("#phaserPenaltyStage canvas")).toBeVisible({timeout:15_000});
   await expectSurfaceFit(page,".pen-modal");

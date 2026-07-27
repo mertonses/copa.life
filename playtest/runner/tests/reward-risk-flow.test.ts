@@ -4,11 +4,11 @@ test.use({serviceWorkers:"block"});
 
 async function openHub(page:Page){
   await page.goto("/?reward-risk-flow=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const game=globalThis as any;
     game.setLang("tr");
-    game.quickStart();
-    game.quickAll();
+    await game.quickStart();
+    await game.quickAll();
   });
   await page.locator("#postClubName").fill("Reward XI");
   await page.evaluate(()=>{
