@@ -164,7 +164,7 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   });
   await page.goto("/?advanced-settings-ui=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
-  await page.locator("#advancedToggle").click();
+  await page.evaluate(async()=>{await (globalThis as any).CopaLazy.openAdvancedSettings();});
 
   const body=page.locator(".advanced-body");
   await expect(body).toBeVisible();

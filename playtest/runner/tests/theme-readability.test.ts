@@ -178,7 +178,7 @@ for(const theme of ["dark"] as const){
     await expectReadable(page,`${theme} player profile`);
     await page.locator(".player-profile-close").click();
 
-    await page.locator("#advancedToggle").click();
+    await page.evaluate(async()=>{await (globalThis as any).CopaLazy.openAdvancedSettings();});
     await expect(page.locator("[data-advanced-settings]")).toBeVisible();
     await expectReadable(page,`${theme} advanced settings`);
     expect(errors).toEqual([]);

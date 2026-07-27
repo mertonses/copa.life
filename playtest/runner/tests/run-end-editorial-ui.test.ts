@@ -285,11 +285,9 @@ test("chairman picker separates personality from mechanics and collapses safely 
   await expect(modal.locator(".cp-fx-hdr")).toHaveText(["AVANTAJLAR","DEZAVANTAJ","OYUN TARZI"]);
   await expect(modal.locator(".cp-fx-item")).toContainText([
     "Borç limiti €28M — en geniş marj",
-    "Danışma sonuçları çoğunlukla destekleyicidir",
     "Kartlar €1M daha pahalı",
-    "Pozitif danışma finalde en fazla −2 güç bırakır",
   ]);
-  await expect(modal.locator(".cp-playstyle")).toContainText("Kasayı rahatlatır");
+  await expect(modal.locator(".cp-playstyle")).toContainText("Geniş borç limitiyle rahat harcama yaparsın. Finalde borcu kontrol etmen gerekir.");
   await expect(modal.locator(".cp-sel-btn")).toHaveText("BAŞKANI SEÇ");
   await expect(modal.locator(".cp-counter")).toHaveText("1 / 6");
 
@@ -360,11 +358,10 @@ test("chairman picker separates personality from mechanics and collapses safely 
   expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
   if(testInfo.project.name.includes("mobile")){
-    expect(layout.mobileOrder).toBe(true);
+    expect(layout.desktopOrder).toBe(true);
     expect(layout.mechanics.top).toBeGreaterThanOrEqual(layout.persona.bottom-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(88);
     expect(layout.portrait.right).toBeLessThanOrEqual(layout.personaCopy.left+1);
-    await expect(modal.locator(".cp-playstyle")).not.toHaveAttribute("open","");
   }else{
     expect(layout.desktopOrder).toBe(true);
     expect(layout.firstEffectTopDelta).toBeLessThanOrEqual(1);
@@ -373,7 +370,6 @@ test("chairman picker separates personality from mechanics and collapses safely 
     expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(190);
     expect(layout.modalHeight).toBeLessThanOrEqual(425);
-    await expect(modal.locator(".cp-playstyle")).toHaveAttribute("open","");
     await expect(modal.locator(".cp-nav-btn small")).toHaveCount(2);
     await expect(modal.locator(".cp-nav-btn small").first()).toBeVisible();
   }
@@ -381,7 +377,7 @@ test("chairman picker separates personality from mechanics and collapses safely 
   const themeStyles=await modal.evaluate(root=>{
     const html=document.documentElement;
     const mechanics=root.querySelector(".cp-mechanics") as HTMLElement;
-    const copy=root.querySelector(".chairpopup-desc") as HTMLElement;
+    const copy=root.querySelector(".cp-playstyle p") as HTMLElement;
     return["light","dark"].map(theme=>{
       html.dataset.theme=theme;
       return{

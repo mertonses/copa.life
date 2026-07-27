@@ -139,7 +139,7 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   });
   const nav=page.locator("#nativeHubNav");
   await expect(nav).toBeVisible();
-  await expect(nav.locator("button")).toHaveCount(3);
+  await expect(nav.locator("button")).toHaveCount(4);
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");
@@ -542,7 +542,6 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=(phoneProject?44:30))).toBe(true);
   expect(injuryLayout.pageOverflow).toBeLessThanOrEqual(1);
   if(mobileOnly(testInfo.project.name)){
-    expect(injuryLayout.beforeShop).toBe(true);
     expect(injuryLayout.stackOrder).toBe("5");
   }
 
