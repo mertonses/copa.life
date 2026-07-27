@@ -26,7 +26,7 @@ test("mobile primary actions use one safe-area aware dock without cloning contro
   expect(metrics.bottom).toBeGreaterThanOrEqual(6);
   expect(metrics.safeAreaPadding).not.toBe("");
 
-  await page.evaluate(()=>{(globalThis as any).quickStart();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();});
   await expect(page.locator("#draft")).toBeVisible();
   await expect(dock).toBeHidden();
 });
@@ -101,7 +101,7 @@ test("mobile preferences stay opt-in and draft confirmation stays focused",async
   await expect(page.locator("#mobileConfirmPickBtn")).toHaveAttribute("aria-pressed","true");
   await page.locator("#settingsBtn").click();
 
-  await page.evaluate(()=>{(globalThis as any).quickStart();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();});
   await expect(page.locator("#mobileDraftContext")).toHaveCount(0);
   await page.evaluate(()=>{(globalThis as any).roll();});
   await expect(page.locator("#optstage")).toBeVisible();
@@ -233,7 +233,7 @@ test("mobile player profile uses a near-full-height sheet with persistent contro
 test("single tap keeps placement active while the peek detail opens and closes safely",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-player-peek=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Peek Test FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -259,7 +259,7 @@ test("single tap keeps placement active while the peek detail opens and closes s
 test("hub context and result details stay compact without hiding information",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-result-disclosures=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Mobile Result FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -361,7 +361,7 @@ test("hub context and result details stay compact without hiding information",as
 test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","desktop result contract");
   await page.goto("/?desktop-result-sections=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Desktop Result FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -499,7 +499,7 @@ test("footer keeps its link rail separate from the independent-project note",asy
 test("backup picker stays readable and bounded on desktop and mobile",async({page},testInfo)=>{
   const phoneProject=testInfo.project.name.includes("mobile");
   await page.goto("/?backup-picker-layout=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Backup Test FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();w.setCaptain(0);w.closeModal();});

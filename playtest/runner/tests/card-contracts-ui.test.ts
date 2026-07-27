@@ -7,7 +7,7 @@ async function openHub(page:Page){
   await page.evaluate(async()=>{
     const game=globalThis as any;
     game.setLang("tr");
-    game.quickStart();
+    await game.quickStart();
     await game.quickAll();
   });
   await page.locator("#postClubName").fill("Contract XI");

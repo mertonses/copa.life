@@ -4,7 +4,7 @@ const GAME_URL="http://127.0.0.1:5500/?hidden-player=1";
 
 test("mystery player reveals inline without interrupting the dice flow and blocks undo with a toast",async({page})=>{
   await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{const game=globalThis as any;game.setLang("tr");game.quickStart();game.roll();});
+  await page.evaluate(async()=>{const game=globalThis as any;game.setLang("tr");await game.quickStart();game.roll();});
   await expect(page.locator("#optstage")).toBeVisible();
 
   const playerName=await page.evaluate(()=>{
@@ -63,7 +63,7 @@ test("auto-fill uses draft option generation and records mystery-player offers",
   const result=await page.evaluate(async()=>{
     const game=globalThis as any;
     localStorage.removeItem("copa_balance_telemetry_v1");
-    game.quickStart();
+    await game.quickStart();
     game.deadlineH=6;
     await game.quickAll();
     const telemetry=game.getBalanceTelemetry().hiddenDraft||{};

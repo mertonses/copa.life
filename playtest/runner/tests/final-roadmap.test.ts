@@ -6,7 +6,7 @@ const openFinalReadyHub=async(page:any)=>{
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{
     const global=globalThis as any;
-    global.quickStart();
+    await global.quickStart();
     await global.quickAll();
   });
   await page.locator("#postClubName").fill("Checkpoint FK");
