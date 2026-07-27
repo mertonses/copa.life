@@ -9,7 +9,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(penaltyCore){
   "use strict";
 
-  const MODEL_VERSION="copa-final-core-v4";
+  const MODEL_VERSION="copa-final-core-v5";
   const REPLAY_VERSION=3;
   const TACTICS=new Set(["balanced","more","push","calm","hold"]);
   const CARDS=new Set(["kanat_akini","kontra","sogukkanli_penaltici"]);
@@ -230,8 +230,8 @@
     switch(normalizeTactic(tactic)){
       case"more":effect={attack:0.045,shot:0.025,xg:0.012,defence:-0.045,tempo:0.07,card:0.004,possession:-0.005,press:0.015};break;
       case"push":effect={attack:0.025,shot:0.010,xg:0.006,defence:-0.015,tempo:0.06,card:0.012,possession:0.025,press:0.065};break;
-      case"calm":effect={attack:-0.015,shot:-0.018,xg:-0.004,defence:0.025,tempo:-0.06,card:-0.008,possession:0.035,press:-0.010};break;
-      case"hold":effect={attack:-0.040,shot:-0.035,xg:-0.010,defence:leading?0.070:0.025,tempo:-0.08,card:-0.006,possession:-0.005,press:-0.015};break;
+      case"calm":effect={attack:-0.004,shot:-0.005,xg:-0.001,defence:0.034,tempo:-0.045,card:-0.010,possession:0.050,press:-0.005};break;
+      case"hold":effect={attack:-0.018,shot:-0.014,xg:-0.004,defence:leading?0.110:0.045,tempo:-0.060,card:-0.007,possession:0.010,press:-0.010};break;
       default:effect={attack:0,shot:0,xg:0,defence:0,tempo:0,card:0,possession:0,press:0};
     }
     if(losing&&(tactic==="more"||tactic==="push")){
@@ -239,7 +239,7 @@
     }
     if(leading&&tactic==="more"){effect.attack*=0.55;effect.shot*=0.65;effect.defence*=1.20;}
     if(late&&(tactic==="more"||tactic==="push"))effect.defence-=0.012;
-    if(!leading&&tactic==="hold"){effect.attack-=0.015;effect.shot-=0.010;}
+    if(!leading&&tactic==="hold"){effect.attack-=0.006;effect.shot-=0.004;}
     return effect;
   }
 
@@ -370,6 +370,8 @@
 
         const attackEdge=(powers[side]-powers[other])/190;
         let shotChance=0.43+attackEdge+ownEffect.attack+ownEffect.shot-oppEffect.defence;
+        if(minute>=76&&score[0]===score[1])shotChance+=0.120;
+        if(isGolden)shotChance+=0.060;
         if(sequence==="COUNTER"||sequence==="PRESS_RECOVERY")shotChance+=0.055;
         if(sequence==="RECYCLE"||sequence==="LOW_TEMPO")shotChance-=0.085;
         if(sequence==="SET_PIECE")shotChance+=0.035;
@@ -386,7 +388,7 @@
           distance,centrality:rng.rng(0.35,1),shooting:powers[side]+ownEffect.xg*100,
           decisions:powers[side],powerGap:powers[side]-powers[other],delivery,inBox,
           nearbyDefenders:rng.int(4)
-        })+ownEffect.xg-oppEffect.defence*0.055,0.02,0.58);
+        })+ownEffect.xg-oppEffect.defence*0.055+(isGolden?0.015:0),0.02,0.58);
         stats.shots[side]++;stats.xg[side]+=xg;audit.shots++;
         const result=resolveShot({
           expectedGoals:xg,distance,shooting:powers[side],decisions:powers[side],

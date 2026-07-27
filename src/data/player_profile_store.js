@@ -108,13 +108,15 @@ function _playerProfileGenerated(player,countryHint){
     const row=data.records[key],best=String(row[bestIndex]||"").toUpperCase(),same=kind==="gk"?/(?:GK|KL)/.test(best):kind==="fwd"?/(?:ST|OOS)/.test(best):kind==="def"?/(?:^|[ /,])(?:D|KB)(?:[ (/,]|$)/.test(best):/(?:DOS|OS)/.test(best)&&!/(?:OOS)/.test(best);
     if(!same)return;
     const distance=Math.abs(row.slice(0,6).reduce(function(sum,item){return sum+(Number(item)||0);},0)/6-ov);
-    if(distance<gap-.01){gap=distance;matches.length=0;matches.push(key);}else if(Math.abs(distance-gap)<.01)matches.push(key);
+    if(value.fab)matches.push([key,distance]);else if(distance<gap-.01){gap=distance;matches.length=0;matches.push(key);}else if(Math.abs(distance-gap)<.01)matches.push(key);
   });
+  if(value.fab){matches.sort(function(a,b){return a[1]-b[1];});matches.splice(12);matches.forEach(function(item,index){matches[index]=item[0];});}
   if(!matches.length)return null;
   let hash=2166136261;(String(value.name||"")+"|"+String(value.club||"")+"|"+String(value.age||"")).split("").forEach(function(character){hash^=character.charCodeAt(0);hash=Math.imul(hash,16777619);});
   const key=matches[(hash>>>0)%matches.length],row=data.records[key],profile={source:data.source||"copa.life oyun modeli",source_type:"copa_model_fallback",model_version:data.model_version||"copa-model-v1",profile_key:playerProfileKey(country||"TR",value.name,value.club,value.age)};
   (data.fields||[]).forEach(function(field,index){profile[field]=row[index];});
-  profile.national_team="";profile.secondary_position="";profile.preferred_foot="";profile.best_position="";profile.positions="";return profile;
+  profile.national_team="";if(!value.fab){profile.secondary_position="";profile.preferred_foot="";profile.best_position="";profile.positions="";}
+  return profile;
 }
 function playerProfileForPlayerAsync(player,countryHint){return playerProfileResolveKeyAsync(player,countryHint).then(function(key){return key?playerProfileByKeyAsync(key):_playerProfileGenerated(player,countryHint);});}
 function playerProfileForAsync(country,name,club,age){return playerProfileByKeyAsync(playerProfileKey(country,name,club,age));}

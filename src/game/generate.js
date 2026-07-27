@@ -1,8 +1,6 @@
-/* Kadro/oyuncu uretimi: havuz filtreleme, fabrikasyon, draft secenekleri.
-   core/squad.js USTUNE oturur; runtime state (round/style/deadlineH/LANG) okur. */
 const usedNames=new Set();let fabCount=0;
-const FABSUR=["Yılmaz","Demir","Kaya","Şahin","Çelik","Aslan","Doğan","Polat","Koç","Bulut"];
 const rnd=a=>a[rand()*a.length|0],ri=(a,b)=>a+Math.floor(rand()*(b-a+1));
+function regenName(lang){const p=COPA_REGEN_NAMES[lang]||COPA_REGEN_NAMES.en,a=p[0].split(","),b=p[1].split(",");for(;;){const n=rnd(a)+(fabCount>16?" "+rnd(a):"")+" "+rnd(b);if(!usedNames.has(n)){usedNames.add(n);return n;}}}
 function availAll(lo,hi){lo=lo||0;hi=hi||99;return POOL.filter(p=>!usedNames.has(p[0])&&p[1]>=lo&&p[1]<=hi);}
 function availG(g,lo,hi){return availAll(lo,hi).filter(p=>p[2]===g);}
 const _tsvg={
@@ -16,7 +14,7 @@ const _tsvg={
 const TRAITS={hizli:{e:_tsvg.hizli,pw:()=>(style==="kontra"||style==="gegen")?2:0},lider:{e:_tsvg.lider,pw:()=>round>=7?2:0},buyukmac:{e:_tsvg.buyukmac,pw:()=>round>=5?2:0},sorunlu:{e:_tsvg.sorunlu,pw:()=>0},temasli:{e:_tsvg.temasli,pw:()=>0},wonderkid:{e:_tsvg.wonderkid,pw:()=>0}};
 function assignTrait(o){o.dev=0;o.trait=null;if(o.fab)return;const r=rand();if(o.age<=20&&r<0.20)o.trait="wonderkid";else if(r<0.10)o.trait="hizli";else if(r<0.17)o.trait="lider";else if(r<0.24)o.trait="buyukmac";else if(r<0.30)o.trait="sorunlu";else if(r<0.35)o.trait="temasli";}
 function mkOpt(name,ov,nat,pos,fab,club,age,tr,marketHint,naturalPos,potential,leagueTier){const resolvedAge=age||26,resolvedPotential=typeof playerPotential==="function"?playerPotential(ov,resolvedAge,potential):Math.max(ov,Number(potential)||ov);const pr=valueOf(ov,resolvedAge,resolvedPotential);let price=(!fab&&typeof deadlineH!=="undefined"&&deadlineH<=6)?Math.max(1,Math.round(pr*1.15)):pr;if(!fab&&typeof chairmanTransferMultiplier==="function")price=Math.max(1,Math.round(price*chairmanTransferMultiplier()));const o={name,ov,natG:nat,natPos:naturalPos||pos,pos,club:club||"",age:resolvedAge,tr:tr||0,marketHint:Number(marketHint)||0,potential:resolvedPotential,leagueTier:Number(leagueTier)||1,price,fab:!!fab,train:0,dev:0,trait:null,eff:ov};if(!fab&&typeof playerProfileKey==="function")o.profileKey=playerProfileKey(typeof selectedCountry==="string"?selectedCountry:"TR",name,o.club,o.age);assignTrait(o);return o;}
-function fabPlayer(pos,lo,hi){fabCount++;const ov=ri(lo||55,hi||61),g=groupOf(pos);const nm=(lo&&lo<60?(LANG==="tr"?"Yeğen ":"Nephew "):"")+rnd(FABSUR)+" "+fabCount;return mkOpt(nm,ov,g,pos,true,"",ri(17,34),1);}
+function fabPlayer(pos,lo,hi){fabCount++;const ov=ri(lo||55,hi||61),g=groupOf(pos),nm=regenName(COPA_REGEN_NAMES[LANG]?LANG:"en");return mkOpt(nm,ov,g,pos,true,"",ri(17,34),1);}
 function discountRangeFor(ov){if(ov>=85)return [35,50];if(ov>=80)return [20,40];if(ov>=75)return [20,40];if(ov>=70)return [15,30];return [10,22];}
 function applyBargain(o){if(!o||o.hidden||o.free||o.bargain)return;const rg=discountRangeFor(o.ov),id=chairman&&chairman.id,bonus=(id==="pinti")?3:0,pct=Math.min(50,ri(rg[0]+bonus,rg[1]+bonus));o.oldPrice=o.price;o.discountPct=pct;o.price=Math.max(1,Math.round(o.oldPrice*(100-pct)/100));o.bargain=true;if(!o.trait&&rand()<0.25)o.trait=rnd(["temasli","sorunlu"]);}
 const DRAFT_QUALITY_BIAS={TR:0,JP:0.20,ENG:0.25,ES:0.25,DE:0.30,IT:0.30};

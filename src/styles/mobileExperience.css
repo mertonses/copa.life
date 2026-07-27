@@ -1150,9 +1150,6 @@
   .mobile-action-dock[data-dock-kind="hub"] #prepBtn b{font-size:7.5px!important;white-space:nowrap}
   .mobile-action-dock[data-dock-kind="hub"] #prepBtn em{height:15px;min-width:22px;font-size:7px}
   .mobile-action-dock[data-dock-kind="hub"] .presbtngp .btn-pres{font-size:0!important}
-  .mobile-action-dock[data-dock-kind="hub"] .presbtngp .btn-pres::after{
-    content:attr(aria-label);font:800 7.5px/1.05 var(--mono);letter-spacing:.35px;white-space:nowrap;
-  }
   .mobile-action-dock[data-dock-kind="hub"] #playBtn{font-size:8px!important}
 
   /* Every modal is a visibly separate, fully opaque surface in both themes. */

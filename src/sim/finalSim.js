@@ -2595,7 +2595,7 @@ function buildSim(myPow, oppPow) {
     return {
       country:typeof selectedCountry!=="undefined"?selectedCountry:"",
       round:6,outcome,
-      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v4",
+      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v5",
       power_gap:powerGap,end_type:endType,tactic:shoutMode||"balanced"
     };
   }
@@ -2815,7 +2815,7 @@ function buildSim(myPow, oppPow) {
     if(gameEnded||!window.CopaFinalSimPersistence)return false;
     const core=window.CopaFinalSimCore;
     return window.CopaFinalSimPersistence.persist({
-      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v4",
+      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v5",
       runSeed:seedBase,round:_r,homePower:myPow,awayPower:oppPow,
       match:getCheckpointState()
     });

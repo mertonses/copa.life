@@ -9,9 +9,15 @@ function legacySpendable(){return Math.max(0,Math.round(legacyCash||0));}
 function budgetAfterCost(cost){cost=Math.max(0,Math.round(cost||0));return Math.round((budget||0)-Math.max(0,cost-legacySpendable()));}
 function canAffordCost(cost){return budgetAfterCost(cost)>=activeDebtLimit();}
 function recordDebt(){if(econStats)econStats.worstDebt=Math.min(econStats.worstDebt||0,budget||0);}
+function recordCashFlow(kind,amount,tag,before,after,legacy){
+ if(!econStats)return;
+ const list=Array.isArray(econStats.transactions)?econStats.transactions:[];
+ list.push({id:list.length+1,round:Math.max(1,Number(typeof round!=="undefined"?round:1)||1),kind,amount:Math.abs(Math.round(amount||0)),tag:tag||kind,before:Math.round(before||0),after:Math.round(after||0),legacy:Math.max(0,Math.round(legacy||0))});
+ econStats.transactions=list.slice(-120);
+}
 function debtStage(){return budget<=-20?3:budget<=-10?2:budget<0?1:0;}
-function spend(cost,tag){cost=Math.round(cost||0);if(cost<=0)return budget;const fromLegacy=Math.min(legacySpendable(),cost);if(fromLegacy>0)legacyCash=Math.max(0,Math.round((legacyCash||0)-fromLegacy));const fromBudget=cost-fromLegacy;budget=Math.round(budget-fromBudget);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+cost;recordDebt();return budget;}
-function earn(amount,tag){amount=Math.round(amount||0);budget=Math.round(budget+amount);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+amount;recordDebt();return budget;}
+function spend(cost,tag){cost=Math.round(cost||0);if(cost<=0)return budget;const before=budget,fromLegacy=Math.min(legacySpendable(),cost);if(fromLegacy>0)legacyCash=Math.max(0,Math.round((legacyCash||0)-fromLegacy));const fromBudget=cost-fromLegacy;budget=Math.round(budget-fromBudget);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+cost;recordCashFlow("expense",cost,tag,before,budget,fromLegacy);recordDebt();return budget;}
+function earn(amount,tag){amount=Math.round(amount||0);const before=budget;budget=Math.round(budget+amount);if(econStats&&tag)econStats[tag]=(econStats[tag]||0)+amount;recordCashFlow("income",amount,tag,before,budget,0);recordDebt();return budget;}
 function addLegacyCash(amount){amount=Math.max(0,Math.round(amount||0));legacyCash=Math.round((legacyCash||0)+amount);return legacyCash;}
 function addFinalPenalty(amount,source){
  amount=Math.max(0,Math.round(amount||0));

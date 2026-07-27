@@ -59,7 +59,7 @@
     const varianceAdjustment=varianceUnit*10*(variance-1);
     const talk=data.talk&&typeof data.talk==="object"?data.talk:{};
     const preparation=data.preparation&&typeof data.preparation==="object"?data.preparation:{};
-    const openingBoost=Math.max(-2,Math.min(3,Number(talk.first20)||0))*.35;
+    const openingBoost=Math.max(-2,Math.min(3,Number(talk.first20)||0))*.15;
     const preparedOpponent=Math.max(35,(Number(data.awayPower)||0)+(Number(preparation.opponent)||0));
     let homeTactic=tacticForStyle(data.style);
     if(Number(talk.tempo)>=2)homeTactic="push";

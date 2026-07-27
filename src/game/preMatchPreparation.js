@@ -28,6 +28,16 @@
   }
   function clear(id){state.choices=state.choices.filter(item=>item.id!==id);state.lastEffects=null;render();}
   function repeatFactor(id){const streak=Math.max(0,Number(state.streaks[id])||0);return streak===0?1:streak===1?.7:.45;}
+  function relevance(id,round,opponent){
+    const r=Math.max(1,Number(round)||1),opp=opponent&&typeof opponent==="object"?opponent:{};
+    if(id==="analysis")return opp.style?4:1;
+    if(id==="penalties")return r>=4?4:0;
+    if(id==="recovery")return state.fatigue>=12?4:1;
+    if(id==="cohesion")return 2;
+    if(id==="defence")return Number(opp.power)>=78?3:2;
+    if(id==="finishing")return Number(opp.power)<78?3:2;
+    return 2;
+  }
   function effects(round,opponent){
     ensureRound(round);
     if(state.lastEffects)return{...state.lastEffects};
@@ -76,7 +86,7 @@
     const remaining=2-spent(),eff=effects(state.round,state.opponent);
     const status=panel.querySelector("[data-prep-status]");
     const analysis=eff.analysis&&state.opponent&&state.opponent.style?` · ${tr()?"Rakip stili":"Opponent style"}: ${state.opponent.style}`:"";
-    if(status)status.innerHTML=`<b>${tr()?remaining+" hazırlık puanı":remaining+" preparation points"}</b><span>${tr()?"Güç":"Power"} +${eff.power.toFixed(1)} · ${tr()?"Risk":"Risk"} ×${eff.injuryRisk.toFixed(2)} · ${tr()?"Yorgunluk":"Fatigue"} ${state.fatigue}${eff.fatigueDelta>=0?"+":""}${eff.fatigueDelta}${analysis}</span>`;
+    if(status)status.innerHTML=`<b>${tr()?remaining+" antrenman puanı":remaining+" training points"}</b><span>${tr()?"Güç":"Power"} +${eff.power.toFixed(1)} · ${tr()?"Risk":"Risk"} ×${eff.injuryRisk.toFixed(2)} · ${tr()?"Yorgunluk":"Fatigue"} ${state.fatigue}${eff.fatigueDelta>=0?"+":""}${eff.fatigueDelta}${analysis}</span>`;
     panel.querySelectorAll("[data-drill]").forEach(card=>{
       const id=card.dataset.drill,chosen=state.choices.find(item=>item.id===id);
       card.classList.toggle("active",!!chosen);
@@ -86,12 +96,15 @@
   function open(round,opponent){
     ensureRound(round);
     state.opponent=opponent&&typeof opponent==="object"?{name:opponent.name||"",style:opponent.style||""}:null;
-    const cards=Object.keys(DRILLS).map(id=>{
+    const ordered=Object.keys(DRILLS).sort((a,b)=>relevance(b,state.round,state.opponent)-relevance(a,state.round,state.opponent));
+    const cards=ordered.map(id=>{
       const drill=DRILLS[id],streak=state.streaks[id]||0;
-      return`<article class="prep-drill" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b><small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
+      const score=relevance(id,state.round,state.opponent),recommended=id===ordered[0]||score>=4;
+      const badge=recommended?`<mark>${tr()?"BU MAÇ ÖNERİLİR":"RECOMMENDED"}</mark>`:score===0?`<mark class="is-muted">${tr()?"DÜŞÜK ÖNCELİK":"LOW PRIORITY"}</mark>`:"";
+      return`<article class="prep-drill${recommended?" is-recommended":""}" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b>${badge}<small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
     }).join("");
     root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><div class="prep-title-row"><div><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></div><button type="button" class="prep-help" aria-expanded="false" onclick="const note=this.closest('.prep-modal').querySelector('.prep-help-note');note.hidden=!note.hidden;this.setAttribute('aria-expanded',String(!note.hidden))">?</button></div><aside class="prep-help-note" hidden>${tr()?"Toplam 2 puanın var. İki farklı hafif çalışma veya tek bir yoğun çalışma seçebilirsin. Dolu bir plan varken başka seçeneğe dokunursan plan yeni seçime geçer.":"You have 2 points: choose two light drills or one intense drill. Selecting another drill when the plan is full replaces the plan."}</aside></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
     render();
   }
-  root.CopaPreparation={DRILLS,open,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,snapshot,restore,reset,spent};
+  root.CopaPreparation={DRILLS,open,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,relevance,snapshot,restore,reset,spent};
 })(window);
