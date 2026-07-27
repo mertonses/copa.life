@@ -37,7 +37,10 @@ test("TR, EN, ES, DE and IT render the intro, guide, draft and fixture chrome",a
     });
     await expect(page.locator("#draft")).toBeVisible();
     await expect(page.locator("#pickhdr")).toHaveText(await page.evaluate(()=>(globalThis as any).L().pickhdr));
-    await expect(page.locator("#fixbar .fr").first()).toHaveText(await page.evaluate(()=>(globalThis as any).L().rounds[0]));
+    await expect(page.locator("#fixbar .fr").first()).toHaveText(await page.evaluate(()=>{
+      const label=String((globalThis as any).L().rounds[0]||"");
+      return label.replace(/^.*?·\s*/,"");
+    }));
     const visibleText=await page.locator("body").innerText();
     expect(visibleText).not.toMatch(/\b(?:undefined|null|NaN)\b/i);
     expect(errors).toEqual([]);

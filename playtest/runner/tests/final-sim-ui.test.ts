@@ -273,7 +273,7 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   expect(after.score).toEqual(before.score);
   expect(after.decisionLog.at(-1)?.tactic).toBe("push");
   expect(after.savedMinute).toBeGreaterThanOrEqual(before.minute);
-  expect(after.model).toBe("copa-final-core-v4");
+  expect(after.model).toBe("copa-final-core-v5");
 });
 
 test("shareable final code can be imported and deterministically verified",async({page},testInfo)=>{
@@ -287,7 +287,7 @@ test("shareable final code can be imported and deterministically verified",async
   });
   await page.locator("#finalReplayImportValue").fill(code);
   await page.getByRole("button",{name:/TEKRARI DOĞRULA|VERIFY REPLAY/}).click();
-  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v4");
+  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v5");
   await expect(page.locator(".scoutmodal")).toContainText(/Skor|Score/);
   const replayed=await page.evaluate((value)=>{
     const replay=(globalThis as any).CopaFinalReplay.inspect(value);

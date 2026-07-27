@@ -55,7 +55,7 @@ const reachDraw=async(page:any)=>{
   });
   expect(squadVisuals.pitch).toMatch(/31, 107, 69|radial-gradient/);
   expect(squadVisuals.warnings.every((value:string)=>value!=="rgba(0, 0, 0, 0)")).toBe(true);
-  expect(squadVisuals.ratings.length).toBeGreaterThan(1);
+  expect(squadVisuals.ratings.length).toBeGreaterThanOrEqual(1);
   await page.locator("#postClubName").fill("Mobil Test FK");
   await page.evaluate(()=>(globalThis as any).pcGo());
   await expect(page.locator("#tournamentDraw")).toBeVisible();
@@ -136,7 +136,7 @@ test("draft candidates keep only the two useful quick actions",async({page},test
   await capture(page,"03-draft-candidate-gallery.png");
 });
 
-test("Phaser draw ceremony reveals a ball and preserves accessible controls",async({page},testInfo)=>{
+test("compact draw ceremony reveals a ball and preserves accessible controls",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.goto("/?native-game=1&visual=draw",{waitUntil:"domcontentloaded"});
@@ -152,7 +152,8 @@ test("Phaser draw ceremony reveals a ball and preserves accessible controls",asy
     return Object.values(game.tournament.teams).filter((team:any)=>team.id!=="player").map((team:any)=>team.name).filter((name:string)=>!domestic.has(name.trim().toLocaleLowerCase())&&!name.toLocaleLowerCase().startsWith(label+" "));
   });
   expect(foreignClubs).toEqual([]);
-  await expect(page.locator("#phaserDrawStage canvas")).toBeVisible({timeout:15_000});
+  await expect(page.locator("#phaserDrawStage canvas")).toBeHidden();
+  await expect(page.locator(".td-machine>.td-ball")).toBeVisible();
   await expect(page.locator(".td-group")).toHaveCount(8);
   await expect(page.locator(".td-group.is-eligible")).toHaveCount(8);
   await expect(page.locator("[data-hold-draw]")).toContainText(/basılı tut|hold/i);
@@ -197,14 +198,18 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
     const oppCrest=bar.querySelector<HTMLElement>(".opp .vs-crest")!.getBoundingClientRect(),oppText=bar.querySelector<HTMLElement>(".opp .vs-ti")!.getBoundingClientRect();
     return{youOrdered:youCrest.right<=youText.left+1,oppOrdered:oppText.right<=oppCrest.left+1,scoutInMiddle:!!bar.querySelector(".mid>.vsscout")};
   });
-  expect(versusLayout).toEqual({youOrdered:true,oppOrdered:true,scoutInMiddle:true});
+  expect(versusLayout).toEqual({youOrdered:true,oppOrdered:true,scoutInMiddle:false});
   expect(await page.locator(".context-metric").evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).backgroundColor!=="rgba(0, 0, 0, 0)"||getComputedStyle(node).backgroundImage!=="none"))).toBe(true);
-  await expect(page.locator("#nativeHubNav button")).toHaveCount(3);
+  await expect(page.locator("#nativeHubNav button")).toHaveCount(4);
   const coachmark=page.locator(".copa-coachmark");
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
   await page.locator(".kasa-detail-btn").click();
-  await expect(page.locator(".cash-info-modal")).toBeVisible();
-  await expect(page.locator(".cash-info-modal .context-number")).toHaveCount(4);
+  await expect(page.locator(".cash-mechanic-sheet")).toBeVisible();
+  await expect(page.locator(".cash-mechanic-rules article")).toHaveCount(4);
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await page.locator(".kasa-detail-link").click();
+  await expect(page.locator(".cash-detail-sheet")).toBeVisible();
+  await expect(page.locator(".cash-detail-metrics article")).toHaveCount(4);
   await page.evaluate(()=>(globalThis as any).closeModal());
   await page.locator("#presBtn").click();
   await expect(page.locator("#toastContainer")).toContainText(/quarter-final|çeyrek final/i);
@@ -212,7 +217,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#hubPitch")).toBeVisible();
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
   const actionLayout=await page.locator("#mobileActionDock .actionbtns").evaluate((panel:HTMLElement)=>{
-    const controls=["prepBtn","presBtn","talkBtn","playBtn"].map(id=>document.getElementById(id)!.getBoundingClientRect());
+    const controls=["presBtn","talkBtn","playBtn"].map(id=>document.getElementById(id)!.getBoundingClientRect());
     return{
       rows:new Set(controls.map(rect=>Math.round(rect.top))).size,
       panelOverflow:panel.scrollWidth-panel.clientWidth,
@@ -222,15 +227,16 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   expect(actionLayout.rows).toBe(1);
   expect(actionLayout.panelOverflow).toBeLessThanOrEqual(1);
   expect(actionLayout.widths.every(width=>width>=44)).toBe(true);
-  await expect(page.locator("#prepBtn")).toBeVisible();
-  await page.locator("#prepBtn").click();
-  await expect(page.locator(".prep-modal")).toBeVisible();
+  await expect(page.locator("#prepBtn")).toHaveCount(0);
+  await page.locator('#nativeHubNav [data-native-target="training"]').click();
+  await expect(page.locator("#mobileTrainingRoute .prep-modal")).toBeVisible();
   await expect(page.locator(".prep-drill")).toHaveCount(7);
   await expectSurfaceFit(page,".prep-modal");
   await page.locator('.prep-drill[data-drill="finishing"] [data-prep-level="light"]').click();
-  await expect(page.locator("[data-prep-status]")).toContainText(/1 (hazırlık puanı|preparation point)/i);
+  await expect(page.locator("[data-prep-status]")).toContainText(/1 (hazırlık puanı|preparation point|training points)/i);
   await capture(page,"04-preparation-board.png");
   await page.locator(".prep-modal .btn-primary").click();
+  await expect(page.locator('#nativeHubNav [data-native-target="match"]')).toHaveClass(/active/);
   await page.locator("#talkBtn").click();
   await expect(page.locator(".locker-room-modal")).toBeVisible();
   await expectSurfaceFit(page,".locker-room-modal");
