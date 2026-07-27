@@ -13,13 +13,16 @@
     career:'<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 5h16v22H8zM12 10h8m-8 5h8m-8 5h5"/><path d="M6 9H4v14h2"/></svg>'
   };
   function landingPitch(){
-    const players=[[50,88],[24,72],[76,72],[37,55],[63,55],[20,36],[50,37],[80,36],[35,19],[65,19],[50,8]];
+    const players=[[50,90],[18,72],[39,73],[61,73],[82,72],[24,51],[50,54],[76,51],[18,28],[50,22],[82,28]];
     return `<svg class="mgl-tactical-board" viewBox="0 0 240 150" aria-hidden="true">
-      <defs><marker id="mglArrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 8 4 0 8Z"/></marker></defs>
-      <rect x="5" y="5" width="230" height="140" rx="10"/><path d="M5 75h230M120 5v140"/><circle cx="120" cy="75" r="18"/><path d="M75 5v22h90V5M75 145v-22h90v22"/>
-      <g class="mgl-routes"><path d="M50 121Q81 101 99 83T142 55" marker-end="url(#mglArrow)"/><path d="M62 94Q116 80 185 55" marker-end="url(#mglArrow)"/><path d="M120 65Q145 38 157 25" marker-end="url(#mglArrow)"/></g>
-      <g class="mgl-players">${players.map(([x,y],index)=>`<g style="--i:${index}"><circle cx="${x/100*230+5}" cy="${y/100*140+5}" r="${index===6?5:4}"/><text x="${x/100*230+5}" y="${y/100*140+7}">${index+1}</text></g>`).join("")}</g>
+      <rect x="5" y="5" width="230" height="140" rx="10"/><path d="M5 75h230"/><circle cx="120" cy="75" r="18"/><circle cx="120" cy="75" r="1.5"/><path d="M75 5v22h90V5M75 145v-22h90v22"/>
+      <g class="mgl-shape"><path d="M120 132 46 106 61 76 120 80 179 76 194 106Z"/><path d="M61 76 46 45 120 36 194 45 179 76"/></g>
+      <g class="mgl-players">${players.map(([x,y],index)=>`<g style="--i:${index}"><circle cx="${x/100*230+5}" cy="${y/100*140+5}" r="${index===0?4.8:4}"/></g>`).join("")}</g>
     </svg>`;
+  }
+  function landingMeta(){
+    const summary=root.CopaMeta&&typeof root.CopaMeta.careerSummary==="function"?root.CopaMeta.careerSummary():null;
+    return{level:Math.max(1,Number(summary&&summary.level)||1),reputation:Math.max(0,Number(summary&&summary.reputation)||0),licenses:Math.max(0,Number(summary&&summary.licenses)||0)};
   }
 
   function savedSummary(saved){
@@ -39,8 +42,9 @@
     setup.classList.add("hidden");
     let view=document.getElementById("mobileGameLanding");
     if(!view){view=document.createElement("div");view.id="mobileGameLanding";view.className="mobile-game-landing";land.prepend(view);}
-    const data=saved?savedSummary(saved):null;
-    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><span class="mgl-light mgl-light-l"></span><span class="mgl-light mgl-light-r"></span><span class="mgl-tunnel"></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>${tr()?"COPA LİFE":"COPA LIFE"}</h1><p>${tr()?"Yedi maç. Tek kupa. Her seçim kulübünün hikâyesini değiştirir.":"Seven matches. One cup. Every choice changes your club's story."}</p></div><ol class="mgl-road" aria-label="${tr()?"Kupa yolu":"Cup journey"}"><li>${tr()?"KADRO":"SQUAD"}</li><li>${tr()?"GRUPLAR":"GROUPS"}</li><li>${tr()?"ELEMELER":"KNOCKOUT"}</li><li>${tr()?"KUPA":"CUP"}</li></ol><div class="mgl-board-wrap"><span>4–3–3 · ${tr()?"HÜCUM PLANI":"ATTACK PLAN"}</span>${landingPitch()}</div><div class="mgl-bottom">${data?`<article class="mgl-save"><span>${tr()?"DEVAM EDEN KARİYER":"ACTIVE CAREER"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/7</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki rakip":"Next opponent"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"KARİYERE DEVAM ET":"CONTINUE CAREER"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"BAŞLA":"START"}</button></div></div></div>`;
+    view._savedRun=saved||null;
+    const data=saved?savedSummary(saved):null,meta=landingMeta();
+    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><span class="mgl-light mgl-light-l"></span><span class="mgl-light mgl-light-r"></span><span class="mgl-tunnel"></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>COPA LIFE</h1><p>${tr()?"Yedi maç. Tek kupa. Her seçim kulübünün hikâyesini değiştirir.":"Seven matches. One cup. Every choice changes your club's story."}</p></div><ol class="mgl-road" aria-label="${tr()?"Kupa yolu":"Cup journey"}"><li>${tr()?"KADRO":"SQUAD"}</li><li>${tr()?"GRUPLAR":"GROUPS"}</li><li>${tr()?"ELEMELER":"KNOCKOUT"}</li><li>${tr()?"KUPA":"CUP"}</li></ol><div class="mgl-board-wrap"><span>4–3–3 · ${tr()?"DENGELİ YERLEŞİM":"BALANCED SHAPE"}</span>${landingPitch()}</div><section class="mgl-meta" aria-label="${tr()?"Kariyer özeti":"Career summary"}"><div class="mgl-career"><span>${tr()?"KARİYER":"CAREER"}</span><b>${tr()?"SEVİYE":"LEVEL"} ${meta.level}</b><b>${meta.reputation} ${tr()?"İTİBAR":"REP"}</b><b>${meta.licenses} ${tr()?"LİSANS":"LICENCES"}</b></div><div class="mgl-world"><b>6 <small>${tr()?"ÜLKE":"COUNTRIES"}</small></b><b>11 <small>${tr()?"LİG":"LEAGUES"}</small></b><b>9.827 <small>${tr()?"OYUNCU":"PLAYERS"}</small></b><b>220 <small>${tr()?"KULÜP":"CLUBS"}</small></b></div></section><div class="mgl-bottom">${data?`<article class="mgl-save"><span>${tr()?"DEVAM EDEN KARİYER":"ACTIVE CAREER"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/7</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki rakip":"Next opponent"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"KARİYERE DEVAM ET":"CONTINUE CAREER"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"BAŞLA":"START"}</button></div></div></div>`;
     land.classList.remove("hidden");intro.classList.remove("hidden");
     return true;
   }
@@ -134,6 +138,14 @@
   function ensureRoutes(){
     if(!gameMode())return;
     const hub=document.getElementById("hub");if(!hub)return;
+    const scouts=[...document.querySelectorAll("#scoutBtn")],scout=scouts.shift(),opponent=hub.querySelector(".vsbar .side.opp");
+    scouts.forEach(node=>node.remove());
+    if(opponent&&scout&&scout.parentElement!==opponent){
+      const crest=opponent.querySelector(".vs-crest-col");
+      opponent.insertBefore(scout,crest||null);
+    }
+    const feed=document.getElementById("feedwrap"),matchColumn=hub.querySelector(".hcol-l");
+    if(feed&&matchColumn&&feed.parentElement===matchColumn)matchColumn.appendChild(feed);
     let nav=document.getElementById("nativeHubNav");
     if(!nav){
       nav=document.createElement("nav");nav.id="nativeHubNav";nav.className="native-hub-nav";hub.prepend(nav);
@@ -145,6 +157,14 @@
       };
     }
     activateRoute(hub.dataset.mobileRoute||activeRoute);
+  }
+  function refreshLanguage(){
+    const landing=document.getElementById("mobileGameLanding");
+    if(landing&&!landing.classList.contains("hidden"))showLanding(landing._savedRun||null);
+    prepareStepper();enhanceSetupChoices();
+    const nav=document.getElementById("nativeHubNav");
+    if(nav)nav.remove();
+    if(document.getElementById("hub")&&!document.getElementById("hub").classList.contains("hidden"))enhanceHub();
   }
   function renderCareerRoute(){
     const hub=document.getElementById("hub");if(!hub)return;
@@ -255,6 +275,8 @@
     }
     const actions=dock.querySelector(".draft-quick-actions");
     ["allBtn","undoBtn"].forEach(id=>{const element=document.getElementById(id);if(element&&element.parentElement!==actions)actions.appendChild(element);});
+    const rollStage=document.getElementById("rollstage");
+    if(rollStage&&dock.parentElement!==rollStage)rollStage.appendChild(dock);
     const undo=document.getElementById("undoBtn"),auto=document.getElementById("allBtn");
     if(undo)undo.style.cssText="";if(auto)auto.style.cssText="";
     root._draftPositionFilter="ALL";
@@ -276,6 +298,6 @@
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
-  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCard,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,init};
+  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCard,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,refreshLanguage,init};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })(window);

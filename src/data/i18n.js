@@ -654,11 +654,9 @@ function _applyCopaLocaleUi(){
  document.documentElement.style.setProperty("--copa-no-events",JSON.stringify(copy.noEvents));
  var guide=document.getElementById("howtoToggle");
  if(guide){
-  var icon=guide.querySelector("svg");
-  guide.replaceChildren();
-  if(icon)guide.appendChild(icon);
-  guide.appendChild(document.createTextNode(" "+copy.guide));
+  var guideLabel=guide.querySelector(".guide-book-label");if(guideLabel)guideLabel.textContent=copy.guide;
   guide.setAttribute("aria-label",copy.guide);
+  guide.title=copy.guide;
  }
  var music=document.getElementById("musicBtnLbl");
  if(music)music.textContent=copy.music;
@@ -700,6 +698,7 @@ function _installCopaLocaleRuntime(){
   originalSetLang(next);
   _syncCopaLanguageControls();
   _applyCopaLocaleUi();
+  if(window.CopaMobileShell&&typeof window.CopaMobileShell.refreshLanguage==="function")window.CopaMobileShell.refreshLanguage();
   if(window.PlayerProfiles&&typeof window.PlayerProfiles.refresh==="function")window.PlayerProfiles.refresh();
  };
  _installCopaHowtoModalRuntime();

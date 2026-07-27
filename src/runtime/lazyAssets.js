@@ -48,7 +48,7 @@
   function ensureChairPicker(){
     return Promise.all([
       loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260721-chair-contrast1",'link[href*="chairPicker.css"]'),
-      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260721-chair-contrast1",()=>!!global.CopaChairPicker)
+      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260727-compact-chair2",()=>!!global.CopaChairPicker)
     ]).then(()=>global.CopaChairPicker);
   }
   function ensureAdvancedSettings(){

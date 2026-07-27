@@ -32,7 +32,7 @@ const checks = [
   },
   {
     name: "chairman profile badge belongs to the centred persona panel",
-    pass: /<div class="chairpopup-desc">\$\{model\.desc\}<\/div><\/div><strong class="cp-role-badge">/.test(chairPicker)
+    pass: /<div class="cp-persona-copy">[\s\S]*?<\/div><strong class="cp-role-badge">/.test(chairPicker)
       && !/cp-mechanics-head[\s\S]*?cp-role-badge/.test(chairPicker)
       && /\.chair-picker-modal \.cp-role-badge\{[^}]*align-self:center;[^}]*justify-content:center;[^}]*margin:12px auto 0;/s.test(chairPickerCss)
       && /@media\(max-width:720px\)\{[\s\S]*?\.chair-picker-modal \.cp-role-badge\{grid-column:1\/-1;justify-self:center;/s.test(chairPickerCss),
