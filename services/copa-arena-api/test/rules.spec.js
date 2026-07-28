@@ -4,7 +4,7 @@ import {
   resolveWindow,rewardFor,teamSnapshot,tacticEdge
 } from "../src/rules.js";
 
-function completedPlayer(seed,side,setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"}){
+function completedPlayer(seed,side,setup={formation:"4-4-2",style:"balanced",chairman:"babacan"}){
   const player=initialPlayerState({owner:`owner-${side}`,clubName:`Club ${side}`,rating:1000});
   player.setup=setup;
   player.draft=DRAFT_LINES.map((line,index)=>createDraftOffers(seed,line,index,side)[1]);
@@ -14,6 +14,13 @@ function completedPlayer(seed,side,setup={formation:"4-4-2",style:"balanced",cha
 }
 
 describe("Arena rules",()=>{
+  it("builds a real eleven-player draft with Babacan as the default chairman",()=>{
+    const player=completedPlayer("eleven",0);
+    expect(DRAFT_LINES).toHaveLength(11);
+    expect(player.draft).toHaveLength(11);
+    expect(teamSnapshot(player)).toMatchObject({chairman:"babacan"});
+  });
+
   it("creates deterministic but side-specific fair draft offers",()=>{
     for(let step=0;step<DRAFT_LINES.length;step++){
       const one=createDraftOffers("seed",DRAFT_LINES[step],step,0);

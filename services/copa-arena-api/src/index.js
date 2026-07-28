@@ -1,6 +1,6 @@
 import {DurableObject} from "cloudflare:workers";
 import {
-  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
+  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
   createDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,publicState,
   resolveParticipation,
   resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,validateSetup
@@ -276,10 +276,16 @@ export class ArenaRoom extends DurableObject{
       try{socket.send(JSON.stringify({type:"state",state:publicState(this.state,attachment.owner)}));}catch(_){}
     }
   }
+  isCurrentRules(){
+    return this.state.rulesVersion===ARENA_RULES_VERSION;
+  }
+  draftSlots(){
+    return this.isCurrentRules()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
+  }
   defaultAction(index){
     const player=this.state.players[index];
     if(this.state.phase==="lobby")player.ready=true;
-    else if(this.state.phase==="setup")player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+    else if(this.state.phase==="setup")player.setup={formation:"4-4-2",style:"balanced",chairman:this.isCurrentRules()?"babacan":"diplomat"};
     else if(this.state.phase==="draft"){
       const offers=this.state.offers[index],affordable=offers.filter(item=>item.cost<=this.remainingBudget(player));
       player.draft.push(affordable.sort((a,b)=>b.power-a.power)[0]||offers.sort((a,b)=>a.cost-b.cost)[0]);
@@ -289,7 +295,7 @@ export class ArenaRoom extends DurableObject{
   }
   remainingBudget(player){
     const chair=CHAIRMEN[player.setup&&player.setup.chairman]||CHAIRMEN.patron;
-    return 20+chair.budget-player.draft.reduce((sum,item)=>sum+Number(item.cost||0),0);
+    return (this.isCurrentRules()?44:20)+chair.budget-player.draft.reduce((sum,item)=>sum+Number(item.cost||0),0);
   }
   bothDone(){
     const [home,away]=this.state.players;
@@ -310,11 +316,14 @@ export class ArenaRoom extends DurableObject{
     if(this.state.phase==="lobby")this.state.phase="setup";
     else if(this.state.phase==="setup"){
       this.state.phase="draft";this.state.draftStep=0;
-      this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,DRAFT_LINES[0],0,index));
+      const first=this.draftSlots()[0];
+      this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,first.line,0,index,first.slot));
     }else if(this.state.phase==="draft"){
-      if(this.state.draftStep<DRAFT_LINES.length-1){
+      const slots=this.draftSlots();
+      if(this.state.draftStep<slots.length-1){
         this.state.draftStep++;
-        this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,DRAFT_LINES[this.state.draftStep],this.state.draftStep,index));
+        const next=slots[this.state.draftStep];
+        this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,next.line,this.state.draftStep,index,next.slot));
       }else{
         this.state.phase="market";
         this.state.offers=this.state.players.map((_,index)=>createMarketOffers(this.state.seed,index));
@@ -322,7 +331,7 @@ export class ArenaRoom extends DurableObject{
     }else if(this.state.phase==="market"){this.state.phase="training";this.state.offers=null;}
     else if(this.state.phase==="training"){this.state.phase="live";this.state.window=0;this.state.offers=null;}
     else if(this.state.phase==="live"){
-      const home=teamSnapshot(this.state.players[0]),away=teamSnapshot(this.state.players[1]);
+      const home=teamSnapshot(this.state.players[0],this.state.rulesVersion),away=teamSnapshot(this.state.players[1],this.state.rulesVersion);
       const outcome=resolveWindow({seed:this.state.seed,window:this.state.window,home,away,homeTactic:this.state.players[0].tactics[this.state.window],awayTactic:this.state.players[1].tactics[this.state.window]});
       this.state.score[0]+=outcome.homeGoals;this.state.score[1]+=outcome.awayGoals;
       this.state.events.push(...outcome.events);
@@ -397,18 +406,34 @@ export class ArenaRoom extends DurableObject{
   async action(owner,data){
     const index=this.state.players.findIndex(player=>player.owner===owner);if(index<0)return "unauthorized";
     const player=this.state.players[index];
-    if(data.type==="ready"&&this.state.phase==="lobby")player.ready=true;
-    else if(data.type==="setup"&&this.state.phase==="setup"&&validateSetup(data.choice))player.setup={formation:data.choice.formation,style:data.choice.style,chairman:data.choice.chairman};
+    if(data.type==="ready"&&this.state.phase==="lobby"){
+      if(player.ready)return "already_submitted";
+      player.ready=true;
+    }
+    else if(data.type==="setup"&&this.state.phase==="setup"){
+      if(player.setup)return "already_submitted";
+      const choice={...data.choice,chairman:this.isCurrentRules()?"babacan":data.choice&&data.choice.chairman};
+      if(!validateSetup(choice))return "unavailable_choice";
+      player.setup=choice;
+    }
     else if(data.type==="draft"&&this.state.phase==="draft"){
+      if(player.draft.length>this.state.draftStep)return "already_submitted";
       const offer=this.state.offers[index].find(item=>item.id===data.choice);
       if(!offer||offer.cost>this.remainingBudget(player))return "unavailable_choice";
       player.draft.push(offer);
     }else if(data.type==="market"&&this.state.phase==="market"){
+      if(player.market)return "already_submitted";
       const offer=this.state.offers[index].find(item=>item.id===data.choice);
       if(!offer||offer.cost>this.remainingBudget(player))return "unavailable_choice";
       player.market={id:offer.id};
-    }else if(data.type==="training"&&this.state.phase==="training"&&TRAINING.includes(data.choice))player.training=data.choice;
-    else if(data.type==="tactic"&&this.state.phase==="live"&&TACTICS.includes(data.choice))player.tactics.push(data.choice);
+    }else if(data.type==="training"&&this.state.phase==="training"&&TRAINING.includes(data.choice)){
+      if(player.training)return "already_submitted";
+      player.training=data.choice;
+    }
+    else if(data.type==="tactic"&&this.state.phase==="live"&&TACTICS.includes(data.choice)){
+      if(player.tactics.length>this.state.window)return "already_submitted";
+      player.tactics.push(data.choice);
+    }
     else return "wrong_phase";
     if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";

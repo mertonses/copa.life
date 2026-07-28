@@ -152,12 +152,15 @@ describe("Arena Durable Objects",()=>{
       const act=(owner,data)=>instance.action(owner,{...data,actionId:`AA-${++sequence}ABCDEFGH`});
       await act("owner-home",{type:"ready"});await act("owner-away",{type:"ready"});
       for(const owner of ["owner-home","owner-away"])await act(owner,{type:"setup",choice:{formation:"4-4-2",style:"balanced",chairman:"diplomat"}});
+      expect(instance.state.players.every(player=>player.setup.chairman==="babacan")).toBe(true);
       for(let step=0;step<DRAFT_LINES.length;step++){
         for(let side=0;side<2;side++){
           const offer=instance.state.offers[side].sort((a,b)=>a.cost-b.cost)[0];
-          await act(players[side].owner,{type:"draft",choice:offer.id});
+          expect(await act(players[side].owner,{type:"draft",choice:offer.id})).toBe("ok");
+          if(step===0&&side===0)expect(await act(players[side].owner,{type:"draft",choice:offer.id})).toBe("already_submitted");
         }
       }
+      expect(instance.state.players.every(player=>player.draft.length===11)).toBe(true);
       for(let side=0;side<2;side++){
         const free=instance.state.offers[side].find(item=>item.id==="none");
         await act(players[side].owner,{type:"market",choice:free.id});

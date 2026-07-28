@@ -1,9 +1,9 @@
-export const ARENA_RULES_VERSION="arena-rules-v2";
+export const ARENA_RULES_VERSION="arena-rules-v3";
 export const MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
   lobby:45,
   setup:60,
-  draft:35,
+  draft:22,
   market:30,
   training:25,
   live:24,
@@ -25,13 +25,29 @@ export const STYLES=Object.freeze({
 });
 
 export const CHAIRMEN=Object.freeze({
+  babacan:{budget:4,chemistry:0,risk:0,flex:0},
+  // Kept for rooms created with arena-rules-v1/v2. New matches always use Babacan.
   patron:{budget:4,chemistry:0,risk:0,flex:0},
   diplomat:{budget:1,chemistry:2,risk:0,flex:0},
   showman:{budget:2,chemistry:0,risk:2,flex:0},
   professor:{budget:1,chemistry:0,risk:0,flex:2}
 });
 
-export const DRAFT_LINES=Object.freeze(["GK","DEF","MID","WING","ST"]);
+export const LEGACY_DRAFT_LINES=Object.freeze(["GK","DEF","MID","WING","ST"]);
+export const DRAFT_SLOTS=Object.freeze([
+  {slot:"GK",line:"GK"},
+  {slot:"LB",line:"DEF"},
+  {slot:"CB1",line:"DEF"},
+  {slot:"CB2",line:"DEF"},
+  {slot:"RB",line:"DEF"},
+  {slot:"CM1",line:"MID"},
+  {slot:"CM2",line:"MID"},
+  {slot:"AM",line:"MID"},
+  {slot:"LW",line:"WING"},
+  {slot:"RW",line:"WING"},
+  {slot:"ST",line:"ST"}
+]);
+export const DRAFT_LINES=Object.freeze(DRAFT_SLOTS.map(item=>item.line));
 export const TACTICS=Object.freeze(["press","balanced","counter","control"]);
 export const TRAINING=Object.freeze(["finishing","shape","chemistry","recovery"]);
 export const MARKET_CARDS=Object.freeze([
@@ -88,8 +104,8 @@ export function ratingDelta(homeRating,awayRating,score){
   return Math.max(-28,Math.min(28,Math.round(28*(Number(score)-expected))));
 }
 
-export function createDraftOffers(seed,line,step,side){
-  if(!DRAFT_LINES.includes(line))throw new Error("invalid_draft_line");
+export function createDraftOffers(seed,line,step,side,slot=line){
+  if(!LEGACY_DRAFT_LINES.includes(line))throw new Error("invalid_draft_line");
   const random=rng(`${seed}|${line}|${step}`);
   const bands=[
     {power:66+Math.floor(random()*4),cost:1,chemistry:2,trait:"connector"},
@@ -99,6 +115,7 @@ export function createDraftOffers(seed,line,step,side){
   const rotation=(hashSeed(`${seed}|${side}|${step}`)%3);
   return bands.map((_,index)=>bands[(index+rotation)%3]).map((base,index)=>({
     id:`${line.toLowerCase()}-${step}-${index}-${hashSeed(`${seed}|${side}|${line}|${index}`).toString(36)}`,
+    slot,
     line,
     name:`${pick(random,FIRST_NAMES)} ${pick(random,LAST_NAMES)}`,
     power:base.power,
@@ -155,13 +172,18 @@ export function validateSetup(choice){
   return !!choice&&Object.hasOwn(FORMATIONS,choice.formation)&&Object.hasOwn(STYLES,choice.style)&&Object.hasOwn(CHAIRMEN,choice.chairman);
 }
 
-export function teamSnapshot(player){
-  if(!validateSetup(player&&player.setup)||!Array.isArray(player.draft)||player.draft.length!==DRAFT_LINES.length)return null;
+export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
+  const legacy=rulesVersion!=="arena-rules-v3";
+  const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
+  if(!validateSetup(player&&player.setup)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
   const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=CHAIRMEN[player.setup.chairman];
   const card=MARKET_CARDS.find(item=>item.id===(player.market&&player.market.id))||MARKET_CARDS.at(-1);
-  const linePowers=Object.fromEntries(player.draft.map(item=>[item.line,round(item.power)]));
+  const linePowers=Object.fromEntries(LEGACY_DRAFT_LINES.map(line=>{
+    const players=player.draft.filter(item=>item.line===line);
+    return [line,players.length?players.reduce((sum,item)=>sum+round(item.power),0)/players.length:65];
+  }));
   const spent=player.draft.reduce((sum,item)=>sum+round(item.cost),0)+round(card.cost);
-  const budget=20+chairman.budget-spent;
+  const budget=(legacy?20:44)+chairman.budget-spent;
   const chemistry=clamp(player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(player.training==="chemistry"?2:0),-3,9);
   const base={
     attack:((linePowers.ST||65)*.58+(linePowers.WING||65)*.27+(linePowers.MID||65)*.15)/1,
@@ -256,6 +278,15 @@ export function publicState(state,owner){
   const opponentIndex=selfIndex===0?1:0;
   const self=state.players[selfIndex],opponent=state.players[opponentIndex];
   const hideCurrentDraft=state.phase==="draft";
+  const legacy=state.rulesVersion!=="arena-rules-v3";
+  const chairman=self&&CHAIRMEN[self.setup&&self.setup.chairman]||CHAIRMEN.patron;
+  const draftSpent=self?self.draft.reduce((sum,item)=>sum+round(item.cost),0):0;
+  const draftStatus=self?{
+    count:self.draft.length,
+    total:legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length,
+    budget:(legacy?20:44)+chairman.budget-draftSpent,
+    power:self.draft.length?round(self.draft.reduce((sum,item)=>sum+round(item.power),0)/self.draft.length):0
+  }:null;
   return {
     protocol:1,
     rulesVersion:state.rulesVersion||(state.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1"),
@@ -282,7 +313,8 @@ export function publicState(state,owner){
       tacticLocked:opponent.tactics.length>state.window
     }:null,
     offers:state.offers&&selfIndex>=0?state.offers[selfIndex]:null,
-    team:self?teamSnapshot(self):null,
-    opponentTeam:["live","result"].includes(state.phase)&&opponent?teamSnapshot(opponent):null
+    draftStatus,
+    team:self?teamSnapshot(self,state.rulesVersion):null,
+    opponentTeam:["live","result"].includes(state.phase)&&opponent?teamSnapshot(opponent,state.rulesVersion):null
   };
 }
