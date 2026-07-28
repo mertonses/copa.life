@@ -628,11 +628,30 @@ test("market identity, free-agent comparison and relationship sheet stay compact
     memories.flatMap((memory:any)=>memory.players.map((player:any)=>[memory.id,player.id])).slice(0,5).forEach(([runId,playerId]:string[])=>game.CopaMeta.toggleHallPlayer(runId,playerId));
     game.CopaMeta.openProgression("museum");
   });
-  await expect(page.locator(".meta-collection-grid article")).toHaveCount(4);
+  await expect(page.locator(".meta-collection-grid article")).toHaveCount(8);
   await expect(page.locator(".meta-collection-grid article.is-complete")).toHaveCount(4);
   await expect(page.locator(".meta-token-bank")).toBeVisible();
   await expectSurfaceFit(page,".meta-progress-modal");
   await capture(page,"03k-museum-collections.png");
+});
+
+test("club files stay opt-in and never interrupt another hub route",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
+  await reset(page);
+  await page.goto("/?native-game=1&visual=club-files",{waitUntil:"domcontentloaded"});
+  await reachDraw(page);
+  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  await page.locator('#nativeHubNav [data-native-target="market"]').click();
+  await page.waitForTimeout(2500);
+  await expect(page.locator("#modal")).toHaveClass(/hidden/);
+  await page.locator('#nativeHubNav [data-native-target="career"]').click();
+  const prompt=page.locator(".club-file-panel-pending");
+  await expect(prompt).toBeVisible();
+  await prompt.click();
+  await expect(page.locator(".club-file-select")).toBeVisible();
+  await page.locator(".club-file-options button").first().click();
+  await expect(page.locator("#modal")).toHaveClass(/hidden/);
+  expect(await page.evaluate(()=>(globalThis as any).CopaClubFiles.snapshot().selected)).toBe("debt");
 });
 
 test("Phaser penalty canvas keeps ball and keeper directions tied to the core result",async({page},testInfo)=>{

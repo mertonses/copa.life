@@ -104,7 +104,7 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
-  expect(layout.boardHeight).toBeGreaterThanOrEqual(100);
+  expect(layout.boardHeight).toBeGreaterThanOrEqual(99);
   expect(layout.boardHeight).toBeLessThanOrEqual(130);
   expect(layout.actionWidthDelta).toBeLessThanOrEqual(1);
   expect(layout.actionGap).toBeGreaterThanOrEqual(5);

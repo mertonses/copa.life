@@ -298,7 +298,7 @@
   function openCareerSection(section){activeCareerSection=["career","mastery","museum","world"].includes(section)?section:"career";renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
   function enhanceHub(){
     document.body.classList.remove("mobile-game-setup-open","mobile-game-setup-final");
-    const panel=document.querySelector("#hub .hub-action-panel .actionbtns");if(!panel)return;
+    const panel=document.querySelector("#hub .hub-action-panel .actionbtns,#mobileActionDock .hub-action-panel .actionbtns");if(!panel)return;
     const oldPrep=document.getElementById("prepBtn");if(oldPrep)oldPrep.remove();
     const talkButton=document.getElementById("talkBtn");
     if(talkButton&&!talkButton.dataset.mobileTalkBound){

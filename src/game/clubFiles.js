@@ -55,24 +55,23 @@
   function selectionMarkup(){
     return `<div class="club-file-select"><header><span>${tr()?"KULÜP DOSYALARI":"CLUB FILES"}</span><h3>${tr()?"Üç maçlık bir kulüp hedefi seç":"Choose a three-match club objective"}</h3><p>${tr()?"Dosyalar kadro gücü vermez. Kalıcı hikâye, kozmetik ve koleksiyon tamamlanınca tek bir kontrollü jeton açar.":"Files grant no squad power. They unlock permanent story, cosmetics and one bounded token for completing the set."}</p></header><div class="club-file-options">${Object.entries(DEFINITIONS).map(([id,item])=>`<button type="button" onclick="CopaClubFiles.select('${id}')"><i>${item.icon}</i><span><b>${tr()?item.tr:item.en}</b><small>${tr()?item.trGoal:item.enGoal}</small><em>${tr()?item.trReward:item.enReward}</em></span><strong>→</strong></button>`).join("")}</div></div>`;
   }
-  function showSelection(){
+  function selectionSurfaceReady(){
+    const hub=document.getElementById("hub");
+    if(!hub||hub.classList.contains("hidden"))return false;
+    if(document.body.classList.contains("arena-active"))return false;
+    const route=String(hub.dataset.mobileRoute||"match");
+    return route==="match";
+  }
+  function showSelection(explicit){
     if(state.selected||Number(root.round)!==1||typeof root.showModal!=="function")return false;
+    if(!explicit&&!selectionSurfaceReady())return false;
     const modal=document.getElementById("modal");
     if(modal&&!modal.classList.contains("hidden"))return false;
     root.showModal(selectionMarkup(),{dismissOnOverlay:false,label:tr()?"Kulüp dosyaları":"Club files"});
     return true;
   }
   function queueSelection(delay){
-    if(state.selected||Number(root.round)!==1)return false;
-    const attempt=count=>{
-      if(state.selected||count>18)return;
-      const phase=root.CopaRunState&&root.CopaRunState.phase;
-      const chairmanBusy=root.pendingChairmanEvent&&root.pendingChairmanEvent.status==="pending";
-      if((!phase||phase==="hub")&&!chairmanBusy&&showSelection())return;
-      setTimeout(()=>attempt(count+1),650);
-    };
-    setTimeout(()=>attempt(0),Math.max(0,Number(delay)||0));
-    return true;
+    return false;
   }
   function checkpointFor(context){
     const round=Math.max(1,Number(context&&context.round)||1);
@@ -131,7 +130,9 @@
     return true;
   }
   function panelMarkup(){
-    if(!state.selected)return "";
+    if(!state.selected){
+      return `<button type="button" class="club-file-panel club-file-panel-pending" onclick="CopaClubFiles.showSelection(true)"><span><small>${tr()?"KULÜP DOSYASI":"CLUB FILE"}</small><b>${tr()?"Üç maçlık hedefini seç":"Choose a three-match objective"}</b></span><em>${tr()?"SEÇ":"CHOOSE"} →</em></button>`;
+    }
     const item=DEFINITIONS[state.selected],done=state.checkpoints.length;
     const dots=[0,1,2].map(index=>{const point=state.checkpoints[index];return `<i class="${point?(point.pass?"is-pass":"is-miss"):""}">${point?(point.pass?"✓":"×"):index+1}</i>`;}).join("");
     const status=state.completed?(state.success?(tr()?"TAMAMLANDI":"COMPLETED"):(tr()?"KAÇIRILDI":"MISSED")):`${done}/3`;

@@ -706,12 +706,16 @@ function _benchPanelCanDrag(panel){
 }
 function _clampBenchPanel(panel,next){
   const area=panel&&panel.closest(".pitch-area");if(!area)return;
-  const inset=10;panel.style.maxHeight=`${Math.max(120,area.clientHeight-inset*2)}px`;
-  const maxX=Math.max(inset,area.clientWidth-panel.offsetWidth-inset),maxY=Math.max(inset,area.clientHeight-panel.offsetHeight-inset);
+  const pitch=area.querySelector("#hubPitch")||area;
+  const inset=10,originX=pitch.offsetLeft,originY=pitch.offsetTop;
+  panel.style.maxHeight=`${Math.max(120,pitch.clientHeight-inset*2)}px`;
+  const minX=originX+inset,minY=originY+inset;
+  const maxX=Math.max(minX,originX+pitch.offsetWidth-panel.offsetWidth-inset);
+  const maxY=Math.max(minY,originY+pitch.offsetHeight-panel.offsetHeight-inset);
   const inlineX=Number.parseFloat(panel.style.left),inlineY=Number.parseFloat(panel.style.top);
-  const fallbackX=Math.max(inset,area.clientWidth-panel.offsetWidth-inset);
-  const x=Math.max(inset,Math.min(maxX,Number.isFinite(next&&next.x)?next.x:(Number.isFinite(inlineX)?inlineX:fallbackX)));
-  const y=Math.max(inset,Math.min(maxY,Number.isFinite(next&&next.y)?next.y:(Number.isFinite(inlineY)?inlineY:inset)));
+  const fallbackX=maxX;
+  const x=Math.max(minX,Math.min(maxX,Number.isFinite(next&&next.x)?next.x:(Number.isFinite(inlineX)?inlineX:fallbackX)));
+  const y=Math.max(minY,Math.min(maxY,Number.isFinite(next&&next.y)?next.y:(Number.isFinite(inlineY)?inlineY:minY)));
   panel.style.left=`${Math.round(x)}px`;panel.style.top=`${Math.round(y)}px`;panel.style.right="auto";
 }
 function _resetBenchPanelPosition(panel){

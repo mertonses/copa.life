@@ -233,7 +233,11 @@
     const intro=document.getElementById("intro");
     if(isVisible(intro))return{node:document.querySelector(".v7-primary-actions")||document.getElementById("startBtn"),kind:"intro"};
     const hub=document.getElementById("hub");
-    if(isVisible(hub))return{node:hub.querySelector(".hub-action-panel"),kind:"hub"};
+    if(isVisible(hub)){
+      const actionPanel=hub.querySelector(".hub-action-panel")||
+        (mounted&&mounted.node&&mounted.node.classList.contains("hub-action-panel")?mounted.node:null);
+      return actionPanel?{node:actionPanel,kind:"hub"}:null;
+    }
     const sim=document.getElementById("sim");
     if(isVisible(sim)){
       const penaltyButton=sim.querySelector(".final-penalty-btn");

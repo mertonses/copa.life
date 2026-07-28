@@ -5,7 +5,7 @@
   min-width:0;
   width:100%!important;
   max-width:none!important;
-  margin:14px 0 0!important;
+  margin:14px auto 0!important;
 }
 #hub #tournamentHubPanel .tg-hub-card{margin:0;border-radius:10px;overflow:hidden}
 #hub #tournamentHubPanel .tg-hub-card>header{padding:10px 12px}
@@ -32,6 +32,12 @@
 @media(max-width:900px){
   #hub #tournamentHubPanel{order:5!important;width:100%!important;max-width:100%!important}
   .hub-fixture-bottom{width:100%;margin-top:10px}
+}
+@media(min-width:1181px){
+  #hub #tournamentHubPanel{max-width:830px!important}
+}
+@media(min-width:901px) and (max-width:1180px){
+  #hub #tournamentHubPanel{max-width:660px!important}
 }
 @media(max-width:760px){
   #hub #tournamentHubPanel{margin-top:10px!important}
