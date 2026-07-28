@@ -181,7 +181,8 @@ test("three group wins build a valid round-of-16 path and the tour can reach the
   const forceWinWithReward=async()=>{
     await page.evaluate(()=>{
       const w=globalThis as any,stage=w.CopaTournamentRuntime.stage();
-      w.CopaRunState.transition("match",{reason:"forced_tournament_win"});
+      const transition=w.CopaRunState.transition("match",{force:true,reason:"forced_tournament_win"});
+      if(!transition?.ok)throw new Error(`Unable to enter forced tournament match: ${transition?.reason||"unknown"}`);
       (0,eval)(`lastMatchPerf={power:78,oppPower:72,gf:2,ga:0,win:true,draw:false,note:"Test win",why:"Test"};lastMatchEvents=[];pendingMatchResolution={round,advance:true,draw:false,gf:2,ga:0,stage:"${stage}"};fixtures[round-1]={...fixtures[round-1],res:"W",gf:2,ga:0,events:[]};`);
       w.afterMatch(true);
     });
