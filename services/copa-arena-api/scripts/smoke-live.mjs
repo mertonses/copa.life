@@ -40,12 +40,14 @@ await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="setup","setup"
   console.error(JSON.stringify(peers.map(peer=>peer.messages.slice(-6))));
   throw error;
 });
-peers.forEach(peer=>peer.send("setup",{formation:"4-4-2",style:"balanced",chairman:"diplomat"}));
-for(let step=0;step<5;step++){
+peers.forEach(peer=>peer.send("setup",{formation:"4-4-2",style:"balanced"}));
+for(let step=0;step<11;step++){
   await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="draft"&&state.draftStep===step,`draft-${step}`)));
+  if(peers.some(peer=>peer.state.self.setup.chairman!=="babacan"))throw new Error("chairman_not_babacan");
   peers.forEach(peer=>peer.send("draft",[...peer.state.offers].sort((a,b)=>a.cost-b.cost)[0].id));
 }
 await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="market","market")));
+if(peers.some(peer=>peer.state.self.draft.length!==11||peer.state.draftStatus.total!==11))throw new Error("starting_xi_not_complete");
 peers.forEach(peer=>peer.send("market",peer.state.offers.find(item=>item.id==="none").id));
 await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="training","training")));
 peers.forEach(peer=>peer.send("training","chemistry"));
