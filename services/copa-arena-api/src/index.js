@@ -2,6 +2,7 @@ import {DurableObject} from "cloudflare:workers";
 import {
   ARENA_RULES_VERSION,CHAIRMEN,DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
   createDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,publicState,
+  resolveParticipation,
   resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,validateSetup
 } from "./rules.js";
 
@@ -245,8 +246,9 @@ export class ArenaRoom extends DurableObject{
     }
     const access=Object.fromEntries(players.map(player=>[player.owner,randomId("RT-",24)]));
     this.state={
-      matchId,seed,access,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
-      players:players.map(initialPlayerState),draftStep:0,window:0,offers:null,score:[0,0],events:[],result:null,completed:false,resultRecorded:false,createdAt:Date.now()
+      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
+      players:players.map(initialPlayerState),draftStep:0,window:0,offers:null,score:[0,0],events:[],result:null,completed:false,resultRecorded:false,
+      participationPolicy:"minimum-manual-v1",createdAt:Date.now()
     };
     this.persist();await this.ctx.storage.setAlarm(this.state.deadline);
     return access;
@@ -335,9 +337,22 @@ export class ArenaRoom extends DurableObject{
     }
     const homeWon=penalty?penalty[0]>penalty[1]:this.state.score[0]>this.state.score[1];
     const draw=!penalty&&this.state.score[0]===this.state.score[1];
-    const outcomes=draw?["draw","draw"]:(homeWon?["win","loss"]:["loss","win"]);
+    const simulatedOutcomes=draw?["draw","draw"]:(homeWon?["win","loss"]:["loss","win"]);
+    const participation=this.state.participationPolicy
+      ?resolveParticipation(this.state.players,simulatedOutcomes)
+      :{eligible:[true,true],outcomes:simulatedOutcomes,forfeitIndex:null,voided:false};
+    const outcomes=participation.outcomes;
+    if(participation.voided){this.state.score=[0,0];penalty=null;}
+    else if(participation.forfeitIndex!==null){
+      this.state.score=participation.forfeitIndex===0?[0,3]:[3,0];
+      penalty=null;
+    }
     this.state.phase="result";this.state.completed=true;
-    this.state.result={score:this.state.score,penalty,outcomes,teams:[home,away],finishedAt:Date.now()};
+    this.state.result={
+      score:this.state.score,penalty,outcomes,teams:[home,away],
+      participation:participation.eligible,forfeitIndex:participation.forfeitIndex,voided:participation.voided,
+      finishedAt:Date.now()
+    };
     this.state.deadline=Date.now()+PHASE_SECONDS.result*1000;this.persist();
     const recorded=await this.recordResult(outcomes);
     if(!recorded)this.state.deadline=Date.now()+10_000;
@@ -347,14 +362,17 @@ export class ArenaRoom extends DurableObject{
     const match=this.state,created=nowIso(),season=seasonKey();
     const existing=await this.env.DB.prepare("SELECT match_id FROM arena_matches WHERE match_id=?").bind(match.matchId).first();
     if(existing){this.state.resultRecorded=true;this.persist();return true;}
+    const currentProfiles=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
+    const rulesVersion=match.rulesVersion||(match.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1");
     const statements=[
       this.env.DB.prepare("INSERT OR IGNORE INTO arena_matches(match_id,rules_version,season_key,home_owner,away_owner,home_score,away_score,result_json,created_at,finished_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
-        .bind(match.matchId,ARENA_RULES_VERSION,season,match.players[0].owner,match.players[1].owner,match.score[0],match.score[1],JSON.stringify(match.result),new Date(match.createdAt).toISOString(),created)
+        .bind(match.matchId,rulesVersion,season,match.players[0].owner,match.players[1].owner,match.score[0],match.score[1],JSON.stringify(match.result),new Date(match.createdAt).toISOString(),created)
     ];
-    for(let index=0;index<2;index++){
-      const player=match.players[index],opponent=match.players[index===0?1:0],reward=rewardFor(outcomes[index],player.rating,opponent.rating);
+    for(let index=0;index<2&&!match.result.voided;index++){
+      const player=match.players[index],rating=Number(currentProfiles[index].rating),opponentRating=Number(currentProfiles[index===0?1:0].rating),reward=rewardFor(outcomes[index],rating,opponentRating);
+      if(match.result.forfeitIndex===index){reward.seasonPoints=0;reward.tokenProgress=0;}
       statements.push(this.env.DB.prepare("INSERT OR IGNORE INTO arena_match_players(match_id,owner_hash,outcome,rating_before,rating_delta,season_points,token_progress,created_at) VALUES(?,?,?,?,?,?,?,?)")
-        .bind(match.matchId,player.owner,outcomes[index],player.rating,reward.ratingDelta,reward.seasonPoints,reward.tokenProgress,created));
+        .bind(match.matchId,player.owner,outcomes[index],rating,reward.ratingDelta,reward.seasonPoints,reward.tokenProgress,created));
       const win=outcomes[index]==="win"?1:0,draw=outcomes[index]==="draw"?1:0,loss=outcomes[index]==="loss"?1:0,streak=win?1:0;
       statements.push(this.env.DB.prepare("UPDATE arena_profiles SET rating=MAX(700,MIN(1900,rating+?)),season_key=?,season_points=season_points+?,wins=wins+?,draws=draws+?,losses=losses+?,streak=CASE WHEN ?=1 THEN MAX(1,streak+1) ELSE 0 END,token_progress=token_progress+?,updated_at=? WHERE owner_hash=?")
         .bind(reward.ratingDelta,season,reward.seasonPoints,win,draw,loss,streak,reward.tokenProgress,created,player.owner));
@@ -364,7 +382,7 @@ export class ArenaRoom extends DurableObject{
       for(const player of match.players)await grantCosmetics(this.env,player.owner);
       await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash IN (?,?) AND match_id=?").bind(match.players[0].owner,match.players[1].owner,match.matchId).run();
       this.state.resultRecorded=true;this.persist();
-      metric(this.env,"match_completed",outcomes.join("-"),match.score[0]+match.score[1]);
+      metric(this.env,"match_completed",match.result.voided?"void":outcomes.join("-"),match.score[0]+match.score[1]);
       return true;
     }catch(error){console.error("arena_result_write_failed",match.matchId,error);return false;}
   }
@@ -391,6 +409,7 @@ export class ArenaRoom extends DurableObject{
     }else if(data.type==="training"&&this.state.phase==="training"&&TRAINING.includes(data.choice))player.training=data.choice;
     else if(data.type==="tactic"&&this.state.phase==="live"&&TACTICS.includes(data.choice))player.tactics.push(data.choice);
     else return "wrong_phase";
+    if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
   }
   async alarm(){
@@ -446,8 +465,16 @@ async function handleSession(request,env){
   const name=clubName(data.clubName);if(!name)return json(request,env,{error:"invalid_club_name"},422);
   const mode=String(data.mode||"ranked"),region=REGIONS.has(data.region)?data.region:"global";
   if(!MODES.has(mode))return json(request,env,{error:"invalid_mode"},422);
-  const row=await ensureProfile(env,id.owner,name),ticket=randomId("AT-",24),ticketHash=await sha("ticket:"+ticket),expires=futureIso(5*60_000),presenceExpires=futureIso(10*60_000);
+  const row=await ensureProfile(env,id.owner,name);
   await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const recoverable=await env.DB.prepare("SELECT ticket_hash FROM arena_tickets WHERE owner_hash=? AND consumed_at IS NULL AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  if(recoverable){
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM arena_tickets WHERE owner_hash=? AND consumed_at IS NULL").bind(id.owner),
+      env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(id.owner)
+    ]);
+  }
+  const ticket=randomId("AT-",24),ticketHash=await sha("ticket:"+ticket),expires=futureIso(5*60_000),presenceExpires=futureIso(10*60_000);
   const acquired=await env.DB.prepare("INSERT OR IGNORE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'queue',NULL,?,?)").bind(id.owner,presenceExpires,nowIso()).run();
   if(Number(acquired.meta&&acquired.meta.changes)!==1)return json(request,env,{error:"arena_session_active"},409);
   await env.DB.prepare("INSERT INTO arena_tickets(ticket_hash,owner_hash,client_hash,mode,region,club_name,rating,expires_at,created_at) VALUES(?,?,?,?,?,?,?,?,?)")
@@ -504,7 +531,15 @@ async function handleQueueSocket(request,env,url){
   const queueName=`${ticket.mode}:${ticket.region}`;
   const stub=env.ARENA_MATCHMAKER.getByName(queueName);
   const headers=new Headers(request.headers);headers.set("x-arena-owner",ticket.owner_hash);headers.set("x-arena-club",encodeURIComponent(ticket.club_name));headers.set("x-arena-rating",String(ticket.rating));
-  const forwarded=new Request(request,{headers});return stub.fetch(forwarded);
+  const forwarded=new Request(request,{headers});
+  try{
+    const response=await stub.fetch(forwarded);
+    if(response.status!==101)await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(ticket.owner_hash).run();
+    return response;
+  }catch(error){
+    await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(ticket.owner_hash).run();
+    throw error;
+  }
 }
 async function handleRoomSocket(request,env,url,matchId){
   if(!ROOM_ID.test(matchId))return new Response("Not Found",{status:404});

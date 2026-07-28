@@ -1,4 +1,5 @@
-export const ARENA_RULES_VERSION="arena-rules-v1";
+export const ARENA_RULES_VERSION="arena-rules-v2";
+export const MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
   lobby:45,
   setup:60,
@@ -131,8 +132,22 @@ export function initialPlayerState(input){
     market:null,
     training:null,
     tactics:[],
+    manualDecisions:0,
     connected:false,
     lastSeenAt:Date.now()
+  };
+}
+
+export function resolveParticipation(players,outcomes){
+  const eligible=players.map(player=>(Number(player&&player.manualDecisions)||0)>=MIN_MANUAL_DECISIONS);
+  if(eligible[0]&&eligible[1])return {eligible,outcomes:[...outcomes],forfeitIndex:null,voided:false};
+  if(!eligible[0]&&!eligible[1])return {eligible,outcomes:["draw","draw"],forfeitIndex:null,voided:true};
+  const forfeitIndex=eligible[0]?1:0;
+  return {
+    eligible,
+    outcomes:forfeitIndex===0?["loss","win"]:["win","loss"],
+    forfeitIndex,
+    voided:false
   };
 }
 
@@ -243,7 +258,7 @@ export function publicState(state,owner){
   const hideCurrentDraft=state.phase==="draft";
   return {
     protocol:1,
-    rulesVersion:ARENA_RULES_VERSION,
+    rulesVersion:state.rulesVersion||(state.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1"),
     matchId:state.matchId,
     phase:state.phase,
     deadline:state.deadline,

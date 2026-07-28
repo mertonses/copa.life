@@ -1,7 +1,7 @@
 import {describe,expect,it} from "vitest";
 import {
-  DRAFT_LINES,createDraftOffers,createMarketOffers,divisionFor,initialPlayerState,ratingDelta,resolveWindow,
-  rewardFor,teamSnapshot,tacticEdge
+  DRAFT_LINES,createDraftOffers,createMarketOffers,divisionFor,initialPlayerState,ratingDelta,resolveParticipation,
+  resolveWindow,rewardFor,teamSnapshot,tacticEdge
 } from "../src/rules.js";
 
 function completedPlayer(seed,side,setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"}){
@@ -69,6 +69,19 @@ describe("Arena rules",()=>{
     expect(rewardFor("loss",1600,1000).ratingDelta).toBeGreaterThanOrEqual(-28);
     expect(divisionFor(999)).toBe("aday");
     expect(divisionFor(1600)).toBe("efsane");
+  });
+
+  it("voids fully automated matches and turns one-sided inactivity into a forfeit",()=>{
+    const active={manualDecisions:2},inactive={manualDecisions:1};
+    expect(resolveParticipation([inactive,inactive],["win","loss"])).toMatchObject({
+      outcomes:["draw","draw"],forfeitIndex:null,voided:true
+    });
+    expect(resolveParticipation([active,inactive],["loss","win"])).toMatchObject({
+      outcomes:["win","loss"],forfeitIndex:1,voided:false
+    });
+    expect(resolveParticipation([active,active],["loss","win"])).toMatchObject({
+      outcomes:["loss","win"],forfeitIndex:null,voided:false
+    });
   });
 });
 

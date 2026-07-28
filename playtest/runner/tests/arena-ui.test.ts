@@ -6,7 +6,7 @@ const output=path.resolve(__dirname,"../../../outputs/ui-visuals/arena");
 const profile={publicId:"AC-QA",clubName:"Uzun Yolculuk Spor Kulübü",rating:1284,division:"gumus",seasonKey:"2026-Q3",seasonPoints:184,wins:12,draws:4,losses:7,streak:3,tokenProgress:16,cosmetics:["arena_badge_rookie","arena_frame_floodlights"]};
 const self={owner:"self",clubName:profile.clubName,rating:1284,ready:false,setup:null,draft:[],market:null,training:null,tactics:[],connected:true};
 const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connected:true,setup:null,draftCount:0,draft:[],market:null,training:null,tacticLocked:false};
-const base={protocol:1,rulesVersion:"arena-rules-v1",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,team:null,opponentTeam:null};
+const base={protocol:1,rulesVersion:"arena-rules-v2",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -114,6 +114,12 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
 
   await setRoom(page,{...base,phase:"result",score:[2,1],result:{score:[2,1],penalty:null,outcomes:["win","loss"]}});
   await capture(page,"08-web-arena-result.png");
+  await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
+  await expect(page.locator(".arena-result>span")).toContainText("FORFEIT VICTORY");
+  await capture(page,"09-web-arena-forfeit-result.png");
+  await setRoom(page,{...base,phase:"result",score:[0,0],result:{score:[0,0],penalty:null,outcomes:["draw","draw"],forfeitIndex:null,voided:true}});
+  await expect(page.locator(".arena-result>span")).toContainText("VOID MATCH");
+  await capture(page,"10-web-arena-void-result.png");
   const layout=await audit(page);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
   expect(layout.shellOverflow).toBeLessThanOrEqual(1);
@@ -143,5 +149,10 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(draft.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(draft.smallest,viewport.name).toBeGreaterThanOrEqual(7);
     await capture(page,`android-${viewport.name}-draft.png`);
+    await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
+    const result=await audit(page);
+    expect(result.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(result.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
+    await capture(page,`android-${viewport.name}-forfeit-result.png`);
   }
 });
