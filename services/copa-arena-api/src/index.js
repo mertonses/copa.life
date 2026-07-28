@@ -285,7 +285,7 @@ export class ArenaRoom extends DurableObject{
   defaultAction(index){
     const player=this.state.players[index];
     if(this.state.phase==="lobby")player.ready=true;
-    else if(this.state.phase==="setup")player.setup={formation:"4-4-2",style:"balanced",chairman:this.isCurrentRules()?"babacan":"diplomat"};
+    else if(this.state.phase==="setup")player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
     else if(this.state.phase==="draft"){
       const offers=this.state.offers[index],affordable=offers.filter(item=>item.cost<=this.remainingBudget(player));
       player.draft.push(affordable.sort((a,b)=>b.power-a.power)[0]||offers.sort((a,b)=>a.cost-b.cost)[0]);
@@ -412,7 +412,7 @@ export class ArenaRoom extends DurableObject{
     }
     else if(data.type==="setup"&&this.state.phase==="setup"){
       if(player.setup)return "already_submitted";
-      const choice={...data.choice,chairman:this.isCurrentRules()?"babacan":data.choice&&data.choice.chairman};
+      const choice={...data.choice,chairman:"babacan"};
       if(!validateSetup(choice))return "unavailable_choice";
       player.setup=choice;
     }
