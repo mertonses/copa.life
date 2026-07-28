@@ -86,6 +86,36 @@ describe("Arena HTTP API",()=>{
 });
 
 describe("Arena Durable Objects",()=>{
+  it("recovers an expired live decision window when a client syncs",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-EXPIREDLIVE000001");
+    const players=[
+      {owner:"owner-expired-home",clubName:"Aktif Ev",rating:1000},
+      {owner:"owner-expired-away",clubName:"Bekleyen Dep",rating:1000}
+    ];
+    await room.init("AR-EXPIREDLIVE000001",players,"expired-live-seed");
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+        player.draft=DRAFT_LINES.map((line,index)=>({
+          line,id:`${line}-${index}`,name:`Test ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
+        }));
+        player.market={id:"none"};
+        player.training="recovery";
+      }
+      instance.state.phase="live";
+      instance.state.window=0;
+      instance.state.players[0].tactics=["press"];
+      instance.state.players[1].tactics=[];
+      instance.state.deadline=Date.now()-1;
+      instance.persist();
+      expect(await instance.recoverExpired()).toBe(true);
+      expect(instance.state.phase).toBe("live");
+      expect(instance.state.window).toBe(1);
+      expect(instance.state.players[1].tactics).toEqual(["balanced"]);
+      expect(instance.state.deadline).toBeGreaterThan(Date.now());
+    });
+  });
+
   it("pairs two real sockets and creates a room",async()=>{
     const make=async(id,name)=>{
       const response=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(id),body:JSON.stringify({clubName:name,mode:"ranked",region:"weur"})});

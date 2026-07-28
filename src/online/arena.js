@@ -56,7 +56,7 @@
   Object.assign(COPY.es,{forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
   Object.assign(COPY.de,{forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
   Object.assign(COPY.it,{forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,queueStarted:0,timer:null,retries:0,lastError:"",lastResultSound:""};
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retries:0,lastError:"",lastResultSound:""};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -189,7 +189,7 @@
       <div class="arena-live-score"><span>${esc(game.self&&game.self.clubName||text("you"))}</span><b>${score[game.selfIndex]||0}<i>–</i>${score[game.selfIndex===0?1:0]||0}</b><span>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</span></div>
       <div class="arena-pitch-live"><i></i><i></i><b style="left:${28+game.window*22}%"></b>${events.map(event=>`<span style="left:${Math.min(94,Math.max(6,event.minute))}%">${event.type==="goal"?"●":"▪"}</span>`).join("")}</div>
       <div class="arena-event-feed">${events.length?events.map(event=>`<span><b>${event.minute}'</b><i class="${event.side===(game.selfIndex===0?"home":"away")?"mine":""}">${esc(text(event.type==="goal"?"goal":"cardEvent"))}</i></span>`).join(""):`<span><b>0'</b><i>${esc(text("live"))}</i></span>`}</div>
-      <div class="arena-tactic-window"><span>${game.window+1} / 3</span><h2>${esc(text("tacticDecision"))}</h2>${game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(text("waiting"))}</p>`:options("tactics",["press","balanced","counter","control"])}</div>
+      <div class="arena-tactic-window"><span>${game.window+1} / 3</span><h2>${esc(text("tacticDecision"))}</h2>${game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p data-arena-deadline="${Number(game.deadline)||0}">${esc(text("waiting"))}</p>`:options("tactics",["press","balanced","counter","control"])}</div>
     </div>`);
   }
   function result(game){
@@ -228,6 +228,7 @@
     element.innerHTML=html;
     const elapsed=element.querySelector("[data-arena-elapsed]");
     if(elapsed)updateElapsed();
+    updateDeadline();
   }
   function open(){
     root.closeModal&&root.closeModal();
@@ -275,7 +276,7 @@
   function connectRoom(saved){
     state.screen="room";state.room=null;render();
     const socket=new WebSocket(`${wsBase()}/v1/arena/rooms/${encodeURIComponent(saved.matchId)}/connect?token=${encodeURIComponent(saved.token)}`);state.socket=socket;
-    socket.addEventListener("open",()=>{state.retries=0;if(state.room)send({type:"sync"});});
+    socket.addEventListener("open",()=>{state.retries=0;startHeartbeat(socket);if(state.room)socket.send(JSON.stringify({type:"sync"}));});
     socket.addEventListener("message",event=>{
       let data;try{data=JSON.parse(event.data);}catch(_){return;}
       if(data.type==="state"){
@@ -287,6 +288,7 @@
       }
     });
     socket.addEventListener("close",event=>{
+      if(state.socket===socket){clearInterval(state.heartbeat);state.heartbeat=null;}
       if(state.screen!=="room"||state.room&&state.room.phase==="result"||event.code===1000)return;
       if(state.retries>=5){state.lastError="room_reconnect_failed";setScreen("error");return;}
       state.retries++;setTimeout(()=>{telemetry("arena_reconnected","retry",state.retries);connectRoom(saved);},Math.min(8000,700*Math.pow(2,state.retries)));
@@ -295,6 +297,8 @@
   }
   function disconnect(cancel=true){
     clearInterval(state.timer);state.timer=null;
+    clearInterval(state.heartbeat);state.heartbeat=null;
+    clearInterval(state.deadlineTimer);state.deadlineTimer=null;
     if(state.socket){if(cancel&&state.screen==="queue"&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"cancel"}));try{state.socket.close(1000,"client");}catch(_){}state.socket=null;}
   }
   function send(payload){
@@ -305,6 +309,23 @@
     clearInterval(state.timer);
     const paint=()=>{const element=document.querySelector("[data-arena-elapsed]");if(!element)return;const seconds=Math.floor((Date.now()-state.queueStarted)/1000);element.textContent=`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;};
     paint();state.timer=setInterval(paint,1000);
+  }
+  function startHeartbeat(socket){
+    clearInterval(state.heartbeat);
+    state.heartbeat=setInterval(()=>{
+      if(state.screen==="room"&&state.socket===socket&&socket.readyState===1)socket.send(JSON.stringify({type:"sync"}));
+    },4000);
+  }
+  function updateDeadline(){
+    clearInterval(state.deadlineTimer);state.deadlineTimer=null;
+    const element=document.querySelector("[data-arena-deadline]");if(!element)return;
+    const deadline=Number(element.dataset.arenaDeadline)||0;
+    const paint=()=>{
+      const seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+      element.textContent=`${text("waiting")} · ${seconds}s`;
+      if(seconds===0&&state.socket&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"sync"}));
+    };
+    paint();state.deadlineTimer=setInterval(paint,1000);
   }
   async function showLeaderboard(){
     setScreen("loading");try{state.leaderboard=(await request("/v1/arena/leaderboard?limit=25")).entries||[];setScreen("leaderboard");}catch(error){state.lastError=error.message;setScreen("error");}

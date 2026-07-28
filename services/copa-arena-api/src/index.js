@@ -259,6 +259,7 @@ export class ArenaRoom extends DurableObject{
     const token=request.headers.get("x-arena-room-token")||"";
     const owner=Object.keys(this.state.access).find(key=>timingSafe(this.state.access[key],token))||"";
     if(!owner)return new Response("Unauthorized",{status:401});
+    await this.recoverExpired();
     for(const socket of this.ctx.getWebSockets(`owner:${owner}`))try{socket.close(4001,"reconnected");}catch(_){}
     const [client,server]=Object.values(new WebSocketPair()),index=this.state.players.findIndex(player=>player.owner===owner);
     server.serializeAttachment({owner,index,connectedAt:Date.now(),messages:0,windowStartedAt:Date.now()});
@@ -412,6 +413,11 @@ export class ArenaRoom extends DurableObject{
     if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
   }
+  async recoverExpired(){
+    if(!this.state||this.state.phase==="result"||Date.now()<Number(this.state.deadline||0))return false;
+    await this.alarm();
+    return true;
+  }
   async alarm(){
     if(!this.state)return;
     if(this.state.phase==="result"){
@@ -445,8 +451,10 @@ export class ArenaRoom extends DurableObject{
     if(attachment.messages>30){socket.send(JSON.stringify({type:"error",code:"rate_limited"}));return;}
     if(typeof message!=="string"||message.length>4096){socket.close(1009,"invalid");return;}
     let data;try{data=JSON.parse(message);}catch(_){socket.send(JSON.stringify({type:"error",code:"invalid_json"}));return;}
+    if(data.type==="ping"||data.type==="sync")await this.recoverExpired();
     if(data.type==="ping"){socket.send(JSON.stringify({type:"pong",at:Date.now()}));return;}
     if(data.type==="sync"){socket.send(JSON.stringify({type:"state",state:publicState(this.state,attachment.owner)}));return;}
+    await this.recoverExpired();
     if(!this.acceptAction(attachment.owner,data.actionId)){socket.send(JSON.stringify({type:"ack",actionId:data.actionId,duplicate:true}));return;}
     const status=await this.action(attachment.owner,data);
     socket.send(JSON.stringify({type:"ack",actionId:data.actionId,status}));

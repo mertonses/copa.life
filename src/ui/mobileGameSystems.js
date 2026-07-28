@@ -231,7 +231,12 @@
         activateRoute(route);
       };
     }
-    nav.innerHTML=navMarkup();
+    const navKey=tr()?"tr":"en";
+    const targets=[...nav.querySelectorAll("[data-native-target]")].map(button=>button.dataset.nativeTarget).join("|");
+    if(nav.dataset.markupKey!==navKey||targets!=="match|market|training|career"){
+      nav.innerHTML=navMarkup();
+      nav.dataset.markupKey=navKey;
+    }
     activateRoute(hub.dataset.mobileRoute||activeRoute);
   }
   function refreshLanguage(){
