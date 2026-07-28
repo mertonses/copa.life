@@ -6,7 +6,9 @@ const output=path.resolve(__dirname,"../../../outputs/ui-visuals/arena");
 const profile={publicId:"AC-QA",clubName:"Uzun Yolculuk Spor Kulübü",rating:1284,division:"gumus",seasonKey:"2026-Q3",seasonPoints:184,wins:12,draws:4,losses:7,streak:3,tokenProgress:16,cosmetics:["arena_badge_rookie","arena_frame_floodlights"]};
 const self={owner:"self",clubName:profile.clubName,rating:1284,ready:false,setup:null,draft:[],market:null,training:null,tactics:[],connected:true};
 const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connected:true,setup:null,draftCount:0,draft:[],market:null,training:null,tacticLocked:false};
-const base={protocol:1,rulesVersion:"arena-rules-v7",catalogVersion:"qa-catalog",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0},team:null,opponentTeam:null};
+const slots=["GK","LB","CB1","CB2","RB","CM1","CM2","AM","LW","RW","ST"];
+const squad=(prefix:string,offset=0)=>slots.map((slot,index)=>({id:`${prefix}-${slot}`,slot,line:slot==="GK"?"GK":slot.startsWith("CB")||["LB","RB"].includes(slot)?"DEF":slot==="ST"?"ST":slot.startsWith("W")?"WING":"MID",name:`${prefix} ${slot}`,position:slot.replace(/\d/g,""),power:68+((index+offset)%17),effectivePower:68+((index+offset)%17),cost:1,chemistry:0}));
+const base={protocol:1,rulesVersion:"arena-rules-v8",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -94,6 +96,14 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator('[data-arena-action="submit-setup"]')).toBeEnabled();
   await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
   await capture(page,"03-web-arena-setup.png");
+  await page.evaluate(()=>{
+    const arena=(globalThis as any).CopaArena;
+    arena.state.connection="reconnecting";arena.state.reconnectAt=Date.now()+4200;arena.refresh();
+  });
+  await expect(page.locator(".arena-reconnect-banner")).toContainText("RECONNECTING");
+  await expect(page.locator("[data-arena-reconnect-countdown]")).toContainText(/4s|5s/);
+  await page.evaluate(()=>{const arena=(globalThis as any).CopaArena;arena.state.connection="connected";arena.state.latency=96;arena.refresh();});
+  await expect(page.locator(".arena-live-mark")).toContainText("96ms");
 
   const offers=[
     {id:"gk-0-a",line:"GK",name:"Doğan Alemdar",power:67,effectivePower:67,cost:1,chemistry:2,trait:"connector",sourceLeague:"TR",sourceLeagueLabel:{tr:"Türkiye ligi",en:"Türkiye league"},club:"Stade Rennais FC",position:"GK",positionFit:"natural",age:23},
@@ -108,6 +118,9 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-offers .is-unaffordable")).toBeDisabled();
   await expect(page.locator(".arena-budget-warning")).toContainText("Budget reserved");
   await expect(page.locator(".arena-draft-progress")).toContainText("1 / 11");
+  await expect(page.locator(".arena-team-pulse")).toContainText("SUGGESTED RESERVE");
+  await expect(page.locator(".arena-lineup-player")).toHaveCount(1);
+  await expect(page.locator(".arena-lineup-player strong")).toContainText("75");
   await capture(page,"04-web-arena-draft.png");
 
   const market=[
@@ -119,9 +132,12 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await setRoom(page,{...base,phase:"market",offers:market,team:{budget:8,power:76,chemistry:3}});
   await capture(page,"05-web-arena-market.png");
 
-  await setRoom(page,{...base,phase:"training",self:{...self,training:"chemistry"},team:{budget:8,power:76,chemistry:3}});
+  await setRoom(page,{...base,phase:"training",self:{...self,setup:{formation:"4-3-3",style:"control",chairman:"babacan"},draft:squad("COPA"),training:"chemistry"},opponent:{...opponent,setup:{formation:"4-2-3-1",style:"counter",chairman:"babacan"},draft:squad("NORTH",3),draftCount:11},team:{budget:8,power:76,chemistry:3},opponentTeam:{budget:7,power:75,chemistry:2}});
   await expect(page.locator(".arena-choice-grid .is-selected")).toContainText("SELECTED");
+  await expect(page.locator(".arena-lineup-wrap.is-versus .arena-lineup-player")).toHaveCount(22);
+  await expect(page.locator(".arena-lineup-wrap.is-versus")).toContainText("PRE-MATCH");
   await capture(page,"06-web-arena-training.png");
+  await page.locator(".arena-lineup-wrap.is-versus").screenshot({path:path.join(output,"06b-web-arena-head-to-head-pitch.png")});
 
   await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:60,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:49,type:"goal",side:"away"}],windowResult:{window:1,startMinute:30,endMinute:60,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
   await expect(page.locator(".arena-window-report")).toContainText("WINDOW REPORT");
@@ -146,9 +162,11 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
 
 test("Copa Arena Android package remains compact at phone and tablet widths",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="mobile-chromium","Android package matrix");
-  for(const viewport of [{width:360,height:800,name:"phone-small"},{width:430,height:932,name:"phone"},{width:768,height:1024,name:"tablet"}]){
+  for(const viewport of [{width:360,height:800,name:"phone-small",scale:"130"},{width:430,height:932,name:"phone",scale:"115"},{width:768,height:1024,name:"tablet",scale:"100"}]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await boot(page,true);
+    await page.evaluate((scale:string)=>(globalThis as any).CopaMobileExperience?.setTextScale(scale),viewport.scale);
+    await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale",viewport.scale);
     await capture(page,`android-${viewport.name}-opening.png`);
     await page.locator("#arenaBtn:visible, [data-mobile-arena]:visible").first().click();
     await expect(page.locator(".arena-portal")).toBeVisible();
@@ -161,7 +179,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
       {id:"st-b",line:"ST",name:"Lorenzo Lucca",power:76,effectivePower:76,cost:3,chemistry:1,trait:"reliable",sourceLeague:"IT",sourceLeagueLabel:{tr:"İtalya ligi",en:"Italy league"},club:"SSC Napoli",position:"ST",positionFit:"natural",age:25},
       {id:"st-c",line:"ST",name:"Ollie Watkins",power:84,effectivePower:84,cost:6,chemistry:-1,trait:"star",sourceLeague:"ENG",sourceLeagueLabel:{tr:"İngiltere ligi",en:"England league"},club:"Aston Villa FC",position:"ST",positionFit:"natural",age:30}
     ];
-    const mobileDraft=[...Array(10)].map((_,index)=>({id:`pick-${index}`,line:"MID",name:`Player ${index}`,power:72,cost:1,chemistry:0})).concat(mobileOffers[1]);
+    const mobileDraft=squad("MOBILE").slice(0,10).concat({...mobileOffers[1],slot:"ST"} as any);
     await setRoom(page,{...base,phase:"draft",draftStep:10,offers:mobileOffers,self:{...self,draft:mobileDraft},draftStatus:{count:11,total:11,budget:32,power:73}});
     await expect(page.locator(".arena-draft-progress")).toContainText("11 / 11");
     await expect(page.locator(".arena-offers .is-selected")).toBeVisible();
@@ -178,4 +196,14 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(result.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     await capture(page,`android-${viewport.name}-forfeit-result.png`);
   }
+});
+
+test("Copa Arena blocks ranked queue cleanly while offline",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","single offline behavior check");
+  await boot(page);
+  await page.locator("#arenaBtn").click();
+  await page.context().setOffline(true);
+  await page.locator('[data-arena-action="queue"]').click();
+  await expect(page.locator(".arena-error")).toContainText("offline");
+  await page.context().setOffline(false);
 });

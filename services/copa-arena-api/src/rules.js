@@ -2,7 +2,7 @@ import {
   ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES,ARENA_PLAYER_SOURCES
 } from "./playerCatalog.js";
 
-export const ARENA_RULES_VERSION="arena-rules-v7";
+export const ARENA_RULES_VERSION="arena-rules-v8";
 export const MIN_MANUAL_DECISIONS=6;
 export const LEGACY_MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
@@ -31,13 +31,15 @@ export const STYLES=Object.freeze({
 });
 
 export const CHAIRMEN=Object.freeze({
-  babacan:{budget:4,chemistry:0,risk:0,flex:0},
-  // Kept for rooms created with arena-rules-v1/v2. New matches always use Babacan.
+  babacan:{budget:4,chemistry:0,risk:0,flex:0}
+});
+const LEGACY_CHAIRMEN=Object.freeze({
   patron:{budget:4,chemistry:0,risk:0,flex:0},
   diplomat:{budget:1,chemistry:2,risk:0,flex:0},
   showman:{budget:2,chemistry:0,risk:2,flex:0},
   professor:{budget:1,chemistry:0,risk:0,flex:2}
 });
+const chairmanFor=(id,rulesVersion)=>CHAIRMEN[id]||(!usesFullXI(rulesVersion)&&LEGACY_CHAIRMEN[id])||CHAIRMEN.babacan;
 
 export const LEGACY_DRAFT_LINES=Object.freeze(["GK","DEF","MID","WING","ST"]);
 export const DRAFT_SLOTS=Object.freeze([
@@ -67,7 +69,7 @@ export const MARKET_CARDS=Object.freeze([
 
 const FIRST_NAMES=["Arda","Deniz","Mert","Onur","Emir","Can","Atlas","Eren","Kerem","Bora","Luca","Diego","Marco","Leo","Alex","Noah"];
 const LAST_NAMES=["Aydın","Kaya","Demir","Erdem","Yalın","Aksoy","Costa","Rossi","Silva","Santos","Meyer","Mori","Ito","King","Stone","Reed"];
-const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7"]);
+const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7","arena-rules-v8"]);
 const DRAFT_TIERS=Object.freeze(["connector","reliable","star"]);
 const SLOT_POSITIONS=Object.freeze({
   GK:["GK"],LB:["LB"],CB1:["CB"],CB2:["CB"],RB:["RB"],
@@ -105,7 +107,7 @@ export function usesFullXI(rulesVersion=ARENA_RULES_VERSION){
 }
 
 export function allowsRegulationDraw(rulesVersion=ARENA_RULES_VERSION){
-  return ["arena-rules-v6","arena-rules-v7"].includes(rulesVersion);
+  return ["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion);
 }
 
 export function seasonKey(date=new Date()){
@@ -170,7 +172,7 @@ function arenaCost(player,tier){
 }
 
 function arenaChemistry(player,tier,rulesVersion){
-  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7"].includes(rulesVersion))return 2;
+  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion))return 2;
   let value=round(player.age)>=30?2:round(player.age)>=24?1:0;
   if(tier==="star"&&round(player.power)>=82)value--;
   return clamp(value,-1,2);
@@ -180,7 +182,7 @@ function draftOffer(player,tier,line,slot,rulesVersion){
   const position=String(player.position||"").toUpperCase();
   const natural=(SLOT_POSITIONS[slot]||[]).includes(position);
   const positionFit=natural?"natural":"adapted";
-  const positionPenalty=positionFit==="adapted"&&rulesVersion==="arena-rules-v7"?ADAPTED_POSITION_PENALTY:0;
+  const positionPenalty=positionFit==="adapted"&&["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?ADAPTED_POSITION_PENALTY:0;
   const power=round(player.power);
   const source=ARENA_PLAYER_SOURCES[player.sourceLeague]||{code:player.sourceLeague,label:{tr:player.sourceLeague,en:player.sourceLeague}};
   return {
@@ -326,31 +328,32 @@ export function resolveParticipation(players,outcomes,policy="meaningful-partici
   };
 }
 
-export function validateSetup(choice){
-  return !!choice&&Object.hasOwn(FORMATIONS,choice.formation)&&Object.hasOwn(STYLES,choice.style)&&Object.hasOwn(CHAIRMEN,choice.chairman);
+export function validateSetup(choice,rulesVersion=ARENA_RULES_VERSION){
+  return !!choice&&Object.hasOwn(FORMATIONS,choice.formation)&&Object.hasOwn(STYLES,choice.style)&&
+    (Object.hasOwn(CHAIRMEN,choice.chairman)||(!usesFullXI(rulesVersion)&&Object.hasOwn(LEGACY_CHAIRMEN,choice.chairman)));
 }
 
 export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
   const legacy=!usesFullXI(rulesVersion);
   const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
-  if(!validateSetup(player&&player.setup)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
-  if(rulesVersion==="arena-rules-v7"){
+  if(!validateSetup(player&&player.setup,rulesVersion)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
+  if(["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)){
     const identities=player.draft.map(item=>item.sourceId).filter(Boolean);
     if(new Set(identities).size!==identities.length)return null;
   }
-  const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=CHAIRMEN[player.setup.chairman];
+  const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=chairmanFor(player.setup.chairman,rulesVersion);
   const card=MARKET_CARDS.find(item=>item.id===(player.market&&player.market.id))||MARKET_CARDS.at(-1);
   const linePowers=Object.fromEntries(LEGACY_DRAFT_LINES.map(line=>{
     const players=player.draft.filter(item=>item.line===line);
     return [line,players.length?players.reduce((sum,item)=>
-      sum+round(rulesVersion==="arena-rules-v7"?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
+      sum+round(["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
     )/players.length:65];
   }));
   const spent=player.draft.reduce((sum,item)=>sum+round(item.cost),0)+round(card.cost);
   const budget=(legacy?20:44)+chairman.budget-spent;
   const chemistry=clamp(
     player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(player.training==="chemistry"?2:0),
-    -3,["arena-rules-v6","arena-rules-v7"].includes(rulesVersion)?18:9
+    -3,["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?18:9
   );
   const base={
     attack:((linePowers.ST||65)*.58+(linePowers.WING||65)*.27+(linePowers.MID||65)*.15)/1,
@@ -455,16 +458,20 @@ export function publicState(state,owner){
   const self=state.players[selfIndex],opponent=state.players[opponentIndex];
   const hideCurrentDraft=state.phase==="draft";
   const legacy=!usesFullXI(state.rulesVersion);
-  const chairman=self&&CHAIRMEN[self.setup&&self.setup.chairman]||CHAIRMEN.patron;
+  const chairman=self?chairmanFor(self.setup&&self.setup.chairman,state.rulesVersion):CHAIRMEN.babacan;
   const draftSpent=self?self.draft.reduce((sum,item)=>sum+round(item.cost),0):0;
   const draftStatus=self?{
     count:self.draft.length,
     total:legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length,
     budget:(legacy?20:44)+chairman.budget-draftSpent,
-    power:self.draft.length?round(self.draft.reduce((sum,item)=>sum+round(item.power),0)/self.draft.length):0
+    power:self.draft.length?round(self.draft.reduce((sum,item)=>sum+round(item.effectivePower??item.power),0)/self.draft.length):0,
+    recommendedReserve:state.phase==="draft"&&usesFullXI(state.rulesVersion)
+      ?minimumFutureDraftCost(state.seed,selfIndex,state.draftStep,state.rulesVersion,state.draftPlan)
+      :0
   }:null;
   return {
     protocol:1,
+    mode:state.mode||"ranked",
     rulesVersion:state.rulesVersion||(state.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1"),
     catalogVersion:state.catalogVersion||null,
     playerSources:state.playerSources||null,
@@ -499,6 +506,6 @@ export function publicState(state,owner){
     offers:state.offers&&selfIndex>=0?state.offers[selfIndex]:null,
     draftStatus,
     team:self?teamSnapshot(self,state.rulesVersion):null,
-    opponentTeam:["live","result"].includes(state.phase)&&opponent?teamSnapshot(opponent,state.rulesVersion):null
+    opponentTeam:["training","live","result"].includes(state.phase)&&opponent?teamSnapshot(opponent,state.rulesVersion):null
   };
 }
