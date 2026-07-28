@@ -6,7 +6,7 @@ const output=path.resolve(__dirname,"../../../outputs/ui-visuals/arena");
 const profile={publicId:"AC-QA",clubName:"Uzun Yolculuk Spor Kulübü",rating:1284,division:"gumus",seasonKey:"2026-Q3",seasonPoints:184,wins:12,draws:4,losses:7,streak:3,tokenProgress:16,cosmetics:["arena_badge_rookie","arena_frame_floodlights"]};
 const self={owner:"self",clubName:profile.clubName,rating:1284,ready:false,setup:null,draft:[],market:null,training:null,tactics:[],connected:true};
 const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connected:true,setup:null,draftCount:0,draft:[],market:null,training:null,tacticLocked:false};
-const base={protocol:1,rulesVersion:"arena-rules-v3",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0},team:null,opponentTeam:null};
+const base={protocol:1,rulesVersion:"arena-rules-v4",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -96,12 +96,14 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await capture(page,"03-web-arena-setup.png");
 
   const offers=[
-    {id:"gk-0-a",line:"GK",name:"Arda Aydın",power:67,cost:1,chemistry:2,trait:"connector"},
-    {id:"gk-0-b",line:"GK",name:"Diego Carlos",power:75,cost:3,chemistry:1,trait:"reliable"},
-    {id:"gk-0-c",line:"GK",name:"Muhammed Emin Uzunyol",power:83,cost:6,chemistry:-1,trait:"star"}
+    {id:"gk-0-a",line:"GK",name:"Doğan Alemdar",power:67,cost:1,chemistry:2,trait:"connector",country:"TR",club:"Stade Rennais FC",position:"GK",age:23},
+    {id:"gk-0-b",line:"GK",name:"Joan García",power:75,cost:3,chemistry:1,trait:"reliable",country:"ES",club:"FC Barcelona",position:"GK",age:25},
+    {id:"gk-0-c",line:"GK",name:"Oliver Baumann",power:83,cost:6,chemistry:-1,trait:"star",country:"DE",club:"TSG Hoffenheim",position:"GK",age:36}
   ];
   await setRoom(page,{...base,phase:"draft",draftStep:0,offers,self:{...self,draft:[offers[1]]},draftStatus:{count:1,total:11,budget:45,power:75}});
   await expect(page.locator(".arena-offers .is-selected")).toContainText("SELECTED");
+  await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("ES");
+  await expect(page.locator(".arena-offers .is-selected .arena-player-club")).toContainText("FC Barcelona");
   await expect(page.locator(".arena-draft-progress")).toContainText("1 / 11");
   await capture(page,"04-web-arena-draft.png");
 
@@ -149,14 +151,15 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(portal.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     await capture(page,`android-${viewport.name}-hub.png`);
     const mobileOffers=[
-      {id:"st-a",line:"ST",name:"Can Kaya",power:68,cost:1,chemistry:2,trait:"connector"},
-      {id:"st-b",line:"ST",name:"Luca Rossi",power:76,cost:3,chemistry:1,trait:"reliable"},
-      {id:"st-c",line:"ST",name:"Abdurrahman Demircioğlu",power:84,cost:6,chemistry:-1,trait:"star"}
+      {id:"st-a",line:"ST",name:"Kenan Yıldız",power:68,cost:1,chemistry:2,trait:"connector",country:"TR",club:"Juventus FC",position:"ST",age:21},
+      {id:"st-b",line:"ST",name:"Lorenzo Lucca",power:76,cost:3,chemistry:1,trait:"reliable",country:"IT",club:"SSC Napoli",position:"ST",age:25},
+      {id:"st-c",line:"ST",name:"Ollie Watkins",power:84,cost:6,chemistry:-1,trait:"star",country:"EN",club:"Aston Villa FC",position:"ST",age:30}
     ];
     const mobileDraft=[...Array(10)].map((_,index)=>({id:`pick-${index}`,line:"MID",name:`Player ${index}`,power:72,cost:1,chemistry:0})).concat(mobileOffers[1]);
     await setRoom(page,{...base,phase:"draft",draftStep:10,offers:mobileOffers,self:{...self,draft:mobileDraft},draftStatus:{count:11,total:11,budget:32,power:73}});
     await expect(page.locator(".arena-draft-progress")).toContainText("11 / 11");
     await expect(page.locator(".arena-offers .is-selected")).toBeVisible();
+    await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("IT");
     const draft=await audit(page);
     expect(draft.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(draft.shellOverflow,viewport.name).toBeLessThanOrEqual(1);

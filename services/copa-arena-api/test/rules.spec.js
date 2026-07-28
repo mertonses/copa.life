@@ -1,8 +1,9 @@
 import {describe,expect,it} from "vitest";
 import {
-  DRAFT_LINES,createDraftOffers,createMarketOffers,divisionFor,initialPlayerState,ratingDelta,resolveParticipation,
-  resolveWindow,rewardFor,teamSnapshot,tacticEdge
+  ARENA_RULES_VERSION,DRAFT_LINES,createDraftOffers,createLegacyDraftOffers,createMarketOffers,divisionFor,initialPlayerState,
+  ratingDelta,resolveParticipation,resolveWindow,rewardFor,teamSnapshot,tacticEdge,usesFullXI
 } from "../src/rules.js";
+import {ARENA_PLAYER_CATALOG,ARENA_PLAYER_COUNTRIES} from "../src/playerCatalog.js";
 
 function completedPlayer(seed,side,setup={formation:"4-4-2",style:"balanced",chairman:"babacan"}){
   const player=initialPlayerState({owner:`owner-${side}`,clubName:`Club ${side}`,rating:1000});
@@ -28,8 +29,47 @@ describe("Arena rules",()=>{
       expect(createDraftOffers("seed",DRAFT_LINES[step],step,0)).toEqual(one);
       expect(one.map(item=>item.power).sort()).toEqual(two.map(item=>item.power).sort());
       expect(one.map(item=>item.cost).sort()).toEqual(two.map(item=>item.cost).sort());
+      expect(one.map(item=>item.sourceId).sort()).toEqual(two.map(item=>item.sourceId).sort());
       expect(one.map(item=>item.id)).not.toEqual(two.map(item=>item.id));
     }
+  });
+
+  it("sources complete real-player profiles from all six cleared country databases",()=>{
+    const countries=new Set();
+    for(let run=0;run<40;run++)for(let step=0;step<DRAFT_LINES.length;step++){
+      for(const offer of createDraftOffers(`country-${run}`,DRAFT_LINES[step],step,0)){
+        countries.add(offer.country);
+        expect(offer).toMatchObject({
+          sourceId:expect.stringMatching(/^(TR|ES|DE|IT|EN|JP)-\d+$/),
+          name:expect.any(String),
+          club:expect.any(String),
+          position:expect.any(String),
+          age:expect.any(Number),
+          potential:expect.any(Number)
+        });
+        const tierPool=ARENA_PLAYER_CATALOG[offer.line][offer.trait][offer.country];
+        expect(tierPool.some(player=>player.sourceId===offer.sourceId&&player.name===offer.name&&player.power===offer.power)).toBe(true);
+        expect(offer.cost).toBeGreaterThanOrEqual(1);
+        expect(offer.cost).toBeLessThanOrEqual(6);
+        expect(offer.chemistry).toBeGreaterThanOrEqual(-1);
+        expect(offer.chemistry).toBeLessThanOrEqual(2);
+      }
+    }
+    expect([...countries].sort()).toEqual([...ARENA_PLAYER_COUNTRIES].sort());
+  });
+
+  it("keeps v3 eleven-player rooms compatible while preserving five-player v1/v2 rooms",()=>{
+    expect(ARENA_RULES_VERSION).toBe("arena-rules-v4");
+    expect(usesFullXI("arena-rules-v3")).toBe(true);
+    expect(usesFullXI("arena-rules-v2")).toBe(false);
+    expect(createLegacyDraftOffers("legacy","GK",0,0)).toHaveLength(3);
+    const eleven=completedPlayer("legacy-eleven",0);
+    expect(teamSnapshot(eleven,"arena-rules-v3")).not.toBeNull();
+    const five=initialPlayerState({owner:"legacy",clubName:"Legacy",rating:1000});
+    five.setup={formation:"4-4-2",style:"balanced",chairman:"patron"};
+    five.draft=["GK","DEF","MID","WING","ST"].map((line,index)=>createLegacyDraftOffers("legacy-five",line,index,0)[1]);
+    five.market={id:"none"};
+    expect(teamSnapshot(five,"arena-rules-v2")).not.toBeNull();
   });
 
   it("mirrors market power while varying only presentation order",()=>{

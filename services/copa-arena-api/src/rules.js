@@ -1,4 +1,6 @@
-export const ARENA_RULES_VERSION="arena-rules-v3";
+import {ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES} from "./playerCatalog.js";
+
+export const ARENA_RULES_VERSION="arena-rules-v4";
 export const MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
   lobby:45,
@@ -61,6 +63,8 @@ export const MARKET_CARDS=Object.freeze([
 
 const FIRST_NAMES=["Arda","Deniz","Mert","Onur","Emir","Can","Atlas","Eren","Kerem","Bora","Luca","Diego","Marco","Leo","Alex","Noah"];
 const LAST_NAMES=["Aydın","Kaya","Demir","Erdem","Yalın","Aksoy","Costa","Rossi","Silva","Santos","Meyer","Mori","Ito","King","Stone","Reed"];
+const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4"]);
+const DRAFT_TIERS=Object.freeze(["connector","reliable","star"]);
 
 export function hashSeed(value){
   let hash=2166136261;
@@ -83,6 +87,10 @@ const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 const round=value=>Math.round(Number(value)||0);
 const pick=(random,list)=>list[Math.floor(random()*list.length)%list.length];
 
+export function usesFullXI(rulesVersion=ARENA_RULES_VERSION){
+  return FULL_XI_RULES.has(rulesVersion);
+}
+
 export function seasonKey(date=new Date()){
   const start=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),1));
   const quarter=Math.floor(start.getUTCMonth()/3)+1;
@@ -104,7 +112,7 @@ export function ratingDelta(homeRating,awayRating,score){
   return Math.max(-28,Math.min(28,Math.round(28*(Number(score)-expected))));
 }
 
-export function createDraftOffers(seed,line,step,side,slot=line){
+export function createLegacyDraftOffers(seed,line,step,side,slot=line){
   if(!LEGACY_DRAFT_LINES.includes(line))throw new Error("invalid_draft_line");
   const random=rng(`${seed}|${line}|${step}`);
   const bands=[
@@ -122,6 +130,52 @@ export function createDraftOffers(seed,line,step,side,slot=line){
     cost:base.cost,
     chemistry:base.chemistry,
     trait:base.trait
+  }));
+}
+
+function arenaCost(player,tier){
+  const potentialGap=Math.max(0,round(player.potential)-round(player.power));
+  if(tier==="connector")return potentialGap>=6&&round(player.age)<=22?2:1;
+  if(tier==="reliable")return round(player.power)>=76&&round(player.age)<=29?4:3;
+  return round(player.power)>=82&&round(player.age)<=29?6:5;
+}
+
+function arenaChemistry(player,tier){
+  let value=round(player.age)>=30?2:round(player.age)>=24?1:0;
+  if(tier==="star"&&round(player.power)>=82)value--;
+  return clamp(value,-1,2);
+}
+
+export function createDraftOffers(seed,line,step,side,slot=line){
+  if(!LEGACY_DRAFT_LINES.includes(line))throw new Error("invalid_draft_line");
+  const countryOffset=hashSeed(`${seed}|countries|${line}|${step}|${ARENA_PLAYER_CATALOG_VERSION}`)%ARENA_PLAYER_COUNTRIES.length;
+  const offers=DRAFT_TIERS.map((tier,tierIndex)=>{
+    const country=ARENA_PLAYER_COUNTRIES[(countryOffset+tierIndex*2)%ARENA_PLAYER_COUNTRIES.length];
+    const pool=ARENA_PLAYER_CATALOG[line]&&ARENA_PLAYER_CATALOG[line][tier]&&ARENA_PLAYER_CATALOG[line][tier][country];
+    if(!Array.isArray(pool)||!pool.length)throw new Error("missing_arena_player_pool");
+    const player=pool[hashSeed(`${seed}|player|${line}|${step}|${tier}|${country}|${ARENA_PLAYER_CATALOG_VERSION}`)%pool.length];
+    return {
+      sourceId:player.sourceId,
+      slot,
+      line,
+      name:player.name,
+      power:round(player.power),
+      cost:arenaCost(player,tier),
+      chemistry:arenaChemistry(player,tier),
+      trait:tier,
+      country:player.country,
+      club:player.club,
+      age:round(player.age),
+      position:player.position,
+      potential:round(player.potential),
+      leagueLevel:round(player.leagueLevel),
+      marketHint:round(player.marketHint)
+    };
+  });
+  const rotation=hashSeed(`${seed}|${side}|${step}`)%offers.length;
+  return offers.map((_,index)=>offers[(index+rotation)%offers.length]).map((offer,index)=>({
+    ...offer,
+    id:`${line.toLowerCase()}-${step}-${index}-${hashSeed(`${seed}|${side}|${offer.sourceId}`).toString(36)}`
   }));
 }
 
@@ -173,7 +227,7 @@ export function validateSetup(choice){
 }
 
 export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
-  const legacy=rulesVersion!=="arena-rules-v3";
+  const legacy=!usesFullXI(rulesVersion);
   const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
   if(!validateSetup(player&&player.setup)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
   const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=CHAIRMEN[player.setup.chairman];
@@ -278,7 +332,7 @@ export function publicState(state,owner){
   const opponentIndex=selfIndex===0?1:0;
   const self=state.players[selfIndex],opponent=state.players[opponentIndex];
   const hideCurrentDraft=state.phase==="draft";
-  const legacy=state.rulesVersion!=="arena-rules-v3";
+  const legacy=!usesFullXI(state.rulesVersion);
   const chairman=self&&CHAIRMEN[self.setup&&self.setup.chairman]||CHAIRMEN.patron;
   const draftSpent=self?self.draft.reduce((sum,item)=>sum+round(item.cost),0):0;
   const draftStatus=self?{
