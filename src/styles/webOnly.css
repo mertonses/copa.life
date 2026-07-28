@@ -129,9 +129,13 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   html[data-copa-platform="web"] .style-select-modal>.stylelist{
     display:grid;
     gap:8px;
+    box-sizing:border-box;
+    width:100%;
     min-height:0;
+    min-width:0;
     margin:0;
     padding:0 1px 12px;
+    overflow-x:hidden;
     overflow-y:auto;
     overscroll-behavior:contain;
   }
@@ -142,7 +146,10 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     grid-template-columns:38px minmax(0,1fr);
     gap:13px;
     align-items:center;
+    width:100%;
+    max-width:100%;
     min-height:88px;
+    min-width:0;
     margin:0;
     padding:12px 14px;
     border-radius:11px;
@@ -163,10 +170,13 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 
   html[data-copa-platform="web"] .style-select-modal .style-choice-modern .ssm{
     display:grid;
-    grid-template-columns:minmax(190px,.82fr) minmax(330px,1.35fr);
-    gap:18px;
+    grid-template-columns:minmax(150px,.72fr) minmax(0,1.35fr);
+    gap:14px;
     align-items:center;
+    width:100%;
+    max-width:100%;
     min-width:0;
+    overflow:hidden;
   }
 
   html[data-copa-platform="web"] .style-select-modal .style-choice-summary{
@@ -220,7 +230,10 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     gap:7px!important;
     align-items:stretch!important;
     min-width:0;
+    width:100%;
+    max-width:100%;
     margin:0;
+    overflow:hidden;
   }
 
   html[data-copa-platform="web"] .style-select-modal .style-impact-grid span{
@@ -234,6 +247,8 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     padding:8px 10px!important;
     font-size:8.5px;
     line-height:1.3;
+    overflow-wrap:anywhere;
+    white-space:normal;
   }
 
   html[data-copa-platform="web"] .style-select-modal .style-impact-grid :is(.is-positive,.is-negative){
@@ -452,10 +467,51 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   }
 
   html[data-copa-platform="web"] #nativeHubNav button{
+    --tab-tone:var(--color-primary);
     grid-row:1!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
     min-width:0!important;
     min-height:60px!important;
     padding:7px 3px!important;
+    color:color-mix(in srgb,var(--tab-tone) 62%,var(--color-slate))!important;
+  }
+
+  html[data-copa-platform="web"] #nativeHubNav button[data-native-target="market"]{--tab-tone:#D6A21F}
+  html[data-copa-platform="web"] #nativeHubNav button[data-native-target="training"]{--tab-tone:#7DD3FC}
+  html[data-copa-platform="web"] #nativeHubNav button[data-native-target="career"]{--tab-tone:var(--status-success)}
+  html[data-copa-platform="web"] #nativeHubNav button.active{color:var(--tab-tone)!important}
+
+  html[data-copa-platform="web"] #nativeHubNav .hub-tab-svg{
+    display:block!important;
+    flex:0 0 20px!important;
+    width:20px!important;
+    height:20px!important;
+    overflow:visible!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.7!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+  }
+
+  html[data-copa-platform="web"] #nativeHubNav .hub-tab-icon-frame{
+    fill:color-mix(in srgb,var(--tab-tone) 8%,transparent)!important;
+    stroke:currentColor!important;
+  }
+
+  html[data-copa-platform="web"] #nativeHubNav .hub-tab-motion{
+    fill:none!important;
+    stroke:currentColor!important;
+  }
+
+  html[data-copa-platform="web"] #nativeHubNav .hub-tab-token{
+    fill:currentColor!important;
+    stroke:var(--surface-bg)!important;
+    stroke-width:1.2!important;
   }
 
   html[data-copa-platform="web"] #nativeHubNav .native-hub-tab-label{
@@ -469,6 +525,24 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   html[data-copa-platform="web"] #hub[data-mobile-route="training"] .hubcols,
   html[data-copa-platform="web"] #hub[data-mobile-route="career"] .hubcols{
     display:none!important;
+  }
+
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.vsbar{order:10!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.hub-action-panel{order:20!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.hub-stat-row{order:30!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.styletag{order:40!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.final-pills{order:50!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>.pitch-area{order:60!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>#tournamentHubPanel{order:70!important}
+  html[data-copa-platform="web"] #hub[data-mobile-route="match"] .hcol-l>#feedwrap{
+    order:100!important;
+    margin-top:10px!important;
+    margin-bottom:76px!important;
   }
 
   html[data-copa-platform="web"] #hub[data-mobile-route="market"] .hubcols,
@@ -522,8 +596,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     padding:7px 5px!important;
   }
 
-  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] :is(#talkBtn,#presBtn,#playBtn) span,
-  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] #presBtn::after{
+  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] :is(#talkBtn,#presBtn,#playBtn) span{
     display:block!important;
     min-width:0;
     overflow:hidden;
@@ -535,7 +608,8 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   }
 
   html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] #presBtn::after{
-    content:attr(aria-label);
+    content:none!important;
+    display:none!important;
   }
 
   html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] #talkBtn{
@@ -567,11 +641,34 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     min-height:44px;
   }
 
+  html[data-copa-platform="web"] #result .result-row{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+    align-items:stretch!important;
+  }
+
+  html[data-copa-platform="web"] #result .result-row>:is(#shareCardBtn,#statsBtn,.result-seed-action){
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    min-height:62px!important;
+    height:100%!important;
+    margin:0!important;
+  }
+
+  html[data-copa-platform="web"] #result .result-row>.result-seed-action{
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:8px 7px!important;
+    border-radius:9px!important;
+  }
+
 }
 
 @media(max-width:380px){
-  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] :is(#talkBtn,#presBtn,#playBtn) span,
-  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] #presBtn::after{
+  html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] :is(#talkBtn,#presBtn,#playBtn) span{
     font-size:7px!important;
   }
 
@@ -579,5 +676,18 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     flex-basis:18px!important;
     width:18px!important;
     height:18px!important;
+  }
+
+  html[data-copa-platform="web"] #result .result-row{
+    gap:5px!important;
+  }
+
+  html[data-copa-platform="web"] #result .result-row .result-action-label{
+    font-size:7px!important;
+    letter-spacing:.35px!important;
+  }
+
+  html[data-copa-platform="web"] #result .result-row>.result-seed-action{
+    padding-inline:5px!important;
   }
 }

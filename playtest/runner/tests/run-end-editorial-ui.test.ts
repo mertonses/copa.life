@@ -86,11 +86,14 @@ async function finishSackedRun(page:Page){
 }
 
 test("sacked result keeps a compact visual hierarchy without horizontal overflow",async({page},testInfo)=>{
+  if(testInfo.project.name==="mobile-chromium")await page.setViewportSize({width:360,height:800});
   await finishSackedRun(page);
+  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
   const layout=await page.evaluate(()=>{
     const rect=(selector:string)=>document.querySelector(selector)!.getBoundingClientRect();
     const board=rect("#result .scoreboard");
     const actions=[...document.querySelectorAll("#result .result-row .btn")].map(node=>node.getBoundingClientRect());
+    const actionItems=[...document.querySelectorAll("#result .result-row>*")].map(node=>node.getBoundingClientRect());
     const stats=[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect());
     const decision=getComputedStyle(document.querySelector("#result .scoreboard")!,"::before");
     return{
@@ -98,6 +101,9 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
       boardHeight:board.height,
       actionWidthDelta:Math.abs(actions[0].width-actions[1].width),
       actionGap:actions[1].left-actions[0].right,
+      actionItemCount:actionItems.length,
+      actionSameRow:Math.max(...actionItems.map(item=>item.top))-Math.min(...actionItems.map(item=>item.top))<=1,
+      actionItemsInside:actionItems.every(item=>item.left>=0&&item.right<=innerWidth+1),
       statGap:stats[1].left-stats[0].right,
       decision:decision.content,
       negativeCash:getComputedStyle(document.querySelector("#rCash")!).color
@@ -108,9 +114,13 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
   expect(layout.boardHeight).toBeLessThanOrEqual(130);
   expect(layout.actionWidthDelta).toBeLessThanOrEqual(1);
   expect(layout.actionGap).toBeGreaterThanOrEqual(5);
+  expect(layout.actionItemCount).toBe(3);
+  expect(layout.actionSameRow).toBe(true);
+  expect(layout.actionItemsInside).toBe(true);
   expect(layout.statGap).toBeGreaterThanOrEqual(5);
   expect(layout.decision).toContain("YÖNETİM");
   expect(layout.negativeCash).not.toBe("rgb(243, 245, 244)");
+  await page.locator("#result .result-row").scrollIntoViewIfNeeded();
   await page.screenshot({path:testInfo.outputPath("sacked-result-ui.png"),fullPage:true});
 });
 

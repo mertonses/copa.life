@@ -415,7 +415,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   const style=document.createElement("link"),script=document.createElement("script");
   let pending=2;const done=()=>{pending--;if(pending===0)resolve();};
   style.rel="stylesheet";
-  style.href=platform==="web"?"src/styles/webOnly.css?v=20260728-chair-action4":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
+  style.href=platform==="web"?"src/styles/webOnly.css?v=20260729-responsive-result7":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
   script.src="src/ui/mobileGameSystems.js?v=20260728-ui-fixes2";
   script.onload=done;script.onerror=done;
