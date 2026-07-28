@@ -26,21 +26,34 @@ test("web play-style modal keeps summaries and effects aligned",async({page},tes
     (globalThis as any).normalStart();
   });
   await expect(page.locator(".style-select-modal")).toBeVisible();
+  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
+  await page.waitForTimeout(100);
   const layout=await page.locator(".style-select-modal").evaluate((modal:HTMLElement)=>{
     const cards=[...modal.querySelectorAll<HTMLElement>(".style-choice-modern")];
     const modalRect=modal.getBoundingClientRect();
+    const list=modal.querySelector<HTMLElement>(".stylelist")!;
+    const listRect=list.getBoundingClientRect();
     return{
       modalWidth:modalRect.width,
       modalOverflow:modal.scrollWidth-modal.clientWidth,
+      listOverflow:list.scrollWidth-list.clientWidth,
+      listInsideModal:listRect.left>=modalRect.left&&listRect.right<=modalRect.right,
       pageOverflow:document.documentElement.scrollWidth-innerWidth,
       cardHeights:cards.map(card=>card.getBoundingClientRect().height),
       rows:cards.map(card=>{
+        const cardRect=card.getBoundingClientRect();
         const summary=card.querySelector<HTMLElement>(".style-choice-summary")!.getBoundingClientRect();
         const effects=card.querySelector<HTMLElement>(".style-impact-grid")!.getBoundingClientRect();
         const value=card.querySelector<HTMLElement>(".style-impact-value")!.getBoundingClientRect();
         const effectStyle=getComputedStyle(card.querySelector<HTMLElement>(".style-impact-grid")!);
+        const effectItems=[...card.querySelectorAll<HTMLElement>(".style-impact-grid span")].map(node=>node.getBoundingClientRect());
         return{
+          cardInsideList:cardRect.left>=listRect.left-1&&cardRect.right<=listRect.right+1,
+          cardInsideModal:cardRect.left>=modalRect.left&&cardRect.right<=modalRect.right,
           effectsAfterSummary:effects.left>=summary.right+8,
+          effectsInsideCard:effects.left>=cardRect.left&&effects.right<=cardRect.right-10,
+          itemsInsideEffects:effectItems.every(item=>item.left>=effects.left-1&&item.right<=effects.right+1),
+          equalEffectWidths:Math.max(...effectItems.map(item=>item.width))-Math.min(...effectItems.map(item=>item.width))<=1,
           verticallyAligned:Math.abs((summary.top+summary.bottom)/2-(effects.top+effects.bottom)/2)<=4,
           valueInsideSummary:value.left>=summary.left&&value.right<=summary.right+1,
           effectDisplay:effectStyle.display,
@@ -54,23 +67,46 @@ test("web play-style modal keeps summaries and effects aligned",async({page},tes
   await capture(page,"00b-style-selection-modal.png");
   expect(layout.modalWidth).toBeGreaterThanOrEqual(720);
   expect(layout.modalOverflow).toBeLessThanOrEqual(1);
+  expect(layout.listOverflow).toBeLessThanOrEqual(1);
+  expect(layout.listInsideModal).toBe(true);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
   expect(Math.max(...layout.cardHeights)).toBeLessThanOrEqual(112);
-  expect(layout.rows.every(row=>row.effectsAfterSummary&&row.verticallyAligned&&row.valueInsideSummary&&row.effectDisplay==="grid"&&row.effectColumns.split(" ").length===2&&!row.clipped),JSON.stringify(layout.rows)).toBe(true);
+  expect(layout.rows.every(row=>row.cardInsideList&&row.cardInsideModal&&row.effectsAfterSummary&&row.effectsInsideCard&&row.itemsInsideEffects&&row.equalEffectWidths&&row.verticallyAligned&&row.valueInsideSummary&&row.effectDisplay==="grid"&&row.effectColumns.split(" ").length===2&&!row.clipped),JSON.stringify(layout.rows)).toBe(true);
   await page.setViewportSize({width:768,height:900});
   const narrow=await page.locator(".style-select-modal").evaluate((modal:HTMLElement)=>({
     pageOverflow:document.documentElement.scrollWidth-innerWidth,
     modalOverflow:modal.scrollWidth-modal.clientWidth,
+    listOverflow:modal.querySelector<HTMLElement>(".stylelist")!.scrollWidth-modal.querySelector<HTMLElement>(".stylelist")!.clientWidth,
     rows:[...modal.querySelectorAll<HTMLElement>(".style-choice-modern")].map(card=>{
+      const cardRect=card.getBoundingClientRect();
       const summary=card.querySelector<HTMLElement>(".style-choice-summary")!.getBoundingClientRect();
       const effects=card.querySelector<HTMLElement>(".style-impact-grid")!.getBoundingClientRect();
-      return effects.left>=summary.right+8&&effects.right<=card.getBoundingClientRect().right-10;
+      const items=[...card.querySelectorAll<HTMLElement>(".style-impact-grid span")].map(node=>node.getBoundingClientRect());
+      return effects.left>=summary.right+8&&effects.right<=cardRect.right-10&&items.every(item=>item.left>=effects.left-1&&item.right<=effects.right+1);
     }),
   }));
   expect(narrow.pageOverflow).toBeLessThanOrEqual(1);
   expect(narrow.modalOverflow).toBeLessThanOrEqual(1);
+  expect(narrow.listOverflow).toBeLessThanOrEqual(1);
   expect(narrow.rows.every(Boolean)).toBe(true);
   await capture(page,"00c-style-selection-modal-768.png");
+  await page.setViewportSize({width:1024,height:768});
+  const compactDesktop=await page.locator(".style-select-modal").evaluate((modal:HTMLElement)=>{
+    const rect=modal.getBoundingClientRect();
+    const list=modal.querySelector<HTMLElement>(".stylelist")!;
+    return{
+      top:rect.top,
+      bottom:rect.bottom,
+      viewportHeight:innerHeight,
+      listNeedsScroll:list.scrollHeight>list.clientHeight+1,
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(compactDesktop.top).toBeGreaterThanOrEqual(0);
+  expect(compactDesktop.bottom).toBeLessThanOrEqual(compactDesktop.viewportHeight);
+  expect(compactDesktop.listNeedsScroll).toBe(false);
+  expect(compactDesktop.pageOverflow).toBeLessThanOrEqual(1);
+  await capture(page,"00d-style-selection-modal-1024x768.png");
 });
 
 test("wide web surfaces remain readable and use the available canvas",async({page},testInfo)=>{
@@ -395,6 +431,8 @@ test("web responsive setup shells keep navigation readable and centered",async({
   test.skip(testInfo.project.name!=="mobile-chromium","source-web mobile device matrix");
   for(const viewport of [
     {width:360,height:800,name:"small-mobile"},
+    {width:390,height:844,name:"compact-mobile"},
+    {width:414,height:896,name:"iphone-xr"},
     {width:430,height:932,name:"mobile"},
     {width:768,height:1024,name:"tablet"},
     {width:1024,height:768,name:"landscape"},
@@ -430,6 +468,8 @@ test("source-web hub routes stay bounded and keep every primary action visible",
   test.skip(testInfo.project.name!=="mobile-chromium","source-web responsive hub matrix");
   for(const viewport of [
     {width:360,height:800,name:"small-mobile"},
+    {width:390,height:844,name:"compact-mobile"},
+    {width:414,height:896,name:"iphone-xr"},
     {width:430,height:932,name:"mobile"},
     {width:768,height:1024,name:"tablet"},
     {width:1024,height:768,name:"landscape"},
@@ -437,6 +477,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await reset(page);
     await page.goto(`/?web-hub-${viewport.name}-visual-qa=1`,{waitUntil:"domcontentloaded"});
+    await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
     await page.evaluate(async()=>{
       const game=globalThis as any;
       game.CopaMobileShell.newRun();
@@ -463,6 +504,11 @@ test("source-web hub routes stay bounded and keep every primary action visible",
       const actionRoot=document.querySelector<HTMLElement>(".mobile-action-dock .actionbtns")
         ||document.querySelector<HTMLElement>(".hub-action-panel .actionbtns")!;
       const buttons=[...actionRoot.querySelectorAll<HTMLElement>("button")].filter(button=>button.offsetParent);
+      const navIcons=[...document.querySelectorAll<SVGElement>("#nativeHubNav .hub-tab-svg")];
+      const feed=document.querySelector<HTMLElement>("#feedwrap")!;
+      const tournament=document.querySelector<HTMLElement>("#tournamentHubPanel")!;
+      const pitch=document.querySelector<HTMLElement>(".pitch-area")!;
+      const president=document.querySelector<HTMLElement>("#presBtn")!;
       return{
         overflow:document.documentElement.scrollWidth-innerWidth,
         leakedMarket:!!document.querySelector<HTMLElement>("#shopLbl")?.offsetParent,
@@ -470,7 +516,17 @@ test("source-web hub routes stay bounded and keep every primary action visible",
         parentWidth:actionRoot.parentElement!.getBoundingClientRect().width,
         clipped:buttons.filter(button=>button.scrollWidth>button.clientWidth+1).map(button=>button.id),
         tiny:buttons.filter(button=>button.getBoundingClientRect().height<44).map(button=>button.id),
-        presidentLabel:getComputedStyle(document.querySelector<HTMLElement>("#presBtn")!,"::after").content,
+        presidentLabel:getComputedStyle(president,"::after").content,
+        presidentSpans:[...president.querySelectorAll("span")].filter(span=>(span as HTMLElement).offsetParent).length,
+        navIconCount:navIcons.length,
+        malformedNavIcons:navIcons.filter(icon=>{
+          const rect=icon.getBoundingClientRect(),style=getComputedStyle(icon);
+          return rect.width<16||rect.height<16||style.fill!=="none";
+        }).length,
+        feedVisible:!!feed.offsetParent,
+        feedHeight:feed.getBoundingClientRect().height,
+        feedAfterPitch:feed.getBoundingClientRect().top>=pitch.getBoundingClientRect().bottom-1,
+        feedAfterTournament:!tournament.offsetParent||feed.getBoundingClientRect().top>=tournament.getBoundingClientRect().bottom-1,
       };
     });
     expect(match.overflow,viewport.name).toBeLessThanOrEqual(1);
@@ -478,7 +534,24 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     expect(match.actionWidth,viewport.name).toBeGreaterThan(match.parentWidth*.88);
     expect(match.clipped,viewport.name).toEqual([]);
     expect(match.tiny,viewport.name).toEqual([]);
-    if(viewport.width<=760)expect(match.presidentLabel,viewport.name).not.toBe("none");
+    expect(match.presidentSpans,viewport.name).toBe(1);
+    expect(match.navIconCount,viewport.name).toBe(4);
+    expect(match.malformedNavIcons,viewport.name).toBe(0);
+    expect(match.feedVisible,viewport.name).toBe(true);
+    expect(match.feedHeight,viewport.name).toBeGreaterThanOrEqual(80);
+    expect(match.feedAfterPitch,viewport.name).toBe(true);
+    expect(match.feedAfterTournament,viewport.name).toBe(true);
+    if(viewport.width<=760)expect(["none","normal",'""']).toContain(match.presidentLabel);
+    await capture(page,`responsive-${viewport.name}-match.png`);
+    await page.locator("#feedwrap").scrollIntoViewIfNeeded();
+    const feedViewport=await page.locator("#feedwrap").evaluate((feed:HTMLElement)=>{
+      const rect=feed.getBoundingClientRect();
+      return{top:rect.top,bottom:rect.bottom,viewportHeight:innerHeight};
+    });
+    expect(feedViewport.top,viewport.name).toBeGreaterThanOrEqual(-1);
+    expect(feedViewport.bottom,viewport.name).toBeLessThanOrEqual(feedViewport.viewportHeight+1);
+    await capture(page,`responsive-${viewport.name}-match-bottom.png`);
+    await page.locator("#nativeHubNav").scrollIntoViewIfNeeded();
 
     await page.locator('#nativeHubNav [data-native-target="market"]').click();
     await expect(page.locator("#shopcards>.cardtile")).toHaveCount(3);
