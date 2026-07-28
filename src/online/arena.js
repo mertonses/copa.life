@@ -29,7 +29,8 @@
       authentic:"GERÇEK OYUNCU",noBots:"Bot veya Ghost Club kullanılmaz.",fair:"EŞİT TEKLİF",fairCopy:"Hız değil karar kalitesi kazandırır.",
       server:"SUNUCU OTORİTELİ",serverCopy:"Sonuç bir kez üretilir ve değiştirilemez.",
       deleteData:"ARENA VERİLERİMİ SİL",deleteConfirm:"Arena kulübün, derecen ve maç geçmişin kalıcı olarak silinecek. Devam edilsin mi?",
-      you:"SEN",opponent:"RAKİP",goal:"GOL",cardEvent:"KART",tacticDecision:"TAKTİK KARARI",pass:"PAS",marketCard:"KART"
+      you:"SEN",opponent:"RAKİP",goal:"GOL",cardEvent:"KART",tacticDecision:"TAKTİK KARARI",pass:"PAS",marketCard:"KART",
+      selected:"SEÇİLDİ",startingXI:"İLK 11",babacan:"BABACAN BAŞKAN"
     },
     en:{
       arena:"COPA ARENA",subtitle:"Build your club live, make the call, climb the table.",
@@ -47,7 +48,8 @@
       authentic:"REAL OPPONENTS",noBots:"No bots or Ghost Clubs.",fair:"MIRRORED OFFERS",fairCopy:"Decision quality matters, not click speed.",
       server:"SERVER AUTHORITATIVE",serverCopy:"The result is generated once and cannot be rerolled.",
       deleteData:"DELETE MY ARENA DATA",deleteConfirm:"Your Arena club, rating and match history will be permanently deleted. Continue?",
-      you:"YOU",opponent:"OPPONENT",goal:"GOAL",cardEvent:"CARD",tacticDecision:"TACTIC DECISION",pass:"PASS",marketCard:"CARD"
+      you:"YOU",opponent:"OPPONENT",goal:"GOAL",cardEvent:"CARD",tacticDecision:"TACTIC DECISION",pass:"PASS",marketCard:"CARD",
+      selected:"SELECTED",startingXI:"STARTING XI",babacan:"BABACAN CHAIRMAN"
     }
   };
   COPY.es={...COPY.en,subtitle:"Construye tu club en directo, decide y sube en la tabla.",ranked:"CAMINO CLASIFICATORIO",play:"BUSCAR PARTIDA",back:"VOLVER A COPA LIFE",loading:"CARGANDO ARENA",rating:"PUNTUACIÓN",season:"RUTA DE TEMPORADA",record:"CARRERA",history:"ÚLTIMOS PARTIDOS",leaderboard:"CLASIFICACIÓN",queue:"BUSCANDO RIVAL",queueCopy:"Buscando un club real de nivel similar.",cancel:"CANCELAR BÚSQUEDA",ready:"ESTOY LISTO",waiting:"ESPERANDO AL RIVAL",setup:"IDENTIDAD DEL CLUB",draft:"CREA TU ONCE",market:"TOQUE FINAL",training:"PLAN DE PARTIDO",live:"PARTIDO EN VIVO",result:"FINAL",formation:"FORMACIÓN",style:"ESTILO DE JUEGO",chairman:"PRESIDENTE",budget:"CAJA RESTANTE",chemistry:"QUÍMICA",power:"FUERZA",choose:"ELEGIR",reconnecting:"RECONECTANDO",retry:"REINTENTAR",home:"CENTRO ARENA",win:"VICTORIA",loss:"DERROTA",draw:"EMPATE",searchAgain:"NUEVO PARTIDO",consentTitle:"ENTRAR EN LA ARENA",consent:"Copa Arena es un modo en vivo y clasificatorio. El nombre del club, los resultados y la puntuación aparecen en la tabla pública. No hay datos personales ni chat libre.",accept:"ACEPTAR Y ENTRAR",club:"NOMBRE DEL CLUB ARENA",network:"No se puede acceder al servicio Arena.",empty:"Aún no hay partidos completados.",authentic:"RIVALES REALES",noBots:"Sin bots ni Ghost Clubs.",fair:"OFERTAS ESPEJO",fairCopy:"Decide mejor, no más rápido.",server:"SERVIDOR AUTORITATIVO",serverCopy:"El resultado se genera una vez y no puede repetirse.",deleteData:"BORRAR MIS DATOS DE ARENA",deleteConfirm:"Tu club Arena, puntuación e historial se borrarán de forma permanente. ¿Continuar?",you:"TÚ",opponent:"RIVAL",goal:"GOL",cardEvent:"TARJETA",tacticDecision:"DECISIÓN TÁCTICA",pass:"PASAR",marketCard:"CARTA"};
@@ -159,26 +161,38 @@
     traits:{connector:"Connector",reliable:"Reliable",star:"Star"}
   };
   const choiceLabel=(kind,value)=>((root.LANG==="tr"?choiceLabels:choiceLabelsEn)[kind]||{})[value]||value;
-  function options(kind,values){
-    return `<div class="arena-choice-grid ${kind}">${values.map(value=>`<button data-arena-choice="${esc(kind)}:${esc(value)}"><i></i><b>${esc(choiceLabel(kind,value))}</b><span>${kind==="tactics"?"↗":kind==="training"?"+2":"◆"}</span></button>`).join("")}</div>`;
+  function options(kind,values,selected="",locked=false){
+    return `<div class="arena-choice-grid ${kind}">${values.map(value=>{
+      const active=value===selected;
+      return `<button class="${active?"is-selected":""}" data-arena-choice="${esc(kind)}:${esc(value)}" aria-pressed="${active}" ${locked?"disabled":""}><i></i><b>${esc(choiceLabel(kind,value))}</b><span>${kind==="tactics"?"↗":kind==="training"?"+2":"◆"}</span><em>✓ ${esc(text("selected"))}</em></button>`;
+    }).join("")}</div>`;
   }
   function statusStrip(game){
     const self=game.self||{},opponent=game.opponent||{};
     return `<div class="arena-versus"><span><small>${esc(text("you"))}</small><b>${esc(self.clubName||"—")}</b><strong>${self.rating||"—"}</strong></span><i>VS</i><span><small>${esc(text("opponent"))}</small><b>${esc(opponent.clubName||"—")}</b><strong>${opponent.rating||"—"}</strong></span></div>`;
   }
   function setup(game){
-    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>01 / 05</span><h1>${esc(text("setup"))}</h1><p>${esc(text("fairCopy"))}</p><label>${esc(text("formation"))}</label>${options("formations",["4-4-2","4-3-3","4-2-3-1","3-5-2"])}<label>${esc(text("style"))}</label>${options("styles",["balanced","press","counter","control"])}<label>${esc(text("chairman"))}</label>${options("chairmen",["patron","diplomat","showman","professor"])}<button class="arena-primary" data-arena-action="submit-setup" disabled>${esc(text("choose"))}</button></div>`);
+    const submitted=!!(game.self&&game.self.setup),chosen=game.self&&game.self.setup||{};
+    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>01 / 14</span><h1>${esc(text("setup"))}</h1><p>${esc(text("fairCopy"))}</p><div class="arena-fixed-chairman"><b>${esc(text("babacan"))}</b><small>${root.LANG==="tr"?"Tüm kulüpler eşit yönetim desteğiyle başlar.":"Every club starts with the same board support."}</small></div><label>${esc(text("formation"))}</label>${options("formations",["4-4-2","4-3-3","4-2-3-1","3-5-2"],chosen.formation,submitted)}<label>${esc(text("style"))}</label>${options("styles",["balanced","press","counter","control"],chosen.style,submitted)}<button class="arena-primary" data-arena-action="submit-setup" disabled>${esc(submitted?text("waiting"):text("choose"))}</button></div>`);
   }
   function draft(game){
-    const lines=root.LANG==="tr"?["KALECİ","SAVUNMA","ORTA SAHA","KANAT","FORVET"]:["GOALKEEPER","DEFENCE","MIDFIELD","WING","STRIKER"];
-    const offers=game.offers||[],line=lines[game.draftStep]||(root.LANG==="tr"?"KADRO":"SQUAD");
-    return chrome(`${statusStrip(game)}<div class="arena-phase arena-draft"><span>0${game.draftStep+2} / 07 · ${esc(line)}</span><h1>${esc(text("draft"))}</h1><div class="arena-team-pulse"><b>${esc(text("budget"))} <i>€${game.team&&game.team.budget!=null?game.team.budget:20}M</i></b><b>${esc(text("power"))} <i>${game.team&&game.team.power||"—"}</i></b></div><div class="arena-offers">${offers.map(item=>`<button data-arena-choice="draft:${esc(item.id)}"><span>${esc(item.line)}</span><strong>${item.power}</strong><b>${esc(item.name)}</b><small>€${item.cost}M · ${item.chemistry>=0?"+":""}${item.chemistry} ${esc(text("chemistry"))}</small><i>${esc(choiceLabel("traits",item.trait))}</i></button>`).join("")}</div></div>`);
+    const offers=game.offers||[],picked=game.self&&game.self.draft||[],selected=picked[game.draftStep]||null,status=game.draftStatus||{};
+    const slot=(offers[0]&&offers[0].slot)||(root.LANG==="tr"?"OYUNCU":"PLAYER"),count=Number(status.count!=null?status.count:picked.length),total=Number(status.total)||11;
+    return chrome(`${statusStrip(game)}<div class="arena-phase arena-draft"><span>${String(game.draftStep+2).padStart(2,"0")} / 14 · ${esc(slot)}</span><h1>${esc(text("draft"))}</h1><div class="arena-draft-progress"><span>${esc(text("startingXI"))}<b>${count} / ${total}</b></span><div>${Array.from({length:total},(_,index)=>`<i class="${index<count?"is-filled":""}"></i>`).join("")}</div></div><div class="arena-team-pulse"><b>${esc(text("budget"))} <i>€${status.budget!=null?status.budget:48}M</i></b><b>${esc(text("power"))} <i>${status.power||"—"}</i></b></div><div class="arena-offers">${offers.map(item=>{
+      const active=!!selected&&selected.id===item.id;
+      return `<button class="${active?"is-selected":""}" data-arena-choice="draft:${esc(item.id)}" aria-pressed="${active}" ${selected?"disabled":""}><span>${esc(item.slot||item.line)}</span><strong>${item.power}</strong><b>${esc(item.name)}</b><small>€${item.cost}M · ${item.chemistry>=0?"+":""}${item.chemistry} ${esc(text("chemistry"))}</small><i>${esc(choiceLabel("traits",item.trait))}</i><em>✓ ${esc(text("selected"))}</em></button>`;
+    }).join("")}</div>${selected?`<p class="arena-choice-confirmed">${esc(selected.name)} · ${esc(text("selected"))}</p>`:""}</div>`);
   }
   function market(game){
-    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>07 / 09</span><h1>${esc(text("market"))}</h1><div class="arena-offers arena-market-offers">${(game.offers||[]).map(item=>`<button data-arena-choice="market:${esc(item.id)}"><span>${esc(text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><b>${esc(choiceLabel("market",item.id))}</b><small>ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small></button>`).join("")}</div></div>`);
+    const selected=game.self&&game.self.market&&game.self.market.id;
+    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>13 / 14</span><h1>${esc(text("market"))}</h1><div class="arena-offers arena-market-offers">${(game.offers||[]).map(item=>{
+      const active=item.id===selected;
+      return `<button class="${active?"is-selected":""}" data-arena-choice="market:${esc(item.id)}" aria-pressed="${active}" ${selected?"disabled":""}><span>${esc(text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><b>${esc(choiceLabel("market",item.id))}</b><small>ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small><em>✓ ${esc(text("selected"))}</em></button>`;
+    }).join("")}</div>${selected?`<p class="arena-choice-confirmed">${esc(choiceLabel("market",selected))} · ${esc(text("selected"))}</p>`:""}</div>`);
   }
   function training(game){
-    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>08 / 09</span><h1>${esc(text("training"))}</h1>${options("training",["finishing","shape","chemistry","recovery"])}</div>`);
+    const selected=game.self&&game.self.training||"";
+    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>14 / 14</span><h1>${esc(text("training"))}</h1>${options("training",["finishing","shape","chemistry","recovery"],selected,!!selected)}${selected?`<p class="arena-choice-confirmed">${esc(choiceLabel("training",selected))} · ${esc(text("selected"))}</p>`:""}</div>`);
   }
   function lobby(game){
     return chrome(`${statusStrip(game)}<div class="arena-ready"><div class="arena-ready-ring">${icon("shield")}<i></i></div><h1>${esc(game.self&&game.self.ready?text("waiting"):text("ready"))}</h1><p>${esc(text("serverCopy"))}</p><button class="arena-primary" data-arena-action="ready" ${game.self&&game.self.ready?"disabled":""}>${esc(text("ready"))}</button></div>`);
@@ -189,7 +203,7 @@
       <div class="arena-live-score"><span>${esc(game.self&&game.self.clubName||text("you"))}</span><b>${score[game.selfIndex]||0}<i>–</i>${score[game.selfIndex===0?1:0]||0}</b><span>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</span></div>
       <div class="arena-pitch-live"><i></i><i></i><b style="left:${28+game.window*22}%"></b>${events.map(event=>`<span style="left:${Math.min(94,Math.max(6,event.minute))}%">${event.type==="goal"?"●":"▪"}</span>`).join("")}</div>
       <div class="arena-event-feed">${events.length?events.map(event=>`<span><b>${event.minute}'</b><i class="${event.side===(game.selfIndex===0?"home":"away")?"mine":""}">${esc(text(event.type==="goal"?"goal":"cardEvent"))}</i></span>`).join(""):`<span><b>0'</b><i>${esc(text("live"))}</i></span>`}</div>
-      <div class="arena-tactic-window"><span>${game.window+1} / 3</span><h2>${esc(text("tacticDecision"))}</h2>${game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p data-arena-deadline="${Number(game.deadline)||0}">${esc(text("waiting"))}</p>`:options("tactics",["press","balanced","counter","control"])}</div>
+      <div class="arena-tactic-window"><span>${game.window+1} / 3</span><h2>${esc(text("tacticDecision"))}</h2>${options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p data-arena-deadline="${Number(game.deadline)||0}">${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(text("waiting"))}</p>`:""}</div>
     </div>`);
   }
   function result(game){
@@ -286,6 +300,10 @@
         if(previous&&previous.phase!==data.state.phase)telemetry("arena_phase_completed",previous.phase);
         if(data.state.phase==="result"){remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":data.state.result.outcomes[data.state.selfIndex]);}
       }
+      if(data.type==="ack"&&data.status&&data.status!=="ok"){
+        render();
+        if(data.status!=="already_submitted")sfx("error");
+      }
     });
     socket.addEventListener("close",event=>{
       if(state.socket===socket){clearInterval(state.heartbeat);state.heartbeat=null;}
@@ -334,14 +352,22 @@
     if(event.target.matches("[data-arena-club]"))set(CLUB_KEY,event.target.value.trim());
   }
   function selectChoice(button){
+    if(button.disabled)return;
     const [kind,value]=button.dataset.arenaChoice.split(":");
-    if(["draft","market"].includes(kind)){send({type:kind,choice:value});return;}
-    if(kind==="training"){send({type:"training",choice:value});return;}
-    if(kind==="tactics"){send({type:"tactic",choice:value});return;}
+    if(["draft","market","training","tactics"].includes(kind)){
+      const group=button.parentElement;
+      if(group)group.querySelectorAll("button").forEach(item=>{
+        item.disabled=true;item.classList.toggle("is-selected",item===button);item.setAttribute("aria-pressed",String(item===button));
+      });
+      const type=kind==="tactics"?"tactic":kind;
+      if(!send({type,choice:value})&&group)group.querySelectorAll("button").forEach(item=>{item.disabled=false;item.classList.remove("is-selected");item.setAttribute("aria-pressed","false");});
+      return;
+    }
     const group=button.closest(".arena-choice-grid");group.querySelectorAll("button").forEach(item=>item.classList.toggle("is-selected",item===button));
+    group.querySelectorAll("button").forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
     const phase=button.closest(".arena-phase");if(phase)phase.dataset[kind]=value;
     const submit=phase&&phase.querySelector('[data-arena-action="submit-setup"]');
-    if(submit)submit.disabled=!(phase.dataset.formations&&phase.dataset.styles&&phase.dataset.chairmen);
+    if(submit)submit.disabled=!(phase.dataset.formations&&phase.dataset.styles);
   }
   function onClick(event){
     const choice=event.target.closest("[data-arena-choice]");if(choice){selectChoice(choice);return;}
@@ -357,7 +383,7 @@
     if(action==="cancel"){disconnect(true);loadPortal();return;}
     if(action==="ready"){send({type:"ready"});return;}
     if(action==="submit-setup"){
-      const phase=button.closest(".arena-phase");send({type:"setup",choice:{formation:phase.dataset.formations,style:phase.dataset.styles,chairman:phase.dataset.chairmen}});return;
+      const phase=button.closest(".arena-phase");button.disabled=true;button.textContent=text("waiting");send({type:"setup",choice:{formation:phase.dataset.formations,style:phase.dataset.styles}});return;
     }
     if(action==="portal"){disconnect(false);loadPortal();return;}
     if(action==="history"){setScreen("history");return;}

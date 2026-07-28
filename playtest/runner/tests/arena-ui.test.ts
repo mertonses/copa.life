@@ -6,7 +6,7 @@ const output=path.resolve(__dirname,"../../../outputs/ui-visuals/arena");
 const profile={publicId:"AC-QA",clubName:"Uzun Yolculuk Spor Kulübü",rating:1284,division:"gumus",seasonKey:"2026-Q3",seasonPoints:184,wins:12,draws:4,losses:7,streak:3,tokenProgress:16,cosmetics:["arena_badge_rookie","arena_frame_floodlights"]};
 const self={owner:"self",clubName:profile.clubName,rating:1284,ready:false,setup:null,draft:[],market:null,training:null,tactics:[],connected:true};
 const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connected:true,setup:null,draftCount:0,draft:[],market:null,training:null,tacticLocked:false};
-const base={protocol:1,rulesVersion:"arena-rules-v2",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,team:null,opponentTeam:null};
+const base={protocol:1,rulesVersion:"arena-rules-v3",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -87,6 +87,12 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await page.evaluate(()=>(globalThis as any).setLang("en"));
 
   await setRoom(page,{...base,phase:"setup"});
+  await expect(page.locator(".arena-choice-grid.chairmen")).toHaveCount(0);
+  await expect(page.locator(".arena-fixed-chairman")).toContainText("BABACAN");
+  await page.locator('[data-arena-choice="formations:4-4-2"]').click();
+  await page.locator('[data-arena-choice="styles:balanced"]').click();
+  await expect(page.locator('[data-arena-action="submit-setup"]')).toBeEnabled();
+  await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
   await capture(page,"03-web-arena-setup.png");
 
   const offers=[
@@ -94,7 +100,9 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
     {id:"gk-0-b",line:"GK",name:"Diego Carlos",power:75,cost:3,chemistry:1,trait:"reliable"},
     {id:"gk-0-c",line:"GK",name:"Muhammed Emin Uzunyol",power:83,cost:6,chemistry:-1,trait:"star"}
   ];
-  await setRoom(page,{...base,phase:"draft",draftStep:0,offers,team:{budget:21,power:73,chemistry:2}});
+  await setRoom(page,{...base,phase:"draft",draftStep:0,offers,self:{...self,draft:[offers[1]]},draftStatus:{count:1,total:11,budget:45,power:75}});
+  await expect(page.locator(".arena-offers .is-selected")).toContainText("SELECTED");
+  await expect(page.locator(".arena-draft-progress")).toContainText("1 / 11");
   await capture(page,"04-web-arena-draft.png");
 
   const market=[
@@ -106,7 +114,8 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await setRoom(page,{...base,phase:"market",offers:market,team:{budget:8,power:76,chemistry:3}});
   await capture(page,"05-web-arena-market.png");
 
-  await setRoom(page,{...base,phase:"training",team:{budget:8,power:76,chemistry:3}});
+  await setRoom(page,{...base,phase:"training",self:{...self,training:"chemistry"},team:{budget:8,power:76,chemistry:3}});
+  await expect(page.locator(".arena-choice-grid .is-selected")).toContainText("SELECTED");
   await capture(page,"06-web-arena-training.png");
 
   await setRoom(page,{...base,phase:"live",window:1,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:49,type:"goal",side:"away"}],self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"}},team:{power:76},opponentTeam:{power:75}});
@@ -139,11 +148,15 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(portal.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(portal.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     await capture(page,`android-${viewport.name}-hub.png`);
-    await setRoom(page,{...base,phase:"draft",draftStep:4,offers:[
+    const mobileOffers=[
       {id:"st-a",line:"ST",name:"Can Kaya",power:68,cost:1,chemistry:2,trait:"connector"},
       {id:"st-b",line:"ST",name:"Luca Rossi",power:76,cost:3,chemistry:1,trait:"reliable"},
       {id:"st-c",line:"ST",name:"Abdurrahman Demircioğlu",power:84,cost:6,chemistry:-1,trait:"star"}
-    ],team:{budget:6,power:77,chemistry:2}});
+    ];
+    const mobileDraft=[...Array(10)].map((_,index)=>({id:`pick-${index}`,line:"MID",name:`Player ${index}`,power:72,cost:1,chemistry:0})).concat(mobileOffers[1]);
+    await setRoom(page,{...base,phase:"draft",draftStep:10,offers:mobileOffers,self:{...self,draft:mobileDraft},draftStatus:{count:11,total:11,budget:32,power:73}});
+    await expect(page.locator(".arena-draft-progress")).toContainText("11 / 11");
+    await expect(page.locator(".arena-offers .is-selected")).toBeVisible();
     const draft=await audit(page);
     expect(draft.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(draft.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
