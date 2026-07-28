@@ -27,12 +27,12 @@ test("Son Dans uses the safer final-only COMMON and DARK values",async({page})=>
     const healthy=game.picksBySlot.filter(Boolean).map((player:any)=>({...player,injured:false}));
     const injured=healthy.map((player:any,index:number)=>index===0?{...player,injured:true}:player);
     game.cardVariant.son_dans=0;
-    const commonHealthy=game.cardEff("son_dans",healthy,6);
-    const commonInjured=game.cardEff("son_dans",injured,6);
-    const early=game.cardEff("son_dans",healthy,5);
+    const commonHealthy=game.cardEff("son_dans",healthy,7);
+    const commonInjured=game.cardEff("son_dans",injured,7);
+    const early=game.cardEff("son_dans",healthy,6);
     game.cardVariant.son_dans=1;
-    const darkHealthy=game.cardEff("son_dans",healthy,6);
-    const darkInjured=game.cardEff("son_dans",injured,6);
+    const darkHealthy=game.cardEff("son_dans",healthy,7);
+    const darkInjured=game.cardEff("son_dans",injured,7);
     return{commonHealthy,commonInjured,darkHealthy,darkInjured,early};
   });
   expect(values).toEqual({
@@ -49,7 +49,7 @@ test("Kurban Belli injury cost reads as one natural text flow in a narrow card",
   await page.evaluate(()=>{
     const game=globalThis as any;
     game.budget=100;
-    game.shopOffers=["kurban_belli"];
+    game.shopOffers=["kurban_belli","taraftar","genc"];
     game.shopVariants.kurban_belli=1;
     game.renderHub();
   });
@@ -115,6 +115,7 @@ test("Piyango creates, persists and consumes the fixed two-round coupon",async({
   const state=await page.evaluate(()=>{
     const game=globalThis as any;
     game.round=6;
+    game.budget=100;
     game.chairmanMarketMod=()=>0;
     game.lotteryCouponAmount=0;
     game.lotteryCouponTurns=0;

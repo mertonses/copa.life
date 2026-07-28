@@ -73,7 +73,17 @@ test("Android comfort text sizes persist and settings controls are easy to tap",
   }));
   expect(sizes.every(size=>size.width>=44&&size.height>=48)).toBe(true);
 
-  await page.locator('[data-mobile-text-scale="130"]').click();
+  for(const scale of ["100","115","130"]){
+    await page.locator(`[data-mobile-text-scale="${scale}"]`).click();
+    await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale",scale);
+    await expect(page.locator(`[data-mobile-text-scale="${scale}"]`)).toHaveAttribute("aria-pressed","true");
+    const layout=await page.evaluate(()=>({
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+      clipped:[...document.querySelectorAll<HTMLElement>("#settingsMenu button")].filter(button=>button.scrollWidth>button.clientWidth+1||button.scrollHeight>button.clientHeight+1).map(button=>button.id||button.textContent?.trim())
+    }));
+    expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+    expect(layout.clipped).toEqual([]);
+  }
   await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale","130");
   await expect(page.locator('[data-mobile-text-scale="130"]')).toHaveAttribute("aria-pressed","true");
   expect(await page.evaluate(()=>localStorage.getItem("copa_mobile_text_scale"))).toBe("130");

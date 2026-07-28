@@ -38,11 +38,12 @@ const json=(request,env,body,status=200)=>new Response(JSON.stringify(body),{sta
 const randomId=(prefix,bytes=16)=>{const data=new Uint8Array(bytes);crypto.getRandomValues(data);return prefix+Array.from(data,value=>value.toString(16).padStart(2,"0")).join("").toUpperCase();};
 const nowIso=()=>new Date().toISOString();
 const futureIso=ms=>new Date(Date.now()+ms).toISOString();
+const jsonArray=value=>{try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch(_){return[];}};
 const tokenFrom=request=>{const token=String(request.headers.get("x-copa-arena-token")||"");return ARENA_TOKEN.test(token)?token:"";};
 const clientFrom=request=>{const client=String(request.headers.get("x-copa-client")||"");return CLIENT_ID.test(client)?client:"";};
 const timingSafe=(a,b)=>{
   const one=new TextEncoder().encode(String(a)),two=new TextEncoder().encode(String(b));if(one.length!==two.length)return false;
-  let diff=0;for(let index=0;index<one.length;index++)diff|=one[index]^two[index];return diff===0;
+  return crypto.subtle.timingSafeEqual(one,two);
 };
 async function sha(value){
   const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(String(value)));
@@ -55,7 +56,17 @@ async function identity(request){
 }
 async function body(request,limit=MAX_BODY_BYTES){
   const length=Number(request.headers.get("content-length")||0);if(length>limit)throw new Error("payload_too_large");
-  const text=await request.text();if(new TextEncoder().encode(text).byteLength>limit)throw new Error("payload_too_large");
+  if(!request.body)return JSON.parse("");
+  const reader=request.body.getReader(),decoder=new TextDecoder();let size=0,text="";
+  try{
+    while(true){
+      const {done,value}=await reader.read();if(done)break;
+      size+=value.byteLength;
+      if(size>limit){await reader.cancel("payload_too_large");throw new Error("payload_too_large");}
+      text+=decoder.decode(value,{stream:true});
+    }
+    text+=decoder.decode();
+  }finally{reader.releaseLock();}
   return JSON.parse(text);
 }
 function clubName(value){
@@ -82,7 +93,7 @@ function profile(row){
     losses:Number(row.losses)||0,
     streak:Number(row.streak)||0,
     tokenProgress:Number(row.token_progress)||0,
-    cosmetics:JSON.parse(row.cosmetics||"[]")
+    cosmetics:jsonArray(row.cosmetics)
   };
 }
 async function ensureProfile(env,owner,name){
@@ -116,7 +127,7 @@ async function recentOpponents(env,owner,limit=3){
   return (rows.results||[]).map(row=>row.home_owner===owner?row.away_owner:row.home_owner).filter(Boolean);
 }
 async function rateLimit(env,request,name,limit=20){
-  const binding=env.ARENA_LIMITER;if(!binding)return true;
+  const binding=name==="session"?(env.ARENA_SESSION_LIMITER||env.ARENA_LIMITER):env.ARENA_LIMITER;if(!binding)return true;
   const id=await identity(request);const key=id?`${name}:${id.owner}`:`${name}:anonymous`;
   const outcome=await binding.limit({key});return !!outcome.success;
 }
@@ -127,7 +138,7 @@ function metric(env,event,detail="",value=0){
 async function grantCosmetics(env,owner){
   const row=await env.DB.prepare("SELECT token_progress,cosmetics,season_key FROM arena_profiles WHERE owner_hash=?").bind(owner).first();
   if(!row)return [];
-  const owned=new Set(JSON.parse(row.cosmetics||"[]")),granted=[];
+  const owned=new Set(jsonArray(row.cosmetics)),granted=[];
   for(const reward of COSMETIC_REWARDS){
     if(Number(row.token_progress)<reward.at||owned.has(reward.id))continue;
     owned.add(reward.id);granted.push(reward.id);
@@ -191,6 +202,7 @@ export class ArenaMatchmaker extends DurableObject{
       used.add(home.owner);used.add(away.owner);
       this.ctx.storage.sql.exec("UPDATE queue SET status='matching' WHERE owner IN (?,?)",home.owner,away.owner);
       const matchId=randomId("AR-",12),seed=randomId("",16);
+      let committed=false;
       try{
         const room=this.env.ARENA_ROOM.getByName(matchId);
         const access=await room.init(matchId,[
@@ -201,13 +213,18 @@ export class ArenaMatchmaker extends DurableObject{
           this.env.DB.prepare("UPDATE arena_presence SET status='match',match_id=?,expires_at=?,updated_at=? WHERE owner_hash=?").bind(matchId,futureIso(45*60_000),nowIso(),home.owner),
           this.env.DB.prepare("UPDATE arena_presence SET status='match',match_id=?,expires_at=?,updated_at=? WHERE owner_hash=?").bind(matchId,futureIso(45*60_000),nowIso(),away.owner)
         ]);
-        sockets.get(home.socket_id).send(JSON.stringify({type:"matched",matchId,roomToken:access[home.owner]}));
-        sockets.get(away.socket_id).send(JSON.stringify({type:"matched",matchId,roomToken:access[away.owner]}));
         this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner IN (?,?)",home.owner,away.owner);
         this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner IN (?,?)",home.owner,away.owner);
+        committed=true;
+        for(const row of [home,away]){
+          try{sockets.get(row.socket_id).send(JSON.stringify({type:"matched",matchId,roomToken:access[row.owner]}));}
+          catch(error){console.error("arena_match_delivery_failed",matchId,row.owner,error);}
+        }
       }catch(error){
-        this.ctx.storage.sql.exec("UPDATE queue SET status='queued' WHERE owner IN (?,?)",home.owner,away.owner);
-        for(const row of [home,away])try{sockets.get(row.socket_id).send(JSON.stringify({type:"error",code:"match_creation_failed"}));}catch(_){}
+        if(!committed){
+          this.ctx.storage.sql.exec("UPDATE queue SET status='queued' WHERE owner IN (?,?)",home.owner,away.owner);
+          for(const row of [home,away])try{sockets.get(row.socket_id).send(JSON.stringify({type:"error",code:"match_creation_failed"}));}catch(_){}
+        }
         console.error("arena_pair_failed",error);
       }
     }
@@ -273,6 +290,10 @@ export class ArenaRoom extends DurableObject{
     };
     this.persist();await this.ctx.storage.setAlarm(this.state.deadline);
     return access;
+  }
+  accessFor(owner){
+    if(!this.state||!Object.hasOwn(this.state.access,owner))return "";
+    return this.state.access[owner];
   }
   async fetch(request){
     if(!this.state)return new Response("Not Found",{status:404});
@@ -430,8 +451,7 @@ export class ArenaRoom extends DurableObject{
     const match=this.state,created=nowIso(),season=seasonKey();
     const existing=await this.env.DB.prepare("SELECT match_id FROM arena_matches WHERE match_id=?").bind(match.matchId).first();
     if(existing){
-      await this.attachResultProfiles();
-      this.state.resultRecorded=true;this.persist();return true;
+      return this.finalizeRecordedResult(outcomes,false);
     }
     const currentProfiles=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
     const rulesVersion=match.rulesVersion||(match.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1");
@@ -441,22 +461,29 @@ export class ArenaRoom extends DurableObject{
     ];
     for(let index=0;index<2&&!match.result.voided;index++){
       const player=match.players[index],rating=Number(currentProfiles[index].rating),opponentRating=Number(currentProfiles[index===0?1:0].rating),reward=rewardFor(outcomes[index],rating,opponentRating);
+      const settlementToken=randomId("AS-",16);
       if(match.result.forfeitIndex===index){reward.seasonPoints=0;reward.tokenProgress=0;}
-      statements.push(this.env.DB.prepare("INSERT OR IGNORE INTO arena_match_players(match_id,owner_hash,outcome,rating_before,rating_delta,season_points,token_progress,created_at) VALUES(?,?,?,?,?,?,?,?)")
-        .bind(match.matchId,player.owner,outcomes[index],rating,reward.ratingDelta,reward.seasonPoints,reward.tokenProgress,created));
+      statements.push(this.env.DB.prepare("INSERT OR IGNORE INTO arena_match_players(match_id,owner_hash,outcome,rating_before,rating_delta,season_points,token_progress,created_at,settlement_token) VALUES(?,?,?,?,?,?,?,?,?)")
+        .bind(match.matchId,player.owner,outcomes[index],rating,reward.ratingDelta,reward.seasonPoints,reward.tokenProgress,created,settlementToken));
       const win=outcomes[index]==="win"?1:0,draw=outcomes[index]==="draw"?1:0,loss=outcomes[index]==="loss"?1:0,streak=win?1:0;
-      statements.push(this.env.DB.prepare("UPDATE arena_profiles SET rating=MAX(700,MIN(1900,rating+?)),season_key=?,season_points=season_points+?,wins=wins+?,draws=draws+?,losses=losses+?,streak=CASE WHEN ?=1 THEN MAX(1,streak+1) ELSE 0 END,token_progress=token_progress+?,updated_at=? WHERE owner_hash=?")
-        .bind(reward.ratingDelta,season,reward.seasonPoints,win,draw,loss,streak,reward.tokenProgress,created,player.owner));
+      statements.push(this.env.DB.prepare("UPDATE arena_profiles SET rating=MAX(700,MIN(1900,rating+?)),season_key=?,season_points=season_points+?,wins=wins+?,draws=draws+?,losses=losses+?,streak=CASE WHEN ?=1 THEN MAX(1,streak+1) ELSE 0 END,token_progress=token_progress+?,updated_at=? WHERE owner_hash=? AND EXISTS (SELECT 1 FROM arena_match_players WHERE match_id=? AND owner_hash=? AND settlement_token=?)")
+        .bind(reward.ratingDelta,season,reward.seasonPoints,win,draw,loss,streak,reward.tokenProgress,created,player.owner,match.matchId,player.owner,settlementToken));
     }
     try{
       await this.env.DB.batch(statements);
+      return this.finalizeRecordedResult(outcomes,true);
+    }catch(error){console.error("arena_result_write_failed",match.matchId,error);return false;}
+  }
+  async finalizeRecordedResult(outcomes,writeMetric){
+    const match=this.state;
+    try{
       for(const player of match.players)await grantCosmetics(this.env,player.owner);
       await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash IN (?,?) AND match_id=?").bind(match.players[0].owner,match.players[1].owner,match.matchId).run();
       await this.attachResultProfiles();
       this.state.resultRecorded=true;this.persist();
-      metric(this.env,"match_completed",match.result.voided?"void":outcomes.join("-"),match.score[0]+match.score[1]);
+      if(writeMetric)metric(this.env,"match_completed",match.result.voided?"void":outcomes.join("-"),match.score[0]+match.score[1]);
       return true;
-    }catch(error){console.error("arena_result_write_failed",match.matchId,error);return false;}
+    }catch(error){console.error("arena_result_finalize_failed",match.matchId,error);return false;}
   }
   async attachResultProfiles(){
     const profiles=await Promise.all(this.state.players.map(player=>ensureProfile(this.env,player.owner,"")));
@@ -584,6 +611,15 @@ async function handleSession(request,env){
   if(!MODES.has(mode))return json(request,env,{error:"invalid_mode"},422);
   const row=await ensureProfile(env,id.owner,name);
   await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const activeMatch=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=? AND status='match' AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  if(activeMatch&&ROOM_ID.test(String(activeMatch.match_id||""))){
+    const room=env.ARENA_ROOM.getByName(activeMatch.match_id),roomToken=await room.accessFor(id.owner);
+    if(roomToken){
+      await env.DB.prepare("DELETE FROM arena_tickets WHERE owner_hash=? AND consumed_at IS NULL").bind(id.owner).run();
+      return json(request,env,{recoverMatch:{matchId:activeMatch.match_id,roomToken},profile:profile(row)},200);
+    }
+    await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(id.owner,activeMatch.match_id).run();
+  }
   const recoverable=await env.DB.prepare("SELECT ticket_hash FROM arena_tickets WHERE owner_hash=? AND consumed_at IS NULL AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
   if(recoverable){
     await env.DB.batch([

@@ -18,6 +18,11 @@ const waitMessage=(socket,type,timeout=2000)=>new Promise((resolve,reject)=>{
   };
   socket.addEventListener("message",listener);
 });
+const ownerFor=async suffix=>{
+  const token=headers(suffix)["x-copa-arena-token"];
+  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(`arena-owner:${token}`));
+  return Array.from(new Uint8Array(bytes),item=>item.toString(16).padStart(2,"0")).join("");
+};
 
 beforeEach(async()=>{await applyD1Migrations(env.DB,env.TEST_MIGRATIONS);});
 
@@ -27,6 +32,20 @@ describe("Arena HTTP API",()=>{
     expect(missing.status).toBe(428);
     const invalid=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("invalid"),body:JSON.stringify({clubName:"<script>",mode:"ranked"})});
     expect(invalid.status).toBe(422);
+  });
+
+  it("rejects an oversized streamed body before buffering it",async()=>{
+    const stream=new ReadableStream({
+      start(controller){
+        for(let index=0;index<6;index++)controller.enqueue(new TextEncoder().encode("x".repeat(1024)));
+        controller.close();
+      }
+    });
+    const response=await SELF.fetch("https://arena.test/v1/arena/session",{
+      method:"POST",headers:headers("streamlimit"),body:stream
+    });
+    expect(response.status).toBe(413);
+    expect(await response.json()).toEqual({error:"payload_too_large"});
   });
 
   it("creates a stable profile and a single-use queue ticket",async()=>{
@@ -75,6 +94,22 @@ describe("Arena HTTP API",()=>{
     expect(newSession.ticket).not.toBe(oldSession.ticket);
     const stale=await SELF.fetch(`https://arena.test/v1/arena/connect?ticket=${oldSession.ticket}`,{headers:{...headers("lostticket"),upgrade:"websocket"}});
     expect(stale.status).toBe(401);
+  });
+
+  it("recovers an active match when its matched socket message was lost",async()=>{
+    const suffix="recoverroom",owner=await ownerFor(suffix),matchId="AR-RECOVERY00000001";
+    const first=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(suffix),body:JSON.stringify({clubName:"Dönüş SK",mode:"ranked",region:"weur"})});
+    expect(first.status).toBe(201);
+    const room=env.ARENA_ROOM.getByName(matchId);
+    const access=await room.init(matchId,[
+      {owner,clubName:"Dönüş SK",rating:1000},
+      {owner:"owner-recovery-rival",clubName:"Rakip SK",rating:1000}
+    ],"recovery-seed");
+    await env.DB.prepare("UPDATE arena_presence SET status='match',match_id=?,expires_at=?,updated_at=? WHERE owner_hash=?")
+      .bind(matchId,new Date(Date.now()+60_000).toISOString(),new Date().toISOString(),owner).run();
+    const recovered=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(suffix),body:JSON.stringify({clubName:"Dönüş SK",mode:"ranked",region:"weur"})});
+    expect(recovered.status).toBe(200);
+    expect(await recovered.json()).toMatchObject({recoverMatch:{matchId,roomToken:access[owner]}});
   });
 
   it("deletes Arena identity data without deleting the opponent's match record",async()=>{
@@ -198,6 +233,35 @@ describe("Arena Durable Objects",()=>{
     await runInDurableObject(room,instance=>instance.recordResult(instance.state.result.outcomes));
     const history=await env.DB.prepare("SELECT * FROM arena_match_players WHERE match_id=?").bind("AR-TESTROOM000000001").all();
     expect(history.results).toHaveLength(2);
+  });
+
+  it("settles concurrent duplicate result writes exactly once",async()=>{
+    const matchId="AR-CONCURRENT0000001",created=new Date().toISOString();
+    const players=[
+      {owner:"owner-concurrent-home",clubName:"Tek Yazım Ev",rating:1000},
+      {owner:"owner-concurrent-away",clubName:"Tek Yazım Dep",rating:1000}
+    ];
+    await env.DB.batch(players.map((player,index)=>
+      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(player.owner,`AC-CONCUR${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
+    ));
+    const room=env.ARENA_ROOM.getByName(matchId);
+    await room.init(matchId,players,"concurrent-seed");
+    await runInDurableObject(room,async instance=>{
+      instance.state.score=[2,1];
+      instance.state.result={
+        score:[2,1],outcomes:["win","loss"],penalty:null,forfeitIndex:null,voided:false,
+        teams:[{},{}],rulesVersion:instance.state.rulesVersion
+      };
+      const outcomes=instance.state.result.outcomes;
+      expect(await Promise.all([instance.recordResult(outcomes),instance.recordResult(outcomes)])).toEqual([true,true]);
+    });
+    const profiles=await env.DB.prepare("SELECT owner_hash,wins,draws,losses FROM arena_profiles WHERE owner_hash LIKE 'owner-concurrent-%' ORDER BY owner_hash").all();
+    expect(profiles.results).toHaveLength(2);
+    expect(profiles.results.reduce((total,row)=>total+row.wins+row.draws+row.losses,0)).toBe(2);
+    const settlements=await env.DB.prepare("SELECT owner_hash,settlement_token FROM arena_match_players WHERE match_id=?").bind(matchId).all();
+    expect(settlements.results).toHaveLength(2);
+    expect(settlements.results.every(row=>String(row.settlement_token).startsWith("AS-"))).toBe(true);
   });
 
   it("does not award progression when both players abandon the match",async()=>{
