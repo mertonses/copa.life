@@ -18,13 +18,25 @@
     if(state.round!==value){state.round=value;state.choices=[];state.lastEffects=null;}
   }
   function spent(){return state.choices.reduce((sum,item)=>sum+(item.intensity==="intense"?2:1),0);}
+  function playDrillSound(id){
+    const sounds={
+      finishing:()=>typeof root.sfxKick==="function"&&root.sfxKick(7),
+      defence:()=>typeof root.sfxStamp==="function"&&root.sfxStamp(),
+      setpieces:()=>typeof root.sfxWhistle==="function"&&root.sfxWhistle(),
+      penalties:()=>typeof root.sfxTick==="function"&&root.sfxTick(),
+      cohesion:()=>typeof root.sfxSeat==="function"&&root.sfxSeat(),
+      recovery:()=>typeof root.sfxSave==="function"&&root.sfxSave(),
+      analysis:()=>typeof root.sfxFormation==="function"&&root.sfxFormation()
+    };
+    try{if(sounds[id])sounds[id]();}catch(_){}
+  }
   function select(id,intensity,round){
     ensureRound(round||state.round);
     if(!DRILLS[id])return false;
     const level=intensity==="intense"?"intense":"light",cost=level==="intense"?2:1;
     let next=state.choices.filter(item=>item.id!==id);
     if(next.reduce((sum,item)=>sum+(item.intensity==="intense"?2:1),0)+cost>2)next=[];
-    next.push({id,intensity:level});state.choices=next;state.lastEffects=null;render();return true;
+    next.push({id,intensity:level});state.choices=next;state.lastEffects=null;playDrillSound(id);render();return true;
   }
   function clear(id){state.choices=state.choices.filter(item=>item.id!==id);state.lastEffects=null;render();}
   function repeatFactor(id){const streak=Math.max(0,Number(state.streaks[id])||0);return streak===0?1:streak===1?.7:.45;}
@@ -101,7 +113,7 @@
       const drill=DRILLS[id],streak=state.streaks[id]||0;
       const score=relevance(id,state.round,state.opponent),recommended=id===ordered[0]||score>=4;
       const badge=recommended?`<mark>${tr()?"BU MAÇ ÖNERİLİR":"RECOMMENDED"}</mark>`:score===0?`<mark class="is-muted">${tr()?"DÜŞÜK ÖNCELİK":"LOW PRIORITY"}</mark>`:"";
-      return`<article class="prep-drill${recommended?" is-recommended":""}" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b>${badge}<small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
+      return`<article class="prep-drill prep-kind-${drill.kind}${recommended?" is-recommended":""}" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b>${badge}<small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
     }).join("");
     root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><div class="prep-title-row"><div><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></div><button type="button" class="prep-help" aria-expanded="false" onclick="const note=this.closest('.prep-modal').querySelector('.prep-help-note');note.hidden=!note.hidden;this.setAttribute('aria-expanded',String(!note.hidden))">?</button></div><aside class="prep-help-note" hidden>${tr()?"Toplam 2 puanın var. İki farklı hafif çalışma veya tek bir yoğun çalışma seçebilirsin. Dolu bir plan varken başka seçeneğe dokunursan plan yeni seçime geçer.":"You have 2 points: choose two light drills or one intense drill. Selecting another drill when the plan is full replaces the plan."}</aside></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
     render();

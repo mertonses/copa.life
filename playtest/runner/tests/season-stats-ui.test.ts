@@ -4,7 +4,7 @@ async function prepareCompletedRun(page:Page,path:string){
   const errors:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));
   await page.goto(path,{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const game=globalThis as any;
     if(game.COPA_IS_NATIVE){
       localStorage.setItem("copa_online_features_onboarding_v1",JSON.stringify({
@@ -12,11 +12,11 @@ async function prepareCompletedRun(page:Page,path:string){
         action:"test_fixture",accepted_at:new Date().toISOString()
       }));
     }
-    game.quickStart();
-    game.quickAll();
+    await game.quickStart();
+    await game.quickAll();
   });
   await page.locator("#postClubName").fill("Season Visual XI");
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const game=globalThis as any;
     game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();
     game.setCaptain(0);
@@ -51,7 +51,7 @@ async function prepareShortPenaltyRun(page:Page,path:string){
   const errors:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));
   await page.goto(path,{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{
+  await page.evaluate(async()=>{
     const game=globalThis as any;
     if(game.COPA_IS_NATIVE){
       localStorage.setItem("copa_online_features_onboarding_v1",JSON.stringify({
@@ -59,8 +59,8 @@ async function prepareShortPenaltyRun(page:Page,path:string){
         action:"test_fixture",accepted_at:new Date().toISOString()
       }));
     }
-    game.quickStart();
-    game.quickAll();
+    await game.quickStart();
+    await game.quickAll();
   });
   await page.locator("#postClubName").fill("DERD");
   await page.evaluate(()=>{

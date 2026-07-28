@@ -178,7 +178,7 @@ for(const theme of ["dark"] as const){
     await expectReadable(page,`${theme} player profile`);
     await page.locator(".player-profile-close").click();
 
-    await page.locator("#advancedToggle").click();
+    await page.evaluate(async()=>{await (globalThis as any).CopaLazy.openAdvancedSettings();});
     await expect(page.locator("[data-advanced-settings]")).toBeVisible();
     await expectReadable(page,`${theme} advanced settings`);
     expect(errors).toEqual([]);
@@ -188,7 +188,7 @@ for(const theme of ["dark"] as const){
 test("the dark-only theme remains readable on the mobile hub and decision modal",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="mobile-chromium","phone theme audit");
   await page.goto("/?mobile-theme-audit=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Tema Test FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});

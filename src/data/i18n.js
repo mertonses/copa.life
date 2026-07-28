@@ -649,7 +649,6 @@ function _applyCopaLocaleUi(){
  var footerContact=document.querySelector(".footer-link[onclick*='openContactForm']");
  if(footerContact){var footerIcon=footerContact.querySelector("svg");footerContact.replaceChildren();if(footerIcon)footerContact.appendChild(footerIcon);footerContact.appendChild(document.createTextNode(copy.contact));}
  if(window.CopaFaq&&typeof window.CopaFaq.refreshFooter==="function")window.CopaFaq.refreshFooter(LANG);
- var ribbon=document.querySelector(".country-new-ribbon");if(ribbon){ribbon.textContent=copy.newLabel;ribbon.setAttribute("aria-label",copy.newLabel);}
  document.documentElement.style.setProperty("--copa-active-effects",JSON.stringify(copy.activeEffects));
  document.documentElement.style.setProperty("--copa-no-events",JSON.stringify(copy.noEvents));
  var guide=document.getElementById("howtoToggle");

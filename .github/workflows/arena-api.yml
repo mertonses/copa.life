@@ -1,0 +1,64 @@
+name: Copa Arena API
+
+on:
+  pull_request:
+    paths:
+      - 'services/copa-arena-api/**'
+      - 'src/data/players.js'
+      - 'src/data/players_*.js'
+      - 'tools/build-arena-player-catalog.mjs'
+      - '.github/workflows/arena-api.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/copa-arena-api/**'
+      - 'src/data/players.js'
+      - 'src/data/players_*.js'
+      - 'tools/build-arena-player-catalog.mjs'
+      - '.github/workflows/arena-api.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: copa-arena-api-production
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: services/copa-arena-api
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/copa-arena-api/package-lock.json
+      - run: npm ci
+      - run: node ../../tools/build-arena-player-catalog.mjs --check
+      - run: npm run check
+
+  deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx wrangler d1 migrations apply copa-life-arena --remote --config wrangler.jsonc
+      - run: npx wrangler deploy --config wrangler.jsonc
+      - run: node scripts/check-health.mjs

@@ -43,6 +43,12 @@ jobs:
       - name: Test Ghost API
         run: npm run check --prefix services/ghost-club-api
 
+      - name: Install Copa Arena API dependencies
+        run: npm ci --prefix services/copa-arena-api
+
+      - name: Test Copa Arena API
+        run: npm run check --prefix services/copa-arena-api
+
       - name: Install browser test dependencies
         run: npm ci --prefix playtest/runner
 

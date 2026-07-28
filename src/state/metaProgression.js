@@ -4,13 +4,14 @@
 
   const STORAGE_KEY="copa_meta_progression_v1";
   const FORMAT="copa-life-save";
-  const VERSION=2;
+  const VERSION=4;
   const ARCHIVE_LIMIT=20;
   const MUSEUM_LIMIT=60;
   const HALL_LIMIT=11;
   const LICENSE_LEVELS=new Set([3,5,7,9,12,15]);
   const STYLES=new Set(["gegen","kontra","tiki","uzun","blok"]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
+  const CLUB_FILE_IDS=new Set(["debt","youth","tactics"]);
   const BADGES=Object.freeze({
     first_run:["İlk Adım","First Step"],
     finalist:["Son Perde","Final Act"],
@@ -26,7 +27,9 @@
     mastery:{styles:{},formations:{},chairmen:{}},
     badges:[],
     archive:[],
-    museum:{memories:[],hall:[]}
+    museum:{memories:[],hall:[],collections:{claimed:[],stories:[],kits:[],crests:[],tokens:0,selectedKit:"",selectedCrest:""}},
+    clubFiles:{completed:{debt:0,youth:0,tactics:0},claimed:[]},
+    chairHistory:{}
   });
   const safeGet=()=>{try{return localStorage.getItem(STORAGE_KEY);}catch(_){return null;}};
   const safeSet=value=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value));return true;}catch(_){return false;}};
@@ -103,12 +106,28 @@
     const archive=(Array.isArray(source.archive)?source.archive:[]).map(cleanArchiveEntry).filter(Boolean);
     const uniqueArchive=[];for(const item of archive){const at=uniqueArchive.findIndex(entry=>entry.id===item.id);if(at>=0)uniqueArchive.splice(at,1);uniqueArchive.push(item);}
     const museumSource=object(source.museum)?source.museum:{};
+    const collectionSource=object(museumSource.collections)?museumSource.collections:{};
+    const claimed=Array.from(new Set((Array.isArray(collectionSource.claimed)?collectionSource.claimed:[]).map(value=>text(value,40)).filter(Boolean)));
+    const cosmetics=value=>Array.from(new Set((Array.isArray(value)?value:[]).map(item=>text(item,40)).filter(Boolean)));
     const memories=(Array.isArray(museumSource.memories)?museumSource.memories:[]).map(cleanMemory).filter(Boolean);
     const uniqueMemories=[];for(const item of memories){const at=uniqueMemories.findIndex(entry=>entry.id===item.id);if(at>=0)uniqueMemories.splice(at,1);uniqueMemories.push(item);}
     const memoryIds=new Set(uniqueMemories.map(item=>item.id));
     const hall=(Array.isArray(museumSource.hall)?museumSource.hall:[]).filter(item=>object(item)&&memoryIds.has(item.runId)).map(item=>({
       runId:text(item.runId,40),playerId:text(item.playerId,40)
     })).filter((item,index,list)=>list.findIndex(other=>other.runId===item.runId&&other.playerId===item.playerId)===index).slice(0,HALL_LIMIT);
+    const clubSource=object(source.clubFiles)?source.clubFiles:{},historySource=object(source.chairHistory)?source.chairHistory:{};
+    const clubClaimed=Array.from(new Set((Array.isArray(clubSource.claimed)?clubSource.claimed:[]).map(item=>text(item,32)).filter(item=>CLUB_FILE_IDS.has(item)||item==="club_files_set")));
+    const chairHistory={};
+    for(const [chairId,raw] of Object.entries(historySource)){
+      if(!/^[a-z_]{2,24}$/.test(chairId)||!object(raw))continue;
+      const decisions=object(raw.decisions)?countMap(raw.decisions,key=>/^[a-z_]{2,32}$/.test(key)):{};
+      chairHistory[chairId]={
+        runs:integer(raw.runs,0,1000000),decisionCount:integer(raw.decisionCount,0,1000000),
+        positive:integer(raw.positive,0,1000000),negative:integer(raw.negative,0,1000000),decisions,
+        lastOutcome:/^[a-z_]{2,32}$/.test(String(raw.lastOutcome||""))?String(raw.lastOutcome):"",
+        lastPositive:!!raw.lastPositive,lastRunId:text(raw.lastRunId,40)
+      };
+    }
     return {
       version:VERSION,
       career:{
@@ -123,7 +142,13 @@
       },
       badges:Array.from(new Set((Array.isArray(source.badges)?source.badges:[]).filter(key=>Object.hasOwn(BADGES,key)))),
       archive:uniqueArchive.slice(-ARCHIVE_LIMIT),
-      museum:{memories:uniqueMemories.slice(-MUSEUM_LIMIT),hall}
+      museum:{memories:uniqueMemories.slice(-MUSEUM_LIMIT),hall,collections:{
+        claimed,stories:cosmetics(collectionSource.stories),kits:cosmetics(collectionSource.kits),crests:cosmetics(collectionSource.crests),tokens:integer(collectionSource.tokens,0,3),
+        selectedKit:cosmetics(collectionSource.kits).includes(text(collectionSource.selectedKit,40))?text(collectionSource.selectedKit,40):"",
+        selectedCrest:cosmetics(collectionSource.crests).includes(text(collectionSource.selectedCrest,40))?text(collectionSource.selectedCrest,40):""
+      }},
+      clubFiles:{completed:Object.assign({debt:0,youth:0,tactics:0},countMap(clubSource.completed,key=>CLUB_FILE_IDS.has(key))),claimed:clubClaimed},
+      chairHistory
     };
   }
   let state=(()=>{try{return normalize(JSON.parse(safeGet()||"null"));}catch(_){return empty();}})();
@@ -131,6 +156,89 @@
   const addBadge=key=>{if(Object.hasOwn(BADGES,key)&&!state.badges.includes(key))state.badges.push(key);};
   const increment=(map,key)=>{if(key)map[key]=integer((map[key]||0)+1,0,1000000);};
   const lockedFormationCount=()=>Array.isArray(global.FORMORDER)?global.FORMORDER.filter(item=>!(global.unlockedForms||[]).includes(item)).length:0;
+  const COLLECTIONS=Object.freeze([
+    {id:"story_first_steps",kind:"story",reward:"story_first_steps",test:()=>state.museum.memories.length>=3},
+    {id:"kit_tactical_journey",kind:"kit",reward:"kit_tactical_journey",test:()=>new Set(state.archive.map(item=>item.style)).size>=3},
+    {id:"crest_boardroom",kind:"crest",reward:"crest_boardroom",test:()=>new Set(state.archive.map(item=>item.chairman)).size>=3},
+    {id:"token_hall_champion",kind:"token",reward:"run_start_token",test:()=>state.archive.some(item=>item.result==="win")&&state.museum.hall.length>=5}
+  ]);
+  function evaluateCollections(){
+    const unlocked=[];
+    for(const collection of COLLECTIONS){
+      if(state.museum.collections.claimed.includes(collection.id)||!collection.test())continue;
+      state.museum.collections.claimed.push(collection.id);
+      if(collection.kind==="story")state.museum.collections.stories.push(collection.reward);
+      else if(collection.kind==="kit")state.museum.collections.kits.push(collection.reward);
+      else if(collection.kind==="crest")state.museum.collections.crests.push(collection.reward);
+      else state.museum.collections.tokens=Math.min(3,state.museum.collections.tokens+1);
+      unlocked.push({id:collection.id,kind:collection.kind,reward:collection.reward});
+    }
+    return unlocked;
+  }
+  function consumeStartToken(){
+    if(state.museum.collections.tokens<1)return 0;
+    state.museum.collections.tokens--;persist();return 1;
+  }
+  function activeCosmetics(){
+    return {
+      kit:state.museum.collections.selectedKit||"",
+      crest:state.museum.collections.selectedCrest||""
+    };
+  }
+  function completeClubFile(id){
+    const key=String(id||"");
+    if(!CLUB_FILE_IDS.has(key))return {ok:false,reason:"invalid"};
+    increment(state.clubFiles.completed,key);
+    const rewards=[],first=!state.clubFiles.claimed.includes(key);
+    if(first){
+      state.clubFiles.claimed.push(key);
+      if(key==="debt"){state.museum.collections.stories.push("story_clean_ledger");rewards.push({kind:"story",id:"story_clean_ledger"});}
+      if(key==="youth"){state.museum.collections.crests.push("crest_academy_threads");rewards.push({kind:"crest",id:"crest_academy_threads"});}
+      if(key==="tactics"){state.museum.collections.kits.push("kit_three_plans");rewards.push({kind:"kit",id:"kit_three_plans"});}
+    }
+    if([...CLUB_FILE_IDS].every(item=>state.clubFiles.claimed.includes(item))&&!state.clubFiles.claimed.includes("club_files_set")){
+      state.clubFiles.claimed.push("club_files_set");
+      state.museum.collections.tokens=Math.min(3,state.museum.collections.tokens+1);
+      rewards.push({kind:"token",id:"run_start_token"});
+    }
+    state.museum.collections.stories=Array.from(new Set(state.museum.collections.stories));
+    state.museum.collections.kits=Array.from(new Set(state.museum.collections.kits));
+    state.museum.collections.crests=Array.from(new Set(state.museum.collections.crests));
+    persist();
+    return {ok:true,first,rewards,completed:state.clubFiles.completed[key]};
+  }
+  function clubFileSummary(){return JSON.parse(JSON.stringify(state.clubFiles));}
+  function chairHistoryFor(chairId){
+    const key=String(chairId||"");
+    return JSON.parse(JSON.stringify(state.chairHistory[key]||{runs:0,decisionCount:0,positive:0,negative:0,decisions:{},lastOutcome:"",lastPositive:false,lastRunId:""}));
+  }
+  function ensureChairHistory(chairId){
+    const key=text(chairId,24);
+    if(!key)return null;
+    if(!state.chairHistory[key])state.chairHistory[key]={runs:0,decisionCount:0,positive:0,negative:0,decisions:{},lastOutcome:"",lastPositive:false,lastRunId:""};
+    return state.chairHistory[key];
+  }
+  function recordChairDecision(chairId,outcomeId,positive){
+    const history=ensureChairHistory(chairId),outcome=text(outcomeId,32);
+    if(!history||!/^[a-z_]{2,32}$/.test(outcome))return false;
+    increment(history.decisions,outcome);history.decisionCount=integer(history.decisionCount+1,0,1000000);
+    if(positive)history.positive=integer(history.positive+1,0,1000000);else history.negative=integer(history.negative+1,0,1000000);
+    history.lastOutcome=outcome;history.lastPositive=!!positive;persist();return true;
+  }
+  function recordChairRun(chairId,runId){
+    const history=ensureChairHistory(chairId),id=text(runId,40);
+    if(!history||!id||history.lastRunId===id)return false;
+    history.runs=integer(history.runs+1,0,1000000);history.lastRunId=id;persist();return true;
+  }
+  function selectCosmetic(kind,id){
+    const field=kind==="kit"?"selectedKit":kind==="crest"?"selectedCrest":"";
+    const owned=kind==="kit"?state.museum.collections.kits:kind==="crest"?state.museum.collections.crests:[];
+    if(!field||!owned.includes(id))return false;
+    state.museum.collections[field]=state.museum.collections[field]===id?"":id;
+    persist();
+    openProgression("museum");
+    return true;
+  }
 
   function reputationFor(value){
     const played=integer(value.playedMatches==null?value.round:value.playedMatches,1,7);
@@ -166,6 +274,7 @@
     increment(state.mastery.styles,entry.style);
     increment(state.mastery.formations,entry.formation);
     increment(state.mastery.chairmen,entry.chairman);
+    recordChairRun(entry.chairman,entry.id);
     addBadge("first_run");if(entry.round>=7)addBadge("finalist");if(entry.result==="win")addBadge("champion");
     if(entry.cash>=0)addBadge("clean_books");if(entry.cards>=5)addBadge("collector");if(entry.ghost)addBadge("ghost_match");
     if(Object.keys(state.mastery.styles).filter(key=>state.mastery.styles[key]>0).length>=STYLES.size)addBadge("six_styles");
@@ -173,6 +282,7 @@
 
     const memory=cleanMemory(Object.assign({},entry,{players:value.players,featuredIndex:value.featuredIndex||0}));
     if(memory)state.museum.memories=state.museum.memories.filter(item=>item.id!==memory.id).concat(memory).slice(-MUSEUM_LIMIT);
+    const collectionsUnlocked=evaluateCollections();
     persist();
     const masteryAfter={
       style:state.mastery.styles[entry.style]||0,
@@ -182,7 +292,7 @@
     return {
       entry,reputation,oldReputation,newReputation,oldLevel,newLevel,licensesEarned,
       licensesAvailable:state.career.licenses,memory,
-      mastery:{before:masteryBefore,after:masteryAfter}
+      mastery:{before:masteryBefore,after:masteryAfter},collectionsUnlocked
     };
   }
 
@@ -215,6 +325,7 @@
       if(state.museum.hall.length>=HALL_LIMIT)return false;
       state.museum.hall.push({runId,playerId});
     }
+    evaluateCollections();
     persist();return true;
   }
 
@@ -292,6 +403,18 @@
   }
   function museumHTML(tr){
     const hall=hallEntries();
+    const claimed=new Set(state.museum.collections.claimed.concat(state.clubFiles.claimed));
+    const collectionData=[
+      ["story_first_steps","story","story_first_steps",tr?"İLK ADIMLAR":"FIRST STEPS",tr?"3 sezon hatırası":"3 run memories",Math.min(3,state.museum.memories.length),3,tr?"Hikâye":"Story"],
+      ["kit_tactical_journey","kit","kit_tactical_journey",tr?"TAKTİK YOLCULUĞU":"TACTICAL JOURNEY",tr?"3 farklı anlayış":"3 different styles",Math.min(3,new Set(state.archive.map(item=>item.style)).size),3,tr?"Forma":"Kit"],
+      ["crest_boardroom","crest","crest_boardroom",tr?"YÖNETİM MASASI":"BOARDROOM",tr?"3 farklı başkan":"3 different chairmen",Math.min(3,new Set(state.archive.map(item=>item.chairman)).size),3,tr?"Arma":"Crest"],
+      ["token_hall_champion","token","run_start_token",tr?"KUPA MİRASI":"CUP LEGACY",tr?"Şampiyonluk + 5 müze oyuncusu":"Champion + 5 Hall players",state.archive.some(item=>item.result==="win")?Math.min(5,hall.length):0,5,tr?"Başlangıç jetonu":"Run-start token"],
+      ["debt","story","story_clean_ledger",tr?"TEMİZ DEFTER":"CLEAN LEDGER",tr?"Kulüp dosyasını tamamla":"Complete the club file",Math.min(1,state.clubFiles.completed.debt||0),1,tr?"Hikâye":"Story"],
+      ["youth","crest","crest_academy_threads",tr?"GENÇ KİMLİK":"YOUTH IDENTITY",tr?"Kulüp dosyasını tamamla":"Complete the club file",Math.min(1,state.clubFiles.completed.youth||0),1,tr?"Arma":"Crest"],
+      ["tactics","kit","kit_three_plans",tr?"TAKTİK ÇEŞİTLİLİK":"TACTICAL VARIETY",tr?"Kulüp dosyasını tamamla":"Complete the club file",Math.min(1,state.clubFiles.completed.tactics||0),1,tr?"Forma":"Kit"],
+      ["club_files_set","token","run_start_token",tr?"KULÜP ARŞİVİ":"CLUB ARCHIVE",tr?"Üç kulüp dosyasını tamamla":"Complete all three club files",state.clubFiles.claimed.filter(id=>CLUB_FILE_IDS.has(id)).length,3,tr?"Tek kontrollü jeton":"One bounded token"]
+    ];
+    const collections=`<section class="meta-collections"><div class="meta-section-heading"><h4>${tr?"MÜZE KOLEKSİYONLARI":"MUSEUM COLLECTIONS"}</h4><small>${claimed.size}/${collectionData.length} · ${tr?"Kalıcı güç vermez":"No permanent power"}</small></div><div class="meta-collection-grid">${collectionData.map(([id,kind,rewardId,title,goal,value,max,reward])=>{const complete=claimed.has(id),selected=(kind==="kit"&&state.museum.collections.selectedKit===rewardId)||(kind==="crest"&&state.museum.collections.selectedCrest===rewardId);return `<article class="${complete?"is-complete":""} ${selected?"is-equipped":""}"><div><small>${goal}</small><b>${title}</b></div><span>${complete?"✓":`${value}/${max}`}</span><p>${reward}</p>${complete&&(kind==="kit"||kind==="crest")?`<button type="button" onclick="CopaMeta.selectCosmetic('${kind}','${rewardId}')">${selected?(tr?"AKTİF":"EQUIPPED"):(tr?"KUŞAN":"EQUIP")}</button>`:""}</article>`;}).join("")}</div>${state.museum.collections.tokens?`<div class="meta-token-bank"><b>${tr?"HAZIR JETON":"TOKEN READY"} · ${state.museum.collections.tokens}</b><span>${tr?"Yeni turun ilk oyuncu krizinde risksiz uzlaşma açar.":"Unlocks a safe compromise in the first player crisis of a new run."}</span></div>`:""}</section>`;
     if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div><section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir turu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
     const hallHTML=hall.length?hall.map(({memory,player})=>`<div class="meta-hall-player"><span>${escapeHTML(player.pos)}</span><b>${escapeHTML(player.name)}</b><small>${player.power} · ${escapeHTML(memory.team)}</small></div>`).join(""):`<div class="meta-inline-empty">${tr?"Hatıralarındaki oyuncuları yıldızlayarak kendi 11'ini kur.":"Star players from your memories to build your own XI."}</div>`;
     const memories=[...state.museum.memories].reverse().map(memory=>{
@@ -305,7 +428,7 @@
         </button>
       </article>`;
     }).join("");
-    return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>
+    return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>${collections}
       <section class="meta-hall-section"><div class="meta-section-heading"><h4>${tr?"SEÇİLİ KADRO":"SELECTED XI"}</h4><small>${tr?"En fazla 11 oyuncu":"Up to 11 players"}</small></div><div class="meta-hall-grid">${hallHTML}</div></section>
       <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"En yeniden eskiye":"Newest first"}</small></div><div class="meta-memory-list">${memories}</div></section>`;
   }
@@ -313,7 +436,8 @@
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level),threshold=levelThreshold(level),nextThreshold=levelThreshold(level+1);
     const earned=Math.max(0,state.career.reputation-threshold),required=Math.max(1,nextThreshold-threshold);
     const progress=Math.max(0,Math.min(100,Math.round(earned/required*100)));
-    return `<section class="meta-career-hero">
+    const activeFile=global.CopaClubFiles&&typeof global.CopaClubFiles.panelMarkup==="function"?global.CopaClubFiles.panelMarkup():"";
+    return `${activeFile}<section class="meta-career-hero">
       <div class="meta-level-lockup"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div>
       <div class="meta-career-progress">
         <div><b>${state.career.reputation.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"İtibar":"Reputation"}</b><small>${earned}/${required}</small></div>
@@ -380,7 +504,7 @@
     const raw=String(code||"").trim();if(raw.length<16||raw.length>500000)throw new Error("invalid_length");
     const parts=raw.split(".");if(parts.length!==3||parts[0]!=="CPS1")throw new Error("invalid_format");
     const body=base64Decode(parts[1]);if(hash(body)!==parts[2])throw new Error("checksum");
-    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
+    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2,3,4].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
     return payload;
   }
   function importCode(code){
@@ -401,7 +525,28 @@
     for(const group of ["styles","formations","chairmen"])for(const [key,count] of Object.entries(imported.mastery[group]))merged.mastery[group][key]=Math.max(merged.mastery[group][key]||0,count);
     merged.badges=Array.from(new Set(merged.badges.concat(imported.badges)));
     merged.archive=normalize({archive:merged.archive.concat(imported.archive)}).archive;
-    merged.museum=normalize({museum:{memories:merged.museum.memories.concat(imported.museum.memories),hall:merged.museum.hall.concat(imported.museum.hall)}}).museum;
+    merged.museum=normalize({museum:{
+      memories:merged.museum.memories.concat(imported.museum.memories),hall:merged.museum.hall.concat(imported.museum.hall),
+      collections:{
+        claimed:merged.museum.collections.claimed.concat(imported.museum.collections.claimed),
+        stories:merged.museum.collections.stories.concat(imported.museum.collections.stories),
+        kits:merged.museum.collections.kits.concat(imported.museum.collections.kits),
+        crests:merged.museum.collections.crests.concat(imported.museum.collections.crests),
+        tokens:Math.max(merged.museum.collections.tokens,imported.museum.collections.tokens),
+        selectedKit:merged.museum.collections.selectedKit||imported.museum.collections.selectedKit,
+        selectedCrest:merged.museum.collections.selectedCrest||imported.museum.collections.selectedCrest
+      }
+    }}).museum;
+    for(const id of CLUB_FILE_IDS)merged.clubFiles.completed[id]=Math.max(merged.clubFiles.completed[id]||0,imported.clubFiles.completed[id]||0);
+    merged.clubFiles.claimed=Array.from(new Set(merged.clubFiles.claimed.concat(imported.clubFiles.claimed)));
+    for(const [chairId,history] of Object.entries(imported.chairHistory)){
+      const current=merged.chairHistory[chairId]||{runs:0,decisionCount:0,positive:0,negative:0,decisions:{},lastOutcome:"",lastPositive:false,lastRunId:""};
+      current.runs=Math.max(current.runs,history.runs);current.decisionCount=Math.max(current.decisionCount,history.decisionCount);
+      current.positive=Math.max(current.positive,history.positive);current.negative=Math.max(current.negative,history.negative);
+      for(const [outcome,count] of Object.entries(history.decisions))current.decisions[outcome]=Math.max(current.decisions[outcome]||0,count);
+      if(history.decisionCount>=current.decisionCount){current.lastOutcome=history.lastOutcome;current.lastPositive=history.lastPositive;current.lastRunId=history.lastRunId;}
+      merged.chairHistory[chairId]=current;
+    }
     state=merged;persist();
     if(typeof global.saveMeta==="function")global.saveMeta();if(typeof global.applyMeta==="function")global.applyMeta();if(typeof global.buildFormButtons==="function")global.buildFormButtons();if(typeof global.buildChairButtons==="function")global.buildChairButtons();
     return {ok:true,runs:state.archive.length};
@@ -430,7 +575,8 @@
   global.CopaMeta=Object.freeze({
     recordRun,getState:()=>JSON.parse(JSON.stringify(state)),careerSummary,careerLevel,levelThreshold,masteryInfo,
     renderPanelHTML:(tab="career")=>panelHTML(["career","mastery","museum","world"].includes(tab)?tab:"career",global.LANG==="tr"),
-    requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,
+    requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,consumeStartToken,evaluateCollections,activeCosmetics,selectCosmetic,
+    completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,
     exportCode,importCode,openProgression,openArchive,openExport,openImport,copyExport,downloadExport,submitImport,installControl
   });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installControl,{once:true});else installControl();

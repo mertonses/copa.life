@@ -24,7 +24,7 @@ test.describe("critical mobile run integrity",()=>{
     await expect(page.locator("#draft")).toBeVisible();
     let state=await page.evaluate(()=>{const w=globalThis as any;return{filled:w.picksBySlot.filter(Boolean).length,remaining:w.remaining,phase:w.CopaRunState.phase};});
     expect(state).toEqual({filled:1,remaining:10,phase:"draft"});
-    await page.evaluate(()=>{(globalThis as any).quickAll();});
+    await page.evaluate(async()=>{await (globalThis as any).quickAll();});
     await expect(page.locator("#postClubName")).toBeVisible();
     await page.locator("#postClubName").fill("Mobile Test FK");
     await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -36,7 +36,7 @@ test.describe("critical mobile run integrity",()=>{
   });
 
   test("an incomplete XI cannot kick off",async({page})=>{
-    await startDraft(page);await page.evaluate(()=>{(globalThis as any).quickAll();});
+    await startDraft(page);await page.evaluate(async()=>{await (globalThis as any).quickAll();});
     await expect(page.locator("#postClubName")).toBeVisible();await page.locator("#postClubName").fill("Guard FK");await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
     await expect(page.locator("#hub")).toBeVisible();
     const phase=await page.evaluate(()=>{const w=globalThis as any;w.picksBySlot[2]=null;w.playMatch();return w.CopaRunState.phase;});

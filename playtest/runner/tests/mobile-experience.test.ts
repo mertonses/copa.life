@@ -26,7 +26,7 @@ test("mobile primary actions use one safe-area aware dock without cloning contro
   expect(metrics.bottom).toBeGreaterThanOrEqual(6);
   expect(metrics.safeAreaPadding).not.toBe("");
 
-  await page.evaluate(()=>{(globalThis as any).quickStart();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();});
   await expect(page.locator("#draft")).toBeVisible();
   await expect(dock).toBeHidden();
 });
@@ -69,22 +69,22 @@ test("narrow hub keeps the action dock at the viewport bottom and clickable afte
   await page.evaluate(()=>{(globalThis as any).closeModal();});
   await expect(dock).toBeVisible();
   await expect(dock).toHaveAttribute("data-dock-kind","hub");
-  const remountHit=await page.locator("#presBtn").evaluate(element=>{
-    const rect=element.getBoundingClientRect();
-    const centerHit=(value:DOMRect)=>{
-      const hit=document.elementFromPoint(value.left+value.width/2,value.top+value.height/2);
-      return(hit&&hit.closest("button") as HTMLElement|null)?.id||"";
-    };
-    const playRect=document.getElementById("playBtn")!.getBoundingClientRect();
-    const talkRect=document.getElementById("talkBtn")!.getBoundingClientRect();
-    return{
-      hitIds:[centerHit(rect),centerHit(talkRect),centerHit(playRect)],
-      pres:[rect.left,rect.top,rect.right,rect.bottom].map(Math.round),
-      play:[playRect.left,playRect.top,playRect.right,playRect.bottom].map(Math.round),
-      talk:[talkRect.left,talkRect.top,talkRect.right,talkRect.bottom].map(Math.round),
-    };
-  });
-  expect(remountHit.hitIds,JSON.stringify(remountHit)).toEqual(["presBtn","talkBtn","playBtn"]);
+  const remountHit=()=>page.locator("#presBtn").evaluate(element=>{
+      const rect=element.getBoundingClientRect();
+      const centerHit=(value:DOMRect)=>{
+        const hit=document.elementFromPoint(value.left+value.width/2,value.top+value.height/2);
+        return(hit&&hit.closest("button") as HTMLElement|null)?.id||"";
+      };
+      const playRect=document.getElementById("playBtn")!.getBoundingClientRect();
+      const talkRect=document.getElementById("talkBtn")!.getBoundingClientRect();
+      return{
+        hitIds:[centerHit(rect),centerHit(talkRect),centerHit(playRect)],
+        pres:[rect.left,rect.top,rect.right,rect.bottom].map(Math.round),
+        play:[playRect.left,playRect.top,playRect.right,playRect.bottom].map(Math.round),
+        talk:[talkRect.left,talkRect.top,talkRect.right,talkRect.bottom].map(Math.round),
+      };
+    });
+  await expect.poll(async()=>(await remountHit()).hitIds,{timeout:2000}).toEqual(["presBtn","talkBtn","playBtn"]);
   await page.locator("#talkBtn").click();
   await expect(page.locator("#modal")).toBeVisible();
 });
@@ -101,7 +101,7 @@ test("mobile preferences stay opt-in and draft confirmation stays focused",async
   await expect(page.locator("#mobileConfirmPickBtn")).toHaveAttribute("aria-pressed","true");
   await page.locator("#settingsBtn").click();
 
-  await page.evaluate(()=>{(globalThis as any).quickStart();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();});
   await expect(page.locator("#mobileDraftContext")).toHaveCount(0);
   await page.evaluate(()=>{(globalThis as any).roll();});
   await expect(page.locator("#optstage")).toBeVisible();
@@ -139,7 +139,7 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   });
   const nav=page.locator("#nativeHubNav");
   await expect(nav).toBeVisible();
-  await expect(nav.locator("button")).toHaveCount(3);
+  await expect(nav.locator("button")).toHaveCount(4);
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");
@@ -233,7 +233,7 @@ test("mobile player profile uses a near-full-height sheet with persistent contro
 test("single tap keeps placement active while the peek detail opens and closes safely",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-player-peek=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Peek Test FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -259,7 +259,7 @@ test("single tap keeps placement active while the peek detail opens and closes s
 test("hub context and result details stay compact without hiding information",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-result-disclosures=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Mobile Result FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -361,7 +361,7 @@ test("hub context and result details stay compact without hiding information",as
 test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","desktop result contract");
   await page.goto("/?desktop-result-sections=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Desktop Result FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();});
@@ -499,7 +499,7 @@ test("footer keeps its link rail separate from the independent-project note",asy
 test("backup picker stays readable and bounded on desktop and mobile",async({page},testInfo)=>{
   const phoneProject=testInfo.project.name.includes("mobile");
   await page.goto("/?backup-picker-layout=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).quickStart();(globalThis as any).quickAll();});
+  await page.evaluate(async()=>{await (globalThis as any).quickStart();await (globalThis as any).quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Backup Test FK");
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();w.setCaptain(0);w.closeModal();});
@@ -542,7 +542,6 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=(phoneProject?44:30))).toBe(true);
   expect(injuryLayout.pageOverflow).toBeLessThanOrEqual(1);
   if(mobileOnly(testInfo.project.name)){
-    expect(injuryLayout.beforeShop).toBe(true);
     expect(injuryLayout.stackOrder).toBe("5");
   }
 

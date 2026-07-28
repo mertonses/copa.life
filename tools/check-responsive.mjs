@@ -62,14 +62,14 @@ const checks = [
       && /#talkBtn span\{[\s\S]*font-size:8\.5px!important;[\s\S]*text-align:center!important/s.test(mobile),
   },
   {
-    name: "mobile result secondary actions stay in one three-column row",
-    pass: /#result \.result-row\{[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/s.test(mobile),
+    name: "mobile result secondary actions stay in one balanced row",
+    pass: /#result \.result-row\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/s.test(mobile),
   },
   {
     name: "result summary stays compact on narrow screens",
     pass: /\.result \.scoreboard\{[\s\S]*?min-height:94px;[\s\S]*?padding:14px 22px 13px;/s.test(match)
       && /\.result \.scoreboard-title\{[\s\S]*?display:flex;[\s\S]*?align-items:baseline;/s.test(match)
-      && /@media\(max-width:760px\)\{[\s\S]*?\.result \.statline\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}[\s\S]*?\.result \.scoreboard\{min-height:82px;/s.test(match)
+      && /@media\(max-width:760px\)\{[\s\S]*?\.result \.statline\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)\}[\s\S]*?\.result \.scoreboard\{[\s\S]*?min-height:112px;/s.test(match)
       && /function resultHeroLabel\(r,wasSacked,x\)\{\s*if\(wasSacked\)return "";\s*if\(r\.won\)return typeof teamName/s.test(html),
   },
   {

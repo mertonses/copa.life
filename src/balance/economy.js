@@ -51,6 +51,7 @@ function newShopOffers(){
      }
    }
  }
+ if(globalThis.CopaMarketIdentity)globalThis.CopaMarketIdentity.applyCardOffers(round,shopOffers,shopVariants);
  /* A market visit must always contain at least one legal decision. When both
     regular offers are blocked by the chairman/debt guard, replace the second
     slot with a zero-upfront-cost economy offer instead of inflating the budget. */
