@@ -17,8 +17,11 @@ assert.match(power,/const cap=typeof _currentCaptainPlayer==="function"\?_curren
   "power calculation must resolve the captain by player identity");
 assert.match(html,/function setCaptain\(idx\)\{captainIdx=idx;captainPlayerRef=picksBySlot\[idx\]\|\|null;/,
   "captain selection must retain the selected player identity");
-assert.match(html,/function _squadReadyPitch[\s\S]*?const pv=effOf\(p\);return `<button type="button" class="pc-mini-player pc-pl"/,
-  "postcard tactical XI must show the same effective player power used on the pitch");
+assert.match(
+  html,
+  /function _squadReadyPitch[\s\S]*?const pv=effOf\(p\)[\s\S]*?short=_squadReadyPlayerLabel\(p\);return `<button type="button" class="pc-mini-player pc-pl"[\s\S]*?<b>\$\{pv\}<\/b><small>\$\{short\}<\/small>/,
+  "postcard tactical XI must show the same effective player power and compact player label used on the pitch"
+);
 assert.ok(html.includes('${tone(effOf(e.p))}')&&html.includes('${effOf(e.p)}</span>'),
   "captain picker must show effective rather than stale base power");
 assert.match(html,/picks\.reduce\(\(a,p\)=>a\+effOf\(p\),0\)/,
