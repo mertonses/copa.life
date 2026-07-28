@@ -93,6 +93,8 @@
     "check:rights:public": "node tools/check-publishing-rights.mjs --public",
     "test:worker": "npm test --prefix services/ghost-club-api",
     "test:arena": "npm test --prefix services/copa-arena-api",
+    "arena:players": "node tools/build-arena-player-catalog.mjs",
+    "check:arena:players": "node tools/build-arena-player-catalog.mjs --check",
     "report:cards": "node tools/card-balance-report.mjs",
     "profiles:manifest": "node tools/export-player-profile-manifest.mjs",
     "profiles:build-copa": "node tools/build-copa-player-profiles.mjs",

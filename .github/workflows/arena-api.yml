@@ -4,11 +4,17 @@ on:
   pull_request:
     paths:
       - 'services/copa-arena-api/**'
+      - 'src/data/players.js'
+      - 'src/data/players_*.js'
+      - 'tools/build-arena-player-catalog.mjs'
       - '.github/workflows/arena-api.yml'
   push:
     branches: [main]
     paths:
       - 'services/copa-arena-api/**'
+      - 'src/data/players.js'
+      - 'src/data/players_*.js'
+      - 'tools/build-arena-player-catalog.mjs'
       - '.github/workflows/arena-api.yml'
   workflow_dispatch:
 
@@ -35,6 +41,7 @@ jobs:
           cache: npm
           cache-dependency-path: services/copa-arena-api/package-lock.json
       - run: npm ci
+      - run: node ../../tools/build-arena-player-catalog.mjs --check
       - run: npm run check
 
   deploy:

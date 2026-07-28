@@ -1,9 +1,9 @@
 import {DurableObject} from "cloudflare:workers";
 import {
   ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
-  createDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,publicState,
+  createDraftOffers,createLegacyDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,publicState,
   resolveParticipation,
-  resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,validateSetup
+  resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
 } from "./rules.js";
 
 const MAX_BODY_BYTES=16*1024;
@@ -279,8 +279,16 @@ export class ArenaRoom extends DurableObject{
   isCurrentRules(){
     return this.state.rulesVersion===ARENA_RULES_VERSION;
   }
+  usesFullXI(){
+    return usesFullXI(this.state.rulesVersion);
+  }
   draftSlots(){
-    return this.isCurrentRules()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
+    return this.usesFullXI()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
+  }
+  draftOffers(line,step,side,slot){
+    return this.isCurrentRules()
+      ?createDraftOffers(this.state.seed,line,step,side,slot)
+      :createLegacyDraftOffers(this.state.seed,line,step,side,slot);
   }
   defaultAction(index){
     const player=this.state.players[index];
@@ -295,7 +303,7 @@ export class ArenaRoom extends DurableObject{
   }
   remainingBudget(player){
     const chair=CHAIRMEN[player.setup&&player.setup.chairman]||CHAIRMEN.patron;
-    return (this.isCurrentRules()?44:20)+chair.budget-player.draft.reduce((sum,item)=>sum+Number(item.cost||0),0);
+    return (this.usesFullXI()?44:20)+chair.budget-player.draft.reduce((sum,item)=>sum+Number(item.cost||0),0);
   }
   bothDone(){
     const [home,away]=this.state.players;
@@ -317,13 +325,13 @@ export class ArenaRoom extends DurableObject{
     else if(this.state.phase==="setup"){
       this.state.phase="draft";this.state.draftStep=0;
       const first=this.draftSlots()[0];
-      this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,first.line,0,index,first.slot));
+      this.state.offers=this.state.players.map((_,index)=>this.draftOffers(first.line,0,index,first.slot));
     }else if(this.state.phase==="draft"){
       const slots=this.draftSlots();
       if(this.state.draftStep<slots.length-1){
         this.state.draftStep++;
         const next=slots[this.state.draftStep];
-        this.state.offers=this.state.players.map((_,index)=>createDraftOffers(this.state.seed,next.line,this.state.draftStep,index,next.slot));
+        this.state.offers=this.state.players.map((_,index)=>this.draftOffers(next.line,this.state.draftStep,index,next.slot));
       }else{
         this.state.phase="market";
         this.state.offers=this.state.players.map((_,index)=>createMarketOffers(this.state.seed,index));
