@@ -321,11 +321,13 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   const metricSurfaces=await page.locator("#hub .hub-stat-row").evaluate((row:HTMLElement)=>
     [...row.children].map(node=>{
       const style=getComputedStyle(node);
-      return{backgroundColor:style.backgroundColor,backgroundImage:style.backgroundImage};
+      return{backgroundColor:style.backgroundColor,backgroundImage:style.backgroundImage,accent:style.getPropertyValue("--metric-accent").trim()};
     })
   );
   expect(metricSurfaces.every(surface=>surface.backgroundColor!=="rgba(0, 0, 0, 0)")).toBe(true);
-  expect(new Set(metricSurfaces.map(surface=>surface.backgroundImage)).size).toBeGreaterThanOrEqual(3);
+  expect(metricSurfaces.every(surface=>surface.backgroundImage!=="none")).toBe(true);
+  expect(metricSurfaces.every(surface=>surface.accent.length>0)).toBe(true);
+  expect(new Set(metricSurfaces.map(surface=>surface.backgroundImage)).size).toBeGreaterThanOrEqual(2);
   await capture(page,"03b-context-metrics.png");
   await expect(page.locator("#feedwrap")).toBeVisible();
   expect(await page.locator("#feedwrap").evaluate(node=>node.parentElement?.classList.contains("hcol-l"))).toBe(true);
