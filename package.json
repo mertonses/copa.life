@@ -54,7 +54,7 @@
     "ios:version:patch": "node tools/ios-version.mjs bump patch",
     "ios:version:minor": "node tools/ios-version.mjs bump minor",
     "ios:version:major": "node tools/ios-version.mjs bump major",
-    "audit:security": "npm audit --audit-level=high && npm audit --audit-level=high --prefix services/ghost-club-api && npm audit --audit-level=high --prefix playtest/runner",
+    "audit:security": "npm audit --audit-level=high && npm audit --audit-level=high --prefix services/ghost-club-api && npm audit --audit-level=high --prefix services/copa-arena-api && npm audit --audit-level=high --prefix playtest/runner",
     "check:encoding": "node tools/check-encoding.mjs",
     "check:locales": "node tools/check-locales.mjs",
     "check:responsive": "node tools/check-responsive.mjs",
@@ -79,6 +79,10 @@
     "check:chairmen": "node tools/check-chairman-events.mjs",
     "check:trust": "node tools/check-chairman-trust-info.mjs",
     "check:meta": "node tools/check-meta-progression.mjs",
+    "check:relationships": "node tools/check-relationship-systems.mjs",
+    "check:clubfiles": "node tools/check-club-files.mjs",
+    "check:marketidentity": "node tools/check-market-identity.mjs",
+    "check:surfaces": "node tools/check-surface-contract.mjs",
     "check:lineupsync": "node tools/check-lineup-power-sync.mjs",
     "check:clubnames": "node tools/check-club-name-security.mjs",
     "check:ghosts": "node tools/check-ghost-clubs.mjs",
@@ -88,6 +92,7 @@
     "check:rights": "node tools/check-publishing-rights.mjs",
     "check:rights:public": "node tools/check-publishing-rights.mjs --public",
     "test:worker": "npm test --prefix services/ghost-club-api",
+    "test:arena": "npm test --prefix services/copa-arena-api",
     "report:cards": "node tools/card-balance-report.mjs",
     "profiles:manifest": "node tools/export-player-profile-manifest.mjs",
     "profiles:build-copa": "node tools/build-copa-player-profiles.mjs",
@@ -102,7 +107,7 @@
     "check:tournament": "node tools/check-group-tournament.mjs",
     "check:tournament:balance": "node tools/check-tournament-balance.mjs",
     "check:tournament:balance:matrix": "node tools/check-tournament-balance-matrix.mjs",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:preparation && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:rewarded-ads && npm run check:play-games-pc && npm run check:android:store && npm run check:android:release:source && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:surfaces && npm run check:cards && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:preparation && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:relationships && npm run check:clubfiles && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:rewarded-ads && npm run check:play-games-pc && npm run check:android:store && npm run check:android:release:source && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.4.2",

@@ -121,6 +121,9 @@ body.reduced-motion .td-swipe-hand{animation:none}@media(prefers-reduced-motion:
 }
 
 /* Draw focus model: active pot, eligible groups and a clear last-drawn transfer. */
+.td-pot-card{display:contents}
+.td-ball{display:grid;place-items:center;padding:0}
+.td-ball>span{display:block;place-self:center;margin:0;line-height:1}
 .td-group-stage{min-width:0;overflow:hidden}
 .td-groups{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(250px,32%);gap:10px;overflow-x:auto;padding:2px 2px 9px;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-color:color-mix(in srgb,var(--color-primary) 45%,transparent) transparent;scrollbar-width:thin}
 .td-group{scroll-snap-align:start;transition:opacity .2s,border-color .2s,box-shadow .2s,transform .2s}

@@ -59,9 +59,23 @@
     position:fixed!important;z-index:9001!important;right:0!important;bottom:0!important;left:0!important;top:auto!important;
     display:block!important;width:100%!important;max-width:none!important;max-height:min(70dvh,560px)!important;margin:0!important;
     padding:14px max(14px,var(--copa-safe-right)) calc(14px + var(--copa-safe-bottom)) max(14px,var(--copa-safe-left))!important;
-    box-sizing:border-box;overflow:auto!important;border-radius:18px 18px 0 0!important;background:var(--surface-bg)!important;
+    box-sizing:border-box;overflow:hidden!important;border-radius:18px 18px 0 0!important;background:var(--surface-bg)!important;
     color:var(--color-ink)!important;box-shadow:0 -12px 40px rgba(10,17,24,.28)!important;
     transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s;
+  }
+  html[data-copa-platform="android"] #hubBenchSection.native-bench-sheet .bench-list,
+  html[data-copa-platform="ios"] #hubBenchSection.native-bench-sheet .bench-list{
+    min-height:0;
+    max-height:calc(min(70dvh,560px) - 62px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    touch-action:pan-y;
+  }
+  html.hub-player-dragging[data-copa-platform="android"] #hubBenchSection.native-bench-sheet .bench-list,
+  html.hub-player-dragging[data-copa-platform="ios"] #hubBenchSection.native-bench-sheet .bench-list{
+    overflow:hidden;
+    touch-action:none;
   }
   html.native-bench-open[data-copa-platform="android"] #hubBenchSection.native-bench-sheet,
   html.native-bench-open[data-copa-platform="ios"] #hubBenchSection.native-bench-sheet{transform:translateY(0);visibility:visible;transition-delay:0s}
@@ -129,6 +143,7 @@
     pointer-events:none!important;
   }
 
+  .mobile-action-dock[data-dock-kind="intro"] .v7-primary-actions,
   .mobile-action-dock[data-dock-kind="intro"] #startBtn,
   .mobile-action-dock[data-dock-kind="result"] #againBtn,
   .mobile-action-dock[data-dock-kind="penalty"] .final-penalty-btn{
@@ -138,6 +153,18 @@
     padding:11px 14px!important;
     font-size:14px!important;
     white-space:nowrap;
+  }
+  .mobile-action-dock[data-dock-kind="intro"] .v7-primary-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:7px;
+    min-height:0!important;
+    padding:0!important;
+  }
+  .mobile-action-dock[data-dock-kind="intro"] #arenaBtn{
+    width:100%!important;
+    min-height:46px!important;
+    margin:0!important;
   }
 
   .mobile-action-dock[data-dock-kind="hub"] .hub-action-panel{
@@ -1018,7 +1045,7 @@
     border-radius:0!important;
   }
   #result .result-row{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
     gap:6px!important;
   }
   #result .result-row .btn{

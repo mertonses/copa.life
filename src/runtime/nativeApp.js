@@ -35,6 +35,6 @@
     });
   root.addEventListener("pagehide",checkpoint,{passive:true});
   const statusTasks=[StatusBar.setStyle({style:"LIGHT"}),StatusBar.setOverlaysWebView({overlay:false})];
-  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#F3F5F4"}));
+  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#101D28"}));
   Promise.allSettled(statusTasks).finally(()=>SplashScreen.hide().catch(()=>{}));
 })(window);

@@ -70,9 +70,10 @@ function powerBreakdown(r,excludedCard){
  const captainChem=typeof captainDecisionChemistryForRound==="function"?captainDecisionChemistryForRound(r):0;
  const synergy=globalThis.CopaCardSynergy?globalThis.CopaCardSynergy.calculate(cards):{power:0};
  const preparation=globalThis.CopaPreparation?globalThis.CopaPreparation.effects(r,typeof opponent!=="undefined"?opponent:null):{power:0};
+ const relationshipBonus=globalThis.CopaRelationships?globalThis.CopaRelationships.matchModifier():0;
  const chemistryResult=chemBonus(s);
  const synergyBonus=Math.max(-2,Math.min(5,Number(synergy.power)||0)),preparationBonus=Math.max(0,Math.min(4,Number(preparation.power)||0));
- const rawBonus=uncappedRaw+moral+wxBonus+capBonus+synergyBonus+preparationBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemistryResult.total+captainChem));
- return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:finalCardRaw-finalCardApplied,matchup,risk,trait,moral,synergyBonus,preparationBonus,chemistryScore:chemistryResult.score||50,chemistryVariance:chemistryResult.variance||1,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
+ const rawBonus=uncappedRaw+moral+wxBonus+capBonus+synergyBonus+preparationBonus+relationshipBonus,bonus=rawBonus,chem=Math.max(-5,Math.min(5,chemistryResult.total+captainChem));
+ return {avg,starImpact,styleBonus,cardBonus,loanBonus,promiseBonus,captainPenalty,captainChem,finalCardRaw,finalCardApplied,finalCardOverflow:finalCardRaw-finalCardApplied,matchup,risk,trait,moral,synergyBonus,preparationBonus,relationshipBonus,chemistryScore:chemistryResult.score||50,chemistryVariance:chemistryResult.variance||1,rawBonus,bonus,capLoss:0,chem,fan:0,power:Math.round(avg+starImpact+bonus+chem)};
 }
 function squadPower(r,excludedCard){return powerBreakdown(r,excludedCard);}

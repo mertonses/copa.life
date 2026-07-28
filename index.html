@@ -2,6 +2,7 @@
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="copa-ghost-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
 <meta name="copa-analytics-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
+<meta name="copa-arena-api" content="https://copa-life-arena.mertonses-copa.workers.dev">
 <meta name="copa-build-version" content="__COPA_BUILD_VERSION__">
 <meta name="copa-platform" content="web">
 <title>Copa Life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
@@ -72,7 +73,7 @@ if("serviceWorker"in navigator){
   "description": "Roguelite futbol oyunu. Şans + strateji. 6 ülke, 9000+ oyuncu. Kadro kur, transfer yönet, kupayı kaldır.",
   "url": "https://copa.life",
   "genre": ["Sports", "Strategy", "Simulation"],
-  "playMode": "SinglePlayer",
+  "playMode": ["SinglePlayer", "MultiPlayer"],
   "applicationCategory": "Game",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -96,7 +97,9 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260721-rating-scale1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260727-compact-draw1">
-<link rel="preload" as="style" href="src/styles/mobileGameSystems.css?v=20260727-balance-qol3" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-club-files1">
+<link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
+<link rel="stylesheet" href="src/styles/arena.css?v=20260728-arena1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -229,12 +232,15 @@ if("serviceWorker"in navigator){
         <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.svg" alt="">İngiltere</button>
         <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.svg" alt="">İspanya</button>
         <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.svg" alt="">Almanya</button>
-        <button class="country-new" data-country="JP" onclick="pickCountry('JP')" title="Japonya"><span class="country-new-ribbon" aria-label="Yeni">YENİ</span><img src="assets/flags/JP.svg" alt="">Japonya</button>
+        <button data-country="JP" onclick="pickCountry('JP')" title="Japonya"><img src="assets/flags/JP.svg" alt="">Japonya</button>
       </div>
     </div>
     <div class="v7-cta-stack">
       <div class="v7-summary" id="introSummary"></div>
-      <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
+      <div class="v7-primary-actions">
+        <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
+        <button class="arena-entry" id="arenaBtn" type="button" onclick="CopaArena.open()" aria-label="Copa Arena çok oyunculu modu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/><path class="arena-icon-spark" d="M12 1v3M3 6l3 2M21 6l-3 2"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button>
+      </div>
       <div class="advanced-wrap hidden" aria-hidden="true">
         <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
       </div>
@@ -289,7 +295,8 @@ if("serviceWorker"in navigator){
       <div class="styletag" id="styletag">—</div>
       <div class="final-pills" id="finalPills"></div>
       <div class="pitch-area">
-        <div class="pitch" id="hubPitch" style="aspect-ratio:68/60"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div><div class="pitch-overlay" id="pitchOverlay"><div class="cardrow" id="cardrow"></div></div></div>
+        <div class="pitch-tactical-strip"><div class="pitch-overlay" id="pitchOverlay"><div class="cardrow" id="cardrow"></div></div></div>
+        <div class="pitch" id="hubPitch" style="aspect-ratio:68/60"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div></div>
         <div class="hub-bench-stack" id="hubBenchStack">
          <div class="injbar hidden" id="injbar" role="status" aria-live="polite"></div>
          <div id="hubBenchSection"></div>
@@ -340,6 +347,7 @@ if("serviceWorker"in navigator){
 </div>
 <div id="modal" class="modal hidden"></div>
 <script src="src/runtime/platform.js?v=20260715-platform1"></script>
+<script src="src/runtime/surfaceContract.js?v=20260728-opaque-surfaces1"></script>
 <script src="src/data/generic_club_visuals.js?v=20260715-generic-crests1"></script>
 <script src="src/data/players.js?v=20260720-player-balance1"></script>
 <script src="src/data/formations.js?v=20260711-stability1"></script>
@@ -387,12 +395,16 @@ try{
 <script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
 <script src="src/game/chemistry.js?v=20260726-systems1"></script>
 <script src="src/game/preMatchPreparation.js?v=20260727-context-rank4"></script>
-<script src="src/balance/power.js?v=20260720-explicit-power1"></script>
+<script src="src/game/marketIdentity.js?v=20260728-market-identity1"></script>
+<script src="src/game/relationshipSystems.js?v=20260728-relationships1"></script>
+<script src="src/game/clubFiles.js?v=20260728-club-files1"></script>
+<script src="src/balance/power.js?v=20260728-relationships1"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260727-formation-sfx2"></script>
 <script src="src/online/ghostClubs.js?v=20260727-balance-v5"></script>
+<script src="src/online/arena.js?v=20260728-arena1"></script>
 <script src="src/ui/hub.js?v=20260727-card-readability1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260726-mobile-repair1"></script>
@@ -411,7 +423,8 @@ function _genFreeAgents(){
   const agents=[];
   const posPool=slots.map(s=>s[0]);
   for(let i=0;i<count;i++){
-    const pos=posPool[Math.floor(rand()*posPool.length)];
+    const randomPos=posPool[Math.floor(rand()*posPool.length)];
+    const pos=window.CopaMarketIdentity?CopaMarketIdentity.freeAgentPosition(round,i,randomPos):randomPos;
     const lo=60+round*2,hi=lo+8;
     const p=typeof takeUnique==="function"?takeUnique(pos,lo,hi):typeof fabPlayer==="function"?fabPlayer(pos,lo,hi):null;
     if(!p)continue;
@@ -419,8 +432,10 @@ function _genFreeAgents(){
     const urgency=1+Math.max(0,round-1)*0.10;
     const baseFee=typeof playerMarketValue==="function"?playerMarketValue(p.ov,"free_agent",round,p.age,p.potential):Math.max(2,Math.round(valueOf(p.ov,p.age,p.potential)*0.90*urgency));
     const adjustedFee=Math.round(baseFee*(typeof chairmanTransferMultiplier==="function"?chairmanTransferMultiplier():1));
-    const fee=typeof clampFreeAgentFee==="function"?clampFreeAgentFee(p.ov,round,adjustedFee):Math.max(2,Math.min(adjustedFee,24));
-    agents.push({p,fee});
+    const clampedFee=typeof clampFreeAgentFee==="function"?clampFreeAgentFee(p.ov,round,adjustedFee):Math.max(2,Math.min(adjustedFee,24));
+    const fee=window.CopaMarketIdentity?CopaMarketIdentity.freeAgentFee(round,p,clampedFee):clampedFee;
+    const market=window.CopaMarketIdentity?CopaMarketIdentity.decorateFreeAgent(round,i,p):{};
+    agents.push({p,fee,...market});
   }
   window._freeAgents=agents;
 }
@@ -448,6 +463,26 @@ function _freeAgentDisplayName(name){
   }
   return clean.slice(0,20).trim();
 }
+function _freeAgentComparisonFor(player){
+  const squad=(typeof picksBySlot!=="undefined"?picksBySlot:[]).filter(Boolean);
+  if(!player||!squad.length)return null;
+  const candidateGroup=typeof groupOf==="function"?groupOf(player.pos):player.pos;
+  const sameGroup=squad.filter(item=>(typeof groupOf==="function"?groupOf(item.pos):item.pos)===candidateGroup);
+  const pool=sameGroup.length?sameGroup:squad;
+  return pool.slice().sort((a,b)=>(typeof effOf==="function"?effOf(a):a.ov||0)-(typeof effOf==="function"?effOf(b):b.ov||0))[0]||null;
+}
+function _freeAgentLockReason(item){
+  if(!item)return "";
+  if(typeof freeAgentBoughtThisTurn!=="undefined"&&freeAgentBoughtThisTurn>=1)return LANG==="tr"?"Bu tur transfer hakkı kullanıldı":"Round transfer already used";
+  const p=item.p||{},fee=Number(item.fee)||0;
+  if(typeof canAffordChairmanSpend==="function"&&canAffordChairmanSpend(fee,"transfer",p))return "";
+  const loss=typeof chairmanSpendTrustLoss==="function"?chairmanSpendTrustLoss(fee,"transfer",p):0;
+  const projectedTrust=Math.max(0,(Number(chairTrust)||0)-loss);
+  const limit=typeof chairmanSackLimitForTrust==="function"?chairmanSackLimitForTrust(projectedTrust):(typeof DEBT_LIMIT==="number"?DEBT_LIMIT:-20);
+  const after=typeof budgetAfterCost==="function"?budgetAfterCost(fee):budget-fee;
+  const missing=Math.max(1,Math.ceil(limit-after));
+  return LANG==="tr"?`Kilitli · €${missing}M güvenli pay gerekli`:`Locked · €${missing}M safety margin needed`;
+}
 function _renderFreeAgents(){
   const fa=window._freeAgents;
   let el=$("freeAgentRow");
@@ -456,7 +491,7 @@ function _renderFreeAgents(){
   const tr=LANG==="tr";
   const hdr=`<div style="font-family:var(--mono);font-size:9px;color:var(--color-slate);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>${tr?"SERBEST TRANSFER":"FREE AGENTS"}</div>`;
   const tiles=fa.slice(0,2).map((a,ai)=>{
-    const p=a.p,pos=p.pos,inEff=typeof effOf==="function"?effOf(p):p.ov,cant=!(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(a.fee,"transfer",p):canAffordCost(a.fee));
+    const p=a.p,pos=p.pos,inEff=typeof effOf==="function"?effOf(p):p.ov,lockReason=_freeAgentLockReason(a),cant=!!lockReason;
     const posLbl=typeof L==="function"?L().abbr[pos]||pos:pos;
     const powerTone=n=>ovTextCol(n);
     const monogram=_playerMonogram(p.name||("FA "+ai));
@@ -464,7 +499,8 @@ function _renderFreeAgents(){
     const fullName=p.name||("FA "+ai);
     const playerName=_freeAgentDisplayName(fullName);
     const powerWord=tr?"Güç":"Power";
-    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-cash-after="${budget-a.fee}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true">${monogram}</div><div class="ct-body"><div class="ct-name">${playerName}</div><div class="free-agent-meta"><span>${posLbl}</span><span class="free-agent-meta-dot" aria-hidden="true">·</span><span>${powerWord}</span><span class="ov-val" style="--ovc:${powerTone(inEff)}">${inEff}</span></div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b>${inEff}</b></span><span>${tr?"KASA SONRASI":"CASH AFTER"}<b class="${budget-a.fee<0?"is-negative":""}">${runMoney(budget-a.fee)}</b></span></div><div class="ct-foot free-agent-actions"><button type="button" onclick="event.stopPropagation();CopaMobileShell.openFreeAgentProfile(this,${ai})">${tr?"PROFİL":"PROFILE"}</button><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div>`;
+    const lock=`<div class="free-agent-lock${cant?"":" hidden"}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${lockReason}</span></div>`;
+    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true">${monogram}</div><div class="ct-body"><div class="ct-name">${playerName}</div><div class="free-agent-meta"><span>${posLbl}</span><span class="free-agent-meta-dot" aria-hidden="true">·</span><span>${powerWord}</span><span class="ov-val" style="--ovc:${powerTone(inEff)}">${inEff}</span></div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b>${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--border-subtle);margin-top:10px;opacity:.5"></div>`;
 }
@@ -616,7 +652,7 @@ function setCopaHeroTitle(html){
   tagline.innerHTML=String(html||"");
 }
 window.setCopaHeroTitle=setCopaHeroTitle;
-function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(window.CopaAdvancedSettings)window.CopaAdvancedSettings.refreshCopy();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
+function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(window.CopaAdvancedSettings)window.CopaAdvancedSettings.refreshCopy();if(window.CopaArena)window.CopaArena.refresh();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
   if(!$("hub").classList.contains("hidden"))renderHub();if(!$("draft").classList.contains("hidden"))refreshDraft();if($("tournamentDraw")&&!$("tournamentDraw").classList.contains("hidden"))startTournamentDraw(true);if(!$("result").classList.contains("hidden")&&lastResult)renderResult();if(!$("fixbar").classList.contains("hidden"))renderFixtures();}
 function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.life — Roguelite futbol. Şans + strateji.":"copa.life — Roguelite football. Luck + strategy.";$("lblBudget").innerHTML=x.budget;$("coverTitle").textContent=x.coverTitle;const cupLocale=_cups[LANG]||_cups.en;$("coverSub").textContent=cupLocale[selectedCountry]||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;const _patHtml=x.patreonText.replace("copa.life","<span style='font-family:var(--mono);font-weight:900'>copa<span style='opacity:.38'>.</span>life</span>");if($("patreonIntroText"))$("patreonIntroText").innerHTML=_patHtml;if($("patreonResultText"))$("patreonResultText").innerHTML=_patHtml;if($("contactIntroLabel"))$("contactIntroLabel").textContent=tr?"İletişim":"Contact";if($("contactIntroText"))$("contactIntroText").textContent=tr?"Soru, fikir, hata? · ":"Question, idea, bug? · ";$("pickhdr").textContent=x.pickhdr;const _ico_ball="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='7' cy='7' r='5.5'/><polygon points='7,4.5 8.8,5.8 8.1,7.8 5.9,7.8 5.2,5.8' fill='currentColor' opacity='.25' stroke-width='.8'/></svg>";const _ico_person="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' style='vertical-align:-.15em'><circle cx='6' cy='4' r='2.5'/><path d='M1 13Q1 9 6 9Q11 9 11 13'/></svg>";const _ico_club="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><path d='M7 1L13 4V8Q13 12 7 13Q1 12 1 8V4Z'/></svg>";const _ico_card="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' style='vertical-align:-.1em'><rect x='1' y='1' width='10' height='12' rx='1.5'/><line x1='3.5' y1='5' x2='8.5' y2='5'/><line x1='3.5' y1='7.5' x2='8.5' y2='7.5'/><line x1='3.5' y1='10' x2='6' y2='10'/></svg>";const _cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:42;const _fpLig=tr?"5 ülke · 10 lig":"5 countries · 10 leagues";$("protoFoot").innerHTML=`copa.life · ${_ico_ball} ${_fpLig} · ${_ico_person} <b>9.264</b> ${tr?"oyuncu":"players"} · ${_ico_club} <b>180</b> ${tr?"kulüp":"clubs"} · ${_ico_card} <b>${_cc}</b> ${tr?"kart":"cards"} · <b>6</b> ${tr?"tur":"rounds"} · <b>6</b> ${tr?"başkan":"chairs"}`;const ms=$("mechStats");if(ms)ms.innerHTML=`<span><b>9.264</b> ${tr?"oyuncu":"players"}</span><span>·</span><span><b>10</b> ${tr?"lig":"leagues"}</span><span>·</span><span><b>${_cc}</b> ${tr?"kart":"cards"}</span><span>·</span><span><b>6</b> ${tr?"tur":"rounds"}</span><span>·</span><span><b>6</b> ${tr?"başkan":"chairs"}</span>`;if($("shareBtnLbl"))$("shareBtnLbl").textContent=tr?"PAYLAŞ":"SHARE";$("rollHint").textContent=x.rollHint;$("rollBtn").innerHTML=x.roll;$("allBtn").innerHTML=x.allBtn;if($("undoBtn"))$("undoBtn").innerHTML=x.undo;if($("howtoToggle")){const _bookSvg=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>`;$("howtoToggle").innerHTML=_bookSvg+(tr?"COPA REHBERİ":"COPA GUIDE");}_applyHowtoLang();$("ddLbl").innerHTML=x.ddTitle;
   if($("startBtn"))$("startBtn").textContent=x.startBtn;if($("allBtn"))$("allBtn").innerHTML=`<svg class="dice-ico" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="7" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="1" fill="currentColor" stroke="none"/></svg> ${tr?"Takımı Otomatik Kur":"Auto-fill XI"}`;if($("howtoToggle"))$("howtoToggle").innerHTML=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>${tr?"COPA REHBERİ":"COPA GUIDE"}`;if($("countryhdr"))$("countryhdr").textContent=tr?"Ülkeni Seç":"Pick Your Country";
@@ -834,10 +870,12 @@ function _renderKasaTile(rootId,prefix){
 function _setCountryDraftLoading(loading){window._countryDraftLoading=!!loading;const button=$("startBtn");if(!button)return;button.disabled=!!loading;button.setAttribute("aria-busy",loading?"true":"false");button.textContent=loading?LT("Oyuncular yükleniyor…","Loading players…","Cargando jugadores…","Spieler werden geladen…","Caricamento giocatori…"):(L().startBtn||LT("BAŞLA","START","EMPEZAR","START","INIZIA"));}
 function retryCountryDraft(){try{closeModal();}catch(_){}return beginDraft();}
 function _showCountryDraftLoadError(country,error){if(window.CopaDiagnostics)window.CopaDiagnostics.capture("country_players_load_failed",String(country||"")+":"+String(error&&error.message||error||"load_failed"),error&&error.stack);showModal(`<div class="scoutmodal" data-country-load-error="${clip(country||"",8)}"><h4>${LT("Oyuncular yüklenemedi","Players could not be loaded","No se pudieron cargar los jugadores","Spieler konnten nicht geladen werden","Impossibile caricare i giocatori")}</h4><p>${LT("Bağlantını kontrol edip tekrar dene. Seçimin ve ayarların korunuyor.","Check your connection and try again. Your selection and settings are preserved.","Comprueba tu conexión e inténtalo de nuevo. Tu selección y ajustes se conservan.","Prüfe deine Verbindung und versuche es erneut. Auswahl und Einstellungen bleiben erhalten.","Controlla la connessione e riprova. Selezione e impostazioni restano salvate.")}</p><div class="bact"><button class="btn btn-primary" onclick="retryCountryDraft()">${LT("TEKRAR DENE","TRY AGAIN","REINTENTAR","ERNEUT VERSUCHEN","RIPROVA")}</button><button class="btn btn-ghost" onclick="closeModal()">${LT("VAZGEÇ","CANCEL","CANCELAR","ABBRECHEN","ANNULLA")}</button></div></div>`,{label:LT("Yükleme hatası","Loading error","Error de carga","Ladefehler","Errore di caricamento")});}
-function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(selectedCountry!=="TR"&&(!Array.isArray(_countryPool)||!_countryPool.length)&&window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function"){if(window._countryDraftPromise)return window._countryDraftPromise;_setCountryDraftLoading(true);const _loadingCountry=selectedCountry,_draftPromise=window.CopaLazy.ensureCountryPlayers(_loadingCountry).then(()=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;return beginDraft();}).catch(error=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;_showCountryDraftLoadError(_loadingCountry,error);return false;});window._countryDraftPromise=_draftPromise;return _draftPromise;}document.body.classList.add("run-active");window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];pendingMatchResolution=null;pendingLoanReward=null;rewardCardSwapState=null;tournament=null;tournamentFormat="groups32_v2";window._rewardPendingRound=0;window._rewardResolvedRound=0;teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;lotteryCouponAmount=0;lotteryCouponTurns=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
+function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(selectedCountry!=="TR"&&(!Array.isArray(_countryPool)||!_countryPool.length)&&window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function"){if(window._countryDraftPromise)return window._countryDraftPromise;_setCountryDraftLoading(true);const _loadingCountry=selectedCountry,_draftPromise=window.CopaLazy.ensureCountryPlayers(_loadingCountry).then(()=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;return beginDraft();}).catch(error=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;_showCountryDraftLoadError(_loadingCountry,error);return false;});window._countryDraftPromise=_draftPromise;return _draftPromise;}document.body.classList.add("run-active");window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];pendingMatchResolution=null;pendingLoanReward=null;rewardCardSwapState=null;tournament=null;tournamentFormat="groups32_v2";window._rewardPendingRound=0;window._rewardResolvedRound=0;teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};{const _cosmetics=window.CopaMeta&&typeof CopaMeta.activeCosmetics==="function"?CopaMeta.activeCosmetics():{};if(_cosmetics.kit==="kit_tactical_journey")kit={bg:"#183F3A",fg:"#F3F5F4",sec:"#D6A21F"};}slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;lotteryCouponAmount=0;lotteryCouponTurns=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
   teamName="";
   draftRewardedRerollsEarned=0;draftRewardInFlight=false;rewardedInjuryHealsEarned=0;injuryRewardInFlight=false;rewardedMarketRerollsEarned=0;shopRewardInFlight=false;
   chairmanEventRunId=String(seedNum)+"-"+Date.now().toString(36);pendingChairmanEvent=null;chairmanEventSeen={};window._kaosOfferRound=0;window._kaosOfferPendingRound=0;
+  if(window.CopaRelationships)CopaRelationships.reset({startToken:window.CopaMeta&&typeof CopaMeta.consumeStartToken==="function"?CopaMeta.consumeStartToken():0});
+  if(window.CopaClubFiles)CopaClubFiles.reset();
   medicalProtectionTurns=0;
   window._postMatchResolvedRound=0;
   window._ghostSeenIds=[];window._ghostCheckedRounds=[];window._ghostOpponentUsed=false;window._ghostOpponentId="";
@@ -957,19 +995,19 @@ function clip(s,n){return s.length>n?s.slice(0,n-1)+"…":s;}
 function shortName(p){const n=p.fab?p.name:p.name;const pa=n.split(" ");if(pa.length<2)return clip(n,9);let s=pa[0][0]+"."+pa[pa.length-1];if(s.length>10)s=clip(pa[pa.length-1],9);return s;}
 function _setSlotLabel(v){const e=$("slotname");if(e)e.textContent=v;}
 function _setSlotN(v){const e=$("slotn");if(e)e.textContent=v;}
-function loadRollStage(){const x=L();currentSlot=-1;slots.forEach((_,i)=>{const el=$("r"+i);if(el){el.classList.remove("cur","slot-dim");}});_setSlotN((slots.length-remaining)+"/"+slots.length);_setSlotLabel(x.rollPrompt);$("rollstage").classList.remove("hidden");$("optstage").classList.add("hidden");updateUndoBtn();}
+function loadRollStage(){const x=L();currentSlot=-1;currentOpts=[];slots.forEach((_,i)=>{const el=$("r"+i);if(el){el.classList.remove("cur","slot-dim");}});_setSlotN((slots.length-remaining)+"/"+slots.length);_setSlotLabel(x.rollPrompt);$("rollstage").classList.remove("hidden");$("optstage").classList.add("hidden");const dock=$("draftThumbDock"),rollHost=$("rollstage");if(dock&&rollHost&&dock.parentElement!==rollHost)rollHost.appendChild(dock);const rb=$("rollBtn");if(rb){rb.disabled=false;rb.removeAttribute("aria-busy");}updateUndoBtn();}
 function refreshDraft(){const x=L();slots.forEach((s,i)=>{const el=$("r"+i);if(el&&el.classList.contains("empty"))el.querySelector(".rp").textContent=x.abbr[s[0]];});if(currentSlot>=0&&!$("optstage").classList.contains("hidden")){_setSlotLabel(x.pos[slots[currentSlot][0]]+" · "+x.abbr[slots[currentSlot][0]]);renderOpts();}else _setSlotLabel(x.rollPrompt);}
 
 /* ===== draft ===== */
 function _draftPublicRating(o){if(!o)return 0;if(!o.hidden)return Number(o.eff??o.ov)||0;return o.scoutSignal==="positive"?78:o.scoutSignal==="negative"?61:69;}
 function _draftWorstPublicIndex(options){return options.reduce((worst,o,i)=>_draftPublicRating(o)<_draftPublicRating(options[worst])?i:worst,0);}
 function _trackHiddenOffer(source,options){const hidden=(options||[]).find(o=>o&&o.hidden);if(hidden&&typeof trackHiddenDraftMetric==="function")trackHiddenDraftMetric("offered",{source:source||"manual",signal:hidden.scoutSignal||"neutral",late:deadlineH<=6});}
-function roll(){if(window._countryDraftPromise)return window._countryDraftPromise.then(()=>roll());const allUf=unfilled(),filter=window._draftPositionFilter||"ALL",filtered=filter==="ALL"?allUf:allUf.filter(index=>posGroup(slots[index][0])===filter),uf=filtered.length?filtered:allUf;if(!uf.length)return;if(deadlineH<=2&&!panicDone&&remaining>1){panicDone=true;panicBuy();return;}currentSlot=uf[rand()*uf.length|0];if(deadlineH>2){deadlineH-=2;updateDeadline();}sfxRoll();sfxTick();
+function roll(){if(currentSlot>=0||!$("optstage").classList.contains("hidden"))return false;if(window._countryDraftPromise)return window._countryDraftPromise.then(()=>roll());const allUf=unfilled(),filter=window._draftPositionFilter||"ALL",filtered=filter==="ALL"?allUf:allUf.filter(index=>posGroup(slots[index][0])===filter),uf=filtered.length?filtered:allUf;if(!uf.length)return false;const rollButton=$("rollBtn");if(rollButton){rollButton.disabled=true;rollButton.setAttribute("aria-busy","true");}if(deadlineH<=2&&!panicDone&&remaining>1){panicDone=true;panicBuy();return false;}currentSlot=uf[rand()*uf.length|0];if(deadlineH>2){deadlineH-=2;updateDeadline();}sfxRoll();sfxTick();
   showFx(()=>{const x=L(),pos=slots[currentSlot][0];currentOpts=draftOptions(pos);const reserve=(remaining-1)*0.6,debtLimit=typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT,cap=(budget+(typeof legacySpendable==="function"?legacySpendable():0))-reserve-debtLimit;
     if(!currentOpts.some(o=>typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve}):o.price<=cap)){const fp=fabPlayer(pos,55,61);fp.price=0;fp.free=true;currentOpts[_draftWorstPublicIndex(currentOpts)]=fp;}
     _trackHiddenOffer("manual",currentOpts);
     slots.forEach((_,i)=>{const el=$("r"+i);if(!el)return;el.classList.remove("cur","slot-dim");if(filled[i])return;el.classList.add("slot-dim");});const _cel=$("r"+currentSlot);if(_cel&&_cel.classList.contains("empty")){_cel.classList.add("cur");_cel.classList.remove("slot-dim");}
-    _setSlotLabel(x.pos[pos]+" · "+x.abbr[pos]);renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");_saveState();});}
+    _setSlotLabel(x.pos[pos]+" · "+x.abbr[pos]);renderOpts();$("rollstage").classList.add("hidden");$("optstage").classList.remove("hidden");_saveState();});return true;}
 function ovCol(ov){ov=Number(ov)||0;return ov>=90?"var(--rating-elite-bg)":ov>=80?"var(--rating-good-bg)":ov>=70?"var(--rating-average-bg)":ov>=60?"var(--rating-weak-bg)":"var(--rating-worst-bg)";}
 function ovOnCol(ov){ov=Number(ov)||0;return ov>=90?"var(--rating-on-elite)":ov>=80?"var(--rating-on-good)":ov>=70?"var(--rating-on-average)":ov>=60?"var(--rating-on-weak)":"var(--rating-on-worst)";}
 function ovTextCol(ov){ov=Number(ov)||0;return ov>=90?"var(--rating-elite-text)":ov>=80?"var(--rating-good-text)":ov>=70?"var(--rating-average-text)":ov>=60?"var(--rating-weak-text)":"var(--rating-worst-text)";}
@@ -1015,7 +1053,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("dr
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});if(window.PlayerProfiles&&!o.hidden)PlayerProfiles.bind(b,o,{delayCoarseAction:true});c.appendChild(b);});
   const debtPick=currentOpts.some(o=>(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve}):canAffordCost((o.price||0)+reserve))&&(typeof budgetAfterCost==="function"?budgetAfterCost(o.price||0):budget-(o.price||0))<0);
   const rb=$("rerollBtn");if(rb){const _rewardOffer=canOfferRewardedDraftReroll(),_rerollSvg=`<svg viewBox="0 0 18 18" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><path d="M3 9Q3 5.5 6.5 3.8Q10 2 13.5 4.5"/><path d="M15 9Q15 12.5 11.5 14.2Q8 16 4.5 13.5"/><polyline points="11.5,2.5 14,5 16,2.5" stroke-width="1.6"/><polyline points="6.5,15.5 4,13 2,15.5" stroke-width="1.6"/></svg>`;rb.disabled=draftRerollsLeft<=0&&(!_rewardOffer||draftRewardInFlight);rb.setAttribute("aria-busy",draftRewardInFlight?"true":"false");rb.innerHTML=draftRerollsLeft>0?(tr?_rerollSvg+"Ücretsiz yenile ("+draftRerollsLeft+" hak)":_rerollSvg+"Free reroll ("+draftRerollsLeft+" left)"):draftRewardInFlight?LT("Reklam hazırlanıyor…","Loading ad…","Cargando anuncio…","Anzeige wird geladen…","Caricamento annuncio…"):_rewardOffer?LT(`Reklam izle · +1 hak (${draftRewardedRerollsEarned}/2)`,`Watch ad · +1 reroll (${draftRewardedRerollsEarned}/2)`,`Ver anuncio · +1 intento (${draftRewardedRerollsEarned}/2)`,`Werbung ansehen · +1 Versuch (${draftRewardedRerollsEarned}/2)`,`Guarda annuncio · +1 tentativo (${draftRewardedRerollsEarned}/2)`):(draftRewardedRerollsEarned>=MAX_REWARDED_DRAFT_REROLLS?LT("Ek yenileme hakkı bitti ✗","Extra rerolls used ✗","Intentos extra agotados ✗","Zusätzliche Versuche verbraucht ✗","Tentativi extra esauriti ✗"):(tr?"Yenileme kullanıldı ✗":"Reroll used ✗"));const rd=$("rerollDesc");if(rd)rd.textContent=draftRerollsLeft>0?(tr?"Aynı mevki için 3 yeni aday getirir.":"Brings 3 new candidates for the same position."):_rewardOffer?LT("Reklam tamamlanınca 1 hak kazanırsın; tur başına en fazla 2.","Complete the ad for 1 reroll; maximum 2 per run.","Completa el anuncio para obtener 1 intento; máximo 2 por partida.","Schließe die Anzeige für 1 Versuch ab; maximal 2 pro Lauf.","Completa l'annuncio per 1 tentativo; massimo 2 per partita."):"";}
-  const om=$("optmsg");if(om){om.style.color="";om.textContent=any?(debtPick?(tr?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}}
+  const om=$("optmsg");if(om){om.style.color="";om.textContent=any?(debtPick?(tr?"Uyarı: bu seçimlerden biri kasayı eksiye düşürür.":"Warning: one of these picks puts funds below zero."):""):x.noAfford;}if(window.CopaMobileShell&&typeof CopaMobileShell.enhanceDraftControls==="function")CopaMobileShell.enhanceDraftControls();}
 function canOfferRewardedDraftReroll(){return !!(window.COPA_IS_NATIVE&&window.COPA_PLATFORM==="android"&&window.CopaNativeAds&&typeof window.CopaNativeAds.showRewardedReroll==="function"&&draftRewardedRerollsEarned<MAX_REWARDED_DRAFT_REROLLS);}
 async function requestRewardedDraftReroll(){if(draftRewardInFlight||currentSlot<0||draftRerollsLeft>0||!canOfferRewardedDraftReroll())return;draftRewardInFlight=true;renderOpts();let result={earned:false,reason:"native_error"};try{result=await window.CopaNativeAds.showRewardedReroll(chairmanEventRunId);}catch(_){result={earned:false,reason:"native_error"};}draftRewardInFlight=false;if(result&&result.earned){const previous=draftRewardedRerollsEarned,nativeCount=Math.max(previous+1,Number(result.earnedCount)||0);draftRewardedRerollsEarned=Math.min(MAX_REWARDED_DRAFT_REROLLS,nativeCount);draftRerollsLeft+=Math.max(1,draftRewardedRerollsEarned-previous);draftRerollUsed=false;_saveState();if(typeof showToast==="function")showToast(LT("+1 yenileme hakkı kazandın.","You earned +1 reroll.","Has ganado +1 intento.","Du hast +1 Versuch erhalten.","Hai ottenuto +1 tentativo."));}else if(typeof showToast==="function"){const unavailable=result&&result.reason==="not_ready";showToast(unavailable?LT("Reklam henüz hazır değil; biraz sonra tekrar dene.","The ad is not ready yet; try again shortly.","El anuncio aún no está listo; inténtalo de nuevo pronto.","Die Anzeige ist noch nicht bereit; versuche es gleich erneut.","L'annuncio non è ancora pronto; riprova tra poco."):LT("Reklam tamamlanmadı; hak eklenmedi.","The ad was not completed; no reroll was added.","El anuncio no se completó; no se añadió ningún intento.","Die Anzeige wurde nicht abgeschlossen; kein Versuch wurde hinzugefügt.","L'annuncio non è stato completato; nessun tentativo aggiunto."));}renderOpts();}
 function rerollOptions(){if(currentSlot<0)return;if(draftRerollsLeft<=0){requestRewardedDraftReroll();return;}const _hadHidden=currentOpts.some(o=>o&&o.hidden);draftRerollsLeft--;draftRerollUsed=draftRerollsLeft<=0;const _pos=slots[currentSlot][0],_reserve=(remaining-1)*0.6;currentOpts=draftOptions(_pos);const _affordable=o=>typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve:_reserve}):canAffordCost((o.price||0)+_reserve);if(!currentOpts.some(_affordable)){const fp=fabPlayer(_pos,55,61);fp.price=0;fp.free=true;currentOpts[_draftWorstPublicIndex(currentOpts)]=fp;}if(_hadHidden&&typeof trackHiddenDraftMetric==="function")trackHiddenDraftMetric("rerolled",{source:"manual",late:deadlineH<=6});_trackHiddenOffer("reroll",currentOpts);sfxRoll();renderOpts();_saveState();}
@@ -1141,7 +1179,7 @@ function _torpilNephewChoice(oc,expectedEvent){
   const tr=LANG==="tr";
   eventSeen.nephewDecision=true;
   const lim=Math.abs(chairmanSackLimit());
-  showModal(`<div class="bulletin"><div class="bhead"><span>${L().presHead}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_PP_SVG.nephew}</div><div class="bhl">${tr?"Torpilli Oyuncu Teklifi":"Cronyism Offer"}</div><div class="bbody">${tr?"Kabul: 62–68 güç, her tur +3 gelişim, +€3M; finalde −1 güç. Reddet: borç toleransı €3M daralır.":"Accept: 62–68 power, +3 growth each round and +€3M; −1 final power. Decline: debt tolerance tightens by €3M."}</div><div class="beff down">${tr?"Karar kalıcıdır":"The decision is permanent"}</div><div class="bact"><button class="btn btn-primary" onclick="_showNephewTargetPicker()">${tr?"Kabul Et":"Accept"}</button><button class="btn btn-ghost" onclick="closeModal();_rejectNephew()">${tr?"Reddet (limit: €"+(lim-3)+"M)":"Reject (limit: €"+(lim-3)+"M)"}</button></div></div>`);
+  showModal(`<div class="bulletin nephew-offer-modal"><div class="bhead"><span>${L().presHead}</span><span>${L().rounds[round-1]}</span></div><div class="nephew-offer-hero"><div class="bmascot">${_PP_SVG.nephew}</div><div><span>${tr?"KADRO KARARI":"SQUAD DECISION"}</span><h3>${tr?"Torpilli Oyuncu Teklifi":"Cronyism Offer"}</h3></div></div><div class="nephew-choice-list"><article class="is-accept"><header><b>${tr?"KABUL":"ACCEPT"}</b><em>${tr?"Oyuncu ve nakit":"Player and cash"}</em></header><ul><li><span>${tr?"Oyuncu":"Player"}</span><strong>62–68 ${tr?"güç":"power"}</strong></li><li><span>${tr?"Gelişim":"Growth"}</span><strong>${tr?"Her tur +3":"Every round +3"}</strong></li><li><span>${tr?"Kasa":"Cash"}</span><strong>+€3M</strong></li><li class="is-risk"><span>${tr?"Final":"Final"}</span><strong>−1 ${tr?"güç":"power"}</strong></li></ul></article><article class="is-decline"><header><b>${tr?"REDDET":"DECLINE"}</b><em>${tr?"Daha dar güvenli alan":"Tighter safety margin"}</em></header><ul><li class="is-risk"><span>${tr?"Borç toleransı":"Debt tolerance"}</span><strong>−€3M</strong></li><li><span>${tr?"Yeni limit":"New limit"}</span><strong>−€${lim-3}M</strong></li></ul></article></div><p class="nephew-permanent">${tr?"Bu karar geri alınamaz.":"This decision cannot be undone."}</p><div class="bact nephew-offer-actions"><button class="btn btn-primary" onclick="_showNephewTargetPicker()">${tr?"KABUL ET":"ACCEPT"}</button><button class="btn btn-ghost" onclick="closeModal();_rejectNephew()">${tr?"REDDET":"DECLINE"}</button></div></div>`);
   window._pendingNephewOc=oc;
 }
 function _showNephewTargetPicker(){
@@ -1432,7 +1470,7 @@ function _chooseManagementReplacement(id){
   setBudget();renderHub();queuePendingChairmanEvent(200);
   if(typeof _saveState==="function")_saveState();
 }
-function pickOutcome(){const pool=POUT.filter(o=>(o.id!=="nephew"||chairman.id!=="torpilci"||!eventSeen.nephewDecision)&&(!o.eligible||o.eligible()));const safePool=pool.length?pool:POUT.filter(o=>o.id==="sale");const w=chairman.w;if(!w)return safePool[rand()*safePool.length|0];const wl=safePool.map(o=>[o,Math.max(0,w[o.id]!=null?w[o.id]:1)]).filter(e=>e[1]>0);if(!wl.length)return safePool[0];let tot=0;wl.forEach(e=>tot+=e[1]);let r=rand()*tot;for(const e of wl){r-=e[1];if(r<=0)return e[0];}return wl[0][0];}
+function pickOutcome(){let pool=POUT.filter(o=>(o.id!=="nephew"||chairman.id!=="torpilci"||!eventSeen.nephewDecision)&&(!o.eligible||o.eligible()));if(window.CopaRelationships)pool=CopaRelationships.filterChairOutcomes(pool);const safePool=pool.length?pool:POUT.filter(o=>o.id==="sale");const w=chairman.w;if(!w)return safePool[rand()*safePool.length|0];const wl=safePool.map(o=>[o,Math.max(0,w[o.id]!=null?w[o.id]:1)]).filter(e=>e[1]>0);if(!wl.length)return safePool[0];let tot=0;wl.forEach(e=>tot+=e[1]);let r=rand()*tot;for(const e of wl){r-=e[1];if(r<=0)return e[0];}return wl[0][0];}
 const POUT=[
   {id:"generous",run:()=>{const d=ri(7,13);earn(d,"earned");return{delta:d};}},
   {id:"sponsor",run:()=>{const d=ri(6,11);earn(d,"earned");riskPowerMod-=2;return{delta:d};}},
@@ -1466,13 +1504,14 @@ function openPresident(){
   const _discNote=_babDisc?'<div class="chair-consult-note">'+(tr?"G&uuml;ven indirimi aktif":"Trust discount active")+'</div>':"";
   const _mediaCost=chairman.id==="sansasyoncu"&&sansMediaPressure>0?'<div class="chair-consult-note warn">'+(tr?"Medya bask&#305;s&#305;: dan&#305;&#351;ma +&euro;2M":"Media pressure: consult +&euro;2M")+'</div>':"";
   const consultBtn=av?_discNote+_mediaCost+'<button class="btn btn-primary chair-consult-btn" onclick="consultPresident()">'+_trustSvg+(tr?"Dan&#305;&#351;":"Consult")+' &minus;&euro;'+_consultCost+'M</button>':round>=4?'<div class="chair-status-pill">'+(tr?"Bu tur hakk&#305;n bitti":"Used this run")+'</div>':"";
+  const relationshipBtn=window.CopaRelationships?CopaRelationships.chairMarkup(chairman.id):"";
   const fx=_CHAIR_FX&&_CHAIR_FX[chairman.id],fxLang=tr?"tr":"en";
   const hints=fx?[...(fx.pros&&fx.pros[fxLang]||[]),...(fx.cons&&fx.cons[fxLang]||[])].map(v=>String(v).replace(/\p{Emoji_Presentation}\s*/gu,"").trim()).filter(Boolean):[];
   let sections="";
   if(chairman.id==="sansasyoncu"){sections='<div class="chair-sections"><div class="chair-section"><b>'+(tr?"Art&#305;lar":"Upside")+'</b><span>'+(tr?"Y&#305;ld&#305;z bonusu y&uuml;ksek":"High star bonus")+'</span><span>'+(tr?"B&uuml;y&uuml;k transferlerde etkili":"Strong with big transfers")+'</span></div><div class="chair-section"><b>'+(tr?"Riskler":"Risks")+'</b><span>'+(tr?"Pazar pahal&#305;":"Expensive market")+'</span></div></div>';}
   else if(hints.length){sections='<div class="chair-sections"><div class="chair-section"><b>'+(tr?"&Ouml;zellikler":"Traits")+'</b>'+hints.map(h=>'<span>'+h+'</span>').join("")+'</div></div>';}
   const _trustNum='<div class="chair-trust-line">'+(tr?"BA&#350;KAN G&Uuml;VEN&#304;":"CHAIR TRUST")+' <span>'+chairTrust+'/3</span></div>';
-  showModal('<div class="chairpopup chair-profile"><button class="modal-x" onclick="closeModal()" aria-label="'+(tr?"Kapat":"Close")+'">&times;</button>'+phimg+'<div class="chairpopup-name">'+(cd?cd.n:chairman.id)+'</div><div class="chairpopup-sub">'+(cd?cd.role:"")+'</div>'+_trustNum+'<div class="chairpopup-desc">'+(cd?cd.desc:"")+'</div>'+sections+consultBtn+'</div>',{dismissOnOverlay:true,label:tr?"Ba&#351;kan":"Chairman"});
+  showModal('<div class="chairpopup chair-profile"><button class="modal-x" onclick="closeModal()" aria-label="'+(tr?"Kapat":"Close")+'">&times;</button>'+phimg+'<div class="chairpopup-name">'+(cd?cd.n:chairman.id)+'</div><div class="chairpopup-sub">'+(cd?cd.role:"")+'</div>'+_trustNum+'<div class="chairpopup-desc">'+(cd?cd.desc:"")+'</div>'+sections+relationshipBtn+consultBtn+'</div>',{dismissOnOverlay:true,label:tr?"Ba&#351;kan":"Chairman"});
 }
 function presidentMoodLine(id){const tr=LANG==="tr";const map={babacan:tr?"Patron Ba&#351;kan son s&#246;z&#252; tart&#305;yor...":"The Patron is weighing the final word...",leydi:tr?"Diplomat Ba&#351;kan teraziyi dengeliyor...":"The Diplomat is balancing the scales...",pinti:tr?"Pinti Ba&#351;kan kasay&#305; say&#305;yor...":"The Miser is counting the cash...",sansasyoncu:tr?"&#350;ovmen Ba&#351;kan kameralar&#305; bekliyor...":"The Showman is waiting for the cameras...",torpilci:tr?"Torpilci Ba&#351;kan telefonlar&#305; a&#231;t&#305;...":"The Fixer is making calls...",cilgin:tr?"Profes&#246;r Ba&#351;kan zarlar&#305; kar&#305;&#351;t&#305;r&#305;yor...":"The Professor is shuffling the dice..."};return map[id]||(tr?"Ba&#351;kan son s&#246;z&#252; s&#246;yl&#252;yor...":"The chairman is making the call...");}
 function presidentResultBody(oc,t){const tr=LANG==="tr";const map={generous:tr?"Kasaya beklenmedik para giri&#351;i oldu.":"Unexpected money entered the coffers.",sponsor:tr?"Sponsor geliri kasay&#305; rahatlatt&#305;; yo&#287;un program bu ma&#231; tak&#305;m g&#252;c&#252;n&#252; 2 d&#252;&#351;&#252;r&#252;r.":"Sponsor income eased the budget, but the schedule reduces team power by 2 this match.",sale:tr?"Kul&#252;b&#252;n adas&#305; sat&#305;ld&#305; ve gelir kasaya akt&#305;.":"The club's island was sold and the proceeds entered the budget.",star:tr?"Ba&#351;kan transferi ba&#287;lad&#305;.":"The chairman landed the signing.",bargain:tr?"Ta&#351;radan de&#287;erli bir f&#305;rsat &#231;&#305;kt&#305;.":"A useful bargain emerged from the provinces.",academy:tr?"Altyap&#305;dan kadroya yeni bir isim geldi.":"A new name came through the academy.",youth:tr?"Bonservis ödenmeden yedek kulübesine genç bir oyuncu eklendi.":"A young player joined the bench without a transfer fee.",nephew:tr?"Ba&#351;kan&#305;n adam&#305; kadroya girdi.":"The chairman's man entered the squad.",cut:tr?"Ba&#351;kan kasadan kesinti yapt&#305;.":"The chairman cut the club budget.",yacht:tr?"Ba&#351;kan kul&#252;p kasas&#305;n&#305; yordu.":"The chairman drained club funds.",tax:tr?"Vergi cezas&#305; kasaya yans&#305;d&#305;.":"A tax penalty hit the budget.",federation:tr?"Riskli kararlar federasyon denetimine takıldı.":"Risky decisions triggered a federation review.",ffp:tr?"Harcama seviyesi nedeniyle sıradaki transfer pazarı kapatıldı.":"The next transfer market was closed after a spending review.",fans:tr?"Taraftar tepkisi başkan güvenini ve maç hazırlığını düşürdü.":"Supporter pressure hurt board trust and match preparation.",investigation:tr?"Riskli kartlar soruşturma ve para cezası doğurdu.":"Risky cards triggered an investigation and a fine.",management:tr?"Kulüp yönetimi değişti; seçtiğin başkanın yerine yeni bir başkan geldi.":"The board changed and a new chairman took control."};return map[oc.id]||t[2];}
@@ -1499,7 +1538,7 @@ if(chairman.id==="cilgin"&&(oc.id==="cut"||oc.id==="yacht"||oc.id==="tax")){cons
 function _cilginKabulEt(){const oc=window._pendingCilginOc;window._pendingCilginOc=null;if(oc)_resolvePresidentOc(oc);}
 function _cilginItiraz(){const oc=window._pendingCilginOc;window._pendingCilginOc=null;if(!oc)return;const tr=LANG==="tr";const _ok=`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>`;const _bad=`<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>`;if(rand()<0.5){pushFeed(" "+(tr?"İtiraz kabul edildi — olay iptal!":"Object succeeded — event cancelled!"),"buy");showModal(`<div class="bulletin"><div class="bhead"><span> ${tr?"İtiraz":"Object"}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_ok}</div><div class="bhl up">${tr?"Başkan Geri Adım Attı":"Chairman Backed Down"}</div><div class="bbody">${tr?"İtirazın işe yaradı — bütçen korundu.":"Your objection worked — budget protected."}</div><div class="beff up">${tr?"Olay iptal":"Event cancelled"}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${L().presClose}</button></div></div>`);return;}const _base=Math.max(0,Math.round(oc._pendingDelta||cilginCrisisAmount(oc.id)));const _d=Math.min(28,_base*2);spend(_d,"president");setBudget();pushFeed(" "+(tr?"İtiraz ters tepti — etkisi iki katı: -€"+_d+"M":"Object backfired — double effect: -€"+_d+"M"),"lose");showModal(`<div class="bulletin"><div class="bhead"><span> ${tr?"İtiraz":"Object"}</span><span>${L().rounds[round-1]}</span></div><div class="bmascot">${_bad}</div><div class="bhl down">${tr?"İtiraz Ters Tepti":"Object Backfired"}</div><div class="bbody">${tr?"Başkan daha da çıldırdı.":"Chairman went even more crazy."}</div><div class="beff down">-€${_d}M</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub();">${L().presClose}</button></div></div>`);if(round>=3)checkChairmanSack("president");}
 function _resolvePresidentOc(oc){if(runEnded)return;const x=L(),_eventChairmanId=chairman.id;
-  let info;if(oc.place)info=upgradeSlot(oc.place[0],oc.place[1],oc.place[2]);else if(oc.down)info=downgradeSlot(oc.down[0],oc.down[1]);else info=oc.run();setBudget();const t=x.pp[oc.id](info);if(info&&info.mode==="bench"){t[2]=LANG==="tr"?`${info.name} ilk 11'i zayıflatmadan yedeğe eklendi.`:`${info.name} joined the bench without weakening the XI.`;t[3]=(LANG==="tr"?"Yedek":"Bench")+` · ${info.ov}`;}else if(info&&info.mode==="cash"){t[2]=LANG==="tr"?"Kadroda güvenli bir yükseltme bulunamadı; destek kasaya aktarıldı.":"No safe XI upgrade was available; the support moved to cash.";t[3]=`+€${info.delta}M`;}if(typeof trackChairmanMetric==="function")trackChairmanMetric(oc.id==="management"?"neutralEvents":t[4]?"positiveEvents":"negativeEvents",1,_eventChairmanId);if(_eventChairmanId==="babacan"&&t[4]&&chairSupportDebt<2){const _support=Math.min(2-chairSupportDebt,2);chairSupportDebt+=_support;addFinalPenalty(_support,"chairman_support");pushFeed("⚠️ "+(LANG==="tr"?"Başkan desteği finalde -"+_support+" güç bıraktı":"Chairman support added final -"+_support+" power"),"lose");}if(!t[4]&&info&&info.delta)notePresidentHit(t[0],info.delta);sfxStamp();if(info&&info.delta)sfxCoin();
+  let info;if(oc.place)info=upgradeSlot(oc.place[0],oc.place[1],oc.place[2]);else if(oc.down)info=downgradeSlot(oc.down[0],oc.down[1]);else info=oc.run();setBudget();const t=x.pp[oc.id](info);if(info&&info.mode==="bench"){t[2]=LANG==="tr"?`${info.name} ilk 11'i zayıflatmadan yedeğe eklendi.`:`${info.name} joined the bench without weakening the XI.`;t[3]=(LANG==="tr"?"Yedek":"Bench")+` · ${info.ov}`;}else if(info&&info.mode==="cash"){t[2]=LANG==="tr"?"Kadroda güvenli bir yükseltme bulunamadı; destek kasaya aktarıldı.":"No safe XI upgrade was available; the support moved to cash.";t[3]=`+€${info.delta}M`;}if(window.CopaRelationships)CopaRelationships.recordChairDecision(_eventChairmanId,oc.id,!!t[4]);if(typeof trackChairmanMetric==="function")trackChairmanMetric(oc.id==="management"?"neutralEvents":t[4]?"positiveEvents":"negativeEvents",1,_eventChairmanId);if(_eventChairmanId==="babacan"&&t[4]&&chairSupportDebt<2){const _support=Math.min(2-chairSupportDebt,2);chairSupportDebt+=_support;addFinalPenalty(_support,"chairman_support");pushFeed("⚠️ "+(LANG==="tr"?"Başkan desteği finalde -"+_support+" güç bıraktı":"Chairman support added final -"+_support+" power"),"lose");}if(!t[4]&&info&&info.delta)notePresidentHit(t[0],info.delta);sfxStamp();if(info&&info.delta)sfxCoin();
   const _FEED_ICOS={generous:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><circle cx="7" cy="7" r="6"/><path d="M7 4.5v5M5.5 5.5Q5.5 4.5 7 4.5Q8.5 4.5 8.5 6Q8.5 7.5 7 7.5Q8.5 7.5 8.5 9Q8.5 9.5 7 9.5Q5.5 9.5 5.5 8.5" stroke-width="1.1"/></svg>`,sponsor:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="vertical-align:-.15em"><rect x="1" y="3" width="12" height="8" rx="1.5"/><line x1="1" y1="6" x2="13" y2="6"/><line x1="5" y1="9" x2="7" y2="9"/></svg>`,sale:`<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="vertical-align:-.15em"><circle cx="7" cy="7" r="5.5"/><line x1="4.5" y1="9.5" x2="9.5" y2="4.5"/><circle cx="5.5" cy="5.5" r=".9" fill="currentColor" stroke="none"/><circle cx="8.5" cy="8.5" r=".9" fill="currentColor" stroke="none"/></svg>`};
   const _pIco=_FEED_ICOS[oc.id]||"";
   pushFeed(_pIco+" <b>"+t[0]+"</b> "+t[3],"pres");if(round>=3&&checkChairmanSack("president"))return;
@@ -1581,10 +1620,17 @@ function showToast(msg,{type="default",duration=2600}={}){
   c.appendChild(t);
   setTimeout(()=>{t.classList.add("toast-out");t.addEventListener("animationend",()=>t.remove(),{once:true});setTimeout(()=>t.remove(),450);},duration);
 }
-let _modalPrevFocus=null,_modalTrapFn=null;
+let _modalPrevFocus=null,_modalTrapFn=null,_modalScrollSnapshot=null;
 function showModal(html,{dismissOnOverlay=false,dismissOnEscape=true,label="",bare=false,sheetClass=""}={}){
   if(window.PlayerProfiles)PlayerProfiles.close();
   const m=$("modal");
+  if(m.classList.contains("hidden")||!_modalScrollSnapshot){
+    const scrolling=document.scrollingElement||document.documentElement;
+    _modalScrollSnapshot={
+      x:window.scrollX||scrolling.scrollLeft||0,
+      y:window.scrollY||scrolling.scrollTop||0
+    };
+  }
   const ariaLabel=label?` aria-label="${label}"`:" aria-labelledby=\"_mdlttl\"";
   const sheetCls=["sheet",bare?"sheet-bare":"",sheetClass].filter(Boolean).join(" ");
   m.innerHTML=`<div class="${sheetCls}" role="dialog" aria-modal="true"${ariaLabel}>${html}</div>`;
@@ -1594,7 +1640,7 @@ function showModal(html,{dismissOnOverlay=false,dismissOnEscape=true,label="",ba
   _modalPrevFocus=document.activeElement;
   const focusable='button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
   const first=m.querySelector(focusable);
-  if(first)first.focus();
+  if(first){try{first.focus({preventScroll:true});}catch(_){first.focus();}}
   if(_modalTrapFn)m.removeEventListener("keydown",_modalTrapFn);
   _modalTrapFn=e=>{
     if(e.key==="Escape"){
@@ -1612,11 +1658,18 @@ function showModal(html,{dismissOnOverlay=false,dismissOnEscape=true,label="",ba
 }
 function closeModal(){
   if(window.PlayerProfiles)PlayerProfiles.close();
+  if(typeof _restoreNormalMatchSim==="function"&&_normalMatchSimHome)_restoreNormalMatchSim();
   const m=$("modal");
+  const scrollSnapshot=_modalScrollSnapshot;
   if(_modalTrapFn){m.removeEventListener("keydown",_modalTrapFn);_modalTrapFn=null;}
   m.classList.add("hidden");m.innerHTML="";
-  if(_modalPrevFocus&&_modalPrevFocus.focus){try{_modalPrevFocus.focus();}catch(e){}}
+  if(_modalPrevFocus&&_modalPrevFocus.focus){try{_modalPrevFocus.focus({preventScroll:true});}catch(e){try{_modalPrevFocus.focus();}catch(_){}}}
   _modalPrevFocus=null;
+  _modalScrollSnapshot=null;
+  if(scrollSnapshot){
+    const restore=()=>window.scrollTo(scrollSnapshot.x,scrollSnapshot.y);
+    restore();window.requestAnimationFrame(restore);
+  }
 }
 
 /* ===== match ===== */
@@ -1685,15 +1738,15 @@ function _captureLastMatchReportSnapshot(options){
 function matchEventsHTML(ev){
   const _ball=`<svg viewBox='0 0 16 16' width='13' height='13' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='8' cy='8' r='6'/><path d='M8 4L10 6L9.2 8.8L6.8 8.8L6 6Z' fill='currentColor' opacity='.25' stroke-width='.8'/><path d='M8 4L6 6M8 4L10 6M6 6L2.5 7M10 6L13.5 7M6.8 8.8L5.5 11.5M9.2 8.8L10.5 11.5'/></svg>`;
   const _net=`<svg viewBox='0 0 18 14' width='15' height='11' fill='none' stroke='currentColor' stroke-width='1.3' stroke-linecap='round' style='vertical-align:-.05em'><rect x='1' y='1' width='16' height='10' rx='1'/><line x1='1' y1='4' x2='17' y2='4'/><line x1='1' y1='7.5' x2='17' y2='7.5'/><line x1='5' y1='1' x2='5' y2='11'/><line x1='9' y1='1' x2='9' y2='11'/><line x1='13' y1='1' x2='13' y2='11'/><path d='M1 11L1 13L17 13L17 11'/></svg>`;
-  const _yellow=`<svg viewBox='0 0 10 14' width='9' height='12' fill='#F24A28' style='vertical-align:-.1em'><rect x='0' y='0' width='10' height='14' rx='1.5'/></svg>`;
-  const _red=`<svg viewBox='0 0 10 14' width='9' height='12' fill='#420102' style='vertical-align:-.1em'><rect x='0' y='0' width='10' height='14' rx='1.5'/></svg>`;
+  const _yellow=`<svg viewBox='0 0 10 14' width='9' height='12' fill='#D6A21F' style='vertical-align:-.1em'><rect x='0' y='0' width='10' height='14' rx='1.5'/></svg>`;
+  const _red=`<svg viewBox='0 0 10 14' width='9' height='12' fill='#DA3D2E' style='vertical-align:-.1em'><rect x='0' y='0' width='10' height='14' rx='1.5'/></svg>`;
   const _near=`<svg viewBox='0 0 16 16' width='13' height='13' fill='none' stroke='#DA3D2E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='8' cy='8' r='6'/><path d='M5 8Q6.5 5 8 8Q9.5 11 11 8'/></svg>`;
   const goals=ev.filter(e=>e.type==="goal");if(!goals.length&&!ev.filter(e=>e.type!=="near").length)return `<div class="goalsum">${LANG==="tr"?"Gol olmadı":"No goals"}</div>`;
   return `<div class="goalsum">${ev.sort((a,b)=>a.m-b.m).map((e,eventIndex)=>{
-    if(e.type==="goal")return `<div class="event-goal ${e.home?"home":"away"}" data-profile-event-index="${eventIndex}"><b>${e.m}'</b> ${e.home?_ball:_net} ${clip(e.name,18)}</div>`;
-    if(e.type==="yellow")return `<div class="${e.home?"home":"away"}" data-profile-event-index="${eventIndex}" style="opacity:.75"><b>${e.m}'</b> ${_yellow} ${clip(e.name,14)}</div>`;
-    if(e.type==="red")return `<div class="${e.home?"home":"away"}" data-profile-event-index="${eventIndex}"><b>${e.m}'</b> ${_red} <b>${clip(e.name,14)}</b>${LANG==="tr"?" — bir sonraki maçta -1 güç":" — next match -1 power"}</div>`;
-    if(e.type==="near")return `<div class="home" data-profile-event-index="${eventIndex}" style="opacity:.6"><b>${e.m}'</b> ${_near} ${clip(e.name,14)} ${LANG==="tr"?"— isabet yok":"— off target"}</div>`;
+    if(e.type==="goal")return `<div class="event-goal ${e.home?"home":"away"}" data-profile-event-index="${eventIndex}"><b>${e.m}'</b><span class="event-icon">${e.home?_ball:_net}</span><span class="event-copy">${clip(e.name,18)}</span></div>`;
+    if(e.type==="yellow")return `<div class="event-card ${e.home?"home":"away"}" data-profile-event-index="${eventIndex}"><b>${e.m}'</b><span class="event-icon">${_yellow}</span><span class="event-copy">${clip(e.name,14)}</span></div>`;
+    if(e.type==="red")return `<div class="event-card event-red ${e.home?"home":"away"}" data-profile-event-index="${eventIndex}"><b>${e.m}'</b><span class="event-icon">${_red}</span><span class="event-copy"><strong>${clip(e.name,14)}</strong><em class="event-impact">${LANG==="tr"?"SONRAKİ MAÇ −1 GÜÇ":"NEXT MATCH −1 POWER"}</em></span></div>`;
+    if(e.type==="near")return `<div class="event-near home" data-profile-event-index="${eventIndex}"><b>${e.m}'</b><span class="event-icon">${_near}</span><span class="event-copy">${clip(e.name,14)} <small>${LANG==="tr"?"isabet yok":"off target"}</small></span></div>`;
     return "";}).join("")}</div>`;}
 function performanceNote(perf){const tr=LANG==="tr";if(injuredIdx>=0)return tr?"Sakatlık Pahalıya Patladı":"Injury Cost You";if(perf.gf+perf.ga<=1)return tr?"Kısır Maç":"Tight Match";if(perf.win&&perf.gf-perf.ga>=2)return tr?"Rahat Galibiyet":"Comfortable Win";if(perf.ga===0&&perf.gf>0)return tr?"Kaleci Kurtardı":"Keeper Held Firm";if(perf.draw){const groupDraw=window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active()&&window.CopaTournamentRuntime.stage()==="group";return groupDraw?LT("Puanlar Paylaşıldı","Points Shared","Reparto de puntos","Punkte geteilt","Punti condivisi"):LT("Penaltı Gerilimi","Penalty Drama","Drama en los penaltis","Elfmeterdrama","Brivido ai rigori");}return perf.win?(tr?"Kontrollü Geçiş":"Controlled Advance"):(tr?"Derslik Maç":"Learning Loss");}
 function performanceWhy(perf){
@@ -1774,20 +1827,105 @@ function selectMatchPresentation(mode){
 function showMatchModePicker(sp){
   const tr=LANG==="tr",warnings=matchRiskWarnings(sp);
   const warningHtml=warnings.length?`<div class="match-mode-warnings">${warnings.map(item=>`<span>${_riskIcon(item)}<b>${item}</b></span>`).join("")}</div>`:`<div class="match-mode-clear">✓ ${tr?"Belirgin risk yok":"No major warning"}</div>`;
-  showModal(`<div class="match-mode-modal"><span class="match-mode-kicker">${tr?"MAÇ SUNUMU":"MATCH PRESENTATION"}</span><h3>${tr?"Nasıl oynamak istersin?":"How do you want to play?"}</h3>${warningHtml}<div class="match-mode-options"><button type="button" onclick="selectMatchPresentation('watch')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m9 9 6 3-6 3z"/></svg><b>${tr?"İZLE":"WATCH"}</b><small>${tr?"Canlı maç · 60 sn":"Live match · 60 sec"}</small></button><button type="button" onclick="selectMatchPresentation('quick')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 5 7 7-7 7M12 5l7 7-7 7"/></svg><b>${tr?"HIZLI OYNA":"QUICK PLAY"}</b><small>${tr?"Aynı sonuç · 2 sn":"Same result · 2 sec"}</small></button></div><p class="match-mode-memory">${tr?"Seçimin hatırlanır. Maça Çık yanındaki küçük düğmeden değiştirebilirsin.":"Your choice is remembered. Change it from the small button beside Play Match."}</p><button class="match-mode-back" type="button" onclick="closeModal()">${tr?"GERİ":"BACK"}</button></div>`,{dismissOnOverlay:true,label:tr?"Maç sunumu":"Match presentation"});
+  const preferred=_preferredMatchPresentation;
+  showModal(`<div class="match-mode-modal"><span class="match-mode-kicker">${tr?"MAÇ SUNUMU":"MATCH PRESENTATION"}</span><h3>${tr?"Nasıl oynamak istersin?":"How do you want to play?"}</h3>${warningHtml}<div class="match-mode-options"><button type="button" class="${preferred==="watch"?"is-last-choice":""}" onclick="selectMatchPresentation('watch')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m9 9 6 3-6 3z"/></svg><b>${tr?"İZLE":"WATCH"}</b><small>${tr?"Final kalitesinde canlı sunum · 60 sn":"Final-quality live presentation · 60 sec"}</small></button><button type="button" class="${preferred==="quick"?"is-last-choice":""}" onclick="selectMatchPresentation('quick')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 5 7 7-7 7M12 5l7 7-7 7"/></svg><b>${tr?"HIZLI OYNA":"QUICK PLAY"}</b><small>${tr?"Aynı sonuç · 2 sn":"Same result · 2 sec"}</small></button></div><p class="match-mode-memory">${tr?"Son seçimin işaretlenir; bu ekran her maçtan önce yeniden açılır.":"Your last choice is marked; this screen opens before every match."}</p><button class="match-mode-back" type="button" onclick="closeModal()">${tr?"GERİ":"BACK"}</button></div>`,{dismissOnOverlay:true,label:tr?"Maç sunumu":"Match presentation"});
+}
+var _normalMatchSimHome=null,_normalMatchPlayback=null;
+function _normalMatchEventLabel(event){
+  const tr=LANG==="tr",type=event&&event.type||"moment";
+  if(type==="goal")return tr?"GOL":"GOAL";
+  if(type==="yellow")return tr?"SARI KART":"YELLOW CARD";
+  if(type==="red")return tr?"KIRMIZI KART":"RED CARD";
+  if(type==="near")return tr?"İSABET YOK":"OFF TARGET";
+  return tr?"MAÇ ANI":"MATCH MOMENT";
+}
+function _normalMatchEventType(event){
+  const type=event&&event.type||"moment";
+  return type==="yellow"?"yellow-card":type==="red"?"red-card":type==="near"?"wide":type;
+}
+function _normalMatchLiveField(){
+  const home=clip(teamName||"XI",18).toUpperCase(),away=clip(opponent&&opponent.name||"RAKİP",18).toUpperCase();
+  return `<svg id="emSvg" viewBox="0 0 100 65" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${LANG==="tr"?"Maç olay haritası":"Match event map"}"><defs><linearGradient id="normalEmGnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#17242D"/><stop offset="52%" stop-color="#1F2B34"/><stop offset="100%" stop-color="#17242D"/></linearGradient><radialGradient id="normalEmVig" cx="50%" cy="50%" r="72%"><stop offset="62%" stop-color="rgba(16,29,40,0)"/><stop offset="100%" stop-color="rgba(16,29,40,.42)"/></radialGradient></defs><rect width="100" height="65" fill="url(#normalEmGnd)"/><g stroke="rgba(243,245,244,.045)" stroke-width=".25">${[10,20,30,40,60,70,80,90].map(x=>`<line x1="${x}" y1="2" x2="${x}" y2="63"/>`).join("")}${[13,22,43,54.5].map(y=>`<line x1="3" y1="${y}" x2="97" y2="${y}"/>`).join("")}</g><line x1="3" y1="22" x2="97" y2="22" stroke="rgba(104,117,124,.16)" stroke-width=".35" stroke-dasharray="1.6 1.8"/><line x1="3" y1="43" x2="97" y2="43" stroke="rgba(104,117,124,.16)" stroke-width=".35" stroke-dasharray="1.6 1.8"/><rect x="3" y="2" width="94" height="61" rx=".8" fill="none" stroke="rgba(243,245,244,.34)" stroke-width=".5"/><line x1="3" y1="32.5" x2="97" y2="32.5" stroke="rgba(243,245,244,.24)" stroke-width=".4"/><circle cx="50" cy="32.5" r="8.5" fill="none" stroke="rgba(243,245,244,.2)" stroke-width=".4"/><circle cx="50" cy="32.5" r=".8" fill="rgba(243,245,244,.28)"/><rect x="30" y="2" width="40" height="13" fill="rgba(243,245,244,.025)" stroke="rgba(243,245,244,.25)" stroke-width=".4"/><rect x="30" y="50" width="40" height="13" fill="rgba(243,245,244,.025)" stroke="rgba(243,245,244,.25)" stroke-width=".4"/><rect x="40" y="2" width="20" height="5" fill="none" stroke="rgba(243,245,244,.18)" stroke-width=".35"/><rect x="40" y="58" width="20" height="5" fill="none" stroke="rgba(243,245,244,.18)" stroke-width=".35"/><rect x="41" y=".4" width="18" height="1.8" fill="rgba(243,245,244,.42)" rx=".3"/><rect x="41" y="62.8" width="18" height="1.8" fill="rgba(243,245,244,.42)" rx=".3"/><rect width="100" height="65" fill="url(#normalEmVig)" pointer-events="none"/><g id="emMarkers"></g><g id="normalLiveBall"><circle cx="50" cy="32.5" r="1.45" fill="#F3F5F4"/><circle cx="50" cy="32.5" r="2.5" fill="none" stroke="#F24A28" stroke-width=".55"><animate attributeName="r" values="2.2;4.2;2.2" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;.15;.9" dur="1.5s" repeatCount="indefinite"/></circle></g><text x="6" y="5.6" font-size="3.1" fill="rgba(104,117,124,.9)" font-family="system-ui,sans-serif" font-weight="700">${home} ▾</text><text x="6" y="61.5" font-size="3.1" fill="rgba(243,245,244,.48)" font-family="system-ui,sans-serif" font-weight="700">${away} ▴</text></svg>`;
+}
+function _normalMatchLiveTimeline(){
+  const ticks=[0,15,30,45,60,75,90];
+  return `<svg class="tl-svg" viewBox="0 0 300 24" preserveAspectRatio="xMidYMid meet"><rect x="2" y="11" width="296" height="3" rx="1.5" fill="rgba(86,97,106,.3)"/><rect id="normalTlProg" x="2" y="11" width="0" height="3" rx="1.5" fill="#4E9B65"/>${ticks.map(minute=>{const x=(2+minute/90*296).toFixed(1);return `<line x1="${x}" y1="9" x2="${x}" y2="15" stroke="currentColor" stroke-width="1" opacity=".72"/><text x="${x}" y="22.5" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="system-ui,sans-serif">${minute}'</text>`;}).join("")}<g id="normalTlMarkers"></g><line id="normalTlCursor" x1="2" y1="7" x2="2" y2="17" stroke="#F24A28" stroke-width="1.6"/></svg>`;
+}
+function _restoreNormalMatchSim(){
+  clearInterval(window._normalMatchPresentationTick);window._normalMatchPresentationTick=null;
+  const state=_normalMatchSimHome,sim=document.getElementById("sim");
+  if(state&&sim){
+    sim.classList.add("hidden");sim.classList.remove("normal-match-popup");sim.removeAttribute("data-normal-match");
+    const anchor=state.next&&state.next.parentNode===state.parent?state.next:null;
+    state.parent.insertBefore(sim,anchor);
+  }
+  _normalMatchSimHome=null;_normalMatchPlayback=null;
+}
+function _normalMatchLiveRender(){
+  const state=_normalMatchPlayback;if(!state)return;
+  const elapsed=Date.now()-state.started,ratio=Math.max(0,Math.min(1,elapsed/state.duration)),minute=Math.min(90,Math.floor(ratio*90));
+  const set=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=String(value);};
+  set("simClk",String(minute).padStart(2,"0")+"'");
+  const progress=document.getElementById("normalTlProg");if(progress)progress.setAttribute("width",String(296*ratio));
+  const cursor=document.getElementById("normalTlCursor");if(cursor){const x=2+296*ratio;cursor.setAttribute("x1",String(x));cursor.setAttribute("x2",String(x));}
+  const perf=lastMatchPerf||{},score=[0,0];
+  state.events.forEach((event,index)=>{
+    if(Number(event.m||0)>minute)return;
+    if(event.type==="goal")score[event.home?0:1]++;
+    if(state.revealed.has(index))return;
+    state.revealed.add(index);
+    const eventType=_normalMatchEventType(event),label=_normalMatchEventLabel(event),side=event.home?0:1;
+    const row=document.createElement("div");row.className=(event.home?"home":"away")+" goal event-row event-"+eventType+(event.type==="goal"||event.type==="red"?" ev-major":"");
+    row.dataset.eventType=eventType;row.innerHTML=`<b>${event.m||"·"}'</b><span><b>${label} · ${clip(event.name||"",18)}</b><small>${event.home?clip(teamName||"XI",18):clip(opponent&&opponent.name||"RAKİP",18)}</small></span>`;
+    const list=document.getElementById("simGoals");if(list){list.prepend(row);while(list.children.length>12)list.lastElementChild.remove();}
+    const markerRoot=document.getElementById("normalTlMarkers"),x=(2+(Number(event.m)||0)/90*296).toFixed(1);
+    if(markerRoot)markerRoot.insertAdjacentHTML("beforeend",event.type==="yellow"||event.type==="red"?`<rect x="${Number(x)-2.2}" y="5" width="4.4" height="7" rx=".7" fill="${event.type==="red"?"#DA3D2E":"#D6A21F"}" transform="rotate(8 ${x} 8.5)"/>`:`<circle cx="${x}" cy="8.5" r="${event.type==="goal"?3:2.2}" fill="${event.type==="goal"?"#4E9B65":"#AAB2B3"}"/>`);
+    const map=document.getElementById("emMarkers"),seed=(Number(event.m)||0)+(String(event.name||"").length*7),mx=12+(seed*13)%76,my=event.home?14+(seed*7)%18:35+(seed*7)%18;
+    if(map)map.insertAdjacentHTML("beforeend",`<circle class="normal-event-marker event-${eventType}" cx="${mx}" cy="${my}" r="${event.type==="goal"?2.1:1.45}" fill="${event.type==="goal"?"#4E9B65":event.type==="red"?"#DA3D2E":event.type==="yellow"?"#D6A21F":"#AAB2B3"}"><animate attributeName="opacity" values=".25;1;.65" dur=".8s" repeatCount="2"/></circle>`);
+    const ball=document.getElementById("normalLiveBall");if(ball)ball.setAttribute("transform",`translate(${mx-50} ${my-32.5})`);
+    set("simComm",`${event.m||"·"}' · ${label} · ${event.name||""}`);
+  });
+  set("simScore",score[0]+"–"+score[1]);
+  const scalePair=values=>(Array.isArray(values)?values:[0,0]).map(value=>Math.round((Number(value)||0)*ratio));
+  const shots=scalePair(perf.shots),saves=scalePair(perf.saves),corners=scalePair(perf.corners);
+  set("statShot",shots[0]+"-"+shots[1]);set("statSave",saves[0]+"-"+saves[1]);set("statDanger",Math.max(score[0],Math.round(shots[0]*.45))+"-"+Math.max(score[1],Math.round(shots[1]*.45)));set("statCorner",corners[0]+"-"+corners[1]);
+  const xg=Array.isArray(perf.xg)?perf.xg:[0,0];set("statXg",(Number(xg[0]||0)*ratio).toFixed(1)+"-"+(Number(xg[1]||0)*ratio).toFixed(1));
+  const possession=Array.isArray(perf.possession)?perf.possession:[50,50],homePoss=Math.round(Number(possession[0])||50);set("statPoss",homePoss+"–"+(100-homePoss));
+  const momentum=Math.max(20,Math.min(80,Math.round(50+(homePoss-50)*.7+(score[0]-score[1])*5)));
+  set("momA",momentum+"%");set("momB",(100-momentum)+"%");
+  const bar=document.getElementById("momBar");if(bar)bar.style.background=`linear-gradient(90deg,var(--green,#4E9B65) ${momentum}%,var(--red,#DA3D2E) ${momentum}%)`;
+  const meter=document.getElementById("matchMomentum");if(meter)meter.setAttribute("aria-valuenow",String(momentum));
+  set("simState",minute<45?(LANG==="tr"?"İlk yarı":"First half"):minute<90?(LANG==="tr"?"İkinci yarı":"Second half"):(LANG==="tr"?"Maç tamamlandı":"Full time"));
+  if(ratio>=1)finishMatchPresentation();
+}
+function _presentNormalMatchLive(duration){
+  const sim=document.getElementById("sim"),tr=LANG==="tr";if(!sim)return false;
+  const parent=sim.parentNode,next=sim.nextSibling;
+  showModal(`<div class="normal-match-live-shell"><header><span>${tr?"CANLI MAÇ":"LIVE MATCH"}</span><b>${tr?"Final simülasyonu görünümü":"Final simulation presentation"}</b></header><div id="normalMatchSimMount"></div><footer><div class="normal-match-live-progress" style="--live-duration:${duration}ms"><i></i></div><button type="button" onclick="finishMatchPresentation()">${tr?"SONUCA GEÇ":"SKIP TO RESULT"} →</button></footer></div>`,{dismissOnEscape:false,label:tr?"Canlı maç":"Live match",sheetClass:"normal-match-live-sheet"});
+  const mount=document.getElementById("normalMatchSimMount");if(!mount)return false;
+  _normalMatchSimHome={parent,next};mount.appendChild(sim);sim.classList.remove("hidden");sim.classList.add("normal-match-popup");sim.dataset.normalMatch="true";
+  setTimeout(()=>{if(window.CopaMobileExperience&&typeof CopaMobileExperience.setSimView==="function")CopaMobileExperience.setSimView("field");},0);
+  const set=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=String(value);};
+  set("tvover",(tr?"KUPA MAÇI":"CUP MATCH")+" · "+(tr?"CANLI":"LIVE"));set("simA",clip(teamName||"XI",15));set("simB",clip(opponent&&opponent.name||"RAKİP",15));set("simScore","0–0");set("simClk","00'");set("simState",tr?"Santra bekleniyor":"Awaiting kick-off");set("simComm","—");set("simRadio",tr?"Stadyum hazır · maç başlıyor":"The stadium is ready · kick-off");
+  ["statShot","statSave","statDanger","statCorner"].forEach(id=>set(id,"0-0"));set("statXg","0.0-0.0");set("statPoss","50–50");set("momA","50%");set("momB","50%");
+  const map=document.getElementById("simEventMap"),timeline=document.getElementById("simTimeline"),events=document.getElementById("simGoals");if(map)map.innerHTML=_normalMatchLiveField();if(timeline)timeline.innerHTML=_normalMatchLiveTimeline();if(events)events.innerHTML="";
+  _normalMatchPlayback={started:Date.now(),duration,events:(lastMatchEvents||[]).slice().sort((a,b)=>(a.m||0)-(b.m||0)),revealed:new Set()};
+  _normalMatchLiveRender();window._normalMatchPresentationTick=setInterval(_normalMatchLiveRender,400);
+  return true;
 }
 function presentResolvedMatch(mode){
-  const tr=LANG==="tr",watch=mode==="watch",duration=watch?60000:2200,events=(lastMatchEvents||[]).slice(0,watch?8:3);
+  const tr=LANG==="tr",watch=mode==="watch",duration=Number(window._matchPresentationDurationOverride)||(watch?60000:2200),events=(lastMatchEvents||[]).slice(0,3);
   if(window.CopaAnalytics)window.CopaAnalytics.track("match_presentation_selected",{mode:watch?"watch":"quick",round});
+  if(watch&&_presentNormalMatchLive(duration))return;
   showModal(`<div class="match-playback ${watch?"is-watch":"is-quick"}"><span>${watch?(tr?"CANLI MAÇ":"LIVE MATCH"):(tr?"HIZLI SONUÇ":"QUICK RESULT")}</span><h3>${clip(teamName||"XI",15)} <em>VS</em> ${clip(opponent.name,15)}</h3><div class="match-playback-pitch"><i></i><b>●</b></div><div class="match-playback-events">${events.map(event=>`<small>${event.m||event.minute||"·"}' ${event.name||event.text||""}</small>`).join("")}</div><div class="match-playback-progress" style="--playback-duration:${duration}ms"><i></i></div><button type="button" onclick="finishMatchPresentation()">${watch?(tr?"SONUCA GEÇ":"SKIP TO RESULT"):(tr?"SONUÇ HAZIRLANIYOR":"PREPARING RESULT")}</button></div>`,{dismissOnEscape:false,label:tr?"Maç":"Match"});
   clearTimeout(window._matchPresentationTimer);
   window._matchPresentationTimer=setTimeout(finishMatchPresentation,duration);
 }
 function finishMatchPresentation(){
   clearTimeout(window._matchPresentationTimer);window._matchPresentationTimer=null;
-  closeModal();_selectedMatchPresentation="";_showPendingMatchResult();
+  _restoreNormalMatchSim();closeModal();_selectedMatchPresentation="";_showPendingMatchResult();
 }
-function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;if(window.CopaRunState&&window.CopaRunState.phase!=="hub")return;if(pendingChairmanEvent&&pendingChairmanEvent.status==="pending"){showPendingChairmanEvent();return;}if(eventSeen[round]==="pending"){showDraftEvent(round);return;}if(!hasCompleteStartingXI()){showModal(`<div class="scoutmodal"><h4>${LANG==="tr"?"Kadro tamamlanmadı":"Squad incomplete"}</h4><p>${LANG==="tr"?"Maça çıkmak için ilk 11'in tamamlanması gerekiyor.":"Complete the starting XI before playing a match."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${LANG==="tr"?"KAPAT":"CLOSE"}</button></div></div>`);return;}if(!hasSelectedCaptain()){pickCaptain();return;}if(_showSuspendedBlock())return;clearTimeout(autoTimer);if(typeof showMatchPromiseModal==="function"&&showMatchPromiseModal())return;if(round>=7&&chairman.id==="pinti"&&pintiSavings>=4&&!window._pintiSavingsUsed){window._pintiSavingsUsed=true;_showPintiSavingsModal(squadPower(round));return;}const sp=squadPower(round);const requested=presentationMode==="watch"||presentationMode==="quick"?presentationMode:(presentationMode===true?_selectedMatchPresentation:""),mode=requested||_preferredMatchPresentation;if(!mode){showMatchModePicker(sp);return;}_selectedMatchPresentation=mode;if(round>=7){if(!window._finalTacticDone){window._finalTacticDone=true;_showFinalTacticModal(sp);return;}window._finalTacticDone=false;showFinalCard(sp);return;}
+function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;if(window.CopaRunState&&window.CopaRunState.phase!=="hub")return;if(pendingChairmanEvent&&pendingChairmanEvent.status==="pending"){showPendingChairmanEvent();return;}if(eventSeen[round]==="pending"){showDraftEvent(round);return;}if(!hasCompleteStartingXI()){showModal(`<div class="scoutmodal"><h4>${LANG==="tr"?"Kadro tamamlanmadı":"Squad incomplete"}</h4><p>${LANG==="tr"?"Maça çıkmak için ilk 11'in tamamlanması gerekiyor.":"Complete the starting XI before playing a match."}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${LANG==="tr"?"KAPAT":"CLOSE"}</button></div></div>`);return;}if(!hasSelectedCaptain()){pickCaptain();return;}if(_showSuspendedBlock())return;clearTimeout(autoTimer);if(typeof showMatchPromiseModal==="function"&&showMatchPromiseModal())return;if(round>=7&&chairman.id==="pinti"&&pintiSavings>=4&&!window._pintiSavingsUsed){window._pintiSavingsUsed=true;_showPintiSavingsModal(squadPower(round));return;}const sp=squadPower(round);const requested=presentationMode==="watch"||presentationMode==="quick"?presentationMode:(presentationMode===true?_selectedMatchPresentation:""),mode=requested;if(!mode){showMatchModePicker(sp);return;}_selectedMatchPresentation=mode;if(round>=7){if(!window._finalTacticDone){window._finalTacticDone=true;_showFinalTacticModal(sp);return;}window._finalTacticDone=false;showFinalCard(sp);return;}
   if(!window.CopaFinalSimCore||!window.CopaNormalMatch){
     if(window._normalMatchCoreLoading)return;
     window._normalMatchCoreLoading=true;
@@ -1824,9 +1962,11 @@ function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;
   }
   const gf=coreResult.regulationScore[0],ga=coreResult.regulationScore[1];
   window._penTrainingBonus=window.CopaPreparation?CopaPreparation.penaltyBonus(round):0;
+  if(window.CopaClubFiles)CopaClubFiles.completeRound({round,cash:budget,limit:chairmanSackLimit(),lineup:picksBySlot,preparation:window.CopaPreparation?CopaPreparation.snapshot():null});
   if(window.CopaPreparation)CopaPreparation.completeMatch(round,picksBySlot,slots);
+  if(window.CopaRelationships)CopaRelationships.completeMatch(picksBySlot,round,typeof rand==="function"?rand:null);
   const press=coreResult.stats.pressWins[0],edge=0;
-  window._matchRedCard=false;window._redCardPlayerName=null;suspendedSlotIdx=-1;[...picksBySlot,...(bench||[])].forEach(p=>{if(p)p.suspended=false;});lastMatchEvents=makeCoreMatchEvents(coreResult);const win=gf>ga,draw=gf===ga,res=draw?"D":win?"W":"L",_yellow=coreResult.stats.yellow||[0,0],_red=coreResult.stats.red||[0,0],_fairPlay={player:-(Number(_yellow[0])||0)-3*(Number(_red[0])||0),opponent:-(Number(_yellow[1])||0)-3*(Number(_red[1])||0)};lastMatchPerf={power:sp.power,oppPower:opponent.power,cardBonus:sp.cardBonus,gf,ga,win,draw,press,edge,talk:lastTalkResult?Object.assign({},lastTalkResult):null,events:lastMatchEvents.slice(),modelVersion:coreResult.model_version,xg:coreResult.stats.xg.slice(),shots:coreResult.stats.shots.slice(),saves:coreResult.stats.saves.slice(),possession:coreResult.stats.possession.slice(),fairPlay:_fairPlay,replayCode:coreResult.replayCode};lastMatchPerf.note=performanceNote(lastMatchPerf);lastMatchPerf.why=performanceWhy(lastMatchPerf);window.lastMatchRatings=null;_captureLastMatchReportSnapshot({score:[gf,ga],events:lastMatchEvents,homeWon:win,homePower:sp.power,awayPower:opponent.power});fixtures[round-1].res=res;fixtures[round-1].gf=gf;fixtures[round-1].ga=ga;fixtures[round-1].fairPlay=_fairPlay;fixtures[round-1].events=lastMatchEvents.slice();fixtures[round-1].note=lastMatchPerf.note;if(typeof finishCardMatchCommitments==="function")lastMatchPerf.cardContracts=finishCardMatchCommitments(gf,ga,round);const advance=win;window._penSaveChance=draw?1/3:1/3;if(window.CopaAnalytics)window.CopaAnalytics.track("match_completed",analyticsBalanceProps({round,outcome:draw?"draw":win?"win":"loss",model_version:coreResult.model_version,power_gap:analyticsPowerGap(sp.power,opponent.power),tactic:CopaNormalMatch.tacticForStyle(style)}));sfxWhistle();renderFixtures();
+  window._matchRedCard=false;window._redCardPlayerName=null;suspendedSlotIdx=-1;[...picksBySlot,...(bench||[])].forEach(p=>{if(p)p.suspended=false;});lastMatchEvents=makeCoreMatchEvents(coreResult);const win=gf>ga,draw=gf===ga,res=draw?"D":win?"W":"L",_yellow=coreResult.stats.yellow||[0,0],_red=coreResult.stats.red||[0,0],_fairPlay={player:-(Number(_yellow[0])||0)-3*(Number(_red[0])||0),opponent:-(Number(_yellow[1])||0)-3*(Number(_red[1])||0)};lastMatchPerf={power:sp.power,oppPower:opponent.power,cardBonus:sp.cardBonus,gf,ga,win,draw,press,edge,talk:lastTalkResult?Object.assign({},lastTalkResult):null,events:lastMatchEvents.slice(),modelVersion:coreResult.model_version,xg:coreResult.stats.xg.slice(),shots:coreResult.stats.shots.slice(),saves:coreResult.stats.saves.slice(),corners:(coreResult.stats.corners||[0,0]).slice(),possession:coreResult.stats.possession.slice(),fairPlay:_fairPlay,replayCode:coreResult.replayCode};lastMatchPerf.note=performanceNote(lastMatchPerf);lastMatchPerf.why=performanceWhy(lastMatchPerf);window.lastMatchRatings=null;_captureLastMatchReportSnapshot({score:[gf,ga],events:lastMatchEvents,homeWon:win,homePower:sp.power,awayPower:opponent.power});fixtures[round-1].res=res;fixtures[round-1].gf=gf;fixtures[round-1].ga=ga;fixtures[round-1].fairPlay=_fairPlay;fixtures[round-1].events=lastMatchEvents.slice();fixtures[round-1].note=lastMatchPerf.note;if(typeof finishCardMatchCommitments==="function")lastMatchPerf.cardContracts=finishCardMatchCommitments(gf,ga,round);const advance=win;window._penSaveChance=draw?1/3:1/3;if(window.CopaAnalytics)window.CopaAnalytics.track("match_completed",analyticsBalanceProps({round,outcome:draw?"draw":win?"win":"loss",model_version:coreResult.model_version,power_gap:analyticsPowerGap(sp.power,opponent.power),tactic:CopaNormalMatch.tacticForStyle(style)}));sfxWhistle();renderFixtures();
   /* Kırmızı kart etkisi: bir sonraki maça taşı */
   if(window._matchRedCard){if(!win)riskPowerMod-=1;const _rcn=window._redCardPlayerName;if(_rcn){const _rci=picksBySlot.findIndex(p=>p&&(p.name||"").split(" ").pop()===_rcn);if(_rci>=0){suspendedSlotIdx=_rci;picksBySlot[_rci].suspended=true;pushFeed(" <b>"+shortName(picksBySlot[_rci])+"</b> "+(LANG==="tr"?"cezalı — sonraki maçta oynayamaz":"suspended — misses next match"),"lose");}else{pushFeed(" "+(LANG==="tr"?"Kırmızı kart — bir sonraki maç -1 güç":"Red card — next match -1 power"),"lose");}}}
   const _rwin=`<svg viewBox='0 0 14 14' width='12' height='12' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><polyline points='2,7 5.5,10.5 12,3'/></svg>`;
@@ -2509,19 +2649,19 @@ function pickCaptain(){
       </div>
       <div class="cap-card-meta">
         <span>${L().abbr[e.p.pos]||e.p.pos}</span>
-        <span style="color:${tone(effOf(e.p))};font-weight:800">${effOf(e.p)}</span>
+        <span class="cap-card-power" style="--cap-power:${tone(effOf(e.p))}">${effOf(e.p)}</span>
         ${e.p.age?`<span>${e.p.age}y</span>`:""}
       </div>
     </button>`;
   }).join("");
   const tr=LANG==="tr";
-  showModal(`<div style="padding:16px 16px 12px">
+  showModal(`<div class="captain-picker" style="padding:16px 16px 12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
       <div style="font-family:var(--disp);font-weight:800;font-size:18px;color:var(--color-ink)">${tr?"KAPTANI SEÇ":"PICK CAPTAIN"}</div>
       <button onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}" style="background:none;border:none;cursor:pointer;color:var(--color-slate);font-size:22px;line-height:1;padding:0 2px;opacity:.6">×</button>
     </div>
     <div style="font-family:var(--mono);font-size:11px;color:var(--color-slate);margin-bottom:14px">${tr?`Kaptan sahada <b style="color:var(--status-positive-text)">+1 / +2 / +3</b> güç sağlar. Tecrübeli veya genç yetenek kaptanlar daha fazla etki eder; sakatlanırsa <b style="color:var(--status-negative-text)">−3</b> uygulanır.`:`Captain gives <b style="color:var(--status-positive-text)">+1 / +2 / +3</b> power on the pitch. Veteran or wonderkid captains boost more; if injured: <b style="color:var(--status-negative-text)">−3</b>.`}</div>
-    <div role="listbox" aria-label="${tr?"Kaptan seçimi":"Captain selection"}" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
+    <div class="cap-grid" role="listbox" aria-label="${tr?"Kaptan seçimi":"Captain selection"}" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
   </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
   if(window.PlayerProfiles)document.querySelectorAll(".cap-card[data-profile-player-index]").forEach(card=>{const p=picksBySlot[+card.dataset.profilePlayerIndex];if(p)PlayerProfiles.bind(card,p,{delayCoarseAction:true});});
 }
@@ -2761,8 +2901,14 @@ function _squadReadyModel(sq){
   if(!warnings.length)warnings.push({tone:"good",title:tr?"Kadro dengeli":"Squad balanced",text:tr?"İlk 11, kimya ve kasa kontrolü geçti.":"The XI, chemistry and budget checks passed."});
   return{strongest,riskiest,debtRatio,pressure,chemistry,warnings};
 }
+function _squadReadyPlayerLabel(player){
+  const raw=String(surOf(player)||player&&player.name||"").trim();
+  const last=raw.split(/\s+/).filter(Boolean).pop()||raw;
+  const chars=Array.from(last);
+  return chars.length>7?chars.slice(0,6).join("")+"…":last;
+}
 function _squadReadyPitch(sq,tone){
-  return `<div class="pc-mini-pitch" role="group" aria-label="${LANG==="tr"?"İlk 11 taktik sahası":"Starting XI tactical pitch"}"><span class="pc-pitch-line pc-pitch-half"></span><span class="pc-pitch-line pc-pitch-circle"></span><span class="pc-pitch-line pc-pitch-box-top"></span><span class="pc-pitch-line pc-pitch-box-bottom"></span>${sq.map(({sl,i,p})=>{const pv=effOf(p);return `<button type="button" class="pc-mini-player pc-pl" data-profile-player-index="${i}" style="--pc-x:${sl[1]}%;--pc-y:${sl[2]}%;--pc-tone:${tone(pv)}" aria-label="${surOf(p)}, ${pv}"><b>${pv}</b><small>${surOf(p)}</small></button>`;}).join("")}</div>`;
+  return `<div class="pc-mini-pitch" role="group" aria-label="${LANG==="tr"?"İlk 11 taktik sahası":"Starting XI tactical pitch"}"><span class="pc-pitch-line pc-pitch-half"></span><span class="pc-pitch-line pc-pitch-circle"></span><span class="pc-pitch-line pc-pitch-box-top"></span><span class="pc-pitch-line pc-pitch-box-bottom"></span>${sq.map(({sl,i,p})=>{const pv=effOf(p),full=surOf(p),short=_squadReadyPlayerLabel(p);return `<button type="button" class="pc-mini-player pc-pl" data-profile-player-index="${i}" style="--pc-x:${sl[1]}%;--pc-y:${sl[2]}%;--pc-tone:${tone(pv)}" aria-label="${full}, ${pv}" title="${full}"><b>${pv}</b><small>${short}</small></button>`;}).join("")}</div>`;
 }
 function showPostcard(cb){
   _pcCb=cb;
@@ -2917,6 +3063,7 @@ function _setFinalPauseUi(paused){
 }
 function _launchFinalSim(myPow,resumeCheckpoint){
   const oppPow=opponent?opponent.power:50;
+  const finalPresentation=_selectedMatchPresentation||"watch";
   if(!resumeCheckpoint){
     creditMatchdayIncome(round,myPow,oppPow);
     _saveState();
@@ -2936,6 +3083,10 @@ function _launchFinalSim(myPow,resumeCheckpoint){
   if(resumeCheckpoint&&sim&&typeof sim.restore==="function"){
     if(!sim.restore(resumeCheckpoint.match)&&window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();
   }
+  if(!resumeCheckpoint&&finalPresentation==="quick"){
+    setTimeout(()=>{if(sim&&typeof sim.skip==="function")sim.skip();},900);
+  }
+  _selectedMatchPresentation="";
 }
 function startFinalSim(myPow,resumeCheckpoint){
   if(typeof buildSim==="function"){_launchFinalSim(myPow,resumeCheckpoint);return;}
@@ -3148,7 +3299,7 @@ function _saveState(phaseOverride){
     pendingMatchResolution:_runCheckpointClone(pendingMatchResolution),lastMatchPerf:_runCheckpointClone(lastMatchPerf),lastMatchEvents:_runCheckpointClone(lastMatchEvents),lastMatchReportData:_runCheckpointClone(window.lastMatchReportData),
     postMatchResolvedRound:Number(window._postMatchResolvedRound)||0,rewardPendingRound:Number(window._rewardPendingRound)||0,rewardResolvedRound:Number(window._rewardResolvedRound)||0,
     pendingLoanReward:_runCheckpointClone(pendingLoanReward),rewardCardSwapState:_runCheckpointClone(rewardCardSwapState),loanPlayer:_runCheckpointClone(loanPlayer),
-    preparation:window.CopaPreparation?CopaPreparation.snapshot():null,chemistrySystem:window.CopaChemistry?CopaChemistry.snapshot():null,talkMatchProfile:_runCheckpointClone(window._talkMatchProfile),
+    preparation:window.CopaPreparation?CopaPreparation.snapshot():null,chemistrySystem:window.CopaChemistry?CopaChemistry.snapshot():null,relationships:window.CopaRelationships?CopaRelationships.snapshot():null,clubFiles:window.CopaClubFiles?CopaClubFiles.snapshot():null,talkMatchProfile:_runCheckpointClone(window._talkMatchProfile),
     draft:{remaining,currentSlot,currentOpts:(currentOpts||[]).map(p=>p?Object.assign({},p):null),rerollsLeft:draftRerollsLeft,rewardedRerollsEarned:draftRewardedRerollsEarned,deadlineH,usedNames:[...usedNames]}
   });}catch(e){}
 }
@@ -3202,7 +3353,7 @@ function _tryRestoreState(){
     window._postMatchResolvedRound=Number(st.postMatchResolvedRound)||0;window._rewardPendingRound=Number(st.rewardPendingRound)||0;window._rewardResolvedRound=Number(st.rewardResolvedRound)||0;
     pendingLoanReward=st.pendingLoanReward||null;if(pendingLoanReward&&Number.isInteger(Number(pendingLoanReward.weakIdx))&&picksBySlot[Number(pendingLoanReward.weakIdx)])pendingLoanReward.displaced=picksBySlot[Number(pendingLoanReward.weakIdx)];
     rewardCardSwapState=st.rewardCardSwapState||null;loanPlayer=st.loanPlayer||null;_rewardActionLocked=false;_rewardSwapCompletion=false;
-    if(window.CopaPreparation)CopaPreparation.restore(st.preparation);if(window.CopaChemistry)CopaChemistry.restore(st.chemistrySystem);window._talkMatchProfile=st.talkMatchProfile||null;
+    if(window.CopaPreparation)CopaPreparation.restore(st.preparation);if(window.CopaChemistry)CopaChemistry.restore(st.chemistrySystem);if(window.CopaRelationships)CopaRelationships.restore(st.relationships);if(window.CopaClubFiles)CopaClubFiles.restore(st.clubFiles);window._talkMatchProfile=st.talkMatchProfile||null;
     runEnded=false;undoData=null;undoUsed=false;autoPlay=false;if(window.GhostClubs&&typeof window.GhostClubs.updateRun==="function")window.GhostClubs.updateRun({seed:seedNum,country:selectedCountry,clubName:teamName,cheatRun:!!window._runUsesCheatSeed,ghostOpponentUsed:!!window._ghostOpponentUsed,ghostOpponentId:window._ghostOpponentId||""});
     if(restorePhase==="draft"){
       const draft=st.draft||{};currentSlot=Number.isInteger(draft.currentSlot)&&!filled[draft.currentSlot]?draft.currentSlot:-1;currentOpts=Array.isArray(draft.currentOpts)?draft.currentOpts.filter(Boolean):[];draftRerollsLeft=Math.max(0,Number(draft.rerollsLeft??DRAFT_REROLLS));draftRewardedRerollsEarned=Math.max(0,Math.min(MAX_REWARDED_DRAFT_REROLLS,Number(draft.rewardedRerollsEarned)||0));draftRewardInFlight=false;draftRerollUsed=draftRerollsLeft<=0;deadlineH=Math.max(1,Number(draft.deadlineH)||24);usedNames.clear();(Array.isArray(draft.usedNames)?draft.usedNames:picksBySlot.filter(Boolean).map(p=>p.name)).forEach(name=>usedNames.add(name));

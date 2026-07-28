@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "copa-life-arena-test",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {"binding": "DB", "database_name": "copa-life-arena-test", "database_id": "local-arena-test", "migrations_dir": "migrations"}
+  ],
+  "durable_objects": {
+    "bindings": [
+      {"name": "ARENA_MATCHMAKER", "class_name": "ArenaMatchmaker"},
+      {"name": "ARENA_ROOM", "class_name": "ArenaRoom"}
+    ]
+  },
+  "migrations": [
+    {"tag": "v1", "new_sqlite_classes": ["ArenaMatchmaker", "ArenaRoom"]}
+  ]
+}

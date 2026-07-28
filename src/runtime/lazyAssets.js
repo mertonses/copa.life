@@ -38,7 +38,7 @@
     if(!document.querySelector("link[data-copa-meta]")){
       const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260726-mobile-repair1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
-    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260720-career3",()=>!!global.CopaMeta).then(()=>{
+    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260728-club-files1",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
       if(typeof global.buildFormButtons==="function")global.buildFormButtons();
       if(typeof global.buildChairButtons==="function")global.buildChairButtons();
