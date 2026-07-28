@@ -1,6 +1,6 @@
 import {describe,expect,it} from "vitest";
 import {
-  ARENA_RULES_VERSION,DRAFT_LINES,DRAFT_SLOTS,MIN_MANUAL_DECISIONS,allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,initialPlayerState,
+  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_LINES,DRAFT_SLOTS,MIN_MANUAL_DECISIONS,allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,initialPlayerState,
   minimumFutureDraftCost,ratingDelta,resolveParticipation,resolveWindow,rewardFor,teamSnapshot,tacticEdge,usesFullXI
 } from "../src/rules.js";
 import {
@@ -100,7 +100,7 @@ describe("Arena rules",()=>{
   });
 
   it("keeps v3 eleven-player rooms compatible while preserving five-player v1/v2 rooms",()=>{
-    expect(ARENA_RULES_VERSION).toBe("arena-rules-v7");
+    expect(ARENA_RULES_VERSION).toBe("arena-rules-v8");
     expect(usesFullXI("arena-rules-v3")).toBe(true);
     expect(usesFullXI("arena-rules-v2")).toBe(false);
     expect(createLegacyDraftOffers("legacy","GK",0,0)).toHaveLength(3);
@@ -140,6 +140,7 @@ describe("Arena rules",()=>{
 
   it("allows ranked regulation draws only in the new rules version",()=>{
     expect(allowsRegulationDraw("arena-rules-v7")).toBe(true);
+    expect(allowsRegulationDraw("arena-rules-v8")).toBe(true);
     expect(allowsRegulationDraw("arena-rules-v6")).toBe(true);
     expect(allowsRegulationDraw("arena-rules-v5")).toBe(false);
   });
@@ -196,10 +197,9 @@ describe("Arena rules",()=>{
     expect(player.draft[1].effectivePower).toBe(player.draft[1].power-3);
   });
 
-  it("gives every chairman a bounded, distinct mechanical lever",()=>{
-    const teams=["patron","diplomat","showman","professor"].map(chairman=>teamSnapshot(completedPlayer("chairs",0,{formation:"4-4-2",style:"balanced",chairman})));
-    expect(new Set(teams.map(team=>`${team.budget}:${team.chemistry}:${team.risk}:${team.flex}`)).size).toBe(4);
-    expect(teams.every(team=>team.power>=65&&team.power<=90)).toBe(true);
+  it("exposes only the fixed Babacan chairman to current rooms",()=>{
+    expect(Object.keys(CHAIRMEN)).toEqual(["babacan"]);
+    expect(teamSnapshot(completedPlayer("chairs",0,{formation:"4-4-2",style:"balanced",chairman:"diplomat"}))).toBeNull();
   });
 
   it("scales chemistry capacity with the eleven-player draft",()=>{
@@ -207,6 +207,7 @@ describe("Arena rules",()=>{
     eleven.draft=eleven.draft.map(player=>({...player,chemistry:2}));
     eleven.training="chemistry";
     expect(teamSnapshot(eleven,"arena-rules-v7").chemistry).toBe(18);
+    expect(teamSnapshot(eleven,"arena-rules-v8").chemistry).toBe(18);
     expect(teamSnapshot(eleven,"arena-rules-v6").chemistry).toBe(18);
     expect(teamSnapshot(eleven,"arena-rules-v5").chemistry).toBe(9);
     const legacy=initialPlayerState({owner:"legacy-chem",clubName:"Legacy Chem",rating:1000});

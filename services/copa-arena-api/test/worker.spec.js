@@ -64,6 +64,22 @@ describe("Arena HTTP API",()=>{
     socketResponse.webSocket.close(1000,"done");
   });
 
+  it("creates a separate rewardless server-authoritative practice room",async()=>{
+    const suffix="practice",owner=await ownerFor(suffix);
+    const response=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(suffix),body:JSON.stringify({clubName:"Prova SK",mode:"practice",region:"weur"})});
+    const data=await response.json();
+    expect(response.status).toBe(201);
+    expect(data.ticket).toBeUndefined();
+    expect(data.directMatch.roomToken).toMatch(/^RT-/);
+    const room=env.ARENA_ROOM.getByName(data.directMatch.matchId);
+    await runInDurableObject(room,instance=>{
+      expect(instance.state.mode).toBe("practice");
+      expect(instance.state.botIndex).toBe(1);
+      expect(instance.state.players[0].owner).toBe(owner);
+      expect(instance.state.players[1]).toMatchObject({clubName:"ARENA TRAINING XI",connected:true});
+    });
+  });
+
   it("returns only public leaderboard fields",async()=>{
     await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("board"),body:JSON.stringify({clubName:"Kuzey FK",mode:"ranked"})});
     const response=await SELF.fetch("https://arena.test/v1/arena/leaderboard");
@@ -131,7 +147,7 @@ describe("Arena Durable Objects",()=>{
     await room.init("AR-EXPIREDLIVE000001",players,"expired-live-seed");
     await runInDurableObject(room,async instance=>{
       for(const player of instance.state.players){
-        player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
         player.draft=DRAFT_LINES.map((line,index)=>({
           line,id:`${line}-${index}`,name:`Test ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
         }));
@@ -278,7 +294,7 @@ describe("Arena Durable Objects",()=>{
     await room.init("AR-AFKVOID000000001",players,"void-seed");
     await runInDurableObject(room,async instance=>{
       for(const player of instance.state.players){
-        player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
         player.draft=DRAFT_LINES.map((line,index)=>({
           line,id:`${line}-${index}`,name:`Test ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
         }));
@@ -312,7 +328,7 @@ describe("Arena Durable Objects",()=>{
     await room.init("AR-AFKFORFEIT000001",players,"forfeit-seed");
     await runInDurableObject(room,async instance=>{
       for(const player of instance.state.players){
-        player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
         player.draft=DRAFT_LINES.map((line,index)=>({
           line,id:`${line}-${index}`,name:`Test ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
         }));
@@ -394,7 +410,7 @@ describe("Arena Durable Objects",()=>{
     await room.init("AR-SEASONRESET00001",players,"season-seed");
     await runInDurableObject(room,async instance=>{
       for(const player of instance.state.players){
-        player.setup={formation:"4-4-2",style:"balanced",chairman:"diplomat"};
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
         player.draft=DRAFT_LINES.map((line,index)=>({
           line,id:`${line}-${index}`,name:`Test ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
         }));
