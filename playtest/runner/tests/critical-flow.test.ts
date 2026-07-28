@@ -73,7 +73,8 @@ test("England player pool loads on selection and is ready before draft generatio
 });
 
 test("country pools stay lazy, load on demand, and restore the saved country synchronously",async({page})=>{
-  await page.addInitScript(()=>{if(!localStorage.getItem("_copa_country_lazy_test")){localStorage.setItem("_copa_country_lazy_test","1");localStorage.setItem("copa_country","TR");localStorage.removeItem("copa_run_v5");}});
+  const marker=`_copa_country_lazy_${Date.now()}_${Math.random()}`;
+  await page.addInitScript(key=>{if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,"1");localStorage.setItem("copa_country","TR");localStorage.removeItem("copa_run_v5");}},marker);
   await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
   expect(await page.evaluate(()=>{const w=globalThis as any;return [w.POOL_EN,w.POOL_ES,w.POOL_IT,w.POOL_DE,w.POOL_JP].map((pool:any[])=>pool.length);})).toEqual([0,0,0,0,0]);
   const expected={ES:1061,IT:2656,DE:1206,JP:561};

@@ -204,9 +204,7 @@
     return chrome(`${statusStrip(game)}<div class="arena-phase arena-draft"><span>${String(game.draftStep+2).padStart(2,"0")} / 14 · ${esc(slot)}</span><h1>${esc(text("draft"))}</h1><p>${esc(local("İki kulübe denk güçte, farklı oyuncular sunulur; bir futbolcu maçta yalnızca bir kez yer alır.","Both clubs receive equivalent but distinct players; each footballer can appear only once per match."))}</p><div class="arena-draft-progress"><span>${esc(text("startingXI"))}<b>${count} / ${total}</b></span><div>${Array.from({length:total},(_,index)=>`<i class="${index<count?"is-filled":""}"></i>`).join("")}</div></div><div class="arena-team-pulse"><b>${esc(text("budget"))} <i>€${status.budget!=null?status.budget:48}M</i></b><b>${esc(text("power"))} <i>${status.power||"—"}</i></b></div><div class="arena-offers">${offers.map(item=>{
       const active=!!selected&&selected.id===item.id;
       const leagueLabel=item.sourceLeagueLabel&&(item.sourceLeagueLabel[root.LANG]||item.sourceLeagueLabel.en)||item.sourceLeague||"";
-      const dataSourceLabel=({tr:"veri kaynağı",es:"fuente de datos",de:"Datenquelle",it:"fonte dati"}[root.LANG]||"data source");
-      const leagueSource=leagueLabel?`${leagueLabel} · ${dataSourceLabel}`:"";
-      const profileMeta=[leagueSource,item.position,item.age?`${item.age}${root.LANG==="tr"?" yaş":"y"}`:""].filter(Boolean).join(" · ");
+      const profileMeta=[leagueLabel,item.position,item.age?`${item.age}${root.LANG==="tr"?" yaş":"y"}`:""].filter(Boolean).join(" · ");
       const fit=item.positionFit==="adapted"?local("UYARLANMIŞ MEVKİ","ADAPTED POSITION"):local("DOĞAL MEVKİ","NATURAL POSITION");
       const penalty=item.positionPenalty?` · ${local("güç cezası","power penalty")} -${item.positionPenalty}`:"";
       const affordable=item.affordable!==false;
@@ -315,6 +313,10 @@
     disconnect(false);setScreen("loading");
     try{
       const data=await request("/v1/arena/session",{method:"POST",body:JSON.stringify({clubName:clubName(),mode:"ranked",region:"weur"})});
+      if(data.recoverMatch){
+        const saved={matchId:data.recoverMatch.matchId,token:data.recoverMatch.roomToken};
+        state.profile=data.profile;set(ROOM_KEY,JSON.stringify(saved));telemetry("arena_reconnected","session_recovery");connectRoom(saved);return;
+      }
       state.profile=data.profile;state.queueStarted=Date.now();setScreen("queue");telemetry("arena_queue_joined","weur",data.profile.rating);sfx("queue");
       connectQueue(data.ticket);
     }catch(error){state.lastError=error.message;setScreen("error");sfx("error");}

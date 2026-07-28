@@ -69,9 +69,11 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
       const rect=node.getBoundingClientRect();return{x:rect.x,y:rect.y};
     }),
   }));
-  const dataTransfer=await page.evaluateHandle(()=>new DataTransfer());
   const benchPlayer=page.locator("#hubBenchSection .bench-row").first();
-  await benchPlayer.dispatchEvent("dragstart",{dataTransfer});
+  await benchPlayer.evaluate(node=>{
+    const event=new DragEvent("dragstart",{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()});
+    node.dispatchEvent(event);
+  });
   const during=await page.evaluate(()=>({
     locked:document.documentElement.classList.contains("hub-player-dragging"),
     bodyPosition:getComputedStyle(document.body).position,
@@ -91,7 +93,7 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
   expect(during.preview!.height).toBeLessThanOrEqual(68);
   expect(during.slots).toEqual(before.slots);
 
-  await benchPlayer.dispatchEvent("dragend",{dataTransfer});
+  await benchPlayer.evaluate(node=>node.dispatchEvent(new DragEvent("dragend",{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()})));
   await page.waitForTimeout(50);
   const after=await page.evaluate(()=>({
     y:scrollY,

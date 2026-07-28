@@ -13,6 +13,8 @@ const openFinalReadyHub=async(page:any)=>{
   await page.evaluate(()=>{
     const global=globalThis as any;
     global.pcGo();
+    global.fastTournamentDraw();
+    global.finishTournamentDraw();
     global.setCaptain(0);
     global.closeModal();
     global.round=6;

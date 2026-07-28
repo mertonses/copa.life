@@ -102,7 +102,8 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   ];
   await setRoom(page,{...base,phase:"draft",draftStep:0,offers,self:{...self,draft:[offers[1]]},draftStatus:{count:1,total:11,budget:45,power:75}});
   await expect(page.locator(".arena-offers .is-selected")).toContainText("SELECTED");
-  await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("Spain league · data source");
+  await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("Spain league");
+  await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).not.toContainText(/data source|veri kaynağı/i);
   await expect(page.locator(".arena-offers .is-selected .arena-player-club")).toContainText("FC Barcelona");
   await expect(page.locator(".arena-offers .is-unaffordable")).toBeDisabled();
   await expect(page.locator(".arena-budget-warning")).toContainText("Budget reserved");
@@ -164,7 +165,8 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     await setRoom(page,{...base,phase:"draft",draftStep:10,offers:mobileOffers,self:{...self,draft:mobileDraft},draftStatus:{count:11,total:11,budget:32,power:73}});
     await expect(page.locator(".arena-draft-progress")).toContainText("11 / 11");
     await expect(page.locator(".arena-offers .is-selected")).toBeVisible();
-    await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("Italy league · data source");
+    await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).toContainText("Italy league");
+    await expect(page.locator(".arena-offers .is-selected .arena-player-origin")).not.toContainText(/data source|veri kaynağı/i);
     const draft=await audit(page);
     expect(draft.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(draft.shellOverflow,viewport.name).toBeLessThanOrEqual(1);

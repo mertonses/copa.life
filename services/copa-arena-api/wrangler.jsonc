@@ -14,7 +14,8 @@
   },
   "triggers": {"crons": ["23 3 * * *"]},
   "ratelimits": [
-    {"name": "ARENA_LIMITER", "namespace_id": "42001", "simple": {"limit": 30, "period": 60}}
+    {"name": "ARENA_LIMITER", "namespace_id": "42001", "simple": {"limit": 30, "period": 60}},
+    {"name": "ARENA_SESSION_LIMITER", "namespace_id": "42002", "simple": {"limit": 8, "period": 60}}
   ],
   "analytics_engine_datasets": [
     {"binding": "ARENA_ANALYTICS", "dataset": "copa_life_arena_events"}
