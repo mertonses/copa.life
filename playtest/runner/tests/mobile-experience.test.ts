@@ -69,22 +69,22 @@ test("narrow hub keeps the action dock at the viewport bottom and clickable afte
   await page.evaluate(()=>{(globalThis as any).closeModal();});
   await expect(dock).toBeVisible();
   await expect(dock).toHaveAttribute("data-dock-kind","hub");
-  const remountHit=await page.locator("#presBtn").evaluate(element=>{
-    const rect=element.getBoundingClientRect();
-    const centerHit=(value:DOMRect)=>{
-      const hit=document.elementFromPoint(value.left+value.width/2,value.top+value.height/2);
-      return(hit&&hit.closest("button") as HTMLElement|null)?.id||"";
-    };
-    const playRect=document.getElementById("playBtn")!.getBoundingClientRect();
-    const talkRect=document.getElementById("talkBtn")!.getBoundingClientRect();
-    return{
-      hitIds:[centerHit(rect),centerHit(talkRect),centerHit(playRect)],
-      pres:[rect.left,rect.top,rect.right,rect.bottom].map(Math.round),
-      play:[playRect.left,playRect.top,playRect.right,playRect.bottom].map(Math.round),
-      talk:[talkRect.left,talkRect.top,talkRect.right,talkRect.bottom].map(Math.round),
-    };
-  });
-  expect(remountHit.hitIds,JSON.stringify(remountHit)).toEqual(["presBtn","talkBtn","playBtn"]);
+  const remountHit=()=>page.locator("#presBtn").evaluate(element=>{
+      const rect=element.getBoundingClientRect();
+      const centerHit=(value:DOMRect)=>{
+        const hit=document.elementFromPoint(value.left+value.width/2,value.top+value.height/2);
+        return(hit&&hit.closest("button") as HTMLElement|null)?.id||"";
+      };
+      const playRect=document.getElementById("playBtn")!.getBoundingClientRect();
+      const talkRect=document.getElementById("talkBtn")!.getBoundingClientRect();
+      return{
+        hitIds:[centerHit(rect),centerHit(talkRect),centerHit(playRect)],
+        pres:[rect.left,rect.top,rect.right,rect.bottom].map(Math.round),
+        play:[playRect.left,playRect.top,playRect.right,playRect.bottom].map(Math.round),
+        talk:[talkRect.left,talkRect.top,talkRect.right,talkRect.bottom].map(Math.round),
+      };
+    });
+  await expect.poll(async()=>(await remountHit()).hitIds,{timeout:2000}).toEqual(["presBtn","talkBtn","playBtn"]);
   await page.locator("#talkBtn").click();
   await expect(page.locator("#modal")).toBeVisible();
 });
