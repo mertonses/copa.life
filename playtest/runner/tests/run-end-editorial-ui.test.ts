@@ -63,6 +63,57 @@ async function finishRun(page:Page,options:{ghost?:boolean;zeroEconomy?:boolean;
   await expect(page.locator("#result")).toBeVisible();
 }
 
+async function finishSackedRun(page:Page){
+  await page.goto("/?run-end-sacked-ui=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    await game.quickStart();
+    if(game._countryDraftPromise)await game._countryDraftPromise;
+    await game.quickAll();
+  });
+  await page.locator("#postClubName").fill("Borç FK");
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.pcGo();
+    game.fastTournamentDraw();
+    game.finishTournamentDraw();
+    game.setCaptain(0);
+    game.closeModal();
+    game._runSeedResultCheat("sacked");
+  });
+  await expect(page.locator("#result")).toBeVisible();
+}
+
+test("sacked result keeps a compact visual hierarchy without horizontal overflow",async({page},testInfo)=>{
+  await finishSackedRun(page);
+  const layout=await page.evaluate(()=>{
+    const rect=(selector:string)=>document.querySelector(selector)!.getBoundingClientRect();
+    const board=rect("#result .scoreboard");
+    const actions=[...document.querySelectorAll("#result .result-row .btn")].map(node=>node.getBoundingClientRect());
+    const stats=[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect());
+    const decision=getComputedStyle(document.querySelector("#result .scoreboard")!,"::before");
+    return{
+      overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+      boardHeight:board.height,
+      actionWidthDelta:Math.abs(actions[0].width-actions[1].width),
+      actionGap:actions[1].left-actions[0].right,
+      statGap:stats[1].left-stats[0].right,
+      decision:decision.content,
+      negativeCash:getComputedStyle(document.querySelector("#rCash")!).color
+    };
+  });
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.boardHeight).toBeGreaterThanOrEqual(99);
+  expect(layout.boardHeight).toBeLessThanOrEqual(130);
+  expect(layout.actionWidthDelta).toBeLessThanOrEqual(1);
+  expect(layout.actionGap).toBeGreaterThanOrEqual(5);
+  expect(layout.statGap).toBeGreaterThanOrEqual(5);
+  expect(layout.decision).toContain("YÖNETİM");
+  expect(layout.negativeCash).not.toBe("rgb(243, 245, 244)");
+  await page.screenshot({path:testInfo.outputPath("sacked-result-ui.png"),fullPage:true});
+});
+
 test("completed shared run stays on the result and keeps Club Career in the main flow",async({page})=>{
   await finishRun(page,{ghost:true});
   await expect(page.locator(".ghost-run-shell")).toHaveCount(0);

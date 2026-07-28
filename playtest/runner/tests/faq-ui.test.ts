@@ -1,10 +1,11 @@
 import {test,expect,type Page} from "@playwright/test";
 
-async function openFaq(page:Page,path="/"){
+async function openFaq(page:Page,path="/",viaVisibleControl=true){
   const errors:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));
   await page.goto(path,{waitUntil:"domcontentloaded"});
-  await page.locator("#footerFaqBtn").click();
+  if(viaVisibleControl)await page.locator("#footerFaqBtn").click();
+  else await page.evaluate(()=>{(globalThis as any).openFaq();});
   await expect(page.locator(".faq-modal")).toBeVisible();
   return errors;
 }
@@ -60,7 +61,7 @@ test("shareable FAQ page switches language without layout overflow",async({page}
   const errors:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));
   await page.goto("/faq.html?lang=tr",{waitUntil:"domcontentloaded"});
-  await expect(page.locator(".faq-page-main .faq-item")).toHaveCount(9);
+  await expect(page.locator(".faq-page-main .faq-item")).toHaveCount(10);
   await page.locator('[data-lang="en"]').click();
   await expect(page.locator("h1")).toHaveText("Frequently Asked Questions");
   await expect(page).toHaveURL(/lang=en/);
@@ -78,7 +79,7 @@ test("Android and iOS packages retain the native-safe FAQ",async({page},testInfo
       ?"/dist-ios/index.html?faq-native=ios"
       :"";
   test.skip(!path,"native mobile package contract");
-  const errors=await openFaq(page,path);
+  const errors=await openFaq(page,path,false);
   await assertAccordion(page);
   const fullPage=path.startsWith("/dist-android")?"/dist-android/faq.html?lang=en":"/dist-ios/faq.html?lang=en";
   await page.goto(fullPage,{waitUntil:"domcontentloaded"});

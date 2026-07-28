@@ -137,7 +137,7 @@
   }
 
   function isPhoneInteraction(){
-    return !!phoneMedia.matches;
+    return !!phoneMedia.matches || Number(global.innerWidth || 0) <= 760;
   }
 
   function ensureDock(){
@@ -231,9 +231,13 @@
     const modal=document.getElementById("modal");
     if(isVisible(modal))return null;
     const intro=document.getElementById("intro");
-    if(isVisible(intro))return{node:document.getElementById("startBtn"),kind:"intro"};
+    if(isVisible(intro))return{node:document.querySelector(".v7-primary-actions")||document.getElementById("startBtn"),kind:"intro"};
     const hub=document.getElementById("hub");
-    if(isVisible(hub))return{node:hub.querySelector(".hub-action-panel"),kind:"hub"};
+    if(isVisible(hub)){
+      const actionPanel=hub.querySelector(".hub-action-panel")||
+        (mounted&&mounted.node&&mounted.node.classList.contains("hub-action-panel")?mounted.node:null);
+      return actionPanel?{node:actionPanel,kind:"hub"}:null;
+    }
     const sim=document.getElementById("sim");
     if(isVisible(sim)){
       const penaltyButton=sim.querySelector(".final-penalty-btn");
@@ -971,6 +975,10 @@
     if(syncFrame)return;
     syncFrame=requestAnimationFrame(sync);
   }
+  function refresh(){
+    if(syncFrame){cancelAnimationFrame(syncFrame);syncFrame=0;}
+    sync();
+  }
 
   function updateKeyboardState(){
     const active=document.activeElement;
@@ -1084,7 +1092,7 @@
   }
 
   global.CopaMobileExperience={
-    refresh:scheduleSync,
+    refresh,
     setSimView,
     isPhoneInteraction,
     handleBack,

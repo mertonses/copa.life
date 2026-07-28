@@ -12,9 +12,9 @@ const sandbox={
   localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,String(value))},
   navigator:{},document:{readyState:"complete",querySelector:()=>null},
   FORMORDER:["4-4-2","4-3-3","3-5-2","5-3-2"],DEFAULT_FORMS:["4-4-2"],
-  CHAIR_ORDER:["babacan","leydi"],unlockedForms:["4-4-2","4-3-3"],unlockedChairs:["babacan","leydi"],
+  CHAIR_ORDER:["babacan","leydi","torpilci"],unlockedForms:["4-4-2","4-3-3"],unlockedChairs:["babacan","leydi"],
   selectedChairId:"leydi",pendingChairChoices:[],metaBest:6,metaRuns:8,eliteBonus:true,legacyFund:12,
-  LANG:"en"
+  LANG:"en",showModal:()=>{},closeModal:()=>{}
 };
 sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
@@ -24,7 +24,7 @@ const meta=sandbox.CopaMeta;
 for(let index=0;index<23;index++)meta.recordRun({
   seed:index+1,metaRun:index+1,team:`Archive ${index}`,country:index%2?"TR":"JP",
   formation:index%2?"4-4-2":"4-3-3",style:["gegen","kontra","tiki","uzun","blok"][index%5],
-  chairman:index%2?"babacan":"leydi",identity:"Test build",won:index===22,round:index===22?6:3,
+  chairman:["babacan","leydi","torpilci"][index%3],identity:"Test build",won:index===22,round:index===22?6:3,
   endType:"",power:72+index%8,cards:index===22?5:2,cash:index===22?4:-3,score:index===22?"2-1":"",ghost:index===21
   ,players:[{id:`p-${index}-a`,name:`Captain ${index}`,pos:"CM",power:75+index%8,club:`Archive ${index}`,age:24},{id:`p-${index}-b`,name:`Keeper ${index}`,pos:"GK",power:70,club:`Archive ${index}`,age:27}]
 });
@@ -42,6 +42,25 @@ assert.equal(meta.getState().museum.memories[0].featuredIndex,1,"featured museum
 for(const memory of state.museum.memories.slice(0,11))assert.equal(meta.toggleHallPlayer(memory.id,memory.players[0].id),true);
 assert.equal(meta.getState().museum.hall.length,11,"Hall XI must accept eleven players");
 assert.equal(meta.toggleHallPlayer(state.museum.memories[11].id,state.museum.memories[11].players[0].id),false,"Hall XI must reject a twelfth player");
+assert.equal(meta.selectCosmetic("kit","kit_tactical_journey"),true,"unlocked museum kit must be equipable");
+assert.equal(meta.selectCosmetic("crest","crest_boardroom"),true,"unlocked museum crest must be equipable");
+assert.equal(meta.activeCosmetics().kit,"kit_tactical_journey","equipped kit must be available to a new run");
+assert.equal(meta.activeCosmetics().crest,"crest_boardroom","equipped crest must be available to a new run");
+assert.equal(meta.consumeStartToken(),1,"completed cup legacy collection must provide one bounded run-start token");
+assert.equal(meta.consumeStartToken(),0,"museum token must be consumed only once");
+for(const file of ["debt","youth","tactics"])assert.equal(meta.completeClubFile(file).ok,true);
+const clubState=meta.getState();
+assert.deepEqual(Object.keys(clubState.clubFiles.completed).sort(),["debt","tactics","youth"]);
+assert.ok(clubState.museum.collections.stories.includes("story_clean_ledger"),"club files must unlock story rewards without power");
+assert.ok(clubState.museum.collections.crests.includes("crest_academy_threads"),"club files must unlock a cosmetic crest");
+assert.ok(clubState.museum.collections.kits.includes("kit_three_plans"),"club files must unlock a cosmetic kit");
+assert.equal(meta.selectCosmetic("crest","crest_academy_threads"),true,"club-file crest must be equipable from the museum");
+assert.equal(meta.selectCosmetic("kit","kit_three_plans"),true,"club-file kit must be equipable from the museum");
+assert.equal(meta.consumeStartToken(),1,"completing the three-file set must grant exactly one bounded token");
+assert.equal(meta.consumeStartToken(),0);
+assert.ok(meta.chairHistory("babacan").runs>0,"completed runs must build persistent chairman history");
+assert.equal(meta.recordChairDecision("babacan","academy",true),true);
+assert.equal(meta.chairHistory("babacan").lastOutcome,"academy");
 const unlocked=meta.requestFormationUnlock("3-5-2");
 assert.equal(unlocked.ok,true,"one licence must permanently unlock one formation");
 assert.equal(unlocked.formation,"3-5-2");assert.equal(unlocked.licenses,2);

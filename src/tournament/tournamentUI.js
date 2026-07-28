@@ -60,9 +60,9 @@
       <div class="td-stage">
         <aside class="td-machine">
           <div id="phaserDrawStage" role="application" aria-label="${esc(copy.drawTitle)}"></div>
-          <div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
-          <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button>
-          <div class="td-live" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?`${esc(teamName(state,last.teamId))} · ${esc(copy.group)} ${last.groupId}`:next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
+          <div class="td-pot-card"><div class="td-machine-top"><span>${complete?esc(copy.drawComplete):`${esc(copy.pot)} ${currentPot}`}</span><small>${remaining} ${esc(copy.remaining)}</small></div>
+          <button type="button" class="td-ball" onclick="revealTournamentBall()" ${complete?"disabled":""} aria-label="${esc(copy.drawOne)}"><span>${complete?"✓":currentPot}</span><i></i></button></div>
+          <div class="td-live${last&&!complete?" is-recent":""}" id="tournamentDrawLive" role="status" aria-live="polite">${complete?esc(copy.allDrawn):last?"":next?esc(copy.nextBall):esc(copy.allDrawn)}</div>
           ${last?`<div class="td-transfer-band" aria-live="polite"><span>${esc(mobileCopy.last)}</span><b>${esc(lastName)}</b><em>→ ${esc(copy.group)} ${esc(last.groupId)}</em></div>`:""}
           <div class="td-actions">${complete?`<button class="btn btn-go" onclick="finishTournamentDraw()">${esc(copy.seeGroup)}</button>`:`<button class="btn btn-primary" onclick="revealTournamentBall()">${esc(copy.drawOne)}</button><button class="btn btn-ghost td-hold-draw" data-hold-draw aria-pressed="false"><span>${esc(copy.quickDraw)}</span><small>${esc(mobileCopy.hold)}</small><i aria-hidden="true"></i></button>`}</div>
           ${(root.motionReduced&&root.motionReduced())?`<p class="td-motion-note">${esc(mobileCopy.reduced)}</p>`:""}

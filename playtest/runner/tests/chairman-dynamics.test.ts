@@ -1,6 +1,9 @@
 import {test,expect,type Page} from "@playwright/test";
+import path from "node:path";
+import fs from "node:fs";
 
 test.use({serviceWorkers:"block"});
+const visualDir=path.resolve(__dirname,"../../../outputs/ui-visuals");
 
 async function openHub(page:Page){
   await page.goto("/?chairman-dynamics=1",{waitUntil:"domcontentloaded"});
@@ -111,6 +114,46 @@ test("draft transfer affordability and undo use the same chairman transaction",a
   expect(result.afterPick).toEqual({trust:2,budget:21,legacy:0});
   expect(result.restored).toEqual({trust:3,budget:30,legacy:5,spent:result.baseline.spent,feed:result.baseline.feed,empty:true});
   expect(result.savedEmpty).toBe(true);
+});
+
+test("Fixer offer presents consequences as a compact vertical decision",async({page})=>{
+  await page.setViewportSize({width:700,height:650});
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.eval("chairman=Object.assign({},chairman,{id:'torpilci'}); chairTrust=2; budget=20; round=3; chairmanEventRunId='nephew-ui-test'; pendingChairmanEvent=null; chairmanEventSeen={}; finalPenalty=0; eventSeen={};");
+    const event=game.prepareChairmanRoundEvent("nephew");
+    game._torpilNephewChoice({id:"nephew",down:[62,68]},event);
+  });
+  const modal=page.locator(".nephew-offer-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal.locator(".nephew-choice-list article")).toHaveCount(2);
+  await expect(modal.locator(".nephew-choice-list li")).toHaveCount(6);
+  await expect(modal.locator(".nephew-offer-actions .btn")).toHaveCount(2);
+  const layout=await modal.evaluate((panel:HTMLElement)=>{
+    const cards=[...panel.querySelectorAll<HTMLElement>(".nephew-choice-list article")].map(card=>card.getBoundingClientRect());
+    const actions=[...panel.querySelectorAll<HTMLElement>(".nephew-offer-actions .btn")].map(button=>button.getBoundingClientRect());
+    const shell=(panel.closest(".sheet")||panel) as HTMLElement,shellRect=shell.getBoundingClientRect();
+    return{
+      background:getComputedStyle(panel).backgroundColor,
+      cardsStacked:cards[1].top>cards[0].bottom,
+      actionsStacked:actions[1].top>actions[0].bottom,
+      overflow:panel.scrollWidth-panel.clientWidth,
+      shell:{left:shellRect.left,right:shellRect.right,top:shellRect.top,bottom:shellRect.bottom},
+      viewport:{width:innerWidth,height:innerHeight},
+    };
+  });
+  expect(layout.background).toBe("rgb(39, 52, 60)");
+  expect(layout.cardsStacked).toBe(true);
+  expect(layout.actionsStacked).toBe(true);
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.shell.left).toBeGreaterThanOrEqual(-1);
+  expect(layout.shell.right).toBeLessThanOrEqual(layout.viewport.width+1);
+  expect(layout.shell.top).toBeGreaterThanOrEqual(-1);
+  expect(layout.shell.bottom).toBeLessThanOrEqual(layout.viewport.height+1);
+  fs.mkdirSync(visualDir,{recursive:true});
+  await page.screenshot({path:path.join(visualDir,"11-nephew-offer.png"),fullPage:true});
 });
 
 test("Fixer acceptance targets a chosen weak player and persists the full cost",async({page})=>{

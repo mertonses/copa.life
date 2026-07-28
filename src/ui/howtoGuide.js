@@ -122,7 +122,7 @@
   const guideData=()=>typeof _HOWTO!=="undefined"&&(_HOWTO[currentLang()]||_HOWTO.en)||{steps:[]};
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const visible=node=>!!(node&&node.isConnected&&!node.classList.contains("hidden")&&node.getClientRects().length);
-  const contextualTipsAllowed=()=>true;
+  const contextualTipsAllowed=()=>!document.body.classList.contains("arena-active");
 
   function ensureStyle(){
     if(document.querySelector("link[data-copa-howto]"))return;

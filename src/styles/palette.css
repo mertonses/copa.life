@@ -151,8 +151,8 @@ html[data-theme="dark"]{
   --surface-top:#303C44;
   --surface-deep:#0A1118;
   --surface-dark:#0A1118;
-  --surface-muted:color-mix(in srgb,#F3F5F4 11%,transparent);
-  --surface-primary-soft:color-mix(in srgb,#F24A28 16%,transparent);
+  --surface-muted:#303C44;
+  --surface-primary-soft:#27343C;
 
   --text-primary:#F3F5F4;
   --text-secondary:#AAB2B3;
@@ -170,7 +170,7 @@ html[data-theme="dark"]{
   --border-selected:#F24A28;
   --focus-ring:color-mix(in srgb,#F25F40 62%,transparent);
   --overlay-bg:color-mix(in srgb,#0A1118 78%,transparent);
-  --disabled-bg:color-mix(in srgb,#F3F5F4 9%,transparent);
+  --disabled-bg:#1F2B34;
   --disabled-text:#AAB2B3;
 
   --status-positive-text:color-mix(in srgb,#4E9B65 62%,#F3F5F4);
@@ -235,6 +235,12 @@ html[data-theme="dark"]{
 
 html,body{background:var(--page-bg);color:var(--text-primary)}
 body::before{background:radial-gradient(color-mix(in srgb,var(--text-secondary) 11%,transparent) 1px,transparent 1px)}
+
+/* Structural surfaces always keep an opaque base. Decorative gradients and
+   overlays may remain translucent above this paint layer. */
+[data-copa-opaque-surface="true"]{
+  background-color:var(--copa-opaque-bg,var(--surface-elevated))!important;
+}
 
 .btn-primary,.btn-go{
   background:var(--action-primary);
@@ -369,11 +375,6 @@ html .btn:focus{
 .copa-coachmark>span{color:var(--action-text)}
 .copa-coachmark-ok{background:var(--action-primary);color:var(--text-on-primary)}
 .shout-more svg path:first-child{fill:var(--action-primary)}
-.country-new-ribbon,
-html[data-theme="dark"] .country-new-ribbon{
-  background:var(--action-primary);
-  color:var(--brand-navy);
-}
 .trust-info-level.is-secure,.trust-info-current.is-secure{--trust-accent:var(--status-positive-text)}
 .trust-info-level.is-steady,.trust-info-current.is-steady{--trust-accent:var(--status-info-text)}
 .trust-info-level.is-fragile,.trust-info-current.is-fragile,

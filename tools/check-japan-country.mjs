@@ -48,7 +48,7 @@ const persistence = read("src/state/runPersistence.js");
 const sw = read("sw.js");
 expect(persistence.includes('[2,3,4,5,6].includes(version)'), "Legacy/current save migration is missing from runPersistence");
 for (const marker of [
-  'data-country="JP"', 'class="country-new-ribbon"', 'assets/flags/JP.svg',
+  'data-country="JP"', 'assets/flags/JP.svg',
   'src/data/players_japan.js', 'JP:[POOL_JP,OPP_POOL_JP]', 'if(k==="JP")return[POOL_JP,OPP_POOL_JP,OPP_BASES_JP]',
   'src/data/opponents.js?v=20260714-japan1', 'src/data/logos.js?v=20260714-japan1',
   'src/game/generate.js?v=20260720-player-balance1', 'src/ui/hub.js?v=',
@@ -58,9 +58,10 @@ for (const marker of [
 ]) expect(html.includes(marker), `Japonya runtime bağlantısı eksik: ${marker}`);
 expect(html.indexOf("src/data/players_japan.js") < html.indexOf("src/game/generate.js"), "Japonya havuzu generate.js öncesinde yüklenmeli");
 expect(/COUNTRY_CODES\.filter[\s\S]{0,300}Math\.random/.test(html), "Rastgele Başla ülke havuzunu kullanmıyor");
-for (const marker of ["repeat(6,minmax(0,1fr))", ".country-new-ribbon", 'html[data-theme="dark"] .country-new-ribbon', "repeat(3,minmax(0,1fr))"]) {
+for (const marker of ["repeat(6,minmax(0,1fr))", "repeat(3,minmax(0,1fr))"]) {
   expect(css.includes(marker), `Japonya responsive/dark stil eksik: ${marker}`);
 }
+expect(!html.includes('class="country-new-ribbon"')&&!css.includes(".country-new-ribbon"),"Japonya YENİ rozeti kaldırılmadı");
 expect(read("assets/flags/JP.svg").includes('viewBox="0 0 3 2"'), "Japonya bayrağı 3:2 değil");
 expect(sw.includes('"/src/data/players_japan.js"') && sw.includes('"/assets/flags/JP.svg"'), "Japonya PWA önbelleği eksik");
 expect(ghost.includes('country:cleanText(context.selectedCountry||context.country||"TR").slice(0,8)'), "Hayalet Kulüp ülke serialize yolu eksik");

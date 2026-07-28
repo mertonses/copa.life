@@ -1,0 +1,225 @@
+/*
+ * Android WebView surface contract.
+ *
+ * The shared UI intentionally uses translucent color-mix() layers on the web.
+ * Native WebView compositing can flatten those layers against the page canvas,
+ * making cards and modal sections look transparent. Keep this file last and
+ * give Android's structural surfaces a real opaque base before any contextual
+ * gradient is painted.
+ */
+html[data-copa-platform="android"]{
+  --android-page:#101D28;
+  --android-surface:#17242D;
+  --android-elevated:#27343C;
+  --android-raised:#303C44;
+  --android-border:#3A4750;
+  --android-border-strong:#68757C;
+  color-scheme:dark;
+  background-color:var(--android-page);
+}
+
+html[data-copa-platform="android"] body,
+html[data-copa-platform="android"] #app,
+html[data-copa-platform="android"] .wrap{
+  background-color:var(--android-page)!important;
+}
+
+html[data-copa-platform="android"] :is(
+  .sheet,
+  .postcard,
+  .hub-action-panel,
+  .runCareerProgress,
+  .mobile-result-disclosure,
+  .advanced-settings-sheet,
+  .cash-mechanic-sheet,
+  .cash-detail-sheet,
+  .match-mode-sheet,
+  .season-stats-modal,
+  .meta-progress-modal,
+  .player-profile-modal,
+  .match-analysis-modal
+){
+  border-color:var(--android-border)!important;
+  background-color:var(--android-elevated)!important;
+}
+
+html[data-copa-platform="android"] :is(
+  .mobile-action-dock,
+  .native-hub-nav,
+  .hub-game-tabs,
+  .cash-mechanic-rules article,
+  .cash-detail-hero,
+  .cash-detail-metrics article,
+  .cash-history,
+  .mobile-result-disclosure>summary,
+  .runCareerProgress li,
+  .runCareerProgress .career-memory-row
+){
+  border-color:var(--android-border)!important;
+  background-color:var(--android-surface)!important;
+}
+
+html[data-copa-platform="android"] :is(
+  .cash-history li,
+  .cash-detail-metrics article,
+  .cash-mechanic-rules article,
+  .runCareerProgress li
+){
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+/* Context metrics must never depend on a transparent color-mix result. */
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile,#kasaTile),
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card){
+  border-color:var(--metric-accent,var(--android-border-strong))!important;
+  background-color:var(--android-elevated)!important;
+}
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile)[data-metric-tone="worst"]{
+  background:linear-gradient(145deg,rgba(218,61,46,.48),rgba(66,1,2,.36)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile)[data-metric-tone="weak"]{
+  background:linear-gradient(145deg,rgba(242,95,64,.38),rgba(218,61,46,.19)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile)[data-metric-tone="average"]{
+  background:linear-gradient(145deg,rgba(214,162,31,.42),rgba(128,96,0,.2)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile)[data-metric-tone="good"]{
+  background:linear-gradient(145deg,rgba(78,155,101,.44),rgba(31,107,69,.2)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub .hub-stat-row>:is(#chemTile,#powTile,#trustTile)[data-metric-tone="elite"]{
+  background:linear-gradient(145deg,rgba(31,107,69,.62),rgba(31,107,69,.24)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub #kasaTile.kasa-deep-debt,
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card).kasa-deep-debt{
+  background:linear-gradient(145deg,rgba(66,1,2,.9),rgba(218,61,46,.25)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub #kasaTile.kasa-debt,
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card).kasa-debt{
+  background:linear-gradient(145deg,rgba(218,61,46,.48),rgba(66,1,2,.22)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub #kasaTile.kasa-zero,
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card).kasa-zero{
+  background:linear-gradient(145deg,rgba(214,162,31,.42),rgba(128,96,0,.2)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub #kasaTile.kasa-positive,
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card).kasa-positive{
+  background:linear-gradient(145deg,rgba(78,155,101,.44),rgba(31,107,69,.2)),#27343C!important;
+}
+html[data-copa-platform="android"] #hub #kasaTile.kasa-rich,
+html[data-copa-platform="android"] #draft :is(#draftKasaTile,.draft-kasa-card).kasa-rich{
+  background:linear-gradient(145deg,rgba(31,107,69,.62),rgba(31,107,69,.24)),#27343C!important;
+}
+
+/* Primary navigation remains readable even when WebView drops backdrop blur. */
+html[data-copa-platform="android"] :is(.hub-game-tabs,.native-hub-nav){
+  box-shadow:0 8px 22px rgba(10,17,24,.32)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html[data-copa-platform="android"] :is(.hub-game-tabs,.native-hub-nav) button{
+  color:#AAB2B3!important;
+  background-color:#17242D!important;
+}
+html[data-copa-platform="android"] :is(.hub-game-tabs,.native-hub-nav) button.active{
+  color:#F3F5F4!important;
+  background-color:#303C44!important;
+}
+
+@media(max-width:480px){
+  html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-nav button{
+    flex-direction:column!important;
+    justify-content:center!important;
+    gap:3px!important;
+    padding:5px 3px!important;
+  }
+  html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-nav .hub-tab-svg{
+    flex-basis:20px;
+    width:20px!important;
+    height:20px!important;
+  }
+  html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-tab-label{
+    width:100%;
+    overflow:visible;
+    font-size:7.5px!important;
+    letter-spacing:.025em!important;
+    text-align:center;
+    text-overflow:clip;
+  }
+}
+
+/* Modal and dock translucency is useful on browsers, but harms Android text
+   contrast when hardware compositing is disabled. */
+html[data-copa-platform="android"] .modal{
+  background-color:rgba(10,17,24,.88)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html[data-copa-platform="android"] .mobile-action-dock{
+  box-shadow:0 -8px 24px rgba(10,17,24,.38)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Market surfaces need an opaque fallback. Older Android System WebViews can
+   reject a color-mix() gradient as a whole, otherwise leaving these cards
+   visually merged with the page canvas. */
+html[data-copa-platform="android"] #marketDecisionHeader{
+  border-color:var(--android-border)!important;
+  background-color:var(--android-surface)!important;
+}
+html[data-copa-platform="android"] #marketDecisionHeader .market-cash-panel{
+  border-color:var(--android-border)!important;
+  background-color:var(--android-page)!important;
+}
+html[data-copa-platform="android"] #freeAgentRow .free-agent-card{
+  border-color:var(--fa-tone,var(--android-border-strong))!important;
+  border-left-color:var(--fa-tone,var(--android-border-strong))!important;
+  background-color:var(--android-surface)!important;
+}
+html[data-copa-platform="android"] #freeAgentRow .free-agent-card .ct-head,
+html[data-copa-platform="android"] #freeAgentRow .free-agent-actions{
+  border-color:var(--android-border)!important;
+  background-color:var(--android-elevated)!important;
+}
+html[data-copa-platform="android"] #freeAgentRow :is(.free-agent-impact span,.free-agent-actions button){
+  border-color:var(--android-border)!important;
+  background-color:var(--android-page)!important;
+}
+
+html[data-copa-platform="android"] :is(button,.btn,[role="button"]):disabled{
+  background-color:rgba(255,255,255,.08);
+  color:#AAB2B3;
+}
+
+/* The landing pitch must not rely on color-mix support in older System
+   WebViews. These concrete fallbacks keep the same composition as iOS. */
+html[data-copa-platform="android"] .mgl-board-wrap{
+  border:1px solid #315547!important;
+  background:linear-gradient(180deg,rgba(31,107,69,.20),rgba(16,29,40,.34)),#10271F!important;
+  box-shadow:inset 0 0 0 1px rgba(243,245,244,.025),0 10px 30px rgba(10,17,24,.18)!important;
+}
+html[data-copa-platform="android"] .mgl-tactical-board{
+  color:#F3F5F4!important;
+}
+html[data-copa-platform="android"] .mgl-tactical-board>rect,
+html[data-copa-platform="android"] .mgl-tactical-board>path,
+html[data-copa-platform="android"] .mgl-tactical-board>circle{
+  stroke:rgba(243,245,244,.24)!important;
+}
+html[data-copa-platform="android"] .mgl-tactical-board .mgl-routes path{
+  stroke:#4E9B65!important;
+}
+html[data-copa-platform="android"] .mgl-tactical-board .mgl-players circle{
+  fill:#101D28!important;
+  stroke:#4E9B65!important;
+}
+html[data-copa-platform="android"] .mgl-tactical-board .mgl-players circle:nth-child(6){
+  fill:#F24A28!important;
+  stroke:#F3F5F4!important;
+}
+
+@media (forced-colors:active){
+  html[data-copa-platform="android"] :is(.sheet,.postcard,.context-metric){
+    forced-color-adjust:none;
+  }
+}
