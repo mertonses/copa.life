@@ -1,7 +1,10 @@
-import {ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES} from "./playerCatalog.js";
+import {
+  ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES,ARENA_PLAYER_SOURCES
+} from "./playerCatalog.js";
 
-export const ARENA_RULES_VERSION="arena-rules-v5";
-export const MIN_MANUAL_DECISIONS=2;
+export const ARENA_RULES_VERSION="arena-rules-v7";
+export const MIN_MANUAL_DECISIONS=6;
+export const LEGACY_MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
   lobby:45,
   setup:60,
@@ -64,12 +67,17 @@ export const MARKET_CARDS=Object.freeze([
 
 const FIRST_NAMES=["Arda","Deniz","Mert","Onur","Emir","Can","Atlas","Eren","Kerem","Bora","Luca","Diego","Marco","Leo","Alex","Noah"];
 const LAST_NAMES=["Aydın","Kaya","Demir","Erdem","Yalın","Aksoy","Costa","Rossi","Silva","Santos","Meyer","Mori","Ito","King","Stone","Reed"];
-const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5"]);
+const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7"]);
 const DRAFT_TIERS=Object.freeze(["connector","reliable","star"]);
 const SLOT_POSITIONS=Object.freeze({
-  GK:["GK"],LB:["LB","LWB"],CB1:["CB"],CB2:["CB"],RB:["RB","RWB"],
+  GK:["GK"],LB:["LB"],CB1:["CB"],CB2:["CB"],RB:["RB"],
   CM1:["CM","DM"],CM2:["CM","DM"],AM:["AM","CM"],LW:["LW","LM"],RW:["RW","RM"],ST:["ST","CF"]
 });
+const SLOT_ADAPTED_POSITIONS=Object.freeze({
+  GK:[],LB:["WB","CB"],CB1:["WB","LB","RB"],CB2:["WB","LB","RB"],RB:["WB","CB"],
+  CM1:["AM","LM","RM"],CM2:["AM","LM","RM"],AM:["DM","LM","RM"],LW:["RW","RM","AM"],RW:["LW","LM","AM"],ST:["LW","RW","AM"]
+});
+const ADAPTED_POSITION_PENALTY=3;
 
 export function hashSeed(value){
   let hash=2166136261;
@@ -96,6 +104,10 @@ export function usesFullXI(rulesVersion=ARENA_RULES_VERSION){
   return FULL_XI_RULES.has(rulesVersion);
 }
 
+export function allowsRegulationDraw(rulesVersion=ARENA_RULES_VERSION){
+  return ["arena-rules-v6","arena-rules-v7"].includes(rulesVersion);
+}
+
 export function seasonKey(date=new Date()){
   const start=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),1));
   const quarter=Math.floor(start.getUTCMonth()/3)+1;
@@ -110,6 +122,18 @@ export function divisionFor(rating){
   if(value>=1150)return "gumus";
   if(value>=1000)return "bronz";
   return "aday";
+}
+
+export function chooseMatchCandidate(home,candidates,recentByOwner={}){
+  const homeRecent=new Set(recentByOwner[home.owner]||[]);
+  return [...candidates].sort((one,two)=>{
+    const oneRepeat=homeRecent.has(one.owner)||(recentByOwner[one.owner]||[]).includes(home.owner);
+    const twoRepeat=homeRecent.has(two.owner)||(recentByOwner[two.owner]||[]).includes(home.owner);
+    if(oneRepeat!==twoRepeat)return Number(oneRepeat)-Number(twoRepeat);
+    const oneGap=Math.abs(Number(one.rating)-Number(home.rating));
+    const twoGap=Math.abs(Number(two.rating)-Number(home.rating));
+    return oneGap-twoGap||Number(one.joined_at)-Number(two.joined_at);
+  })[0]||null;
 }
 
 export function ratingDelta(homeRating,awayRating,score){
@@ -145,48 +169,98 @@ function arenaCost(player,tier){
   return round(player.power)>=82&&round(player.age)<=29?6:5;
 }
 
-function arenaChemistry(player,tier){
+function arenaChemistry(player,tier,rulesVersion){
+  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7"].includes(rulesVersion))return 2;
   let value=round(player.age)>=30?2:round(player.age)>=24?1:0;
   if(tier==="star"&&round(player.power)>=82)value--;
   return clamp(value,-1,2);
 }
 
-export function createDraftOffers(seed,line,step,side,slot=line){
+function draftOffer(player,tier,line,slot,rulesVersion){
+  const position=String(player.position||"").toUpperCase();
+  const natural=(SLOT_POSITIONS[slot]||[]).includes(position);
+  const positionFit=natural?"natural":"adapted";
+  const positionPenalty=positionFit==="adapted"&&rulesVersion==="arena-rules-v7"?ADAPTED_POSITION_PENALTY:0;
+  const power=round(player.power);
+  const source=ARENA_PLAYER_SOURCES[player.sourceLeague]||{code:player.sourceLeague,label:{tr:player.sourceLeague,en:player.sourceLeague}};
+  return {
+    sourceId:player.sourceId,
+    slot,
+    line,
+    name:player.name,
+    power,
+    effectivePower:Math.max(1,power-positionPenalty),
+    positionPenalty,
+    cost:arenaCost(player,tier),
+    chemistry:arenaChemistry(player,tier,rulesVersion),
+    trait:tier,
+    sourceLeague:source.code,
+    sourceLeagueLabel:source.label,
+    nationality:null,
+    club:player.club,
+    age:round(player.age),
+    position:player.position,
+    positionFit,
+    potential:round(player.potential),
+    leagueLevel:round(player.leagueLevel),
+    marketHint:round(player.marketHint)
+  };
+}
+
+function candidatePair(seed,line,step,slot,tier,country,rulesVersion,reserved){
+  const pool=ARENA_PLAYER_CATALOG[line]&&ARENA_PLAYER_CATALOG[line][tier]&&ARENA_PLAYER_CATALOG[line][tier][country];
+  if(!Array.isArray(pool)||!pool.length)throw new Error("missing_arena_player_pool");
+  const naturalPositions=SLOT_POSITIONS[slot]||[];
+  const adaptedPositions=SLOT_ADAPTED_POSITIONS[slot]||[];
+  const available=pool.filter(player=>!reserved.has(player.sourceId));
+  const natural=available.filter(player=>naturalPositions.includes(String(player.position||"").toUpperCase()));
+  const adapted=available.filter(player=>adaptedPositions.includes(String(player.position||"").toUpperCase()));
+  const candidates=[...natural,...adapted.filter(player=>!natural.includes(player))];
+  const fallback=available.filter(player=>!candidates.includes(player));
+  const offers=[...(candidates.length>=2?candidates:available.length>=2?available:fallback)]
+    .map(player=>draftOffer(player,tier,line,slot,rulesVersion));
+  if(offers.length<2)throw new Error("exhausted_arena_player_pool");
+  const pairs=[];
+  for(let one=0;one<offers.length;one++)for(let two=one+1;two<offers.length;two++){
+    const first=offers[one],second=offers[two];
+    const fitMismatch=first.positionFit===second.positionFit?0:50;
+    const adaptedPair=first.positionFit==="adapted"&&second.positionFit==="adapted"?12:0;
+    const score=Math.abs(first.effectivePower-second.effectivePower)*10+
+      Math.abs(first.cost-second.cost)*5+Math.abs(first.chemistry-second.chemistry)*2+fitMismatch+adaptedPair;
+    pairs.push({offers:[first,second],score,tie:hashSeed(`${seed}|pair|${line}|${step}|${tier}|${country}|${first.sourceId}|${second.sourceId}`)});
+  }
+  pairs.sort((one,two)=>one.score-two.score||one.tie-two.tie);
+  return pairs[0].offers;
+}
+
+export function createDraftOffers(seed,line,step,side,slot=line,rulesVersion=ARENA_RULES_VERSION,options={}){
   if(!LEGACY_DRAFT_LINES.includes(line))throw new Error("invalid_draft_line");
-  const countryOffset=hashSeed(`${seed}|countries|${line}|${step}|${ARENA_PLAYER_CATALOG_VERSION}`)%ARENA_PLAYER_COUNTRIES.length;
-  const offers=DRAFT_TIERS.map((tier,tierIndex)=>{
+  const catalogVersion=options.catalogVersion||ARENA_PLAYER_CATALOG_VERSION;
+  if(catalogVersion!==ARENA_PLAYER_CATALOG_VERSION)throw new Error("arena_catalog_version_unavailable");
+  const reserved=new Set(options.reservedSourceIds||[]);
+  const countryOffset=hashSeed(`${seed}|countries|${line}|${step}|${catalogVersion}`)%ARENA_PLAYER_COUNTRIES.length;
+  const pairs=DRAFT_TIERS.map((tier,tierIndex)=>{
     const country=ARENA_PLAYER_COUNTRIES[(countryOffset+tierIndex*2)%ARENA_PLAYER_COUNTRIES.length];
-    const pool=ARENA_PLAYER_CATALOG[line]&&ARENA_PLAYER_CATALOG[line][tier]&&ARENA_PLAYER_CATALOG[line][tier][country];
-    if(!Array.isArray(pool)||!pool.length)throw new Error("missing_arena_player_pool");
-    const preferred=SLOT_POSITIONS[slot]||[];
-    const compatible=preferred.length?pool.filter(item=>preferred.includes(String(item.position||"").toUpperCase())):pool;
-    const candidates=compatible.length?compatible:pool;
-    const player=candidates[hashSeed(`${seed}|player|${line}|${step}|${tier}|${country}|${ARENA_PLAYER_CATALOG_VERSION}`)%candidates.length];
-    const positionFit=preferred.includes(String(player.position||"").toUpperCase())?"natural":"adapted";
-    return {
-      sourceId:player.sourceId,
-      slot,
-      line,
-      name:player.name,
-      power:round(player.power),
-      cost:arenaCost(player,tier),
-      chemistry:arenaChemistry(player,tier),
-      trait:tier,
-      country:player.country,
-      club:player.club,
-      age:round(player.age),
-      position:player.position,
-      positionFit,
-      potential:round(player.potential),
-      leagueLevel:round(player.leagueLevel),
-      marketHint:round(player.marketHint)
-    };
+    const pair=candidatePair(seed,line,step,slot,tier,country,rulesVersion,reserved);
+    return hashSeed(`${seed}|pair-sides|${line}|${step}|${tier}|${country}`)%2?pair.reverse():pair;
   });
+  const offers=pairs.map(pair=>pair[Number(side)===1?1:0]);
   const rotation=hashSeed(`${seed}|${side}|${step}`)%offers.length;
   return offers.map((_,index)=>offers[(index+rotation)%offers.length]).map((offer,index)=>({
     ...offer,
     id:`${line.toLowerCase()}-${step}-${index}-${hashSeed(`${seed}|${side}|${offer.sourceId}`).toString(36)}`
   }));
+}
+
+export function createDraftPlan(seed,rulesVersion=ARENA_RULES_VERSION,catalogVersion=ARENA_PLAYER_CATALOG_VERSION){
+  if(catalogVersion!==ARENA_PLAYER_CATALOG_VERSION)throw new Error("arena_catalog_version_unavailable");
+  const reserved=new Set();
+  return DRAFT_SLOTS.map((item,step)=>{
+    const options={catalogVersion,reservedSourceIds:[...reserved]};
+    const round=[0,1].map(side=>createDraftOffers(seed,item.line,step,side,item.slot,rulesVersion,options));
+    for(const offer of round.flat())reserved.add(offer.sourceId);
+    return round;
+  });
 }
 
 export function createMarketOffers(seed,side){
@@ -202,6 +276,20 @@ export function createMarketOffers(seed,side){
   return [...ordered,{...MARKET_CARDS.find(card=>card.id==="none")}];
 }
 
+export function minimumFutureDraftCost(seed,side,afterStep,rulesVersion=ARENA_RULES_VERSION,draftPlan=null){
+  const fullXI=usesFullXI(rulesVersion);
+  const slots=fullXI?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
+  return slots.slice(Number(afterStep)+1).reduce((sum,item,offset)=>{
+    const step=Number(afterStep)+1+offset;
+    const offers=draftPlan&&draftPlan[step]&&draftPlan[step][side]
+      ?draftPlan[step][side]
+      :fullXI
+      ?createDraftOffers(seed,item.line,step,side,item.slot,rulesVersion)
+      :createLegacyDraftOffers(seed,item.line,step,side,item.slot);
+    return sum+Math.min(...offers.map(offer=>round(offer.cost)));
+  },0);
+}
+
 export function initialPlayerState(input){
   return {
     owner:String(input.owner||""),
@@ -214,13 +302,19 @@ export function initialPlayerState(input){
     training:null,
     tactics:[],
     manualDecisions:0,
+    manualTactics:0,
     connected:false,
     lastSeenAt:Date.now()
   };
 }
 
-export function resolveParticipation(players,outcomes){
-  const eligible=players.map(player=>(Number(player&&player.manualDecisions)||0)>=MIN_MANUAL_DECISIONS);
+export function resolveParticipation(players,outcomes,policy="meaningful-participation-v2"){
+  const eligible=players.map(player=>{
+    const decisions=Number(player&&player.manualDecisions)||0;
+    if(policy==="minimum-manual-v1")return decisions>=LEGACY_MIN_MANUAL_DECISIONS;
+    const tactics=Number(player&&player.manualTactics)||0;
+    return decisions>=MIN_MANUAL_DECISIONS&&(tactics>=1||decisions>=13);
+  });
   if(eligible[0]&&eligible[1])return {eligible,outcomes:[...outcomes],forfeitIndex:null,voided:false};
   if(!eligible[0]&&!eligible[1])return {eligible,outcomes:["draw","draw"],forfeitIndex:null,voided:true};
   const forfeitIndex=eligible[0]?1:0;
@@ -240,15 +334,24 @@ export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
   const legacy=!usesFullXI(rulesVersion);
   const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
   if(!validateSetup(player&&player.setup)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
+  if(rulesVersion==="arena-rules-v7"){
+    const identities=player.draft.map(item=>item.sourceId).filter(Boolean);
+    if(new Set(identities).size!==identities.length)return null;
+  }
   const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=CHAIRMEN[player.setup.chairman];
   const card=MARKET_CARDS.find(item=>item.id===(player.market&&player.market.id))||MARKET_CARDS.at(-1);
   const linePowers=Object.fromEntries(LEGACY_DRAFT_LINES.map(line=>{
     const players=player.draft.filter(item=>item.line===line);
-    return [line,players.length?players.reduce((sum,item)=>sum+round(item.power),0)/players.length:65];
+    return [line,players.length?players.reduce((sum,item)=>
+      sum+round(rulesVersion==="arena-rules-v7"?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
+    )/players.length:65];
   }));
   const spent=player.draft.reduce((sum,item)=>sum+round(item.cost),0)+round(card.cost);
   const budget=(legacy?20:44)+chairman.budget-spent;
-  const chemistry=clamp(player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(player.training==="chemistry"?2:0),-3,9);
+  const chemistry=clamp(
+    player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(player.training==="chemistry"?2:0),
+    -3,["arena-rules-v6","arena-rules-v7"].includes(rulesVersion)?18:9
+  );
   const base={
     attack:((linePowers.ST||65)*.58+(linePowers.WING||65)*.27+(linePowers.MID||65)*.15)/1,
     defense:((linePowers.GK||65)*.34+(linePowers.DEF||65)*.52+(linePowers.MID||65)*.14)/1,
@@ -363,6 +466,8 @@ export function publicState(state,owner){
   return {
     protocol:1,
     rulesVersion:state.rulesVersion||(state.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1"),
+    catalogVersion:state.catalogVersion||null,
+    playerSources:state.playerSources||null,
     matchId:state.matchId,
     phase:state.phase,
     deadline:state.deadline,

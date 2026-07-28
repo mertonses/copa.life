@@ -45,7 +45,10 @@ test.describe("run lifecycle and recovery",()=>{
     await expect(page.locator("#result")).toBeVisible();
     await expect(page.locator("#rCareerProgress")).toBeVisible();
     await expect(page.locator("#rCareerProgress")).toContainText(/CLUB CAREER|KULÜP KARİYERİ/);
-    expect(await page.locator("#rCareerProgress").evaluate(element=>element.previousElementSibling?.classList.contains("statline"))).toBe(true);
+    expect(await page.locator("#rCareerProgress").evaluate(element=>{
+      const analysis=element.previousElementSibling;
+      return analysis?.id==="matchAnalysisEntry"&&analysis.previousElementSibling?.classList.contains("statline");
+    })).toBe(true);
     await expect(page.locator("#modal")).toBeHidden();
     const result=await page.evaluate(()=>{const w=globalThis as any;const career=w.CopaMeta.getState();return{phase:w.CopaRunState.phase,ended:w.runEnded,won:w.lastResult&&w.lastResult.won,save:localStorage.getItem("copa_run_v6"),reputation:career.career.reputation,memories:career.museum.memories.length,licenses:career.career.licenses};});
     expect(result).toMatchObject({phase:"result",ended:true,won:true,save:null,memories:1});

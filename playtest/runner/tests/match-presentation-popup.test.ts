@@ -48,7 +48,19 @@ test("MAÇA ÇIK always asks for presentation and WATCH reuses final UI inside t
   await expect(page.locator(".match-mode-modal")).toBeVisible();
   await expect(page.getByRole("button",{name:/İZLE/})).toBeVisible();
   await expect(page.getByRole("button",{name:/HIZLI OYNA/})).toBeVisible();
-  await expect(page.locator(".match-mode-options .is-last-choice")).toContainText("HIZLI OYNA");
+  const modeLayout=await page.locator(".match-mode-options").evaluate(element=>{
+    const root=element as HTMLElement;
+    const bounds=root.getBoundingClientRect();
+    const buttons=[...root.querySelectorAll<HTMLElement>("button")].map(button=>{
+      const rect=button.getBoundingClientRect();
+      return{left:rect.left,right:rect.right,width:rect.width,height:rect.height};
+    });
+    return{bounds:{left:bounds.left,right:bounds.right},buttons};
+  });
+  expect(modeLayout.buttons).toHaveLength(2);
+  expect(Math.abs(modeLayout.buttons[0].width-modeLayout.buttons[1].width)).toBeLessThanOrEqual(1);
+  expect(modeLayout.buttons.every(button=>button.height>=44)).toBe(true);
+  expect(modeLayout.buttons.every(button=>button.left>=modeLayout.bounds.left-1&&button.right<=modeLayout.bounds.right+1)).toBe(true);
   await page.screenshot({path:path.join(visualDir,packaged?"android-match-mode-picker.png":"web-match-mode-picker.png"),fullPage:true});
 
   await page.getByRole("button",{name:/İZLE/}).click();

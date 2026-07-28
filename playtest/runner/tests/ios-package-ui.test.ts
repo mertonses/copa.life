@@ -17,7 +17,11 @@ test("iOS store artifact boots with the shared game and native-safe visuals",asy
   }));
   expect(ghostDefaults).toEqual({matching:false,sharing:false});
   await expect(page.locator('script[src*="src/data/logos.js"]')).toHaveCount(0);
-  await expect(page.locator('img[src^="assets/flags/"]')).toHaveCount(0);
-  expect(await page.locator(".generic-country-code").count()).toBeGreaterThan(0);
+  const flagAssets=await page.locator("#countryPick").evaluate((picker:HTMLElement)=>({
+    assets:[...picker.querySelectorAll<HTMLImageElement>('img[src^="assets/flags/"]')]
+      .map(image=>({complete:image.complete,width:image.naturalWidth,height:image.naturalHeight})),
+  }));
+  expect(flagAssets.assets).toHaveLength(6);
+  expect(flagAssets.assets.every(flag=>flag.complete&&flag.width>0&&flag.height>0)).toBe(true);
   expect(errors).toEqual([]);
 });

@@ -617,7 +617,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     pt.innerHTML=`<button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="${LANG==="tr"?"Kadro gücü nasıl hesaplanır?":"How is squad power calculated?"}" style="color:var(--color-slate);border-color:var(--border-strong);opacity:.8">?</button><div class="mh" id="powHdr">${LANG==="tr"?"KADRO GÜCÜ":"SQUAD POWER"}</div><div class="mv" id="powV" style="color:${pfg};font-size:22px;line-height:1.05">${pv}</div><div class="ms" id="powHint">${x.powHint}</div>${_vsBar}`;
   }}
   {const os=$("oppStars"),oc=$("oppChar"),ys=$("youStars"),yc=$("youChar");if(os)os.textContent="★".repeat(starsOf(opponent.power));if(oc&&oppChar)oc.innerHTML=oppChar.e+" "+oppChar.l;if(ys)ys.textContent="★".repeat(starsOf(sp.power));if(yc){yc.innerHTML=x.styles[style].i+" "+x.styles[style].n;}}
-  {const chName=x.chair[chairman.id].n;const pb=$("presBtn");const _tr=LANG==="tr";const presMascot=`<svg class="pres-mascot" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="pres-mascot-head"><path d="M13 18c0-5 2.7-8 6-8s6 3 6 8v2c0 4-2.7 7-6 7s-6-3-6-7v-2Z"/><path d="M12 17c-1.7-2-2.1-4.1-1.1-6.2 2.8 1.4 5 .9 7.6-1.9 3.1 3.2 5.5 3.7 8.5 1.9 1.1 2.3.6 4.5-1 6.4"/><path d="M16 19h.1M22 19h.1"/><path d="M16.5 23c1.6 1 3.4 1 5 0"/><path d="M9 34c1.3-4.1 4.4-6 10-6s8.7 1.9 10 6"/></g><path class="pres-mascot-tie" d="M18 28l-2 6h6l-2-6"/></svg>`;pb.classList.add("btn-pres-action");pb.innerHTML=`${presMascot}<span>${x.ui.seeChair}</span>`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.classList.toggle("locked",locked);pb.style.opacity=locked?"0.58":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl){pl.textContent="";pl.setAttribute("aria-hidden","true");}}$("scoutBtn").title=x.scout;
+  {const chName=x.chair[chairman.id].n;const pb=$("presBtn");const chairActionIcon=`<svg class="chair-action-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M6.5 19c.8-4 2.6-6 5.5-6s4.7 2 5.5 6"/><path d="M9.5 14.2 12 18l2.5-3.8"/><path d="M4 20h16"/></svg>`;pb.classList.add("btn-pres-action");pb.innerHTML=`${chairActionIcon}<span>${x.ui.seeChair}</span>`;pb.disabled=false;pb.title=chName;const locked=round<4;pb.classList.toggle("locked",locked);pb.style.opacity=locked?"0.58":"1";pb.onclick=locked?(typeof presBtnLockedClick==="function"?presBtnLockedClick:null):openPresident;const pl=$("presLabel");if(pl){pl.textContent="";pl.setAttribute("aria-hidden","true");}}$("scoutBtn").title=x.scout;
   $("playBtn").innerHTML=round>=7?x.playFinal:x.play;
   {const tb=$("talkBtn");if(tb){const talkIcon=`<svg class="talk-ico" viewBox="0 0 24 18" width="19" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3.5h13a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2H10l-5 3v-3H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path class="talk-wave" d="M7 7.5h7"/><path class="talk-wave talk-wave-2" d="M7 10h4"/></svg>`;tb.classList.remove("hidden");tb.disabled=!!talkUsed;tb.classList.toggle("used",!!talkUsed);tb.setAttribute("aria-disabled",talkUsed?"true":"false");tb.title=talkUsed?(LANG==="tr"?"Bu tur konuşma kullanıldı":"Team talk already used this round"):"";tb.innerHTML=talkIcon+`<span>${LANG==="tr"?"TAKIMA KONUŞ":"TEAM TALK"}</span>`;}}
   renderDebtWarning();syncPintiSavingsWidget();renderInjbar();
@@ -639,6 +639,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     el._insufficientTimer=setTimeout(()=>el.classList.remove("show-insufficient"),1500);
   }
   window._flashInsufficient=_flashInsufficient;
+  if(cardsBoughtThisTurn===0&&shopOffers.length>0&&shopOffers.length<3&&typeof newShopOffers==="function")newShopOffers();
   const sc=$("shopcards");sc.innerHTML="";
   {
     let marketHead=document.getElementById("marketDecisionHeader");
@@ -656,7 +657,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     coupon.innerHTML=`<span class="lottery-coupon-icon">🎟</span><span><b>${LANG==="tr"?"PİYANGO KUPONU":"LOTTERY COUPON"}</b><small>${LANG==="tr"?`İlk kart en fazla −€${lotteryCouponAmount}M · min. €2M · ${couponRounds} tur`:`Next card up to −€${lotteryCouponAmount}M · min. €2M · ${couponRounds} round${couponRounds===1?"":"s"}`}</small></span>`;
     sc.appendChild(coupon);
   }
-  shopOffers.slice(0,2).forEach(k=>{
+  shopOffers.slice(0,3).forEach(k=>{
     const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;
     cardVariant[k]=sv;
     const cd=x.cards[k];

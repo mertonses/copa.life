@@ -105,6 +105,23 @@
       card.querySelectorAll(".prep-level").forEach(button=>button.classList.toggle("active",!!chosen&&button.dataset.prepLevel===chosen.intensity));
     });
   }
+  function openHelp(){
+    const title=tr()?"ANTRENMAN NASIL ÇALIŞIR?":"HOW TRAINING WORKS";
+    const items=tr()?[
+      ["Plan kapasitesi","Her maç öncesi sınırlı bir çalışma kapasiten vardır. İki hafif çalışma veya tek yoğun çalışma seçebilirsin.","2 HAFİF · 1 YOĞUN"],
+      ["Rakibe göre seçim","Rakip gücü, oyun anlayışı ve turun aşaması bazı çalışmaların o maç için daha anlamlı olmasını sağlar.","RAKİP · STİL · TUR"],
+      ["Yoğunluk","Yoğun çalışma daha belirgin etki yaratabilir; buna karşılık oyuncuların yükünü ve yorgunluğunu daha fazla etkiler.","DAHA GÜÇLÜ ETKİ · DAHA FAZLA YÜK"],
+      ["Tekrar ve toparlanma","Aynı çalışmayı sürekli seçmek zamanla daha az verimli olur. Toparlanma, biriken yorgunluğu ve sakatlık riskini yönetmeye yardım eder.","TEKRAR AZALTIR · TOPARLANMA DENGELER"],
+      ["Etki alanları","Çalışmalar hücum, savunma, duran top, penaltı hazırlığı, takım uyumu veya rakip analizine odaklanır. Sonuç; kadron, rakip ve maç koşullarıyla birlikte değerlendirilir.","6 ETKİ ALANI"]
+    ]:[
+      ["Plan capacity","Before each match you have limited training capacity: choose two light drills or one intense drill.","2 LIGHT · 1 INTENSE"],
+      ["Match the opponent","Opponent strength, style and tournament stage make some drills more relevant for that match.","OPPONENT · STYLE · STAGE"],
+      ["Intensity","Intense work can create a stronger effect, while also placing more load and fatigue on the squad.","STRONGER EFFECT · MORE LOAD"],
+      ["Repetition and recovery","Repeating the same drill becomes less effective over time. Recovery helps manage accumulated fatigue and injury risk.","REPETITION FADES · RECOVERY BALANCES"],
+      ["Areas of impact","Drills focus on attack, defence, set pieces, penalties, chemistry or opposition analysis. Their outcome is considered together with your squad, opponent and match conditions.","6 IMPACT AREAS"]
+    ];
+    root.showModal(`<div class="prep-help-modal"><header><span>${tr()?"OYUN REHBERİ":"GAME GUIDE"}</span><h3>${title}</h3></header><div>${items.map((item,index)=>`<article><i>0${index+1}</i><p><b>${item[0]}</b><em>${item[2]}</em><small>${item[1]}</small></p></article>`).join("")}</div><button class="btn btn-primary" type="button" onclick="closeModal()">${tr()?"ANLADIM":"GOT IT"}</button></div>`,{dismissOnOverlay:true,label:title});
+  }
   function open(round,opponent){
     ensureRound(round);
     state.opponent=opponent&&typeof opponent==="object"?{name:opponent.name||"",style:opponent.style||""}:null;
@@ -115,8 +132,8 @@
       const badge=recommended?`<mark>${tr()?"BU MAÇ ÖNERİLİR":"RECOMMENDED"}</mark>`:score===0?`<mark class="is-muted">${tr()?"DÜŞÜK ÖNCELİK":"LOW PRIORITY"}</mark>`:"";
       return`<article class="prep-drill prep-kind-${drill.kind}${recommended?" is-recommended":""}" data-drill="${id}"><div class="prep-drill-icon">${drill.icon}</div><div><b>${tr()?drill.tr:drill.en}</b>${badge}<small>${streak?`${tr()?"Tekrar etkisi":"Repeat effect"} ×${repeatFactor(id).toFixed(2)}`:(tr()?"Tam etki":"Full effect")}</small></div><div class="prep-levels">${button(id,"light",tr()?"HAFİF · 1":"LIGHT · 1")}${button(id,"intense",tr()?"YOĞUN · 2":"INTENSE · 2")}</div></article>`;
     }).join("");
-    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><div class="prep-title-row"><div><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></div><button type="button" class="prep-help" aria-expanded="false" onclick="const note=this.closest('.prep-modal').querySelector('.prep-help-note');note.hidden=!note.hidden;this.setAttribute('aria-expanded',String(!note.hidden))">?</button></div><aside class="prep-help-note" hidden>${tr()?"Toplam 2 puanın var. İki farklı hafif çalışma veya tek bir yoğun çalışma seçebilirsin. Dolu bir plan varken başka seçeneğe dokunursan plan yeni seçime geçer.":"You have 2 points: choose two light drills or one intense drill. Selecting another drill when the plan is full replaces the plan."}</aside></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
+    root.showModal(`<div class="prep-modal"><header><span>${tr()?"MAÇ ÖNCESİ":"PRE-MATCH"}</span><div class="prep-title-row"><div><h3>${tr()?"Hazırlık tahtası":"Preparation board"}</h3><p>${opponent&&opponent.name?opponent.name:""}</p></div><button type="button" class="prep-help" onclick="CopaPreparation.openHelp()" aria-label="${tr()?"Antrenman mekaniğini açıkla":"Explain training mechanics"}">?</button></div></header><div class="prep-status" data-prep-status></div><div class="prep-grid">${cards}</div><div class="bact"><button class="btn btn-primary" onclick="closeModal();renderHub()">${tr()?"PLANI UYGULA":"APPLY PLAN"}</button></div></div>`,{dismissOnOverlay:true,label:tr()?"Maç öncesi hazırlık":"Pre-match preparation",sheetClass:"sheet-preparation"});
     render();
   }
-  root.CopaPreparation={DRILLS,open,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,relevance,snapshot,restore,reset,spent};
+  root.CopaPreparation={DRILLS,open,openHelp,render,select,clear,effects,completeMatch,injuryMultiplier,penaltyBonus,relevance,snapshot,restore,reset,spent};
 })(window);

@@ -92,7 +92,7 @@ test("packaged Android UI keeps structural and contextual surfaces opaque",async
   fs.mkdirSync(visualDir,{recursive:true});
   await page.screenshot({path:path.join(visualDir,"android-native-context-metrics.png"),fullPage:true});
   await page.locator('#nativeHubNav [data-native-target="market"]').click();
-  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(2);
+  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   const marketSurfaces=await page.evaluate(()=>{
     const selectors=[
       "#marketDecisionHeader",

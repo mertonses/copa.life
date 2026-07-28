@@ -7,7 +7,8 @@ var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUs
 var DRAFT_REROLLS=1,MAX_REWARDED_DRAFT_REROLLS=2,draftRerollsLeft=DRAFT_REROLLS,draftRewardedRerollsEarned=0,draftRewardInFlight=false;
 var MAX_REWARDED_INJURY_HEALS=1,rewardedInjuryHealsEarned=0,injuryRewardInFlight=false;
 var MAX_REWARDED_MARKET_REROLLS=1,rewardedMarketRerollsEarned=0,shopRewardInFlight=false;
-var cardsBoughtThisTurn=0,freeAgentBoughtThisTurn=0,shopRerolledThisTurn=0;
+var MAX_REWARDED_FREE_AGENT_REROLLS=1,rewardedFreeAgentRerollsEarned=0,freeAgentRewardInFlight=false;
+var cardsBoughtThisTurn=0,freeAgentBoughtThisTurn=0,shopRerolledThisTurn=0,freeAgentRerolledThisTurn=0;
 var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPenalty=0,installmentTurns=0,installmentAmt=0,quietCamp=0,lastCreditActive=0,econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:"",transactions:[]};
 var loanPlayer=null;
 var legacyFund=0,legacyCash=0;

@@ -33,7 +33,7 @@ function newShopOffers(){
    const weight=cardMarketWeight(k,round);
    for(let i=0;i<Math.max(1,Math.round(weight));i++)pool.push(k);
  });
- const limit=2;
+ const limit=3;
  while(shopOffers.length<limit&&pool.length){
    const idx=rand()*pool.length|0;
    const k=pool.splice(idx,1)[0];
@@ -52,8 +52,8 @@ function newShopOffers(){
    }
  }
  if(globalThis.CopaMarketIdentity)globalThis.CopaMarketIdentity.applyCardOffers(round,shopOffers,shopVariants);
- /* A market visit must always contain at least one legal decision. When both
-    regular offers are blocked by the chairman/debt guard, replace the second
+ /* A market visit must always contain at least one legal decision. When every
+    regular offer is blocked by the chairman/debt guard, replace the final
     slot with a zero-upfront-cost economy offer instead of inflating the budget. */
  const offerAffordable=k=>{
    const old=cardVariant[k]||0;cardVariant[k]=shopVariants[k]||0;

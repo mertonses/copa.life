@@ -28,6 +28,7 @@
     state.sansSpotlightIdx=Number.isInteger(Number(state.sansSpotlightIdx))?Number(state.sansSpotlightIdx):-1;
     state.rewardedInjuryHealsEarned=finite(state.rewardedInjuryHealsEarned)?Math.max(0,Math.min(1,Number(state.rewardedInjuryHealsEarned))):0;
     state.rewardedMarketRerollsEarned=finite(state.rewardedMarketRerollsEarned)?Math.max(0,Math.min(1,Number(state.rewardedMarketRerollsEarned))):0;
+    state.rewardedFreeAgentRerollsEarned=finite(state.rewardedFreeAgentRerollsEarned)?Math.max(0,Math.min(1,Number(state.rewardedFreeAgentRerollsEarned))):0;
     if(state.phase==="draft"){
       const draft=object(state.draft)?Object.assign({},state.draft):{};
       draft.remaining=finite(draft.remaining)?Number(draft.remaining):(Array.isArray(state.picks)?state.picks.filter(player=>!player).length:11);

@@ -30,15 +30,15 @@
   }
   function ensureFinalSim(){
     return ensureMatchCore()
-      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260727-balance-v5",()=>typeof global.buildSim==="function")).then(()=>{
+      .then(()=>loadScriptOnce("final-sim","src/sim/finalSim.js?v=20260728-ui-fixes1",()=>typeof global.buildSim==="function")).then(()=>{
       if(typeof global._copaSimPauseUi==="function")global.simPause=global._copaSimPauseUi;
     });
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260726-mobile-repair1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260728-ui-fixes1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
-    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260728-club-files1",()=>!!global.CopaMeta).then(()=>{
+    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260728-ui-fixes1",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
       if(typeof global.buildFormButtons==="function")global.buildFormButtons();
       if(typeof global.buildChairButtons==="function")global.buildChairButtons();

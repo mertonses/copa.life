@@ -1,10 +1,11 @@
 import {DurableObject} from "cloudflare:workers";
 import {
   ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
-  createDraftOffers,createLegacyDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,publicState,
+  allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,minimumFutureDraftCost,publicState,
   resolveParticipation,
   resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
 } from "./rules.js";
+import {ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_SOURCES} from "./playerCatalog.js";
 
 const MAX_BODY_BYTES=16*1024;
 const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","capacitor://localhost"];
@@ -108,6 +109,12 @@ async function consumeTicket(env,ticket){
   const update=await env.DB.prepare("UPDATE arena_tickets SET consumed_at=? WHERE ticket_hash=? AND consumed_at IS NULL").bind(when,hash).run();
   return Number(update.meta&&update.meta.changes)===1?row:null;
 }
+async function recentOpponents(env,owner,limit=3){
+  const rows=await env.DB.prepare(
+    "SELECT home_owner,away_owner FROM arena_matches WHERE home_owner=? OR away_owner=? ORDER BY finished_at DESC LIMIT ?"
+  ).bind(owner,owner,limit).all();
+  return (rows.results||[]).map(row=>row.home_owner===owner?row.away_owner:row.home_owner).filter(Boolean);
+}
 async function rateLimit(env,request,name,limit=20){
   const binding=env.ARENA_LIMITER;if(!binding)return true;
   const id=await identity(request);const key=id?`${name}:${id.owner}`:`${name}:anonymous`;
@@ -137,7 +144,7 @@ export class ArenaMatchmaker extends DurableObject{
   constructor(ctx,env){
     super(ctx,env);
     this.ctx.blockConcurrencyWhile(async()=>{
-      this.ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS queue(owner TEXT PRIMARY KEY, socket_id TEXT NOT NULL, club_name TEXT NOT NULL, rating INTEGER NOT NULL, joined_at INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'queued')");
+      this.ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS queue(owner TEXT PRIMARY KEY, socket_id TEXT NOT NULL, club_name TEXT NOT NULL, rating INTEGER NOT NULL, joined_at INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'queued');CREATE TABLE IF NOT EXISTS queue_recent(owner TEXT PRIMARY KEY,recent_json TEXT NOT NULL)");
     });
   }
   async fetch(request){
@@ -145,12 +152,15 @@ export class ArenaMatchmaker extends DurableObject{
     const owner=request.headers.get("x-arena-owner")||"";
     let club="";try{club=clean(decodeURIComponent(request.headers.get("x-arena-club")||""),29);}catch(_){}
     const rating=Math.round(clamp(request.headers.get("x-arena-rating"),700,1900));
+    let recent=[];try{recent=JSON.parse(decodeURIComponent(request.headers.get("x-arena-recent")||"[]"));}catch(_){}
+    recent=Array.isArray(recent)?recent.filter(item=>typeof item==="string").slice(0,3):[];
     if(!owner||!club)return new Response("Unauthorized",{status:401});
     const existing=this.ctx.getWebSockets(`owner:${owner}`);for(const socket of existing)try{socket.close(4001,"replaced");}catch(_){}
     const [client,server]=Object.values(new WebSocketPair()),socketId=randomId("S-",8),joinedAt=Date.now();
     server.serializeAttachment({owner,socketId,clubName:club,rating,joinedAt});
     this.ctx.acceptWebSocket(server,[`owner:${owner}`]);
     this.ctx.storage.sql.exec("INSERT OR REPLACE INTO queue(owner,socket_id,club_name,rating,joined_at,status) VALUES(?,?,?,?,?,'queued')",owner,socketId,club,rating,joinedAt);
+    this.ctx.storage.sql.exec("INSERT OR REPLACE INTO queue_recent(owner,recent_json) VALUES(?,?)",owner,JSON.stringify(recent));
     server.send(JSON.stringify({type:"queued",joinedAt,rating}));
     await this.pair();
     await this.ctx.storage.setAlarm(Date.now()+10_000);
@@ -167,11 +177,16 @@ export class ArenaMatchmaker extends DurableObject{
     const rows=this.ctx.storage.sql.exec("SELECT * FROM queue WHERE status='queued' ORDER BY joined_at ASC").toArray();
     if(rows.length<2)return;
     const sockets=this.sockets(),used=new Set();
+    const recentByOwner=Object.fromEntries(this.ctx.storage.sql.exec("SELECT owner,recent_json FROM queue_recent").toArray().map(row=>{
+      let recent=[];try{recent=JSON.parse(row.recent_json);}catch(_){}
+      return [row.owner,Array.isArray(recent)?recent:[]];
+    }));
     for(const home of rows){
       if(used.has(home.owner)||!sockets.has(home.socket_id))continue;
       const waited=Math.max(0,Date.now()-Number(home.joined_at));
       const range=100+Math.floor(waited/15_000)*75;
-      const away=rows.filter(row=>row.owner!==home.owner&&!used.has(row.owner)&&sockets.has(row.socket_id)&&Math.abs(Number(row.rating)-Number(home.rating))<=range).sort((a,b)=>Math.abs(Number(a.rating)-Number(home.rating))-Math.abs(Number(b.rating)-Number(home.rating)))[0];
+      const candidates=rows.filter(row=>row.owner!==home.owner&&!used.has(row.owner)&&sockets.has(row.socket_id)&&Math.abs(Number(row.rating)-Number(home.rating))<=range);
+      const away=chooseMatchCandidate(home,candidates,recentByOwner);
       if(!away)continue;
       used.add(home.owner);used.add(away.owner);
       this.ctx.storage.sql.exec("UPDATE queue SET status='matching' WHERE owner IN (?,?)",home.owner,away.owner);
@@ -189,6 +204,7 @@ export class ArenaMatchmaker extends DurableObject{
         sockets.get(home.socket_id).send(JSON.stringify({type:"matched",matchId,roomToken:access[home.owner]}));
         sockets.get(away.socket_id).send(JSON.stringify({type:"matched",matchId,roomToken:access[away.owner]}));
         this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner IN (?,?)",home.owner,away.owner);
+        this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner IN (?,?)",home.owner,away.owner);
       }catch(error){
         this.ctx.storage.sql.exec("UPDATE queue SET status='queued' WHERE owner IN (?,?)",home.owner,away.owner);
         for(const row of [home,away])try{sockets.get(row.socket_id).send(JSON.stringify({type:"error",code:"match_creation_failed"}));}catch(_){}
@@ -201,6 +217,7 @@ export class ArenaMatchmaker extends DurableObject{
     const rows=this.ctx.storage.sql.exec("SELECT owner,socket_id FROM queue").toArray();
     for(const row of rows)if(!sockets.has(row.socket_id)){
       this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner=?",row.owner);
+      this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner=?",row.owner);
       await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(row.owner).run();
     }
     await this.pair();
@@ -213,6 +230,7 @@ export class ArenaMatchmaker extends DurableObject{
     if(data.type==="ping")socket.send(JSON.stringify({type:"pong",at:Date.now()}));
     if(data.type==="cancel"){
       this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner=? AND socket_id=?",attachment.owner,attachment.socketId);
+      this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner=?",attachment.owner);
       await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(attachment.owner).run();
       socket.send(JSON.stringify({type:"cancelled"}));socket.close(1000,"cancelled");
     }
@@ -221,6 +239,7 @@ export class ArenaMatchmaker extends DurableObject{
     const attachment=socket.deserializeAttachment();
     if(attachment){
       this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner=? AND socket_id=?",attachment.owner,attachment.socketId);
+      this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner=?",attachment.owner);
       await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND status='queue'").bind(attachment.owner).run();
     }
   }
@@ -245,10 +264,12 @@ export class ArenaRoom extends DurableObject{
       return this.state.access;
     }
     const access=Object.fromEntries(players.map(player=>[player.owner,randomId("RT-",24)]));
+    const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
       matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
       players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],result:null,completed:false,resultRecorded:false,
-      participationPolicy:"minimum-manual-v1",createdAt:Date.now()
+      catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
+      participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
     this.persist();await this.ctx.storage.setAlarm(this.state.deadline);
     return access;
@@ -277,7 +298,7 @@ export class ArenaRoom extends DurableObject{
     }
   }
   isCurrentRules(){
-    return this.state.rulesVersion==="arena-rules-v4"||this.state.rulesVersion===ARENA_RULES_VERSION;
+    return ["arena-rules-v4","arena-rules-v5","arena-rules-v6",ARENA_RULES_VERSION].includes(this.state.rulesVersion);
   }
   usesFullXI(){
     return usesFullXI(this.state.rulesVersion);
@@ -286,17 +307,46 @@ export class ArenaRoom extends DurableObject{
     return this.usesFullXI()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
   }
   draftOffers(line,step,side,slot){
+    if(this.state.rulesVersion==="arena-rules-v7"&&this.state.draftPlan){
+      return this.state.draftPlan[step][side].map(offer=>({...offer}));
+    }
     return this.isCurrentRules()
-      ?createDraftOffers(this.state.seed,line,step,side,slot)
+      ?createDraftOffers(this.state.seed,line,step,side,slot,this.state.rulesVersion)
       :createLegacyDraftOffers(this.state.seed,line,step,side,slot);
+  }
+  draftChoiceBudget(player,side){
+    if(this.state.rulesVersion!==ARENA_RULES_VERSION)return this.remainingBudget(player);
+    return this.remainingBudget(player)-minimumFutureDraftCost(
+      this.state.seed,side,this.state.draftStep,this.state.rulesVersion,this.state.draftPlan
+    );
+  }
+  draftRoundOffers(step){
+    const slot=this.draftSlots()[step];
+    return this.state.players.map((player,side)=>{
+      const choiceBudget=this.remainingBudget(player)-minimumFutureDraftCost(
+        this.state.seed,side,step,this.state.rulesVersion,this.state.draftPlan
+      );
+      return this.draftOffers(slot.line,step,side,slot.slot).map(offer=>({
+        ...offer,affordable:offer.cost<=choiceBudget
+      }));
+    });
+  }
+  marketRoundOffers(){
+    return this.state.players.map((player,side)=>createMarketOffers(this.state.seed,side).map(offer=>({
+      ...offer,affordable:offer.cost<=this.remainingBudget(player)
+    })));
   }
   defaultAction(index){
     const player=this.state.players[index];
     if(this.state.phase==="lobby")player.ready=true;
     else if(this.state.phase==="setup")player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
     else if(this.state.phase==="draft"){
-      const offers=this.state.offers[index],affordable=offers.filter(item=>item.cost<=this.remainingBudget(player));
-      player.draft.push(affordable.sort((a,b)=>b.power-a.power)[0]||offers.sort((a,b)=>a.cost-b.cost)[0]);
+      const offers=this.state.offers[index],affordable=offers.filter(item=>item.cost<=this.draftChoiceBudget(player,index));
+      const choice=affordable.sort((a,b)=>
+        (b.power+b.chemistry*1.5-b.cost)-(a.power+a.chemistry*1.5-a.cost)
+      )[0];
+      if(!choice)throw new Error("arena_draft_budget_invariant");
+      player.draft.push(choice);
     }else if(this.state.phase==="market")player.market={id:"none"};
     else if(this.state.phase==="training")player.training="recovery";
     else if(this.state.phase==="live"&&(this.state.liveStage||"decision")==="decision")player.tactics.push("balanced");
@@ -324,17 +374,15 @@ export class ArenaRoom extends DurableObject{
     if(this.state.phase==="lobby")this.state.phase="setup";
     else if(this.state.phase==="setup"){
       this.state.phase="draft";this.state.draftStep=0;
-      const first=this.draftSlots()[0];
-      this.state.offers=this.state.players.map((_,index)=>this.draftOffers(first.line,0,index,first.slot));
+      this.state.offers=this.draftRoundOffers(0);
     }else if(this.state.phase==="draft"){
       const slots=this.draftSlots();
       if(this.state.draftStep<slots.length-1){
         this.state.draftStep++;
-        const next=slots[this.state.draftStep];
-        this.state.offers=this.state.players.map((_,index)=>this.draftOffers(next.line,this.state.draftStep,index,next.slot));
+        this.state.offers=this.draftRoundOffers(this.state.draftStep);
       }else{
         this.state.phase="market";
-        this.state.offers=this.state.players.map((_,index)=>createMarketOffers(this.state.seed,index));
+        this.state.offers=this.marketRoundOffers();
       }
     }else if(this.state.phase==="market"){this.state.phase="training";this.state.offers=null;}
     else if(this.state.phase==="training"){
@@ -351,14 +399,14 @@ export class ArenaRoom extends DurableObject{
   }
   async finish(home,away){
     let penalty=null;
-    if(this.state.score[0]===this.state.score[1]){
+    if(this.state.score[0]===this.state.score[1]&&!allowsRegulationDraw(this.state.rulesVersion)){
       penalty=resolvePenalty(this.state.seed,home.power,away.power);
     }
     const homeWon=penalty?penalty[0]>penalty[1]:this.state.score[0]>this.state.score[1];
     const draw=!penalty&&this.state.score[0]===this.state.score[1];
     const simulatedOutcomes=draw?["draw","draw"]:(homeWon?["win","loss"]:["loss","win"]);
     const participation=this.state.participationPolicy
-      ?resolveParticipation(this.state.players,simulatedOutcomes)
+      ?resolveParticipation(this.state.players,simulatedOutcomes,this.state.participationPolicy)
       :{eligible:[true,true],outcomes:simulatedOutcomes,forfeitIndex:null,voided:false};
     const outcomes=participation.outcomes;
     if(participation.voided){this.state.score=[0,0];penalty=null;}
@@ -370,6 +418,7 @@ export class ArenaRoom extends DurableObject{
     this.state.result={
       score:this.state.score,penalty,outcomes,teams:[home,away],
       participation:participation.eligible,forfeitIndex:participation.forfeitIndex,voided:participation.voided,
+      rulesVersion:this.state.rulesVersion,catalogVersion:this.state.catalogVersion||null,playerSources:this.state.playerSources||null,
       finishedAt:Date.now()
     };
     this.state.deadline=Date.now()+PHASE_SECONDS.result*1000;this.persist();
@@ -387,8 +436,8 @@ export class ArenaRoom extends DurableObject{
     const currentProfiles=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
     const rulesVersion=match.rulesVersion||(match.participationPolicy?ARENA_RULES_VERSION:"arena-rules-v1");
     const statements=[
-      this.env.DB.prepare("INSERT OR IGNORE INTO arena_matches(match_id,rules_version,season_key,home_owner,away_owner,home_score,away_score,result_json,created_at,finished_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
-        .bind(match.matchId,rulesVersion,season,match.players[0].owner,match.players[1].owner,match.score[0],match.score[1],JSON.stringify(match.result),new Date(match.createdAt).toISOString(),created)
+      this.env.DB.prepare("INSERT OR IGNORE INTO arena_matches(match_id,rules_version,catalog_version,source_provenance_json,season_key,home_owner,away_owner,home_score,away_score,result_json,created_at,finished_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(match.matchId,rulesVersion,match.catalogVersion||null,JSON.stringify(match.playerSources||null),season,match.players[0].owner,match.players[1].owner,match.score[0],match.score[1],JSON.stringify(match.result),new Date(match.createdAt).toISOString(),created)
     ];
     for(let index=0;index<2&&!match.result.voided;index++){
       const player=match.players[index],rating=Number(currentProfiles[index].rating),opponentRating=Number(currentProfiles[index===0?1:0].rating),reward=rewardFor(outcomes[index],rating,opponentRating);
@@ -442,7 +491,8 @@ export class ArenaRoom extends DurableObject{
     else if(data.type==="draft"&&this.state.phase==="draft"){
       if(player.draft.length>this.state.draftStep)return "already_submitted";
       const offer=this.state.offers[index].find(item=>item.id===data.choice);
-      if(!offer||offer.cost>this.remainingBudget(player))return "unavailable_choice";
+      if(!offer||offer.cost>this.draftChoiceBudget(player,index))return "unavailable_choice";
+      if(offer.sourceId&&this.state.players.some(candidate=>candidate.draft.some(pick=>pick.sourceId===offer.sourceId)))return "unavailable_choice";
       player.draft.push(offer);
     }else if(data.type==="market"&&this.state.phase==="market"){
       if(player.market)return "already_submitted";
@@ -459,6 +509,7 @@ export class ArenaRoom extends DurableObject{
     }
     else return "wrong_phase";
     if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
+    if(data.type==="tactic")player.manualTactics=(Number(player.manualTactics)||0)+1;
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
   }
   async recoverExpired(){
@@ -596,7 +647,10 @@ async function handleQueueSocket(request,env,url){
   const ticket=await consumeTicket(env,raw);if(!ticket)return new Response("Ticket expired",{status:401});
   const queueName=`${ticket.mode}:${ticket.region}`;
   const stub=env.ARENA_MATCHMAKER.getByName(queueName);
-  const headers=new Headers(request.headers);headers.set("x-arena-owner",ticket.owner_hash);headers.set("x-arena-club",encodeURIComponent(ticket.club_name));headers.set("x-arena-rating",String(ticket.rating));
+  let recent=[];try{recent=await recentOpponents(env,ticket.owner_hash);}catch(error){
+    console.error(JSON.stringify({message:"arena_recent_opponents_failed",owner:ticket.owner_hash,error:String(error)}));
+  }
+  const headers=new Headers(request.headers);headers.set("x-arena-owner",ticket.owner_hash);headers.set("x-arena-club",encodeURIComponent(ticket.club_name));headers.set("x-arena-rating",String(ticket.rating));headers.set("x-arena-recent",encodeURIComponent(JSON.stringify(recent)));
   const forwarded=new Request(request,{headers});
   try{
     const response=await stub.fetch(forwarded);

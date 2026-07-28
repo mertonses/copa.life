@@ -1,0 +1,217 @@
+/*
+ * Shared Android/iOS visual QA layer.
+ * Rules stay native-scoped so the source web presentation is unaffected.
+ */
+html:is(
+  [data-copa-platform="android"],
+  [data-copa-platform="ios"]
+){
+  --native-readable-muted:#AEB8BA;
+}
+
+@media(max-width:760px){
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game body.mobile-game-setup-open:not(.mobile-game-setup-final) #mobileActionDock,
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game body.mobile-game-setup-open:not(.mobile-game-setup-final) #introSetup .v7-cta-stack{
+    display:none!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #introSetup .v7-sec-lbl{
+    color:var(--native-readable-muted)!important;
+    font-size:10.5px!important;
+    line-height:1.25;
+    opacity:1!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #formpick .mobile-formation-card.locked{
+    opacity:.68!important;
+    filter:saturate(.55)!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked{
+    opacity:.66!important;
+    filter:grayscale(.52)!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked :is(
+    .chairbtn-name,
+    .chair-detail-link,
+    .chair-mobile-meta b,
+    .chair-mobile-meta em
+  ){
+    color:var(--native-readable-muted)!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.sel .chairbtn-name{
+    color:#F3F5F4!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game body.run-active #toastContainer{
+    top:auto!important;
+    right:12px!important;
+    left:auto!important;
+    bottom:calc(var(--mobile-dock-height,0px) + max(20px,env(safe-area-inset-bottom)))!important;
+    width:min(280px,calc(100vw - 24px))!important;
+    align-items:stretch!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game body.run-active #toastContainer .toast:not(:last-child){
+    display:none!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #mobileActionDock[data-dock-kind="hub"] #presBtn span{
+    display:-webkit-box!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    font-size:7px!important;
+    line-height:1.08!important;
+    letter-spacing:0!important;
+    text-align:center;
+    text-overflow:ellipsis!important;
+    white-space:normal!important;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #mobileActionDock[data-dock-kind="hub"] button:disabled{
+    color:var(--native-readable-muted)!important;
+    opacity:.72!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game body.run-active .copa-coachmark{
+    top:max(84px,calc(env(safe-area-inset-top) + 76px))!important;
+    right:12px!important;
+    bottom:auto!important;
+    left:auto!important;
+    max-width:min(290px,calc(100vw - 24px))!important;
+    max-height:calc(100dvh - 180px);
+    overflow:auto;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #nativeHubNav .native-hub-tab-label{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) .match-mode-options button:hover{
+    transform:none!important;
+  }
+}
+
+@media(min-width:761px) and (max-width:1024px){
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) #hub .hub-action-panel .actionbar{
+    display:block!important;
+    width:100%!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) #hub .hub-action-panel .actionbtns{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    width:100%!important;
+    max-width:none!important;
+    gap:8px!important;
+    overflow:visible!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) #hub .hub-action-panel .presbtngp{
+    width:100%!important;
+    min-width:0!important;
+    padding:0!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) #hub .hub-action-panel :is(#talkBtn,#presBtn,#playBtn){
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:8px!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) #hub .hub-action-panel :is(#talkBtn,#presBtn,#playBtn) span{
+    max-width:100%!important;
+    overflow:hidden!important;
+    font-size:8px!important;
+    line-height:1.15!important;
+    letter-spacing:0!important;
+    text-align:center;
+    text-overflow:ellipsis!important;
+    white-space:normal!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) body.run-active #toastContainer{
+    top:auto!important;
+    right:16px!important;
+    left:auto!important;
+    bottom:20px!important;
+    width:min(300px,calc(100vw - 32px))!important;
+    align-items:stretch!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ) body.run-active #toastContainer .toast:not(:last-child){
+    display:none!important;
+  }
+}

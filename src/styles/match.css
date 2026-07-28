@@ -1733,6 +1733,22 @@ html[data-theme="dark"] .result .narrative-number.neutral{color:var(--status-inf
   min-height:42px;
   justify-content:center;
 }
+.result .result-row>.result-seed-action{
+  box-sizing:border-box;
+  display:flex;
+  min-width:0;
+  min-height:42px;
+  flex-direction:column;
+  justify-content:center;
+  gap:3px;
+  margin:0;
+  padding:7px 10px;
+  border:1px solid var(--border-default);
+  border-radius:6px;
+  background:rgba(255,255,255,.58);
+}
+.result .result-row>.result-seed-action span{color:var(--color-slate);font:800 7px/1 var(--mono);letter-spacing:.08em}
+.result .result-row>.result-seed-action b{color:var(--color-primary);font:900 9px/1 var(--mono);letter-spacing:.08em}
 #againBtn{
   background:var(--color-primary);
   color:var(--color-ink);
@@ -1798,7 +1814,7 @@ html[data-theme="dark"] #againBtn .again-copa{color:#101D28}
   }
   .result .result-actions{margin-top:10px}
   .result .result-row{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     gap:8px!important;
   }
   .result .result-row .btn{
@@ -3563,3 +3579,5 @@ html[data-theme="dark"] #sim .shoutbtn.lit{
   #result .lmr-team-head{background:var(--surface-bg)!important;color:var(--text-primary)!important}
   #result .lmr-team-head>strong{color:var(--text-primary)!important}
 }
+
+.lmr-event.lmr-yellow{background:#F0C44D!important}

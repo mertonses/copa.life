@@ -173,5 +173,5 @@ body.reduced-motion .td-group{transition:none!important}
 .tg-table tbody tr.is-qualified-first .tg-rank{background:var(--status-success);color:var(--color-ink);font-weight:900}
 .tg-table tbody tr.is-qualified-second .tg-rank{background:var(--risk-fortune);color:var(--color-ink);font-weight:900}
 .tg-qualification-note{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
-.tg-roundof16-badge{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:6px;background:#FFFFFF;color:#0A1118;font:900 8px/1 var(--mono);letter-spacing:.07em;box-shadow:0 3px 10px color-mix(in srgb,var(--color-ink) 12%,transparent)}
+.tg-roundof16-badge{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border:1px solid #DDE3E2;border-radius:6px;background:#F3F5F4;color:#0A1118;font:900 8px/1 var(--mono);letter-spacing:.07em;box-shadow:0 3px 10px color-mix(in srgb,var(--color-ink) 12%,transparent)}
 .tg-qualification-note small{flex-basis:100%;color:var(--color-slate);font:800 7px/1 var(--mono)}

@@ -367,7 +367,12 @@
       blok:[tr?"Alçak Blok":"Low Block"]
     };
     if(group==="styles"&&styles[key])return styles[key][0];
+    if(group==="chairmen"&&global.L&&global.L().chair&&global.L().chair[key])return global.L().chair[key].n;
     return String(key||"").replace(/_/g," ").replace(/\b\w/g,char=>char.toUpperCase());
+  }
+  function masteryIcon(group,key){
+    if(group==="styles"&&global.L&&global.L().styles&&global.L().styles[key]&&global.L().styles[key].i)return global.L().styles[key].i;
+    return `<span aria-hidden="true">${group==="formations"?"⌗":group==="chairmen"?"♙":"◇"}</span>`;
   }
   function masteryGroupHTML(group,tr){
     const entries=Object.entries(state.mastery[group]).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
@@ -376,7 +381,7 @@
       const progress=masteryProgress(count),current=tierLabel(count,tr);
       const next=progress.next==null?(tr?"En yüksek kademe":"Highest tier"):tierLabel(progress.target,tr);
       return `<article class="meta-mastery-row tier-${progress.tier}">
-        <div class="meta-mastery-copy"><b>${escapeHTML(masteryName(group,key,tr))}</b><small>${progress.next==null?next:`${tr?"Sonraki":"Next"}: ${next}`}</small></div>
+        <div class="meta-mastery-icon">${masteryIcon(group,key)}</div><div class="meta-mastery-copy"><b>${escapeHTML(masteryName(group,key,tr))}</b><small>${progress.next==null?next:`${tr?"Sonraki":"Next"}: ${next}`}</small></div>
         <div class="meta-mastery-state"><span class="meta-tier-badge">${current}</span><small>${progress.next==null?`${count}`:`${count}/${progress.target}`}</small></div>
         <span class="meta-mastery-track" aria-label="${count}/${progress.target}"><i style="width:${progress.percent}%"></i></span>
       </article>`;
@@ -414,32 +419,35 @@
       ["tactics","kit","kit_three_plans",tr?"TAKTİK ÇEŞİTLİLİK":"TACTICAL VARIETY",tr?"Kulüp dosyasını tamamla":"Complete the club file",Math.min(1,state.clubFiles.completed.tactics||0),1,tr?"Forma":"Kit"],
       ["club_files_set","token","run_start_token",tr?"KULÜP ARŞİVİ":"CLUB ARCHIVE",tr?"Üç kulüp dosyasını tamamla":"Complete all three club files",state.clubFiles.claimed.filter(id=>CLUB_FILE_IDS.has(id)).length,3,tr?"Tek kontrollü jeton":"One bounded token"]
     ];
-    const collections=`<section class="meta-collections"><div class="meta-section-heading"><h4>${tr?"MÜZE KOLEKSİYONLARI":"MUSEUM COLLECTIONS"}</h4><small>${claimed.size}/${collectionData.length} · ${tr?"Kalıcı güç vermez":"No permanent power"}</small></div><div class="meta-collection-grid">${collectionData.map(([id,kind,rewardId,title,goal,value,max,reward])=>{const complete=claimed.has(id),selected=(kind==="kit"&&state.museum.collections.selectedKit===rewardId)||(kind==="crest"&&state.museum.collections.selectedCrest===rewardId);return `<article class="${complete?"is-complete":""} ${selected?"is-equipped":""}"><div><small>${goal}</small><b>${title}</b></div><span>${complete?"✓":`${value}/${max}`}</span><p>${reward}</p>${complete&&(kind==="kit"||kind==="crest")?`<button type="button" onclick="CopaMeta.selectCosmetic('${kind}','${rewardId}')">${selected?(tr?"AKTİF":"EQUIPPED"):(tr?"KUŞAN":"EQUIP")}</button>`:""}</article>`;}).join("")}</div>${state.museum.collections.tokens?`<div class="meta-token-bank"><b>${tr?"HAZIR JETON":"TOKEN READY"} · ${state.museum.collections.tokens}</b><span>${tr?"Yeni turun ilk oyuncu krizinde risksiz uzlaşma açar.":"Unlocks a safe compromise in the first player crisis of a new run."}</span></div>`:""}</section>`;
-    if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div><section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir turu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
+    const collectionIcons={story:"✦",kit:"▤",crest:"◆",token:"◈"};
+    const collections=`<section class="meta-collections"><div class="meta-section-heading"><h4>${tr?"MÜZE KOLEKSİYONLARI":"MUSEUM COLLECTIONS"}</h4><small>${claimed.size}/${collectionData.length} · ${tr?"Kalıcı güç vermez":"No permanent power"}</small></div><div class="meta-collection-grid">${collectionData.map(([id,kind,rewardId,title,goal,value,max,reward])=>{const complete=claimed.has(id),selected=(kind==="kit"&&state.museum.collections.selectedKit===rewardId)||(kind==="crest"&&state.museum.collections.selectedCrest===rewardId),progress=Math.round(Math.min(1,value/max)*100);return `<article class="kind-${kind} ${complete?"is-complete":""} ${selected?"is-equipped":""}" style="--collection-progress:${progress}%"><span class="meta-collection-icon" aria-hidden="true">${collectionIcons[kind]}</span><div><small>${goal}</small><b>${title}</b><p>${reward}</p></div><strong>${complete?"✓":`${value}/${max}`}</strong>${complete&&(kind==="kit"||kind==="crest")?`<button type="button" onclick="CopaMeta.selectCosmetic('${kind}','${rewardId}')">${selected?(tr?"AKTİF":"EQUIPPED"):(tr?"KUŞAN":"EQUIP")}</button>`:""}</article>`;}).join("")}</div>${state.museum.collections.tokens?`<div class="meta-token-bank"><b>${tr?"HAZIR JETON":"TOKEN READY"} · ${state.museum.collections.tokens}</b><span>${tr?"Yeni turun ilk oyuncu krizinde risksiz uzlaşma açar.":"Unlocks a safe compromise in the first player crisis of a new run."}</span></div>`:""}</section>`;
+    if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div>${collections}<section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir turu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
     const hallHTML=hall.length?hall.map(({memory,player})=>`<div class="meta-hall-player"><span>${escapeHTML(player.pos)}</span><b>${escapeHTML(player.name)}</b><small>${player.power} · ${escapeHTML(memory.team)}</small></div>`).join(""):`<div class="meta-inline-empty">${tr?"Hatıralarındaki oyuncuları yıldızlayarak kendi 11'ini kur.":"Star players from your memories to build your own XI."}</div>`;
-    const memories=[...state.museum.memories].reverse().map(memory=>{
+    const memoryCard=memory=>{
       const featured=memory.players[memory.featuredIndex]||memory.players[0],pinned=state.museum.hall.some(item=>item.runId===memory.id&&item.playerId===featured.id);
       const result=resultMeta(memory,tr),date=new Date(memory.finishedAt).toLocaleDateString(tr?"tr-TR":"en-GB",{day:"2-digit",month:"short",year:"numeric"});
       return `<article class="meta-memory-card ${result.className}">
-        <span class="meta-memory-dot" aria-hidden="true"></span>
         <div class="meta-memory-run"><small>${date} · ${result.label}</small><b>${escapeHTML(memory.team)}</b><span>${stageProgress(memory,tr)} · ${escapeHTML(memory.formation)}</span></div>
         <button type="button" class="${pinned?"is-pinned":""}" onclick="CopaMeta.toggleHallFromUi('${memory.id}','${featured.id}')" aria-label="${tr?"Şöhretler Karması seçimi":"Hall XI selection"}">
           <span aria-hidden="true">${pinned?"★":"☆"}</span><b>${escapeHTML(featured.name)}</b><small>${escapeHTML(featured.pos)} · ${featured.power}</small>
         </button>
       </article>`;
-    }).join("");
+    };
+    const orderedMemories=[...state.museum.memories].reverse(),recentMemories=orderedMemories.slice(0,6).map(memoryCard).join(""),olderMemories=orderedMemories.slice(6).map(memoryCard).join("");
     return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>${collections}
       <section class="meta-hall-section"><div class="meta-section-heading"><h4>${tr?"SEÇİLİ KADRO":"SELECTED XI"}</h4><small>${tr?"En fazla 11 oyuncu":"Up to 11 players"}</small></div><div class="meta-hall-grid">${hallHTML}</div></section>
-      <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"En yeniden eskiye":"Newest first"}</small></div><div class="meta-memory-list">${memories}</div></section>`;
+      <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"Son 6 sezon":"Latest 6 runs"}</small></div><div class="meta-memory-list">${recentMemories}</div>${olderMemories?`<details class="meta-memory-archive"><summary>${tr?"DAHA ESKİ HATIRALAR":"OLDER MEMORIES"} · ${orderedMemories.length-6}<span aria-hidden="true">⌄</span></summary><div class="meta-memory-list">${olderMemories}</div></details>`:""}</section>`;
   }
   function careerHTML(tr){
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level),threshold=levelThreshold(level),nextThreshold=levelThreshold(level+1);
     const earned=Math.max(0,state.career.reputation-threshold),required=Math.max(1,nextThreshold-threshold);
     const progress=Math.max(0,Math.min(100,Math.round(earned/required*100)));
+    const progressTone=progress>=75?"is-high":progress>=35?"is-mid":"is-low";
+    const levelTone=level>=8?"is-elite":level>=4?"is-established":"is-building";
     const activeFile=global.CopaClubFiles&&typeof global.CopaClubFiles.panelMarkup==="function"?global.CopaClubFiles.panelMarkup():"";
-    return `${activeFile}<section class="meta-career-hero">
-      <div class="meta-level-lockup"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div>
-      <div class="meta-career-progress">
+    return `${activeFile}<section class="meta-career-hero ${progressTone} ${levelTone}">
+      <div class="meta-level-lockup ${levelTone}"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div>
+      <div class="meta-career-progress ${progressTone}">
         <div><b>${state.career.reputation.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"İtibar":"Reputation"}</b><small>${earned}/${required}</small></div>
         <span><i style="width:${progress}%"></i></span>
         <small>${tr?"Seviye":"Level"} ${level+1}: ${nextThreshold.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"itibar":"reputation"}</small>

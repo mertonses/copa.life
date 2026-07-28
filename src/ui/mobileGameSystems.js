@@ -150,13 +150,8 @@
     });
     document.querySelectorAll("#chairpick .chairbtn").forEach(button=>{
       button.classList.add("mobile-chair-card");
-      if(button.querySelector(".chair-mobile-meta"))return;
-      const id=button.dataset.chairId||"";
-      const fx=root.COPA_CHAIR_FX&&root.COPA_CHAIR_FX[id];
-      const lines=fx&&fx.pros&&fx.cons?[...(fx.pros[tr()?"tr":"en"]||[]),...(fx.cons[tr()?"tr":"en"]||[])]:[];
-      const limit=(lines.join(" ").match(/€\d+M/)||[])[0]||"";
-      const effect=lines.find(line=>!limit||!line.includes(limit))||lines[0]|| (tr()?"Karar ve bütçe profilini incele":"Review decisions and budget");
-      button.insertAdjacentHTML("beforeend",`<span class="chair-mobile-meta">${limit?`<b>${limit}</b>`:""}<em>${escapeHtml(effect)}</em></span><span class="chair-detail-link">${tr()?"DETAY →":"DETAIL →"}</span>`);
+      button.querySelector(".chair-mobile-meta")?.remove();
+      if(!button.querySelector(".chair-detail-link"))button.insertAdjacentHTML("beforeend",`<span class="chair-detail-link">${tr()?"DETAY →":"DETAIL →"}</span>`);
     });
   }
   function setSetupStep(value){
@@ -291,17 +286,21 @@
     const hub=document.getElementById("hub");if(!hub)return;
     let panel=document.getElementById("mobileCareerRoute");
     if(!panel){panel=document.createElement("section");panel.id="mobileCareerRoute";panel.className="mobile-career-route";hub.appendChild(panel);}
+    if(activeCareerSection==="world"&&panel.dataset.section==="world"&&panel.querySelector("#metaWorldPanel"))return;
     const summary=root.CopaMeta&&typeof root.CopaMeta.careerSummary==="function"?root.CopaMeta.careerSummary():null;
     const labels={career:tr()?"KARİYER":"CAREER",mastery:tr()?"USTALIK":"MASTERY",museum:tr()?"MÜZE":"MUSEUM",world:tr()?"DÜNYA":"WORLD"};
     const basePanel=root.CopaMeta&&typeof root.CopaMeta.renderPanelHTML==="function"?root.CopaMeta.renderPanelHTML(activeCareerSection):`<div class="mobile-career-metrics"><article><small>${tr()?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><b>${summary&&summary.level||1}</b></article><article><small>${tr()?"İTİBAR":"REPUTATION"}</small><b>${summary&&summary.reputation||0}</b></article><article><small>${tr()?"LİSANS":"LICENCES"}</small><b>${summary&&summary.licenses||0}</b></article></div>`;
     const fullPanel=basePanel;
     panel.innerHTML=`<header><span>${tr()?"KULÜP KARİYERİ":"CLUB CAREER"}</span><h2>${tr()?"Mirasın, tek ekranda.":"Your legacy, in one place."}</h2></header><nav class="mobile-career-tabs" aria-label="${tr()?"Kariyer bölümleri":"Career sections"}">${Object.keys(labels).map(id=>`<button type="button" class="${id===activeCareerSection?"active":""}" onclick="CopaMobileShell.openCareerSection('${id}')">${labels[id]}</button>`).join("")}</nav><div class="mobile-career-panel">${fullPanel}</div>`;
+    panel.dataset.section=activeCareerSection;
     if(activeCareerSection==="world"&&root.GhostClubs&&typeof root.GhostClubs.renderLeaderboard==="function"){
       const world=panel.querySelector("#metaWorldPanel");if(world)root.GhostClubs.renderLeaderboard(world);
     }
   }
   function openCareerSection(section){activeCareerSection=["career","mastery","museum","world"].includes(section)?section:"career";renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
   function enhanceHub(){
+    const hub=document.getElementById("hub");
+    if(!hub||hub.classList.contains("hidden"))return;
     document.body.classList.remove("mobile-game-setup-open","mobile-game-setup-final");
     const panel=document.querySelector("#hub .hub-action-panel .actionbtns,#mobileActionDock .hub-action-panel .actionbtns");if(!panel)return;
     const oldPrep=document.getElementById("prepBtn");if(oldPrep)oldPrep.remove();
@@ -374,21 +373,16 @@
   function openFreeAgentProfile(trigger,index){
     const item=root._freeAgents&&root._freeAgents[index];if(item&&item.p&&root.PlayerProfiles)root.PlayerProfiles.open(item.p,trigger,"api");
   }
-  function confirmFreeAgent(index){
-    const item=root._freeAgents&&root._freeAgents[index],card=document.querySelector(`[data-free-agent="${index}"]`);if(!item||!card)return;
-    const name=item.p.name||"",fee=item.fee||0,lockReason=card.dataset.lockReason||"",blocked=!!lockReason;
-    root.showModal(`<div class="free-agent-confirm"><span>${tr()?"TRANSFER ONAYI":"TRANSFER CONFIRMATION"}</span><h3>${escapeHtml(name)}</h3><div><small>${tr()?"Bonservis":"Fee"}</small><b>${fee?`€${fee}M`:(tr()?"Ücretsiz":"Free")}</b></div><p>${blocked?escapeHtml(lockReason):(tr()?"Oyuncu yedek kulübesine katılır. Bu tur yalnızca bir serbest transfer yapabilirsin.":"The player joins the bench. You can complete one free transfer this round.")}</p><div class="bact"><button class="btn btn-primary free-agent-confirm-buy" ${blocked?"disabled":""}>${blocked?(tr()?"TRANSFER KİLİTLİ":"TRANSFER LOCKED"):(tr()?"TRANSFERİ ONAYLA":"CONFIRM TRANSFER")}</button><button class="btn btn-ghost" onclick="closeModal()">${tr()?"VAZGEÇ":"CANCEL"}</button></div></div>`,{dismissOnOverlay:true,label:name});
-    const buy=document.querySelector(".free-agent-confirm-buy");if(buy&&!blocked)buy.onclick=()=>{root.closeModal();root._signFreeAgent(index);};
-  }
   function openFreeAgent(trigger,index){
     const item=root._freeAgents&&root._freeAgents[index];if(!item)return;
     const p=item.p||{},card=trigger.closest(".free-agent-card"),pos=(typeof root.L==="function"&&root.L().abbr[p.pos])||p.pos||"—",power=typeof root.effOf==="function"?root.effOf(p):p.ov||0,lockReason=card.dataset.lockReason||"",blocked=!!lockReason;
     const current=typeof root._freeAgentComparisonFor==="function"?root._freeAgentComparisonFor(p):null,currentPower=current?(typeof root.effOf==="function"?root.effOf(current):current.ov||0):0,delta=power-currentPower;
     const currentPos=current&&((typeof root.L==="function"&&root.L().abbr[current.pos])||current.pos||"—");
-    const comparison=current?`<div class="free-agent-versus"><article class="is-current"><small>${tr()?"MEVCUT OYUNCU":"CURRENT PLAYER"}</small><b>${escapeHtml(current.name||"")}</b><span>${escapeHtml(currentPos)} · ${tr()?"Güç":"Power"} ${currentPower}</span></article><i aria-hidden="true">→</i><article class="is-candidate"><small>${tr()?"ADAY":"CANDIDATE"}</small><b>${escapeHtml(p.name||"")}</b><span>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} ${power}</span><em class="${delta>=0?"is-positive":"is-negative"}">${delta>=0?"+":""}${delta}</em></article></div>`:`<div class="free-agent-empty-compare">${tr()?"Karşılaştırılabilir kadro oyuncusu yok.":"No comparable squad player."}</div>`;
+    const currentTone=typeof root.ovTextCol==="function"?root.ovTextCol(currentPower):"var(--color-slate)",candidateTone=typeof root.ovTextCol==="function"?root.ovTextCol(power):"var(--fa-tone)";
+    const comparison=current?`<div class="free-agent-versus"><article class="is-current"><small>${tr()?"MEVCUT OYUNCU":"CURRENT PLAYER"}</small><b>${escapeHtml(current.name||"")}</b><span>${escapeHtml(currentPos)} · ${tr()?"Güç":"Power"} <strong style="--power-tone:${currentTone}">${currentPower}</strong></span></article><i aria-hidden="true">→</i><article class="is-candidate"><small>${tr()?"ADAY":"CANDIDATE"}</small><b>${escapeHtml(p.name||"")}</b><span>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <strong style="--power-tone:${candidateTone}">${power}</strong></span><em class="${delta>=0?"is-positive":"is-negative"}">${delta>=0?"+":""}${delta}</em></article></div>`:`<div class="free-agent-empty-compare">${tr()?"Karşılaştırılabilir kadro oyuncusu yok.":"No comparable squad player."}</div>`;
     const locked=blocked?`<div class="free-agent-detail-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${escapeHtml(lockReason)}</span></div>`:"";
-    root.showModal(`<div class="free-agent-detail" style="--fa-tone:${getComputedStyle(card).getPropertyValue("--fa-tone")}"><div class="mobile-sheet-grip"></div><header><span>${tr()?"SERBEST TRANSFER":"FREE AGENT"}</span><b>${item.fee?`€${item.fee}M`:(tr()?"ÜCRETSİZ":"FREE")}</b></header><div class="free-agent-detail-id"><i>${escapeHtml(typeof root._playerMonogram==="function"?root._playerMonogram(p.name):String(p.name||"FA").slice(0,2))}</i><div><h3>${escapeHtml(p.name||"")}</h3><p>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <b>${power}</b></p></div></div><div class="free-agent-compare-title">${tr()?"KADRO KARŞILAŞTIRMASI":"SQUAD COMPARISON"}</div>${comparison}${locked}<div class="bact"><button class="btn btn-primary free-agent-transfer-next" ${blocked?"disabled":""}>${blocked?(tr()?"TRANSFER KİLİTLİ":"TRANSFER LOCKED"):(tr()?"TRANSFER ONAYINA GEÇ":"CONTINUE TO TRANSFER")}</button><button class="btn btn-ghost" onclick="closeModal()">${tr()?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:true,label:p.name||""});
-    const next=document.querySelector(".free-agent-transfer-next");if(next&&!blocked)next.onclick=()=>{root.closeModal();confirmFreeAgent(index);};
+    root.showModal(`<div class="free-agent-detail" style="--fa-tone:${getComputedStyle(card).getPropertyValue("--fa-tone")}"><div class="mobile-sheet-grip"></div><header><span>${tr()?"SERBEST TRANSFER":"FREE AGENT"}</span><b>${item.fee?`€${item.fee}M`:(tr()?"ÜCRETSİZ":"FREE")}</b></header><div class="free-agent-detail-id"><i>${escapeHtml(typeof root._playerMonogram==="function"?root._playerMonogram(p.name):String(p.name||"FA").slice(0,2))}</i><div><h3>${escapeHtml(p.name||"")}</h3><p>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <b>${power}</b></p></div></div><div class="free-agent-compare-title">${tr()?"KADRO KARŞILAŞTIRMASI":"SQUAD COMPARISON"}</div>${comparison}${locked}<div class="bact"><button class="btn btn-primary free-agent-transfer-next" ${blocked?"disabled":""}>${blocked?(tr()?"TRANSFER KİLİTLİ":"TRANSFER LOCKED"):(tr()?"SATIN AL":"BUY")}</button><button class="btn btn-ghost" onclick="closeModal()">${tr()?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:true,label:p.name||""});
+    const next=document.querySelector(".free-agent-transfer-next");if(next&&!blocked)next.onclick=()=>{root.closeModal();root._signFreeAgent(index);};
   }
   function bindCardUX(){
     document.addEventListener("pointerdown",event=>{
@@ -484,6 +478,6 @@
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
-  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,confirmFreeAgent,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
+  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })(window);

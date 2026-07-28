@@ -447,22 +447,20 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   const matchModeLayout=await page.locator(".match-mode-modal").evaluate((modal:HTMLElement)=>{
     const buttons=[...modal.querySelectorAll<HTMLElement>(".match-mode-options button")].map(button=>button.getBoundingClientRect());
     const back=modal.querySelector<HTMLElement>(".match-mode-back")!;
-    const memory=modal.querySelector<HTMLElement>(".match-mode-memory")!;
     return{
       background:getComputedStyle(modal).backgroundColor,
       warningBackground:getComputedStyle(modal.querySelector<HTMLElement>(".match-mode-warnings span,.match-mode-clear")!).backgroundColor,
       buttonBackgrounds:[...modal.querySelectorAll<HTMLElement>(".match-mode-options button")].map(button=>getComputedStyle(button).backgroundColor),
+      buttonRects:buttons.map(rect=>({top:rect.top,height:rect.height,bottom:rect.bottom})),
       aligned:Math.abs(buttons[0].top-buttons[1].top)<=1&&Math.abs(buttons[0].height-buttons[1].height)<=1,
-      memoryGap:memory.getBoundingClientRect().top-buttons[0].bottom,
-      backGap:back.getBoundingClientRect().top-memory.getBoundingClientRect().bottom,
+      backGap:back.getBoundingClientRect().top-buttons[0].bottom,
       backHeight:back.getBoundingClientRect().height,
     };
   });
   expect(matchModeLayout.background).toBe("rgb(39, 52, 60)");
   expect(matchModeLayout.warningBackground).not.toBe("rgba(0, 0, 0, 0)");
   expect(matchModeLayout.buttonBackgrounds.every(color=>color==="rgb(23, 36, 45)")).toBe(true);
-  expect(matchModeLayout.aligned).toBe(true);
-  expect(matchModeLayout.memoryGap).toBeGreaterThanOrEqual(8);
+  expect(matchModeLayout.aligned,JSON.stringify(matchModeLayout.buttonRects)).toBe(true);
   expect(matchModeLayout.backGap).toBeGreaterThanOrEqual(8);
   expect(matchModeLayout.backHeight).toBeGreaterThanOrEqual(40);
   await expectSurfaceFit(page,".match-mode-modal");
@@ -478,7 +476,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#shopcards")).not.toContainText(/KASA SONRASI|CASH AFTER/i);
   await expect(page.locator("#freeAgentRow")).not.toContainText(/KASA SONRASI|CASH AFTER/i);
   await capture(page,"03h-compact-market.png");
-  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(2);
+  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
   await page.locator("#freeAgentRow .free-agent-review").first().click();
   await expect(page.locator(".free-agent-detail")).toBeVisible();
@@ -581,7 +579,7 @@ test("market identity, free-agent comparison and relationship sheet stay compact
   await expect(page.locator('#nativeHubNav [data-native-target="market"] .native-hub-market-dot')).toBeHidden();
   await expect(page.locator("#marketDecisionHeader .market-condition small")).toBeVisible();
   await expect(page.locator("#marketDecisionHeader .market-money span")).toHaveCount(2);
-  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(2);
+  await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
   const marketSurfaces=await page.evaluate(()=>{
     const style=(selector:string)=>getComputedStyle(document.querySelector<HTMLElement>(selector)!);

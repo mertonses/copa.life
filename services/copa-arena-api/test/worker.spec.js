@@ -1,6 +1,7 @@
 import {beforeEach,describe,expect,it} from "vitest";
 import {env,SELF,runInDurableObject,applyD1Migrations} from "cloudflare:test";
 import {ARENA_RULES_VERSION,DRAFT_LINES,seasonKey,teamSnapshot} from "../src/rules.js";
+import {ARENA_PLAYER_CATALOG_VERSION} from "../src/playerCatalog.js";
 
 const origin="https://copa.life";
 const headers=(suffix)=>({
@@ -152,6 +153,9 @@ describe("Arena Durable Objects",()=>{
     await room.init("AR-TESTROOM000000001",players,"room-seed");
     await runInDurableObject(room,async instance=>{
       expect(instance.state.rulesVersion).toBe(ARENA_RULES_VERSION);
+      expect(instance.state.catalogVersion).toBe(ARENA_PLAYER_CATALOG_VERSION);
+      expect(instance.state.draftPlan.flat(2)).toHaveLength(66);
+      expect(new Set(instance.state.draftPlan.flat(2).map(offer=>offer.sourceId)).size).toBe(66);
       expect(instance.acceptAction("owner-home","AA-c093e7e013304d56a149c633e80f02a3")).toBe(true);
       expect(instance.acceptAction("owner-home","AA-c093e7e013304d56a149c633e80f02a3")).toBe(false);
       let sequence=0;
@@ -187,6 +191,10 @@ describe("Arena Durable Objects",()=>{
     });
     const results=await env.DB.prepare("SELECT * FROM arena_match_players WHERE match_id=?").bind("AR-TESTROOM000000001").all();
     expect(results.results).toHaveLength(2);
+    const match=await env.DB.prepare("SELECT catalog_version,source_provenance_json,result_json FROM arena_matches WHERE match_id=?").bind("AR-TESTROOM000000001").first();
+    expect(match.catalog_version).toBe(ARENA_PLAYER_CATALOG_VERSION);
+    expect(JSON.parse(match.source_provenance_json).ENG.code).toBe("ENG");
+    expect(JSON.parse(match.result_json).catalogVersion).toBe(ARENA_PLAYER_CATALOG_VERSION);
     await runInDurableObject(room,instance=>instance.recordResult(instance.state.result.outcomes));
     const history=await env.DB.prepare("SELECT * FROM arena_match_players WHERE match_id=?").bind("AR-TESTROOM000000001").all();
     expect(history.results).toHaveLength(2);
@@ -248,7 +256,8 @@ describe("Arena Durable Objects",()=>{
         player.training="recovery";
         player.tactics=["balanced","balanced","balanced"];
       }
-      instance.state.players[0].manualDecisions=2;
+      instance.state.players[0].manualDecisions=6;
+      instance.state.players[0].manualTactics=1;
       const [home,away]=instance.state.players;
       await instance.finish(teamSnapshot(home),teamSnapshot(away));
       expect(instance.state.result).toMatchObject({
@@ -263,6 +272,48 @@ describe("Arena Durable Objects",()=>{
     expect(active.rating_delta).toBeGreaterThan(0);
     expect(inactive).toMatchObject({outcome:"loss",season_points:0,token_progress:0});
     expect(inactive.rating_delta).toBeLessThan(0);
+  });
+
+  it("records a current-rules regulation draw without a penalty shootout",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-REGULATIONDRAW001");
+    const players=[
+      {owner:"owner-draw-home",clubName:"Berabere Ev",rating:1000},
+      {owner:"owner-draw-away",clubName:"Berabere Dep",rating:1000}
+    ];
+    const created=new Date().toISOString();
+    await env.DB.batch(players.map((player,index)=>
+      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(player.owner,`AC-DRAW${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
+    ));
+    await room.init("AR-REGULATIONDRAW001",players,"draw-seed");
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
+        player.draft=DRAFT_LINES.map((line,index)=>({
+          line,id:`${line}-${index}`,name:`Draw ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"
+        }));
+        player.market={id:"none"};
+        player.training="recovery";
+        player.tactics=["balanced","balanced","balanced"];
+        player.manualDecisions=6;
+        player.manualTactics=1;
+      }
+      instance.state.score=[1,1];
+      await instance.finish(
+        teamSnapshot(instance.state.players[0]),
+        teamSnapshot(instance.state.players[1])
+      );
+      expect(instance.state.result).toMatchObject({
+        score:[1,1],penalty:null,outcomes:["draw","draw"],forfeitIndex:null,voided:false
+      });
+    });
+    const rows=await env.DB.prepare(
+      "SELECT outcome,rating_delta,season_points,token_progress FROM arena_match_players WHERE match_id=?"
+    ).bind("AR-REGULATIONDRAW001").all();
+    expect(rows.results).toHaveLength(2);
+    expect(rows.results.every(row=>
+      row.outcome==="draw"&&row.rating_delta===0&&row.season_points===12&&row.token_progress===2
+    )).toBe(true);
   });
 
   it("soft-resets a stale season before applying the completed match",async()=>{
@@ -286,7 +337,8 @@ describe("Arena Durable Objects",()=>{
         player.market={id:"none"};
         player.training="recovery";
         player.tactics=["balanced","balanced","balanced"];
-        player.manualDecisions=2;
+        player.manualDecisions=6;
+        player.manualTactics=1;
       }
       const [home,away]=instance.state.players;
       await instance.finish(teamSnapshot(home),teamSnapshot(away));

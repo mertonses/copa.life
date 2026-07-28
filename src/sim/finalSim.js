@@ -1182,7 +1182,7 @@ function buildSim(myPow, oppPow) {
       el=document.createElementNS(NS,'rect');
       el.setAttribute('x',(parseFloat(x)-1.5).toFixed(1));el.setAttribute('y','10.5');
       el.setAttribute('width','3');el.setAttribute('height','4');el.setAttribute('rx','0.5');
-      el.setAttribute('fill',type==='yellow_card'?'#F24A28':'#420102');
+      el.setAttribute('fill',type==='yellow_card'?'#F0C44D':'#420102');
       el.setAttribute('transform','rotate(12 '+x+' 12.5)');
     }else{
       el=document.createElementNS(NS,'circle');
@@ -1220,7 +1220,7 @@ function buildSim(myPow, oppPow) {
     // Semantic event signals stay stable across themes and never rely on team colour alone.
     if(type==='goal')return '#4E9B65';
     if(type==='save')return '#AAB2B3';
-    if(type==='yellow_card'||type==='card')return '#F24A28';
+    if(type==='yellow_card'||type==='card')return '#F0C44D';
     if(type==='red_card'||type==='injury')return '#DA3D2E';
     if(type==='danger'||type==='chance'||type==='wide')return '#F25F40';
     return '#68757C';
