@@ -104,6 +104,7 @@ describe("Arena rules",()=>{
     expect(usesFullXI("arena-rules-v3")).toBe(true);
     expect(usesFullXI("arena-rules-v2")).toBe(false);
     expect(createLegacyDraftOffers("legacy","GK",0,0)).toHaveLength(3);
+    expect(initialPlayerState({owner:"blank"}).clubName).toBe("");
     const eleven=completedPlayer("legacy-eleven",0);
     expect(teamSnapshot(eleven,"arena-rules-v3")).not.toBeNull();
     const five=initialPlayerState({owner:"legacy",clubName:"Legacy",rating:1000});

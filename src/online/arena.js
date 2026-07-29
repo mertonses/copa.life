@@ -8,7 +8,7 @@
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
     if(document.querySelector('link[data-copa-arena-styles]'))return;
-    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260729-livev10";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
+    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260729-live-emotes1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
   }
   ensureArenaStyles();
   const REWARDS=[
@@ -19,7 +19,7 @@
   ];
   const COPY={
     tr:{
-      arena:"COPA ARENA",subtitle:"Canlı rakiplere karşı kulübünü kur, kararını ver, yüksel.",
+      arena:"COPA ARENA",multiplayer:"ÇOK OYUNCULU",subtitle:"Canlı rakiplere karşı kulübünü kur, kararını ver, yüksel.",
       ranked:"DERECELİ YOLCULUK",play:"EŞLEŞME BUL",back:"COPA LIFE'A DÖN",loading:"ARENA YÜKLENİYOR",
       candidate:"ADAY",bronze:"BRONZ",silver:"GÜMÜŞ",gold:"ALTIN",diamond:"ELMAS",legend:"EFSANE",
       rating:"RATING",season:"SEZON YOLU",record:"KARİYER",history:"SON MAÇLAR",leaderboard:"SIRALAMA",
@@ -38,7 +38,7 @@
       selected:"SEÇİLDİ",startingXI:"İLK 11",babacan:"BABACAN BAŞKAN",practice:"YAPAY ZEKÂ ANTRENMANI",practiceCopy:"Ödülsüz, derecesiz ve sunucu otoriteli prova maçı.",practiceAgain:"YENİ ANTRENMAN",networkGood:"İYİ",networkFair:"ORTA",networkPoor:"ZAYIF"
     },
     en:{
-      arena:"COPA ARENA",subtitle:"Build your club live, make the call, climb the table.",
+      arena:"COPA ARENA",multiplayer:"MULTIPLAYER",subtitle:"Build your club live, make the call, climb the table.",
       ranked:"RANKED JOURNEY",play:"FIND A MATCH",back:"BACK TO COPA LIFE",loading:"LOADING ARENA",
       candidate:"CANDIDATE",bronze:"BRONZE",silver:"SILVER",gold:"GOLD",diamond:"DIAMOND",legend:"LEGEND",
       rating:"RATING",season:"SEASON TRACK",record:"CAREER",history:"RECENT MATCHES",leaderboard:"LEADERBOARD",
@@ -60,10 +60,10 @@
   COPY.es={...COPY.en,subtitle:"Construye tu club en directo, decide y sube en la tabla.",ranked:"CAMINO CLASIFICATORIO",play:"BUSCAR PARTIDA",back:"VOLVER A COPA LIFE",loading:"CARGANDO ARENA",rating:"PUNTUACIÓN",season:"RUTA DE TEMPORADA",record:"CARRERA",history:"ÚLTIMOS PARTIDOS",leaderboard:"CLASIFICACIÓN",queue:"BUSCANDO RIVAL",queueCopy:"Buscando un club real de nivel similar.",cancel:"CANCELAR BÚSQUEDA",ready:"ESTOY LISTO",waiting:"ESPERANDO AL RIVAL",setup:"IDENTIDAD DEL CLUB",draft:"CREA TU ONCE",market:"TOQUE FINAL",training:"PLAN DE PARTIDO",live:"PARTIDO EN VIVO",result:"FINAL",formation:"FORMACIÓN",style:"ESTILO DE JUEGO",chairman:"PRESIDENTE",budget:"CAJA RESTANTE",chemistry:"QUÍMICA",power:"FUERZA",choose:"ELEGIR",reconnecting:"RECONECTANDO",retry:"REINTENTAR",home:"CENTRO ARENA",win:"VICTORIA",loss:"DERROTA",draw:"EMPATE",searchAgain:"NUEVO PARTIDO",consentTitle:"ENTRAR EN LA ARENA",consent:"Copa Arena es un modo en vivo y clasificatorio. El nombre del club, los resultados y la puntuación aparecen en la tabla pública. No hay datos personales ni chat libre.",accept:"ACEPTAR Y ENTRAR",club:"NOMBRE DEL CLUB ARENA",network:"No se puede acceder al servicio Arena.",empty:"Aún no hay partidos completados.",authentic:"RIVALES REALES",noBots:"Sin bots ni Ghost Clubs.",fair:"OFERTAS EQUIVALENTES",fairCopy:"Decide mejor, no más rápido.",server:"SERVIDOR AUTORITATIVO",serverCopy:"El resultado se genera una vez y no puede repetirse.",deleteData:"BORRAR MIS DATOS DE ARENA",deleteConfirm:"Tu club Arena, puntuación e historial se borrarán de forma permanente. ¿Continuar?",you:"TÚ",opponent:"RIVAL",goal:"GOL",cardEvent:"TARJETA",tacticDecision:"DECISIÓN TÁCTICA",pass:"PASAR",marketCard:"CARTA"};
   COPY.de={...COPY.en,subtitle:"Baue deinen Club live auf, entscheide und steige auf.",ranked:"RANGLISTENREISE",play:"MATCH FINDEN",back:"ZURÜCK ZU COPA LIFE",loading:"ARENA LÄDT",rating:"WERTUNG",season:"SAISONPFAD",record:"KARRIERE",history:"LETZTE SPIELE",leaderboard:"RANGLISTE",queue:"GEGNER WIRD GESUCHT",queueCopy:"Ein echter Club auf ähnlichem Niveau wird gesucht.",cancel:"SUCHE ABBRECHEN",ready:"BEREIT",waiting:"WARTE AUF GEGNER",setup:"CLUBIDENTITÄT",draft:"BAUE DEINE ELF",market:"LETZTER SCHLIFF",training:"SPIELPLAN",live:"LIVE-SPIEL",result:"ABPFIFF",formation:"FORMATION",style:"SPIELSTIL",chairman:"PRÄSIDENT",budget:"RESTBUDGET",chemistry:"CHEMIE",power:"STÄRKE",choose:"WÄHLEN",reconnecting:"VERBINDUNG WIRD WIEDERHERGESTELLT",retry:"ERNEUT VERSUCHEN",home:"ARENA-ZENTRALE",win:"SIEG",loss:"NIEDERLAGE",draw:"UNENTSCHIEDEN",searchAgain:"NEUES MATCH",consentTitle:"ARENA BETRETEN",consent:"Copa Arena ist live und gewertet. Clubname, Ergebnisse und Wertung erscheinen öffentlich. Es gibt keine persönlichen Daten und keinen freien Chat.",accept:"AKZEPTIEREN UND STARTEN",club:"ARENA-CLUBNAME",network:"Arena-Dienst ist nicht erreichbar.",empty:"Noch keine abgeschlossenen Spiele.",authentic:"ECHTE GEGNER",noBots:"Keine Bots oder Ghost Clubs.",fair:"GLEICHWERTIGE ANGEBOTE",fairCopy:"Entscheidungsqualität zählt, nicht Tempo.",server:"SERVER-AUTORITATIV",serverCopy:"Das Ergebnis wird einmal erzeugt und kann nicht neu gewürfelt werden.",deleteData:"MEINE ARENA-DATEN LÖSCHEN",deleteConfirm:"Arena-Club, Wertung und Verlauf werden dauerhaft gelöscht. Fortfahren?",you:"DU",opponent:"GEGNER",goal:"TOR",cardEvent:"KARTE",tacticDecision:"TAKTISCHE ENTSCHEIDUNG",pass:"AUSLASSEN",marketCard:"KARTE"};
   COPY.it={...COPY.en,subtitle:"Costruisci il club dal vivo, scegli e scala la classifica.",ranked:"VIAGGIO CLASSIFICATO",play:"TROVA PARTITA",back:"TORNA A COPA LIFE",loading:"CARICAMENTO ARENA",rating:"PUNTEGGIO",season:"PERCORSO STAGIONE",record:"CARRIERA",history:"ULTIME PARTITE",leaderboard:"CLASSIFICA",queue:"RICERCA AVVERSARIO",queueCopy:"Cerchiamo un club reale di livello simile.",cancel:"ANNULLA RICERCA",ready:"SONO PRONTO",waiting:"IN ATTESA DELL'AVVERSARIO",setup:"IDENTITÀ DEL CLUB",draft:"CREA L'UNDICI",market:"TOCCO FINALE",training:"PIANO PARTITA",live:"PARTITA LIVE",result:"FINE PARTITA",formation:"MODULO",style:"STILE DI GIOCO",chairman:"PRESIDENTE",budget:"CASSA RESTANTE",chemistry:"INTESA",power:"FORZA",choose:"SCEGLI",reconnecting:"RICONNESSIONE",retry:"RIPROVA",home:"CENTRO ARENA",win:"VITTORIA",loss:"SCONFITTA",draw:"PAREGGIO",searchAgain:"NUOVA PARTITA",consentTitle:"ENTRA NELL'ARENA",consent:"Copa Arena è una modalità live e classificata. Nome del club, risultati e punteggio compaiono nella classifica pubblica. Non ci sono dati personali né chat libera.",accept:"ACCETTA ED ENTRA",club:"NOME CLUB ARENA",network:"Servizio Arena non disponibile.",empty:"Nessuna partita completata.",authentic:"AVVERSARI REALI",noBots:"Niente bot o Ghost Club.",fair:"OFFERTE EQUIVALENTI",fairCopy:"Conta la qualità delle scelte, non la velocità.",server:"SERVER AUTORITATIVO",serverCopy:"Il risultato viene generato una volta e non può essere rilanciato.",deleteData:"ELIMINA I MIEI DATI ARENA",deleteConfirm:"Club Arena, punteggio e cronologia verranno eliminati definitivamente. Continuare?",you:"TU",opponent:"AVVERSARIO",goal:"GOL",cardEvent:"CARTELLINO",tacticDecision:"DECISIONE TATTICA",pass:"PASSA",marketCard:"CARTA"};
-  Object.assign(COPY.es,{forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
-  Object.assign(COPY.de,{forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
-  Object.assign(COPY.it,{forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:""};
+  Object.assign(COPY.es,{multiplayer:"MULTIJUGADOR",forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
+  Object.assign(COPY.de,{multiplayer:"MEHRSPIELER",forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
+  Object.assign(COPY.it,{multiplayer:"MULTIGIOCATORE",forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -76,19 +76,51 @@
   const token=()=>{const saved=get(TOKEN_KEY);if(/^CAR-[A-Z0-9]{24,96}$/.test(saved))return saved;const value="CAR-"+uuid().toUpperCase().padEnd(24,"A");set(TOKEN_KEY,value);return value;};
   const client=()=>root.GhostClubs&&typeof root.GhostClubs.clientId==="function"?root.GhostClubs.clientId():(()=>{const key="copa_ghost_client_id_v1",saved=get(key);if(/^GCL-[A-Z0-9]{8,40}$/.test(saved))return saved;const value="GCL-"+uuid().toUpperCase().slice(0,32);set(key,value);return value;})();
   const headers=()=>({"content-type":"application/json","x-copa-client":client(),"x-copa-arena-token":token()});
-  const clubName=()=>get(CLUB_KEY,(root.teamName&&String(root.teamName).trim())||"COPA CLUB").slice(0,29);
+  const clubName=()=>get(CLUB_KEY,"").trim().slice(0,29);
   const actionId=()=>`AA-${uuid().slice(0,24)}`;
   const local=(tr,en)=>root.LANG==="tr"?tr:en;
+  const soundMuted=()=>!!root._muted||!!root.muted;
   function sfx(kind){
-    if(root._muted)return;
-    try{
-      const Audio=root.AudioContext||root.webkitAudioContext;if(!Audio)return;
-      const context=sfx.context||(sfx.context=new Audio()),now=context.currentTime,gain=context.createGain(),osc=context.createOscillator();
-      const tones={open:[180,260,.12],queue:[220,330,.16],match:[196,523,.3],pick:[320,410,.09],goal:[260,660,.22],error:[120,80,.16],win:[330,740,.35]};
-      const tone=tones[kind]||tones.pick;osc.type=kind==="match"||kind==="win"?"triangle":"sine";osc.frequency.setValueAtTime(tone[0],now);osc.frequency.exponentialRampToValueAtTime(tone[1],now+tone[2]);
-      gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.07,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+tone[2]);
-      osc.connect(gain).connect(context.destination);osc.start(now);osc.stop(now+tone[2]+.02);
-    }catch(_){}
+    if(soundMuted())return;
+    if(kind==="goal"&&root.sfxGoal)return root.sfxGoal();
+    if(kind==="win"&&root.sfxJingle)return root.sfxJingle();
+    const context=root.ac&&root.ac(),tone=({open:[260,.12],queue:[330,.16],match:[523,.3],pick:[410,.09],emote:[620,.13],error:[80,.16]}[kind]||[410,.09]);
+    if(context&&root.click)root.click(context,context.currentTime,tone[0],.05,tone[1]);
+  }
+  function penaltySfx(outcome){
+    if(root.sfxArena&&root.sfxArena(outcome)){state.lastAudioCue=`penalty:${outcome}`;state.audioCueCount++;}
+  }
+  function stopArenaClock(){
+    clearTimeout(state.audioClockTimer);state.audioClockTimer=null;state.audioClockActive=false;state.audioClockBeat=0;
+  }
+  function arenaClockWanted(game){
+    if(!game||state.screen!=="room"||document.hidden||soundMuted())return false;
+    if(game.phase==="setup")return !(game.self&&game.self.setup);
+    if(game.phase==="draft")return true;
+    if(game.phase==="market")return !(game.self&&game.self.market);
+    if(game.phase==="training")return !(game.self&&game.self.training);
+    if(game.phase==="live")return game.liveStage!=="reveal"&&!(game.self&&game.self.tactics&&game.self.tactics.length>game.window);
+    if(game.phase==="penalty")return game.penalty&&game.penalty.stage!=="reveal"&&!game.penalty.selfLocked;
+    return false;
+  }
+  function arenaClockDelay(game){
+    const seconds=Math.max(0,(Number(game&&game.deadline)||Date.now()+30_000)-Date.now())/1000;
+    return seconds<=6?420:seconds<=12?560:760;
+  }
+  function scheduleArenaClock(game){
+    clearTimeout(state.audioClockTimer);
+    if(!arenaClockWanted(game)){stopArenaClock();return;}
+    state.audioClockActive=true;
+    if(root.sfxArenaTick)root.sfxArenaTick(state.audioClockBeat++%2===1,arenaClockDelay(game)<600);
+    state.audioClockTimer=setTimeout(()=>scheduleArenaClock(state.room),arenaClockDelay(game));
+  }
+  function syncArenaAudio(game){
+    if(arenaClockWanted(game)){if(!state.audioClockActive)scheduleArenaClock(game);}else stopArenaClock();
+    const penalty=game&&game.phase==="penalty"&&game.penalty,last=penalty&&penalty.stage==="reveal"&&(penalty.history||[]).at(-1);
+    if(last){
+      const key=`${game.matchId||""}:${last.kick==null?(penalty.history||[]).length:last.kick}:${last.shooter}:${last.outcome}`;
+      if(key!==state.lastPenaltySound){state.lastPenaltySound=key;penaltySfx(last.outcome);}
+    }
   }
   async function request(path,options={}){
     const response=await fetch(api()+path,{...options,headers:{...headers(),...(options.headers||{})}});
@@ -116,7 +148,7 @@
     };
     return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.arena}</svg>`;
   }
-  function chrome(content,kicker="COPA ARENA"){
+  function chrome(content,kicker=text("multiplayer")){
     const isLive=state.screen==="room"&&state.room&&["live","penalty"].includes(state.room.phase);
     const quality=state.latency==null?"":state.latency<180?"good":state.latency<450?"fair":"poor";
     const status=isLive?`LIVE${state.latency==null?"":` · ${state.latency}ms`}`:quality?`${text("network"+quality[0].toUpperCase()+quality.slice(1))} ${state.latency}ms`:local("ÇEVRİMİÇİ","ONLINE");
@@ -159,9 +191,8 @@
     chairmen:{patron:"Patron",diplomat:"Diplomat",showman:"Şovmen",professor:"Profesör"},
     training:{finishing:"Bitiricilik",shape:"Savunma Şekli",chemistry:"Takım Uyumu",recovery:"Toparlanma"},
     plans:{adaptive:"Akıllı Denge",protect:"Güvenli Kilit",brave:"Hücum Tepkisi"},
-    tactics:{press:"Baskı Kur",balanced:"Dengede Kal",counter:"Kontraya Çık",control:"Topu Tut"},
-    market:{twelfth:"12. Adam",counter:"Kontra",wall:"Savunma Duvarı",wonderkid:"Genç Yetenek",captain:"Kaptan",none:"Kart Alma"},
-    traits:{connector:"Bağlantı",reliable:"Güvenilir",star:"Yıldız"}
+    tactics:{press:"Ön Alan Presi",balanced:"Dengeli Blok",counter:"Hızlı Geçiş",control:"Topa Sahip Olma"},
+    market:{twelfth:"12. Adam",counter:"Kontra",wall:"Savunma Duvarı",wonderkid:"Genç Yetenek",captain:"Kaptan",none:"Kart Alma"}
   };
   const choiceLabelsEn={
     formations:choiceLabels.formations,
@@ -169,23 +200,17 @@
     chairmen:{patron:"Patron",diplomat:"Diplomat",showman:"Showman",professor:"Professor"},
     training:{finishing:"Finishing",shape:"Defensive Shape",chemistry:"Team Chemistry",recovery:"Recovery"},
     plans:{adaptive:"Smart Balance",protect:"Protect the Lead",brave:"Brave Response"},
-    tactics:{press:"Press",balanced:"Hold Shape",counter:"Counter",control:"Keep Ball"},
-    market:{twelfth:"12th Player",counter:"Counter",wall:"Defensive Wall",wonderkid:"Wonderkid",captain:"Captain",none:"No Card"},
-    traits:{connector:"Connector",reliable:"Reliable",star:"Star"}
+    tactics:{press:"High Press",balanced:"Balanced Block",counter:"Fast Transition",control:"Possession Play"},
+    market:{twelfth:"12th Player",counter:"Counter",wall:"Defensive Wall",wonderkid:"Wonderkid",captain:"Captain",none:"No Card"}
   };
   const choiceLabel=(kind,value)=>((root.LANG==="tr"?choiceLabels:choiceLabelsEn)[kind]||{})[value]||value;
-  const traitDescription=trait=>({
-    connector:local("Kimya odaklı","Chemistry focused"),
-    reliable:local("Dengeli katkı","Balanced contribution"),
-    star:local("Güç odaklı","Power focused")
-  })[trait]||"";
   function options(kind,values,selected="",locked=false){
     const descriptions={
       tactics:{
-        press:local("Kontrol oyununa karşı üstün; dayanıklılık harcar.","Counters Control; costs stamina."),
-        balanced:local("Güvenli ve nötr; eşleşme bonusu yok.","Safe and neutral; no counter bonus."),
-        counter:local("Baskıya karşı üstün; orta saha kontrolü azalır.","Counters Press; gives up midfield control."),
-        control:local("Kontraya karşı üstün; tempo ve dayanıklılık ister.","Counters Counter; demands tempo and stamina.")
+        press:local("Rakibin pasla çıkışını bozar. Topa Sahip Olma'ya üstün; Hızlı Geçiş'e karşı zayıf.","Disrupts build-up. Strong against Possession Play; vulnerable to Fast Transition."),
+        balanced:local("Hatlar arası mesafeyi korur. Eşleşme avantajı veya dezavantajı oluşturmaz.","Keeps the lines compact. Creates no matchup advantage or disadvantage."),
+        counter:local("Top kazanılınca dikine çıkar. Ön Alan Presi'ne üstün; Topa Sahip Olma'ya karşı zayıf.","Attacks vertically after regaining the ball. Strong against High Press; vulnerable to Possession Play."),
+        control:local("Sabırlı paslarla oyunu yerleştirir. Hızlı Geçiş'e üstün; Ön Alan Presi'ne karşı zayıf.","Establishes the game through patient passing. Strong against Fast Transition; vulnerable to High Press.")
       },
       training:{
         finishing:local("Hücum +2","Attack +2"),shape:local("Savunma +2","Defence +2"),
@@ -198,13 +223,39 @@
       return `<button class="${active?"is-selected":""}" data-arena-choice="${esc(kind)}:${esc(value)}" aria-pressed="${active}" ${locked?"disabled":""}><i></i><b>${esc(choiceLabel(kind,value))}</b><span>${kind==="tactics"?"↗":kind==="training"?"+":"◆"}</span>${detail?`<small>${esc(detail)}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
     }).join("")}</div>`;
   }
+  const EMOTE_IDS=["hello","applause","fire","respect"];
+  const emoteLabel=id=>({
+    hello:local("Selam","Hello"),
+    applause:local("İyi hamle","Nice play"),
+    fire:local("Haydi!","Let's go!"),
+    respect:local("İyi oyun","Good game")
+  })[id]||id;
+  function emoteIcon(id){
+    const paths={
+      hello:"<path d='M5 6h14v10H11l-5 4v-4H5z'/><path d='M9 11h.01M12 11h.01M15 11h.01'/>",
+      applause:"<path d='m12 3 2.2 4.5L19 8.2l-3.5 3.4.8 4.8-4.3-2.3-4.3 2.3.8-4.8L5 8.2l4.8-.7z'/><path d='M4 19h16'/>",
+      fire:"<path d='M13 2c1 5-3 6-1 10 1-2 3-3 4-5 3 3 4 6 2 10-1 3-4 5-7 5-4 0-7-3-7-7 0-3 2-6 5-9 0 3 1 5 2 6 0-4 3-6 2-10z'/>",
+      respect:"<path d='M12 3 20 7v5c0 5-3 8-8 10-5-2-8-5-8-10V7z'/><path d='m8 12 2.5 2.5L16 9'/>"
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[id]||paths.hello}</svg>`;
+  }
+  function emoteReaction(item,side){
+    if(!item||!EMOTE_IDS.includes(item.id)||Date.now()-Number(item.at||0)>3400)return "";
+    return `<span class="arena-emote-reaction is-${side}" data-arena-emote-sequence="${Number(item.sequence)||0}" role="status">${emoteIcon(item.id)}<b>${esc(emoteLabel(item.id))}</b></span>`;
+  }
+  function emotePicker(){
+    const cooling=Date.now()<Number(state.emoteReadyAt||0);
+    return `<div class="arena-emote-picker" role="menu" aria-label="${esc(local("Emote gönder","Send emote"))}">${EMOTE_IDS.map(id=>`<button type="button" data-arena-emote="${id}" role="menuitem" ${cooling?"disabled":""}>${emoteIcon(id)}<span>${esc(emoteLabel(id))}</span></button>`).join("")}</div>`;
+  }
   function statusStrip(game){
     const self=game.self||{},opponent=game.opponent||{};
     const phaseLabel=game.phase==="penalty"
       ?(game.penalty&&game.penalty.stage==="reveal"?local("VURUŞ OYNATILIYOR","PLAYING KICK"):local("KARARINI KİLİTLE","LOCK YOUR CHOICE"))
       :(game.liveStage==="reveal"?local("CANLI AKSİYON","LIVE ACTION"):local("TAKTİK KARARI","TACTICAL CALL"));
     const presence=opponent.connected?local("Rakip bağlı","Opponent connected"):local("Rakip yeniden bağlanıyor","Opponent reconnecting");
-    return `<div class="arena-versus"><span><small>${esc(text("you"))}</small><b>${esc(self.clubName||"—")}</b><strong>${self.rating||"—"}</strong></span><i>VS</i><span><small>${esc(text("opponent"))}</small><b>${esc(opponent.clubName||"—")}</b><strong>${opponent.rating||"—"}</strong></span></div><div class="arena-phase-status ${opponent.connected?"is-connected":"is-reconnecting"}"><span>${esc(presence)}</span><b data-arena-deadline="${Number(game.deadline)||0}" data-arena-deadline-label="${esc(phaseLabel)}"></b></div>`;
+    const emotes=game.emotes||{},enabled=game.mode!=="practice";
+    const trigger=enabled?`<button type="button" class="arena-emote-trigger ${Date.now()<Number(state.emoteReadyAt||0)?"is-cooling":""}" data-arena-action="toggle-emotes" aria-label="${esc(local("Emote gönder","Send emote"))}" aria-haspopup="menu" aria-expanded="${state.emoteMenu}">${emoteIcon("hello")}</button>`:"";
+    return `<div class="arena-versus"><span class="is-self"><small>${esc(text("you"))}</small><div class="arena-club-line"><b>${esc(self.clubName||"—")}</b>${trigger}${emoteReaction(emotes.self,"self")}</div><strong>${self.rating||"—"}</strong>${enabled&&state.emoteMenu?emotePicker():""}</span><i>VS</i><span class="is-opponent"><small>${esc(text("opponent"))}</small><div class="arena-club-line"><b>${esc(opponent.clubName||"—")}</b>${emoteReaction(emotes.opponent,"opponent")}</div><strong>${opponent.rating||"—"}</strong></span></div><div class="arena-phase-status ${opponent.connected?"is-connected":"is-reconnecting"}"><span>${esc(presence)}</span><b data-arena-deadline="${Number(game.deadline)||0}" data-arena-deadline-label="${esc(phaseLabel)}"></b></div>`;
   }
   function setupDraft(game){
     const matchId=String(game.matchId||"");
@@ -259,7 +310,9 @@
       const penalty=item.positionPenalty?` · ${local("güç cezası","power penalty")} -${item.positionPenalty}`:"";
       const affordable=item.affordable!==false;
       const itemPower=item.effectivePower??item.power;
-      return `<button class="${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="draft:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(item.slot||item.line)}</span><strong class="arena-context-power power-${powerBand(itemPower)}">${itemPower}</strong><b>${esc(item.name)}</b>${profileMeta?`<small class="arena-player-origin">${esc(profileMeta)}</small>`:""}<small class="arena-position-fit ${item.positionFit==="adapted"?"is-adapted":""}">${esc(fit+penalty)}</small>${item.club?`<small class="arena-player-club">${esc(item.club)}</small>`:""}<small class="arena-player-value">€${item.cost}M · ${item.chemistry>=0?"+":""}${item.chemistry} ${esc(text("chemistry"))}</small>${!affordable?`<small class="arena-budget-warning">${esc(local("Kalan mevkiler için bütçe gerekli","Budget reserved for remaining positions"))}</small>`:""}<i title="${esc(local("Bağlantı kimyayı, Güvenilir dengeyi, Yıldız gücü öne çıkarır.","Connector favors chemistry, Reliable balance, Star power."))}">${esc(choiceLabel("traits",item.trait))}<small>${esc(traitDescription(item.trait))}</small></i><em>✓ ${esc(text("selected"))}</em></button>`;
+      const priceTone=!affordable?"unavailable":item.cost<=2?"value":item.cost<=4?"standard":"premium";
+      const chemistryTone=item.chemistry>0?"positive":item.chemistry<0?"negative":"neutral";
+      return `<button class="${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="draft:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(item.slot||item.line)}</span><small class="arena-player-price is-${priceTone}">€${item.cost}M</small><strong class="arena-context-power power-${powerBand(itemPower)}">${itemPower}</strong><b>${esc(item.name)}</b>${profileMeta?`<small class="arena-player-origin">${esc(profileMeta)}</small>`:""}<small class="arena-position-fit ${item.positionFit==="adapted"?"is-adapted":""}">${esc(fit+penalty)}</small>${item.club?`<small class="arena-player-club">${esc(item.club)}</small>`:""}<small class="arena-player-chem is-${chemistryTone}"><span>${esc(text("chemistry"))}</span><b>${item.chemistry>=0?"+":""}${item.chemistry}</b></small>${!affordable?`<small class="arena-budget-warning">${esc(local("Kalan mevkiler için bütçe gerekli","Budget reserved for remaining positions"))}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
     }).join("")}</div>${selected?`<p class="arena-choice-confirmed">${esc(selected.name)} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game)}</div>`);
   }
   function market(game){
@@ -283,7 +336,8 @@
     return chrome(`${statusStrip(game)}<div class="arena-phase"><span>13 / 14</span><h1>${esc(text("market"))}</h1><div class="arena-team-pulse"><b class="arena-budget-state budget-${budgetBand(team.budget)}">${esc(text("budget"))} <i class="arena-context-budget budget-${budgetBand(team.budget)}">€${team.budget==null?"—":team.budget}M</i></b><b>${esc(text("chemistry"))} <i>${team.chemistry==null?"—":team.chemistry}</i></b><b>${esc(text("power"))} <i class="arena-context-power power-${powerBand(team.power)}">${team.power||"—"}</i></b></div><div class="arena-offers arena-market-offers">${(game.offers||[]).map(item=>{
       const active=item.id===selected;
       const affordable=item.affordable!==false,fit=synergy(item),projected=item.projected||{};
-      return `<button class="arena-card is-${esc(item.category||"reserve")} ${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="market:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(categoryLabels[item.category]||text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><i class="arena-card-glyph" aria-hidden="true"></i><b>${esc(choiceLabel("market",item.id))}</b><small class="arena-card-trigger">${esc(activations[item.activation]||activations.none)}</small><small class="arena-card-stats">ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small><small class="arena-card-preview">${esc(text("power"))} <i class="arena-context-power power-${powerBand(projected.power)}">${projected.power??"—"}</i> · ${esc(text("chemistry"))} ${projected.chemistry??"—"}</small><small class="arena-card-fit is-${fit[0]}">${esc(fit[1])}</small>${!affordable?`<small class="arena-budget-warning">${esc(local("Yetersiz bütçe","Not enough budget"))}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
+      const impact=item.id==="none"?"":`<small class="arena-card-stats">ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small><small class="arena-card-preview">${esc(text("power"))} <i class="arena-context-power power-${powerBand(projected.power)}">${projected.power??"—"}</i> · ${esc(text("chemistry"))} ${projected.chemistry??"—"}</small><small class="arena-card-fit is-${fit[0]}">${esc(fit[1])}</small>`;
+      return `<button class="arena-card is-${esc(item.category||"reserve")} ${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="market:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(categoryLabels[item.category]||text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><i class="arena-card-glyph" aria-hidden="true"></i><b>${esc(choiceLabel("market",item.id))}</b><small class="arena-card-trigger">${esc(activations[item.activation]||activations.none)}</small>${impact}${!affordable?`<small class="arena-budget-warning">${esc(local("Yetersiz bütçe","Not enough budget"))}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
     }).join("")}</div>${selected?`<p class="arena-choice-confirmed">${esc(choiceLabel("market",selected))} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game)}</div>`);
   }
   function matchPlanDraft(game){
@@ -298,6 +352,18 @@
     }
     return state.planDraft;
   }
+  function planVisual(value){
+    const visuals={
+      finishing:`<svg viewBox="0 0 64 48"><path class="plan-frame" d="M37 9h18v25H37"/><path class="plan-net" d="M43 9v25m6-25v25m6-17H37m18 8H37"/><path class="plan-flight" d="M11 34C20 31 25 23 35 17"/><circle class="plan-ball" cx="11" cy="34" r="4"/></svg>`,
+      shape:`<svg viewBox="0 0 64 48"><path class="plan-shield" d="M32 7l18 7v11c0 9-7 14-18 18-11-4-18-9-18-18V14z"/><path class="plan-block" d="M20 27h24"/><circle class="plan-node is-one" cx="21" cy="23" r="3"/><circle class="plan-node is-two" cx="32" cy="29" r="3"/><circle class="plan-node is-three" cx="43" cy="23" r="3"/></svg>`,
+      chemistry:`<svg viewBox="0 0 64 48"><path class="plan-link" d="M17 31L28 14l19 5-6 18-24-6zM28 14l13 23M47 19L17 31"/><circle class="plan-node is-one" cx="28" cy="14" r="4"/><circle class="plan-node is-two" cx="47" cy="19" r="4"/><circle class="plan-node is-three" cx="41" cy="37" r="4"/><circle class="plan-node is-four" cx="17" cy="31" r="4"/></svg>`,
+      recovery:`<svg viewBox="0 0 64 48"><path class="plan-orbit" d="M47 18a16 16 0 10-1 16"/><path class="plan-arrow" d="M44 10l5 8-9 2"/><path class="plan-pulse" d="M18 27h8l3-7 6 14 4-7h8"/></svg>`,
+      adaptive:`<svg viewBox="0 0 64 48"><path class="plan-horizon" d="M11 35h42"/><path class="plan-balance" d="M32 12v23M20 19h24M20 19l-7 12h14zm24 0l-7 12h14z"/><circle class="plan-pivot" cx="32" cy="19" r="3"/></svg>`,
+      protect:`<svg viewBox="0 0 64 48"><path class="plan-shield" d="M32 6l17 7v12c0 9-7 14-17 18-10-4-17-9-17-18V13z"/><rect class="plan-lock" x="25" y="23" width="14" height="11" rx="3"/><path class="plan-lock-hook" d="M28 23v-4a4 4 0 018 0v4"/><path class="plan-scan" d="M18 29h28"/></svg>`,
+      brave:`<svg viewBox="0 0 64 48"><path class="plan-lane" d="M10 38h44"/><path class="plan-rush is-one" d="M14 31l12-9-12-9"/><path class="plan-rush is-two" d="M29 31l12-9-12-9"/><circle class="plan-ball" cx="49" cy="22" r="5"/></svg>`
+    };
+    return `<span class="arena-plan-visual is-${value}" aria-hidden="true">${visuals[value]||""}</span>`;
+  }
   function training(game){
     const plan=matchPlanDraft(game),locked=!!(game.self&&game.self.training)||state.planSubmitting;
     const team=game.team||{},draft=game.self&&game.self.draft||[];
@@ -307,7 +373,7 @@
       protect:local("Öncelik skoru ve alanı korumak","Prioritises score and space"),
       brave:local("Gerideyken daha güçlü hücum riski","Stronger attacking risk when behind")
     };
-    const choiceButtons=(kind,values,selected,details)=>`<div class="arena-plan-grid is-${kind}">${values.map(value=>`<button data-arena-plan="${kind}:${value}" class="${selected===value?"is-selected":""}" aria-pressed="${selected===value}" ${locked?"disabled":""}><i></i><b>${esc(kind==="focus"?choiceLabel("training",value):choiceLabel("plans",value))}</b><small>${esc(details[value])}</small><em>✓</em></button>`).join("")}</div>`;
+    const choiceButtons=(kind,values,selected,details)=>`<div class="arena-plan-grid is-${kind}">${values.map(value=>`<button data-arena-plan="${kind}:${value}" class="${selected===value?"is-selected":""}" aria-pressed="${selected===value}" ${locked?"disabled":""}>${planVisual(value)}<i></i><b>${esc(kind==="focus"?choiceLabel("training",value):choiceLabel("plans",value))}</b><small>${esc(details[value])}</small><em>✓</em></button>`).join("")}</div>`;
     return chrome(`${statusStrip(game)}<div class="arena-phase arena-match-plan"><span>14 / 14</span><h1>${esc(text("training"))}</h1><div class="arena-final-summary"><b>${esc(local("KADRO ÖZETİ","SQUAD SUMMARY"))}</b><span>${draft.length}/11</span><span class="arena-context-power power-${powerBand(team.power)}">${esc(text("power"))} ${team.power||"—"}</span><span>${esc(text("chemistry"))} ${team.chemistry==null?"—":team.chemistry}</span><span class="arena-budget-state arena-context-budget budget-${budgetBand(team.budget)}">${esc(text("budget"))} €${team.budget==null?"—":team.budget}M</span></div><section class="arena-plan-section"><header><span>01</span><div><b>${esc(local("ANA ODAK","PRIMARY FOCUS"))}</b><small>${esc(local("Takımın maç boyunca taşıdığı temel güç.","The team's core strength throughout the match."))}</small></div></header>${choiceButtons("focus",["finishing","shape","chemistry","recovery"],plan.focus,focusDetails)}</section><section class="arena-plan-section"><header><span>02</span><div><b>${esc(local("SENARYO PLANI","MATCH SCRIPT"))}</b><small>${esc(local("Skora göre otomatik, küçük ve kontrollü tepki.","A small, controlled automatic response to the score."))}</small></div></header>${choiceButtons("scenario",["adaptive","protect","brave"],plan.scenario,scenarioDetails)}</section><button class="arena-primary" data-arena-action="submit-plan" ${locked||!(plan.focus&&plan.scenario)?"disabled":""}>${esc(locked?text("waiting"):local("PLANI KİLİTLE","LOCK PLAN"))}</button>${locked?`<p class="arena-choice-confirmed">${esc(choiceLabel("training",plan.focus))} · ${esc(choiceLabel("plans",plan.scenario))} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game,true)}</div>`);
   }
   function lobby(game){
@@ -338,10 +404,19 @@
   const penaltyZoneLabels={
     leftHigh:["SOL ÜST","LEFT HIGH"],leftLow:["SOL ALT","LEFT LOW"],center:["ORTA","CENTER"],rightLow:["SAĞ ALT","RIGHT LOW"],rightHigh:["SAĞ ÜST","RIGHT HIGH"]
   };
+  const penaltyZoneMotion={
+    leftHigh:{x:"18%",y:"72%",keeperX:"20%",keeperY:"44%",keeperRotate:"-68deg"},
+    leftLow:{x:"18%",y:"10%",keeperX:"20%",keeperY:"7%",keeperRotate:"-46deg"},
+    center:{x:"50%",y:"47%",keeperX:"50%",keeperY:"28%",keeperRotate:"0deg"},
+    rightLow:{x:"82%",y:"10%",keeperX:"80%",keeperY:"7%",keeperRotate:"46deg"},
+    rightHigh:{x:"82%",y:"72%",keeperX:"80%",keeperY:"44%",keeperRotate:"68deg"}
+  };
   function penalty(game){
     const shootout=game.penalty||{},score=shootout.score||[0,0],history=shootout.history||[];
     const mine=score[game.selfIndex]||0,theirs=score[game.selfIndex===0?1:0]||0;
     const reveal=shootout.stage==="reveal",last=history.at(-1);
+    const shotMotion=penaltyZoneMotion[last&&last.shooterZone]||penaltyZoneMotion.center;
+    const keeperMotion=penaltyZoneMotion[last&&last.keeperZone]||penaltyZoneMotion.center;
     const role=shootout.selfRole==="shooter"?local("VURUŞ SENDE","YOU SHOOT"):local("KALEYİ SEN KORUYORSUN","YOU KEEP");
     const outcome=last&&({goal:local("GOL","GOAL"),save:local("KURTARIŞ","SAVE"),miss:local("AUT","MISS"),post:local("DİREK","POST")}[last.outcome]||last.outcome);
     const dots=side=>Array.from({length:Math.max(5,Number(shootout.kicks&&shootout.kicks[side])||0)},(_,index)=>{
@@ -352,11 +427,11 @@
       <header><span>${esc(local("BERABERLİK BOZULUYOR","THE TIE BREAKS HERE"))}</span><h1>${esc(local("PENALTI ATIŞLARI","PENALTY SHOOTOUT"))}</h1><p>${esc(local("Kararlar sunucuda gizli kilitlenir ve yalnızca iki taraf da tamamlayınca açıklanır.","Choices are sealed on the server and revealed only after both sides lock."))}</p></header>
       <div class="arena-penalty-score"><span><b>${esc(game.self&&game.self.clubName||text("you"))}</b><i>${dots(game.selfIndex)}</i></span><strong>${mine}<em>–</em>${theirs}</strong><span><b>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</b><i>${dots(game.selfIndex===0?1:0)}</i></span></div>
       <div class="arena-penalty-stage">
-        <div class="arena-goal" aria-label="${esc(local("Penaltı hedef bölgeleri","Penalty target zones"))}"><i></i><i></i><i></i><span></span><b class="arena-keeper"></b><em class="arena-ball"></em></div>
+        <div class="arena-goal" aria-label="${esc(local("Penaltı hedef bölgeleri","Penalty target zones"))}" style="--ball-x:${shotMotion.x};--ball-y:${shotMotion.y};--keeper-x:${keeperMotion.keeperX};--keeper-y:${keeperMotion.keeperY};--keeper-rotate:${keeperMotion.keeperRotate}"><i></i><i></i><i></i><span></span><b class="arena-keeper"></b><em class="arena-ball"></em></div>
         <div class="arena-penalty-call"><small>${esc(local(`${shootout.round||1}. TUR`,`ROUND ${shootout.round||1}`))}</small><h2>${esc(reveal?(outcome||local("VURUŞ","KICK")):role)}</h2>${reveal&&last?`<p>${esc(penaltyZoneLabels[last.shooterZone][root.LANG==="tr"?0:1])} · ${esc(outcome)}</p>`:`<p>${esc(shootout.selfLocked?local("Kararın kilitlendi · rakip bekleniyor","Choice locked · waiting for opponent"):local("Bir bölge seç ve kararını kilitle","Choose a zone and seal your call"))}</p>`}</div>
       </div>
       ${reveal?"":`<div class="arena-penalty-zones" role="group" aria-label="${esc(role)}">${Object.keys(penaltyZoneLabels).map(zone=>`<button data-arena-choice="penalty:${zone}" ${shootout.selfLocked?"disabled":""}><i></i><b>${esc(penaltyZoneLabels[zone][root.LANG==="tr"?0:1])}</b></button>`).join("")}</div>`}
-      <footer><span><i class="${shootout.selfLocked?"is-locked":""}"></i>${esc(local("SEN","YOU"))}</span><b>${esc(local("İKİ KARAR DA GİZLİ","BOTH CHOICES SEALED"))}</b><span><i class="${shootout.opponentLocked?"is-locked":""}"></i>${esc(local("RAKİP","OPPONENT"))}</span></footer>
+      <footer><span><i class="${shootout.selfLocked?"is-locked":""}"></i>${esc(local("SEN","YOU"))}</span><span><i class="${shootout.opponentLocked?"is-locked":""}"></i>${esc(local("RAKİP","OPPONENT"))}</span></footer>
     </section>`);
   }
   function result(game){
@@ -413,13 +488,14 @@
     const elapsed=element.querySelector("[data-arena-elapsed]");
     if(elapsed)updateElapsed();
     updateDeadline();
+    syncArenaAudio(state.screen==="room"?state.room:null);
   }
   function open(){
     root.closeModal&&root.closeModal();
     document.body.classList.add("arena-active");rootEl().classList.remove("hidden");
     const intro=document.getElementById("intro");if(intro)intro.classList.add("hidden");
     sfx("open");telemetry("arena_opened");
-    if(get(TERMS_KEY)!==TERMS_VERSION){setScreen("terms");return;}
+    if(get(TERMS_KEY)!==TERMS_VERSION||!clubName()){setScreen("terms");return;}
     if(resume())return;
     loadPortal();
   }
@@ -473,10 +549,13 @@
       let data;try{data=JSON.parse(event.data);}catch(_){return;}
       if(data.type==="state"){
         const previous=state.room,previousGoals=previous&&previous.events?previous.events.filter(item=>item.type==="goal").length:0;
+        const previousOpponentEmote=previous&&previous.emotes&&previous.emotes.opponent&&Number(previous.emotes.opponent.sequence)||0;
         if(data.state.phase!=="setup"){state.setupDraft=null;state.setupSubmitting=false;}
         if(data.state.phase!=="training"){state.planDraft=null;state.planSubmitting=false;}
         state.room=data.state;state.screen="room";render();
         const goals=(data.state.events||[]).filter(item=>item.type==="goal").length;if(goals>previousGoals)sfx("goal");
+        const nextOpponentEmote=data.state.emotes&&data.state.emotes.opponent&&Number(data.state.emotes.opponent.sequence)||0;
+        if(nextOpponentEmote>previousOpponentEmote)sfx("emote");
         if(previous&&previous.phase!==data.state.phase)telemetry("arena_phase_completed",previous.phase);
         if(data.state.phase==="result"){
           const settled=data.state.result&&data.state.result.profiles&&data.state.result.profiles[data.state.selfIndex];
@@ -519,7 +598,9 @@
     clearInterval(state.timer);state.timer=null;
     clearInterval(state.heartbeat);state.heartbeat=null;
     clearInterval(state.deadlineTimer);state.deadlineTimer=null;
+    stopArenaClock();
     clearTimeout(state.retryTimer);state.retryTimer=null;state.connection="idle";state.reconnectAt=0;
+    clearTimeout(state.emoteCooldownTimer);state.emoteCooldownTimer=null;state.emoteMenu=false;state.emoteReadyAt=0;
     if(state.socket){if(cancel&&state.screen==="queue"&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"cancel"}));try{state.socket.close(1000,"client");}catch(_){}state.socket=null;}
   }
   function send(payload){
@@ -594,6 +675,17 @@
     if(submit)submit.disabled=!(phase.dataset.formations&&phase.dataset.styles);
   }
   function onClick(event){
+    const emoteChoice=event.target.closest("[data-arena-emote]");
+    if(emoteChoice&&state.room&&Date.now()>=Number(state.emoteReadyAt||0)){
+      const emote=emoteChoice.dataset.arenaEmote;
+      state.emoteMenu=false;
+      if(send({type:"emote",emote})){
+        state.emoteReadyAt=Date.now()+2500;
+        clearTimeout(state.emoteCooldownTimer);
+        state.emoteCooldownTimer=setTimeout(()=>{state.emoteReadyAt=0;refresh();},2550);
+      }
+      render();return;
+    }
     const planChoice=event.target.closest("[data-arena-plan]");
     if(planChoice&&!planChoice.disabled&&state.room&&state.room.phase==="training"){
       const [kind,value]=planChoice.dataset.arenaPlan.split(":");
@@ -605,6 +697,7 @@
     const choice=event.target.closest("[data-arena-choice]");if(choice){selectChoice(choice);return;}
     const button=event.target.closest("[data-arena-action]");if(!button)return;
     const action=button.dataset.arenaAction;
+    if(action==="toggle-emotes"){state.emoteMenu=!state.emoteMenu;render();return;}
     if(action==="close"){
       if(state.screen==="room"&&state.room&&state.room.phase!=="result"&&!root.confirm(local("Devam eden Arena maçından ayrılmak istediğine emin misin? Süre dolunca otomatik karar verilir.","Leave the active Arena match? Automatic choices will be made when timers expire.")))return;
       close();return;
@@ -637,7 +730,7 @@
     if(action==="delete-data"){
       if(!root.confirm(text("deleteConfirm")))return;
       request("/v1/arena/profile",{method:"DELETE"}).then(()=>{
-        remove(TOKEN_KEY);remove(TERMS_KEY);remove(ROOM_KEY);state.profile=null;state.history=[];setScreen("terms");
+        remove(TOKEN_KEY);remove(TERMS_KEY);remove(CLUB_KEY);remove(ROOM_KEY);state.profile=null;state.history=[];setScreen("terms");
       }).catch(error=>{state.lastError=error.message;setScreen("error");});
       return;
     }
@@ -648,5 +741,6 @@
     const saved=get(ROOM_KEY);if(!saved)return false;
     try{document.body.classList.add("arena-active");rootEl().classList.remove("hidden");const intro=document.getElementById("intro");if(intro)intro.classList.add("hidden");connectRoom(JSON.parse(saved));return true;}catch(_){remove(ROOM_KEY);return false;}
   }
+  document.addEventListener("visibilitychange",()=>syncArenaAudio(state.screen==="room"?state.room:null));
   root.CopaArena={open,close,refresh,resume,state};
 })(window);

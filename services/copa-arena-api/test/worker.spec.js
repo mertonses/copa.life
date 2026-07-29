@@ -32,6 +32,8 @@ describe("Arena HTTP API",()=>{
     expect(missing.status).toBe(428);
     const invalid=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("invalid"),body:JSON.stringify({clubName:"<script>",mode:"ranked"})});
     expect(invalid.status).toBe(422);
+    const blank=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("blank"),body:JSON.stringify({clubName:"",mode:"ranked"})});
+    expect(blank.status).toBe(422);
   });
 
   it("rejects an oversized streamed body before buffering it",async()=>{
@@ -212,6 +214,13 @@ describe("Arena Durable Objects",()=>{
       let sequence=0;
       const act=(owner,data)=>instance.action(owner,{...data,actionId:`AA-${++sequence}ABCDEFGH`});
       await act("owner-home",{type:"ready"});await act("owner-away",{type:"ready"});
+      const decisionsBeforeEmote=instance.state.players[0].manualDecisions;
+      expect(await act("owner-home",{type:"emote",emote:"applause"})).toBe("ok");
+      expect(publicState(instance.state,"owner-home").emotes.self).toMatchObject({id:"applause",sequence:1});
+      expect(publicState(instance.state,"owner-away").emotes.opponent).toMatchObject({id:"applause",sequence:1});
+      expect(instance.state.players[0].manualDecisions).toBe(decisionsBeforeEmote);
+      expect(await act("owner-home",{type:"emote",emote:"fire"})).toBe("emote_rate_limited");
+      expect(await act("owner-away",{type:"emote",emote:"taunt"})).toBe("unavailable_choice");
       for(const owner of ["owner-home","owner-away"])await act(owner,{type:"setup",choice:{formation:"4-4-2",style:"balanced",chairman:"diplomat"}});
       expect(instance.state.players.every(player=>player.setup.chairman==="babacan")).toBe(true);
       for(let step=0;step<DRAFT_LINES.length;step++){
