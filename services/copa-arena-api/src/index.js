@@ -1,6 +1,6 @@
 import {DurableObject} from "cloudflare:workers";
 import {
-  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,LIVE_SEGMENTS,PENALTY_ZONES,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
+  ARENA_EMOTES,ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,LIVE_SEGMENTS,PENALTY_ZONES,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
   allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,minimumFutureDraftCost,publicState,
   resolveParticipation,
   normalizeMatchPlan,resolveLiveSegment,resolvePenalty,resolvePenaltyKick,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
@@ -288,7 +288,7 @@ export class ArenaRoom extends DurableObject{
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
       matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:options.mode==="practice"?Number(options.botIndex??1):-1,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
-      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,completed:false,resultRecorded:false,
+      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
@@ -562,6 +562,18 @@ export class ArenaRoom extends DurableObject{
   async action(owner,data){
     const index=this.state.players.findIndex(player=>player.owner===owner);if(index<0)return "unauthorized";
     const player=this.state.players[index];
+    if(data.type==="emote"){
+      if(this.state.mode==="practice"||!["setup","draft","market","training","live","penalty"].includes(this.state.phase))return "emote_unavailable";
+      if(!ARENA_EMOTES.includes(data.emote))return "unavailable_choice";
+      const now=Date.now(),cooldowns=this.state.emoteCooldowns||(this.state.emoteCooldowns=[0,0]);
+      if(now-Number(cooldowns[index]||0)<2500)return "emote_rate_limited";
+      cooldowns[index]=now;
+      if(!Array.isArray(this.state.emotes))this.state.emotes=[null,null];
+      this.state.emoteSequence=Number(this.state.emoteSequence||0)+1;
+      this.state.emotes[index]={id:data.emote,sequence:this.state.emoteSequence,at:now};
+      this.persist();this.broadcast();return "ok";
+    }
+    const gameplayAction=["setup","draft","market","training","tactic","penalty"].includes(data.type);
     if(data.type==="ready"&&this.state.phase==="lobby"){
       if(player.ready)return "already_submitted";
       player.ready=true;
@@ -596,9 +608,9 @@ export class ArenaRoom extends DurableObject{
       this.state.penalty.choices[index]=data.choice;
     }
     else return "wrong_phase";
-    if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
+    if(gameplayAction)player.manualDecisions=(Number(player.manualDecisions)||0)+1;
     if(data.type==="tactic")player.manualTactics=(Number(player.manualTactics)||0)+1;
-    if(this.state.mode==="practice"&&this.state.botIndex>=0&&index!==this.state.botIndex)this.defaultAction(this.state.botIndex);
+    if(gameplayAction&&this.state.mode==="practice"&&this.state.botIndex>=0&&index!==this.state.botIndex)this.defaultAction(this.state.botIndex);
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
   }
   async recoverExpired(){

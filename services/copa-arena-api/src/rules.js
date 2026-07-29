@@ -59,6 +59,7 @@ export const DRAFT_SLOTS=Object.freeze([
 ]);
 export const DRAFT_LINES=Object.freeze(DRAFT_SLOTS.map(item=>item.line));
 export const TACTICS=Object.freeze(["press","balanced","counter","control"]);
+export const ARENA_EMOTES=Object.freeze(["hello","applause","fire","respect"]);
 export const TRAINING=Object.freeze(["finishing","shape","chemistry","recovery"]);
 export const MATCH_PLAN_SCENARIOS=Object.freeze(["adaptive","protect","brave"]);
 export const MARKET_CARDS=Object.freeze([
@@ -306,7 +307,7 @@ export function minimumFutureDraftCost(seed,side,afterStep,rulesVersion=ARENA_RU
 export function initialPlayerState(input){
   return {
     owner:String(input.owner||""),
-    clubName:String(input.clubName||"COPA CLUB").slice(0,29),
+    clubName:String(input.clubName||"").trim().slice(0,29),
     rating:round(input.rating)||1000,
     ready:false,
     setup:null,
@@ -593,6 +594,10 @@ export function publicState(state,owner){
     score:state.score,
     events:state.events,
     result:state.result,
+    emotes:{
+      self:state.emotes&&state.emotes[selfIndex]?{...state.emotes[selfIndex]}:null,
+      opponent:state.emotes&&state.emotes[opponentIndex]?{...state.emotes[opponentIndex]}:null
+    },
     self:self?{...self}:null,
     opponent:opponent?{
       clubName:opponent.clubName,

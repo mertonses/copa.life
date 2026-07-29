@@ -99,6 +99,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-chair-action3">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
+<link rel="stylesheet" href="src/styles/arena.css?v=20260729-live-emotes1" data-copa-arena-styles>
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -238,7 +239,7 @@ if("serviceWorker"in navigator){
       <div class="v7-summary" id="introSummary"></div>
       <div class="v7-primary-actions">
         <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
-        <button class="arena-entry" id="arenaBtn" type="button" onclick="CopaArena.open()" aria-label="Copa Arena çok oyunculu modu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/><path class="arena-icon-spark" d="M12 1v3M3 6l3 2M21 6l-3 2"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button>
+        <button class="arena-entry" id="arenaBtn" type="button" onclick="CopaLazy.openArena()" aria-label="Copa Arena çok oyunculu modu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/><path class="arena-icon-spark" d="M12 1v3M3 6l3 2M21 6l-3 2"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button>
       </div>
       <div class="advanced-wrap hidden" aria-hidden="true">
         <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
@@ -402,9 +403,8 @@ try{
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
-<script src="src/audio/sfx.js?v=20260727-formation-sfx2"></script>
+<script src="src/audio/sfx.js?v=20260729-arena-audio1"></script>
 <script src="src/online/ghostClubs.js?v=20260727-balance-v5"></script>
-<script src="src/online/arena.js?v=20260729-context1"></script>
 <script src="src/ui/hub.js?v=20260727-card-readability1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260726-mobile-repair1"></script>
