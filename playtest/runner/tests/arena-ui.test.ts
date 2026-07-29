@@ -446,3 +446,39 @@ test("Copa Arena starts with a blank standalone club name",async({page},testInfo
   await expect(page.locator("[data-arena-club]")).toHaveValue("");
   await expect(page.locator('[data-arena-action="accept"]')).toBeVisible();
 });
+
+test("Google sign-in stays inside the Arena account card on narrow phones",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","phone-width Google sign-in contract");
+  await boot(page,false);
+  await page.evaluate(()=>{
+    localStorage.removeItem("copa_arena_google_user_v1");
+    localStorage.removeItem("copa_arena_terms_v1");
+    (globalThis as any).google={accounts:{id:{
+      initialize(){},
+      renderButton(slot:HTMLElement,options:{width:number}){
+        (globalThis as any).__arenaGoogleWidth=options.width;
+        const frame=document.createElement("iframe");
+        frame.style.width=`${options.width}px`;
+        frame.style.height="44px";
+        slot.appendChild(frame);
+      }
+    }}};
+  });
+  await page.locator('[data-mode-choice="arena"]:visible').click();
+  await expect(page.locator(".arena-google-auth")).toBeVisible();
+  await expect(page.locator(".arena-google-slot iframe")).toBeVisible();
+  const sizes=await page.evaluate(()=>{
+    const auth=document.querySelector<HTMLElement>(".arena-google-auth")!;
+    const slot=document.querySelector<HTMLElement>(".arena-google-slot")!;
+    const frame=slot.querySelector<HTMLElement>("iframe")!;
+    return{
+      requested:(globalThis as any).__arenaGoogleWidth,
+      authWidth:auth.getBoundingClientRect().width,
+      slotWidth:slot.getBoundingClientRect().width,
+      frameRight:frame.getBoundingClientRect().right,
+      authRight:auth.getBoundingClientRect().right
+    };
+  });
+  expect(sizes.requested).toBeLessThanOrEqual(Math.floor(sizes.slotWidth));
+  expect(sizes.frameRight).toBeLessThanOrEqual(sizes.authRight+1);
+});
