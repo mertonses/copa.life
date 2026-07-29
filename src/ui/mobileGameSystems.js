@@ -102,6 +102,7 @@
     view._savedRun=saved||null;
     const data=saved?savedSummary(saved):null,meta=landingMeta();
     view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><span class="mgl-light mgl-light-l"></span><span class="mgl-light mgl-light-r"></span><span class="mgl-tunnel"></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>COPA LIFE</h1><p>${tr()?"Yedi maç. Tek kupa. Her seçim kulübünün hikâyesini değiştirir.":"Seven matches. One cup. Every choice changes your club's story."}</p></div><ol class="mgl-road" aria-label="${tr()?"Kupa yolu":"Cup journey"}"><li>${tr()?"KADRO":"SQUAD"}</li><li>${tr()?"GRUPLAR":"GROUPS"}</li><li>${tr()?"ELEMELER":"KNOCKOUT"}</li><li>${tr()?"KUPA":"CUP"}</li></ol><div class="mgl-board-wrap"><span>4–3–3 · ${tr()?"DENGELİ YERLEŞİM":"BALANCED SHAPE"}</span>${landingPitch()}</div><section class="mgl-meta" aria-label="${tr()?"Kariyer özeti":"Career summary"}"><div class="mgl-career"><span>${tr()?"KARİYER":"CAREER"}</span><b>${tr()?"SEVİYE":"LEVEL"} ${meta.level}</b><b>${meta.reputation} ${tr()?"İTİBAR":"REP"}</b><b>${meta.licenses} ${tr()?"LİSANS":"LICENCES"}</b></div><div class="mgl-world"><b>6 <small>${tr()?"ÜLKE":"COUNTRIES"}</small></b><b>11 <small>${tr()?"LİG":"LEAGUES"}</small></b><b>9.827 <small>${tr()?"OYUNCU":"PLAYERS"}</small></b><b>220 <small>${tr()?"KULÜP":"CLUBS"}</small></b></div></section><div class="mgl-bottom">${data?`<article class="mgl-save"><span>${tr()?"DEVAM EDEN KARİYER":"ACTIVE CAREER"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/7</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki rakip":"Next opponent"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"KARİYERE DEVAM ET":"CONTINUE CAREER"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"BAŞLA":"START"}</button><button class="arena-entry mgl-arena-entry" data-mobile-arena type="button" onclick="CopaLazy.openArena()" aria-label="Copa Arena"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button></div></div></div>`;
+    view.querySelector("[data-mobile-arena]")?.remove();
     land.classList.remove("hidden");intro.classList.remove("hidden");
     return true;
   }
@@ -431,12 +432,14 @@
     if(tone==="discipline"&&ctx.troubled)fit+=2;
     if(tone==="tactical")fit+=1;
     if(target==="youth"&&ctx.young)fit++;if(target==="star"&&ctx.star)fit++;if(target==="defence"&&ctx.defenceNeed)fit++;if(target==="attack"&&ctx.under)fit++;
+    const recent=Array.isArray(ctx.history)?ctx.history.slice(-3):[],repeatCount=recent.filter(item=>item===tone).length;
+    fit-=repeatCount;
     let delta=0;const roll=rng();
     if(def.safe)delta=roll<.85?1:0;
     else if(fit>=2)delta=roll<.45?2:roll<.85?1:roll<.95?0:-1;
     else delta=roll<.20?1:roll<.55?0:roll<.85?-1:-2;
     delta=Math.max(-2,Math.min(3,delta));
-    return{tone,target,delta,fit,focus:def.focus+(delta>0?1:delta),pressure:def.pressure+(delta<0?1:0),tempo:def.tempo,injuryRisk:tone==="challenge"?.04:tone==="discipline"?.02:0,first20:Math.max(-2,Math.min(3,delta+(tone==="tactical"?1:0))),name:def[tr()?"tr":"en"],targetName:TARGETS[target]&&TARGETS[target][tr()?0:1]||TARGETS.all[tr()?0:1]};
+    return{tone,target,delta,fit,repeatCount,focus:def.focus+(delta>0?1:delta),pressure:def.pressure+(delta<0?1:0),tempo:def.tempo,injuryRisk:tone==="challenge"?.04:tone==="discipline"?.02:0,first20:Math.max(-2,Math.min(3,delta+(tone==="tactical"?1:0))),name:def[tr()?"tr":"en"],targetName:TARGETS[target]&&TARGETS[target][tr()?0:1]||TARGETS.all[tr()?0:1]};
   }
   function showTalkResult(result){
     const good=result.delta>=0;

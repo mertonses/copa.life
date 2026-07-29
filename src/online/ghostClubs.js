@@ -26,7 +26,7 @@
     gameVersion:"2026.07.13",
     dataVersion:"2026.07.15-copa1",
     cardSchemaVersion:"2026.07",
-    simulationVersion:"copa-final-core-v5",
+    simulationVersion:"copa-final-core-v6",
     queueMax:24,
     matchChance:{1:.20,2:.24,3:.29,4:.34,5:.38,6:.40,7:.42}
   });

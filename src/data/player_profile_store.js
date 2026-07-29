@@ -84,6 +84,20 @@ function playerProfileByKeyAsync(key){
     PLAYER_PROFILE_CACHE.set(key,profile);return profile;
   });
 }
+function _playerProfileRow(data,key,sourceType){
+  if(!data||!key)return null;
+  const values=data.records&&data.records[key];
+  if(!values)return null;
+  const profile={source:data.source||"copa.life oyun modeli",source_type:sourceType||"copa_model",model_version:data.model_version||"copa-model-v1",profile_key:key};
+  (data.fields||[]).forEach(function(field,index){profile[field]=values[index];});
+  return profile;
+}
+function playerProfileByKeySync(key){
+  if(!key||!PLAYER_PROFILE_DATA)return null;
+  if(PLAYER_PROFILE_CACHE.has(key))return PLAYER_PROFILE_CACHE.get(key);
+  const profile=_playerProfileRow(PLAYER_PROFILE_DATA,key,"copa_model");
+  PLAYER_PROFILE_CACHE.set(key,profile);return profile;
+}
 function playerProfileResolveKeyAsync(player,countryHint){
   const value=player&&typeof player==="object"?player:{};
   return loadPlayerProfiles().then(function(data){
@@ -118,5 +132,32 @@ function _playerProfileGenerated(player,countryHint){
   profile.national_team="";if(!value.fab){profile.secondary_position="";profile.preferred_foot="";profile.best_position="";profile.positions="";}
   return profile;
 }
+function _playerGameplayFallback(player,countryHint){
+  const value=player&&typeof player==="object"?player:{},ov=Math.max(35,Math.min(99,Number(value.ov)||65));
+  const role=String(value.natPos||value.pos||value.role||"").toUpperCase();
+  const isKeeper=/(?:GK|KL|KALE)/.test(role),isForward=/(?:FWD|FOR|ST|OOS|CF)/.test(role);
+  const isDefender=/(?:DEF|CB|LB|RB|WB|KB|SLB)/.test(role);
+  let hash=2166136261;
+  (String(value.name||"")+"|"+String(value.club||"")+"|"+String(value.age||"")+"|"+String(countryHint||"")).split("").forEach(function(character){hash^=character.charCodeAt(0);hash=Math.imul(hash,16777619);});
+  const variance=function(offset){return ((hash>>>offset)%9)-4;};
+  return{
+    source_type:"gameplay_fallback",profile_key:String(value.profileKey||value.profile_key||""),
+    copa_impact:Math.max(35,Math.min(99,ov+(isForward||isKeeper?5:-3)+variance(0))),
+    copa_build_up:Math.max(35,Math.min(99,ov+(isKeeper?-1:isDefender?-2:4)+variance(3))),
+    copa_space_control:Math.max(35,Math.min(99,ov+(isDefender||isKeeper?5:-2)+variance(6))),
+    copa_duels:Math.max(35,Math.min(99,ov+(isDefender?5:isForward?1:-1)+variance(9))),
+    copa_engine:Math.max(35,Math.min(99,ov+(isKeeper?-5:1)+variance(12))),
+    copa_pressure_decision:Math.max(35,Math.min(99,ov+variance(15))),
+    position_fit:100,
+    archetype:isKeeper?"shot_stopper":isForward?"finisher":isDefender?"space_defender":"balanced_midfielder"
+  };
+}
+function playerGameplayProfileSync(player,countryHint){
+  const value=player&&typeof player==="object"?player:{};
+  const explicit=String(value.profileKey||value.profile_key||"").trim();
+  const profile=playerProfileByKeySync(explicit);
+  return profile||_playerGameplayFallback(value,countryHint);
+}
 function playerProfileForPlayerAsync(player,countryHint){return playerProfileResolveKeyAsync(player,countryHint).then(function(key){return key?playerProfileByKeyAsync(key):_playerProfileGenerated(player,countryHint);});}
 function playerProfileForAsync(country,name,club,age){return playerProfileByKeyAsync(playerProfileKey(country,name,club,age));}
+if(typeof window!=="undefined")loadPlayerProfiles().catch(function(){});

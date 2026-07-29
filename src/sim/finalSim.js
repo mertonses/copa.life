@@ -549,7 +549,8 @@ function _chooseSequenceArchetype(ctx,rng){
       losing:!!ctx.losing,leading:!!ctx.leading,
       carrierRole:carrier.role,
       forceLeft:(carrier.role==='LW'||carrier.role==='LB'||_isWideLeft(carrier.x))&&(finalThird||midThird),
-      forceRight:(carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&(finalThird||midThird)
+      forceRight:(carrier.role==='RW'||carrier.role==='RB'||_isWideRight(carrier.x))&&(finalThird||midThird),
+      setPieceBias:tid===0&&globalThis._activeFinalPreparationProfile?Math.min(.5,(Number(globalThis._activeFinalPreparationProfile.setpiece)||0)*.14):0
     },rng);
   }
   const weights=[
@@ -1090,6 +1091,7 @@ function _mkRenderer(canvas,W,H){
    buildSim — main entry point
 ═══════════════════════════════════════════════════════ */
 function buildSim(myPow, oppPow) {
+  if(window.CopaModeGate)window.CopaModeGate.hide();
   // A new match must never inherit the previous final's report image.
   window._heatmapImg=null;
   window._penaltyModalReady=false;
@@ -1315,19 +1317,27 @@ function buildSim(myPow, oppPow) {
   const _namesA=(typeof picksBySlot!=="undefined")?picksBySlot.map(p=>p?p.name:"?"):[];
   const _namesB=(typeof oppLineup!=="undefined"&&oppLineup.length)?oppLineup.map(o=>o.name):Array(11).fill("?");
   const _injA=(typeof picksBySlot!=="undefined")?picksBySlot.map(p=>p&&p.injured):[];
+  const _finalPrep=typeof CopaPreparation!=="undefined"&&CopaPreparation&&typeof CopaPreparation.effects==="function"?CopaPreparation.effects(_r,typeof opponent!=="undefined"?opponent:null):{};
+  globalThis._activeFinalPreparationProfile=_finalPrep;
 
   // Power → stat offset
   const powOffA=Math.max(-15,Math.min(20,(myPow-65)*0.6));
   const powOffB=Math.max(-15,Math.min(20,(oppPow-65)*0.6));
 
   const ROLE_MAP=['GK','CB','LB','RB','DM','CM','CM','LW','RW','ST','ST'];
+  function profileStat(player,key,fallback){
+    const value=Number(player&&player.gameplayProfile&&player.gameplayProfile[key]);
+    return Number.isFinite(value)?fallback*.55+value*.45:fallback;
+  }
   function mkStats(i,off,names,inj){
     const nm=names[i]||'?';
     // derive stats from overall if available
     let ov=65+off;
-    if(typeof picksBySlot!=="undefined"&&picksBySlot[i]&&picksBySlot[i].ov)ov=picksBySlot[i].ov+off;
+    const player=typeof picksBySlot!=="undefined"?picksBySlot[i]:null;
+    if(player&&player.ov)ov=player.ov+off;
     const role=ROLE_MAP[i]||'CM';
-    const base={passing:ov,vision:ov,decisions:ov,dribbling:ov,shooting:role==='ST'?ov+8:role==='AM'?ov+4:ov-5,defending:role==='CB'||role==='DM'?ov+8:ov-5,positioning:ov,anticipation:ov,pace:role==='LW'||role==='RW'||role==='ST'?ov+6:ov,goalkeeping:role==='GK'?ov+15:20,name:nm,number:i+1,injured:!!(inj&&inj[i])};
+    const build=profileStat(player,"copa_build_up",ov),impact=profileStat(player,"copa_impact",ov),space=profileStat(player,"copa_space_control",ov),duels=profileStat(player,"copa_duels",ov),engine=profileStat(player,"copa_engine",ov),decision=profileStat(player,"copa_pressure_decision",ov);
+    const base={passing:build+(Number(_finalPrep.chemistry)||0),vision:build,decisions:decision,dribbling:(build+engine)/2,shooting:impact+(role==='ST'?6:role==='AM'?3:-3)+(Number(_finalPrep.attack)||0)*1.8,defending:(space+duels)/2+(role==='CB'||role==='DM'?6:-3)+(Number(_finalPrep.defence)||0)*1.8,positioning:space,anticipation:decision,pace:engine+(role==='LW'||role==='RW'||role==='ST'?4:0),goalkeeping:role==='GK'?impact+12:20,name:nm,number:i+1,injured:!!(inj&&inj[i])};
     return base;
   }
   function mkStatsB(i,off,names){
@@ -1338,8 +1348,9 @@ function buildSim(myPow, oppPow) {
     // ghost never bypasses the game's established power balancing.
     let ov=65+off;
     if(Number.isFinite(recordedPower))ov=ov*0.65+recordedPower*0.35;
-    const role=ROLE_MAP[i]||'CM';
-    return{passing:ov,vision:ov,decisions:ov,dribbling:ov,shooting:role==='ST'?ov+8:ov-5,defending:role==='CB'||role==='DM'?ov+8:ov-5,positioning:ov,anticipation:ov,pace:role==='LW'||role==='RW'||role==='ST'?ov+6:ov,goalkeeping:role==='GK'?ov+15:20,name:nm,number:i+1};
+    const role=ROLE_MAP[i]||'CM',player=typeof oppLineup!=="undefined"?oppLineup[i]:null;
+    const build=profileStat(player,"copa_build_up",ov),impact=profileStat(player,"copa_impact",ov),space=profileStat(player,"copa_space_control",ov),duels=profileStat(player,"copa_duels",ov),engine=profileStat(player,"copa_engine",ov),decision=profileStat(player,"copa_pressure_decision",ov);
+    return{passing:build,vision:build,decisions:decision,dribbling:(build+engine)/2,shooting:impact+(role==='ST'?6:-3),defending:(space+duels)/2+(role==='CB'||role==='DM'?6:-3),positioning:space,anticipation:decision,pace:engine+(role==='LW'||role==='RW'||role==='ST'?4:0),goalkeeping:role==='GK'?impact+12:20,name:nm,number:i+1};
   }
 
   function mkTeamA(fm,names,inj){
@@ -2595,7 +2606,7 @@ function buildSim(myPow, oppPow) {
     return {
       country:typeof selectedCountry!=="undefined"?selectedCountry:"",
       round:6,outcome,
-      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v5",
+      model_version:window.CopaFinalSimCore&&window.CopaFinalSimCore.MODEL_VERSION||"copa-final-core-v6",
       power_gap:powerGap,end_type:endType,tactic:shoutMode||"balanced"
     };
   }
@@ -2815,7 +2826,7 @@ function buildSim(myPow, oppPow) {
     if(gameEnded||!window.CopaFinalSimPersistence)return false;
     const core=window.CopaFinalSimCore;
     return window.CopaFinalSimPersistence.persist({
-      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v5",
+      modelVersion:core&&core.MODEL_VERSION||"copa-final-core-v6",
       runSeed:seedBase,round:_r,homePower:myPow,awayPower:oppPow,
       match:getCheckpointState()
     });
