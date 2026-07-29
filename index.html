@@ -101,7 +101,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-chair-action3">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
-<link rel="stylesheet" href="src/styles/arena.css?v=20260729-live-emotes1" data-copa-arena-styles>
+<link rel="stylesheet" href="src/styles/arena.css?v=20260730-arena-polish1" data-copa-arena-styles>
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260729-mode-gate1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
@@ -127,13 +127,13 @@ if("serviceWorker"in navigator){
   <div class="mode-gate-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
   <header class="mode-gate-brand">
     <div class="mode-gate-wordmark"><span>Copa</span> <em>Life</em></div>
-    <p>HİKÂYENİ SEÇ. SAHAYA ÇIK.</p>
+    <div class="mode-gate-brand-actions"><p data-mode-copy="slogan">HİKÂYENİ SEÇ. SAHAYA ÇIK.</p><button class="mode-settings-button global-settings-proxy" type="button" onclick="event.stopPropagation();toggleSettings(this)" title="Ayarlar" aria-label="Ayarlar" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
   </header>
   <main class="mode-gate-main">
     <div class="mode-gate-heading">
-      <span>OYUN MODU</span>
+      <span data-mode-copy="kicker">OYUN MODU</span>
       <h1 id="modeGateTitle">Nasıl oynamak istersin?</h1>
-      <p>Tek oyunculu hikâyeni yaşa veya Arena'da gerçek rakiplere meydan oku.</p>
+      <p data-mode-copy="intro">Tek oyunculu hikâyeni yaşa veya Arena'da rakiplere meydan oku.</p>
     </div>
     <div class="mode-gate-grid">
       <button class="mode-card mode-card-classic" type="button" data-mode-choice="classic">
@@ -142,11 +142,11 @@ if("serviceWorker"in navigator){
           <svg viewBox="0 0 96 96"><rect x="20" y="20" width="56" height="56" rx="12"/><circle cx="36" cy="36" r="4"/><circle cx="60" cy="36" r="4"/><circle cx="48" cy="48" r="4"/><circle cx="36" cy="60" r="4"/><circle cx="60" cy="60" r="4"/></svg>
         </span>
         <span class="mode-card-copy">
-          <small>TEK OYUNCULU</small>
-          <strong>COPA LIFE</strong>
-          <span>Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.</span>
+          <small data-mode-copy="solo">TEK OYUNCULU</small>
+          <strong class="mode-title mode-title-life">COPA <em>LIFE</em></strong>
+          <span data-mode-copy="lifeDesc">Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.</span>
         </span>
-        <span class="mode-card-meta"><b>KLASİK DENEYİM</b><i>OYNA →</i></span>
+        <span class="mode-card-meta"><b data-mode-copy="lifeMeta">KLASİK DENEYİM</b><i data-mode-copy="lifeCta">OYNA →</i></span>
       </button>
       <button class="mode-card mode-card-arena" id="arenaModeBtn" type="button" data-mode-choice="arena">
         <span class="mode-card-live"><i></i> LIVE</span>
@@ -156,14 +156,14 @@ if("serviceWorker"in navigator){
           <i></i>
         </span>
         <span class="mode-card-copy">
-          <small>PREMIUM MULTIPLAYER</small>
-          <strong>COPA ARENA</strong>
-          <span>Canlı rakipler, dereceli yolculuk ve rövanş heyecanı.</span>
+          <small data-mode-copy="multiplayer">ÇOK OYUNCULU</small>
+          <strong class="mode-title mode-title-arena">COPA <em>ARENA</em></strong>
+          <span data-mode-copy="arenaDesc">Canlı eşleşmeler, dereceli yolculuk ve rövanş heyecanı.</span>
         </span>
-        <span class="mode-card-meta"><b>REKABETÇİ · CANLI</b><i>ARENA'YA GİR →</i></span>
+        <span class="mode-card-meta"><b data-mode-copy="arenaMeta">REKABETÇİ · CANLI</b><i data-mode-copy="arenaCta">ARENA'YA GİR →</i></span>
       </button>
     </div>
-    <p class="mode-gate-note"><span></span> İki modda da aynı kadro kurma deneyimi, farklı bir mücadele.</p>
+    <p class="mode-gate-note"><span></span><b data-mode-copy="note">İki modda da aynı kadro kurma deneyimi, farklı bir mücadele.</b></p>
   </main>
 </section>
 <div class="wrap">
@@ -431,7 +431,7 @@ try{
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260727-advanced-sheet1"></script>
-<script src="src/ui/modeGate.js?v=20260729-mode-gate2"></script>
+<script src="src/ui/modeGate.js?v=20260730-mode-gate3"></script>
 <script src="src/runtime/finalReplay.js?v=20260719-compact-replay1"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
@@ -450,7 +450,7 @@ try{
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
-<script src="src/audio/sfx.js?v=20260729-arena-audio1"></script>
+<script src="src/audio/sfx.js?v=20260730-audio-defaults1"></script>
 <script src="src/online/ghostClubs.js?v=20260727-balance-v5"></script>
 <script src="src/ui/hub.js?v=20260727-card-readability1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
@@ -715,7 +715,7 @@ function setCopaHeroTitle(html){
   tagline.innerHTML=String(html||"");
 }
 window.setCopaHeroTitle=setCopaHeroTitle;
-function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(window.CopaAdvancedSettings)window.CopaAdvancedSettings.refreshCopy();if(window.CopaArena)window.CopaArena.refresh();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
+function setLang(l){LANG=l;$("lgTR").classList.toggle("on",l==="tr");$("lgEN").classList.toggle("on",l==="en");document.documentElement.lang=l;applyStatic();if(window.CopaAdvancedSettings)window.CopaAdvancedSettings.refreshCopy();if(window.CopaModeGate)window.CopaModeGate.refreshCopy();if(window.CopaArena)window.CopaArena.refresh();if(typeof ensureThemeSetting==="function")ensureThemeSetting();if(typeof ensureMusicSetting==="function")ensureMusicSetting();if(typeof _updateMusicButton==="function")_updateMusicButton();if(typeof refreshThemeSetting==="function")refreshThemeSetting();if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();buildFormButtons();applyMeta();
   if(!$("hub").classList.contains("hidden"))renderHub();if(!$("draft").classList.contains("hidden"))refreshDraft();if($("tournamentDraw")&&!$("tournamentDraw").classList.contains("hidden"))startTournamentDraw(true);if(!$("result").classList.contains("hidden")&&lastResult)renderResult();if(!$("fixbar").classList.contains("hidden"))renderFixtures();}
 function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.life — Roguelite futbol. Şans + strateji.":"copa.life — Roguelite football. Luck + strategy.";$("lblBudget").innerHTML=x.budget;$("coverTitle").textContent=x.coverTitle;const cupLocale=_cups[LANG]||_cups.en;$("coverSub").textContent=cupLocale[selectedCountry]||x.coverSub;$("coverBlurb").textContent=x.coverBlurb;if($("lowryNote"))$("lowryNote").textContent=x.artNote;const _patHtml=x.patreonText.replace("copa.life","<span style='font-family:var(--mono);font-weight:900'>copa<span style='opacity:.38'>.</span>life</span>");if($("patreonIntroText"))$("patreonIntroText").innerHTML=_patHtml;if($("patreonResultText"))$("patreonResultText").innerHTML=_patHtml;if($("contactIntroLabel"))$("contactIntroLabel").textContent=tr?"İletişim":"Contact";if($("contactIntroText"))$("contactIntroText").textContent=tr?"Soru, fikir, hata? · ":"Question, idea, bug? · ";$("pickhdr").textContent=x.pickhdr;const _ico_ball="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><circle cx='7' cy='7' r='5.5'/><polygon points='7,4.5 8.8,5.8 8.1,7.8 5.9,7.8 5.2,5.8' fill='currentColor' opacity='.25' stroke-width='.8'/></svg>";const _ico_person="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' style='vertical-align:-.15em'><circle cx='6' cy='4' r='2.5'/><path d='M1 13Q1 9 6 9Q11 9 11 13'/></svg>";const _ico_club="<svg viewBox='0 0 14 14' width='11' height='11' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-.1em'><path d='M7 1L13 4V8Q13 12 7 13Q1 12 1 8V4Z'/></svg>";const _ico_card="<svg viewBox='0 0 12 14' width='10' height='12' fill='none' stroke='currentColor' stroke-width='1.4' stroke-linecap='round' style='vertical-align:-.1em'><rect x='1' y='1' width='10' height='12' rx='1.5'/><line x1='3.5' y1='5' x2='8.5' y2='5'/><line x1='3.5' y1='7.5' x2='8.5' y2='7.5'/><line x1='3.5' y1='10' x2='6' y2='10'/></svg>";const _cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:42;const _fpLig=tr?"5 ülke · 10 lig":"5 countries · 10 leagues";$("protoFoot").innerHTML=`copa.life · ${_ico_ball} ${_fpLig} · ${_ico_person} <b>9.264</b> ${tr?"oyuncu":"players"} · ${_ico_club} <b>180</b> ${tr?"kulüp":"clubs"} · ${_ico_card} <b>${_cc}</b> ${tr?"kart":"cards"} · <b>6</b> ${tr?"tur":"rounds"} · <b>6</b> ${tr?"başkan":"chairs"}`;const ms=$("mechStats");if(ms)ms.innerHTML=`<span><b>9.264</b> ${tr?"oyuncu":"players"}</span><span>·</span><span><b>10</b> ${tr?"lig":"leagues"}</span><span>·</span><span><b>${_cc}</b> ${tr?"kart":"cards"}</span><span>·</span><span><b>6</b> ${tr?"tur":"rounds"}</span><span>·</span><span><b>6</b> ${tr?"başkan":"chairs"}</span>`;if($("shareBtnLbl"))$("shareBtnLbl").textContent=tr?"PAYLAŞ":"SHARE";$("rollHint").textContent=x.rollHint;$("rollBtn").innerHTML=x.roll;$("allBtn").innerHTML=x.allBtn;if($("undoBtn"))$("undoBtn").innerHTML=x.undo;if($("howtoToggle")){const _bookSvg=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>`;$("howtoToggle").innerHTML=_bookSvg+(tr?"COPA REHBERİ":"COPA GUIDE");}_applyHowtoLang();$("ddLbl").innerHTML=x.ddTitle;
   if($("startBtn"))$("startBtn").textContent=x.startBtn;if($("allBtn"))$("allBtn").innerHTML=`<svg class="dice-ico" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="3"/><circle cx="7" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="7" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="13" r="1" fill="currentColor" stroke="none"/></svg> ${tr?"Takımı Otomatik Kur":"Auto-fill XI"}`;if($("howtoToggle"))$("howtoToggle").innerHTML=`<svg viewBox="0 0 20 16" width="13" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em;margin-right:4px"><rect x="1" y="1" width="8" height="14" rx="1"/><path d="M9 2Q12 1 17 2L17 14Q12 13 9 14"/><line x1="3" y1="5" x2="7" y2="5"/><line x1="3" y1="7.5" x2="7" y2="7.5"/><line x1="3" y1="10" x2="7" y2="10"/><line x1="11" y1="5" x2="15" y2="5"/><line x1="11" y1="7.5" x2="15" y2="7.5"/><line x1="11" y1="10" x2="15" y2="10"/></svg>${tr?"COPA REHBERİ":"COPA GUIDE"}`;if($("countryhdr"))$("countryhdr").textContent=tr?"Ülkeni Seç":"Pick Your Country";
@@ -1429,9 +1429,11 @@ setTimeout(()=>{applyTheme("dark",false);try{const savedMusic=localStorage.getIt
 setTimeout(()=>{if(window.GhostClubs&&typeof window.GhostClubs.ensureSetting==="function")window.GhostClubs.ensureSetting();},0);
 
 /* ===== settings dropdown ===== */
-function toggleSettings(){const d=$("settingsDrop"),trigger=$("settingsBtn");if(!d)return;const opening=d.classList.contains("hidden");d.classList.toggle("hidden");if(trigger)trigger.setAttribute("aria-expanded",String(opening));if(opening){const _wrap=$("settingsWrap");const _close=e=>{if(_wrap&&!_wrap.contains(e.target)){d.classList.add("hidden");if(trigger)trigger.setAttribute("aria-expanded","false");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);}};const _esc=e=>{if(e.key==="Escape"){d.classList.add("hidden");if(trigger)trigger.setAttribute("aria-expanded","false");document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);trigger&&trigger.focus();}};setTimeout(()=>{document.addEventListener("click",_close,true);document.addEventListener("keydown",_esc);const first=d.querySelector("button:not(:disabled)");if(first)first.focus({preventScroll:true});},0);}}
+function _settingsTriggers(){return [...document.querySelectorAll("#settingsBtn,.global-settings-proxy")];}
+function _closeSettings(focusTrigger){const d=$("settingsDrop");if(!d)return;d.classList.add("hidden");d.classList.remove("global-settings-open");d.style.removeProperty("--settings-left");d.style.removeProperty("--settings-top");const wrap=$("settingsWrap");if(wrap&&d.parentElement!==wrap)wrap.appendChild(d);_settingsTriggers().forEach(button=>button.setAttribute("aria-expanded","false"));if(focusTrigger)focusTrigger.focus({preventScroll:true});}
+function toggleSettings(source){const d=$("settingsDrop"),trigger=source&&source.nodeType===1?source:$("settingsBtn");if(!d)return;const opening=d.classList.contains("hidden");if(!opening){_closeSettings(trigger);return;}const proxy=trigger&&trigger.id!=="settingsBtn",wrap=$("settingsWrap");if(proxy&&d.parentElement!==document.body)document.body.appendChild(d);else if(!proxy&&wrap&&d.parentElement!==wrap)wrap.appendChild(d);d.classList.remove("hidden");_settingsTriggers().forEach(button=>button.setAttribute("aria-expanded",String(button===trigger)));if(proxy){const rect=trigger.getBoundingClientRect(),width=Math.min(310,Math.max(240,innerWidth-20)),left=Math.max(10,Math.min(innerWidth-width-10,rect.right-width));d.style.setProperty("--settings-left",`${left}px`);d.style.setProperty("--settings-top",`${Math.min(innerHeight-20,rect.bottom+8)}px`);d.classList.add("global-settings-open");}else d.classList.remove("global-settings-open");const _close=e=>{if(!d.contains(e.target)&&!e.target.closest(".global-settings-proxy,#settingsBtn")){_closeSettings();document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);}};const _esc=e=>{if(e.key==="Escape"){_closeSettings(trigger);document.removeEventListener("click",_close,true);document.removeEventListener("keydown",_esc);}};setTimeout(()=>{document.addEventListener("click",_close,true);document.addEventListener("keydown",_esc);const first=d.querySelector("button:not(:disabled)");if(first)first.focus({preventScroll:true});},0);}
 function toggleReducedMotion(){const on=document.body.classList.toggle("reduced-motion");const b=$("animBtn");if(b)b.classList.toggle("on",on);try{localStorage.setItem("copa_reduced_motion",on?"1":"0");}catch(e){}}
-document.addEventListener("click",function(e){const w=$("settingsWrap");if(w&&!e.composedPath().includes(w)){const d=$("settingsDrop"),trigger=$("settingsBtn");if(d)d.classList.add("hidden");if(trigger)trigger.setAttribute("aria-expanded","false");}});
+document.addEventListener("click",function(e){const w=$("settingsWrap");if(w&&!e.composedPath().includes(w)&&!e.target.closest(".global-settings-proxy"))_closeSettings();});
 
 /* ===== no right-click on assets ===== */
 document.addEventListener("contextmenu",function(e){if(e.target.tagName==="IMG"||e.target.tagName==="CANVAS"||e.target.closest(".cover")||e.target.closest(".mascot"))e.preventDefault();});

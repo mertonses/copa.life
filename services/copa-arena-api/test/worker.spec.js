@@ -473,6 +473,59 @@ describe("Arena Durable Objects",()=>{
     });
   });
 
+  it("lets a ranked system club decide early and advances as soon as the human is ready",async()=>{
+    const matchId="AR-BOTDECISION000001";
+    const room=env.ARENA_ROOM.getByName(matchId);
+    const players=[
+      {owner:"owner-bot-human",clubName:"İnsan Kulübü",rating:1000},
+      {owner:"arena-system:1234abcd:Q7K2",clubName:"Neon Tayfa FC Q7K2",rating:1012}
+    ];
+    await room.init(matchId,players,"bot-decision-seed",{
+      mode:"ranked",botIndex:1,botProfile:{seed:"Q7K2",risk:.72,thrift:.31,flair:.83,press:.64,patience:.42}
+    });
+    await runInDurableObject(room,async instance=>{
+      expect(instance.state.botDueAt).toBeLessThan(instance.state.deadline);
+      instance.state.botDueAt=Date.now()-1;
+      instance.persist();
+      await instance.alarm();
+      expect(instance.state.phase).toBe("lobby");
+      expect(instance.state.players[1].ready).toBe(true);
+      expect(instance.state.players[0].ready).toBe(false);
+      expect(await instance.action(players[0].owner,{type:"ready"})).toBe("ok");
+      expect(instance.state.phase).toBe("setup");
+      expect(instance.state.botDueAt).toBeGreaterThan(Date.now());
+      expect(instance.state.botDueAt).toBeLessThan(instance.state.deadline);
+    });
+  });
+
+  it("offers a rematch after a penalty shootout result",async()=>{
+    const matchId="AR-PENALTYREMATCH01";
+    const room=env.ARENA_ROOM.getByName(matchId);
+    const players=[
+      {owner:"owner-penalty-home",clubName:"Penaltı Ev",rating:1000},
+      {owner:"owner-penalty-away",clubName:"Penaltı Dep",rating:1000}
+    ];
+    const created=new Date().toISOString();
+    await env.DB.batch(players.map((player,index)=>
+      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(player.owner,`AC-PENALTY${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
+    ));
+    await room.init(matchId,players,"penalty-rematch-seed");
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
+        player.draft=DRAFT_LINES.map((line,index)=>({line,id:`${line}-${index}`,name:`Penalty ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"}));
+        player.market={id:"none"};player.training="recovery";player.tactics=["balanced","balanced","balanced"];
+        player.manualDecisions=6;player.manualTactics=1;
+      }
+      instance.state.score=[1,1];
+      await instance.finish(teamSnapshot(instance.state.players[0]),teamSnapshot(instance.state.players[1]),[5,4]);
+      expect(instance.state.result).toMatchObject({score:[1,1],penalty:[5,4],outcomes:["win","loss"]});
+      expect(instance.state.rematch).toMatchObject({available:true,requests:[false,false],launched:false});
+      expect(publicState(instance.state,players[0].owner).rematch.available).toBe(true);
+    });
+  });
+
   it("soft-resets a stale season before applying the completed match",async()=>{
     const room=env.ARENA_ROOM.getByName("AR-SEASONRESET00001");
     const players=[

@@ -1,6 +1,13 @@
 (function(root){
   "use strict";
   const gate=()=>document.getElementById("modeGate");
+  const COPY={
+    tr:{slogan:"HİKÂYENİ SEÇ. SAHAYA ÇIK.",kicker:"OYUN MODU",title:"Nasıl oynamak istersin?",intro:"Tek oyunculu hikâyeni yaşa veya Arena'da rakiplere meydan oku.",solo:"TEK OYUNCULU",lifeDesc:"Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.",lifeMeta:"KLASİK DENEYİM",lifeCta:"OYNA →",multiplayer:"ÇOK OYUNCULU",arenaDesc:"Canlı eşleşmeler, dereceli yolculuk ve rövanş heyecanı.",arenaMeta:"REKABETÇİ · CANLI",arenaCta:"ARENA'YA GİR →",note:"İki modda da aynı kadro kurma deneyimi, farklı bir mücadele."},
+    en:{slogan:"CHOOSE YOUR STORY. TAKE THE FIELD.",kicker:"GAME MODE",title:"How do you want to play?",intro:"Write your solo story or challenge opponents in the Arena.",solo:"SINGLE PLAYER",lifeDesc:"Build your squad, make your choices and write your own football story.",lifeMeta:"CLASSIC EXPERIENCE",lifeCta:"PLAY →",multiplayer:"MULTIPLAYER",arenaDesc:"Live matchmaking, a ranked journey and rematch drama.",arenaMeta:"COMPETITIVE · LIVE",arenaCta:"ENTER ARENA →",note:"The same squad-building core in both modes, with a different challenge."},
+    es:{slogan:"ELIGE TU HISTORIA. SALTA AL CAMPO.",kicker:"MODO DE JUEGO",title:"¿Cómo quieres jugar?",intro:"Vive tu historia en solitario o desafía a rivales en la Arena.",solo:"UN JUGADOR",lifeDesc:"Crea tu plantilla, decide y escribe tu propia historia de fútbol.",lifeMeta:"EXPERIENCIA CLÁSICA",lifeCta:"JUGAR →",multiplayer:"MULTIJUGADOR",arenaDesc:"Emparejamiento en vivo, camino clasificatorio y emoción de revancha.",arenaMeta:"COMPETITIVO · EN VIVO",arenaCta:"ENTRAR EN ARENA →",note:"La misma creación de plantilla en ambos modos, con un reto diferente."},
+    de:{slogan:"WÄHLE DEINE STORY. AB AUFS FELD.",kicker:"SPIELMODUS",title:"Wie möchtest du spielen?",intro:"Erlebe deine Solo-Story oder fordere Gegner in der Arena heraus.",solo:"EINZELSPIELER",lifeDesc:"Baue deinen Kader, entscheide und schreibe deine eigene Fußballgeschichte.",lifeMeta:"KLASSISCHES ERLEBNIS",lifeCta:"SPIELEN →",multiplayer:"MEHRSPIELER",arenaDesc:"Live-Matchmaking, Ranglistenreise und Revanche-Spannung.",arenaMeta:"WETTKAMPF · LIVE",arenaCta:"ARENA BETRETEN →",note:"In beiden Modi derselbe Kaderbau, aber eine andere Herausforderung."},
+    it:{slogan:"SCEGLI LA TUA STORIA. SCENDI IN CAMPO.",kicker:"MODALITÀ DI GIOCO",title:"Come vuoi giocare?",intro:"Vivi la storia in singolo o sfida gli avversari nell'Arena.",solo:"GIOCATORE SINGOLO",lifeDesc:"Crea la rosa, scegli e scrivi la tua storia di calcio.",lifeMeta:"ESPERIENZA CLASSICA",lifeCta:"GIOCA →",multiplayer:"MULTIGIOCATORE",arenaDesc:"Matchmaking live, percorso classificato ed emozione della rivincita.",arenaMeta:"COMPETITIVO · LIVE",arenaCta:"ENTRA NELL'ARENA →",note:"La stessa creazione della rosa in entrambi i modi, con una sfida diversa."}
+  };
   function setVisible(visible){
     const element=gate();if(!element)return;
     const hidden=!visible;
@@ -24,12 +31,11 @@
   }
   function refreshCopy(){
     const element=gate();if(!element)return;
-    const tr=root.LANG!=="en";
-    const heading=element.querySelector(".mode-gate-heading");
-    if(!heading)return;
-    heading.innerHTML=tr
-      ?'<span>OYUN MODU</span><h1 id="modeGateTitle">Nasıl oynamak istersin?</h1><p>Tek oyunculu hikâyeni yaşa veya Arena\'da gerçek rakiplere meydan oku.</p>'
-      :'<span>GAME MODE</span><h1 id="modeGateTitle">How do you want to play?</h1><p>Write your solo story or challenge real opponents in the Arena.</p>';
+    const copy=COPY[root.LANG]||COPY.en;
+    const title=element.querySelector("#modeGateTitle");if(title)title.textContent=copy.title;
+    element.querySelectorAll("[data-mode-copy]").forEach(node=>{const value=copy[node.dataset.modeCopy];if(value)node.textContent=value;});
+    const settings=element.querySelector(".mode-settings-button");
+    if(settings){const label={tr:"Ayarlar",en:"Settings",es:"Ajustes",de:"Einstellungen",it:"Impostazioni"}[root.LANG]||"Settings";settings.title=label;settings.setAttribute("aria-label",label);}
   }
   function hasRestorableSession(){
     try{

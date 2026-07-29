@@ -40,7 +40,7 @@ else{
 }
 const nativeRuntime=path.join(OUT,"src/runtime/nativeApp.js"),nativeAdsRuntime=path.join(OUT,"src/runtime/nativeAds.js");
 if(fs.existsSync(nativeRuntime)){const source=fs.readFileSync(nativeRuntime,"utf8");if(!source.includes("capacitor.Plugins"))fail("native runtime does not support Capacitor 8 plugin globals");}
-if(!fs.existsSync(nativeAdsRuntime))fail("Android native ad runtime is missing");else{const source=fs.readFileSync(nativeAdsRuntime,"utf8");for(const marker of ["CopaAds","showRunEnd","showRewardedReroll","showRewardedInjury","showRewardedMarket","showPrivacyOptions","privacyOptionsChanged","scheduleInitialize","setTimeout(initialize,8000)"])if(!source.includes(marker))fail(`Android native ad runtime is missing ${marker}`);}
+if(!fs.existsSync(nativeAdsRuntime))fail("Android native ad runtime is missing");else{const source=fs.readFileSync(nativeAdsRuntime,"utf8");for(const marker of ["CopaAds","showRunEnd","showArenaEnd","showRewardedReroll","showRewardedInjury","showRewardedMarket","showPrivacyOptions","privacyOptionsChanged","scheduleInitialize","setTimeout(initialize,8000)"])if(!source.includes(marker))fail(`Android native ad runtime is missing ${marker}`);}
 if(!index.includes("Capacitor.Plugins.Browser")||!index.includes("openNativeSupport")||!index.includes('const supportUrl="https://copa.life/support.html"')||!index.includes("plugin.open({url:supportUrl"))fail("Android support link is not routed through the dedicated support page");
 if(index.includes('plugin.open({url:"https://copa.life/"'))fail("Android support link still routes to the public home page");
 const platformManifestPath=path.join(OUT,"platform-build.json"),versionPath=path.join(ROOT,"release/android-version.json");

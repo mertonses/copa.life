@@ -78,9 +78,24 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await boot(page);
   const entries=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth}));
   expect(entries.overflow).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")}))).toEqual({music:"0",sfx:"0"});
+  const gateLabels={tr:"ÇOK OYUNCULU",en:"MULTIPLAYER",es:"MULTIJUGADOR",de:"MEHRSPIELER",it:"MULTIGIOCATORE"};
+  for(const [language,label] of Object.entries(gateLabels)){
+    await page.evaluate((next)=>(globalThis as any).setLang(next),language);
+    await expect(page.locator('[data-mode-copy="multiplayer"]')).toHaveText(label);
+  }
+  await page.evaluate(()=>(globalThis as any).setLang("en"));
+  await page.locator(".mode-settings-button").click();
+  await expect(page.locator("#settingsDrop")).toBeVisible();
+  await page.keyboard.press("Escape");
   await capture(page,"01-web-opening-with-arena.png");
   await page.locator('[data-mode-choice="arena"]').click();
   await expect(page.locator(".arena-portal")).toBeVisible();
+  await page.locator(".arena-settings-button").click();
+  await expect(page.locator("#settingsDrop")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.evaluate(()=>(globalThis as any).toggleMute());
+  expect(await page.evaluate(()=>localStorage.getItem("copa_sfx"))).toBe("1");
   await capture(page,"02-web-arena-hub.png");
   await page.evaluate(()=>(globalThis as any).setLang("de"));
   await expect(page.locator(".arena-play")).toContainText("MATCH FINDEN");
@@ -288,7 +303,7 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.audioClockActive)).toBe(false);
   await page.evaluate(()=>{(globalThis as any).muted=false;});
 
-  await setRoom(page,{...base,phase:"result",score:[2,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],rematch:{available:true,requested:false,opponentRequested:true,launched:false},self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,1],penalty:null,outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
+  await setRoom(page,{...base,phase:"result",score:[2,2],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],rematch:{available:true,requested:false,opponentRequested:true,launched:false},self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,2],penalty:[5,4],outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
   await expect(page.locator(".arena-result-rewards")).toContainText("1284 → 1298");
   await expect(page.locator(".arena-result-events")).toContainText("71'");
   await expect(page.locator(".arena-rematch")).toContainText("OPPONENT WANTS A REMATCH");
@@ -311,6 +326,8 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
   for(const viewport of [{width:360,height:800,name:"phone-small",scale:"130"},{width:430,height:932,name:"phone",scale:"115"},{width:768,height:1024,name:"tablet",scale:"100"}]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await boot(page,true);
+    expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")})),viewport.name).toEqual({music:"0",sfx:"0"});
+    await page.evaluate(()=>(globalThis as any).toggleMute());
     await page.evaluate((scale:string)=>(globalThis as any).CopaMobileExperience?.setTextScale(scale),viewport.scale);
     await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale",viewport.scale);
     await capture(page,`android-${viewport.name}-opening.png`);
