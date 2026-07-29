@@ -26,6 +26,13 @@ const allowed = new Set([
   "#DDF3E3", "#DF4B48", "#E35B69", "#E3F3F8", "#F0C44D", "#F25D42",
   "#F4F7F7", "#FF4B2B", "#FF5938", "#FF5A38", "#FF7168", "#FF765D",
   "#FF806B", "#FF9A86",
+  // Mode-gate and Arena identity palette. These remain isolated to the two
+  // branded premium surfaces and deliberately share the same dark/gold/status family.
+  "#040B10", "#070D12", "#07131D", "#091117", "#0C1923", "#0D1C28",
+  "#111D24", "#171A1D", "#1A2A36", "#4285F4", "#53C07A", "#71818C",
+  "#74838C", "#81909A", "#84939C", "#8997A0", "#8D9BA5", "#98A5AD",
+  "#AAB4BA", "#CF9D26", "#D9C88F", "#E2B238", "#E3B83F", "#EE806B",
+  "#F4D879", "#F4F6F7", "#F5F6F7", "#F6F1E5", "#FFE697",
 ].map((value) => value.toUpperCase()));
 const roots = ["src/styles", "src/ui", "src/cards"];
 const files = ["index.html", "privacy.html", "terms.html", "src/sim/finalSim.js",
