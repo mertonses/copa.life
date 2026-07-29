@@ -163,7 +163,10 @@
     const mount=()=>{
       if(!root.google||!google.accounts||!google.accounts.id)return;
       google.accounts.id.initialize({client_id:clientId,callback:response=>finishGoogleSignIn(response.credential)});
-      slot.innerHTML="";google.accounts.id.renderButton(slot,{theme:"filled_black",size:"large",shape:"rectangular",text:"continue_with",width:320,logo_alignment:"left"});
+      slot.innerHTML="";
+      const available=Math.floor(slot.getBoundingClientRect().width||320);
+      const buttonWidth=Math.max(200,Math.min(320,available));
+      google.accounts.id.renderButton(slot,{theme:"filled_black",size:"large",shape:"rectangular",text:"continue_with",width:buttonWidth,logo_alignment:"left"});
     };
     if(root.google&&google.accounts){mount();return;}
     let script=document.querySelector("script[data-copa-google-identity]");
