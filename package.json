@@ -130,6 +130,6 @@
     "@capacitor/splash-screen": "8.0.2",
     "@capacitor/status-bar": "8.0.3",
     "@capgo/capacitor-social-login": "^8.3.39",
-    "phaser": "3.90.0"
+    "phaser": "4.2.1"
   }
 }
