@@ -1,9 +1,9 @@
 import {DurableObject} from "cloudflare:workers";
 import {
-  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
+  ARENA_RULES_VERSION,CHAIRMEN,DRAFT_SLOTS,LEGACY_DRAFT_LINES,FORMATIONS,LIVE_SEGMENTS,PENALTY_ZONES,PHASE_SECONDS,STYLES,TACTICS,TRAINING,
   allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,hashSeed,initialPlayerState,minimumFutureDraftCost,publicState,
   resolveParticipation,
-  resolvePenalty,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
+  normalizeMatchPlan,resolveLiveSegment,resolvePenalty,resolvePenaltyKick,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
 } from "./rules.js";
 import {ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_SOURCES} from "./playerCatalog.js";
 
@@ -288,7 +288,7 @@ export class ArenaRoom extends DurableObject{
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
       matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:options.mode==="practice"?Number(options.botIndex??1):-1,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
-      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],result:null,completed:false,resultRecorded:false,
+      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
@@ -333,7 +333,7 @@ export class ArenaRoom extends DurableObject{
     return this.usesFullXI()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
   }
   draftOffers(line,step,side,slot){
-    if(["arena-rules-v7","arena-rules-v8"].includes(this.state.rulesVersion)&&this.state.draftPlan){
+    if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(this.state.rulesVersion)&&this.state.draftPlan){
       return this.state.draftPlan[step][side].map(offer=>({...offer}));
     }
     return this.isCurrentRules()
@@ -358,9 +358,12 @@ export class ArenaRoom extends DurableObject{
     });
   }
   marketRoundOffers(){
-    return this.state.players.map((player,side)=>createMarketOffers(this.state.seed,side).map(offer=>({
-      ...offer,affordable:offer.cost<=this.remainingBudget(player)
-    })));
+    return this.state.players.map((player,side)=>createMarketOffers(this.state.seed,side).map(offer=>{
+      const preview=teamSnapshot({...player,market:{id:offer.id}},this.state.rulesVersion);
+      return {...offer,affordable:offer.cost<=this.remainingBudget(player),projected:preview?{
+        power:preview.power,chemistry:preview.chemistry,budget:preview.budget
+      }:null};
+    }));
   }
   defaultAction(index){
     const player=this.state.players[index];
@@ -374,8 +377,11 @@ export class ArenaRoom extends DurableObject{
       if(!choice)throw new Error("arena_draft_budget_invariant");
       player.draft.push(choice);
     }else if(this.state.phase==="market")player.market={id:"none"};
-    else if(this.state.phase==="training")player.training="recovery";
+    else if(this.state.phase==="training")player.training={focus:"recovery",scenario:"adaptive"};
     else if(this.state.phase==="live"&&(this.state.liveStage||"decision")==="decision")player.tactics.push("balanced");
+    else if(this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]){
+      this.state.penalty.choices[index]=PENALTY_ZONES[hashSeed(`${this.state.seed}|penalty-default|${this.state.penalty.kick}|${index}`)%PENALTY_ZONES.length];
+    }
   }
   remainingBudget(player){
     const chair=CHAIRMEN[player.setup&&player.setup.chairman]||CHAIRMEN.babacan;
@@ -389,10 +395,15 @@ export class ArenaRoom extends DurableObject{
     if(this.state.phase==="market")return !!home.market&&!!away.market;
     if(this.state.phase==="training")return !!home.training&&!!away.training;
     if(this.state.phase==="live")return (this.state.liveStage||"decision")==="decision"&&home.tactics.length>this.state.window&&away.tactics.length>this.state.window;
+    if(this.state.phase==="penalty")return this.state.penalty&&this.state.penalty.stage==="choice"&&this.state.penalty.choices.every(Boolean);
     return false;
   }
   setDeadline(){
-    const seconds=this.state.phase==="live"&&this.state.liveStage==="reveal"?PHASE_SECONDS.liveReveal:(PHASE_SECONDS[this.state.phase]||30);
+    const seconds=this.state.phase==="live"&&this.state.liveStage==="reveal"
+      ?PHASE_SECONDS.liveReveal
+      :this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="reveal"
+      ?PHASE_SECONDS.penaltyReveal
+      :(PHASE_SECONDS[this.state.phase]||30);
     this.state.deadline=Date.now()+seconds*1000;
   }
   async advance(){
@@ -416,16 +427,44 @@ export class ArenaRoom extends DurableObject{
     }
     else if(this.state.phase==="live"){
       const home=teamSnapshot(this.state.players[0],this.state.rulesVersion),away=teamSnapshot(this.state.players[1],this.state.rulesVersion);
-      const outcome=resolveWindow({seed:this.state.seed,window:this.state.window,home,away,homeTactic:this.state.players[0].tactics[this.state.window],awayTactic:this.state.players[1].tactics[this.state.window]});
+      const outcome=this.state.rulesVersion===ARENA_RULES_VERSION
+        ?resolveLiveSegment({seed:this.state.seed,segment:this.state.window,score:this.state.score,home,away,homeTactic:this.state.players[0].tactics[this.state.window],awayTactic:this.state.players[1].tactics[this.state.window]})
+        :resolveWindow({seed:this.state.seed,window:this.state.window,home,away,homeTactic:this.state.players[0].tactics[this.state.window],awayTactic:this.state.players[1].tactics[this.state.window]});
       this.state.score[0]+=outcome.homeGoals;this.state.score[1]+=outcome.awayGoals;
       this.state.events.push(...outcome.events);
       this.state.liveStage="reveal";this.state.matchMinute=outcome.endMinute;this.state.windowResult=outcome;
+    }else if(this.state.phase==="penalty"){
+      const penalty=this.state.penalty,shooter=penalty.turn,keeper=shooter===0?1:0;
+      const teams=this.state.players.map(player=>teamSnapshot(player,this.state.rulesVersion));
+      const result=resolvePenaltyKick({
+        seed:this.state.seed,kick:penalty.kick,
+        shooterZone:penalty.choices[shooter],keeperZone:penalty.choices[keeper],
+        shooterPower:teams[shooter].attack+(teams[shooter].card==="captain"?2:0),
+        keeperPower:teams[keeper].defense+(teams[keeper].card==="captain"?2:0)
+      });
+      penalty.kicks[shooter]++;
+      if(result.goal)penalty.score[shooter]++;
+      penalty.history.push({...result,kick:penalty.kick,round:penalty.round,shooter});
+      penalty.stage="reveal";
     }
     this.setDeadline();this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
   }
-  async finish(home,away){
-    let penalty=null;
-    if(this.state.score[0]===this.state.score[1]&&!allowsRegulationDraw(this.state.rulesVersion)){
+  startPenalties(){
+    const firstShooter=hashSeed(`${this.state.seed}|penalty-first`)%2;
+    this.state.phase="penalty";
+    this.state.penalty={stage:"choice",kick:0,round:1,turn:firstShooter,firstShooter,score:[0,0],kicks:[0,0],choices:[null,null],history:[]};
+    this.setDeadline();this.persist();
+    return this.ctx.storage.setAlarm(this.state.deadline).then(()=>this.broadcast());
+  }
+  penaltyComplete(){
+    const penalty=this.state.penalty,[homeKicks,awayKicks]=penalty.kicks,[home,away]=penalty.score;
+    const homeRemaining=Math.max(0,5-homeKicks),awayRemaining=Math.max(0,5-awayKicks);
+    if(home>away+awayRemaining||away>home+homeRemaining)return true;
+    return homeKicks>=5&&awayKicks>=5&&homeKicks===awayKicks&&home!==away;
+  }
+  async finish(home,away,penaltyOverride=null){
+    let penalty=penaltyOverride;
+    if(!penalty&&this.state.score[0]===this.state.score[1]&&!allowsRegulationDraw(this.state.rulesVersion)&&this.state.rulesVersion!==ARENA_RULES_VERSION){
       penalty=resolvePenalty(this.state.seed,home.power,away.power);
     }
     const homeWon=penalty?penalty[0]>penalty[1]:this.state.score[0]>this.state.score[1];
@@ -445,6 +484,7 @@ export class ArenaRoom extends DurableObject{
     this.state.phase="result";this.state.completed=true;
     this.state.result={
       score:this.state.score,penalty,outcomes,teams:[home,away],
+      regulationDraw:!!penalty&&this.state.score[0]===this.state.score[1],
       participation:participation.eligible,forfeitIndex:participation.forfeitIndex,voided:participation.voided,
       rulesVersion:this.state.rulesVersion,catalogVersion:this.state.catalogVersion||null,playerSources:this.state.playerSources||null,
       finishedAt:Date.now()
@@ -543,13 +583,17 @@ export class ArenaRoom extends DurableObject{
       const offer=this.state.offers[index].find(item=>item.id===data.choice);
       if(!offer||offer.cost>this.remainingBudget(player))return "unavailable_choice";
       player.market={id:offer.id};
-    }else if(data.type==="training"&&this.state.phase==="training"&&TRAINING.includes(data.choice)){
+    }else if(data.type==="training"&&this.state.phase==="training"&&normalizeMatchPlan(data.choice)){
       if(player.training)return "already_submitted";
-      player.training=data.choice;
+      player.training=normalizeMatchPlan(data.choice);
     }
     else if(data.type==="tactic"&&this.state.phase==="live"&&(this.state.liveStage||"decision")==="decision"&&TACTICS.includes(data.choice)){
       if(player.tactics.length>this.state.window)return "already_submitted";
       player.tactics.push(data.choice);
+    }
+    else if(data.type==="penalty"&&this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&PENALTY_ZONES.includes(data.choice)){
+      if(this.state.penalty.choices[index])return "already_submitted";
+      this.state.penalty.choices[index]=data.choice;
     }
     else return "wrong_phase";
     if(data.type!=="ready")player.manualDecisions=(Number(player.manualDecisions)||0)+1;
@@ -577,12 +621,33 @@ export class ArenaRoom extends DurableObject{
     }
     if(Date.now()<this.state.deadline){await this.ctx.storage.setAlarm(this.state.deadline);return;}
     if(this.state.phase==="live"&&this.state.liveStage==="reveal"){
-      if(this.state.window<2){
+      const lastWindow=this.state.rulesVersion===ARENA_RULES_VERSION?LIVE_SEGMENTS.length-1:2;
+      if(this.state.window<lastWindow){
         this.state.window++;this.state.liveStage="decision";this.state.windowResult=null;this.setDeadline();
         this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
       }else{
         const home=teamSnapshot(this.state.players[0],this.state.rulesVersion),away=teamSnapshot(this.state.players[1],this.state.rulesVersion);
-        await this.finish(home,away);
+        if(this.state.score[0]===this.state.score[1]&&!allowsRegulationDraw(this.state.rulesVersion))await this.startPenalties();
+        else await this.finish(home,away);
+      }
+      return;
+    }
+    if(this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="reveal"){
+      const penalty=this.state.penalty;
+      if(this.penaltyComplete()||penalty.kick>=29){
+        if(penalty.score[0]===penalty.score[1]){
+          const winner=hashSeed(`${this.state.seed}|penalty-cap`)%2;
+          penalty.score[winner]++;
+          penalty.history.push({kick:penalty.kick+1,round:penalty.round+1,shooter:winner,goal:true,outcome:"goal",decider:"safety_cap"});
+        }
+        const teams=this.state.players.map(player=>teamSnapshot(player,this.state.rulesVersion));
+        await this.finish(teams[0],teams[1],[...penalty.score]);
+      }else{
+        penalty.kick++;
+        penalty.turn=penalty.turn===0?1:0;
+        penalty.round=Math.max(penalty.kicks[0],penalty.kicks[1])+1;
+        penalty.stage="choice";penalty.choices=[null,null];
+        this.setDeadline();this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
       }
       return;
     }
@@ -594,7 +659,8 @@ export class ArenaRoom extends DurableObject{
         (this.state.phase==="draft"&&player.draft.length<=this.state.draftStep)||
         (this.state.phase==="market"&&!player.market)||
         (this.state.phase==="training"&&!player.training)||
-        (this.state.phase==="live"&&player.tactics.length<=this.state.window);
+        (this.state.phase==="live"&&player.tactics.length<=this.state.window)||
+        (this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]);
       if(incomplete)this.defaultAction(index);
     }
     this.persist();await this.advance();

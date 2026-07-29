@@ -2,7 +2,7 @@ import {
   ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES,ARENA_PLAYER_SOURCES
 } from "./playerCatalog.js";
 
-export const ARENA_RULES_VERSION="arena-rules-v8";
+export const ARENA_RULES_VERSION="arena-rules-v10";
 export const MIN_MANUAL_DECISIONS=6;
 export const LEGACY_MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
@@ -13,6 +13,8 @@ export const PHASE_SECONDS=Object.freeze({
   training:25,
   live:24,
   liveReveal:7,
+  penalty:15,
+  penaltyReveal:4,
   result:180
 });
 
@@ -58,18 +60,19 @@ export const DRAFT_SLOTS=Object.freeze([
 export const DRAFT_LINES=Object.freeze(DRAFT_SLOTS.map(item=>item.line));
 export const TACTICS=Object.freeze(["press","balanced","counter","control"]);
 export const TRAINING=Object.freeze(["finishing","shape","chemistry","recovery"]);
+export const MATCH_PLAN_SCENARIOS=Object.freeze(["adaptive","protect","brave"]);
 export const MARKET_CARDS=Object.freeze([
-  {id:"twelfth",cost:4,attack:1,defense:0,midfield:1,chemistry:1,stamina:0,risk:0},
-  {id:"counter",cost:3,attack:2,defense:0,midfield:-1,chemistry:0,stamina:0,risk:0},
-  {id:"wall",cost:4,attack:0,defense:2,midfield:0,chemistry:0,stamina:1,risk:0},
-  {id:"wonderkid",cost:5,attack:2,defense:0,midfield:0,chemistry:-1,stamina:0,risk:1},
-  {id:"captain",cost:3,attack:0,defense:1,midfield:0,chemistry:2,stamina:0,risk:0},
-  {id:"none",cost:0,attack:0,defense:0,midfield:0,chemistry:0,stamina:0,risk:0}
+  {id:"twelfth",category:"momentum",rarity:"signature",activation:"second_half",cost:4,attack:0,defense:0,midfield:1,chemistry:1,stamina:0,risk:0},
+  {id:"counter",category:"doctrine",rarity:"elite",activation:"trailing",cost:3,attack:1,defense:0,midfield:-1,chemistry:0,stamina:1,risk:0},
+  {id:"wall",category:"defense",rarity:"elite",activation:"leading",cost:4,attack:0,defense:1,midfield:0,chemistry:0,stamina:1,risk:0},
+  {id:"wonderkid",category:"attack",rarity:"signature",activation:"late",cost:5,attack:1,defense:0,midfield:0,chemistry:-1,stamina:0,risk:1},
+  {id:"captain",category:"leadership",rarity:"elite",activation:"pressure",cost:3,attack:0,defense:0,midfield:0,chemistry:2,stamina:0,risk:0},
+  {id:"none",category:"reserve",rarity:"standard",activation:"none",cost:0,attack:0,defense:0,midfield:0,chemistry:0,stamina:0,risk:0}
 ]);
 
 const FIRST_NAMES=["Arda","Deniz","Mert","Onur","Emir","Can","Atlas","Eren","Kerem","Bora","Luca","Diego","Marco","Leo","Alex","Noah"];
 const LAST_NAMES=["Aydın","Kaya","Demir","Erdem","Yalın","Aksoy","Costa","Rossi","Silva","Santos","Meyer","Mori","Ito","King","Stone","Reed"];
-const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7","arena-rules-v8"]);
+const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"]);
 const DRAFT_TIERS=Object.freeze(["connector","reliable","star"]);
 const SLOT_POSITIONS=Object.freeze({
   GK:["GK"],LB:["LB"],CB1:["CB"],CB2:["CB"],RB:["RB"],
@@ -109,6 +112,14 @@ export function usesFullXI(rulesVersion=ARENA_RULES_VERSION){
 export function allowsRegulationDraw(rulesVersion=ARENA_RULES_VERSION){
   return ["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion);
 }
+
+export const LIVE_SEGMENTS=Object.freeze([
+  {startMinute:0,endMinute:20,prompt:"opening"},
+  {startMinute:20,endMinute:45,prompt:"control"},
+  {startMinute:45,endMinute:70,prompt:"response"},
+  {startMinute:70,endMinute:90,prompt:"finish"}
+]);
+export const PENALTY_ZONES=Object.freeze(["leftHigh","leftLow","center","rightLow","rightHigh"]);
 
 export function seasonKey(date=new Date()){
   const start=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),1));
@@ -172,7 +183,7 @@ function arenaCost(player,tier){
 }
 
 function arenaChemistry(player,tier,rulesVersion){
-  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion))return 2;
+  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion))return 2;
   let value=round(player.age)>=30?2:round(player.age)>=24?1:0;
   if(tier==="star"&&round(player.power)>=82)value--;
   return clamp(value,-1,2);
@@ -182,7 +193,7 @@ function draftOffer(player,tier,line,slot,rulesVersion){
   const position=String(player.position||"").toUpperCase();
   const natural=(SLOT_POSITIONS[slot]||[]).includes(position);
   const positionFit=natural?"natural":"adapted";
-  const positionPenalty=positionFit==="adapted"&&["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?ADAPTED_POSITION_PENALTY:0;
+  const positionPenalty=positionFit==="adapted"&&["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?ADAPTED_POSITION_PENALTY:0;
   const power=round(player.power);
   const source=ARENA_PLAYER_SOURCES[player.sourceLeague]||{code:player.sourceLeague,label:{tr:player.sourceLeague,en:player.sourceLeague}};
   return {
@@ -333,27 +344,34 @@ export function validateSetup(choice,rulesVersion=ARENA_RULES_VERSION){
     (Object.hasOwn(CHAIRMEN,choice.chairman)||(!usesFullXI(rulesVersion)&&Object.hasOwn(LEGACY_CHAIRMEN,choice.chairman)));
 }
 
+export function normalizeMatchPlan(choice){
+  if(typeof choice==="string"&&TRAINING.includes(choice))return {focus:choice,scenario:"adaptive"};
+  if(!choice||!TRAINING.includes(choice.focus)||!MATCH_PLAN_SCENARIOS.includes(choice.scenario))return null;
+  return {focus:choice.focus,scenario:choice.scenario};
+}
+
 export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
   const legacy=!usesFullXI(rulesVersion);
   const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
   if(!validateSetup(player&&player.setup,rulesVersion)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
-  if(["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)){
+  if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)){
     const identities=player.draft.map(item=>item.sourceId).filter(Boolean);
     if(new Set(identities).size!==identities.length)return null;
   }
   const formation=FORMATIONS[player.setup.formation],style=STYLES[player.setup.style],chairman=chairmanFor(player.setup.chairman,rulesVersion);
   const card=MARKET_CARDS.find(item=>item.id===(player.market&&player.market.id))||MARKET_CARDS.at(-1);
+  const plan=normalizeMatchPlan(player.training)||{focus:"recovery",scenario:"adaptive"};
   const linePowers=Object.fromEntries(LEGACY_DRAFT_LINES.map(line=>{
     const players=player.draft.filter(item=>item.line===line);
     return [line,players.length?players.reduce((sum,item)=>
-      sum+round(["arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
+      sum+round(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
     )/players.length:65];
   }));
   const spent=player.draft.reduce((sum,item)=>sum+round(item.cost),0)+round(card.cost);
   const budget=(legacy?20:44)+chairman.budget-spent;
   const chemistry=clamp(
-    player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(player.training==="chemistry"?2:0),
-    -3,["arena-rules-v6","arena-rules-v7","arena-rules-v8"].includes(rulesVersion)?18:9
+    player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(plan.focus==="chemistry"?2:0),
+    -3,["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?18:9
   );
   const base={
     attack:((linePowers.ST||65)*.58+(linePowers.WING||65)*.27+(linePowers.MID||65)*.15)/1,
@@ -361,10 +379,10 @@ export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
     midfield:((linePowers.MID||65)*.58+(linePowers.WING||65)*.22+(linePowers.DEF||65)*.2)/1,
     stamina:72
   };
-  base.attack+=formation.attack+style.attack+card.attack+(player.training==="finishing"?2:0);
-  base.defense+=formation.defense+style.defense+card.defense+(player.training==="shape"?2:0);
+  base.attack+=formation.attack+style.attack+card.attack+(plan.focus==="finishing"?2:0);
+  base.defense+=formation.defense+style.defense+card.defense+(plan.focus==="shape"?2:0);
   base.midfield+=formation.midfield+style.midfield+card.midfield+chemistry*.35;
-  base.stamina+=style.stamina+card.stamina+(player.training==="recovery"?3:0);
+  base.stamina+=style.stamina+card.stamina+(plan.focus==="recovery"?3:0);
   const power=round((base.attack+base.defense+base.midfield)/3+chemistry*.18);
   return {
     formation:player.setup.formation,
@@ -379,7 +397,8 @@ export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
     power,
     risk:chairman.risk+card.risk,
     flex:chairman.flex,
-    card:card.id
+    card:card.id,
+    plan
   };
 }
 
@@ -426,6 +445,79 @@ export function resolveWindow(input){
     tactics:[homeTactic,awayTactic],
     advantage:edge>0?"home":edge<0?"away":"neutral"
   };
+}
+
+export function resolveLiveSegment(input){
+  const segment=LIVE_SEGMENTS[Number(input.segment)]||LIVE_SEGMENTS[0];
+  const score=Array.isArray(input.score)?input.score:[0,0];
+  const withLiveModifiers=(team,difference)=>{
+    const next={...team},scenario=team.plan&&team.plan.scenario||"adaptive";
+    if(scenario==="protect"){
+      if(difference>0){next.defense+=2;next.attack-=1;}
+      else if(difference===0)next.defense+=1;
+      else next.attack+=1;
+    }else if(scenario==="brave"){
+      if(difference<0){next.attack+=2;next.defense-=1;}
+      else if(difference===0)next.attack+=1;
+      else next.midfield+=1;
+    }else{
+      if(difference>0)next.defense+=1;
+      else if(difference<0)next.attack+=1;
+      else next.midfield+=1;
+    }
+    if(team.card==="twelfth"&&Number(input.segment)===2){next.attack+=2;next.midfield+=1;}
+    else if(team.card==="counter"&&difference<0)next.attack+=2;
+    else if(team.card==="wall"&&difference>0)next.defense+=2;
+    else if(team.card==="wonderkid"&&Number(input.segment)===3)next.attack+=2;
+    else if(team.card==="captain"&&difference<=0){next.midfield+=1;next.stamina+=1;}
+    return next;
+  };
+  const home=withLiveModifiers(input.home,score[0]-score[1]);
+  const away=withLiveModifiers(input.away,score[1]-score[0]);
+  const windowResult=resolveWindow({...input,home,away,window:Number(input.segment)});
+  const random=rng(`${input.seed}|live-segment|${input.segment}`);
+  const span=segment.endMinute-segment.startMinute;
+  const durationFactor=span/30;
+  const minute=()=>segment.startMinute+2+Math.floor(random()*Math.max(1,span-3));
+  const events=windowResult.events
+    .filter(event=>event.type!=="goal"||random()<durationFactor)
+    .map(event=>({...event,minute:minute()}));
+  const actionCount=2+Math.floor(random()*2);
+  const actionTypes=["attack","shot","save"];
+  for(let index=0;index<actionCount;index++){
+    const type=pick(random,actionTypes);
+    events.push({minute:minute(),type,side:random()<.5?"home":"away"});
+  }
+  events.sort((one,two)=>one.minute-two.minute||String(one.type).localeCompare(String(two.type)));
+  const homeGoals=events.filter(event=>event.type==="goal"&&event.side==="home").length;
+  const awayGoals=events.filter(event=>event.type==="goal"&&event.side==="away").length;
+  return {
+    ...windowResult,
+    window:Number(input.segment),
+    segment:Number(input.segment),
+    prompt:segment.prompt,
+    startMinute:segment.startMinute,
+    endMinute:segment.endMinute,
+    homeGoals,awayGoals,
+    homeXg:Number((windowResult.homeXg*durationFactor).toFixed(2)),
+    awayXg:Number((windowResult.awayXg*durationFactor).toFixed(2)),
+    events
+  };
+}
+
+export function resolvePenaltyKick(input){
+  const shooterZone=PENALTY_ZONES.includes(input.shooterZone)?input.shooterZone:"center";
+  const keeperZone=PENALTY_ZONES.includes(input.keeperZone)?input.keeperZone:"center";
+  const random=rng(`${input.seed}|penalty-kick|${Number(input.kick)}`);
+  const shooterPower=clamp(input.shooterPower,40,99);
+  const keeperPower=clamp(input.keeperPower,40,99);
+  const exact=shooterZone===keeperZone;
+  const sameSide=shooterZone.slice(0,4)===keeperZone.slice(0,4)&&shooterZone!=="center"&&keeperZone!=="center";
+  const missChance=clamp(.075-(shooterPower-70)*.0015,.025,.13);
+  const saveChance=clamp((exact?.57:sameSide?.23:.055)+(keeperPower-shooterPower)*.004,.025,.78);
+  const roll=random();
+  const outcome=roll<missChance?(random()<.35?"post":"miss"):roll<missChance+saveChance?"save":"goal";
+  return {goal:outcome==="goal",outcome,shooterZone,keeperZone};
 }
 
 export function resolvePenalty(seed,homePower,awayPower){
@@ -484,6 +576,20 @@ export function publicState(state,owner){
     liveStage:state.liveStage||"decision",
     matchMinute:Number(state.matchMinute)||0,
     windowResult:state.windowResult||null,
+    liveSegments:LIVE_SEGMENTS,
+    penalty:state.phase==="penalty"&&state.penalty?{
+      stage:state.penalty.stage,
+      kick:state.penalty.kick,
+      round:state.penalty.round,
+      turn:state.penalty.turn,
+      firstShooter:state.penalty.firstShooter,
+      score:[...state.penalty.score],
+      kicks:[...state.penalty.kicks],
+      history:state.penalty.history.map(item=>({...item})),
+      selfRole:selfIndex===state.penalty.turn?"shooter":"keeper",
+      selfLocked:!!state.penalty.choices[selfIndex],
+      opponentLocked:!!state.penalty.choices[opponentIndex]
+    }:null,
     score:state.score,
     events:state.events,
     result:state.result,
@@ -506,6 +612,6 @@ export function publicState(state,owner){
     offers:state.offers&&selfIndex>=0?state.offers[selfIndex]:null,
     draftStatus,
     team:self?teamSnapshot(self,state.rulesVersion):null,
-    opponentTeam:["training","live","result"].includes(state.phase)&&opponent?teamSnapshot(opponent,state.rulesVersion):null
+    opponentTeam:["training","live","penalty","result"].includes(state.phase)&&opponent?teamSnapshot(opponent,state.rulesVersion):null
   };
 }
