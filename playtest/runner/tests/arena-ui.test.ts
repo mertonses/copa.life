@@ -130,9 +130,25 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-budget-warning")).toContainText("Budget reserved");
   await expect(page.locator(".arena-draft-progress")).toContainText("1 / 11");
   await expect(page.locator(".arena-team-pulse")).toContainText("SUGGESTED RESERVE");
+  await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-elite/);
+  await expect(page.locator(".arena-team-pulse .arena-context-power")).toHaveClass(/power-average/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-a"] .arena-context-power')).toHaveClass(/power-weak/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-b"] .arena-context-power')).toHaveClass(/power-average/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-c"] .arena-context-power')).toHaveClass(/power-good/);
   await expect(page.locator(".arena-lineup-player")).toHaveCount(1);
   await expect(page.locator(".arena-lineup-player strong")).toContainText("75");
   await capture(page,"04-web-arena-draft.png");
+  const boundaryOffers=(powers:number[])=>offers.map((item,index)=>({...item,power:powers[index],effectivePower:powers[index]}));
+  await setRoom(page,{...base,phase:"draft",draftStep:0,offers:boundaryOffers([60,61,71]),draftStatus:{count:0,total:11,budget:13,power:71}});
+  await expect(page.locator('[data-arena-choice="draft:gk-0-a"] .arena-context-power')).toHaveClass(/power-worst/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-b"] .arena-context-power')).toHaveClass(/power-weak/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-c"] .arena-context-power')).toHaveClass(/power-average/);
+  await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-average/);
+  await setRoom(page,{...base,phase:"draft",draftStep:0,offers:boundaryOffers([81,91,71]),draftStatus:{count:0,total:11,budget:5,power:91}});
+  await expect(page.locator('[data-arena-choice="draft:gk-0-a"] .arena-context-power')).toHaveClass(/power-good/);
+  await expect(page.locator('[data-arena-choice="draft:gk-0-b"] .arena-context-power')).toHaveClass(/power-elite/);
+  await expect(page.locator(".arena-team-pulse .arena-context-power")).toHaveClass(/power-elite/);
+  await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-worst/);
 
   const market=[
     {id:"twelfth",cost:4,attack:1,defense:0,chemistry:1},
@@ -141,12 +157,17 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
     {id:"none",cost:0,attack:0,defense:0,chemistry:0}
   ];
   await setRoom(page,{...base,phase:"market",offers:market,team:{budget:8,power:76,chemistry:3}});
+  await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-weak/);
+  await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveCSS("animation-name","arenaBudgetPulse");
+  await expect(page.locator(".arena-team-pulse .arena-context-power")).toHaveClass(/power-average/);
   await capture(page,"05-web-arena-market.png");
 
   await setRoom(page,{...base,phase:"training",self:{...self,setup:{formation:"4-3-3",style:"control",chairman:"babacan"},draft:squad("COPA"),training:"chemistry"},opponent:{...opponent,setup:{formation:"4-2-3-1",style:"counter",chairman:"babacan"},draft:squad("NORTH",3),draftCount:11},team:{budget:8,power:76,chemistry:3},opponentTeam:{budget:7,power:75,chemistry:2}});
   await expect(page.locator(".arena-choice-grid .is-selected")).toContainText("SELECTED");
   await expect(page.locator(".arena-lineup-wrap.is-versus .arena-lineup-player")).toHaveCount(22);
   await expect(page.locator(".arena-lineup-wrap.is-versus")).toContainText("PRE-MATCH");
+  await expect(page.locator(".arena-final-summary .arena-context-power")).toHaveClass(/power-average/);
+  await expect(page.locator(".arena-final-summary .arena-context-budget")).toHaveClass(/budget-weak/);
   await capture(page,"06-web-arena-training.png");
   await page.locator(".arena-lineup-wrap.is-versus").screenshot({path:path.join(output,"06b-web-arena-head-to-head-pitch.png")});
 

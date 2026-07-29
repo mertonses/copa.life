@@ -1,1 +1,1 @@
-COPA ARENA kulüp kimliği ekranındaki diziliş ve oyun anlayışı seçimlerinin senkronizasyon sırasında kendiliğinden kalkması düzeltildi. Seçimler artık onaylanana kadar bağlantı ve durum güncellemelerinde korunuyor.
+COPA ARENA oyuncu ve takım güçleri artık kırmızıdan koyu yeşile uzanan bağlamsal renklerle gösteriliyor. Kalan kasa da bütçe seviyesine göre renk değiştiriyor ve kritik seviyelere indikçe hızlanan bir uyarı veriyor.
