@@ -17,6 +17,7 @@ async function boot(page:any,packaged=false){
     localStorage.setItem("copa_arena_terms_v1","arena-terms-v1");
     localStorage.setItem("copa_arena_club_v1","Uzun Yolculuk Spor Kulübü");
     localStorage.setItem("copa_arena_token_v1","CAR-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    localStorage.setItem("copa_arena_google_user_v1",JSON.stringify({name:"Arena QA",email:"qa@copa.life"}));
     localStorage.setItem("copa_ghost_client_id_v1","GCL-AAAAAAAAAAAA");
     const original=globalThis.fetch.bind(globalThis);
     globalThis.fetch=(input:any,init?:RequestInit)=>{
@@ -42,7 +43,7 @@ async function boot(page:any,packaged=false){
   if(packaged)await page.evaluate(()=>{const shell=(globalThis as any).CopaMobileShell;if(shell)shell.showLanding(null);});
   if(packaged)await expect(page.locator("#startBtn")).toHaveCount(1);
   else await expect(page.locator("#startBtn")).toBeVisible();
-  await expect(page.locator("#arenaBtn:visible, [data-mobile-arena]:visible").first()).toBeVisible();
+  await expect(page.locator('[data-mode-choice="arena"]:visible').first()).toBeVisible();
 }
 
 async function capture(page:any,name:string){
@@ -75,15 +76,10 @@ async function audit(page:any){
 test("Copa Arena keeps the singleplayer entry intact and renders every premium web state",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","desktop Arena visual matrix");
   await boot(page);
-  const entries=await page.evaluate(()=>{
-    const start=document.querySelector<HTMLElement>("#startBtn")!.getBoundingClientRect();
-    const arena=document.querySelector<HTMLElement>("#arenaBtn")!.getBoundingClientRect();
-    return{startWidth:start.width,arenaWidth:arena.width,overflow:document.documentElement.scrollWidth-innerWidth};
-  });
-  expect(Math.abs(entries.startWidth-entries.arenaWidth)).toBeLessThanOrEqual(2);
+  const entries=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth}));
   expect(entries.overflow).toBeLessThanOrEqual(1);
   await capture(page,"01-web-opening-with-arena.png");
-  await page.locator("#arenaBtn").click();
+  await page.locator('[data-mode-choice="arena"]').click();
   await expect(page.locator(".arena-portal")).toBeVisible();
   await capture(page,"02-web-arena-hub.png");
   await page.evaluate(()=>(globalThis as any).setLang("de"));
@@ -292,9 +288,10 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.audioClockActive)).toBe(false);
   await page.evaluate(()=>{(globalThis as any).muted=false;});
 
-  await setRoom(page,{...base,phase:"result",score:[2,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,1],penalty:null,outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
+  await setRoom(page,{...base,phase:"result",score:[2,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],rematch:{available:true,requested:false,opponentRequested:true,launched:false},self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,1],penalty:null,outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
   await expect(page.locator(".arena-result-rewards")).toContainText("1284 → 1298");
   await expect(page.locator(".arena-result-events")).toContainText("71'");
+  await expect(page.locator(".arena-rematch")).toContainText("OPPONENT WANTS A REMATCH");
   await capture(page,"10-web-arena-result.png");
   await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
   await expect(page.locator(".arena-result>span")).toContainText("FORFEIT VICTORY");
@@ -317,7 +314,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     await page.evaluate((scale:string)=>(globalThis as any).CopaMobileExperience?.setTextScale(scale),viewport.scale);
     await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale",viewport.scale);
     await capture(page,`android-${viewport.name}-opening.png`);
-    await page.locator("#arenaBtn:visible, [data-mobile-arena]:visible").first().click();
+    await page.locator('[data-mode-choice="arena"]:visible').first().click();
     await expect(page.locator(".arena-portal")).toBeVisible();
     const portal=await audit(page);
     expect(portal.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
@@ -430,7 +427,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
 test("Copa Arena blocks ranked queue cleanly while offline",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single offline behavior check");
   await boot(page);
-  await page.locator("#arenaBtn").click();
+  await page.locator('[data-mode-choice="arena"]').click();
   await page.context().setOffline(true);
   await page.locator('[data-arena-action="queue"]').click();
   await expect(page.locator(".arena-error")).toContainText("offline");
@@ -444,7 +441,7 @@ test("Copa Arena starts with a blank standalone club name",async({page},testInfo
     localStorage.removeItem("copa_arena_club_v1");
     localStorage.removeItem("copa_arena_terms_v1");
   });
-  await page.locator("#arenaBtn:visible, [data-mobile-arena]:visible").first().click();
+  await page.locator('[data-mode-choice="arena"]:visible').first().click();
   await expect(page.locator("[data-arena-club]")).toBeVisible();
   await expect(page.locator("[data-arena-club]")).toHaveValue("");
   await expect(page.locator('[data-arena-action="accept"]')).toBeVisible();

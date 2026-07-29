@@ -49,10 +49,15 @@ async function sha(value){
   const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(String(value)));
   return Array.from(new Uint8Array(bytes),item=>item.toString(16).padStart(2,"0")).join("");
 }
-async function identity(request){
+async function identity(request,env){
   const token=tokenFrom(request),client=clientFrom(request);
   if(!token||!client)return null;
-  return {owner:await sha("arena-owner:"+token),client:await sha("arena-client:"+client)};
+  const tokenHash=await sha("arena-auth:"+token);
+  if(env&&env.DB){
+    const session=await env.DB.prepare("SELECT owner_hash FROM arena_auth_sessions WHERE token_hash=? AND expires_at>?").bind(tokenHash,nowIso()).first();
+    if(session&&session.owner_hash)return {owner:session.owner_hash,client:await sha("arena-client:"+client),authenticated:true};
+  }
+  return {owner:await sha("arena-owner:"+token),client:await sha("arena-client:"+client),authenticated:false};
 }
 async function body(request,limit=MAX_BODY_BYTES){
   const length=Number(request.headers.get("content-length")||0);if(length>limit)throw new Error("payload_too_large");
@@ -128,7 +133,7 @@ async function recentOpponents(env,owner,limit=3){
 }
 async function rateLimit(env,request,name,limit=20){
   const binding=name==="session"?(env.ARENA_SESSION_LIMITER||env.ARENA_LIMITER):env.ARENA_LIMITER;if(!binding)return true;
-  const id=await identity(request);const key=id?`${name}:${id.owner}`:`${name}:anonymous`;
+  const id=await identity(request,env);const key=id?`${name}:${id.owner}`:`${name}:anonymous`;
   const outcome=await binding.limit({key});return !!outcome.success;
 }
 function metric(env,event,detail="",value=0){
@@ -288,7 +293,7 @@ export class ArenaRoom extends DurableObject{
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
       matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:options.mode==="practice"?Number(options.botIndex??1):-1,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
-      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
+      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
@@ -489,6 +494,11 @@ export class ArenaRoom extends DurableObject{
       rulesVersion:this.state.rulesVersion,catalogVersion:this.state.catalogVersion||null,playerSources:this.state.playerSources||null,
       finishedAt:Date.now()
     };
+    this.state.rematch={
+      available:this.state.mode==="ranked"&&!this.state.rematchUsed&&!participation.voided&&participation.forfeitIndex===null,
+      requests:[false,false],
+      launched:false
+    };
     this.state.deadline=Date.now()+PHASE_SECONDS.result*1000;this.persist();
     const recorded=await this.recordResult(outcomes);
     if(!recorded)this.state.deadline=Date.now()+10_000;
@@ -562,6 +572,13 @@ export class ArenaRoom extends DurableObject{
   async action(owner,data){
     const index=this.state.players.findIndex(player=>player.owner===owner);if(index<0)return "unauthorized";
     const player=this.state.players[index];
+    if(data.type==="rematch"&&this.state.phase==="result"){
+      if(!this.state.resultRecorded||!this.state.rematch||!this.state.rematch.available||this.state.rematch.launched)return "rematch_unavailable";
+      if(this.state.rematch.requests[index])return "already_submitted";
+      this.state.rematch.requests[index]=true;this.persist();this.broadcast();
+      if(this.state.rematch.requests.every(Boolean))await this.startRematch();
+      return "ok";
+    }
     if(data.type==="emote"){
       if(this.state.mode==="practice"||!["setup","draft","market","training","live","penalty"].includes(this.state.phase))return "emote_unavailable";
       if(!ARENA_EMOTES.includes(data.emote))return "unavailable_choice";
@@ -612,6 +629,25 @@ export class ArenaRoom extends DurableObject{
     if(data.type==="tactic")player.manualTactics=(Number(player.manualTactics)||0)+1;
     if(gameplayAction&&this.state.mode==="practice"&&this.state.botIndex>=0&&index!==this.state.botIndex)this.defaultAction(this.state.botIndex);
     this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
+  }
+  async startRematch(){
+    if(!this.state.rematch||this.state.rematch.launched)return;
+    this.state.rematch.launched=true;this.persist();this.broadcast();
+    const matchId=randomId("AR-",12),seed=randomId("",16);
+    const players=this.state.players.map((player,index)=>({
+      owner:player.owner,
+      clubName:player.clubName,
+      rating:Number(this.state.result&&this.state.result.profiles&&this.state.result.profiles[index]&&this.state.result.profiles[index].rating)||Number(player.rating)
+    }));
+    const room=this.env.ARENA_ROOM.getByName(matchId);
+    const access=await room.init(matchId,players,seed,{rematchOf:this.state.matchId,rematchUsed:true});
+    const expires=futureIso(45*60_000),updated=nowIso();
+    await this.env.DB.batch(players.map(player=>this.env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'match',?,?,?)").bind(player.owner,matchId,expires,updated)));
+    for(const socket of this.ctx.getWebSockets()){
+      const attachment=socket.deserializeAttachment();if(!attachment||!access[attachment.owner])continue;
+      try{socket.send(JSON.stringify({type:"rematch",matchId,roomToken:access[attachment.owner]}));}catch(error){operational(this.env,"arena_rematch_delivery_failed",matchId,1,error);}
+    }
+    metric(this.env,"arena_rematch_started","ranked",1);
   }
   async recoverExpired(){
     if(!this.state||this.state.phase==="result"||Date.now()<Number(this.state.deadline||0))return false;
@@ -700,9 +736,40 @@ export class ArenaRoom extends DurableObject{
   }
 }
 
+async function verifyGoogleCredential(credential,env){
+  if(env.GOOGLE_TEST_MODE==="true"&&credential==="test-google-credential"){
+    return {sub:"arena-visual-qa",email:"qa@copa.life",email_verified:true,name:"Arena QA"};
+  }
+  if(typeof credential!=="string"||credential.length<100||credential.length>8192)throw new Error("invalid_google_credential");
+  const response=await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+  if(!response.ok)throw new Error("invalid_google_credential");
+  const claims=await response.json();
+  const allowed=String(env.GOOGLE_CLIENT_IDS||"").split(",").map(value=>value.trim()).filter(Boolean);
+  if(!allowed.length||!allowed.includes(String(claims.aud||"")))throw new Error("google_audience_mismatch");
+  if(!["accounts.google.com","https://accounts.google.com"].includes(String(claims.iss||"")))throw new Error("google_issuer_mismatch");
+  if(String(claims.email_verified)!=="true"||!claims.sub)throw new Error("google_email_unverified");
+  if(Number(claims.exp||0)*1000<=Date.now())throw new Error("google_credential_expired");
+  return claims;
+}
+async function handleGoogleAuth(request,env){
+  if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
+  let data;try{data=await body(request,10*1024);}catch(error){return json(request,env,{error:error.message==="payload_too_large"?"payload_too_large":"invalid_json"},400);}
+  let claims;try{claims=await verifyGoogleCredential(data.credential,env);}catch(error){return json(request,env,{error:error.message||"google_sign_in_failed"},401);}
+  const googleSubHash=await sha("google-sub:"+claims.sub);
+  const owner=await sha("arena-google-owner:"+claims.sub);
+  const bearer=randomId("CAR-",32),tokenHash=await sha("arena-auth:"+bearer),expiresAt=futureIso(30*24*60*60_000),created=nowIso();
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO arena_google_accounts(owner_hash,google_sub_hash,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(owner_hash) DO UPDATE SET email=excluded.email,display_name=excluded.display_name,updated_at=excluded.updated_at")
+      .bind(owner,googleSubHash,clean(claims.email,254),clean(claims.name,80),created,created),
+    env.DB.prepare("INSERT INTO arena_auth_sessions(token_hash,owner_hash,expires_at,created_at) VALUES(?,?,?,?)").bind(tokenHash,owner,expiresAt,created)
+  ]);
+  metric(env,"arena_google_signed_in","google",1);
+  return json(request,env,{token:bearer,expiresAt,user:{name:clean(claims.name,80),email:clean(claims.email,254)}},201);
+}
+
 async function handleSession(request,env){
   if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
-  const id=await identity(request);if(!id)return json(request,env,{error:"identity_required"},428);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   let data;try{data=await body(request,4096);}catch(error){return json(request,env,{error:error.message==="payload_too_large"?"payload_too_large":"invalid_json"},error.message==="payload_too_large"?413:400);}
   const name=clubName(data.clubName);if(!name)return json(request,env,{error:"invalid_club_name"},422);
   const mode=String(data.mode||"ranked"),region=REGIONS.has(data.region)?data.region:"global";
@@ -746,7 +813,7 @@ async function handleSession(request,env){
   return json(request,env,{ticket,expiresAt:expires,profile:profile(row)},201);
 }
 async function handleProfile(request,env){
-  const id=await identity(request);if(!id)return json(request,env,{error:"identity_required"},428);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   return json(request,env,{profile:profile(await ensureProfile(env,id.owner,""))});
 }
 async function handleLeaderboard(request,env,url){
@@ -755,7 +822,7 @@ async function handleLeaderboard(request,env,url){
   return json(request,env,{season,entries:(rows.results||[]).map((row,index)=>({...profile(row),rank:index+1}))});
 }
 async function handleHistory(request,env){
-  const id=await identity(request);if(!id)return json(request,env,{error:"identity_required"},428);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   const rows=await env.DB.prepare("SELECT mp.match_id,mp.outcome,mp.rating_before,mp.rating_delta,mp.season_points,mp.token_progress,mp.created_at,m.home_score,m.away_score,m.home_owner FROM arena_match_players mp JOIN arena_matches m ON m.match_id=mp.match_id WHERE mp.owner_hash=? ORDER BY mp.created_at DESC LIMIT 12").bind(id.owner).all();
   return json(request,env,{matches:(rows.results||[]).map(row=>({
     matchId:row.match_id,outcome:row.outcome,ratingBefore:Number(row.rating_before),ratingDelta:Number(row.rating_delta),
@@ -764,7 +831,7 @@ async function handleHistory(request,env){
   }))});
 }
 async function handleDeleteProfile(request,env){
-  const id=await identity(request);if(!id)return json(request,env,{error:"identity_required"},428);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   const deletedOwner=`deleted:${randomId("",12)}`;
   await env.DB.batch([
     env.DB.prepare("UPDATE arena_matches SET home_owner=? WHERE home_owner=?").bind(deletedOwner,id.owner),
@@ -773,6 +840,8 @@ async function handleDeleteProfile(request,env){
     env.DB.prepare("DELETE FROM arena_cosmetic_unlocks WHERE owner_hash=?").bind(id.owner),
     env.DB.prepare("DELETE FROM arena_tickets WHERE owner_hash=?").bind(id.owner),
     env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=?").bind(id.owner),
+    env.DB.prepare("DELETE FROM arena_auth_sessions WHERE owner_hash=?").bind(id.owner),
+    env.DB.prepare("DELETE FROM arena_google_accounts WHERE owner_hash=?").bind(id.owner),
     env.DB.prepare("DELETE FROM arena_profiles WHERE owner_hash=?").bind(id.owner)
   ]);
   metric(env,"arena_profile_deleted","self_service",1);
@@ -781,7 +850,7 @@ async function handleDeleteProfile(request,env){
 }
 async function handleEvent(request,env){
   if(!await rateLimit(env,request,"event",30))return json(request,env,{error:"rate_limited"},429);
-  const id=await identity(request);if(!id)return json(request,env,{error:"identity_required"},428);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   let data;try{data=await body(request,2048);}catch(_){return json(request,env,{error:"invalid_json"},400);}
   const event=String(data.event||""),detail=clean(data.detail,48),value=Math.round(clamp(data.value,-10000,10000));
   if(!ARENA_EVENTS.has(event))return json(request,env,{error:"invalid_event"},422);
@@ -821,6 +890,7 @@ async function route(request,env){
     try{await env.DB.prepare("SELECT 1").first();return json(request,env,{ok:true,service:"copa-arena-api",rulesVersion:ARENA_RULES_VERSION});}
     catch(_){return json(request,env,{ok:false,error:"database_unavailable"},503);}
   }
+  if(request.method==="POST"&&url.pathname==="/v1/arena/auth/google")return handleGoogleAuth(request,env);
   if(request.method==="POST"&&url.pathname==="/v1/arena/session")return handleSession(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/arena/profile")return handleProfile(request,env);
   if(request.method==="DELETE"&&url.pathname==="/v1/arena/profile")return handleDeleteProfile(request,env);
@@ -843,7 +913,8 @@ export default {
     await env.DB.batch([
       env.DB.prepare("DELETE FROM arena_tickets WHERE expires_at<?").bind(nowIso()),
       env.DB.prepare("DELETE FROM arena_tickets WHERE consumed_at IS NOT NULL AND consumed_at<?").bind(cutoff),
-      env.DB.prepare("DELETE FROM arena_presence WHERE expires_at<?").bind(nowIso())
+      env.DB.prepare("DELETE FROM arena_presence WHERE expires_at<?").bind(nowIso()),
+      env.DB.prepare("DELETE FROM arena_auth_sessions WHERE expires_at<?").bind(nowIso())
     ]);
   }
 };

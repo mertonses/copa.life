@@ -4,6 +4,7 @@
   const TERMS_KEY="copa_arena_terms_v1";
   const CLUB_KEY="copa_arena_club_v1";
   const ROOM_KEY="copa_arena_room_v1";
+  const GOOGLE_USER_KEY="copa_arena_google_user_v1";
   const API_META="meta[name='copa-arena-api']";
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
@@ -35,7 +36,9 @@
       server:"SUNUCU OTORİTELİ",serverCopy:"Sonuç bir kez üretilir ve değiştirilemez.",
       deleteData:"ARENA VERİLERİMİ SİL",deleteConfirm:"Arena kulübün, derecen ve maç geçmişin kalıcı olarak silinecek. Devam edilsin mi?",
       you:"SEN",opponent:"RAKİP",goal:"GOL",cardEvent:"KART",tacticDecision:"TAKTİK KARARI",pass:"PAS",marketCard:"KART",
-      selected:"SEÇİLDİ",startingXI:"İLK 11",babacan:"BABACAN BAŞKAN",practice:"YAPAY ZEKÂ ANTRENMANI",practiceCopy:"Ödülsüz, derecesiz ve sunucu otoriteli prova maçı.",practiceAgain:"YENİ ANTRENMAN",networkGood:"İYİ",networkFair:"ORTA",networkPoor:"ZAYIF"
+      selected:"SEÇİLDİ",startingXI:"İLK 11",babacan:"BABACAN BAŞKAN",practice:"YAPAY ZEKÂ ANTRENMANI",practiceCopy:"Ödülsüz, derecesiz ve sunucu otoriteli prova maçı.",practiceAgain:"YENİ ANTRENMAN",networkGood:"İYİ",networkFair:"ORTA",networkPoor:"ZAYIF",
+      googleTitle:"ARENA HESABIN",googleCopy:"Dereceni ve maç geçmişini tüm cihazlarında koru.",googleContinue:"GOOGLE İLE DEVAM ET",googleReady:"GOOGLE HESABI BAĞLANDI",googleConfig:"Google girişi henüz yapılandırılmadı.",
+      rematch:"RÖVANŞ İSTE",rematchSent:"RÖVANŞ İSTEĞİ GÖNDERİLDİ",rematchIncoming:"RAKİBİN RÖVANŞ İSTİYOR",rematchStarting:"RÖVANŞ BAŞLIYOR"
     },
     en:{
       arena:"COPA ARENA",multiplayer:"MULTIPLAYER",subtitle:"Build your club live, make the call, climb the table.",
@@ -54,7 +57,9 @@
       server:"SERVER AUTHORITATIVE",serverCopy:"The result is generated once and cannot be rerolled.",
       deleteData:"DELETE MY ARENA DATA",deleteConfirm:"Your Arena club, rating and match history will be permanently deleted. Continue?",
       you:"YOU",opponent:"OPPONENT",goal:"GOAL",cardEvent:"CARD",tacticDecision:"TACTIC DECISION",pass:"PASS",marketCard:"CARD",
-      selected:"SELECTED",startingXI:"STARTING XI",babacan:"BABACAN CHAIRMAN",practice:"AI PRACTICE",practiceCopy:"Rewardless, unranked and server-authoritative rehearsal.",practiceAgain:"NEW PRACTICE",networkGood:"GOOD",networkFair:"FAIR",networkPoor:"POOR"
+      selected:"SELECTED",startingXI:"STARTING XI",babacan:"BABACAN CHAIRMAN",practice:"AI PRACTICE",practiceCopy:"Rewardless, unranked and server-authoritative rehearsal.",practiceAgain:"NEW PRACTICE",networkGood:"GOOD",networkFair:"FAIR",networkPoor:"POOR",
+      googleTitle:"YOUR ARENA ACCOUNT",googleCopy:"Keep your rating and match history on every device.",googleContinue:"CONTINUE WITH GOOGLE",googleReady:"GOOGLE ACCOUNT CONNECTED",googleConfig:"Google sign-in is not configured yet.",
+      rematch:"REQUEST REMATCH",rematchSent:"REMATCH REQUEST SENT",rematchIncoming:"OPPONENT WANTS A REMATCH",rematchStarting:"REMATCH STARTING"
     }
   };
   COPY.es={...COPY.en,subtitle:"Construye tu club en directo, decide y sube en la tabla.",ranked:"CAMINO CLASIFICATORIO",play:"BUSCAR PARTIDA",back:"VOLVER A COPA LIFE",loading:"CARGANDO ARENA",rating:"PUNTUACIÓN",season:"RUTA DE TEMPORADA",record:"CARRERA",history:"ÚLTIMOS PARTIDOS",leaderboard:"CLASIFICACIÓN",queue:"BUSCANDO RIVAL",queueCopy:"Buscando un club real de nivel similar.",cancel:"CANCELAR BÚSQUEDA",ready:"ESTOY LISTO",waiting:"ESPERANDO AL RIVAL",setup:"IDENTIDAD DEL CLUB",draft:"CREA TU ONCE",market:"TOQUE FINAL",training:"PLAN DE PARTIDO",live:"PARTIDO EN VIVO",result:"FINAL",formation:"FORMACIÓN",style:"ESTILO DE JUEGO",chairman:"PRESIDENTE",budget:"CAJA RESTANTE",chemistry:"QUÍMICA",power:"FUERZA",choose:"ELEGIR",reconnecting:"RECONECTANDO",retry:"REINTENTAR",home:"CENTRO ARENA",win:"VICTORIA",loss:"DERROTA",draw:"EMPATE",searchAgain:"NUEVO PARTIDO",consentTitle:"ENTRAR EN LA ARENA",consent:"Copa Arena es un modo en vivo y clasificatorio. El nombre del club, los resultados y la puntuación aparecen en la tabla pública. No hay datos personales ni chat libre.",accept:"ACEPTAR Y ENTRAR",club:"NOMBRE DEL CLUB ARENA",network:"No se puede acceder al servicio Arena.",empty:"Aún no hay partidos completados.",authentic:"RIVALES REALES",noBots:"Sin bots ni Ghost Clubs.",fair:"OFERTAS EQUIVALENTES",fairCopy:"Decide mejor, no más rápido.",server:"SERVIDOR AUTORITATIVO",serverCopy:"El resultado se genera una vez y no puede repetirse.",deleteData:"BORRAR MIS DATOS DE ARENA",deleteConfirm:"Tu club Arena, puntuación e historial se borrarán de forma permanente. ¿Continuar?",you:"TÚ",opponent:"RIVAL",goal:"GOL",cardEvent:"TARJETA",tacticDecision:"DECISIÓN TÁCTICA",pass:"PASAR",marketCard:"CARTA"};
@@ -63,7 +68,7 @@
   Object.assign(COPY.es,{multiplayer:"MULTIJUGADOR",forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
   Object.assign(COPY.de,{multiplayer:"MEHRSPIELER",forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
   Object.assign(COPY.it,{multiplayer:"MULTIGIOCATORE",forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false};
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -72,6 +77,7 @@
   const get=(key,fallback="")=>{try{const value=storage.getItem(key);return value==null?fallback:value;}catch(_){return fallback;}};
   const set=(key,value)=>{try{storage.setItem(key,value);return true;}catch(_){return false;}};
   const remove=key=>{try{storage.removeItem(key);}catch(_){}};
+  const jsonGet=key=>{try{return JSON.parse(get(key,"null"));}catch(_){return null;}};
   const uuid=()=>root.crypto&&crypto.randomUUID?crypto.randomUUID().replace(/-/g,""):(Date.now().toString(36)+Math.random().toString(36).slice(2));
   const token=()=>{const saved=get(TOKEN_KEY);if(/^CAR-[A-Z0-9]{24,96}$/.test(saved))return saved;const value="CAR-"+uuid().toUpperCase().padEnd(24,"A");set(TOKEN_KEY,value);return value;};
   const client=()=>root.GhostClubs&&typeof root.GhostClubs.clientId==="function"?root.GhostClubs.clientId():(()=>{const key="copa_ghost_client_id_v1",saved=get(key);if(/^GCL-[A-Z0-9]{8,40}$/.test(saved))return saved;const value="GCL-"+uuid().toUpperCase().slice(0,32);set(key,value);return value;})();
@@ -127,6 +133,43 @@
     const data=response.status===204?null:await response.json().catch(()=>({error:"invalid_response"}));
     if(!response.ok)throw new Error(data&&data.error||`http_${response.status}`);return data;
   }
+  const googleClientId=()=>String((document.querySelector("meta[name='copa-google-client-id']")||{}).content||"").trim();
+  const googleIosClientId=()=>String((document.querySelector("meta[name='copa-google-ios-client-id']")||{}).content||"").trim();
+  const nativePlatform=()=>String((document.querySelector("meta[name='copa-platform']")||{}).content||"web")!=="web";
+  async function finishGoogleSignIn(credential){
+    state.googleLoading=true;render();
+    try{
+      const response=await fetch(api()+"/v1/arena/auth/google",{method:"POST",headers:{"content-type":"application/json","x-copa-client":client(),"x-copa-arena-token":token()},body:JSON.stringify({credential})});
+      const data=await response.json().catch(()=>({error:"invalid_response"}));if(!response.ok)throw new Error(data.error||"google_sign_in_failed");
+      set(TOKEN_KEY,data.token);set(GOOGLE_USER_KEY,JSON.stringify(data.user||{}));state.googleUser=data.user||{};state.googleLoading=false;render();
+    }catch(error){state.googleLoading=false;state.lastError=error.message;render();}
+  }
+  async function nativeGoogleSignIn(){
+    const clientId=googleClientId();if(!clientId||clientId.startsWith("__")){state.lastError=text("googleConfig");render();return;}
+    state.googleLoading=true;render();
+    try{
+      const plugin=root.Capacitor&&root.Capacitor.Plugins&&root.Capacitor.Plugins.SocialLogin;
+      if(!plugin)throw new Error("native_google_unavailable");
+      const iosClientId=googleIosClientId();
+      await plugin.initialize({google:{webClientId:clientId,iOSClientId:iosClientId&&!iosClientId.startsWith("__")?iosClientId:undefined,iOSServerClientId:clientId,mode:"online"}});
+      const login=await plugin.login({provider:"google",options:{scopes:["email","profile"]}});
+      const credential=login&&login.result&&login.result.idToken;if(!credential)throw new Error("google_credential_missing");
+      await finishGoogleSignIn(credential);
+    }catch(error){state.googleLoading=false;state.lastError=error.message||"google_sign_in_failed";render();}
+  }
+  function mountGoogleButton(){
+    const slot=rootEl().querySelector("[data-google-slot]");if(!slot||nativePlatform()||state.googleUser)return;
+    const clientId=googleClientId();if(!clientId||clientId.startsWith("__")){slot.innerHTML=`<button type="button" class="arena-google-button is-unconfigured" disabled>${esc(text("googleConfig"))}</button>`;return;}
+    const mount=()=>{
+      if(!root.google||!google.accounts||!google.accounts.id)return;
+      google.accounts.id.initialize({client_id:clientId,callback:response=>finishGoogleSignIn(response.credential)});
+      slot.innerHTML="";google.accounts.id.renderButton(slot,{theme:"filled_black",size:"large",shape:"rectangular",text:"continue_with",width:320,logo_alignment:"left"});
+    };
+    if(root.google&&google.accounts){mount();return;}
+    let script=document.querySelector("script[data-copa-google-identity]");
+    if(!script){script=document.createElement("script");script.src="https://accounts.google.com/gsi/client";script.async=true;script.defer=true;script.dataset.copaGoogleIdentity="1";document.head.appendChild(script);}
+    script.addEventListener("load",mount,{once:true});
+  }
   function telemetry(event,detail="",value=0){request("/v1/arena/events",{method:"POST",body:JSON.stringify({event,detail,value})}).catch(()=>{});}
   function rootEl(){
     let element=document.getElementById("arena");
@@ -140,7 +183,7 @@
   function divisionLabel(value){const map={aday:"candidate",bronz:"bronze",gumus:"silver",altin:"gold",elmas:"diamond",efsane:"legend"};return text(map[value]||"candidate");}
   function icon(name){
     const paths={
-      arena:"<path d='M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6'/><path class='arena-icon-spark' d='M12 1v3M3 6l3 2M21 6l-3 2'/>",
+      arena:"<path d='M3 7l5 5 4-8 4 8 5-5-2 12H5z'/><path d='M6 22h12'/><path class='arena-icon-spark' d='M12 1v2M2 4l2 2M22 4l-2 2'/>",
       search:"<circle cx='11' cy='11' r='6'/><path d='m16 16 5 5M8 11h6M11 8v6'/>",
       shield:"<path d='M12 2 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6z'/><path d='m8 12 2.4 2.4L16 9'/>",
       rank:"<path d='M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7'/>",
@@ -156,7 +199,8 @@
     return `<div class="arena-backdrop" aria-hidden="true"><i></i><i></i><i></i></div><header class="arena-topbar"><button type="button" data-arena-action="close" aria-label="${esc(text("back"))}">←</button><div><span>${esc(kicker)}</span><b>COPA <em>ARENA</em></b></div><div class="arena-live-mark ${isLive?"is-live":"is-online"} is-${quality||"unknown"}"><i></i> ${esc(status)}</div></header>${reconnect}<div class="arena-content">${content}</div>`;
   }
   function terms(){
-    return chrome(`<article class="arena-consent"><div class="arena-crest">${icon("arena")}</div><span class="arena-kicker">${esc(text("ranked"))}</span><h1>${esc(text("consentTitle"))}</h1><p>${esc(text("consent"))}</p><label><span>${esc(text("club"))}</span><input data-arena-club maxlength="29" value="${esc(clubName())}" autocomplete="off"></label><div class="arena-trust-row"><span>${icon("shield")}<b>${esc(text("authentic"))}</b><small>${esc(text("noBots"))}</small></span><span>${icon("rank")}<b>${esc(text("fair"))}</b><small>${esc(text("fairCopy"))}</small></span></div><button class="arena-primary" data-arena-action="accept">${esc(text("accept"))}</button></article>`);
+    const user=state.googleUser;
+    return chrome(`<article class="arena-consent"><div class="arena-crest">${icon("arena")}</div><span class="arena-kicker">${esc(text("ranked"))}</span><h1>${esc(text("consentTitle"))}</h1><p>${esc(text("consent"))}</p><section class="arena-google-auth ${user?"is-ready":""}"><span>${esc(text("googleTitle"))}</span><p>${esc(text("googleCopy"))}</p>${user?`<div class="arena-google-user"><i>G</i><span><b>${esc(user.name||text("googleReady"))}</b><small>${esc(user.email||text("googleReady"))}</small></span><em>✓</em></div>`:nativePlatform()?`<button type="button" class="arena-google-button" data-arena-action="google">${state.googleLoading?"…":`<i>G</i>${esc(text("googleContinue"))}`}</button>`:`<div class="arena-google-slot" data-google-slot></div>`}${state.lastError?`<small class="arena-google-error">${esc(state.lastError)}</small>`:""}</section>${user?`<label><span>${esc(text("club"))}</span><input data-arena-club maxlength="29" value="${esc(clubName())}" autocomplete="off"></label><div class="arena-trust-row"><span>${icon("shield")}<b>${esc(text("authentic"))}</b><small>${esc(text("noBots"))}</small></span><span>${icon("rank")}<b>${esc(text("fair"))}</b><small>${esc(text("fairCopy"))}</small></span></div><button class="arena-primary" data-arena-action="accept">${esc(text("accept"))}</button>`:""}</article>`);
   }
   function rewardTrack(profile){
     const progress=Number(profile.tokenProgress)||0,owned=new Set(profile.cosmetics||[]);
@@ -445,8 +489,11 @@
     const resultLabel=game.result&&game.result.voided?"voided":game.result&&game.result.forfeitIndex!==null&&game.result.forfeitIndex!==undefined?(game.result.forfeitIndex===game.selfIndex?"forfeitLoss":"forfeitWin"):outcome;
     const resultSoundKey=`${game.matchId||"match"}:${mine}:${theirs}:${outcome}`;
     if(outcome==="win"&&state.lastResultSound!==resultSoundKey){state.lastResultSound=resultSoundKey;sfx("win");}
-    const practice=game.mode==="practice";
-    return chrome(`<div class="arena-result ${outcome}"><span>${esc(practice?text("practice"):text(resultLabel))}</span><h1>${mine} <i>–</i> ${theirs}</h1>${penalty?`<p>PEN ${penalty[game.selfIndex]}–${penalty[game.selfIndex===0?1:0]}</p>`:""}${practice?`<p>${esc(text("practiceCopy"))}</p>`:""}${game.result&&game.result.voided?`<p>${esc(text("voidedCopy"))}</p>`:""}<div class="arena-result-clubs"><b>${esc(game.self&&game.self.clubName)}</b><i>VS</i><b>${esc(game.opponent&&game.opponent.clubName)}</b></div><div class="arena-result-rewards"><span><small>${esc(text("rating"))}</small><b>${Number(reward.ratingBefore||game.self&&game.self.rating||1000)} → ${ratingAfter}</b><em>${Number(reward.ratingDelta||0)>=0?"+":""}${Number(reward.ratingDelta||0)}</em></span><span><small>${esc(text("season"))}</small><b>+${Number(reward.seasonPoints||0)} P</b></span><span><small>${esc(text("power"))}</small><b><i class="arena-context-power power-${powerBand(myTeam.power)}">${myTeam.power||"—"}</i> – <i class="arena-context-power power-${powerBand(theirTeam.power)}">${theirTeam.power||"—"}</i></b></span><span><small>${esc(text("chemistry"))}</small><b>${myTeam.chemistry==null?"—":myTeam.chemistry} – ${theirTeam.chemistry==null?"—":theirTeam.chemistry}</b></span></div>${eventRecap.length?`<div class="arena-result-events"><b>${esc(local("MAÇ OLAYLARI","MATCH EVENTS"))}</b>${eventRecap.map(item=>`<span><strong>${Number(item.minute)}'</strong><i class="${item.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(text(item.type==="goal"?"goal":"cardEvent"))} · ${esc(item.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`).join("")}</div>`:""}${decisions.length?`<div class="arena-result-decisions"><b>${esc(local("TAKTİK ÖZETİ","TACTICAL SUMMARY"))}</b>${decisions.map(item=>`<span>${esc(item)}</span>`).join("")}</div>`:""}<div class="arena-result-actions"><button class="arena-primary" data-arena-action="${practice?"practice":"queue"}">${esc(practice?text("practiceAgain"):text("searchAgain"))}</button><button class="arena-quiet" data-arena-action="portal">${esc(text("home"))}</button></div></div>`);
+    const practice=game.mode==="practice",rematch=game.rematch||{};
+    const rematchButton=rematch.available
+      ?`<button class="arena-rematch ${rematch.opponentRequested?"is-incoming":""}" data-arena-action="rematch" ${rematch.requested||rematch.launched?"disabled":""}>${esc(rematch.launched?text("rematchStarting"):rematch.requested?text("rematchSent"):rematch.opponentRequested?text("rematchIncoming"):text("rematch"))}</button>`
+      :"";
+    return chrome(`<div class="arena-result ${outcome}"><span>${esc(practice?text("practice"):text(resultLabel))}</span><h1>${mine} <i>–</i> ${theirs}</h1>${penalty?`<p>PEN ${penalty[game.selfIndex]}–${penalty[game.selfIndex===0?1:0]}</p>`:""}${practice?`<p>${esc(text("practiceCopy"))}</p>`:""}${game.result&&game.result.voided?`<p>${esc(text("voidedCopy"))}</p>`:""}<div class="arena-result-clubs"><b>${esc(game.self&&game.self.clubName)}</b><i>VS</i><b>${esc(game.opponent&&game.opponent.clubName)}</b></div><div class="arena-result-rewards"><span><small>${esc(text("rating"))}</small><b>${Number(reward.ratingBefore||game.self&&game.self.rating||1000)} → ${ratingAfter}</b><em>${Number(reward.ratingDelta||0)>=0?"+":""}${Number(reward.ratingDelta||0)}</em></span><span><small>${esc(text("season"))}</small><b>+${Number(reward.seasonPoints||0)} P</b></span><span><small>${esc(text("power"))}</small><b><i class="arena-context-power power-${powerBand(myTeam.power)}">${myTeam.power||"—"}</i> – <i class="arena-context-power power-${powerBand(theirTeam.power)}">${theirTeam.power||"—"}</i></b></span><span><small>${esc(text("chemistry"))}</small><b>${myTeam.chemistry==null?"—":myTeam.chemistry} – ${theirTeam.chemistry==null?"—":theirTeam.chemistry}</b></span></div>${eventRecap.length?`<div class="arena-result-events"><b>${esc(local("MAÇ OLAYLARI","MATCH EVENTS"))}</b>${eventRecap.map(item=>`<span><strong>${Number(item.minute)}'</strong><i class="${item.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(text(item.type==="goal"?"goal":"cardEvent"))} · ${esc(item.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`).join("")}</div>`:""}${decisions.length?`<div class="arena-result-decisions"><b>${esc(local("TAKTİK ÖZETİ","TACTICAL SUMMARY"))}</b>${decisions.map(item=>`<span>${esc(item)}</span>`).join("")}</div>`:""}<div class="arena-result-actions">${rematchButton}<button class="arena-primary" data-arena-action="${practice?"practice":"queue"}">${esc(practice?text("practiceAgain"):text("searchAgain"))}</button><button class="arena-quiet" data-arena-action="portal">${esc(text("home"))}</button></div></div>`);
   }
   function room(){
     const game=state.room;if(!game)return loading(state.connection==="reconnecting"?text("reconnecting"):text("loading"));
@@ -476,6 +523,7 @@
     else if(state.screen==="leaderboard"||state.screen==="history")html=listView(state.screen);
     else if(state.screen==="error")html=errorView(state.lastError);
     element.innerHTML=html;
+    if(state.screen==="terms")mountGoogleButton();
     if(state.screen==="room"&&state.room&&state.room.phase==="setup"){
       const phase=element.querySelector(".arena-phase"),draft=setupDraft(state.room);
       if(phase){
@@ -495,7 +543,8 @@
     document.body.classList.add("arena-active");rootEl().classList.remove("hidden");
     const intro=document.getElementById("intro");if(intro)intro.classList.add("hidden");
     sfx("open");telemetry("arena_opened");
-    if(get(TERMS_KEY)!==TERMS_VERSION||!clubName()){setScreen("terms");return;}
+    state.googleUser=jsonGet(GOOGLE_USER_KEY);
+    if(!state.googleUser||get(TERMS_KEY)!==TERMS_VERSION||!clubName()){setScreen("terms");return;}
     if(resume())return;
     loadPortal();
   }
@@ -503,6 +552,7 @@
     disconnect(false);document.body.classList.remove("arena-active");rootEl().classList.add("hidden");
     const intro=document.getElementById("intro");if(intro)intro.classList.remove("hidden");
     state.screen="closed";
+    if(root.CopaModeGate)root.CopaModeGate.show();
   }
   async function loadPortal(){
     setScreen("loading");
@@ -562,6 +612,10 @@
           if(settled)state.profile=settled;
           remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":data.state.result.outcomes[data.state.selfIndex]);
         }
+      }
+      if(data.type==="rematch"){
+        const next={matchId:data.matchId,token:data.roomToken,mode:"ranked"};
+        set(ROOM_KEY,JSON.stringify(next));state.room=null;state.retries=0;sfx("match");connectRoom(next);
       }
       if(data.type==="pong"&&state.pingAt){
         state.latency=Math.max(0,Date.now()-state.pingAt);state.pingAt=0;
@@ -698,6 +752,7 @@
     const button=event.target.closest("[data-arena-action]");if(!button)return;
     const action=button.dataset.arenaAction;
     if(action==="toggle-emotes"){state.emoteMenu=!state.emoteMenu;render();return;}
+    if(action==="google"){nativeGoogleSignIn();return;}
     if(action==="close"){
       if(state.screen==="room"&&state.room&&state.room.phase!=="result"&&!root.confirm(local("Devam eden Arena maçından ayrılmak istediğine emin misin? Süre dolunca otomatik karar verilir.","Leave the active Arena match? Automatic choices will be made when timers expire.")))return;
       close();return;
@@ -708,6 +763,7 @@
       set(CLUB_KEY,name);set(TERMS_KEY,TERMS_VERSION);loadPortal();return;
     }
     if(action==="queue"){startQueue("ranked");return;}
+    if(action==="rematch"){send({type:"rematch"});return;}
     if(action==="practice"){startQueue("practice");return;}
     if(action==="cancel"){disconnect(true);loadPortal();return;}
     if(action==="ready"){send({type:"ready"});return;}
@@ -730,7 +786,7 @@
     if(action==="delete-data"){
       if(!root.confirm(text("deleteConfirm")))return;
       request("/v1/arena/profile",{method:"DELETE"}).then(()=>{
-        remove(TOKEN_KEY);remove(TERMS_KEY);remove(CLUB_KEY);remove(ROOM_KEY);state.profile=null;state.history=[];setScreen("terms");
+        remove(TOKEN_KEY);remove(TERMS_KEY);remove(CLUB_KEY);remove(ROOM_KEY);remove(GOOGLE_USER_KEY);state.googleUser=null;state.profile=null;state.history=[];setScreen("terms");
       }).catch(error=>{state.lastError=error.message;setScreen("error");});
       return;
     }
@@ -742,5 +798,5 @@
     try{document.body.classList.add("arena-active");rootEl().classList.remove("hidden");const intro=document.getElementById("intro");if(intro)intro.classList.add("hidden");connectRoom(JSON.parse(saved));return true;}catch(_){remove(ROOM_KEY);return false;}
   }
   document.addEventListener("visibilitychange",()=>syncArenaAudio(state.screen==="room"?state.room:null));
-  root.CopaArena={open,close,refresh,resume,state};
+  root.CopaArena={open,close,refresh,resume,state,finishGoogleSignIn};
 })(window);

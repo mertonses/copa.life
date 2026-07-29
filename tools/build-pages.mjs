@@ -6,6 +6,8 @@ import { getSharedBuildInfo, writePlatformBuildManifest } from "./shared-build-i
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "dist");
 const webAnalyticsToken = String(process.env.CF_WEB_ANALYTICS_TOKEN || "").trim();
+const googleClientId = String(process.env.COPA_GOOGLE_CLIENT_ID || "").trim();
+const googleIosClientId = String(process.env.COPA_GOOGLE_IOS_CLIENT_ID || "").trim();
 
 if (webAnalyticsToken && !/^[A-Za-z0-9_-]{16,128}$/.test(webAnalyticsToken)) {
   throw new Error("CF_WEB_ANALYTICS_TOKEN has an invalid format");
@@ -125,6 +127,8 @@ const builtIndex=path.join(OUT,"index.html");
 if(fs.existsSync(builtIndex)){
   let source=fs.readFileSync(builtIndex,"utf8");
   source=source.replaceAll("__COPA_BUILD_VERSION__",buildVersion);
+  source=source.replaceAll("__COPA_GOOGLE_CLIENT_ID__",googleClientId);
+  source=source.replaceAll("__COPA_GOOGLE_IOS_CLIENT_ID__",googleIosClientId);
   if(webAnalyticsToken){
     const beacon=`<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-copa-analytics="cloudflare-web" data-cf-beacon='${JSON.stringify({token:webAnalyticsToken,spa:true})}'></script>`;
     source=source.replace("</body>",`${beacon}</body>`);
