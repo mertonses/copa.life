@@ -4,7 +4,7 @@
 
   const STORAGE_KEY="copa_meta_progression_v1";
   const FORMAT="copa-life-save";
-  const VERSION=4;
+  const VERSION=5;
   const ARCHIVE_LIMIT=20;
   const MUSEUM_LIMIT=60;
   const HALL_LIMIT=11;
@@ -21,15 +21,28 @@
     ghost_match:["Hayalet Avcı","Ghost Hunter"],
     six_styles:["Taktik Gezgin","Tactical Traveller"]
   });
+  const DIRECTIVES=Object.freeze({
+    clean_cup:{tr:"Temiz Kupa",en:"Clean Cup",trGoal:"Borçsuz şampiyon ol",enGoal:"Win the cup without debt",reward:"crest_clean_cup",kind:"crest"},
+    youth_final:{tr:"Gençlik Yürüyüşü",en:"Youth March",trGoal:"En az 4 gençle finale çık",enGoal:"Reach the final with at least 4 young players",reward:"kit_youth_march",kind:"kit"},
+    pure_tactics:{tr:"Saf Taktik",en:"Pure Tactics",trGoal:"Kart kullanmadan şampiyon ol",enGoal:"Win the cup without cards",reward:"story_pure_tactics",kind:"story"}
+  });
+  const STYLE_PLANS=Object.freeze({
+    gegen:{shotQuality:0,passQuality:0,defensivePressure:0,setPieceBias:0,lateStamina:-.03,pressResistance:.035,opening:.01,styleFit:0},
+    kontra:{shotQuality:.025,passQuality:-1,defensivePressure:0,setPieceBias:0,lateStamina:.015,pressResistance:0,opening:0,styleFit:0},
+    tiki:{shotQuality:-.015,passQuality:2,defensivePressure:0,setPieceBias:0,lateStamina:0,pressResistance:.018,opening:0,styleFit:0},
+    uzun:{shotQuality:.012,passQuality:-1.5,defensivePressure:0,setPieceBias:.16,lateStamina:0,pressResistance:0,opening:0,styleFit:0},
+    blok:{shotQuality:-.02,passQuality:0,defensivePressure:.035,setPieceBias:0,lateStamina:.015,pressResistance:0,opening:0,styleFit:0}
+  });
   const empty=()=>({
     version:VERSION,
-    career:{reputation:0,licenses:0,unlockWindowOpen:false},
+    career:{reputation:0,licenses:0,unlockWindowOpen:false,selectedStylePlan:"",prestige:0},
     mastery:{styles:{},formations:{},chairmen:{}},
     badges:[],
     archive:[],
     museum:{memories:[],hall:[],collections:{claimed:[],stories:[],kits:[],crests:[],tokens:0,selectedKit:"",selectedCrest:""}},
     clubFiles:{completed:{debt:0,youth:0,tactics:0},claimed:[]},
     chairHistory:{}
+    ,directives:{selected:"",completed:[]}
   });
   const safeGet=()=>{try{return localStorage.getItem(STORAGE_KEY);}catch(_){return null;}};
   const safeSet=value=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value));return true;}catch(_){return false;}};
@@ -56,7 +69,8 @@
     for(let candidate=Math.max(2,level+1);candidate<=15;candidate++){
       if(LICENSE_LEVELS.has(candidate))return {level:candidate,type:"license",threshold:levelThreshold(candidate)};
     }
-    return null;
+    const prestigeLevel=Math.max(18,Math.ceil((Math.max(15,level)+1)/3)*3);
+    return prestigeLevel<=999?{level:prestigeLevel,type:"prestige",threshold:levelThreshold(prestigeLevel)}:null;
   }
   const masteryTier=count=>count>=20?4:count>=10?3:count>=5?2:count>=2?1:0;
   const tierLabel=(count,tr)=>[tr?"Yeni":"Rookie",tr?"Deneyimli":"Seasoned",tr?"Uzman":"Specialist",tr?"Usta":"Master",tr?"Efsane":"Legend"][masteryTier(count)];
@@ -133,7 +147,9 @@
       career:{
         reputation:integer(career.reputation,0,100000000),
         licenses:integer(career.licenses,0,99),
-        unlockWindowOpen:!!career.unlockWindowOpen
+        unlockWindowOpen:!!career.unlockWindowOpen,
+        selectedStylePlan:STYLES.has(career.selectedStylePlan)?career.selectedStylePlan:"",
+        prestige:integer(career.prestige,0,999)
       },
       mastery:{
         styles:countMap(mastery.styles,key=>STYLES.has(key)),
@@ -148,7 +164,11 @@
         selectedCrest:cosmetics(collectionSource.crests).includes(text(collectionSource.selectedCrest,40))?text(collectionSource.selectedCrest,40):""
       }},
       clubFiles:{completed:Object.assign({debt:0,youth:0,tactics:0},countMap(clubSource.completed,key=>CLUB_FILE_IDS.has(key))),claimed:clubClaimed},
-      chairHistory
+      chairHistory,
+      directives:{
+        selected:Object.hasOwn(DIRECTIVES,source.directives&&source.directives.selected)?source.directives.selected:"",
+        completed:Array.from(new Set((Array.isArray(source.directives&&source.directives.completed)?source.directives.completed:[]).filter(id=>Object.hasOwn(DIRECTIVES,id))))
+      }
     };
   }
   let state=(()=>{try{return normalize(JSON.parse(safeGet()||"null"));}catch(_){return empty();}})();
@@ -184,6 +204,37 @@
       kit:state.museum.collections.selectedKit||"",
       crest:state.museum.collections.selectedCrest||""
     };
+  }
+  function directivePassed(id,value){
+    const players=Array.isArray(value.players)?value.players:[],young=players.filter(player=>Number(player&&player.age)<=21).length;
+    if(id==="clean_cup")return !!value.won&&Number(value.cash)>=0;
+    if(id==="youth_final")return (value.won||Number(value.round)>=7)&&young>=4;
+    if(id==="pure_tactics")return !!value.won&&Number(value.cards)===0;
+    return false;
+  }
+  function selectDirective(id){
+    const key=String(id||"");
+    if(key&&!Object.hasOwn(DIRECTIVES,key))return false;
+    state.directives.selected=state.directives.selected===key?"":key;persist();openProgression("career");return true;
+  }
+  function completeDirective(value){
+    const id=state.directives.selected;
+    if(!id||state.directives.completed.includes(id)||!directivePassed(id,value))return null;
+    const def=DIRECTIVES[id];state.directives.completed.push(id);
+    const field=def.kind==="kit"?"kits":def.kind==="crest"?"crests":"stories";
+    state.museum.collections[field].push(def.reward);
+    state.museum.collections[field]=Array.from(new Set(state.museum.collections[field]));
+    return{id,kind:def.kind,reward:def.reward};
+  }
+  function selectStylePlan(styleId){
+    const id=String(styleId||""),count=state.mastery.styles[id]||0;
+    if(!STYLES.has(id)||count<5)return false;
+    state.career.selectedStylePlan=state.career.selectedStylePlan===id?"":id;persist();openProgression("mastery");return true;
+  }
+  function activeStylePlan(styleId){
+    const id=String(styleId||"");
+    if(state.career.selectedStylePlan!==id||(state.mastery.styles[id]||0)<5)return null;
+    return {...STYLE_PLANS[id],id};
   }
   function completeClubFile(id){
     const key=String(id||"");
@@ -252,9 +303,14 @@
     const newReputation=oldReputation+reputation,newLevel=careerLevel(newReputation);
     let levelLicenses=0;
     for(let level=oldLevel+1;level<=newLevel;level++)if(LICENSE_LEVELS.has(level))levelLicenses++;
+    let prestigeEarned=0;
+    for(let level=Math.max(18,oldLevel+1);level<=newLevel;level++)if(level%3===0)prestigeEarned++;
     const championLicense=value.won?1:0;
     const licensesEarned=lockedFormationCount()>0?levelLicenses+championLicense:0;
     state.career.reputation=newReputation;
+    state.career.prestige=integer(state.career.prestige+prestigeEarned,0,999);
+    for(let index=0;index<prestigeEarned;index++)state.museum.collections.crests.push(`crest_prestige_${state.career.prestige-prestigeEarned+index+1}`);
+    state.museum.collections.crests=Array.from(new Set(state.museum.collections.crests));
     state.career.licenses=integer(state.career.licenses+licensesEarned,0,99);
     state.career.unlockWindowOpen=state.career.licenses>0;
 
@@ -282,7 +338,7 @@
 
     const memory=cleanMemory(Object.assign({},entry,{players:value.players,featuredIndex:value.featuredIndex||0}));
     if(memory)state.museum.memories=state.museum.memories.filter(item=>item.id!==memory.id).concat(memory).slice(-MUSEUM_LIMIT);
-    const collectionsUnlocked=evaluateCollections();
+    const directiveReward=completeDirective(value),collectionsUnlocked=evaluateCollections();
     persist();
     const masteryAfter={
       style:state.mastery.styles[entry.style]||0,
@@ -290,9 +346,9 @@
       chairman:state.mastery.chairmen[entry.chairman]||0
     };
     return {
-      entry,reputation,oldReputation,newReputation,oldLevel,newLevel,licensesEarned,
+      entry,reputation,oldReputation,newReputation,oldLevel,newLevel,licensesEarned,prestigeEarned,
       licensesAvailable:state.career.licenses,memory,
-      mastery:{before:masteryBefore,after:masteryAfter},collectionsUnlocked
+      mastery:{before:masteryBefore,after:masteryAfter},collectionsUnlocked,directiveReward
     };
   }
 
@@ -380,10 +436,12 @@
     return entries.map(([key,count])=>{
       const progress=masteryProgress(count),current=tierLabel(count,tr);
       const next=progress.next==null?(tr?"En yüksek kademe":"Highest tier"):tierLabel(progress.target,tr);
+      const planUnlocked=group==="styles"&&count>=5,planSelected=planUnlocked&&state.career.selectedStylePlan===key;
       return `<article class="meta-mastery-row tier-${progress.tier}">
         <div class="meta-mastery-icon">${masteryIcon(group,key)}</div><div class="meta-mastery-copy"><b>${escapeHTML(masteryName(group,key,tr))}</b><small>${progress.next==null?next:`${tr?"Sonraki":"Next"}: ${next}`}</small></div>
         <div class="meta-mastery-state"><span class="meta-tier-badge">${current}</span><small>${progress.next==null?`${count}`:`${count}/${progress.target}`}</small></div>
         <span class="meta-mastery-track" aria-label="${count}/${progress.target}"><i style="width:${progress.percent}%"></i></span>
+        ${planUnlocked?`<button type="button" class="meta-plan-toggle ${planSelected?"is-selected":""}" onclick="CopaMeta.selectStylePlan('${key}')">${planSelected?(tr?"AKTİF UZMAN PLANI":"SPECIALIST PLAN ACTIVE"):(tr?"UZMAN PLANINI SEÇ":"SELECT SPECIALIST PLAN")}</button>`:""}
       </article>`;
     }).join("");
   }
@@ -419,8 +477,22 @@
       ["tactics","kit","kit_three_plans",tr?"TAKTİK ÇEŞİTLİLİK":"TACTICAL VARIETY",tr?"Kulüp dosyasını tamamla":"Complete the club file",Math.min(1,state.clubFiles.completed.tactics||0),1,tr?"Forma":"Kit"],
       ["club_files_set","token","run_start_token",tr?"KULÜP ARŞİVİ":"CLUB ARCHIVE",tr?"Üç kulüp dosyasını tamamla":"Complete all three club files",state.clubFiles.claimed.filter(id=>CLUB_FILE_IDS.has(id)).length,3,tr?"Tek kontrollü jeton":"One bounded token"]
     ];
+    const cosmeticNames={
+      crest_clean_cup:[tr?"TEMİZ KUPA ARMASI":"CLEAN CUP CREST",tr?"Borçsuz şampiyonluk yönergesi":"Debt-free champion directive"],
+      kit_youth_march:[tr?"GENÇLİK YÜRÜYÜŞÜ FORMASI":"YOUTH MARCH KIT",tr?"Dört gençle final yönergesi":"Final with four young players"],
+      crest_prestige:[tr?"PRESTİJ ARMASI":"PRESTIGE CREST",tr?"Kariyer prestij kilometre taşı":"Career prestige milestone"]
+    };
+    const listedRewards=new Set(collectionData.map(item=>item[2]));
+    const cosmeticButton=(kind,id)=>{
+      const prestige=id.startsWith("crest_prestige_"),name=cosmeticNames[id]||cosmeticNames[prestige?"crest_prestige":""]||[id.replace(/_/g," ").toUpperCase(),tr?"Kariyer koleksiyonu":"Career collection"];
+      const selected=(kind==="kit"?state.museum.collections.selectedKit:state.museum.collections.selectedCrest)===id;
+      return `<button type="button" class="meta-owned-cosmetic ${selected?"is-equipped":""}" onclick="CopaMeta.selectCosmetic('${kind}','${id}')"><span aria-hidden="true">${kind==="kit"?"▤":"◆"}</span><b>${escapeHTML(name[0])}${prestige?` · ${escapeHTML(id.split("_").pop())}`:""}</b><small>${selected?(tr?"AKTİF":"EQUIPPED"):escapeHTML(name[1])}</small></button>`;
+    };
+    const extraKits=state.museum.collections.kits.filter(id=>!listedRewards.has(id));
+    const extraCrests=state.museum.collections.crests.filter(id=>!listedRewards.has(id));
+    const cosmeticVault=extraKits.length||extraCrests.length?`<div class="meta-cosmetic-vault"><div class="meta-section-heading"><h4>${tr?"KAZANILAN TASARIMLAR":"EARNED DESIGNS"}</h4><small>${tr?"Görsel kimlik · güç avantajı sağlamaz":"Visual identity · no power advantage"}</small></div><div>${extraKits.map(id=>cosmeticButton("kit",id)).join("")}${extraCrests.map(id=>cosmeticButton("crest",id)).join("")}</div></div>`:"";
     const collectionIcons={story:"✦",kit:"▤",crest:"◆",token:"◈"};
-    const collections=`<section class="meta-collections"><div class="meta-section-heading"><h4>${tr?"MÜZE KOLEKSİYONLARI":"MUSEUM COLLECTIONS"}</h4><small>${claimed.size}/${collectionData.length} · ${tr?"Kalıcı güç vermez":"No permanent power"}</small></div><div class="meta-collection-grid">${collectionData.map(([id,kind,rewardId,title,goal,value,max,reward])=>{const complete=claimed.has(id),selected=(kind==="kit"&&state.museum.collections.selectedKit===rewardId)||(kind==="crest"&&state.museum.collections.selectedCrest===rewardId),progress=Math.round(Math.min(1,value/max)*100);return `<article class="kind-${kind} ${complete?"is-complete":""} ${selected?"is-equipped":""}" style="--collection-progress:${progress}%"><span class="meta-collection-icon" aria-hidden="true">${collectionIcons[kind]}</span><div><small>${goal}</small><b>${title}</b><p>${reward}</p></div><strong>${complete?"✓":`${value}/${max}`}</strong>${complete&&(kind==="kit"||kind==="crest")?`<button type="button" onclick="CopaMeta.selectCosmetic('${kind}','${rewardId}')">${selected?(tr?"AKTİF":"EQUIPPED"):(tr?"KUŞAN":"EQUIP")}</button>`:""}</article>`;}).join("")}</div>${state.museum.collections.tokens?`<div class="meta-token-bank"><b>${tr?"HAZIR JETON":"TOKEN READY"} · ${state.museum.collections.tokens}</b><span>${tr?"Yeni turun ilk oyuncu krizinde risksiz uzlaşma açar.":"Unlocks a safe compromise in the first player crisis of a new run."}</span></div>`:""}</section>`;
+    const collections=`<section class="meta-collections"><div class="meta-section-heading"><h4>${tr?"MÜZE KOLEKSİYONLARI":"MUSEUM COLLECTIONS"}</h4><small>${claimed.size}/${collectionData.length} · ${tr?"Kalıcı güç vermez":"No permanent power"}</small></div><div class="meta-collection-grid">${collectionData.map(([id,kind,rewardId,title,goal,value,max,reward])=>{const complete=claimed.has(id),selected=(kind==="kit"&&state.museum.collections.selectedKit===rewardId)||(kind==="crest"&&state.museum.collections.selectedCrest===rewardId),progress=Math.round(Math.min(1,value/max)*100);return `<article class="kind-${kind} ${complete?"is-complete":""} ${selected?"is-equipped":""}" style="--collection-progress:${progress}%"><span class="meta-collection-icon" aria-hidden="true">${collectionIcons[kind]}</span><div><small>${goal}</small><b>${title}</b><p>${reward}</p></div><strong>${complete?"✓":`${value}/${max}`}</strong>${complete&&(kind==="kit"||kind==="crest")?`<button type="button" onclick="CopaMeta.selectCosmetic('${kind}','${rewardId}')">${selected?(tr?"AKTİF":"EQUIPPED"):(tr?"KUŞAN":"EQUIP")}</button>`:""}</article>`;}).join("")}</div>${cosmeticVault}${state.museum.collections.tokens?`<div class="meta-token-bank"><b>${tr?"HAZIR JETON":"TOKEN READY"} · ${state.museum.collections.tokens}</b><span>${tr?"Yeni turun ilk oyuncu krizinde risksiz uzlaşma açar.":"Unlocks a safe compromise in the first player crisis of a new run."}</span></div>`:""}</section>`;
     if(!state.museum.memories.length)return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${tr?"Kalıcı koleksiyon":"Permanent collection"}</span></div>${collections}<section class="meta-empty-state meta-empty-museum"><span class="meta-empty-icon" aria-hidden="true">◇</span><h3>${tr?"Henüz kariyer hatıran yok":"No career memories yet"}</h3><p>${tr?"Bir turu tamamladığında sezonun, öne çıkan oyuncun ve önemli sonuçların burada kalıcı olarak arşivlenecek.":"Complete a run to permanently archive its season, featured player and defining result here."}</p></section>`;
     const hallHTML=hall.length?hall.map(({memory,player})=>`<div class="meta-hall-player"><span>${escapeHTML(player.pos)}</span><b>${escapeHTML(player.name)}</b><small>${player.power} · ${escapeHTML(memory.team)}</small></div>`).join(""):`<div class="meta-inline-empty">${tr?"Hatıralarındaki oyuncuları yıldızlayarak kendi 11'ini kur.":"Star players from your memories to build your own XI."}</div>`;
     const memoryCard=memory=>{
@@ -434,7 +506,8 @@
       </article>`;
     };
     const orderedMemories=[...state.museum.memories].reverse(),recentMemories=orderedMemories.slice(0,6).map(memoryCard).join(""),olderMemories=orderedMemories.slice(6).map(memoryCard).join("");
-    return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>${collections}
+    const exhibition=hall.length===HALL_LIMIT?`<button type="button" class="meta-exhibition" onclick="CopaMeta.playHallExhibition()"><span>XI</span><b>${tr?"ŞÖHRETLER MAÇINA ÇIK":"PLAY HALL EXHIBITION"}</b><small>${tr?"Ödülsüz · kadronun mirasını sahada gör":"No rewards · put your legacy XI on the pitch"}</small></button>`:"";
+    return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>${collections}${exhibition}
       <section class="meta-hall-section"><div class="meta-section-heading"><h4>${tr?"SEÇİLİ KADRO":"SELECTED XI"}</h4><small>${tr?"En fazla 11 oyuncu":"Up to 11 players"}</small></div><div class="meta-hall-grid">${hallHTML}</div></section>
       <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"Son 6 sezon":"Latest 6 runs"}</small></div><div class="meta-memory-list">${recentMemories}</div>${olderMemories?`<details class="meta-memory-archive"><summary>${tr?"DAHA ESKİ HATIRALAR":"OLDER MEMORIES"} · ${orderedMemories.length-6}<span aria-hidden="true">⌄</span></summary><div class="meta-memory-list">${olderMemories}</div></details>`:""}</section>`;
   }
@@ -445,6 +518,7 @@
     const progressTone=progress>=75?"is-high":progress>=35?"is-mid":"is-low";
     const levelTone=level>=8?"is-elite":level>=4?"is-established":"is-building";
     const activeFile=global.CopaClubFiles&&typeof global.CopaClubFiles.panelMarkup==="function"?global.CopaClubFiles.panelMarkup():"";
+    const directiveCards=Object.entries(DIRECTIVES).map(([id,def])=>{const done=state.directives.completed.includes(id),selected=state.directives.selected===id;return `<button type="button" class="meta-directive ${done?"is-complete":""} ${selected?"is-selected":""}" onclick="CopaMeta.selectDirective('${id}')" ${done?"disabled":""}><span>${done?"✓":"◇"}</span><b>${escapeHTML(def[tr?"tr":"en"])}</b><small>${escapeHTML(def[tr?"trGoal":"enGoal"])}</small></button>`;}).join("");
     return `${activeFile}<section class="meta-career-hero ${progressTone} ${levelTone}">
       <div class="meta-level-lockup ${levelTone}"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div>
       <div class="meta-career-progress ${progressTone}">
@@ -453,8 +527,8 @@
         <small>${tr?"Seviye":"Level"} ${level+1}: ${nextThreshold.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"itibar":"reputation"}</small>
       </div>
       <div class="meta-license-count ${state.career.licenses?"has-license":""}"><span aria-hidden="true">◆</span><small>${tr?"TAKTİK LİSANSI":"TACTICAL LICENCE"}</small><strong>${state.career.licenses}</strong></div>
-      ${next?`<div class="meta-next-reward"><span aria-hidden="true">◇</span><p><small>${tr?"SONRAKİ BÜYÜK ÖDÜL":"NEXT MAJOR REWARD"}</small><b>${tr?"Taktik Lisansı":"Tactical Licence"}</b></p><strong>${Math.max(0,next.threshold-state.career.reputation)} ${tr?"itibar kaldı":"reputation left"}</strong></div>`:""}
-    </section>
+      ${next?`<div class="meta-next-reward"><span aria-hidden="true">◇</span><p><small>${tr?"SONRAKİ BÜYÜK ÖDÜL":"NEXT MAJOR REWARD"}</small><b>${next.type==="prestige"?(tr?"Prestij Arması":"Prestige Crest"):(tr?"Taktik Lisansı":"Tactical Licence")}</b></p><strong>${Math.max(0,next.threshold-state.career.reputation)} ${tr?"itibar kaldı":"reputation left"}</strong></div>`:""}
+    </section><section class="meta-directives"><div class="meta-section-heading"><h4>${tr?"KULÜP DİREKTİFLERİ":"CLUB DIRECTIVES"}</h4><small>${state.directives.completed.length}/${Object.keys(DIRECTIVES).length} · ${tr?"Güç değil prestij ödülü":"Prestige, not power"}</small></div><div class="meta-directive-grid">${directiveCards}</div></section>
     <details class="meta-career-disclosure meta-badge-section" open><summary><span>${tr?"ROZETLER":"BADGES"}</span><small>${state.badges.length}/${Object.keys(BADGES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body"><div class="meta-badges">${badgesHTML(tr)}</div></div></details>
     <details class="meta-career-disclosure meta-archive" open><summary><span>${tr?"SON TURLAR":"RECENT RUNS"}</span><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body">${archiveHTML(tr)}</div></details>`;
   }
@@ -488,7 +562,23 @@
   }
   function careerSummary(){
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level);
-    return {level,reputation:state.career.reputation,licenses:state.career.licenses,next};
+    return {level,reputation:state.career.reputation,licenses:state.career.licenses,prestige:state.career.prestige,next};
+  }
+  function playHallExhibition(){
+    const hall=hallEntries(),tr=global.LANG==="tr";
+    if(hall.length!==HALL_LIMIT)return false;
+    const run=()=>{
+      const core=global.CopaFinalSimCore;
+      if(!core)return false;
+      const home=Math.round(hall.reduce((sum,item)=>sum+Number(item.player.power||0),0)/HALL_LIMIT);
+      const seed=parseInt(hash(hall.map(item=>item.player.id).join("|")),36)>>>0;
+      const result=core.simulateMatch({seed,homePower:home,awayPower:80,resolution:"full",plan:{pressResistance:.02}});
+      global.showModal(`<div class="meta-exhibition-result"><span>${tr?"ŞÖHRETLER MAÇI":"HALL EXHIBITION"}</span><h3>${tr?"Senin XI":"Your XI"} <b>${result.score[0]}–${result.score[1]}</b> ${tr?"Efsaneler":"Legends"}</h3><p>xG ${result.stats.xg[0].toFixed(1)}–${result.stats.xg[1].toFixed(1)} · ${tr?"Şut":"Shots"} ${result.stats.shots[0]}–${result.stats.shots[1]}</p><small>${tr?"Bu maç ödülsüzdür ve kariyer istatistiklerini değiştirmez.":"This match has no rewards and does not alter career records."}</small><button class="btn btn-primary" onclick="CopaMeta.openProgression('museum')">${tr?"MÜZEYE DÖN":"BACK TO MUSEUM"}</button></div>`,{label:tr?"Şöhretler maçı":"Hall exhibition"});
+      return true;
+    };
+    if(global.CopaFinalSimCore)return run();
+    if(global.CopaLazy&&typeof global.CopaLazy.ensureMatchCore==="function"){global.CopaLazy.ensureMatchCore().then(run);return true;}
+    return false;
   }
   function masteryInfo(group,key){
     const count=state.mastery[group]&&state.mastery[group][key]||0;
@@ -512,7 +602,7 @@
     const raw=String(code||"").trim();if(raw.length<16||raw.length>500000)throw new Error("invalid_length");
     const parts=raw.split(".");if(parts.length!==3||parts[0]!=="CPS1")throw new Error("invalid_format");
     const body=base64Decode(parts[1]);if(hash(body)!==parts[2])throw new Error("checksum");
-    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2,3,4].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
+    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2,3,4,5].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
     return payload;
   }
   function importCode(code){
@@ -530,8 +620,12 @@
     merged.career.reputation=Math.max(merged.career.reputation,imported.career.reputation);
     merged.career.licenses=Math.max(merged.career.licenses,imported.career.licenses);
     merged.career.unlockWindowOpen=merged.career.unlockWindowOpen||imported.career.unlockWindowOpen;
+    merged.career.prestige=Math.max(merged.career.prestige,imported.career.prestige);
+    if(!merged.career.selectedStylePlan&&imported.career.selectedStylePlan)merged.career.selectedStylePlan=imported.career.selectedStylePlan;
     for(const group of ["styles","formations","chairmen"])for(const [key,count] of Object.entries(imported.mastery[group]))merged.mastery[group][key]=Math.max(merged.mastery[group][key]||0,count);
     merged.badges=Array.from(new Set(merged.badges.concat(imported.badges)));
+    merged.directives.completed=Array.from(new Set(merged.directives.completed.concat(imported.directives.completed)));
+    if(!merged.directives.selected&&imported.directives.selected)merged.directives.selected=imported.directives.selected;
     merged.archive=normalize({archive:merged.archive.concat(imported.archive)}).archive;
     merged.museum=normalize({museum:{
       memories:merged.museum.memories.concat(imported.museum.memories),hall:merged.museum.hall.concat(imported.museum.hall),
@@ -584,7 +678,7 @@
     recordRun,getState:()=>JSON.parse(JSON.stringify(state)),careerSummary,careerLevel,levelThreshold,masteryInfo,
     renderPanelHTML:(tab="career")=>panelHTML(["career","mastery","museum","world"].includes(tab)?tab:"career",global.LANG==="tr"),
     requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,consumeStartToken,evaluateCollections,activeCosmetics,selectCosmetic,
-    completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,
+    completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,selectDirective,selectStylePlan,activeStylePlan,playHallExhibition,
     exportCode,importCode,openProgression,openArchive,openExport,openImport,copyExport,downloadExport,submitImport,installControl
   });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installControl,{once:true});else installControl();

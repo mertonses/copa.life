@@ -106,7 +106,8 @@ test("player profile data falls back when the JSON request fails",async({page})=
       state:global.playerProfileLoadState(),
     };
   });
-  expect(result.failures).toBe(2);
+  // The store warms once at boot, then the forced reload runs the same two-attempt cycle.
+  expect(result.failures).toBe(4);
   expect(result.records).toBe(8866);
   expect(result.scores).toEqual([76,85,81,72,82,88]);
   expect(result.state).toMatchObject({loaded:true,loading:false,error:null,attempts:2});

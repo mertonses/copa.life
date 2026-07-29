@@ -39,9 +39,6 @@
       return !!(run||final||penalty||document.body.classList.contains("run-active"));
     }catch(_){return document.body.classList.contains("run-active");}
   }
-  function isNativeGame(){
-    try{return !!(root.COPA_IS_NATIVE||root.Capacitor?.isNativePlatform?.()||new URLSearchParams(root.location.search).has("native-game"));}catch(_){return false;}
-  }
   function shouldBypassForAutomation(){
     try{
       const params=new URLSearchParams(root.location.search);
@@ -49,7 +46,7 @@
     }catch(_){return false;}
   }
   function shouldYieldToGame(){
-    return shouldBypassForAutomation()||isNativeGame()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
+    return shouldBypassForAutomation()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
   }
   document.addEventListener("click",event=>{
     const button=event.target.closest("[data-mode-choice]");if(button)choose(button.dataset.modeChoice);

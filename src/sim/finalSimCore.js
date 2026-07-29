@@ -9,8 +9,8 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(penaltyCore){
   "use strict";
 
-  const MODEL_VERSION="copa-final-core-v5";
-  const REPLAY_VERSION=3;
+  const MODEL_VERSION="copa-final-core-v6";
+  const REPLAY_VERSION=4;
   const TACTICS=new Set(["balanced","more","push","calm","hold"]);
   const CARDS=new Set(["kanat_akini","kontra","sogukkanli_penaltici"]);
   const SEQUENCES=[
@@ -59,6 +59,19 @@
       duration:Math.round(clamp(item&&item.duration==null?12:item.duration,4,24))
     })).sort((a,b)=>a.minute-b.minute);
   }
+  function normalizePlan(value){
+    const input=value&&typeof value==="object"?value:{};
+    return{
+      shotQuality:round(clamp(input.shotQuality,-.12,.12),4),
+      passQuality:round(clamp(input.passQuality,-10,10),3),
+      defensivePressure:round(clamp(input.defensivePressure,-.12,.12),4),
+      setPieceBias:round(clamp(input.setPieceBias,-.5,.5),4),
+      lateStamina:round(clamp(input.lateStamina,-.12,.12),4),
+      pressResistance:round(clamp(input.pressResistance,-.12,.12),4),
+      opening:round(clamp(input.opening,-.10,.10),4),
+      styleFit:round(clamp(input.styleFit,-2,2),3)
+    };
+  }
   function normalizeConfig(value){
     const input=value&&typeof value==="object"?value:{};
     return {
@@ -73,6 +86,8 @@
       awayCards:normalizeCards(input.awayCards),
       teamTalk:round(clamp(input.teamTalk,-6,6),2),
       awayTeamTalk:round(clamp(input.awayTeamTalk,-6,6),2),
+      plan:normalizePlan(input.plan),
+      awayPlan:normalizePlan(input.awayPlan),
       decisions:normalizeTimeline(input.decisions),
       awayDecisions:normalizeTimeline(input.awayDecisions)
     };
@@ -117,7 +132,7 @@
       {value:"PRESS_RECOVERY",weight:tactic==="push"?18:5},
       {value:"RECYCLE",weight:12+(tactic==="hold"?10:0)+(tactic==="calm"?8:0)+(finalEarly?6:0)},
       {value:"LOW_TEMPO",weight:(tactic==="calm"?18:6)+(finalEarly?12:0)+(data.leading?8:0)},
-      {value:"SET_PIECE",weight:late||golden?5:2}
+      {value:"SET_PIECE",weight:(late||golden?5:2)*(1+clamp(data.setPieceBias,-.5,.5))}
     ];
     let type=weightedPick(weights,rng)||"CENTRAL_TRIANGLE";
     if(data.forceLeft&&rng.bool(0.65))type="WIDE_LEFT";
@@ -267,6 +282,7 @@
     const timelines=[config.decisions,config.awayDecisions];
     const baseTactics=[config.tactic,config.awayTactic];
     const powers=[config.homePower+config.teamTalk,config.awayPower+config.awayTeamTalk];
+    const plans=[config.plan,config.awayPlan];
     const yellowed=[0,0];
     const stoppage=2+rng.int(4);
     const regulationEnd=90+stoppage;
@@ -322,28 +338,30 @@
         const homePossession=1/(1+Math.exp(-possessionLogit));
         const side=rng.bool(clamp(homePossession,0.18,0.82))?0:1;
         const other=1-side;
+        const ownPlan=plans[side],oppPlan=plans[other];
         stats.possession[side]++;
         const tactic=side===0?homeTactic:awayTactic;
         const ownEffect=effects[side],oppEffect=effects[other];
         const ownCards=cards[side];
         const totalSequences=Math.max(1,audit.plannedSequences);
-        const sequence=chooseSequence({
+        let sequence=chooseSequence({
           minute,tactic,isFinal:true,goldenActive:isGolden,
           ownHalf:rng.bool(0.31),finalThird:rng.bool(0.36),
-          profilePass:powers[side],canWide:true,leftReady:true,rightReady:true,
+          profilePass:powers[side]+ownPlan.passQuality,canWide:true,leftReady:true,rightReady:true,
           wideUsage:audit.wide/totalSequences,wideRunNeed:audit.wide>0&&audit.wide<4,
           hasWingCard:ownCards.includes("kanat_akini"),
           hasCounterCard:ownCards.includes("kontra"),
           losing:score[side]<score[other],leading:score[side]>score[other],
           carrierRole:rng.bool(0.08)?"GK":"CM"
         },rng);
+        if(rng.bool(clamp(.018+ownPlan.setPieceBias*.055,.004,.05)))sequence="SET_PIECE";
         sequenceBucket(sequence);
 
         if(sequence==="PRESS_RECOVERY"||tactic==="push"){
           const pressChance=0.12+(ownEffect.press||0)+(powers[side]-powers[other])*0.0015;
           if(rng.bool(clamp(pressChance,0.04,0.34))){stats.pressWins[side]++;audit.pressWins++;}
         }
-        if(sequence==="SET_PIECE"||rng.bool(0.060)){stats.corners[side]++;}
+        if(sequence==="SET_PIECE"||rng.bool(clamp(0.060+ownPlan.setPieceBias*.075,.025,.105))){stats.corners[side]++;}
 
         if(sequence!=="SET_PIECE"){
           const passKind=sequence==="LONG_BALL"?"LONG_PASS":
@@ -351,7 +369,7 @@
             sequence==="COUNTER"||sequence==="PRESS_RECOVERY"?"THROUGH_BALL":
             sequence==="RECYCLE"||sequence==="LOW_TEMPO"?"BACK_PASS":"SHORT_PASS";
           const pass=resolvePass({
-            passing:powers[side],vision:powers[side],decisions:powers[side],
+            passing:powers[side]+ownPlan.passQuality,vision:powers[side]+ownPlan.passQuality*.7,decisions:powers[side]+ownPlan.pressResistance*100,
             anticipation:powers[side],opponentPress:powers[other]+(oppEffect.press||0)*100,
             distance:passKind==="LONG_PASS"?30:passKind==="CROSS"?22:passKind==="THROUGH_BALL"?24:13,
             kind:passKind
@@ -368,8 +386,13 @@
           }
         }
 
-        const attackEdge=(powers[side]-powers[other])/190;
-        let shotChance=0.43+attackEdge+ownEffect.attack+ownEffect.shot-oppEffect.defence;
+        const lateFactor=minute>65?(minute-65)/35:0;
+        const effectiveOwn=powers[side]+ownPlan.lateStamina*8*lateFactor;
+        const effectiveOther=powers[other]+oppPlan.lateStamina*8*lateFactor;
+        const attackEdge=(effectiveOwn-effectiveOther)/190;
+        let shotChance=0.43+attackEdge+ownEffect.attack+ownEffect.shot-oppEffect.defence+
+          ownPlan.shotQuality*.35-oppPlan.defensivePressure*.48+
+          (minute<20?ownPlan.opening*.35:0)+ownPlan.styleFit*.004;
         if(minute>=76&&score[0]===score[1])shotChance+=0.120;
         if(isGolden)shotChance+=0.060;
         if(sequence==="COUNTER"||sequence==="PRESS_RECOVERY")shotChance+=0.055;
@@ -385,14 +408,14 @@
         const distance=delivery==="CUTBACK"?rng.rng(8,16):delivery==="CROSS"?rng.rng(9,22):rng.rng(11,30);
         const inBox=distance<18;
         const xg=clamp(expectedGoalsForShot({
-          distance,centrality:rng.rng(0.35,1),shooting:powers[side]+ownEffect.xg*100,
-          decisions:powers[side],powerGap:powers[side]-powers[other],delivery,inBox,
-          nearbyDefenders:rng.int(4)
-        })+ownEffect.xg-oppEffect.defence*0.055+(isGolden?0.015:0),0.02,0.58);
+          distance,centrality:rng.rng(0.35,1),shooting:effectiveOwn+ownEffect.xg*100+ownPlan.shotQuality*100,
+          decisions:effectiveOwn+ownPlan.pressResistance*50,powerGap:effectiveOwn-effectiveOther,delivery,inBox,
+          nearbyDefenders:clamp(rng.int(4)+oppPlan.defensivePressure*12,0,6)
+        })+ownEffect.xg+ownPlan.shotQuality-oppEffect.defence*0.055-oppPlan.defensivePressure*.32+(isGolden?0.015:0),0.02,0.58);
         stats.shots[side]++;stats.xg[side]+=xg;audit.shots++;
         const result=resolveShot({
-          expectedGoals:xg,distance,shooting:powers[side],decisions:powers[side],
-          vision:powers[side],goalkeeping:powers[other]+3,keeperAnticipation:powers[other]
+          expectedGoals:xg,distance,shooting:effectiveOwn+ownPlan.shotQuality*100,decisions:effectiveOwn+ownPlan.pressResistance*50,
+          vision:effectiveOwn+ownPlan.passQuality,goalkeeping:effectiveOther+3+oppPlan.defensivePressure*30,keeperAnticipation:effectiveOther+oppPlan.defensivePressure*20
         },rng);
         events.push({minute:Math.floor(minute),type:"shot",side,result,xg:round(xg),sequence});
         if(result==="GOAL"){
@@ -462,7 +485,7 @@
     return{
       v:REPLAY_VERSION,m:MODEL_VERSION,r:config.resolution,s:config.seed,h:config.homePower,a:config.awayPower,
       t:config.tactic,at:config.awayTactic,c:config.cards,ac:config.awayCards,
-      tt:config.teamTalk,att:config.awayTeamTalk,d:config.decisions,ad:config.awayDecisions
+      tt:config.teamTalk,att:config.awayTeamTalk,p:config.plan,ap:config.awayPlan,d:config.decisions,ad:config.awayDecisions
     };
   }
   function createReplayCode(rawConfig){
@@ -480,7 +503,7 @@
       return normalizeConfig({
         resolution:payload.r,seed:payload.s,homePower:payload.h,awayPower:payload.a,tactic:payload.t,
         awayTactic:payload.at,cards:payload.c,awayCards:payload.ac,teamTalk:payload.tt,
-        awayTeamTalk:payload.att,decisions:payload.d,awayDecisions:payload.ad
+        awayTeamTalk:payload.att,plan:payload.p,awayPlan:payload.ap,decisions:payload.d,awayDecisions:payload.ad
       });
     }catch(_){return null;}
   }
@@ -491,7 +514,7 @@
 
   return{
     MODEL_VERSION,REPLAY_VERSION,RNG,SEQUENCES:Object.freeze(SEQUENCES.slice()),
-    normalizeConfig,tacticAt,tacticEffects,chooseSequence,expectedGoalsForShot,resolveShot,
+    normalizeConfig,normalizePlan,tacticAt,tacticEffects,chooseSequence,expectedGoalsForShot,resolveShot,
     passProbabilities,resolvePass,disciplineProbabilities,resolveDiscipline,simulateMatch,
     createReplayCode,parseReplayCode,replay
   };

@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const visualDir=path.resolve(__dirname,"../../../outputs/ui-visuals");
 const mobileOnly=(name:string)=>name==="mobile-chromium";
+const desktopOnly=(name:string)=>name==="desktop-chromium";
 const reset=async(page:any)=>{
   await page.addInitScript(()=>{
     for(const key of ["copa_run_v6","copa_run_v6_last_good","copa_run_v5","copa_run_v5_last_good"])localStorage.removeItem(key);
@@ -215,6 +216,50 @@ test("draft candidates keep only the two useful quick actions",async({page},test
   });
   expect(rollQuickActions).toEqual({sameRow:true,overflow:0});
   await capture(page,"03-draft-candidate-gallery.png");
+});
+
+test("narrow web draft keeps player prices and cash figures inside their surfaces",async({page},testInfo)=>{
+  test.skip(!desktopOnly(testInfo.project.name),"narrow web presentation");
+  await reset(page);
+  await page.setViewportSize({width:652,height:900});
+  await page.goto("/?visual=narrow-web-draft",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.CopaMobileShell.newRun();
+    await game.quickStart();
+    if(game._countryDraftPromise)await game._countryDraftPromise;
+  });
+  await page.locator("#rollBtn").click();
+  await expect(page.locator("#opts .opt")).toHaveCount(3);
+
+  const measure=()=>page.evaluate(()=>{
+    const inside=(child:DOMRect,parent:DOMRect)=>child.left>=parent.left-1&&child.right<=parent.right+1&&child.top>=parent.top-1&&child.bottom<=parent.bottom+1;
+    const cash=document.querySelector<HTMLElement>("#draftKasaTile")!;
+    const cashRect=cash.getBoundingClientRect();
+    const cashFigures=["#draftKasaV","#draftKasaDebt","#draftKasaSpent","#draftKasaStatus"].map(selector=>{
+      const element=document.querySelector<HTMLElement>(selector)!;
+      const rect=element.getBoundingClientRect();
+      return{selector,text:(element.innerText||"").trim(),visible:rect.width>0&&rect.height>0,inside:inside(rect,cashRect)};
+    });
+    const prices=[...document.querySelectorAll<HTMLElement>("#opts .opt")].map(card=>{
+      const cardRect=card.getBoundingClientRect();
+      const price=card.querySelector<HTMLElement>(".price .p")!;
+      const rect=price.getBoundingClientRect();
+      return{text:(price.innerText||"").trim(),visible:rect.width>0&&rect.height>0,inside:inside(rect,cardRect),card:{left:cardRect.left,right:cardRect.right,top:cardRect.top,bottom:cardRect.bottom},price:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom}};
+    });
+    return{cashFigures,prices,pageOverflow:document.documentElement.scrollWidth-innerWidth};
+  });
+
+  for(const width of [652,390]){
+    await page.setViewportSize({width,height:900});
+    const layout=await measure();
+    expect(layout.pageOverflow,`${width}px viewport overflow`).toBeLessThanOrEqual(1);
+    expect(layout.cashFigures,`${width}px cash figures`).toEqual(layout.cashFigures.map(item=>({...item,visible:true,inside:true})));
+    expect(layout.cashFigures.every(item=>item.text.length>0),`${width}px cash text`).toBe(true);
+    expect(layout.prices.every(item=>item.visible&&item.inside&&/^€\d+M$/.test(item.text)),`${width}px player prices ${JSON.stringify(layout.prices)}`).toBe(true);
+  }
+  await page.setViewportSize({width:652,height:900});
+  await capture(page,"03b-narrow-web-draft-finances.png");
 });
 
 test("captain recommendation has contextual ratings and a distinct animated highlight",async({page},testInfo)=>{

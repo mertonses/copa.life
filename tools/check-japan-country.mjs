@@ -51,7 +51,7 @@ for (const marker of [
   'data-country="JP"', 'assets/flags/JP.svg',
   'src/data/players_japan.js', 'JP:[POOL_JP,OPP_POOL_JP]', 'if(k==="JP")return[POOL_JP,OPP_POOL_JP,OPP_BASES_JP]',
   'src/data/opponents.js?v=20260714-japan1', 'src/data/logos.js?v=20260714-japan1',
-  'src/game/generate.js?v=20260720-player-balance1', 'src/ui/hub.js?v=',
+  'src/game/generate.js?v=20260729-role-gameplay1', 'src/ui/hub.js?v=',
   'src/styles/layout.css?v=',
   'country:selectedCountry', 'COUNTRY_CODES.includes(st.country)',
   'JP:"JAPONYA KUPASI FİNALİ"', 'JP:"JAPAN CUP FINAL"',

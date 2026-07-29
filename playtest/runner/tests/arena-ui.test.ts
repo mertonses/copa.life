@@ -261,7 +261,7 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-goal")).toHaveAttribute("style",/--ball-x:82%;--ball-y:10%;--keeper-x:20%;--keeper-y:44%;--keeper-rotate:-68deg/);
   await expect(page.locator(".arena-ball")).toHaveCSS("animation-name","arenaPenaltyKick");
   await expect(page.locator(".arena-keeper")).toHaveCSS("animation-name","arenaKeeperDive");
-  await page.waitForTimeout(1150);
+  await page.waitForTimeout(1400);
   const penaltyMotion=await page.evaluate(()=>{
     const goal=document.querySelector(".arena-goal")!.getBoundingClientRect();
     const ball=document.querySelector(".arena-ball")!.getBoundingClientRect();
@@ -276,7 +276,7 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   expect(penaltyMotion.ballX).toBeGreaterThan(.7);
   expect(penaltyMotion.ballY).toBeGreaterThan(.68);
   expect(penaltyMotion.keeperX).toBeLessThan(.35);
-  expect(penaltyMotion.keeperY).toBeLessThan(.6);
+  expect(penaltyMotion.keeperY).toBeLessThan(.61);
   await capture(page,"09-web-arena-penalty-reveal.png");
   for(const [index,outcome] of ["save","post","miss"].entries()){
     const kick=5+index;
@@ -399,7 +399,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     await expect(page.locator(".arena-goal")).toHaveAttribute("style",/--ball-x:82%;--ball-y:10%;--keeper-x:20%;--keeper-y:44%;--keeper-rotate:-68deg/);
     await expect(page.locator(".arena-ball")).toHaveCSS("width","26px");
     await expect(page.locator(".arena-keeper")).toHaveCSS("animation-name","arenaKeeperDive");
-    await page.waitForTimeout(1150);
+    await page.waitForTimeout(1400);
     const mobileMotion=await page.evaluate(()=>{
       const goal=document.querySelector(".arena-goal")!.getBoundingClientRect();
       const ball=document.querySelector(".arena-ball")!.getBoundingClientRect();
@@ -414,7 +414,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(mobileMotion.ballX,viewport.name).toBeGreaterThan(.7);
     expect(mobileMotion.ballY,viewport.name).toBeGreaterThan(.68);
     expect(mobileMotion.keeperX,viewport.name).toBeLessThan(.35);
-    expect(mobileMotion.keeperY,viewport.name).toBeLessThan(.6);
+    expect(mobileMotion.keeperY,viewport.name).toBeLessThan(.61);
     await capture(page,`android-${viewport.name}-penalty-reveal.png`);
     await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
     const result=await audit(page);

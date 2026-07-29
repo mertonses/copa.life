@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 const source=fs.readFileSync(new URL("../src/state/metaProgression.js",import.meta.url),"utf8");
 assert.match(source,/draws\*2/,"group draws must contribute to career reputation");
 const storage=new Map();
+let exhibitionOpened=false,lastModal="";
 const sandbox={
   console,JSON,Math,Date,Object,Array,Number,String,Set,Uint8Array,TextEncoder,TextDecoder,Blob,URL,
   btoa:value=>Buffer.from(value,"binary").toString("base64"),
@@ -14,25 +15,33 @@ const sandbox={
   FORMORDER:["4-4-2","4-3-3","3-5-2","5-3-2"],DEFAULT_FORMS:["4-4-2"],
   CHAIR_ORDER:["babacan","leydi","torpilci"],unlockedForms:["4-4-2","4-3-3"],unlockedChairs:["babacan","leydi"],
   selectedChairId:"leydi",pendingChairChoices:[],metaBest:6,metaRuns:8,eliteBonus:true,legacyFund:12,
-  LANG:"en",showModal:()=>{},closeModal:()=>{}
+  LANG:"en",showModal:html=>{lastModal=String(html);if(lastModal.includes("HALL EXHIBITION"))exhibitionOpened=true;},closeModal:()=>{},
+  CopaFinalSimCore:{simulateMatch:()=>({score:[2,1],stats:{xg:[1.7,.8],shots:[11,7]}})}
 };
 sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:"metaProgression.js"});
 const meta=sandbox.CopaMeta;
 
-for(let index=0;index<23;index++)meta.recordRun({
+for(let index=0;index<23;index++){if(index===22)assert.equal(meta.selectDirective("clean_cup"),true);meta.recordRun({
   seed:index+1,metaRun:index+1,team:`Archive ${index}`,country:index%2?"TR":"JP",
   formation:index%2?"4-4-2":"4-3-3",style:["gegen","kontra","tiki","uzun","blok"][index%5],
   chairman:["babacan","leydi","torpilci"][index%3],identity:"Test build",won:index===22,round:index===22?6:3,
   endType:"",power:72+index%8,cards:index===22?5:2,cash:index===22?4:-3,score:index===22?"2-1":"",ghost:index===21
   ,players:[{id:`p-${index}-a`,name:`Captain ${index}`,pos:"CM",power:75+index%8,club:`Archive ${index}`,age:24},{id:`p-${index}-b`,name:`Keeper ${index}`,pos:"GK",power:70,club:`Archive ${index}`,age:27}]
-});
+});}
 const state=meta.getState();
 assert.equal(state.archive.length,20,"run archive must be capped at 20");
 assert.equal(state.archive.at(-1).result,"win");
 for(const badge of ["first_run","finalist","champion","clean_books","collector","ghost_match","six_styles"])assert.ok(state.badges.includes(badge),`missing horizontal badge ${badge}`);
 assert.equal(Object.values(state.mastery.styles).reduce((sum,count)=>sum+count,0),23,"style mastery must count completed runs without adding power");
+assert.ok(state.directives.completed.includes("clean_cup"),"a completed club directive must persist");
+assert.ok(state.museum.collections.crests.includes("crest_clean_cup"),"club directives must award prestige cosmetics, not power");
+meta.openProgression("museum");
+assert.match(lastModal,/EARNED DESIGNS/,"directive and prestige cosmetics must have an equipable museum surface");
+assert.match(lastModal,/crest_clean_cup/,"the earned directive crest must be present in the museum surface");
+assert.equal(meta.selectStylePlan("gegen"),true,"specialist style plans must unlock at five completed runs");
+assert.equal(meta.activeStylePlan("gegen").pressResistance,.035,"selected specialist plan must expose its bounded tactical trade-off");
 assert.equal(state.career.reputation,687,"reputation must use the fixed run-result formula");
 assert.equal(meta.careerSummary().level,6,"career level must be derived from reputation thresholds");
 assert.equal(state.career.licenses,3,"level 3, level 5 and championship must each award one licence while formations remain locked");
@@ -41,6 +50,8 @@ assert.equal(meta.setFeaturedPlayer(state.museum.memories[0].id,1),true);
 assert.equal(meta.getState().museum.memories[0].featuredIndex,1,"featured museum player must be changeable");
 for(const memory of state.museum.memories.slice(0,11))assert.equal(meta.toggleHallPlayer(memory.id,memory.players[0].id),true);
 assert.equal(meta.getState().museum.hall.length,11,"Hall XI must accept eleven players");
+assert.equal(meta.playHallExhibition(),true,"a complete Hall XI must launch a reward-free exhibition");
+assert.equal(exhibitionOpened,true,"the Hall exhibition result must be user-visible");
 assert.equal(meta.toggleHallPlayer(state.museum.memories[11].id,state.museum.memories[11].players[0].id),false,"Hall XI must reject a twelfth player");
 assert.equal(meta.selectCosmetic("kit","kit_tactical_journey"),true,"unlocked museum kit must be equipable");
 assert.equal(meta.selectCosmetic("crest","crest_boardroom"),true,"unlocked museum crest must be equipable");

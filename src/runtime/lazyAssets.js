@@ -25,8 +25,8 @@
     pending.set(key,promise);return promise;
   }
   function ensureMatchCore(){
-    return loadScriptOnce("final-sim-core","src/sim/finalSimCore.js?v=20260727-balance-v5",()=>!!(global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION))
-      .then(()=>loadScriptOnce("normal-match","src/game/normalMatch.js?v=20260718-shared-core1",()=>!!global.CopaNormalMatch));
+    return loadScriptOnce("final-sim-core","src/sim/finalSimCore.js?v=20260729-strategic-v6",()=>!!(global.CopaFinalSimCore&&global.CopaFinalSimCore.MODEL_VERSION))
+      .then(()=>loadScriptOnce("normal-match","src/game/normalMatch.js?v=20260729-strategic1",()=>!!global.CopaNormalMatch));
   }
   function ensureFinalSim(){
     return ensureMatchCore()
@@ -36,9 +36,9 @@
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260728-ui-fixes1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260729-directives1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
-    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260728-ui-fixes1",()=>!!global.CopaMeta).then(()=>{
+    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260729-directives1",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
       if(typeof global.buildFormButtons==="function")global.buildFormButtons();
       if(typeof global.buildChairButtons==="function")global.buildChairButtons();

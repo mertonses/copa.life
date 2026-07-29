@@ -56,14 +56,14 @@
     const result={power:0,attack:0,defence:0,setpiece:0,penalty:0,chemistry:0,opponent:0,injuryRisk:1,fatigueDelta:0,analysis:false};
     state.choices.forEach(choice=>{
       const intense=choice.intensity==="intense",base=(intense?2.5:1)*repeatFactor(choice.id)*(1-state.fatigue/120);
-      if(choice.id==="finishing"){result.attack+=base;result.power+=base;}
-      if(choice.id==="defence"){result.defence+=base;result.power+=base;}
-      if(choice.id==="setpieces"){result.setpiece+=base;result.power+=base*.7;}
-      if(choice.id==="penalties"){result.penalty+=base*1.25;result.power+=base*.35;}
-      if(choice.id==="cohesion"){result.chemistry+=base;result.power+=base*.5;}
+      if(choice.id==="finishing")result.attack+=base;
+      if(choice.id==="defence")result.defence+=base;
+      if(choice.id==="setpieces")result.setpiece+=base;
+      if(choice.id==="penalties")result.penalty+=base*1.25;
+      if(choice.id==="cohesion")result.chemistry+=base;
       if(choice.id==="recovery"){result.injuryRisk*=intense?.62:.78;result.fatigueDelta-=intense?12:7;}
       if(choice.id==="analysis"){
-        result.analysis=true;result.opponent-=base*(opponent&&opponent.style?1.15:.75);result.power+=base*.35;
+        result.analysis=true;result.opponent-=base*(opponent&&opponent.style?1.15:.75);
       }
       if(intense&&choice.id!=="recovery"){result.fatigueDelta+=10;result.injuryRisk*=1.06;}
     });
@@ -98,7 +98,14 @@
     const remaining=2-spent(),eff=effects(state.round,state.opponent);
     const status=panel.querySelector("[data-prep-status]");
     const analysis=eff.analysis&&state.opponent&&state.opponent.style?` · ${tr()?"Rakip stili":"Opponent style"}: ${state.opponent.style}`:"";
-    if(status)status.innerHTML=`<b>${tr()?remaining+" antrenman puanı":remaining+" training points"}</b><span>${tr()?"Güç":"Power"} +${eff.power.toFixed(1)} · ${tr()?"Risk":"Risk"} ×${eff.injuryRisk.toFixed(2)} · ${tr()?"Yorgunluk":"Fatigue"} ${state.fatigue}${eff.fatigueDelta>=0?"+":""}${eff.fatigueDelta}${analysis}</span>`;
+    const impacts=[
+      eff.attack>0?(tr()?"Bitiriş":"Finishing")+" +"+eff.attack.toFixed(1):"",
+      eff.defence>0?(tr()?"Savunma":"Defence")+" +"+eff.defence.toFixed(1):"",
+      eff.setpiece>0?(tr()?"Duran top":"Set piece")+" +"+eff.setpiece.toFixed(1):"",
+      eff.chemistry>0?(tr()?"Uyum":"Cohesion")+" +"+eff.chemistry.toFixed(1):"",
+      eff.penalty>0?(tr()?"Penaltı":"Penalties")+" +"+eff.penalty.toFixed(1):""
+    ].filter(Boolean).join(" · ");
+    if(status)status.innerHTML=`<b>${tr()?remaining+" antrenman puanı":remaining+" training points"}</b><span>${impacts||(tr()?"Toparlanma planı":"Recovery plan")} · ${tr()?"Risk":"Risk"} ×${eff.injuryRisk.toFixed(2)} · ${tr()?"Yorgunluk":"Fatigue"} ${state.fatigue}${eff.fatigueDelta>=0?"+":""}${eff.fatigueDelta}${analysis}</span>`;
     panel.querySelectorAll("[data-drill]").forEach(card=>{
       const id=card.dataset.drill,chosen=state.choices.find(item=>item.id===id);
       card.classList.toggle("active",!!chosen);

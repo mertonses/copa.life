@@ -3,7 +3,7 @@
 ## 18 Temmuz 2026 itibarıyla tamamlanan temel
 
 - Görsel motorun sekans ve şut çözümüyle ortak kullanılan DOM'suz `copa-final-core-v4` çekirdeği.
-- Aynı seed ile byte düzeyinde tekrar üretilebilir sonuç ve doğrulanabilir `CFS3` paylaşım kodu.
+- Aynı seed ile byte düzeyinde tekrar üretilebilir sonuç ve doğrulanabilir `CFS4` paylaşım kodu.
 - 10.000 gerçek çekirdek maçıyla güç farkı, gol, şut, xG, kart, kurtarış, uzatma ve penaltı kalibrasyonu.
 - On bir aynı-seed A/B senaryosu: dört temel taktik, dört 12 dakikalık hamle, kanat/kontra kartı ve takım konuşması.
 - Maç içi hamleler 12 oyun dakikası sürer, 12 dakika bekleme ister ve final başına en fazla üç kez kullanılabilir.

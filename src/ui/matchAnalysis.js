@@ -17,7 +17,7 @@ const COPY={
     talkBackfire:"Soyunma odası konuşması ters tepti ve maç planını zorlaştırdı.",
     talk:n=>`Takım konuşması maç gücüne ${n>0?"+":""}${n} etki verdi.`,
     cardsUp:n=>`Aktif kartların maç gücüne +${n} katkı sağladı.`,
-    prep:n=>`Hazırlık planı yaklaşık +${n} güç etkisi sağladı; etkisi bu maçla sınırlı kaldı.`,
+    prep:()=>`Hazırlık planı şut kalitesi, savunma baskısı ve duran top üretimini bu maça özel değiştirdi.`,
     tactics:n=>`${n} maç içi komut kullandın; komutlar yalnız uygulandıkları kısa bölümde etkiliydi.`,
     neutralDecision:"Karar etkileri sınırlı kaldı; sonucu esas olarak güç dengesi ve pozisyon kalitesi şekillendirdi."},
   en:{title:"MATCH ANALYSIS",subtitle:"Three concise reasons behind the result",expectation:"EXPECTATION",turning:"TURNING POINT",decision:"DECISION IMPACT",open:"ANALYSE MATCH",close:"Close analysis",score:"Match result",
@@ -35,7 +35,7 @@ const COPY={
     talkBackfire:"The dressing-room talk backfired and made the match plan harder to execute.",
     talk:n=>`The team talk changed match power by ${n>0?"+":""}${n}.`,
     cardsUp:n=>`Active cards added +${n} match power.`,
-    prep:n=>`The preparation plan supplied about +${n} power for this match only.`,
+    prep:()=>`The preparation plan changed shot quality, defensive pressure and set-piece production for this match.`,
     tactics:n=>`You used ${n} in-match instructions; each affected only its short active window.`,
     neutralDecision:"Decision effects stayed limited; the power balance and chance quality shaped the result most."},
   es:{title:"ANÁLISIS DEL PARTIDO",subtitle:"Tres razones breves detrás del resultado",expectation:"EXPECTATIVA",turning:"PUNTO DE GIRO",decision:"EFECTO DE DECISIONES",open:"ANALIZAR PARTIDO",close:"Cerrar análisis",score:"Resultado",
@@ -98,7 +98,7 @@ function decisionImpact(data,c){
   if(talk&&finite(talk.delta)!=null&&Number(talk.delta)!==0)return c.talk(cleanNumber(talk.delta));
   if(finite(data.cardBonus)>0)return c.cardsUp(cleanNumber(data.cardBonus));
   const preparation=data.preparation&&typeof data.preparation==="object"?data.preparation:null;
-  if(preparation&&finite(preparation.power)>0)return c.prep(cleanNumber(preparation.power));
+  if(preparation&&(["attack","defence","setpiece","chemistry","penalty"].some(key=>finite(preparation[key])>0)||preparation.analysis))return c.prep();
   if(finite(data.decisionCount)>0)return c.tactics(Math.round(data.decisionCount));
   return c.neutralDecision;
 }
