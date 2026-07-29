@@ -95,6 +95,15 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await page.locator('[data-arena-choice="styles:balanced"]').click();
   await expect(page.locator('[data-arena-action="submit-setup"]')).toBeEnabled();
   await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
+  await page.evaluate(()=>{
+    const arena=(globalThis as any).CopaArena;
+    arena.state.room={...arena.state.room,self:{...arena.state.room.self,setup:null}};
+    arena.refresh();
+  });
+  await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
+  await expect(page.locator('[data-arena-choice="formations:4-4-2"]')).toHaveAttribute("aria-pressed","true");
+  await expect(page.locator('[data-arena-choice="styles:balanced"]')).toHaveAttribute("aria-pressed","true");
+  await expect(page.locator('[data-arena-action="submit-setup"]')).toBeEnabled();
   await capture(page,"03-web-arena-setup.png");
   await page.evaluate(()=>{
     const arena=(globalThis as any).CopaArena;
@@ -102,8 +111,10 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   });
   await expect(page.locator(".arena-reconnect-banner")).toContainText("RECONNECTING");
   await expect(page.locator("[data-arena-reconnect-countdown]")).toContainText(/4s|5s/);
+  await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
   await page.evaluate(()=>{const arena=(globalThis as any).CopaArena;arena.state.connection="connected";arena.state.latency=96;arena.refresh();});
   await expect(page.locator(".arena-live-mark")).toContainText("96ms");
+  await expect(page.locator(".arena-choice-grid .is-selected")).toHaveCount(2);
 
   const offers=[
     {id:"gk-0-a",line:"GK",name:"Doğan Alemdar",power:67,effectivePower:67,cost:1,chemistry:2,trait:"connector",sourceLeague:"TR",sourceLeagueLabel:{tr:"Türkiye ligi",en:"Türkiye league"},club:"Stade Rennais FC",position:"GK",positionFit:"natural",age:23},
