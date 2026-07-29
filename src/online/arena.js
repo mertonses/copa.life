@@ -8,7 +8,7 @@
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
     if(document.querySelector('link[data-copa-arena-styles]'))return;
-    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260729-context1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
+    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260729-livev10";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
   }
   ensureArenaStyles();
   const REWARDS=[
@@ -63,7 +63,7 @@
   Object.assign(COPY.es,{forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
   Object.assign(COPY.de,{forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
   Object.assign(COPY.it,{forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:""};
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:""};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -117,7 +117,7 @@
     return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.arena}</svg>`;
   }
   function chrome(content,kicker="COPA ARENA"){
-    const isLive=state.screen==="room"&&state.room&&state.room.phase==="live";
+    const isLive=state.screen==="room"&&state.room&&["live","penalty"].includes(state.room.phase);
     const quality=state.latency==null?"":state.latency<180?"good":state.latency<450?"fair":"poor";
     const status=isLive?`LIVE${state.latency==null?"":` · ${state.latency}ms`}`:quality?`${text("network"+quality[0].toUpperCase()+quality.slice(1))} ${state.latency}ms`:local("ÇEVRİMİÇİ","ONLINE");
     const reconnect=state.connection==="reconnecting"?`<div class="arena-reconnect-banner" role="status"><i></i><span><b>${esc(text("reconnecting"))}</b><small data-arena-reconnect-countdown>${Math.max(1,Math.ceil((state.reconnectAt-Date.now())/1000))}s</small></span></div>`:"";
@@ -158,6 +158,7 @@
     styles:{balanced:"Dengeli",press:"Önde Baskı",counter:"Kontra",control:"Kontrol"},
     chairmen:{patron:"Patron",diplomat:"Diplomat",showman:"Şovmen",professor:"Profesör"},
     training:{finishing:"Bitiricilik",shape:"Savunma Şekli",chemistry:"Takım Uyumu",recovery:"Toparlanma"},
+    plans:{adaptive:"Akıllı Denge",protect:"Güvenli Kilit",brave:"Hücum Tepkisi"},
     tactics:{press:"Baskı Kur",balanced:"Dengede Kal",counter:"Kontraya Çık",control:"Topu Tut"},
     market:{twelfth:"12. Adam",counter:"Kontra",wall:"Savunma Duvarı",wonderkid:"Genç Yetenek",captain:"Kaptan",none:"Kart Alma"},
     traits:{connector:"Bağlantı",reliable:"Güvenilir",star:"Yıldız"}
@@ -167,6 +168,7 @@
     styles:{balanced:"Balanced",press:"High Press",counter:"Counter",control:"Control"},
     chairmen:{patron:"Patron",diplomat:"Diplomat",showman:"Showman",professor:"Professor"},
     training:{finishing:"Finishing",shape:"Defensive Shape",chemistry:"Team Chemistry",recovery:"Recovery"},
+    plans:{adaptive:"Smart Balance",protect:"Protect the Lead",brave:"Brave Response"},
     tactics:{press:"Press",balanced:"Hold Shape",counter:"Counter",control:"Keep Ball"},
     market:{twelfth:"12th Player",counter:"Counter",wall:"Defensive Wall",wonderkid:"Wonderkid",captain:"Captain",none:"No Card"},
     traits:{connector:"Connector",reliable:"Reliable",star:"Star"}
@@ -198,7 +200,9 @@
   }
   function statusStrip(game){
     const self=game.self||{},opponent=game.opponent||{};
-    const phaseLabel=game.liveStage==="reveal"?local("OLAYLAR OYNATILIYOR","PLAYING EVENTS"):local("KARAR SÜRESİ","DECISION TIME");
+    const phaseLabel=game.phase==="penalty"
+      ?(game.penalty&&game.penalty.stage==="reveal"?local("VURUŞ OYNATILIYOR","PLAYING KICK"):local("KARARINI KİLİTLE","LOCK YOUR CHOICE"))
+      :(game.liveStage==="reveal"?local("CANLI AKSİYON","LIVE ACTION"):local("TAKTİK KARARI","TACTICAL CALL"));
     const presence=opponent.connected?local("Rakip bağlı","Opponent connected"):local("Rakip yeniden bağlanıyor","Opponent reconnecting");
     return `<div class="arena-versus"><span><small>${esc(text("you"))}</small><b>${esc(self.clubName||"—")}</b><strong>${self.rating||"—"}</strong></span><i>VS</i><span><small>${esc(text("opponent"))}</small><b>${esc(opponent.clubName||"—")}</b><strong>${opponent.rating||"—"}</strong></span></div><div class="arena-phase-status ${opponent.connected?"is-connected":"is-reconnecting"}"><span>${esc(presence)}</span><b data-arena-deadline="${Number(game.deadline)||0}" data-arena-deadline-label="${esc(phaseLabel)}"></b></div>`;
   }
@@ -261,42 +265,107 @@
   function market(game){
     const selected=game.self&&game.self.market&&game.self.market.id;
     const team=game.team||{};
+    const activations={
+      second_half:local("45'–70' arasında ikinci dalga","Second wave from 45'–70'"),
+      trailing:local("Gerideyken hücum ivmesi","Attacking lift while trailing"),
+      leading:local("Öndeyken savunma kilidi","Defensive lock while leading"),
+      late:local("70' sonrası ekstra tehdit","Extra threat after 70'"),
+      pressure:local("Baskı anlarında liderlik","Leadership under pressure"),
+      none:local("Bütçeyi korur","Keeps the budget")
+    };
+    const categoryLabels={momentum:local("MOMENTUM","MOMENTUM"),doctrine:local("DOKTRİN","DOCTRINE"),defense:local("SAVUNMA","DEFENCE"),attack:local("HÜCUM","ATTACK"),leadership:local("LİDERLİK","LEADERSHIP"),reserve:local("REZERV","RESERVE")};
+    const synergy=item=>{
+      const style=game.self&&game.self.setup&&game.self.setup.style,formation=game.self&&game.self.setup&&game.self.setup.formation;
+      const perfect=(item.id==="counter"&&style==="counter")||(item.id==="wall"&&style==="control")||(item.id==="wonderkid"&&formation==="4-3-3")||(item.id==="twelfth"&&style==="press")||item.id==="captain";
+      const risky=item.risk>0||(item.id==="counter"&&style==="control");
+      return perfect?["perfect",local("MÜKEMMEL UYUM","PERFECT FIT")]:risky?["risky",local("RİSKLİ UYUM","BOLD FIT")]:["balanced",local("DENGELİ UYUM","BALANCED FIT")];
+    };
     return chrome(`${statusStrip(game)}<div class="arena-phase"><span>13 / 14</span><h1>${esc(text("market"))}</h1><div class="arena-team-pulse"><b class="arena-budget-state budget-${budgetBand(team.budget)}">${esc(text("budget"))} <i class="arena-context-budget budget-${budgetBand(team.budget)}">€${team.budget==null?"—":team.budget}M</i></b><b>${esc(text("chemistry"))} <i>${team.chemistry==null?"—":team.chemistry}</i></b><b>${esc(text("power"))} <i class="arena-context-power power-${powerBand(team.power)}">${team.power||"—"}</i></b></div><div class="arena-offers arena-market-offers">${(game.offers||[]).map(item=>{
       const active=item.id===selected;
-      const affordable=item.affordable!==false;
-      return `<button class="${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="market:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><b>${esc(choiceLabel("market",item.id))}</b><small>ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small>${!affordable?`<small class="arena-budget-warning">${esc(local("Yetersiz bütçe","Not enough budget"))}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
+      const affordable=item.affordable!==false,fit=synergy(item),projected=item.projected||{};
+      return `<button class="arena-card is-${esc(item.category||"reserve")} ${active?"is-selected":affordable?"":"is-unaffordable"}" data-arena-choice="market:${esc(item.id)}" aria-pressed="${active}" ${selected||!affordable?"disabled":""}><span>${esc(categoryLabels[item.category]||text(item.id==="none"?"pass":"marketCard"))}</span><strong>${item.cost?`€${item.cost}M`:"—"}</strong><i class="arena-card-glyph" aria-hidden="true"></i><b>${esc(choiceLabel("market",item.id))}</b><small class="arena-card-trigger">${esc(activations[item.activation]||activations.none)}</small><small class="arena-card-stats">ATK ${item.attack>=0?"+":""}${item.attack} · DEF ${item.defense>=0?"+":""}${item.defense} · CHEM ${item.chemistry>=0?"+":""}${item.chemistry}</small><small class="arena-card-preview">${esc(text("power"))} <i class="arena-context-power power-${powerBand(projected.power)}">${projected.power??"—"}</i> · ${esc(text("chemistry"))} ${projected.chemistry??"—"}</small><small class="arena-card-fit is-${fit[0]}">${esc(fit[1])}</small>${!affordable?`<small class="arena-budget-warning">${esc(local("Yetersiz bütçe","Not enough budget"))}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
     }).join("")}</div>${selected?`<p class="arena-choice-confirmed">${esc(choiceLabel("market",selected))} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game)}</div>`);
   }
+  function matchPlanDraft(game){
+    if(!state.planDraft||state.planDraft.matchId!==game.matchId){
+      state.planDraft={matchId:game.matchId,focus:"",scenario:""};
+      state.planSubmitting=false;
+    }
+    const saved=game.self&&game.self.training;
+    if(saved){
+      state.planDraft.focus=typeof saved==="string"?saved:saved.focus||"";
+      state.planDraft.scenario=typeof saved==="string"?"adaptive":saved.scenario||"";
+    }
+    return state.planDraft;
+  }
   function training(game){
-    const selected=game.self&&game.self.training||"";
+    const plan=matchPlanDraft(game),locked=!!(game.self&&game.self.training)||state.planSubmitting;
     const team=game.team||{},draft=game.self&&game.self.draft||[];
-    return chrome(`${statusStrip(game)}<div class="arena-phase"><span>14 / 14</span><h1>${esc(text("training"))}</h1><div class="arena-final-summary"><b>${esc(local("KADRO ÖZETİ","SQUAD SUMMARY"))}</b><span>${draft.length}/11</span><span class="arena-context-power power-${powerBand(team.power)}">${esc(text("power"))} ${team.power||"—"}</span><span>${esc(text("chemistry"))} ${team.chemistry==null?"—":team.chemistry}</span><span class="arena-budget-state arena-context-budget budget-${budgetBand(team.budget)}">${esc(text("budget"))} €${team.budget==null?"—":team.budget}M</span></div>${options("training",["finishing","shape","chemistry","recovery"],selected,!!selected)}${selected?`<p class="arena-choice-confirmed">${esc(choiceLabel("training",selected))} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game,true)}</div>`);
+    const focusDetails={finishing:local("Hücum +2","Attack +2"),shape:local("Savunma +2","Defence +2"),chemistry:local("Kimya +2","Chemistry +2"),recovery:local("Dayanıklılık +3","Stamina +3")};
+    const scenarioDetails={
+      adaptive:local("Öndeyken korur · gerideyken hızlanır","Protects a lead · accelerates when behind"),
+      protect:local("Öncelik skoru ve alanı korumak","Prioritises score and space"),
+      brave:local("Gerideyken daha güçlü hücum riski","Stronger attacking risk when behind")
+    };
+    const choiceButtons=(kind,values,selected,details)=>`<div class="arena-plan-grid is-${kind}">${values.map(value=>`<button data-arena-plan="${kind}:${value}" class="${selected===value?"is-selected":""}" aria-pressed="${selected===value}" ${locked?"disabled":""}><i></i><b>${esc(kind==="focus"?choiceLabel("training",value):choiceLabel("plans",value))}</b><small>${esc(details[value])}</small><em>✓</em></button>`).join("")}</div>`;
+    return chrome(`${statusStrip(game)}<div class="arena-phase arena-match-plan"><span>14 / 14</span><h1>${esc(text("training"))}</h1><div class="arena-final-summary"><b>${esc(local("KADRO ÖZETİ","SQUAD SUMMARY"))}</b><span>${draft.length}/11</span><span class="arena-context-power power-${powerBand(team.power)}">${esc(text("power"))} ${team.power||"—"}</span><span>${esc(text("chemistry"))} ${team.chemistry==null?"—":team.chemistry}</span><span class="arena-budget-state arena-context-budget budget-${budgetBand(team.budget)}">${esc(text("budget"))} €${team.budget==null?"—":team.budget}M</span></div><section class="arena-plan-section"><header><span>01</span><div><b>${esc(local("ANA ODAK","PRIMARY FOCUS"))}</b><small>${esc(local("Takımın maç boyunca taşıdığı temel güç.","The team's core strength throughout the match."))}</small></div></header>${choiceButtons("focus",["finishing","shape","chemistry","recovery"],plan.focus,focusDetails)}</section><section class="arena-plan-section"><header><span>02</span><div><b>${esc(local("SENARYO PLANI","MATCH SCRIPT"))}</b><small>${esc(local("Skora göre otomatik, küçük ve kontrollü tepki.","A small, controlled automatic response to the score."))}</small></div></header>${choiceButtons("scenario",["adaptive","protect","brave"],plan.scenario,scenarioDetails)}</section><button class="arena-primary" data-arena-action="submit-plan" ${locked||!(plan.focus&&plan.scenario)?"disabled":""}>${esc(locked?text("waiting"):local("PLANI KİLİTLE","LOCK PLAN"))}</button>${locked?`<p class="arena-choice-confirmed">${esc(choiceLabel("training",plan.focus))} · ${esc(choiceLabel("plans",plan.scenario))} · ${esc(text("selected"))}</p>`:""}${lineupPitch(game,true)}</div>`);
   }
   function lobby(game){
     return chrome(`${statusStrip(game)}<div class="arena-ready"><div class="arena-ready-ring">${icon("shield")}<i></i></div><h1>${esc(game.self&&game.self.ready?text("waiting"):text("ready"))}</h1><p>${esc(text("serverCopy"))}</p><button class="arena-primary" data-arena-action="ready" ${game.self&&game.self.ready?"disabled":""}>${esc(text("ready"))}</button></div>`);
   }
   function live(game){
-    const events=(game.events||[]).slice(-8).reverse(),score=game.score||[0,0],revealing=game.liveStage==="reveal";
+    const allEvents=game.events||[],events=allEvents.slice(-8).reverse(),score=game.score||[0,0],revealing=game.liveStage==="reveal";
     const report=game.windowResult||null,selfHome=game.selfIndex===0;
+    const segments=game.liveSegments&&game.liveSegments.length?game.liveSegments:[{startMinute:0,endMinute:30},{startMinute:30,endMinute:60},{startMinute:60,endMinute:90}];
+    const segment=segments[game.window]||segments[0];
     const myTactic=report&&report.tactics&&report.tactics[selfHome?0:1],theirTactic=report&&report.tactics&&report.tactics[selfHome?1:0];
     const myGoals=report?(selfHome?report.homeGoals:report.awayGoals):0,theirGoals=report?(selfHome?report.awayGoals:report.homeGoals):0;
     const myXg=report?(selfHome?report.homeXg:report.awayXg):0,theirXg=report?(selfHome?report.awayXg:report.homeXg):0;
+    const baseMine=revealing?Math.max(0,(score[game.selfIndex]||0)-myGoals):(score[game.selfIndex]||0);
+    const baseTheirs=revealing?Math.max(0,(score[game.selfIndex===0?1:0]||0)-theirGoals):(score[game.selfIndex===0?1:0]||0);
+    const segmentGoals=allEvents.filter(event=>event.type==="goal"&&event.minute>=Number(segment.startMinute)).map(event=>`${event.minute}:${event.side===(game.selfIndex===0?"home":"away")?0:1}`).join(",");
+    const revealDelay=event=>revealing&&event.minute>=Number(segment.startMinute)?Math.max(0,Math.min(6.5,(event.minute-segment.startMinute)/(segment.endMinute-segment.startMinute)*6.5)):0;
     const advantage=report&&(report.advantage==="neutral"?local("Eşleşme nötr kaldı.","The matchup was neutral."):((report.advantage==="home")===selfHome?local("Taktik eşleşme sende.","You won the tactical matchup."):local("Taktik eşleşme rakipte.","The opponent won the tactical matchup.")));
     return chrome(`${statusStrip(game)}<div class="arena-live">
-      <div class="arena-match-clock"><b>${Number(game.matchMinute)||game.window*30}'</b><span>${revealing?local("OLAYLAR OYNATILIYOR","PLAYING EVENTS"):local("TAKTİK MOLASI","TACTICAL BREAK")}</span></div>
-      <div class="arena-live-score"><span>${esc(game.self&&game.self.clubName||text("you"))}</span><b>${score[game.selfIndex]||0}<i>–</i>${score[game.selfIndex===0?1:0]||0}</b><span>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</span></div>
-      <div class="arena-pitch-live" aria-label="${esc(local("Maç olay haritası; altın senin, turuncu rakibin.","Match event map; gold is you, orange is the opponent."))}"><i></i><i></i><b style="left:${Math.min(94,Math.max(6,Number(game.matchMinute)||game.window*30))}%"></b>${events.map(event=>`<span class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}" style="left:${Math.min(94,Math.max(6,event.minute))}%">${event.type==="goal"?"●":"▪"}</span>`).join("")}<small class="arena-pitch-legend">${esc(local("ALTIN: SEN · TURUNCU: RAKİP","GOLD: YOU · ORANGE: OPPONENT"))}</small></div>
-      <div class="arena-event-feed">${events.length?events.map(event=>`<span><b>${event.minute}'</b><i class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(text(event.type==="goal"?"goal":"cardEvent"))} · ${esc(event.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`).join(""):`<span><b>0'</b><i>${esc(text("live"))}</i></span>`}</div>
+      <div class="arena-match-clock"><b data-arena-match-clock data-start-minute="${Number(segment.startMinute)||0}" data-end-minute="${Number(segment.endMinute)||90}" data-revealing="${revealing}" data-deadline="${Number(game.deadline)||0}">${revealing?Number(segment.startMinute)||0:Number(game.matchMinute)||Number(segment.startMinute)||0}'</b><span>${revealing?local("CANLI AKSİYON","LIVE ACTION"):local("OYUN DEVAM EDERKEN KARAR VER","DECIDE WHILE PLAY CONTINUES")}</span></div>
+      <div class="arena-live-score"><span>${esc(game.self&&game.self.clubName||text("you"))}</span><b data-arena-live-score data-base-mine="${baseMine}" data-base-theirs="${baseTheirs}" data-goals="${esc(segmentGoals)}">${baseMine}<i>–</i>${baseTheirs}</b><span>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</span></div>
+      <div class="arena-pitch-live ${revealing?"is-playing":""}" aria-label="${esc(local("Maç olay haritası; altın senin, turuncu rakibin.","Match event map; gold is you, orange is the opponent."))}"><i></i><i></i><b style="left:${Math.min(94,Math.max(6,Number(game.matchMinute)||Number(segment.startMinute)||0))}%"></b><em class="arena-live-ball"></em>${events.map(event=>`<span class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"} is-${esc(event.type)} ${revealDelay(event)?"is-reveal-event":""}" style="left:${Math.min(94,Math.max(6,event.minute))}%;--reveal-delay:${revealDelay(event)}s">${event.type==="goal"?"●":event.type==="shot"?"◆":"▪"}</span>`).join("")}<small class="arena-pitch-legend">${esc(local("ALTIN: SEN · TURUNCU: RAKİP","GOLD: YOU · ORANGE: OPPONENT"))}</small></div>
+      <div class="arena-event-feed">${events.length?events.map(event=>{const labels={goal:local("GOL","GOAL"),card:local("KART","CARD"),attack:local("TEHLİKELİ ATAK","DANGEROUS ATTACK"),shot:local("ŞUT","SHOT"),save:local("KURTARIŞ","SAVE")};return `<span class="${revealDelay(event)?"is-reveal-event":""}" style="--reveal-delay:${revealDelay(event)}s"><b>${event.minute}'</b><i class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(labels[event.type]||event.type)} · ${esc(event.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`;}).join(""):`<span><b>0'</b><i>${esc(local("BAŞLAMA VURUŞU","KICK-OFF"))}</i></span>`}</div>
       ${revealing&&report?`<div class="arena-window-report"><b>${esc(local(`${report.startMinute}'–${report.endMinute}' BÖLÜM RAPORU`,`${report.startMinute}'–${report.endMinute}' WINDOW REPORT`))}</b><div><span>${esc(choiceLabel("tactics",myTactic))}</span><i>VS</i><span>${esc(choiceLabel("tactics",theirTactic))}</span></div><p>${esc(advantage)} · xG ${myXg}–${theirXg} · ${esc(local("Gol","Goals"))} ${myGoals}–${theirGoals}</p></div>`:""}
-      <div class="arena-tactic-window"><span>${game.window+1} / 3</span><h2>${esc(revealing?local("BÖLÜM SONUCU","WINDOW RESULT"):text("tacticDecision"))}</h2>${revealing?"":options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${!revealing&&game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(text("waiting"))}</p>`:""}</div>
+      <div class="arena-tactic-window"><span>${game.window+1} / ${segments.length}</span><h2>${esc(revealing?local("SAHADA CANLI","LIVE ON THE PITCH"):text("tacticDecision"))}</h2>${revealing?"":options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${!revealing&&game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(local("Maç akışı sürüyor","Match flow continues"))}</p>`:""}</div>
     </div>`);
+  }
+  const penaltyZoneLabels={
+    leftHigh:["SOL ÜST","LEFT HIGH"],leftLow:["SOL ALT","LEFT LOW"],center:["ORTA","CENTER"],rightLow:["SAĞ ALT","RIGHT LOW"],rightHigh:["SAĞ ÜST","RIGHT HIGH"]
+  };
+  function penalty(game){
+    const shootout=game.penalty||{},score=shootout.score||[0,0],history=shootout.history||[];
+    const mine=score[game.selfIndex]||0,theirs=score[game.selfIndex===0?1:0]||0;
+    const reveal=shootout.stage==="reveal",last=history.at(-1);
+    const role=shootout.selfRole==="shooter"?local("VURUŞ SENDE","YOU SHOOT"):local("KALEYİ SEN KORUYORSUN","YOU KEEP");
+    const outcome=last&&({goal:local("GOL","GOAL"),save:local("KURTARIŞ","SAVE"),miss:local("AUT","MISS"),post:local("DİREK","POST")}[last.outcome]||last.outcome);
+    const dots=side=>Array.from({length:Math.max(5,Number(shootout.kicks&&shootout.kicks[side])||0)},(_,index)=>{
+      const kick=history.filter(item=>item.shooter===side)[index];
+      return `<i class="${kick?(kick.goal?"is-goal":"is-miss"):""}"></i>`;
+    }).join("");
+    return chrome(`${statusStrip(game)}<section class="arena-penalty ${reveal?"is-reveal":""}">
+      <header><span>${esc(local("BERABERLİK BOZULUYOR","THE TIE BREAKS HERE"))}</span><h1>${esc(local("PENALTI ATIŞLARI","PENALTY SHOOTOUT"))}</h1><p>${esc(local("Kararlar sunucuda gizli kilitlenir ve yalnızca iki taraf da tamamlayınca açıklanır.","Choices are sealed on the server and revealed only after both sides lock."))}</p></header>
+      <div class="arena-penalty-score"><span><b>${esc(game.self&&game.self.clubName||text("you"))}</b><i>${dots(game.selfIndex)}</i></span><strong>${mine}<em>–</em>${theirs}</strong><span><b>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</b><i>${dots(game.selfIndex===0?1:0)}</i></span></div>
+      <div class="arena-penalty-stage">
+        <div class="arena-goal" aria-label="${esc(local("Penaltı hedef bölgeleri","Penalty target zones"))}"><i></i><i></i><i></i><span></span><b class="arena-keeper"></b><em class="arena-ball"></em></div>
+        <div class="arena-penalty-call"><small>${esc(local(`${shootout.round||1}. TUR`,`ROUND ${shootout.round||1}`))}</small><h2>${esc(reveal?(outcome||local("VURUŞ","KICK")):role)}</h2>${reveal&&last?`<p>${esc(penaltyZoneLabels[last.shooterZone][root.LANG==="tr"?0:1])} · ${esc(outcome)}</p>`:`<p>${esc(shootout.selfLocked?local("Kararın kilitlendi · rakip bekleniyor","Choice locked · waiting for opponent"):local("Bir bölge seç ve kararını kilitle","Choose a zone and seal your call"))}</p>`}</div>
+      </div>
+      ${reveal?"":`<div class="arena-penalty-zones" role="group" aria-label="${esc(role)}">${Object.keys(penaltyZoneLabels).map(zone=>`<button data-arena-choice="penalty:${zone}" ${shootout.selfLocked?"disabled":""}><i></i><b>${esc(penaltyZoneLabels[zone][root.LANG==="tr"?0:1])}</b></button>`).join("")}</div>`}
+      <footer><span><i class="${shootout.selfLocked?"is-locked":""}"></i>${esc(local("SEN","YOU"))}</span><b>${esc(local("İKİ KARAR DA GİZLİ","BOTH CHOICES SEALED"))}</b><span><i class="${shootout.opponentLocked?"is-locked":""}"></i>${esc(local("RAKİP","OPPONENT"))}</span></footer>
+    </section>`);
   }
   function result(game){
     const outcome=game.result&&game.result.outcomes&&game.result.outcomes[game.selfIndex]||"draw",score=game.result&&game.result.score||game.score||[0,0],mine=score[game.selfIndex],theirs=score[game.selfIndex===0?1:0],penalty=game.result&&game.result.penalty;
     const reward=game.result&&game.result.rewards&&game.result.rewards[game.selfIndex]||{},profile=game.result&&game.result.profiles&&game.result.profiles[game.selfIndex]||null;
     const teams=game.result&&game.result.teams||[],myTeam=teams[game.selfIndex]||game.team||{},theirTeam=teams[game.selfIndex===0?1:0]||game.opponentTeam||{};
     const ratingAfter=profile&&profile.rating!=null?profile.rating:Number(reward.ratingBefore||game.self&&game.self.rating||1000)+Number(reward.ratingDelta||0);
-    const decisions=(game.self&&game.self.tactics||[]).map((choice,index)=>`${index*30}' ${choiceLabel("tactics",choice)} / ${choiceLabel("tactics",game.opponent&&game.opponent.tactics&&game.opponent.tactics[index]||"balanced")}`);
+    const decisionMinutes=(game.liveSegments||[]).map(segment=>Number(segment.startMinute)||0);
+    const decisions=(game.self&&game.self.tactics||[]).map((choice,index)=>`${decisionMinutes[index]??index*30}' ${choiceLabel("tactics",choice)} / ${choiceLabel("tactics",game.opponent&&game.opponent.tactics&&game.opponent.tactics[index]||"balanced")}`);
     const eventRecap=(game.events||[]).filter(item=>item.type==="goal"||item.type==="card").slice(-8);
     const resultLabel=game.result&&game.result.voided?"voided":game.result&&game.result.forfeitIndex!==null&&game.result.forfeitIndex!==undefined?(game.result.forfeitIndex===game.selfIndex?"forfeitLoss":"forfeitWin"):outcome;
     const resultSoundKey=`${game.matchId||"match"}:${mine}:${theirs}:${outcome}`;
@@ -312,6 +381,7 @@
     if(game.phase==="market")return market(game);
     if(game.phase==="training")return training(game);
     if(game.phase==="live")return live(game);
+    if(game.phase==="penalty")return penalty(game);
     if(game.phase==="result")return result(game);
     return loading();
   }
@@ -404,6 +474,7 @@
       if(data.type==="state"){
         const previous=state.room,previousGoals=previous&&previous.events?previous.events.filter(item=>item.type==="goal").length:0;
         if(data.state.phase!=="setup"){state.setupDraft=null;state.setupSubmitting=false;}
+        if(data.state.phase!=="training"){state.planDraft=null;state.planSubmitting=false;}
         state.room=data.state;state.screen="room";render();
         const goals=(data.state.events||[]).filter(item=>item.type==="goal").length;if(goals>previousGoals)sfx("goal");
         if(previous&&previous.phase!==data.state.phase)telemetry("arena_phase_completed",previous.phase);
@@ -421,13 +492,14 @@
         }
         const mark=rootEl().querySelector(".arena-live-mark");
         if(mark){
-          const live=state.room&&state.room.phase==="live";
+          const live=state.room&&["live","penalty"].includes(state.room.phase);
           mark.className=`arena-live-mark ${live?"is-live":"is-online"} is-${band}`;
           mark.innerHTML=`<i></i> ${esc(live?`LIVE · ${state.latency}ms`:`${text("network"+band[0].toUpperCase()+band.slice(1))} ${state.latency}ms`)}`;
         }
       }
       if(data.type==="ack"&&data.status&&data.status!=="ok"){
         if(state.room&&state.room.phase==="setup"&&data.status!=="already_submitted")state.setupSubmitting=false;
+        if(state.room&&state.room.phase==="training"&&data.status!=="already_submitted")state.planSubmitting=false;
         render();
         if(data.status!=="already_submitted")sfx("error");
       }
@@ -473,6 +545,20 @@
     const paint=()=>{
       const seconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));
       element.textContent=`${label} · ${seconds}s`;
+      const matchClock=document.querySelector("[data-arena-match-clock]");
+      if(matchClock&&matchClock.dataset.revealing==="true"){
+        const start=Number(matchClock.dataset.startMinute)||0,end=Number(matchClock.dataset.endMinute)||90;
+        const segmentDuration=7000;
+        const progress=Math.max(0,Math.min(1,1-(Number(matchClock.dataset.deadline)-Date.now())/segmentDuration));
+        const minute=Math.round(start+(end-start)*progress);
+        matchClock.textContent=`${minute}'`;
+        const liveScore=document.querySelector("[data-arena-live-score]");
+        if(liveScore){
+          let mine=Number(liveScore.dataset.baseMine)||0,theirs=Number(liveScore.dataset.baseTheirs)||0;
+          String(liveScore.dataset.goals||"").split(",").filter(Boolean).forEach(item=>{const [goalMinute,side]=item.split(":").map(Number);if(goalMinute<=minute){if(side===0)mine++;else theirs++;}});
+          liveScore.innerHTML=`${mine}<i>–</i>${theirs}`;
+        }
+      }
       const reconnect=document.querySelector("[data-arena-reconnect-countdown]");if(reconnect)reconnect.textContent=`${Math.max(0,Math.ceil((state.reconnectAt-Date.now())/1000))}s`;
       if(seconds===0&&state.socket&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"sync"}));
     };
@@ -487,7 +573,7 @@
   function selectChoice(button){
     if(button.disabled)return;
     const [kind,value]=button.dataset.arenaChoice.split(":");
-    if(["draft","market","training","tactics"].includes(kind)){
+    if(["draft","market","training","tactics","penalty"].includes(kind)){
       const group=button.parentElement;
       if(group)group.querySelectorAll("button").forEach(item=>{
         item.disabled=true;item.classList.toggle("is-selected",item===button);item.setAttribute("aria-pressed",String(item===button));
@@ -508,6 +594,14 @@
     if(submit)submit.disabled=!(phase.dataset.formations&&phase.dataset.styles);
   }
   function onClick(event){
+    const planChoice=event.target.closest("[data-arena-plan]");
+    if(planChoice&&!planChoice.disabled&&state.room&&state.room.phase==="training"){
+      const [kind,value]=planChoice.dataset.arenaPlan.split(":");
+      const draft=matchPlanDraft(state.room);
+      if(kind==="focus")draft.focus=value;
+      if(kind==="scenario")draft.scenario=value;
+      render();return;
+    }
     const choice=event.target.closest("[data-arena-choice]");if(choice){selectChoice(choice);return;}
     const button=event.target.closest("[data-arena-action]");if(!button)return;
     const action=button.dataset.arenaAction;
@@ -528,6 +622,13 @@
       const phase=button.closest(".arena-phase"),choice={formation:phase.dataset.formations,style:phase.dataset.styles};
       state.setupSubmitting=true;button.disabled=true;button.textContent=text("waiting");
       if(!send({type:"setup",choice})){state.setupSubmitting=false;render();}
+      return;
+    }
+    if(action==="submit-plan"){
+      const draft=matchPlanDraft(state.room);
+      if(!(draft.focus&&draft.scenario))return;
+      state.planSubmitting=true;button.disabled=true;button.textContent=text("waiting");
+      if(!send({type:"training",choice:{focus:draft.focus,scenario:draft.scenario}})){state.planSubmitting=false;render();}
       return;
     }
     if(action==="portal"){disconnect(false);loadPortal();return;}

@@ -2,12 +2,13 @@ import {
   DRAFT_SLOTS,
   FORMATIONS,
   MARKET_CARDS,
+  MATCH_PLAN_SCENARIOS,
   STYLES,
   TACTICS,
   TRAINING,
   createDraftPlan,
   initialPlayerState,
-  resolveWindow,
+  resolveLiveSegment,
   teamSnapshot
 } from "../services/copa-arena-api/src/rules.js";
 
@@ -53,10 +54,10 @@ function buildTeam(seed,side,strategyName,setup,marketId,training){
 
 function play(seed,home,away,homeTactics,awayTactics){
   const score=[0,0];
-  for(let window=0;window<3;window++){
-    const result=resolveWindow({
-      seed,window,home:home.team,away:away.team,
-      homeTactic:homeTactics[window],awayTactic:awayTactics[window]
+  for(let segment=0;segment<4;segment++){
+    const result=resolveLiveSegment({
+      seed,segment,score,home:home.team,away:away.team,
+      homeTactic:homeTactics[segment],awayTactic:awayTactics[segment]
     });
     score[0]+=result.homeGoals;
     score[1]+=result.awayGoals;
@@ -101,8 +102,8 @@ for(let run=0;run<RUNS;run++){
     assert(new Set(away.player.draft.map(player=>player.sourceId)).size===11,`${seed}: away XI repeats a player`);
     assert(new Set([...home.player.draft,...away.player.draft].map(player=>player.sourceId)).size===22,`${seed}: a player appears for both clubs`);
     seenDraftSignatures.add(home.player.draft.map(player=>player.sourceId).join("|"));
-    const homeTactics=TACTICS.map((_,index)=>TACTICS[(run+index+homeStrategy.length)%TACTICS.length]).slice(0,3);
-    const awayTactics=TACTICS.map((_,index)=>TACTICS[(run*3+index+awayStrategy.length)%TACTICS.length]).slice(0,3);
+    const homeTactics=TACTICS.map((_,index)=>TACTICS[(run+index+homeStrategy.length)%TACTICS.length]);
+    const awayTactics=TACTICS.map((_,index)=>TACTICS[(run*3+index+awayStrategy.length)%TACTICS.length]);
     const score=play(seed,home,away,homeTactics,awayTactics);
     seenScorelines.add(score.join("-"));
     totalMatches++;
@@ -163,7 +164,7 @@ const report={
   }]))
 };
 
-const decisionMatrix={setup:{},market:{},training:{}};
+const decisionMatrix={setup:{},market:{},training:{},scenario:{}};
 function recordDecision(group,label,score,candidateSide){
   const entry=decisionMatrix[group][label]||{games:0,wins:0,draws:0,losses:0};
   const candidate=score[candidateSide],opponent=score[candidateSide===0?1:0];
@@ -183,8 +184,8 @@ for(let run=0;run<DECISION_RUNS;run++){
       const candidate=buildTeam(seed,candidateSide,"reliable",{formation,style},"none","recovery");
       const baseline=buildTeam(seed,candidateSide===0?1:0,"reliable",baselineSetup,"none","recovery");
       const score=candidateSide===0
-        ?play(seed,candidate,baseline,["balanced","balanced","balanced"],["balanced","balanced","balanced"])
-        :play(seed,baseline,candidate,["balanced","balanced","balanced"],["balanced","balanced","balanced"]);
+        ?play(seed,candidate,baseline,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"])
+        :play(seed,baseline,candidate,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"]);
       recordDecision("setup",label,score,candidateSide);
     }
   }
@@ -195,8 +196,8 @@ for(let run=0;run<DECISION_RUNS;run++){
       const candidate=buildTeam(seed,candidateSide,"reliable",baselineSetup,label,"recovery");
       const baseline=buildTeam(seed,candidateSide===0?1:0,"reliable",baselineSetup,"none","recovery");
       const score=candidateSide===0
-        ?play(seed,candidate,baseline,["balanced","balanced","balanced"],["balanced","balanced","balanced"])
-        :play(seed,baseline,candidate,["balanced","balanced","balanced"],["balanced","balanced","balanced"]);
+        ?play(seed,candidate,baseline,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"])
+        :play(seed,baseline,candidate,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"]);
       recordDecision("market",label,score,candidateSide);
     }
   }
@@ -207,9 +208,20 @@ for(let run=0;run<DECISION_RUNS;run++){
       const candidate=buildTeam(seed,candidateSide,"reliable",baselineSetup,"none",label);
       const baseline=buildTeam(seed,candidateSide===0?1:0,"reliable",baselineSetup,"none","recovery");
       const score=candidateSide===0
-        ?play(seed,candidate,baseline,["balanced","balanced","balanced"],["balanced","balanced","balanced"])
-        :play(seed,baseline,candidate,["balanced","balanced","balanced"],["balanced","balanced","balanced"]);
+        ?play(seed,candidate,baseline,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"])
+        :play(seed,baseline,candidate,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"]);
       recordDecision("training",label,score,candidateSide);
+    }
+  }
+  for(const scenario of MATCH_PLAN_SCENARIOS){
+    for(const candidateSide of [0,1]){
+      const seed=`decision-scenario-${run}-${scenario}-${candidateSide}`;
+      const candidate=buildTeam(seed,candidateSide,"reliable",baselineSetup,"none",{focus:"recovery",scenario});
+      const baseline=buildTeam(seed,candidateSide===0?1:0,"reliable",baselineSetup,"none",{focus:"recovery",scenario:"adaptive"});
+      const score=candidateSide===0
+        ?play(seed,candidate,baseline,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"])
+        :play(seed,baseline,candidate,["balanced","balanced","balanced","balanced"],["balanced","balanced","balanced","balanced"]);
+      recordDecision("scenario",scenario,score,candidateSide);
     }
   }
 }

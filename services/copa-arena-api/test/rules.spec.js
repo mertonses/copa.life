@@ -1,7 +1,7 @@
 import {describe,expect,it} from "vitest";
 import {
   ARENA_RULES_VERSION,CHAIRMEN,DRAFT_LINES,DRAFT_SLOTS,MIN_MANUAL_DECISIONS,allowsRegulationDraw,chooseMatchCandidate,createDraftOffers,createDraftPlan,createLegacyDraftOffers,createMarketOffers,divisionFor,initialPlayerState,
-  minimumFutureDraftCost,ratingDelta,resolveParticipation,resolveWindow,rewardFor,teamSnapshot,tacticEdge,usesFullXI
+  LIVE_SEGMENTS,PENALTY_ZONES,minimumFutureDraftCost,normalizeMatchPlan,ratingDelta,resolveLiveSegment,resolveParticipation,resolvePenaltyKick,resolveWindow,rewardFor,teamSnapshot,tacticEdge,usesFullXI
 } from "../src/rules.js";
 import {
   ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES,ARENA_PLAYER_QUARANTINE_COUNT,ARENA_PLAYER_SOURCES
@@ -100,7 +100,7 @@ describe("Arena rules",()=>{
   });
 
   it("keeps v3 eleven-player rooms compatible while preserving five-player v1/v2 rooms",()=>{
-    expect(ARENA_RULES_VERSION).toBe("arena-rules-v8");
+    expect(ARENA_RULES_VERSION).toBe("arena-rules-v10");
     expect(usesFullXI("arena-rules-v3")).toBe(true);
     expect(usesFullXI("arena-rules-v2")).toBe(false);
     expect(createLegacyDraftOffers("legacy","GK",0,0)).toHaveLength(3);
@@ -111,6 +111,39 @@ describe("Arena rules",()=>{
     five.draft=["GK","DEF","MID","WING","ST"].map((line,index)=>createLegacyDraftOffers("legacy-five",line,index,0)[1]);
     five.market={id:"none"};
     expect(teamSnapshot(five,"arena-rules-v2")).not.toBeNull();
+  });
+
+  it("builds deterministic continuous live segments with a full 90 minute timeline",()=>{
+    const home={attack:76,defense:75,midfield:77,stamina:74,risk:0,flex:0};
+    const away={attack:75,defense:76,midfield:74,stamina:73,risk:0,flex:0};
+    const reports=LIVE_SEGMENTS.map((_,segment)=>resolveLiveSegment({
+      seed:"continuous-match",segment,home,away,homeTactic:"press",awayTactic:"control"
+    }));
+    expect(reports.map(item=>[item.startMinute,item.endMinute])).toEqual([[0,20],[20,45],[45,70],[70,90]]);
+    expect(reports.flatMap(item=>item.events).every(event=>event.minute>=0&&event.minute<90)).toBe(true);
+    expect(resolveLiveSegment({seed:"continuous-match",segment:2,home,away,homeTactic:"press",awayTactic:"control"})).toEqual(reports[2]);
+  });
+
+  it("resolves sealed penalty choices deterministically without trusting the client",()=>{
+    const input={seed:"sealed-kick",kick:3,shooterZone:"leftHigh",keeperZone:"rightLow",shooterPower:82,keeperPower:79};
+    expect(resolvePenaltyKick(input)).toEqual(resolvePenaltyKick(input));
+    expect(PENALTY_ZONES).toContain(resolvePenaltyKick(input).shooterZone);
+    expect(["goal","save","miss","post"]).toContain(resolvePenaltyKick(input).outcome);
+  });
+
+  it("normalizes legacy training choices and validates compact match plans",()=>{
+    expect(normalizeMatchPlan("finishing")).toEqual({focus:"finishing",scenario:"adaptive"});
+    expect(normalizeMatchPlan({focus:"shape",scenario:"protect"})).toEqual({focus:"shape",scenario:"protect"});
+    expect(normalizeMatchPlan({focus:"unknown",scenario:"brave"})).toBeNull();
+  });
+
+  it("applies card and match-plan conditions only in their authoritative context",()=>{
+    const base={attack:76,defense:76,midfield:76,stamina:74,risk:0,flex:0,card:"wall",plan:{focus:"shape",scenario:"protect"}};
+    const opponent={...base,card:"none",plan:{focus:"recovery",scenario:"adaptive"}};
+    const leading=resolveLiveSegment({seed:"plan-context",segment:3,score:[2,1],home:base,away:opponent,homeTactic:"balanced",awayTactic:"balanced"});
+    const trailing=resolveLiveSegment({seed:"plan-context",segment:3,score:[1,2],home:base,away:opponent,homeTactic:"balanced",awayTactic:"balanced"});
+    expect(leading).not.toEqual(trailing);
+    expect(resolveLiveSegment({seed:"plan-context",segment:3,score:[2,1],home:base,away:opponent,homeTactic:"balanced",awayTactic:"balanced"})).toEqual(leading);
   });
 
   it("mirrors market power while varying only presentation order",()=>{

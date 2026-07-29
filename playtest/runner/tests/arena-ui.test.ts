@@ -8,7 +8,8 @@ const self={owner:"self",clubName:profile.clubName,rating:1284,ready:false,setup
 const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connected:true,setup:null,draftCount:0,draft:[],market:null,training:null,tacticLocked:false};
 const slots=["GK","LB","CB1","CB2","RB","CM1","CM2","AM","LW","RW","ST"];
 const squad=(prefix:string,offset=0)=>slots.map((slot,index)=>({id:`${prefix}-${slot}`,slot,line:slot==="GK"?"GK":slot.startsWith("CB")||["LB","RB"].includes(slot)?"DEF":slot==="ST"?"ST":slot.startsWith("W")?"WING":"MID",name:`${prefix} ${slot}`,position:slot.replace(/\d/g,""),power:68+((index+offset)%17),effectivePower:68+((index+offset)%17),cost:1,chemistry:0}));
-const base={protocol:1,rulesVersion:"arena-rules-v8",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
+const liveSegments=[{startMinute:0,endMinute:20,prompt:"opening"},{startMinute:20,endMinute:45,prompt:"control"},{startMinute:45,endMinute:70,prompt:"response"},{startMinute:70,endMinute:90,prompt:"finish"}];
+const base={protocol:1,rulesVersion:"arena-rules-v10",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,liveSegments,penalty:null,score:[0,0],events:[],result:null,self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -65,7 +66,8 @@ async function audit(page:any){
       pageOverflow:document.documentElement.scrollWidth-innerWidth,
       shellOverflow:root.scrollWidth-root.clientWidth,
       clipped:visible.filter(node=>node.scrollWidth>node.clientWidth+2&&getComputedStyle(node).whiteSpace!=="normal").map(node=>node.textContent?.trim()).slice(0,10),
-      smallest:Math.min(...visible.map(node=>parseFloat(getComputedStyle(node).fontSize)||99))
+      smallest:Math.min(...visible.map(node=>parseFloat(getComputedStyle(node).fontSize)||99)),
+      undersized:visible.filter(node=>(parseFloat(getComputedStyle(node).fontSize)||99)<7).map(node=>`${node.className||node.tagName}: ${node.textContent?.trim()}`).slice(0,10)
     };
   });
 }
@@ -151,19 +153,25 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-worst/);
 
   const market=[
-    {id:"twelfth",cost:4,attack:1,defense:0,chemistry:1},
-    {id:"counter",cost:3,attack:2,defense:0,chemistry:0},
-    {id:"wall",cost:4,attack:0,defense:2,chemistry:0},
-    {id:"none",cost:0,attack:0,defense:0,chemistry:0}
+    {id:"twelfth",category:"momentum",activation:"second_half",cost:4,attack:0,defense:0,chemistry:1,projected:{power:77,chemistry:4,budget:4}},
+    {id:"counter",category:"doctrine",activation:"trailing",cost:3,attack:1,defense:0,chemistry:0,projected:{power:76,chemistry:3,budget:5}},
+    {id:"wall",category:"defense",activation:"leading",cost:4,attack:0,defense:1,chemistry:0,projected:{power:77,chemistry:3,budget:4}},
+    {id:"none",category:"reserve",activation:"none",cost:0,attack:0,defense:0,chemistry:0,projected:{power:76,chemistry:3,budget:8}}
   ];
   await setRoom(page,{...base,phase:"market",offers:market,team:{budget:8,power:76,chemistry:3}});
   await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveClass(/budget-weak/);
   await expect(page.locator(".arena-team-pulse .arena-context-budget")).toHaveCSS("animation-name","arenaBudgetPulse");
   await expect(page.locator(".arena-team-pulse .arena-context-power")).toHaveClass(/power-average/);
+  await expect(page.locator(".arena-card")).toHaveCount(4);
+  await expect(page.locator(".arena-card-trigger").first()).toContainText("Second wave");
+  await expect(page.locator(".arena-card-preview").first()).toContainText("77");
   await capture(page,"05-web-arena-market.png");
 
-  await setRoom(page,{...base,phase:"training",self:{...self,setup:{formation:"4-3-3",style:"control",chairman:"babacan"},draft:squad("COPA"),training:"chemistry"},opponent:{...opponent,setup:{formation:"4-2-3-1",style:"counter",chairman:"babacan"},draft:squad("NORTH",3),draftCount:11},team:{budget:8,power:76,chemistry:3},opponentTeam:{budget:7,power:75,chemistry:2}});
-  await expect(page.locator(".arena-choice-grid .is-selected")).toContainText("SELECTED");
+  await setRoom(page,{...base,phase:"training",self:{...self,setup:{formation:"4-3-3",style:"control",chairman:"babacan"},draft:squad("COPA"),training:null},opponent:{...opponent,setup:{formation:"4-2-3-1",style:"counter",chairman:"babacan"},draft:squad("NORTH",3),draftCount:11},team:{budget:8,power:76,chemistry:3},opponentTeam:{budget:7,power:75,chemistry:2}});
+  await page.locator('[data-arena-plan="focus:chemistry"]').click();
+  await page.locator('[data-arena-plan="scenario:adaptive"]').click();
+  await expect(page.locator(".arena-plan-grid .is-selected")).toHaveCount(2);
+  await expect(page.locator('[data-arena-action="submit-plan"]')).toBeEnabled();
   await expect(page.locator(".arena-lineup-wrap.is-versus .arena-lineup-player")).toHaveCount(22);
   await expect(page.locator(".arena-lineup-wrap.is-versus")).toContainText("PRE-MATCH");
   await expect(page.locator(".arena-final-summary .arena-context-power")).toHaveClass(/power-average/);
@@ -171,20 +179,38 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await capture(page,"06-web-arena-training.png");
   await page.locator(".arena-lineup-wrap.is-versus").screenshot({path:path.join(output,"06b-web-arena-head-to-head-pitch.png")});
 
-  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:60,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:49,type:"goal",side:"away"}],windowResult:{window:1,startMinute:30,endMinute:60,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
+  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:45,deadline:Date.now()+6500,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"shot",side:"away"},{minute:41,type:"save",side:"home"}],windowResult:{window:1,startMinute:20,endMinute:45,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
   await expect(page.locator(".arena-window-report")).toContainText("WINDOW REPORT");
+  await expect(page.locator(".arena-tactic-window")).toContainText("2 / 4");
+  await expect(page.locator(".arena-pitch-live")).toHaveClass(/is-playing/);
   await capture(page,"07-web-arena-live.png");
+
+  const shootout={stage:"choice",kick:4,round:3,turn:0,firstShooter:0,score:[2,1],kicks:[2,2],history:[
+    {kick:0,round:1,shooter:0,goal:true,outcome:"goal",shooterZone:"leftHigh",keeperZone:"rightLow"},
+    {kick:1,round:1,shooter:1,goal:true,outcome:"goal",shooterZone:"center",keeperZone:"leftLow"},
+    {kick:2,round:2,shooter:0,goal:true,outcome:"goal",shooterZone:"rightLow",keeperZone:"leftHigh"},
+    {kick:3,round:2,shooter:1,goal:false,outcome:"save",shooterZone:"leftLow",keeperZone:"leftLow"}
+  ],selfRole:"shooter",selfLocked:false,opponentLocked:true};
+  await setRoom(page,{...base,phase:"penalty",score:[1,1],penalty:shootout,self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"babacan"},draft:squad("COPA")},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"babacan"},draft:squad("NORTH",2)}});
+  await expect(page.locator(".arena-penalty-zones button")).toHaveCount(5);
+  await expect(page.locator(".arena-penalty")).toContainText("PENALTY SHOOTOUT");
+  await expect(page.locator(".arena-penalty>footer")).toContainText("BOTH CHOICES SEALED");
+  await capture(page,"08-web-arena-penalty.png");
+  await setRoom(page,{...base,phase:"penalty",score:[1,1],penalty:{...shootout,stage:"reveal",score:[3,1],kicks:[3,2],selfLocked:true,opponentLocked:true,history:[...shootout.history,{kick:4,round:3,shooter:0,goal:true,outcome:"goal",shooterZone:"rightHigh",keeperZone:"center"}]}});
+  await expect(page.locator(".arena-penalty")).toHaveClass(/is-reveal/);
+  await expect(page.locator(".arena-penalty-call")).toContainText("GOAL");
+  await capture(page,"09-web-arena-penalty-reveal.png");
 
   await setRoom(page,{...base,phase:"result",score:[2,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,1],penalty:null,outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
   await expect(page.locator(".arena-result-rewards")).toContainText("1284 → 1298");
   await expect(page.locator(".arena-result-events")).toContainText("71'");
-  await capture(page,"08-web-arena-result.png");
+  await capture(page,"10-web-arena-result.png");
   await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
   await expect(page.locator(".arena-result>span")).toContainText("FORFEIT VICTORY");
-  await capture(page,"09-web-arena-forfeit-result.png");
+  await capture(page,"11-web-arena-forfeit-result.png");
   await setRoom(page,{...base,phase:"result",score:[0,0],result:{score:[0,0],penalty:null,outcomes:["draw","draw"],forfeitIndex:null,voided:true}});
   await expect(page.locator(".arena-result>span")).toContainText("VOID MATCH");
-  await capture(page,"10-web-arena-void-result.png");
+  await capture(page,"12-web-arena-void-result.png");
   const layout=await audit(page);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
   expect(layout.shellOverflow).toBeLessThanOrEqual(1);
@@ -222,6 +248,34 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(draft.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(draft.smallest,viewport.name).toBeGreaterThanOrEqual(7);
     await capture(page,`android-${viewport.name}-draft.png`);
+    const mobileMarket=[
+      {id:"twelfth",category:"momentum",activation:"second_half",cost:4,attack:0,defense:0,chemistry:1,projected:{power:77,chemistry:4,budget:4}},
+      {id:"counter",category:"doctrine",activation:"trailing",cost:3,attack:1,defense:0,chemistry:0,projected:{power:76,chemistry:3,budget:5}},
+      {id:"wall",category:"defense",activation:"leading",cost:4,attack:0,defense:1,chemistry:0,projected:{power:77,chemistry:3,budget:4}},
+      {id:"none",category:"reserve",activation:"none",cost:0,attack:0,defense:0,chemistry:0,projected:{power:76,chemistry:3,budget:8}}
+    ];
+    await setRoom(page,{...base,phase:"market",offers:mobileMarket,team:{budget:8,power:76,chemistry:3}});
+    await expect(page.locator(".arena-card")).toHaveCount(4);
+    const market=await audit(page);
+    expect(market.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(market.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(market.undersized,viewport.name).toEqual([]);
+    await capture(page,`android-${viewport.name}-market.png`);
+    await setRoom(page,{...base,phase:"training",self:{...self,setup:{formation:"4-3-3",style:"control",chairman:"babacan"},draft:squad("COPA"),training:null},opponent:{...opponent,setup:{formation:"4-2-3-1",style:"counter",chairman:"babacan"},draft:squad("NORTH",3),draftCount:11},team:{budget:8,power:76,chemistry:3},opponentTeam:{budget:7,power:75,chemistry:2}});
+    await page.locator('[data-arena-plan="focus:chemistry"]').click();
+    await page.locator('[data-arena-plan="scenario:adaptive"]').click();
+    await expect(page.locator(".arena-plan-grid .is-selected")).toHaveCount(2);
+    const plan=await audit(page);
+    expect(plan.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(plan.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(plan.smallest,viewport.name).toBeGreaterThanOrEqual(7);
+    await capture(page,`android-${viewport.name}-training.png`);
+    await setRoom(page,{...base,phase:"penalty",score:[1,1],penalty:{stage:"choice",kick:0,round:1,turn:0,firstShooter:0,score:[0,0],kicks:[0,0],history:[],selfRole:"shooter",selfLocked:false,opponentLocked:false}});
+    await expect(page.locator(".arena-penalty-zones button")).toHaveCount(5);
+    const penalties=await audit(page);
+    expect(penalties.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(penalties.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
+    await capture(page,`android-${viewport.name}-penalty.png`);
     await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
     const result=await audit(page);
     expect(result.pageOverflow,viewport.name).toBeLessThanOrEqual(1);

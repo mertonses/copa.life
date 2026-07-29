@@ -1,6 +1,6 @@
 import {beforeEach,describe,expect,it} from "vitest";
 import {env,SELF,runInDurableObject,applyD1Migrations} from "cloudflare:test";
-import {ARENA_RULES_VERSION,DRAFT_LINES,seasonKey,teamSnapshot} from "../src/rules.js";
+import {ARENA_RULES_VERSION,DRAFT_LINES,publicState,seasonKey,teamSnapshot} from "../src/rules.js";
 import {ARENA_PLAYER_CATALOG_VERSION} from "../src/playerCatalog.js";
 
 const origin="https://copa.life";
@@ -164,7 +164,7 @@ describe("Arena Durable Objects",()=>{
       expect(instance.state.phase).toBe("live");
       expect(instance.state.window).toBe(0);
       expect(instance.state.liveStage).toBe("reveal");
-      expect(instance.state.matchMinute).toBe(30);
+      expect(instance.state.matchMinute).toBe(20);
       expect(instance.state.players[1].tactics).toEqual(["balanced"]);
       expect(instance.state.deadline).toBeGreaterThan(Date.now());
       instance.state.deadline=Date.now()-1;
@@ -227,10 +227,21 @@ describe("Arena Durable Objects",()=>{
         await act(players[side].owner,{type:"market",choice:free.id});
       }
       await act("owner-home",{type:"training",choice:"chemistry"});await act("owner-away",{type:"training",choice:"recovery"});
-      for(let window=0;window<3;window++){
+      const segmentEnds=[20,45,70,90];
+      for(let window=0;window<4;window++){
         await act("owner-home",{type:"tactic",choice:"press"});await act("owner-away",{type:"tactic",choice:"control"});
         expect(instance.state.liveStage).toBe("reveal");
-        expect(instance.state.matchMinute).toBe((window+1)*30);
+        expect(instance.state.matchMinute).toBe(segmentEnds[window]);
+        instance.state.deadline=Date.now()-1;
+        await instance.alarm();
+      }
+      while(instance.state.phase==="penalty"){
+        if(instance.state.penalty.stage==="choice"){
+          expect(await act("owner-home",{type:"penalty",choice:"leftHigh"})).toBe("ok");
+          expect(JSON.stringify(publicState(instance.state,"owner-away"))).not.toContain("leftHigh");
+          expect(await act("owner-home",{type:"penalty",choice:"center"})).toBe("already_submitted");
+          expect(await act("owner-away",{type:"penalty",choice:"rightLow"})).toBe("ok");
+        }
         instance.state.deadline=Date.now()-1;
         await instance.alarm();
       }
