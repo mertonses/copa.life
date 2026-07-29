@@ -51,9 +51,19 @@ if(peers.some(peer=>peer.state.self.draft.length!==11||peer.state.draftStatus.to
 peers.forEach(peer=>peer.send("market",peer.state.offers.find(item=>item.id==="none").id));
 await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="training","training")));
 peers.forEach(peer=>peer.send("training","chemistry"));
-for(let window=0;window<3;window++){
+for(let window=0;window<4;window++){
   await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="live"&&state.window===window,`live-${window}`)));
   peers.forEach(peer=>peer.send("tactic",window%2?"counter":"press"));
+}
+for(let kick=0;kick<30&&!peers.every(peer=>peer.state&&peer.state.phase==="result");kick++){
+  const states=await Promise.all(peers.map(peer=>peer.wait(
+    state=>state.phase==="result"||(state.phase==="penalty"&&state.penalty&&state.penalty.stage==="choice"),
+    `result-or-penalty-${kick}`
+  )));
+  if(states.every(state=>state.phase==="result"))break;
+  if(states.some(state=>state.phase!=="penalty"||!state.penalty||state.penalty.stage!=="choice"))throw new Error("penalty_state_mismatch");
+  const zones=["leftHigh","rightLow","center","rightHigh","leftLow"];
+  peers.forEach((peer,index)=>peer.send("penalty",zones[(kick+index)%zones.length]));
 }
 const results=await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="result","result")));
 if(results.some(state=>!state.result||!Array.isArray(state.result.outcomes)))throw new Error("missing_result");
