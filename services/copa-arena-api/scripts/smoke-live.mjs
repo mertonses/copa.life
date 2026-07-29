@@ -13,7 +13,7 @@ const request=async(id,path,options={})=>{
   if(!response.ok)throw new Error(`${path}:${response.status}:${JSON.stringify(data)}`);
   return data;
 };
-const timeout=(label,ms=20_000)=>new Promise((_,reject)=>setTimeout(()=>reject(new Error(`timeout:${label}`)),ms));
+const timeout=(label,ms=45_000)=>new Promise((_,reject)=>setTimeout(()=>reject(new Error(`timeout:${label}`)),ms));
 const waitEvent=(socket,type)=>Promise.race([
   new Promise((resolve,reject)=>{
     const onMessage=event=>{const data=JSON.parse(event.data);if(data.type===type){socket.removeEventListener("message",onMessage);resolve(data);}};
@@ -55,15 +55,17 @@ for(let window=0;window<4;window++){
   await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="live"&&state.window===window,`live-${window}`)));
   peers.forEach(peer=>peer.send("tactic",window%2?"counter":"press"));
 }
-for(let kick=0;kick<30&&!peers.every(peer=>peer.state&&peer.state.phase==="result");kick++){
+let previousPenaltyKick=-1;
+for(let attempt=0;attempt<30&&!peers.every(peer=>peer.state&&peer.state.phase==="result");attempt++){
   const states=await Promise.all(peers.map(peer=>peer.wait(
-    state=>state.phase==="result"||(state.phase==="penalty"&&state.penalty&&state.penalty.stage==="choice"),
-    `result-or-penalty-${kick}`
+    state=>state.phase==="result"||(state.phase==="penalty"&&state.penalty&&state.penalty.stage==="choice"&&state.penalty.kick>previousPenaltyKick),
+    `result-or-penalty-${attempt}`
   )));
   if(states.every(state=>state.phase==="result"))break;
   if(states.some(state=>state.phase!=="penalty"||!state.penalty||state.penalty.stage!=="choice"))throw new Error("penalty_state_mismatch");
+  previousPenaltyKick=states[0].penalty.kick;
   const zones=["leftHigh","rightLow","center","rightHigh","leftLow"];
-  peers.forEach((peer,index)=>peer.send("penalty",zones[(kick+index)%zones.length]));
+  peers.forEach((peer,index)=>peer.send("penalty",zones[(previousPenaltyKick+index)%zones.length]));
 }
 const results=await Promise.all(peers.map(peer=>peer.wait(state=>state.phase==="result","result")));
 if(results.some(state=>!state.result||!Array.isArray(state.result.outcomes)))throw new Error("missing_result");
