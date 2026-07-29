@@ -1,1 +1,1 @@
-Fixed COPA ARENA formation and play-style selections clearing themselves during synchronization. Choices now remain selected through connection and state updates until they are submitted.
+COPA ARENA player and team power values now use contextual colors from red to dark green. Remaining cash also changes color by budget level and pulses faster as funds become critical.
