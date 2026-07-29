@@ -63,7 +63,7 @@
   Object.assign(COPY.es,{forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
   Object.assign(COPY.de,{forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
   Object.assign(COPY.it,{forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:""};
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,setupDraft:null,setupSubmitting:false,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:""};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -202,8 +202,20 @@
     const presence=opponent.connected?local("Rakip bağlı","Opponent connected"):local("Rakip yeniden bağlanıyor","Opponent reconnecting");
     return `<div class="arena-versus"><span><small>${esc(text("you"))}</small><b>${esc(self.clubName||"—")}</b><strong>${self.rating||"—"}</strong></span><i>VS</i><span><small>${esc(text("opponent"))}</small><b>${esc(opponent.clubName||"—")}</b><strong>${opponent.rating||"—"}</strong></span></div><div class="arena-phase-status ${opponent.connected?"is-connected":"is-reconnecting"}"><span>${esc(presence)}</span><b data-arena-deadline="${Number(game.deadline)||0}" data-arena-deadline-label="${esc(phaseLabel)}"></b></div>`;
   }
+  function setupDraft(game){
+    const matchId=String(game.matchId||"");
+    if(!state.setupDraft||state.setupDraft.matchId!==matchId){
+      state.setupDraft={matchId,formation:"",style:""};
+      state.setupSubmitting=false;
+    }
+    if(game.self&&game.self.setup){
+      state.setupDraft.formation=game.self.setup.formation||"";
+      state.setupDraft.style=game.self.setup.style||"";
+    }
+    return state.setupDraft;
+  }
   function setup(game){
-    const submitted=!!(game.self&&game.self.setup),chosen=game.self&&game.self.setup||{};
+    const chosen=setupDraft(game),confirmed=!!(game.self&&game.self.setup),submitted=confirmed||state.setupSubmitting;
     return chrome(`${statusStrip(game)}<div class="arena-phase"><span>01 / 14</span><h1>${esc(text("setup"))}</h1><p>${esc(text("fairCopy"))}</p><div class="arena-fixed-chairman"><b>${esc(text("babacan"))}</b><small>${root.LANG==="tr"?"Tüm kulüpler eşit yönetim desteğiyle başlar.":"Every club starts with the same board support."}</small></div><label>${esc(text("formation"))}</label>${options("formations",["4-4-2","4-3-3","4-2-3-1","3-5-2"],chosen.formation,submitted)}<label>${esc(text("style"))}</label>${options("styles",["balanced","press","counter","control"],chosen.style,submitted)}<button class="arena-primary" data-arena-action="submit-setup" disabled>${esc(submitted?text("waiting"):text("choose"))}</button></div>`);
   }
   const pitchPositions={
@@ -309,6 +321,15 @@
     else if(state.screen==="leaderboard"||state.screen==="history")html=listView(state.screen);
     else if(state.screen==="error")html=errorView(state.lastError);
     element.innerHTML=html;
+    if(state.screen==="room"&&state.room&&state.room.phase==="setup"){
+      const phase=element.querySelector(".arena-phase"),draft=setupDraft(state.room);
+      if(phase){
+        phase.dataset.formations=draft.formation;
+        phase.dataset.styles=draft.style;
+        const submit=phase.querySelector('[data-arena-action="submit-setup"]');
+        if(submit)submit.disabled=state.setupSubmitting||!!(state.room.self&&state.room.self.setup)||!(draft.formation&&draft.style);
+      }
+    }
     const elapsed=element.querySelector("[data-arena-elapsed]");
     if(elapsed)updateElapsed();
     updateDeadline();
@@ -372,6 +393,7 @@
       let data;try{data=JSON.parse(event.data);}catch(_){return;}
       if(data.type==="state"){
         const previous=state.room,previousGoals=previous&&previous.events?previous.events.filter(item=>item.type==="goal").length:0;
+        if(data.state.phase!=="setup"){state.setupDraft=null;state.setupSubmitting=false;}
         state.room=data.state;state.screen="room";render();
         const goals=(data.state.events||[]).filter(item=>item.type==="goal").length;if(goals>previousGoals)sfx("goal");
         if(previous&&previous.phase!==data.state.phase)telemetry("arena_phase_completed",previous.phase);
@@ -395,6 +417,7 @@
         }
       }
       if(data.type==="ack"&&data.status&&data.status!=="ok"){
+        if(state.room&&state.room.phase==="setup"&&data.status!=="already_submitted")state.setupSubmitting=false;
         render();
         if(data.status!=="already_submitted")sfx("error");
       }
@@ -466,6 +489,11 @@
     const group=button.closest(".arena-choice-grid");group.querySelectorAll("button").forEach(item=>item.classList.toggle("is-selected",item===button));
     group.querySelectorAll("button").forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
     const phase=button.closest(".arena-phase");if(phase)phase.dataset[kind]=value;
+    if(state.room&&state.room.phase==="setup"){
+      const draft=setupDraft(state.room);
+      if(kind==="formations")draft.formation=value;
+      if(kind==="styles")draft.style=value;
+    }
     const submit=phase&&phase.querySelector('[data-arena-action="submit-setup"]');
     if(submit)submit.disabled=!(phase.dataset.formations&&phase.dataset.styles);
   }
@@ -487,7 +515,10 @@
     if(action==="cancel"){disconnect(true);loadPortal();return;}
     if(action==="ready"){send({type:"ready"});return;}
     if(action==="submit-setup"){
-      const phase=button.closest(".arena-phase");button.disabled=true;button.textContent=text("waiting");send({type:"setup",choice:{formation:phase.dataset.formations,style:phase.dataset.styles}});return;
+      const phase=button.closest(".arena-phase"),choice={formation:phase.dataset.formations,style:phase.dataset.styles};
+      state.setupSubmitting=true;button.disabled=true;button.textContent=text("waiting");
+      if(!send({type:"setup",choice})){state.setupSubmitting=false;render();}
+      return;
     }
     if(action==="portal"){disconnect(false);loadPortal();return;}
     if(action==="history"){setScreen("history");return;}
