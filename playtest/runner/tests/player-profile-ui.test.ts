@@ -10,6 +10,31 @@ const player={
   profileKey:"TR|sander van de streek|32|antalyaspor",
 };
 
+test("draft cards expose a dedicated profile details button without the position target icon",async({page})=>{
+  await page.goto("/?draft-profile-button=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const global=globalThis as any;
+    global.selectedCountry="TR";
+    global.formName="4-3-3";
+    global.slots=global.FORMATIONS[global.formName];
+    global.style="gegen";
+    await global.beginDraft();
+    global.roll();
+  });
+  await expect(page.locator("#optstage")).toBeVisible();
+  await expect(page.locator("#opts .opt-card-shell")).toHaveCount(3);
+  await expect(page.locator("#opts .opt-detail-btn")).toHaveCount(3);
+  await expect(page.locator("#opts .opt-ico-wrap")).toHaveCount(0);
+
+  const before=await page.evaluate(()=>(globalThis as any).remaining);
+  const detail=page.locator("#opts .opt-detail-btn:not(:disabled)").first();
+  await expect(detail).toBeVisible();
+  await detail.click();
+  await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","false");
+  await expect(page.locator(".player-profile-card")).toBeVisible();
+  expect(await page.evaluate(()=>(globalThis as any).remaining)).toBe(before);
+});
+
 test("player profile summary, six copa dimensions and insights stay responsive",async({page},testInfo)=>{
   const errors:string[]=[];
   page.on("pageerror",error=>errors.push(error.message));

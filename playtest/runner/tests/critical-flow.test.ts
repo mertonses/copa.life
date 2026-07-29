@@ -59,6 +59,34 @@ test.describe("critical mobile run integrity",()=>{
     const saved=await page.evaluate(()=>{const w=globalThis as any;const run=JSON.parse(localStorage.getItem("copa_run_v6")||"null");return{calls:w.__rewardCalls,left:w.draftRerollsLeft,earned:w.draftRewardedRerollsEarned,saved:run&&run.draft&&run.draft.rewardedRerollsEarned};});
     expect(saved).toEqual({calls:2,left:0,earned:2,saved:2});
   });
+
+  test("balanced Legacy Vault choice survives asynchronous draft startup",async({page})=>{
+    await page.addInitScript(()=>{
+      localStorage.removeItem("copa_run_v6");
+      localStorage.removeItem("copa_run_v6_last_good");
+      localStorage.removeItem("kupayolu");
+      localStorage.setItem("copa_country","TR");
+    });
+    await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
+    const state=await page.evaluate(async()=>{
+      const w=globalThis as any;
+      w.legacyFund=8;
+      w.legacyCash=0;
+      w.selectedCountry="TR";
+      await w.applyLegacyBet("half");
+      const meta=JSON.parse(localStorage.getItem("kupayolu")||"null");
+      const run=JSON.parse(localStorage.getItem("copa_run_v6")||"null");
+      return{
+        legacyFund:w.legacyFund,
+        legacyCash:w.legacyCash,
+        savedFund:meta&&meta.lf,
+        savedCash:run&&run.legacyCash,
+        feed:w.feed.map((item:any)=>String(item&&item.html||item)).join(" ")
+      };
+    });
+    expect(state).toMatchObject({legacyFund:4,legacyCash:4,savedFund:4,savedCash:4});
+    expect(state.feed).toContain("+€4M");
+  });
 });
 
 test("England player pool loads on selection and is ready before draft generation",async({page})=>{

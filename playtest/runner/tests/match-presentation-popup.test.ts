@@ -38,6 +38,29 @@ async function openMatchReadyHub(page:any,packaged:boolean){
   await expect(page.locator("#hub")).toBeVisible();
 }
 
+test("clear match-risk summary remains a single line at compact widths",async({page})=>{
+  await page.setViewportSize({width:540,height:380});
+  await page.goto("/?match-risk-clear-line=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    game.riskSummary=()=>[];
+    game.showMatchModePicker(80);
+  });
+  const clear=page.locator(".match-mode-clear");
+  await expect(clear).toContainText("Belirgin risk yok");
+  const layout=await clear.locator("b").evaluate((label:HTMLElement)=>{
+    const range=document.createRange();
+    range.selectNodeContents(label);
+    return{
+      lines:range.getClientRects().length,
+      whiteSpace:getComputedStyle(label).whiteSpace,
+      overflow:label.scrollWidth-label.clientWidth
+    };
+  });
+  expect(layout).toEqual({lines:1,whiteSpace:"nowrap",overflow:0});
+});
+
 test("MAÇA ÇIK always asks for presentation and WATCH reuses final UI inside the modal",async({page},testInfo)=>{
   const packaged=testInfo.project.name==="mobile-chromium";
   test.skip(!["mobile-chromium","desktop-chromium"].includes(testInfo.project.name),"visual QA runs on Chromium phone and web");

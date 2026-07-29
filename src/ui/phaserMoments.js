@@ -95,13 +95,18 @@
       const keeperDir=reveal&&reveal.keeper||"C",shotDir=reveal&&reveal.shot||"C";
       const keeper=scene.add.container(xs[keeperDir],214);
       const shadow=scene.add.ellipse(0,54,82,13,0x0a1118,.34);
+      const arms=scene.add.graphics();
+      arms.fillStyle(accent,1);
+      /* Keep both arms on one mirrored geometry. Rotated rectangles could round
+         their shoulder/wrist ends differently after the canvas was scaled. */
+      arms.fillPoints([{x:-17,y:-18},{x:-62,y:-7},{x:-62,y:4},{x:-17,y:-5}],true);
+      arms.fillPoints([{x:17,y:-18},{x:62,y:-7},{x:62,y:4},{x:17,y:-5}],true);
       const torso=scene.add.polygon(0,4,[-18,-28,18,-28,25,28,-25,28],accent);
       const shirtMark=scene.add.rectangle(0,-2,12,16,0xf3f5f4,.92);
       const head=scene.add.circle(0,-45,13,0xd6a21f).setStrokeStyle(2,0x101d28,.65);
-      const armL=scene.add.rectangle(-39,-7,48,11,accent).setAngle(-11),armR=scene.add.rectangle(39,-7,48,11,accent).setAngle(11);
       const gloveL=scene.add.circle(-62,-2,7,0xf3f5f4),gloveR=scene.add.circle(62,-2,7,0xf3f5f4);
       const legL=scene.add.rectangle(-13,39,13,42,0x101d28).setAngle(13),legR=scene.add.rectangle(13,39,13,42,0x101d28).setAngle(-13);
-      keeper.add([shadow,legL,legR,torso,shirtMark,armL,armR,gloveL,gloveR,head]);
+      keeper.add([shadow,legL,legR,arms,torso,shirtMark,gloveL,gloveR,head]);
       const ball=scene.add.circle(reveal?xs[shotDir]:360,reveal?150:342,13,0xf3f5f4).setStrokeStyle(2,bg,1);
       scene.add.circle(reveal?xs[shotDir]-3:357,reveal?147:339,3,0x101d28,.78);
       if(reveal&&!reduced()){ball.setPosition(360,342);keeper.setPosition(360,214);scene.tweens.add({targets:ball,x:xs[shotDir],y:reveal.type==="post"?48:142,duration:360,ease:"Cubic.easeOut"});scene.tweens.add({targets:keeper,x:xs[keeperDir],y:keeperDir==="C"?208:193,angle:keeperDir==="L"?-17:keeperDir==="R"?17:0,duration:350,ease:"Sine.easeOut"});}

@@ -413,7 +413,7 @@
     star:{calm:"Takımı oyunda tut, anın gelecek.",believe:"Bu maç senin maçın.",challenge:"Liderliğini şimdi göster!",discipline:"Herkes kadar koşacaksın.",tactical:"Seni boşlukta bulacağız."}
   };
   function talkIcon(key){
-    const paths={calm:"M4 12h16M7 8h10M9 16h6",believe:"M12 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.2l5-.7Z",challenge:"M5 19 9 5l3 7 3-7 4 14M7 15h10",discipline:"M6 4h12v16H6zM9 9h6m-6 4h6",tactical:"M4 18c4-8 8-8 16-12M15 5h5v5"};return`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[key]}"/></svg>`;
+    const paths={calm:"M4 12h16M7 8h10M9 16h6",believe:"M12 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.2l5-.7Z",challenge:"M5 19 9 5l3 7 3-7 4 14M7 15h10",discipline:"M6 4h12v16H6zM9 9h6m-6 4h6",tactical:"M4 18c4-8 8-8 16-12M15 5h5v5"};return`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${paths[key]}" fill="none" vector-effect="non-scaling-stroke"/></svg>`;
   }
   function openTeamTalk(){
     const toneCards=Object.keys(TONES).map(key=>`<button type="button" class="locker-tone tone-${key}" data-tone="${key}" onclick="CopaMobileShell.chooseTalkTone('${key}')">${talkIcon(key)}<span>${TONES[key][tr()?"tr":"en"]}</span><small data-talk-quote="${key}">${tr()?TALK_QUOTES.all[key]:"Choose the words this group needs."}</small></button>`).join("");

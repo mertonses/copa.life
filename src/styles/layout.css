@@ -363,8 +363,6 @@ html[data-theme="dark"] .patreonicon-sm{filter:brightness(0) invert(1)}
 .opt.bargain{border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(104,117,124,.28) inset}
 .opt.bargain::after{content:var(--disc) " İNDİRİM";position:absolute;right:-38px;top:8px;transform:rotate(34deg);width:132px;text-align:center;background:var(--color-primary);color:var(--color-ink);font-family:var(--mono);font-weight:900;font-size:8px;letter-spacing:.8px;padding:3px 0;box-shadow:0 2px 0 rgba(10,17,24,.18);pointer-events:none}
 .opt-lbar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px}
-.opt-ico-wrap{flex-shrink:0;display:flex;align-items:center;opacity:.5;pointer-events:none;margin-left:-4px}
-.opt:hover:not(:disabled) .opt-ico-wrap{opacity:.85}
 .optmsg{font-family:var(--mono);font-size:10px;color:var(--color-slate);text-align:center;margin-top:6px;min-height:12px}
 #rerollBtn{margin:7px 0 0}
 .reroll-desc{display:block;font-family:var(--mono);font-size:9px;color:var(--color-slate);margin-top:3px;opacity:.75}

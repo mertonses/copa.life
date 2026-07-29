@@ -70,6 +70,34 @@ const reachDraw=async(page:any)=>{
   await expect(page.locator("#tournamentDraw")).toBeVisible();
 };
 
+test("locker-room tone icons keep their stroked size outside mobile-only styling",async({page},testInfo)=>{
+  await page.goto("/?locker-icon-contract=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    document.documentElement.classList.remove("copa-mobile-game");
+    (globalThis as any).CopaMobileShell.openTeamTalk();
+  });
+  await expect(page.locator(".locker-room-modal")).toBeVisible();
+  await expect(page.locator(".locker-tone svg")).toHaveCount(5);
+  const icons=await page.locator(".locker-tone").evaluateAll((cards:HTMLElement[])=>cards.map(card=>{
+    const svg=card.querySelector("svg") as SVGElement,path=svg.querySelector("path") as SVGPathElement,box=svg.getBoundingClientRect(),svgStyle=getComputedStyle(svg),pathStyle=getComputedStyle(path);
+    return{
+      cardDisplay:getComputedStyle(card).display,
+      width:box.width,
+      height:box.height,
+      fill:svgStyle.fill,
+      stroke:svgStyle.stroke,
+      pathFill:pathStyle.fill,
+      vectorEffect:path.getAttribute("vector-effect")
+    };
+  }));
+  expect(icons).toHaveLength(5);
+  expect(icons.every(icon=>icon.cardDisplay==="grid")).toBe(true);
+  expect(icons.every(icon=>icon.width>=22&&icon.width<=24&&icon.height>=22&&icon.height<=24)).toBe(true);
+  expect(icons.every(icon=>icon.fill==="none"&&icon.pathFill==="none"&&icon.stroke!=="none")).toBe(true);
+  expect(icons.every(icon=>icon.vectorEffect==="non-scaling-stroke")).toBe(true);
+  await capture(page,`05b-locker-room-icons-${testInfo.project.name}.png`);
+});
+
 test("native landing and three-step setup read as a mobile game",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
@@ -373,6 +401,43 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   expect(metricSurfaces.every(surface=>surface.backgroundImage!=="none")).toBe(true);
   expect(metricSurfaces.every(surface=>surface.accent.length>0)).toBe(true);
   expect(new Set(metricSurfaces.map(surface=>surface.backgroundImage)).size).toBeGreaterThanOrEqual(2);
+  const cashValueContrast=await page.locator("#kasaTile").evaluate((tile:HTMLElement)=>{
+    const states=["kasa-rich","kasa-positive","kasa-zero","kasa-debt","kasa-deep-debt"];
+    const original=states.find(state=>tile.classList.contains(state));
+    const parse=(value:string)=>{
+      const channels=(value.match(/[\d.]+/g)||[]).slice(0,3).map(Number);
+      const scale=/^color\(srgb/i.test(value)?1:255;
+      return channels.map(channel=>channel/scale);
+    };
+    const luminance=(value:string)=>{
+      const channels=parse(value).map(normalized=>normalized<=.03928?normalized/12.92:Math.pow((normalized+.055)/1.055,2.4));
+      return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;
+    };
+    const contrast=(foreground:string,background:string)=>{
+      const a=luminance(foreground),b=luminance(background);
+      return(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+    };
+    const value=tile.querySelector<HTMLElement>(".kasa-main-val")!;
+    tile.style.setProperty("transition","none","important");
+    value.style.setProperty("transition","none","important");
+    const backgrounds=["rgb(10, 17, 24)","rgb(39, 52, 60)"];
+    const results=states.map(state=>{
+      tile.classList.remove(...states);
+      tile.classList.add(state);
+      void value.offsetWidth;
+      const color=getComputedStyle(value).color;
+      const token=getComputedStyle(tile).getPropertyValue("--cash-value-text").trim();
+      return{state,color,token,minimum:Math.min(...backgrounds.map(background=>contrast(color,background)))};
+    });
+    tile.classList.remove(...states);
+    if(original)tile.classList.add(original);
+    tile.style.removeProperty("transition");
+    value.style.removeProperty("transition");
+    return results;
+  });
+  expect(new Set(cashValueContrast.map(result=>result.color)).size,JSON.stringify(cashValueContrast)).toBe(5);
+  expect(new Set(cashValueContrast.map(result=>result.token)).size).toBe(5);
+  expect(cashValueContrast.every(result=>result.minimum>=4.5),JSON.stringify(cashValueContrast)).toBe(true);
   await capture(page,"03b-context-metrics.png");
   await expect(page.locator("#feedwrap")).toBeVisible();
   expect(await page.locator("#feedwrap").evaluate(node=>node.parentElement?.classList.contains("hcol-l"))).toBe(true);
@@ -699,6 +764,26 @@ test("club files stay opt-in and never interrupt another hub route",async({page}
   expect(await page.evaluate(()=>(globalThis as any).CopaClubFiles.snapshot().selected)).toBe("debt");
 });
 
+test("browser career club-file prompt opens the objective picker",async({page},testInfo)=>{
+  test.skip(!desktopOnly(testInfo.project.name),"browser presentation regression");
+  await reset(page);
+  await page.goto("/?visual=browser-club-files",{waitUntil:"domcontentloaded"});
+  await reachDraw(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.fastTournamentDraw();
+    game.finishTournamentDraw();
+    game.setCaptain(0);
+    game.closeModal();
+    game.CopaMeta.openProgression("career");
+  });
+  const prompt=page.locator(".club-file-panel-pending");
+  await expect(prompt).toBeVisible();
+  await prompt.click();
+  await expect(page.locator(".club-file-select")).toBeVisible();
+  await expect(page.locator(".club-file-options button")).toHaveCount(3);
+});
+
 test("Phaser penalty canvas keeps ball and keeper directions tied to the core result",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
@@ -707,6 +792,8 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
   await expect(page.locator("#phaserPenaltyStage canvas")).toBeVisible({timeout:15_000});
   await expectSurfaceFit(page,".pen-modal");
+  fs.mkdirSync(visualDir,{recursive:true});
+  await page.locator("#phaserPenaltyStage canvas").screenshot({path:path.join(visualDir,"09a-phaser-penalty-keeper-idle.png")});
   const directionLayout=await page.locator(".pen-dir-grid").evaluate((grid:HTMLElement)=>{
     const rects=[...grid.querySelectorAll<HTMLElement>(".pen-dir-btn")].map(button=>button.getBoundingClientRect());
     return{
