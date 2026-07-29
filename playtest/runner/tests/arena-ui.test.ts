@@ -447,6 +447,29 @@ test("Copa Arena starts with a blank standalone club name",async({page},testInfo
   await expect(page.locator('[data-arena-action="accept"]')).toBeVisible();
 });
 
+test("guest entry opens Arena immediately with a device-local identity",async({page})=>{
+  await boot(page,false);
+  await page.evaluate(()=>{
+    localStorage.removeItem("copa_arena_google_user_v1");
+    localStorage.removeItem("copa_arena_club_v1");
+    localStorage.removeItem("copa_arena_terms_v1");
+  });
+  await page.locator('[data-mode-choice="arena"]:visible').click();
+  const guest=page.locator('[data-arena-action="guest"]');
+  await expect(guest).toBeVisible();
+  await expect(guest).toContainText(/MİSAFİR OLARAK DEVAM ET|CONTINUE AS GUEST/);
+  await guest.click();
+  await expect(page.locator(".arena-portal")).toBeVisible();
+  const saved=await page.evaluate(()=>({
+    user:JSON.parse(localStorage.getItem("copa_arena_google_user_v1")||"null"),
+    club:localStorage.getItem("copa_arena_club_v1"),
+    terms:localStorage.getItem("copa_arena_terms_v1")
+  }));
+  expect(saved.user).toMatchObject({guest:true});
+  expect(saved.club).toMatch(/^(Misafir|Guest) [A-Z0-9]{4}$/);
+  expect(saved.terms).toBe("arena-terms-v1");
+});
+
 test("Google sign-in stays inside the Arena account card on narrow phones",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="mobile-chromium","phone-width Google sign-in contract");
   await boot(page,false);
@@ -481,4 +504,11 @@ test("Google sign-in stays inside the Arena account card on narrow phones",async
   });
   expect(sizes.requested).toBeLessThanOrEqual(Math.floor(sizes.slotWidth));
   expect(sizes.frameRight).toBeLessThanOrEqual(sizes.authRight+1);
+  const guest=page.locator('[data-arena-action="guest"]');
+  await expect(guest).toBeVisible();
+  const guestInside=await guest.evaluate(button=>{
+    const auth=button.closest(".arena-google-auth")!.getBoundingClientRect(),rect=button.getBoundingClientRect();
+    return rect.left>=auth.left-1&&rect.right<=auth.right+1;
+  });
+  expect(guestInside).toBe(true);
 });
