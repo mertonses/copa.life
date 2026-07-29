@@ -3,6 +3,8 @@
 <meta name="copa-ghost-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
 <meta name="copa-analytics-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
 <meta name="copa-arena-api" content="https://copa-life-arena.mertonses-copa.workers.dev">
+<meta name="copa-google-client-id" content="910942499457-79rqm001821h0tealgup26jba3jrnkmc.apps.googleusercontent.com">
+<meta name="copa-google-ios-client-id" content="910942499457-puuqtrlff1itdu0cejbg990cf1lt4e4a.apps.googleusercontent.com">
 <meta name="copa-build-version" content="__COPA_BUILD_VERSION__">
 <meta name="copa-platform" content="web">
 <title>Copa Life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
@@ -100,6 +102,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-chair-action3">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/arena.css?v=20260729-live-emotes1" data-copa-arena-styles>
+<link rel="stylesheet" href="src/styles/modeGate.css?v=20260729-mode-gate1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -120,6 +123,49 @@ if("serviceWorker"in navigator){
 <p>JavaScript etkin bir tarayıcıyla oyunu oynamak için sayfayı yenileyin.</p>
 </div></noscript></head><body>
 <div id="loader"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,.15)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" stroke="#F24A28" stroke-width="4" stroke-linecap="round"/></svg></div>
+<section id="modeGate" class="mode-gate" aria-labelledby="modeGateTitle">
+  <div class="mode-gate-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
+  <header class="mode-gate-brand">
+    <div class="mode-gate-wordmark"><span>Copa</span> <em>Life</em></div>
+    <p>HİKÂYENİ SEÇ. SAHAYA ÇIK.</p>
+  </header>
+  <main class="mode-gate-main">
+    <div class="mode-gate-heading">
+      <span>OYUN MODU</span>
+      <h1 id="modeGateTitle">Nasıl oynamak istersin?</h1>
+      <p>Tek oyunculu hikâyeni yaşa veya Arena'da gerçek rakiplere meydan oku.</p>
+    </div>
+    <div class="mode-gate-grid">
+      <button class="mode-card mode-card-classic" type="button" data-mode-choice="classic">
+        <span class="mode-card-index">01</span>
+        <span class="mode-card-art" aria-hidden="true">
+          <svg viewBox="0 0 96 96"><rect x="20" y="20" width="56" height="56" rx="12"/><circle cx="36" cy="36" r="4"/><circle cx="60" cy="36" r="4"/><circle cx="48" cy="48" r="4"/><circle cx="36" cy="60" r="4"/><circle cx="60" cy="60" r="4"/></svg>
+        </span>
+        <span class="mode-card-copy">
+          <small>TEK OYUNCULU</small>
+          <strong>COPA LIFE</strong>
+          <span>Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.</span>
+        </span>
+        <span class="mode-card-meta"><b>KLASİK DENEYİM</b><i>OYNA →</i></span>
+      </button>
+      <button class="mode-card mode-card-arena" id="arenaModeBtn" type="button" data-mode-choice="arena">
+        <span class="mode-card-live"><i></i> LIVE</span>
+        <span class="mode-card-index">02</span>
+        <span class="mode-card-art mode-card-crown" aria-hidden="true">
+          <svg viewBox="0 0 96 96"><path d="M18 31l17 15 13-25 13 25 17-15-7 39H25z"/><path d="M27 76h42"/></svg>
+          <i></i>
+        </span>
+        <span class="mode-card-copy">
+          <small>PREMIUM MULTIPLAYER</small>
+          <strong>COPA ARENA</strong>
+          <span>Canlı rakipler, dereceli yolculuk ve rövanş heyecanı.</span>
+        </span>
+        <span class="mode-card-meta"><b>REKABETÇİ · CANLI</b><i>ARENA'YA GİR →</i></span>
+      </button>
+    </div>
+    <p class="mode-gate-note"><span></span> İki modda da aynı kadro kurma deneyimi, farklı bir mücadele.</p>
+  </main>
+</section>
 <div class="wrap">
   <div class="top"><div class="tools"><div class="howto-wrap" id="howtoWrap"><button class="howto-toggle" id="howtoToggle" type="button" onclick="openHowtoModal()" title="COPA REHBERİ" aria-label="COPA REHBERİ"><svg class="guide-book-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="guide-book-cover" d="M4 3.5h6.2c1 0 1.8.4 1.8 1.4V20c0-1.2-.9-2-2.2-2H4z"/><path class="guide-book-page" d="M20 3.5h-6.2c-1 0-1.8.4-1.8 1.4V20c0-1.2.9-2 2.2-2H20z"/><path d="M7 7h2.5M14.5 7H17"/></svg> COPA REHBERİ</button><div class="howto-body hidden" id="howtoBody" aria-hidden="true"></div></div><div class="settingswrap" id="settingsWrap"><button class="iconbtn settingsbtn" id="settingsBtn" onclick="toggleSettings()" title="Ayarlar" aria-label="Ayarlar" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g><animateTransform attributeName="transform" type="rotate" values="0 12 12;360 12 12" dur="12s" repeatCount="indefinite"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></g></svg></button><div class="settingsdrop hidden" id="settingsDrop"><div class="sd-group"><div class="sd-hdr" id="sdHdrLang">DİL</div><div class="sdgrid"><button id="lgTR" class="sdbtn langbtn on" onclick="setLang('tr')"><img src="assets/flags/TR.svg" alt="">TR</button><button id="lgEN" class="sdbtn langbtn" onclick="setLang('en')"><img src="assets/flags/GB.svg" alt="">EN</button></div></div><div class="sd-group"><div class="sd-hdr" id="sdHdrA11y">ERİŞİLEBİLİRLİK</div><button class="sdbtn sd-full" id="animBtn" onclick="toggleReducedMotion()" title="Animasyonları azalt" aria-label="Animasyonları azalt"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><rect x="7" y="7" width="2.5" height="6" rx=".5" fill="currentColor" stroke="none"/><rect x="10.5" y="7" width="2.5" height="6" rx=".5" fill="currentColor" stroke="none"/></svg><span id="animBtnLbl">ANİMASYON AZALT</span></button></div><div class="sd-group"><div class="sd-hdr" id="sdHdrSound">SES</div><button class="sdbtn sd-full" id="muteBtn" onclick="toggleMute()" title="Ses efektleri" aria-label="Ses efektleri"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg><span id="muteBtnLbl">SES EFEKTLERİ</span></button></div></div></div></div>
     <div class="logo" aria-label="Copa Life"><span class="brandmark"><span class="copa">Copa</span><span class="brand-space" aria-hidden="true">&nbsp;</span><span class="life">Life</span></span><p id="logoSlogan" style="font-size:9px;font-family:var(--mono);color:var(--color-slate);opacity:.7;margin:2px 0 0;letter-spacing:.4px;text-align:center">kadere meydan okuduğun kadro yönetim oyunu</p></div>
@@ -239,7 +285,6 @@ if("serviceWorker"in navigator){
       <div class="v7-summary" id="introSummary"></div>
       <div class="v7-primary-actions">
         <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
-        <button class="arena-entry" id="arenaBtn" type="button" onclick="CopaLazy.openArena()" aria-label="Copa Arena çok oyunculu modu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/><path class="arena-icon-spark" d="M12 1v3M3 6l3 2M21 6l-3 2"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button>
       </div>
       <div class="advanced-wrap hidden" aria-hidden="true">
         <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
@@ -385,6 +430,7 @@ try{
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260727-advanced-sheet1"></script>
+<script src="src/ui/modeGate.js?v=20260729-mode-gate2"></script>
 <script src="src/runtime/finalReplay.js?v=20260719-compact-replay1"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>

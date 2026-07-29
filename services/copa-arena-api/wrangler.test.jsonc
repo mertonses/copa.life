@@ -4,6 +4,10 @@
   "main": "src/index.js",
   "compatibility_date": "2026-07-28",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "GOOGLE_TEST_MODE": "true",
+    "GOOGLE_CLIENT_IDS": "test.apps.googleusercontent.com"
+  },
   "d1_databases": [
     {"binding": "DB", "database_name": "copa-life-arena-test", "database_id": "local-arena-test", "migrations_dir": "migrations"}
   ],

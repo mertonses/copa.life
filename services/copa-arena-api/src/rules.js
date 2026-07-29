@@ -594,6 +594,12 @@ export function publicState(state,owner){
     score:state.score,
     events:state.events,
     result:state.result,
+    rematch:state.phase==="result"&&state.rematch?{
+      available:!!state.rematch.available,
+      requested:!!state.rematch.requests[selfIndex],
+      opponentRequested:!!state.rematch.requests[opponentIndex],
+      launched:!!state.rematch.launched
+    }:null,
     emotes:{
       self:state.emotes&&state.emotes[selfIndex]?{...state.emotes[selfIndex]}:null,
       opponent:state.emotes&&state.emotes[opponentIndex]?{...state.emotes[opponentIndex]}:null

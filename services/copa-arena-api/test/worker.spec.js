@@ -27,6 +27,27 @@ const ownerFor=async suffix=>{
 beforeEach(async()=>{await applyD1Migrations(env.DB,env.TEST_MIGRATIONS);});
 
 describe("Arena HTTP API",()=>{
+  it("exchanges a verified Google credential for a stable Arena account session",async()=>{
+    const signIn=()=>SELF.fetch("https://arena.test/v1/arena/auth/google",{
+      method:"POST",headers:headers("googleauth"),body:JSON.stringify({credential:"test-google-credential"})
+    });
+    const first=await signIn(),auth=await first.json();
+    expect(first.status).toBe(201);
+    expect(auth.token).toMatch(/^CAR-[A-Z0-9]{64}$/);
+    expect(auth.user).toMatchObject({email:"qa@copa.life",name:"Arena QA"});
+    const authenticatedHeaders={...headers("googleauth"),"x-copa-arena-token":auth.token};
+    const session=await SELF.fetch("https://arena.test/v1/arena/session",{
+      method:"POST",headers:authenticatedHeaders,body:JSON.stringify({clubName:"Google Arena",mode:"ranked"})
+    });
+    const created=await session.json();
+    expect(session.status).toBe(201);
+    const second=await signIn(),secondAuth=await second.json();
+    const profileResponse=await SELF.fetch("https://arena.test/v1/arena/profile",{
+      headers:{...headers("googleauth2"),"x-copa-arena-token":secondAuth.token}
+    });
+    expect((await profileResponse.json()).profile.publicId).toBe(created.profile.publicId);
+  });
+
   it("requires an Arena identity and rejects invalid names",async()=>{
     const missing=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:{origin,"content-type":"application/json"},body:JSON.stringify({clubName:"Copa"})});
     expect(missing.status).toBe(428);
@@ -414,6 +435,42 @@ describe("Arena Durable Objects",()=>{
     expect(rows.results.every(row=>
       row.outcome==="draw"&&row.rating_delta===0&&row.season_points===12&&row.token_progress===2
     )).toBe(true);
+  });
+
+  it("starts exactly one server-authoritative rematch after both players approve",async()=>{
+    const originalId="AR-REMATCHFLOW000001";
+    const room=env.ARENA_ROOM.getByName(originalId);
+    const players=[
+      {owner:"owner-rematch-home",clubName:"Rövanş Ev",rating:1000},
+      {owner:"owner-rematch-away",clubName:"Rövanş Dep",rating:1000}
+    ];
+    const created=new Date().toISOString();
+    await env.DB.batch(players.map((player,index)=>
+      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(player.owner,`AC-REMATCH${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
+    ));
+    await room.init(originalId,players,"rematch-seed");
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
+        player.draft=DRAFT_LINES.map((line,index)=>({line,id:`${line}-${index}`,name:`Rematch ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"}));
+        player.market={id:"none"};player.training="recovery";player.tactics=["balanced","balanced","balanced"];
+        player.manualDecisions=6;player.manualTactics=1;
+      }
+      await instance.finish(teamSnapshot(instance.state.players[0]),teamSnapshot(instance.state.players[1]));
+      expect(instance.state.rematch).toMatchObject({available:true,requests:[false,false],launched:false});
+      expect(await instance.action(players[0].owner,{type:"rematch"})).toBe("ok");
+      expect(instance.state.rematch.requests).toEqual([true,false]);
+      expect(await instance.action(players[1].owner,{type:"rematch"})).toBe("ok");
+      expect(instance.state.rematch.launched).toBe(true);
+    });
+    const presence=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=?").bind(players[0].owner).first();
+    expect(presence.match_id).not.toBe(originalId);
+    const rematchRoom=env.ARENA_ROOM.getByName(presence.match_id);
+    await runInDurableObject(rematchRoom,instance=>{
+      expect(instance.state.rematchUsed).toBe(true);
+      expect(instance.state.rematchOf).toBe(originalId);
+    });
   });
 
   it("soft-resets a stale season before applying the completed match",async()=>{

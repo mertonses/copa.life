@@ -70,6 +70,8 @@ export function buildNativePackage({
   }
   const out = path.resolve(root, outputDirectory);
   const buildInfo = getSharedBuildInfo(root);
+  const googleClientId = String(process.env.COPA_GOOGLE_CLIENT_ID || "").trim();
+  const googleIosClientId = String(process.env.COPA_GOOGLE_IOS_CLIENT_ID || "").trim();
 
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
@@ -104,7 +106,9 @@ export function buildNativePackage({
       "</body>",
       `${platform === "android" ? `<script src="src/runtime/nativeAds.js?v=${buildInfo.buildVersion}"></script>` : ""}<script src="src/runtime/nativeApp.js?v=${buildInfo.buildVersion}"></script></body>`,
     )
-    .replaceAll("__COPA_BUILD_VERSION__", buildInfo.buildVersion);
+    .replaceAll("__COPA_BUILD_VERSION__", buildInfo.buildVersion)
+    .replaceAll("__COPA_GOOGLE_CLIENT_ID__", googleClientId)
+    .replaceAll("__COPA_GOOGLE_IOS_CLIENT_ID__", googleIosClientId);
   index = index.replace(LOCAL_ASSET_URL, `$1?v=${buildInfo.buildVersion}`);
   index = index.replace(/\?v=202\d[A-Za-z0-9._-]*/g, `?v=${buildInfo.buildVersion}`);
   fs.writeFileSync(indexPath, index);
