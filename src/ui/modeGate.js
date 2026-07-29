@@ -42,8 +42,14 @@
   function isNativeGame(){
     try{return !!(root.COPA_IS_NATIVE||root.Capacitor?.isNativePlatform?.()||new URLSearchParams(root.location.search).has("native-game"));}catch(_){return false;}
   }
+  function shouldBypassForAutomation(){
+    try{
+      const params=new URLSearchParams(root.location.search);
+      return !!root.navigator.webdriver&&!params.has("arena-visual-qa");
+    }catch(_){return false;}
+  }
   function shouldYieldToGame(){
-    return isNativeGame()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
+    return shouldBypassForAutomation()||isNativeGame()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
   }
   document.addEventListener("click",event=>{
     const button=event.target.closest("[data-mode-choice]");if(button)choose(button.dataset.modeChoice);
