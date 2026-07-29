@@ -38,6 +38,10 @@
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({shown:false,reason:"missing_run_key"});
     return Ads.showRunEnd({runKey:key}).catch(()=>({shown:false,reason:"native_error"}));
   }
+  function showArenaEnd(matchId){
+    const key=String(matchId||"").trim();if(!key)return Promise.resolve({shown:false,reason:"missing_match_id"});
+    return Ads.showRunEnd({runKey:`arena:${key}`}).catch(()=>({shown:false,reason:"native_error"}));
+  }
   function showRewardedReroll(runKey){
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({earned:false,reason:"missing_run_key"});
     return Ads.showRewardedReroll({runKey:key}).catch(()=>({earned:false,reason:"native_error"}));
@@ -50,6 +54,6 @@
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({earned:false,reason:"missing_run_key"});
     return Ads.showRewardedMarket({runKey:key}).catch(()=>({earned:false,reason:"native_error"}));
   }
-  root.CopaNativeAds=Object.freeze({showRunEnd,showRewardedReroll,showRewardedInjury,showRewardedMarket,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
+  root.CopaNativeAds=Object.freeze({showRunEnd,showArenaEnd,showRewardedReroll,showRewardedInjury,showRewardedMarket,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
   scheduleInitialize();
 })(window);

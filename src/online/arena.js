@@ -9,7 +9,7 @@
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
     if(document.querySelector('link[data-copa-arena-styles]'))return;
-    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260729-live-emotes1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
+    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260730-arena-polish1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
   }
   ensureArenaStyles();
   const REWARDS=[
@@ -24,7 +24,7 @@
       ranked:"DERECELİ YOLCULUK",play:"EŞLEŞME BUL",back:"COPA LIFE'A DÖN",loading:"ARENA YÜKLENİYOR",
       candidate:"ADAY",bronze:"BRONZ",silver:"GÜMÜŞ",gold:"ALTIN",diamond:"ELMAS",legend:"EFSANE",
       rating:"RATING",season:"SEZON YOLU",record:"KARİYER",history:"SON MAÇLAR",leaderboard:"SIRALAMA",
-      queue:"RAKİP ARANIYOR",queueCopy:"Benzer seviyedeki canlı bir kulüp aranıyor.",cancel:"ARAMAYI İPTAL ET",
+      queue:"RAKİP ARANIYOR",queueCopy:"Benzer seviyede uygun bir kulüp aranıyor.",cancel:"ARAMAYI İPTAL ET",
       ready:"HAZIRIM",waiting:"RAKİP BEKLENİYOR",setup:"KULÜP KİMLİĞİ",draft:"KADRO KUR",market:"SON DOKUNUŞ",
       training:"MAÇ PLANI",live:"CANLI MAÇ",result:"MAÇ SONU",formation:"DİZİLİŞ",style:"OYUN ANLAYIŞI",
       chairman:"BAŞKAN",budget:"KALAN KASA",chemistry:"KİMYA",power:"GÜÇ",choose:"SEÇ",
@@ -32,7 +32,7 @@
       win:"GALİBİYET",loss:"MAĞLUBİYET",draw:"BERABERLİK",forfeitWin:"HÜKMEN GALİBİYET",forfeitLoss:"HÜKMEN MAĞLUBİYET",voided:"HÜKÜMSÜZ MAÇ",voidedCopy:"İki taraf da yeterli sayıda karar vermediği için sıralama ve sezon ilerlemesi değişmedi.",searchAgain:"YENİ EŞLEŞME",
       consentTitle:"ARENA'YA GİR",consent:"Copa Arena canlı ve dereceli bir moddur. Kulüp adın, skorun ve rating'in herkese açık sıralamada görünür. Kişisel bilgi ve serbest sohbet yoktur.",
       accept:"KABUL ET VE GİR",club:"ARENA KULÜP ADI",network:"Arena servisine ulaşılamadı.",empty:"Henüz tamamlanmış maç yok.",
-      authentic:"GERÇEK OYUNCU",noBots:"Bot veya Ghost Club kullanılmaz.",fair:"EŞİT TEKLİF",fairCopy:"Hız değil karar kalitesi kazandırır.",
+      authentic:"HIZLI EŞLEŞME",noBots:"Yeterli oyuncu yoksa sistem kontrollü bir kulüp sırayı ilerletir.",fair:"EŞİT TEKLİF",fairCopy:"Hız değil karar kalitesi kazandırır.",
       server:"SUNUCU OTORİTELİ",serverCopy:"Sonuç bir kez üretilir ve değiştirilemez.",
       deleteData:"ARENA VERİLERİMİ SİL",deleteConfirm:"Arena kulübün, derecen ve maç geçmişin kalıcı olarak silinecek. Devam edilsin mi?",
       you:"SEN",opponent:"RAKİP",goal:"GOL",cardEvent:"KART",tacticDecision:"TAKTİK KARARI",pass:"PAS",marketCard:"KART",
@@ -46,7 +46,7 @@
       ranked:"RANKED JOURNEY",play:"FIND A MATCH",back:"BACK TO COPA LIFE",loading:"LOADING ARENA",
       candidate:"CANDIDATE",bronze:"BRONZE",silver:"SILVER",gold:"GOLD",diamond:"DIAMOND",legend:"LEGEND",
       rating:"RATING",season:"SEASON TRACK",record:"CAREER",history:"RECENT MATCHES",leaderboard:"LEADERBOARD",
-      queue:"FINDING OPPONENT",queueCopy:"Looking for a live club near your level.",cancel:"CANCEL SEARCH",
+      queue:"FINDING OPPONENT",queueCopy:"Looking for a suitable club near your level.",cancel:"CANCEL SEARCH",
       ready:"I'M READY",waiting:"WAITING FOR OPPONENT",setup:"CLUB IDENTITY",draft:"BUILD YOUR XI",market:"FINAL TOUCH",
       training:"MATCH PLAN",live:"LIVE MATCH",result:"FULL TIME",formation:"FORMATION",style:"PLAY STYLE",
       chairman:"CHAIRMAN",budget:"CASH LEFT",chemistry:"CHEMISTRY",power:"POWER",choose:"CHOOSE",
@@ -54,7 +54,7 @@
       win:"VICTORY",loss:"DEFEAT",draw:"DRAW",forfeitWin:"FORFEIT VICTORY",forfeitLoss:"FORFEIT DEFEAT",voided:"VOID MATCH",voidedCopy:"Neither side made enough decisions, so rating and season progress were unchanged.",searchAgain:"NEW MATCH",
       consentTitle:"ENTER THE ARENA",consent:"Copa Arena is live and ranked. Your club name, scores and rating appear on the public table. There is no personal data or free chat.",
       accept:"ACCEPT AND ENTER",club:"ARENA CLUB NAME",network:"Arena service is unavailable.",empty:"No completed matches yet.",
-      authentic:"REAL OPPONENTS",noBots:"No bots or Ghost Clubs.",fair:"EQUIVALENT OFFERS",fairCopy:"Decision quality matters, not click speed.",
+      authentic:"FAST MATCHMAKING",noBots:"When needed, a system-managed club keeps the queue moving.",fair:"EQUIVALENT OFFERS",fairCopy:"Decision quality matters, not click speed.",
       server:"SERVER AUTHORITATIVE",serverCopy:"The result is generated once and cannot be rerolled.",
       deleteData:"DELETE MY ARENA DATA",deleteConfirm:"Your Arena club, rating and match history will be permanently deleted. Continue?",
       you:"YOU",opponent:"OPPONENT",goal:"GOAL",cardEvent:"CARD",tacticDecision:"TACTIC DECISION",pass:"PASS",marketCard:"CARD",
@@ -64,13 +64,13 @@
       rematch:"REQUEST REMATCH",rematchSent:"REMATCH REQUEST SENT",rematchIncoming:"OPPONENT WANTS A REMATCH",rematchStarting:"REMATCH STARTING"
     }
   };
-  COPY.es={...COPY.en,subtitle:"Construye tu club en directo, decide y sube en la tabla.",ranked:"CAMINO CLASIFICATORIO",play:"BUSCAR PARTIDA",back:"VOLVER A COPA LIFE",loading:"CARGANDO ARENA",rating:"PUNTUACIÓN",season:"RUTA DE TEMPORADA",record:"CARRERA",history:"ÚLTIMOS PARTIDOS",leaderboard:"CLASIFICACIÓN",queue:"BUSCANDO RIVAL",queueCopy:"Buscando un club real de nivel similar.",cancel:"CANCELAR BÚSQUEDA",ready:"ESTOY LISTO",waiting:"ESPERANDO AL RIVAL",setup:"IDENTIDAD DEL CLUB",draft:"CREA TU ONCE",market:"TOQUE FINAL",training:"PLAN DE PARTIDO",live:"PARTIDO EN VIVO",result:"FINAL",formation:"FORMACIÓN",style:"ESTILO DE JUEGO",chairman:"PRESIDENTE",budget:"CAJA RESTANTE",chemistry:"QUÍMICA",power:"FUERZA",choose:"ELEGIR",reconnecting:"RECONECTANDO",retry:"REINTENTAR",home:"CENTRO ARENA",win:"VICTORIA",loss:"DERROTA",draw:"EMPATE",searchAgain:"NUEVO PARTIDO",consentTitle:"ENTRAR EN LA ARENA",consent:"Copa Arena es un modo en vivo y clasificatorio. El nombre del club, los resultados y la puntuación aparecen en la tabla pública. No hay datos personales ni chat libre.",accept:"ACEPTAR Y ENTRAR",club:"NOMBRE DEL CLUB ARENA",network:"No se puede acceder al servicio Arena.",empty:"Aún no hay partidos completados.",authentic:"RIVALES REALES",noBots:"Sin bots ni Ghost Clubs.",fair:"OFERTAS EQUIVALENTES",fairCopy:"Decide mejor, no más rápido.",server:"SERVIDOR AUTORITATIVO",serverCopy:"El resultado se genera una vez y no puede repetirse.",deleteData:"BORRAR MIS DATOS DE ARENA",deleteConfirm:"Tu club Arena, puntuación e historial se borrarán de forma permanente. ¿Continuar?",you:"TÚ",opponent:"RIVAL",goal:"GOL",cardEvent:"TARJETA",tacticDecision:"DECISIÓN TÁCTICA",pass:"PASAR",marketCard:"CARTA"};
-  COPY.de={...COPY.en,subtitle:"Baue deinen Club live auf, entscheide und steige auf.",ranked:"RANGLISTENREISE",play:"MATCH FINDEN",back:"ZURÜCK ZU COPA LIFE",loading:"ARENA LÄDT",rating:"WERTUNG",season:"SAISONPFAD",record:"KARRIERE",history:"LETZTE SPIELE",leaderboard:"RANGLISTE",queue:"GEGNER WIRD GESUCHT",queueCopy:"Ein echter Club auf ähnlichem Niveau wird gesucht.",cancel:"SUCHE ABBRECHEN",ready:"BEREIT",waiting:"WARTE AUF GEGNER",setup:"CLUBIDENTITÄT",draft:"BAUE DEINE ELF",market:"LETZTER SCHLIFF",training:"SPIELPLAN",live:"LIVE-SPIEL",result:"ABPFIFF",formation:"FORMATION",style:"SPIELSTIL",chairman:"PRÄSIDENT",budget:"RESTBUDGET",chemistry:"CHEMIE",power:"STÄRKE",choose:"WÄHLEN",reconnecting:"VERBINDUNG WIRD WIEDERHERGESTELLT",retry:"ERNEUT VERSUCHEN",home:"ARENA-ZENTRALE",win:"SIEG",loss:"NIEDERLAGE",draw:"UNENTSCHIEDEN",searchAgain:"NEUES MATCH",consentTitle:"ARENA BETRETEN",consent:"Copa Arena ist live und gewertet. Clubname, Ergebnisse und Wertung erscheinen öffentlich. Es gibt keine persönlichen Daten und keinen freien Chat.",accept:"AKZEPTIEREN UND STARTEN",club:"ARENA-CLUBNAME",network:"Arena-Dienst ist nicht erreichbar.",empty:"Noch keine abgeschlossenen Spiele.",authentic:"ECHTE GEGNER",noBots:"Keine Bots oder Ghost Clubs.",fair:"GLEICHWERTIGE ANGEBOTE",fairCopy:"Entscheidungsqualität zählt, nicht Tempo.",server:"SERVER-AUTORITATIV",serverCopy:"Das Ergebnis wird einmal erzeugt und kann nicht neu gewürfelt werden.",deleteData:"MEINE ARENA-DATEN LÖSCHEN",deleteConfirm:"Arena-Club, Wertung und Verlauf werden dauerhaft gelöscht. Fortfahren?",you:"DU",opponent:"GEGNER",goal:"TOR",cardEvent:"KARTE",tacticDecision:"TAKTISCHE ENTSCHEIDUNG",pass:"AUSLASSEN",marketCard:"KARTE"};
-  COPY.it={...COPY.en,subtitle:"Costruisci il club dal vivo, scegli e scala la classifica.",ranked:"VIAGGIO CLASSIFICATO",play:"TROVA PARTITA",back:"TORNA A COPA LIFE",loading:"CARICAMENTO ARENA",rating:"PUNTEGGIO",season:"PERCORSO STAGIONE",record:"CARRIERA",history:"ULTIME PARTITE",leaderboard:"CLASSIFICA",queue:"RICERCA AVVERSARIO",queueCopy:"Cerchiamo un club reale di livello simile.",cancel:"ANNULLA RICERCA",ready:"SONO PRONTO",waiting:"IN ATTESA DELL'AVVERSARIO",setup:"IDENTITÀ DEL CLUB",draft:"CREA L'UNDICI",market:"TOCCO FINALE",training:"PIANO PARTITA",live:"PARTITA LIVE",result:"FINE PARTITA",formation:"MODULO",style:"STILE DI GIOCO",chairman:"PRESIDENTE",budget:"CASSA RESTANTE",chemistry:"INTESA",power:"FORZA",choose:"SCEGLI",reconnecting:"RICONNESSIONE",retry:"RIPROVA",home:"CENTRO ARENA",win:"VITTORIA",loss:"SCONFITTA",draw:"PAREGGIO",searchAgain:"NUOVA PARTITA",consentTitle:"ENTRA NELL'ARENA",consent:"Copa Arena è una modalità live e classificata. Nome del club, risultati e punteggio compaiono nella classifica pubblica. Non ci sono dati personali né chat libera.",accept:"ACCETTA ED ENTRA",club:"NOME CLUB ARENA",network:"Servizio Arena non disponibile.",empty:"Nessuna partita completata.",authentic:"AVVERSARI REALI",noBots:"Niente bot o Ghost Club.",fair:"OFFERTE EQUIVALENTI",fairCopy:"Conta la qualità delle scelte, non la velocità.",server:"SERVER AUTORITATIVO",serverCopy:"Il risultato viene generato una volta e non può essere rilanciato.",deleteData:"ELIMINA I MIEI DATI ARENA",deleteConfirm:"Club Arena, punteggio e cronologia verranno eliminati definitivamente. Continuare?",you:"TU",opponent:"AVVERSARIO",goal:"GOL",cardEvent:"CARTELLINO",tacticDecision:"DECISIONE TATTICA",pass:"PASSA",marketCard:"CARTA"};
-  Object.assign(COPY.es,{multiplayer:"MULTIJUGADOR",forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron."});
-  Object.assign(COPY.de,{multiplayer:"MEHRSPIELER",forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert."});
-  Object.assign(COPY.it,{multiplayer:"MULTIGIOCATORE",forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false};
+  COPY.es={...COPY.en,subtitle:"Construye tu club en directo, decide y sube en la tabla.",ranked:"CAMINO CLASIFICATORIO",play:"BUSCAR PARTIDA",back:"VOLVER A COPA LIFE",loading:"CARGANDO ARENA",rating:"PUNTUACIÓN",season:"RUTA DE TEMPORADA",record:"CARRERA",history:"ÚLTIMOS PARTIDOS",leaderboard:"CLASIFICACIÓN",queue:"BUSCANDO RIVAL",queueCopy:"Buscando un club adecuado de nivel similar.",cancel:"CANCELAR BÚSQUEDA",ready:"ESTOY LISTO",waiting:"ESPERANDO AL RIVAL",setup:"IDENTIDAD DEL CLUB",draft:"CREA TU ONCE",market:"TOQUE FINAL",training:"PLAN DE PARTIDO",live:"PARTIDO EN VIVO",result:"FINAL",formation:"FORMACIÓN",style:"ESTILO DE JUEGO",chairman:"PRESIDENTE",budget:"CAJA RESTANTE",chemistry:"QUÍMICA",power:"FUERZA",choose:"ELEGIR",reconnecting:"RECONECTANDO",retry:"REINTENTAR",home:"CENTRO ARENA",win:"VICTORIA",loss:"DERROTA",draw:"EMPATE",searchAgain:"NUEVO PARTIDO",consentTitle:"ENTRAR EN LA ARENA",consent:"Copa Arena es un modo en vivo y clasificatorio. El nombre del club, los resultados y la puntuación aparecen en la tabla pública. No hay datos personales ni chat libre.",accept:"ACEPTAR Y ENTRAR",club:"NOMBRE DEL CLUB ARENA",network:"No se puede acceder al servicio Arena.",empty:"Aún no hay partidos completados.",authentic:"EMPAREJAMIENTO RÁPIDO",noBots:"Si hace falta, un club gestionado por el sistema mantiene activa la cola.",fair:"OFERTAS EQUIVALENTES",fairCopy:"Decide mejor, no más rápido.",server:"SERVIDOR AUTORITATIVO",serverCopy:"El resultado se genera una vez y no puede repetirse.",deleteData:"BORRAR MIS DATOS DE ARENA",deleteConfirm:"Tu club Arena, puntuación e historial se borrarán de forma permanente. ¿Continuar?",you:"TÚ",opponent:"RIVAL",goal:"GOL",cardEvent:"TARJETA",tacticDecision:"DECISIÓN TÁCTICA",pass:"PASAR",marketCard:"CARTA"};
+  COPY.de={...COPY.en,subtitle:"Baue deinen Club live auf, entscheide und steige auf.",ranked:"RANGLISTENREISE",play:"MATCH FINDEN",back:"ZURÜCK ZU COPA LIFE",loading:"ARENA LÄDT",rating:"WERTUNG",season:"SAISONPFAD",record:"KARRIERE",history:"LETZTE SPIELE",leaderboard:"RANGLISTE",queue:"GEGNER WIRD GESUCHT",queueCopy:"Ein passender Club mit ähnlicher Wertung wird gesucht.",cancel:"SUCHE ABBRECHEN",ready:"BEREIT",waiting:"WARTE AUF GEGNER",setup:"CLUBIDENTITÄT",draft:"BAUE DEINE ELF",market:"LETZTER SCHLIFF",training:"SPIELPLAN",live:"LIVE-SPIEL",result:"ABPFIFF",formation:"FORMATION",style:"SPIELSTIL",chairman:"PRÄSIDENT",budget:"RESTBUDGET",chemistry:"CHEMIE",power:"STÄRKE",choose:"WÄHLEN",reconnecting:"VERBINDUNG WIRD WIEDERHERGESTELLT",retry:"ERNEUT VERSUCHEN",home:"ARENA-ZENTRALE",win:"SIEG",loss:"NIEDERLAGE",draw:"UNENTSCHIEDEN",searchAgain:"NEUES MATCH",consentTitle:"ARENA BETRETEN",consent:"Copa Arena ist live und gewertet. Clubname, Ergebnisse und Wertung erscheinen öffentlich. Es gibt keine persönlichen Daten und keinen freien Chat.",accept:"AKZEPTIEREN UND STARTEN",club:"ARENA-CLUBNAME",network:"Arena-Dienst ist nicht erreichbar.",empty:"Noch keine abgeschlossenen Spiele.",authentic:"SCHNELLES MATCHMAKING",noBots:"Bei Bedarf hält ein systemverwalteter Club die Warteschlange in Bewegung.",fair:"GLEICHWERTIGE ANGEBOTE",fairCopy:"Entscheidungsqualität zählt, nicht Tempo.",server:"SERVER-AUTORITATIV",serverCopy:"Das Ergebnis wird einmal erzeugt und kann nicht neu gewürfelt werden.",deleteData:"MEINE ARENA-DATEN LÖSCHEN",deleteConfirm:"Arena-Club, Wertung und Verlauf werden dauerhaft gelöscht. Fortfahren?",you:"DU",opponent:"GEGNER",goal:"TOR",cardEvent:"KARTE",tacticDecision:"TAKTISCHE ENTSCHEIDUNG",pass:"AUSLASSEN",marketCard:"KARTE"};
+  COPY.it={...COPY.en,subtitle:"Costruisci il club dal vivo, scegli e scala la classifica.",ranked:"VIAGGIO CLASSIFICATO",play:"TROVA PARTITA",back:"TORNA A COPA LIFE",loading:"CARICAMENTO ARENA",rating:"PUNTEGGIO",season:"PERCORSO STAGIONE",record:"CARRIERA",history:"ULTIME PARTITE",leaderboard:"CLASSIFICA",queue:"RICERCA AVVERSARIO",queueCopy:"Cerchiamo un club adatto di livello simile.",cancel:"ANNULLA RICERCA",ready:"SONO PRONTO",waiting:"IN ATTESA DELL'AVVERSARIO",setup:"IDENTITÀ DEL CLUB",draft:"CREA L'UNDICI",market:"TOCCO FINALE",training:"PIANO PARTITA",live:"PARTITA LIVE",result:"FINE PARTITA",formation:"MODULO",style:"STILE DI GIOCO",chairman:"PRESIDENTE",budget:"CASSA RESTANTE",chemistry:"INTESA",power:"FORZA",choose:"SCEGLI",reconnecting:"RICONNESSIONE",retry:"RIPROVA",home:"CENTRO ARENA",win:"VITTORIA",loss:"SCONFITTA",draw:"PAREGGIO",searchAgain:"NUOVA PARTITA",consentTitle:"ENTRA NELL'ARENA",consent:"Copa Arena è una modalità live e classificata. Nome del club, risultati e punteggio compaiono nella classifica pubblica. Non ci sono dati personali né chat libera.",accept:"ACCETTA ED ENTRA",club:"NOME CLUB ARENA",network:"Servizio Arena non disponibile.",empty:"Nessuna partita completata.",authentic:"MATCHMAKING RAPIDO",noBots:"Se serve, un club gestito dal sistema mantiene attiva la coda.",fair:"OFFERTE EQUIVALENTI",fairCopy:"Conta la qualità delle scelte, non la velocità.",server:"SERVER AUTORITATIVO",serverCopy:"Il risultato viene generato una volta e non può essere rilanciato.",deleteData:"ELIMINA I MIEI DATI ARENA",deleteConfirm:"Club Arena, punteggio e cronologia verranno eliminati definitivamente. Continuare?",you:"TU",opponent:"AVVERSARIO",goal:"GOL",cardEvent:"CARTELLINO",tacticDecision:"DECISIONE TATTICA",pass:"PASSA",marketCard:"CARTA"};
+  Object.assign(COPY.es,{multiplayer:"MULTIJUGADOR",queueCopy:"Buscando un club adecuado de nivel similar.",authentic:"EMPAREJAMIENTO RÁPIDO",noBots:"Si hace falta, un club gestionado por el sistema mantiene activa la cola.",forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron.",rematch:"PEDIR REVANCHA",rematchSent:"SOLICITUD DE REVANCHA ENVIADA",rematchIncoming:"EL RIVAL QUIERE LA REVANCHA",rematchStarting:"COMIENZA LA REVANCHA"});
+  Object.assign(COPY.de,{multiplayer:"MEHRSPIELER",queueCopy:"Ein passender Club mit ähnlicher Wertung wird gesucht.",authentic:"SCHNELLES MATCHMAKING",noBots:"Bei Bedarf hält ein systemverwalteter Club die Warteschlange in Bewegung.",forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert.",rematch:"REVANCHE ANFRAGEN",rematchSent:"REVANCHE ANGEFRAGT",rematchIncoming:"GEGNER WILL EINE REVANCHE",rematchStarting:"REVANCHE STARTET"});
+  Object.assign(COPY.it,{multiplayer:"MULTIGIOCATORE",queueCopy:"Cerchiamo un club adatto di livello simile.",authentic:"MATCHMAKING RAPIDO",noBots:"Se serve, un club gestito dal sistema mantiene attiva la coda.",forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati.",rematch:"CHIEDI RIVINCITA",rematchSent:"RICHIESTA DI RIVINCITA INVIATA",rematchIncoming:"L'AVVERSARIO VUOLE LA RIVINCITA",rematchStarting:"INIZIA LA RIVINCITA"});
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false,searchAudio:null,searchFadeTimer:null,lastArenaAdMatchId:""};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -94,6 +94,26 @@
     if(kind==="win"&&root.sfxJingle)return root.sfxJingle();
     const context=root.ac&&root.ac(),tone=({open:[260,.12],queue:[330,.16],match:[523,.3],pick:[410,.09],emote:[620,.13],error:[80,.16]}[kind]||[410,.09]);
     if(context&&root.click)root.click(context,context.currentTime,tone[0],.05,tone[1]);
+  }
+  const musicEnabled=()=>get("copa_music","0")==="1";
+  function startSearchMusic(){
+    stopSearchMusic(false);
+    if(!musicEnabled())return false;
+    try{
+      const audio=new Audio("assets/audio/ui/searching-opponent.ogg?v=20260730-arena-search1");
+      audio.preload="auto";audio.loop=true;audio.volume=.26;state.searchAudio=audio;
+      audio.play().catch(()=>{if(state.searchAudio===audio)state.searchAudio=null;});
+      return true;
+    }catch(_){return false;}
+  }
+  function stopSearchMusic(reward=false){
+    clearInterval(state.searchFadeTimer);state.searchFadeTimer=null;
+    const audio=state.searchAudio;state.searchAudio=null;
+    if(audio){
+      const start=Number(audio.volume)||.26,steps=7;let step=0;
+      state.searchFadeTimer=setInterval(()=>{step++;audio.volume=Math.max(0,start*(1-step/steps));if(step>=steps){clearInterval(state.searchFadeTimer);state.searchFadeTimer=null;audio.pause();audio.removeAttribute("src");audio.load();}},35);
+    }
+    if(reward){if(root.sfxArenaFound)root.sfxArenaFound();else sfx("match");}
   }
   function penaltySfx(outcome){
     if(root.sfxArena&&root.sfxArena(outcome)){state.lastAudioCue=`penalty:${outcome}`;state.audioCueCount++;}
@@ -168,6 +188,7 @@
   function mountGoogleButton(){
     const slot=rootEl().querySelector("[data-google-slot]");if(!slot||nativePlatform()||state.googleUser)return;
     const clientId=googleClientId();if(!clientId||clientId.startsWith("__")){slot.innerHTML=`<button type="button" class="arena-google-button is-unconfigured" disabled>${esc(text("googleConfig"))}</button>`;return;}
+    slot.innerHTML=`<button type="button" class="arena-google-button is-loading" disabled aria-busy="true"><i>G</i>${esc(text("googleContinue"))}</button>`;
     const mount=()=>{
       if(!root.google||!google.accounts||!google.accounts.id)return;
       google.accounts.id.initialize({client_id:clientId,callback:response=>finishGoogleSignIn(response.credential)});
@@ -198,7 +219,8 @@
       search:"<circle cx='11' cy='11' r='6'/><path d='m16 16 5 5M8 11h6M11 8v6'/>",
       shield:"<path d='M12 2 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6z'/><path d='m8 12 2.4 2.4L16 9'/>",
       rank:"<path d='M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7'/>",
-      ball:"<circle cx='12' cy='12' r='9'/><path d='m12 7 3 2-1 4h-4L9 9zM12 7V3M15 9l4-1M14 13l3 4M10 13l-3 4M9 9 5 8'/>"
+      ball:"<circle cx='12' cy='12' r='9'/><path d='m12 7 3 2-1 4h-4L9 9zM12 7V3M15 9l4-1M14 13l3 4M10 13l-3 4M9 9 5 8'/>",
+      settings:"<path d='M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z'/><circle cx='12' cy='12' r='3'/>"
     };
     return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.arena}</svg>`;
   }
@@ -207,7 +229,8 @@
     const quality=state.latency==null?"":state.latency<180?"good":state.latency<450?"fair":"poor";
     const status=isLive?`LIVE${state.latency==null?"":` · ${state.latency}ms`}`:quality?`${text("network"+quality[0].toUpperCase()+quality.slice(1))} ${state.latency}ms`:local("ÇEVRİMİÇİ","ONLINE");
     const reconnect=state.connection==="reconnecting"?`<div class="arena-reconnect-banner" role="status"><i></i><span><b>${esc(text("reconnecting"))}</b><small data-arena-reconnect-countdown>${Math.max(1,Math.ceil((state.reconnectAt-Date.now())/1000))}s</small></span></div>`:"";
-    return `<div class="arena-backdrop" aria-hidden="true"><i></i><i></i><i></i></div><header class="arena-topbar"><button type="button" data-arena-action="close" aria-label="${esc(text("back"))}">←</button><div><span>${esc(kicker)}</span><b>COPA <em>ARENA</em></b></div><div class="arena-live-mark ${isLive?"is-live":"is-online"} is-${quality||"unknown"}"><i></i> ${esc(status)}</div></header>${reconnect}<div class="arena-content">${content}</div>`;
+    const settingsLabel=({tr:"Ayarlar",en:"Settings",es:"Ajustes",de:"Einstellungen",it:"Impostazioni"}[root.LANG]||"Settings");
+    return `<div class="arena-backdrop" aria-hidden="true"><i></i><i></i><i></i></div><header class="arena-topbar"><button type="button" data-arena-action="close" aria-label="${esc(text("back"))}">←</button><div><span>${esc(kicker)}</span><b>COPA <em>ARENA</em></b></div><div class="arena-topbar-actions"><div class="arena-live-mark ${isLive?"is-live":"is-online"} is-${quality||"unknown"}"><i></i> ${esc(status)}</div><button type="button" class="arena-settings-button global-settings-proxy" onclick="event.stopPropagation();toggleSettings(this)" title="${esc(settingsLabel)}" aria-label="${esc(settingsLabel)}" aria-haspopup="true">${icon("settings")}</button></div></header>${reconnect}<div class="arena-content">${content}</div>`;
   }
   function terms(){
     const user=state.googleUser;
@@ -574,7 +597,7 @@
   }
   async function startQueue(mode="ranked"){
     if(!navigator.onLine){state.lastError="offline";setScreen("error");return;}
-    disconnect(false);setScreen("loading");
+    disconnect(false);if(mode==="ranked")startSearchMusic();setScreen("loading");
     try{
       const data=await request("/v1/arena/session",{method:"POST",body:JSON.stringify({clubName:clubName(),mode,region:"weur"})});
       if(data.recoverMatch){
@@ -587,20 +610,20 @@
       }
       state.profile=data.profile;state.queueStarted=Date.now();setScreen("queue");telemetry("arena_queue_joined","weur",data.profile.rating);sfx("queue");
       connectQueue(data.ticket);
-    }catch(error){state.lastError=error.message;setScreen("error");sfx("error");}
+    }catch(error){stopSearchMusic(false);state.lastError=error.message;setScreen("error");sfx("error");}
   }
   function connectQueue(ticket){
     const socket=new WebSocket(`${wsBase()}/v1/arena/connect?ticket=${encodeURIComponent(ticket)}`);state.socket=socket;
     socket.addEventListener("message",event=>{
       let data;try{data=JSON.parse(event.data);}catch(_){return;}
       if(data.type==="matched"){
-        sfx("match");telemetry("arena_matched","ranked",Math.round((Date.now()-state.queueStarted)/1000));
+        stopSearchMusic(true);telemetry("arena_matched","ranked",Math.round((Date.now()-state.queueStarted)/1000));
         const saved={matchId:data.matchId,token:data.roomToken};set(ROOM_KEY,JSON.stringify(saved));socket.close(1000,"matched");connectRoom(saved);
       }
-      if(data.type==="error"){state.lastError=data.code||"queue_error";setScreen("error");}
+      if(data.type==="error"){stopSearchMusic(false);state.lastError=data.code||"queue_error";setScreen("error");}
     });
-    socket.addEventListener("close",event=>{if(state.screen==="queue"&&event.code!==1000){state.lastError="queue_disconnected";setScreen("error");}});
-    socket.addEventListener("error",()=>{if(state.screen==="queue"){state.lastError="queue_connection";setScreen("error");}});
+    socket.addEventListener("close",event=>{if(state.screen==="queue"&&event.code!==1000){stopSearchMusic(false);state.lastError="queue_disconnected";setScreen("error");}});
+    socket.addEventListener("error",()=>{if(state.screen==="queue"){stopSearchMusic(false);state.lastError="queue_connection";setScreen("error");}});
   }
   function connectRoom(saved){
     state.screen="room";if(!state.room)state.room=null;state.connection=state.retries?"reconnecting":"connecting";render();
@@ -622,6 +645,11 @@
           const settled=data.state.result&&data.state.result.profiles&&data.state.result.profiles[data.state.selfIndex];
           if(settled)state.profile=settled;
           remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":data.state.result.outcomes[data.state.selfIndex]);
+          const matchId=data.state.matchId||saved.matchId;
+          if(data.state.mode!=="practice"&&matchId&&state.lastArenaAdMatchId!==matchId){
+            state.lastArenaAdMatchId=matchId;
+            setTimeout(()=>{if(root.CopaNativeAds&&typeof root.CopaNativeAds.showArenaEnd==="function")root.CopaNativeAds.showArenaEnd(matchId).catch(()=>{});},650);
+          }
         }
       }
       if(data.type==="rematch"){
@@ -666,6 +694,7 @@
     stopArenaClock();
     clearTimeout(state.retryTimer);state.retryTimer=null;state.connection="idle";state.reconnectAt=0;
     clearTimeout(state.emoteCooldownTimer);state.emoteCooldownTimer=null;state.emoteMenu=false;state.emoteReadyAt=0;
+    if(state.screen==="queue"||cancel)stopSearchMusic(false);
     if(state.socket){if(cancel&&state.screen==="queue"&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"cancel"}));try{state.socket.close(1000,"client");}catch(_){}state.socket=null;}
   }
   function send(payload){

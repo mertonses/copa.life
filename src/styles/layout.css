@@ -7126,3 +7126,4 @@ body.reduced-motion .tactical-board-clock b,body.reduced-motion .tactical-attack
   }
   #hub .pitch-area #hubBenchSection .bench-panel-grip{display:none}
 }
+.settingsdrop.global-settings-open{position:fixed!important;z-index:2147483646!important;left:var(--settings-left)!important;right:auto!important;top:var(--settings-top)!important;max-height:min(620px,calc(100dvh - var(--settings-top) - 10px));overflow:auto;overscroll-behavior:contain}

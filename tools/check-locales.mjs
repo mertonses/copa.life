@@ -117,6 +117,9 @@ const seasonSource=fs.readFileSync(new URL("../src/ui/seasonStats.js",import.met
 const lastMatchSource=fs.readFileSync(new URL("../src/ui/lastMatchReport.js",import.meta.url),"utf8");
 const fixtureRoadSource=fs.readFileSync(new URL("../src/ui/fixtureRoad.js",import.meta.url),"utf8");
 const tournamentSource=fs.readFileSync(new URL("../src/tournament/tournamentRuntime.js",import.meta.url),"utf8");
+const arenaSource=fs.readFileSync(new URL("../src/online/arena.js",import.meta.url),"utf8");
+const modeGateSource=fs.readFileSync(new URL("../src/ui/modeGate.js",import.meta.url),"utf8");
+const indexSource=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8");
 const tournamentWindow={LANG:"en"};tournamentWindow.window=tournamentWindow;
 const tournamentContext={window:tournamentWindow};vm.createContext(tournamentContext);vm.runInContext(tournamentSource,tournamentContext);
 const tournamentKeys=["ceremony","drawTitle","drawRule","tournament","team","played","wins","draws","losses","gd","points","groupMatchday","topTwo","allGroups","knockoutRule","roundof16","quarterfinal","semifinal","final","groupEliminated","drawPoint","winPoints","lossPoints"];
@@ -145,6 +148,25 @@ for(const requiredStage of ["SON 16","ROUND OF 16","OCTAVOS","ACHTELFINALE","OTT
   if(!lastMatchSource.includes(requiredStage)&&!fixtureRoadSource.includes(requiredStage))errors.push(`round-of-16 stage is missing from match UI: ${requiredStage}`);
 }
 if(!fixtureRoadSource.includes('Group · Match 1'))errors.push("fixture road fallback is missing the first group match");
+
+const multiplayerLabels={
+  tr:"ÇOK OYUNCULU",
+  en:"MULTIPLAYER",
+  es:"MULTIJUGADOR",
+  de:"MEHRSPIELER",
+  it:"MULTIGIOCATORE"
+};
+for(const [language,label] of Object.entries(multiplayerLabels)){
+  if(!modeGateSource.includes(`multiplayer:"${label}"`))errors.push(`mode gate ${language}.multiplayer must be "${label}"`);
+  if(!arenaSource.includes(`multiplayer:"${label}"`))errors.push(`Arena ${language}.multiplayer must be "${label}"`);
+}
+for(const [sourceName,sourceText] of [["index.html",indexSource],["mode gate",modeGateSource],["Arena",arenaSource]]){
+  if(/PREMIUM\s+MULTIPLAYER/i.test(sourceText))errors.push(`${sourceName} still contains PREMIUM MULTIPLAYER`);
+}
+for(const sourceName of ["src/ui/modeGate.js","src/online/arena.js"]){
+  const sourceText=sourceName.includes("modeGate")?modeGateSource:arenaSource;
+  for(const language of required)if(!sourceText.includes(`${language}:`))errors.push(`${sourceName} is missing ${language} copy`);
+}
 
 if(errors.length){
   console.error("Locale check failed:\n- "+errors.join("\n- "));

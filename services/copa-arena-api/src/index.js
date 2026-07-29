@@ -6,6 +6,7 @@ import {
   normalizeMatchPlan,resolveLiveSegment,resolvePenalty,resolvePenaltyKick,resolveWindow,rewardFor,seasonKey,teamSnapshot,usesFullXI,validateSetup
 } from "./rules.js";
 import {ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_SOURCES} from "./playerCatalog.js";
+import {botDecisionDelay,botWaitMs,createBotIdentity} from "./botIdentity.js";
 
 const MAX_BODY_BYTES=16*1024;
 const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","capacitor://localhost"];
@@ -195,7 +196,6 @@ export class ArenaMatchmaker extends DurableObject{
   }
   async pair(){
     const rows=this.ctx.storage.sql.exec("SELECT * FROM queue WHERE status='queued' ORDER BY joined_at ASC").toArray();
-    if(rows.length<2)return;
     const sockets=this.sockets(),used=new Set();
     const recentByOwner=Object.fromEntries(this.ctx.storage.sql.exec("SELECT owner,recent_json FROM queue_recent").toArray().map(row=>{
       let recent=[];try{recent=JSON.parse(row.recent_json);}catch(_){}
@@ -207,7 +207,10 @@ export class ArenaMatchmaker extends DurableObject{
       const range=100+Math.floor(waited/15_000)*75;
       const candidates=rows.filter(row=>row.owner!==home.owner&&!used.has(row.owner)&&sockets.has(row.socket_id)&&Math.abs(Number(row.rating)-Number(home.rating))<=range);
       const away=chooseMatchCandidate(home,candidates,recentByOwner);
-      if(!away)continue;
+      if(!away){
+        if(waited>=botWaitMs(home.owner))await this.pairWithBot(home,sockets.get(home.socket_id));
+        continue;
+      }
       used.add(home.owner);used.add(away.owner);
       this.ctx.storage.sql.exec("UPDATE queue SET status='matching' WHERE owner IN (?,?)",home.owner,away.owner);
       const matchId=randomId("AR-",12),seed=randomId("",16);
@@ -236,6 +239,30 @@ export class ArenaMatchmaker extends DurableObject{
         }
         console.error("arena_pair_failed",error);
       }
+    }
+  }
+  async pairWithBot(home,socket){
+    if(!socket)return false;
+    const seed=randomId("",16),bot=createBotIdentity(`${home.owner}|${home.joined_at}|${seed}`,Number(home.rating));
+    const matchId=randomId("AR-",12);
+    this.ctx.storage.sql.exec("UPDATE queue SET status='matching' WHERE owner=?",home.owner);
+    try{
+      const room=this.env.ARENA_ROOM.getByName(matchId);
+      const access=await room.init(matchId,[
+        {owner:home.owner,clubName:home.club_name,rating:Number(home.rating)},
+        {owner:bot.owner,clubName:bot.clubName,rating:bot.rating}
+      ],seed,{mode:"ranked",botIndex:1,botProfile:bot.personality});
+      await this.env.DB.prepare("UPDATE arena_presence SET status='match',match_id=?,expires_at=?,updated_at=? WHERE owner_hash=?")
+        .bind(matchId,futureIso(45*60_000),nowIso(),home.owner).run();
+      this.ctx.storage.sql.exec("DELETE FROM queue WHERE owner=?",home.owner);
+      this.ctx.storage.sql.exec("DELETE FROM queue_recent WHERE owner=?",home.owner);
+      socket.send(JSON.stringify({type:"matched",matchId,roomToken:access[home.owner]}));
+      metric(this.env,"arena_bot_match","low_population",Math.round((Date.now()-Number(home.joined_at))/1000));
+      return true;
+    }catch(error){
+      this.ctx.storage.sql.exec("UPDATE queue SET status='queued' WHERE owner=?",home.owner);
+      try{socket.send(JSON.stringify({type:"error",code:"match_creation_failed"}));}catch(_){}
+      console.error("arena_bot_pair_failed",error);return false;
     }
   }
   async alarm(){
@@ -292,13 +319,13 @@ export class ArenaRoom extends DurableObject{
     const access=Object.fromEntries(players.map(player=>[player.owner,randomId("RT-",24)]));
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
-      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:options.mode==="practice"?Number(options.botIndex??1):-1,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
+      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
       players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
     if(this.state.botIndex>=0)this.state.players[this.state.botIndex].connected=true;
-    this.persist();await this.ctx.storage.setAlarm(this.state.deadline);
+    this.scheduleBotDecision();this.persist();await this.armAlarm();
     return access;
   }
   accessFor(owner){
@@ -388,6 +415,76 @@ export class ArenaRoom extends DurableObject{
       this.state.penalty.choices[index]=PENALTY_ZONES[hashSeed(`${this.state.seed}|penalty-default|${this.state.penalty.kick}|${index}`)%PENALTY_ZONES.length];
     }
   }
+  botRoll(label){
+    return (hashSeed(`${this.state.seed}|bot|${this.state.botProfile&&this.state.botProfile.seed||this.state.botIndex}|${label}`)%10_000)/10_000;
+  }
+  botPick(items,label,score){
+    if(!items.length)return null;
+    return [...items].map((item,index)=>({item,value:Number(score(item,index))||0,jitter:this.botRoll(`${label}|${item.id||item}|${index}`)}))
+      .sort((a,b)=>(b.value+b.jitter*4)-(a.value+a.jitter*4))[0].item;
+  }
+  botAction(index){
+    const player=this.state.players[index],profile=this.state.botProfile||{risk:.5,thrift:.5,flair:.5,press:.5,patience:.5};
+    if(this.state.phase==="lobby")player.ready=true;
+    else if(this.state.phase==="setup"){
+      const formations=Object.keys(FORMATIONS),styles=Object.keys(STYLES);
+      player.setup={
+        formation:formations[Math.floor(this.botRoll("formation")*formations.length)%formations.length],
+        style:styles[Math.floor(this.botRoll("style")*styles.length)%styles.length],
+        chairman:"babacan"
+      };
+    }else if(this.state.phase==="draft"){
+      const offers=this.state.offers[index]||[],affordable=offers.filter(item=>item.cost<=this.draftChoiceBudget(player,index));
+      const choice=this.botPick(affordable,`draft-${this.state.draftStep}`,item=>
+        item.power*0.72+item.chemistry*(1.2+profile.flair)+Math.max(0,this.remainingBudget(player)-item.cost)*profile.thrift*.22-item.cost*(.18+profile.thrift*.28)
+      );
+      if(!choice)throw new Error("arena_bot_draft_budget_invariant");
+      player.draft.push(choice);
+    }else if(this.state.phase==="market"){
+      const offers=(this.state.offers[index]||[]).filter(item=>item.cost<=this.remainingBudget(player));
+      const choice=this.botPick(offers,`market-${this.state.draftStep}`,item=>{
+        const preview=teamSnapshot({...player,market:{id:item.id}},this.state.rulesVersion);
+        return (preview&&preview.power||0)*(1-profile.thrift*.28)+(preview&&preview.chemistry||0)*profile.flair-item.cost*profile.thrift*1.8;
+      });
+      player.market={id:choice&&choice.id||"none"};
+    }else if(this.state.phase==="training"){
+      const focuses=["finishing","shape","chemistry","recovery"],scenarios=["adaptive","protect","brave"];
+      const focus=profile.risk>.72?"finishing":profile.flair>.68?"chemistry":profile.patience>.64?"shape":focuses[Math.floor(this.botRoll("focus")*focuses.length)];
+      const scenario=profile.risk>.66?"brave":profile.patience>.7?"protect":scenarios[Math.floor(this.botRoll("scenario")*scenarios.length)];
+      player.training={focus,scenario};
+    }else if(this.state.phase==="live"&&(this.state.liveStage||"decision")==="decision"){
+      const margin=this.state.score[index]-this.state.score[index===0?1:0];
+      const weights=margin<0?["press","control","balanced","counter"]:margin>0?["counter","balanced","control","press"]:["balanced","press","counter","control"];
+      const offset=Math.floor(this.botRoll(`tactic-${this.state.window}`)*weights.length);
+      player.tactics.push(weights[(offset+Math.round(profile.risk*2))%weights.length]);
+    }else if(this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]){
+      const zones=[...PENALTY_ZONES],choice=zones[Math.floor(this.botRoll(`penalty-${this.state.penalty.kick}`)*zones.length)%zones.length];
+      this.state.penalty.choices[index]=choice;
+    }
+    player.manualDecisions=(Number(player.manualDecisions)||0)+1;
+    if(this.state.phase==="live")player.manualTactics=(Number(player.manualTactics)||0)+1;
+    this.state.botDueAt=0;
+  }
+  botPending(){
+    const index=this.state.botIndex;if(index<0)return false;
+    const player=this.state.players[index];
+    return (this.state.phase==="lobby"&&!player.ready)||
+      (this.state.phase==="setup"&&!player.setup)||
+      (this.state.phase==="draft"&&player.draft.length<=this.state.draftStep)||
+      (this.state.phase==="market"&&!player.market)||
+      (this.state.phase==="training"&&!player.training)||
+      (this.state.phase==="live"&&(this.state.liveStage||"decision")==="decision"&&player.tactics.length<=this.state.window)||
+      (this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]);
+  }
+  scheduleBotDecision(){
+    if(!this.botPending()){this.state.botDueAt=0;return;}
+    const step=this.state.phase==="draft"?this.state.draftStep:this.state.phase==="live"?this.state.window:this.state.penalty&&this.state.penalty.kick||0;
+    this.state.botDueAt=Date.now()+botDecisionDelay(this.state.seed,this.state.phase,step);
+  }
+  armAlarm(){
+    const candidates=[Number(this.state.deadline)||0,Number(this.state.botDueAt)||0,Number(this.state.botRematchDueAt)||0].filter(value=>value>Date.now());
+    return this.ctx.storage.setAlarm(candidates.length?Math.min(...candidates):Date.now()+1000);
+  }
   remainingBudget(player){
     const chair=CHAIRMEN[player.setup&&player.setup.chairman]||CHAIRMEN.babacan;
     return (this.usesFullXI()?44:20)+chair.budget-player.draft.reduce((sum,item)=>sum+Number(item.cost||0),0);
@@ -452,14 +549,14 @@ export class ArenaRoom extends DurableObject{
       penalty.history.push({...result,kick:penalty.kick,round:penalty.round,shooter});
       penalty.stage="reveal";
     }
-    this.setDeadline();this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
+    this.setDeadline();this.scheduleBotDecision();this.persist();await this.armAlarm();this.broadcast();
   }
   startPenalties(){
     const firstShooter=hashSeed(`${this.state.seed}|penalty-first`)%2;
     this.state.phase="penalty";
     this.state.penalty={stage:"choice",kick:0,round:1,turn:firstShooter,firstShooter,score:[0,0],kicks:[0,0],choices:[null,null],history:[]};
-    this.setDeadline();this.persist();
-    return this.ctx.storage.setAlarm(this.state.deadline).then(()=>this.broadcast());
+    this.setDeadline();this.scheduleBotDecision();this.persist();
+    return this.armAlarm().then(()=>this.broadcast());
   }
   penaltyComplete(){
     const penalty=this.state.penalty,[homeKicks,awayKicks]=penalty.kicks,[home,away]=penalty.score;
@@ -516,6 +613,7 @@ export class ArenaRoom extends DurableObject{
         this.state.resultRecorded=true;this.persist();metric(this.env,"practice_completed",outcomes[humanIndex],match.score[0]+match.score[1]);return true;
       }catch(error){operational(this.env,"arena_practice_finalize_failed",match.matchId,1,error);return false;}
     }
+    if(match.botIndex>=0)return this.recordRankedBotResult(outcomes,created,season);
     const existing=await this.env.DB.prepare("SELECT match_id FROM arena_matches WHERE match_id=?").bind(match.matchId).first();
     if(existing){
       return this.finalizeRecordedResult(outcomes,false);
@@ -540,6 +638,34 @@ export class ArenaRoom extends DurableObject{
       await this.env.DB.batch(statements);
       return this.finalizeRecordedResult(outcomes,true);
     }catch(error){operational(this.env,"arena_result_write_failed",match.matchId,1,error);return false;}
+  }
+  async recordRankedBotResult(outcomes,created,season){
+    const match=this.state,botIndex=match.botIndex,humanIndex=botIndex===0?1:0;
+    const human=match.players[humanIndex],bot=match.players[botIndex];
+    try{
+      const current=await ensureProfile(this.env,human.owner,""),rating=Number(current.rating),reward=rewardFor(outcomes[humanIndex],rating,Number(bot.rating));
+      const settlementToken=randomId("AS-",16),rulesVersion=match.rulesVersion||ARENA_RULES_VERSION;
+      if(match.result.forfeitIndex===humanIndex){reward.seasonPoints=0;reward.tokenProgress=0;}
+      const statements=[
+        this.env.DB.prepare("INSERT OR IGNORE INTO arena_matches(match_id,rules_version,catalog_version,source_provenance_json,season_key,home_owner,away_owner,home_score,away_score,result_json,created_at,finished_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+          .bind(match.matchId,rulesVersion,match.catalogVersion||null,JSON.stringify(match.playerSources||null),season,match.players[0].owner,match.players[1].owner,match.score[0],match.score[1],JSON.stringify(match.result),new Date(match.createdAt).toISOString(),created)
+      ];
+      if(!match.result.voided){
+        statements.push(this.env.DB.prepare("INSERT OR IGNORE INTO arena_match_players(match_id,owner_hash,outcome,rating_before,rating_delta,season_points,token_progress,created_at,settlement_token) VALUES(?,?,?,?,?,?,?,?,?)")
+          .bind(match.matchId,human.owner,outcomes[humanIndex],rating,reward.ratingDelta,reward.seasonPoints,reward.tokenProgress,created,settlementToken));
+        const win=outcomes[humanIndex]==="win"?1:0,draw=outcomes[humanIndex]==="draw"?1:0,loss=outcomes[humanIndex]==="loss"?1:0;
+        statements.push(this.env.DB.prepare("UPDATE arena_profiles SET rating=MAX(700,MIN(1900,rating+?)),season_key=?,season_points=season_points+?,wins=wins+?,draws=draws+?,losses=losses+?,streak=CASE WHEN ?=1 THEN MAX(1,streak+1) ELSE 0 END,token_progress=token_progress+?,updated_at=? WHERE owner_hash=? AND EXISTS (SELECT 1 FROM arena_match_players WHERE match_id=? AND owner_hash=? AND settlement_token=?)")
+          .bind(reward.ratingDelta,season,reward.seasonPoints,win,draw,loss,win,reward.tokenProgress,created,human.owner,match.matchId,human.owner,settlementToken));
+      }
+      await this.env.DB.batch(statements);
+      await grantCosmetics(this.env,human.owner);
+      await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(human.owner,match.matchId).run();
+      const settled=profile(await ensureProfile(this.env,human.owner,""));
+      const botProfile={clubName:bot.clubName,rating:bot.rating,division:divisionFor(bot.rating),seasonPoints:0,wins:0,draws:0,losses:0,tokenProgress:0,cosmetics:[]};
+      match.result.profiles=match.players.map((_,index)=>index===humanIndex?settled:botProfile);
+      match.result.rewards=match.players.map((_,index)=>index===humanIndex?{ratingBefore:rating,...reward}:{ratingBefore:Number(bot.rating),ratingDelta:0,seasonPoints:0,tokenProgress:0});
+      match.resultRecorded=true;this.persist();metric(this.env,"match_completed_bot",outcomes[humanIndex],match.score[0]+match.score[1]);return true;
+    }catch(error){operational(this.env,"arena_bot_result_write_failed",match.matchId,1,error);return false;}
   }
   async finalizeRecordedResult(outcomes,writeMetric){
     const match=this.state;
@@ -576,7 +702,9 @@ export class ArenaRoom extends DurableObject{
       if(!this.state.resultRecorded||!this.state.rematch||!this.state.rematch.available||this.state.rematch.launched)return "rematch_unavailable";
       if(this.state.rematch.requests[index])return "already_submitted";
       this.state.rematch.requests[index]=true;this.persist();this.broadcast();
-      if(this.state.rematch.requests.every(Boolean))await this.startRematch();
+      if(this.state.botIndex>=0&&index!==this.state.botIndex&&!this.state.rematch.requests[this.state.botIndex]){
+        this.state.botRematchDueAt=Date.now()+botDecisionDelay(this.state.seed,"result",1);this.persist();await this.armAlarm();
+      }else if(this.state.rematch.requests.every(Boolean))await this.startRematch();
       return "ok";
     }
     if(data.type==="emote"){
@@ -627,8 +755,8 @@ export class ArenaRoom extends DurableObject{
     else return "wrong_phase";
     if(gameplayAction)player.manualDecisions=(Number(player.manualDecisions)||0)+1;
     if(data.type==="tactic")player.manualTactics=(Number(player.manualTactics)||0)+1;
-    if(gameplayAction&&this.state.mode==="practice"&&this.state.botIndex>=0&&index!==this.state.botIndex)this.defaultAction(this.state.botIndex);
-    this.persist();await this.advance();if(!this.bothDone())this.broadcast();return "ok";
+    if(gameplayAction&&this.state.botIndex>=0&&index!==this.state.botIndex&&!this.state.botDueAt)this.scheduleBotDecision();
+    this.persist();await this.advance();if(!this.bothDone()){await this.armAlarm();this.broadcast();}return "ok";
   }
   async startRematch(){
     if(!this.state.rematch||this.state.rematch.launched)return;
@@ -640,9 +768,10 @@ export class ArenaRoom extends DurableObject{
       rating:Number(this.state.result&&this.state.result.profiles&&this.state.result.profiles[index]&&this.state.result.profiles[index].rating)||Number(player.rating)
     }));
     const room=this.env.ARENA_ROOM.getByName(matchId);
-    const access=await room.init(matchId,players,seed,{rematchOf:this.state.matchId,rematchUsed:true});
+    const access=await room.init(matchId,players,seed,{rematchOf:this.state.matchId,rematchUsed:true,mode:this.state.mode,botIndex:this.state.botIndex,botProfile:this.state.botProfile});
     const expires=futureIso(45*60_000),updated=nowIso();
-    await this.env.DB.batch(players.map(player=>this.env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'match',?,?,?)").bind(player.owner,matchId,expires,updated)));
+    const presencePlayers=players.filter((_,index)=>index!==this.state.botIndex);
+    if(presencePlayers.length)await this.env.DB.batch(presencePlayers.map(player=>this.env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'match',?,?,?)").bind(player.owner,matchId,expires,updated)));
     for(const socket of this.ctx.getWebSockets()){
       const attachment=socket.deserializeAttachment();if(!attachment||!access[attachment.owner])continue;
       try{socket.send(JSON.stringify({type:"rematch",matchId,roomToken:access[attachment.owner]}));}catch(error){operational(this.env,"arena_rematch_delivery_failed",matchId,1,error);}
@@ -659,20 +788,30 @@ export class ArenaRoom extends DurableObject{
     const alarmDelay=Math.max(0,Date.now()-Number(this.state.deadline||Date.now()));
     if(alarmDelay>5000)operational(this.env,"arena_alarm_delay",this.state.matchId,alarmDelay);
     if(this.state.phase==="result"){
+      if(this.state.botIndex>=0&&this.state.rematch&&this.state.botRematchDueAt&&Date.now()>=this.state.botRematchDueAt){
+        this.state.botRematchDueAt=0;this.state.rematch.requests[this.state.botIndex]=true;this.persist();this.broadcast();
+        if(this.state.rematch.requests.every(Boolean)){await this.startRematch();return;}
+      }
       if(!this.state.resultRecorded){
         const recorded=await this.recordResult(this.state.result.outcomes);
-        if(!recorded){this.state.deadline=Date.now()+10_000;this.persist();await this.ctx.storage.setAlarm(this.state.deadline);return;}
-        this.state.deadline=Date.now()+PHASE_SECONDS.result*1000;this.persist();await this.ctx.storage.setAlarm(this.state.deadline);
+        if(!recorded){this.state.deadline=Date.now()+10_000;this.persist();await this.armAlarm();return;}
+        this.state.deadline=Date.now()+PHASE_SECONDS.result*1000;this.persist();await this.armAlarm();
       }
       if(Date.now()>=this.state.deadline)for(const socket of this.ctx.getWebSockets())try{socket.close(1000,"complete");}catch(_){}
+      else await this.armAlarm();
       return;
     }
-    if(Date.now()<this.state.deadline){await this.ctx.storage.setAlarm(this.state.deadline);return;}
+    if(this.state.botIndex>=0&&this.state.botDueAt&&Date.now()>=this.state.botDueAt&&this.botPending()){
+      this.botAction(this.state.botIndex);this.persist();await this.advance();
+      if(!this.bothDone()){await this.armAlarm();this.broadcast();}
+      return;
+    }
+    if(Date.now()<this.state.deadline){await this.armAlarm();return;}
     if(this.state.phase==="live"&&this.state.liveStage==="reveal"){
       const lastWindow=this.state.rulesVersion===ARENA_RULES_VERSION?LIVE_SEGMENTS.length-1:2;
       if(this.state.window<lastWindow){
-        this.state.window++;this.state.liveStage="decision";this.state.windowResult=null;this.setDeadline();
-        this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
+        this.state.window++;this.state.liveStage="decision";this.state.windowResult=null;this.setDeadline();this.scheduleBotDecision();
+        this.persist();await this.armAlarm();this.broadcast();
       }else{
         const home=teamSnapshot(this.state.players[0],this.state.rulesVersion),away=teamSnapshot(this.state.players[1],this.state.rulesVersion);
         if(this.state.score[0]===this.state.score[1]&&!allowsRegulationDraw(this.state.rulesVersion))await this.startPenalties();
@@ -695,7 +834,7 @@ export class ArenaRoom extends DurableObject{
         penalty.turn=penalty.turn===0?1:0;
         penalty.round=Math.max(penalty.kicks[0],penalty.kicks[1])+1;
         penalty.stage="choice";penalty.choices=[null,null];
-        this.setDeadline();this.persist();await this.ctx.storage.setAlarm(this.state.deadline);this.broadcast();
+        this.setDeadline();this.scheduleBotDecision();this.persist();await this.armAlarm();this.broadcast();
       }
       return;
     }

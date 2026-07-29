@@ -64,7 +64,7 @@
     return loadScriptOnce("hidden-draft","src/ui/hiddenDraft.js?v=20260720-hidden-draft2",()=>!!global.CopaHiddenDraft).then(()=>global.CopaHiddenDraft);
   }
   function ensureArena(){
-    return loadScriptOnce("copa-arena","src/online/arena.js?v=20260729-arena-kicker1",()=>!!global.CopaArena).then(()=>global.CopaArena);
+    return loadScriptOnce("copa-arena","src/online/arena.js?v=20260730-arena-ai1",()=>!!global.CopaArena).then(()=>global.CopaArena);
   }
   function ensureCountryPlayers(country){
     const code=String(country||"TR").toUpperCase();
