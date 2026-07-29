@@ -66,7 +66,9 @@
     if(state.selected||Number(root.round)!==1||typeof root.showModal!=="function")return false;
     if(!explicit&&!selectionSurfaceReady())return false;
     const modal=document.getElementById("modal");
-    if(modal&&!modal.classList.contains("hidden"))return false;
+    /* An explicit click comes from the career modal itself, so it must be
+       allowed to replace that modal with the objective picker. */
+    if(!explicit&&modal&&!modal.classList.contains("hidden"))return false;
     root.showModal(selectionMarkup(),{dismissOnOverlay:false,label:tr()?"Kulüp dosyaları":"Club files"});
     return true;
   }

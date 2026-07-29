@@ -927,7 +927,12 @@
     // cleanup before the phone-only guard so a narrow -> wide resize can
     // restore the desktop result layout.
     ensureResultDisclosures();
-    if(!isPhoneInteraction())return;
+    if(!isPhoneInteraction()){
+      /* Phone-only controls must not survive a narrow -> wide browser resize.
+         Without their mobile media rules they degrade into an unstyled list. */
+      document.querySelector(".mobile-pref-group")?.remove();
+      return;
+    }
     ensurePreferences();
     syncPreferenceLanguage();
     ensureNetworkBanner();

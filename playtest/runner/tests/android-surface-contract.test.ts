@@ -88,6 +88,23 @@ test("packaged Android UI keeps structural and contextual surfaces opaque",async
   expect(metricSurfaces.every(surface=>surface.image!=="none")).toBe(true);
   expect(new Set(metricSurfaces.map(surface=>surface.image)).size).toBeGreaterThanOrEqual(3);
   expect(metricSurfaces.every(surface=>surface.border!=="rgba(0, 0, 0, 0)")).toBe(true);
+  const packagedCashContrast=await page.locator("#kasaTile .kasa-main-val").evaluate((value:HTMLElement)=>{
+    const parse=(color:string)=>{
+      const channels=(color.match(/[\d.]+/g)||[]).slice(0,3).map(Number);
+      const scale=/^color\(srgb/i.test(color)?1:255;
+      return channels.map(channel=>channel/scale);
+    };
+    const luminance=(color:string)=>{
+      const channels=parse(color).map(normalized=>normalized<=.03928?normalized/12.92:Math.pow((normalized+.055)/1.055,2.4));
+      return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;
+    };
+    const foreground=luminance(getComputedStyle(value).color);
+    return["rgb(10, 17, 24)","rgb(39, 52, 60)"].map(background=>{
+      const behind=luminance(background);
+      return(Math.max(foreground,behind)+.05)/(Math.min(foreground,behind)+.05);
+    });
+  });
+  expect(Math.min(...packagedCashContrast),JSON.stringify(packagedCashContrast)).toBeGreaterThanOrEqual(4.5);
 
   fs.mkdirSync(visualDir,{recursive:true});
   await page.screenshot({path:path.join(visualDir,"android-native-context-metrics.png"),fullPage:true});

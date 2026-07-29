@@ -395,6 +395,38 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   await capture(page,"07b-museum.png");
 });
 
+test("browser settings keep phone controls structured and remove them after widening",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","web-only responsive settings regression");
+  await reset(page);
+  await page.setViewportSize({width:430,height:900});
+  await page.goto("/?web-settings-responsive=1",{waitUntil:"domcontentloaded"});
+  await page.locator("#settingsBtn").click();
+  await expect(page.locator(".mobile-pref-group")).toBeVisible();
+  const narrowLayout=await page.evaluate(()=>{
+    const scale=[...document.querySelectorAll<HTMLElement>("[data-mobile-text-scale]")].map(button=>button.getBoundingClientRect());
+    const toggles=[...document.querySelectorAll<HTMLElement>(".mobile-pref-btn")].map(button=>button.getBoundingClientRect());
+    return{
+      scaleRows:new Set(scale.map(rect=>Math.round(rect.top))).size,
+      scaleWidths:scale.map(rect=>rect.width),
+      toggleWidths:toggles.map(rect=>rect.width),
+      menuWidth:document.getElementById("settingsDrop")!.getBoundingClientRect().width,
+      overflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(narrowLayout.scaleRows).toBe(1);
+  expect(Math.max(...narrowLayout.scaleWidths)-Math.min(...narrowLayout.scaleWidths)).toBeLessThanOrEqual(1);
+  expect(narrowLayout.toggleWidths.every(width=>Math.abs(width-narrowLayout.menuWidth+16)<=2)).toBe(true);
+  expect(narrowLayout.overflow).toBeLessThanOrEqual(1);
+  await capture(page,"00b-narrow-browser-settings.png");
+
+  await page.locator("#settingsBtn").click();
+  await page.setViewportSize({width:900,height:900});
+  await expect(page.locator(".mobile-pref-group")).toHaveCount(0);
+  await page.locator("#settingsBtn").click();
+  await expect(page.locator(".mobile-pref-group")).toHaveCount(0);
+  await capture(page,"00c-wide-browser-settings.png");
+});
+
 test("wide web breakpoints remain centered, bounded and operable",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","source-web desktop viewport matrix");
   for(const viewport of [
