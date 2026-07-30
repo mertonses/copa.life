@@ -139,6 +139,16 @@ if(fs.existsSync(builtIndex)){
   source=source.replaceAll("__COPA_ADSENSE_CLIENT__",adsenseClient);
   source=source.replaceAll("__COPA_ADSENSE_CHANNEL__",adsenseChannel);
   source=source.replaceAll("__COPA_ADSENSE_DISPLAY_SLOT__",adsenseDisplaySlot);
+  if(adsenseClient){
+    const attributes=[
+      `data-ad-client="${adsenseClient}"`,
+      `data-ad-frequency-hint="600s"`,
+      adsenseChannel?`data-ad-channel="${adsenseChannel}"`:"",
+    ].filter(Boolean).join(" ");
+    const bootstrap=`<script>window.adsbygoogle=window.adsbygoogle||[];window.adBreak=window.adBreak||function(options){window.adsbygoogle.push(options)};window.adConfig=window.adConfig||window.adBreak;</script>`;
+    const loader=`<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}" crossorigin="anonymous" ${attributes}></script>`;
+    source=source.replace("</head>",`${bootstrap}${loader}</head>`);
+  }
   if(webAnalyticsToken){
     const beacon=`<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-copa-analytics="cloudflare-web" data-cf-beacon='${JSON.stringify({token:webAnalyticsToken,spa:true})}'></script>`;
     source=source.replace("</body>",`${beacon}</body>`);
