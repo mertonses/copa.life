@@ -14,7 +14,7 @@
     sdkRequested=true;root.adsbygoogle=root.adsbygoogle||[];
     if(typeof root.adBreak!=="function")root.adBreak=function(options){root.adsbygoogle.push(options);};
     if(typeof root.adConfig!=="function")root.adConfig=root.adBreak;
-    const existing=document.querySelector(`script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"][src*="${client}"]`);
+    const existing=typeof document.querySelector==="function"?document.querySelector(`script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"][src*="${client}"]`):null;
     if(!existing){
       const script=document.createElement("script");script.async=true;script.crossOrigin="anonymous";script.dataset.adClient=client;script.dataset.adFrequencyHint=String(config.frequencyHint||"600s");
       if(channel)script.dataset.adChannel=channel;
