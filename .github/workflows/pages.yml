@@ -72,6 +72,9 @@ jobs:
         env:
           PUBLIC_RELEASE: '1'
           CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
+          COPA_ADSENSE_CLIENT: ${{ secrets.COPA_ADSENSE_CLIENT }}
+          COPA_ADSENSE_CHANNEL: ${{ secrets.COPA_ADSENSE_CHANNEL }}
+          COPA_ADSENSE_DISPLAY_SLOT: ${{ secrets.COPA_ADSENSE_DISPLAY_SLOT }}
 
       - name: Setup Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

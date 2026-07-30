@@ -57,7 +57,7 @@ for (const marker of ['com.google.android.gms.ads.APPLICATION_ID', '${admobAppId
   if (!manifest.includes(marker)) fail(`AdMob manifest configuration is missing ${marker}`);
 }
 const appGradle = read("android/app/build.gradle");
-for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
+for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID", "COPA_ADMOB_NATIVE_ID"]) {
   if (!appGradle.includes(marker)) fail(`Android ad dependency/configuration is missing ${marker}`);
 }
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");
@@ -65,7 +65,7 @@ for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCod
   if (!mainActivity.includes(marker)) fail(`native update cache guard is missing ${marker}`);
 }
 const adsPlugin = read("android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
-for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
+for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showListPlacement", "NativeAdView", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
   if (!adsPlugin.includes(marker)) fail(`native ad consent/runtime guard is missing ${marker}`);
 }
 
@@ -109,7 +109,7 @@ if (!/track:[\s\S]*?default:\s*alpha[\s\S]*?options:[\s\S]*?-\s*alpha[\s\S]*?-\s
 if (/^\s*-\s*(?:production|beta)\s*$/m.test(playWorkflow) || /tracks:\s*(?:production|beta)/.test(playWorkflow)) {
   fail("automated uploader must not target production or open Beta");
 }
-for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID"]) {
+for (const marker of ["COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID", "COPA_ADMOB_NATIVE_ID"]) {
   if (!playWorkflow.includes(`secrets.${marker}`)) fail(`Google Play workflow is missing ${marker}`);
 }
 

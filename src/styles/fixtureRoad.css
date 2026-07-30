@@ -52,12 +52,12 @@
 @keyframes fixtureTrophyPulse{50%{transform:scale(1.08);box-shadow:0 0 0 5px color-mix(in srgb,var(--color-primary) 14%,transparent)}}
 @media(max-width:700px){
   #fixbar.fixture-road-v2{padding:5px!important}
-  .fixture-track{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:96px;gap:5px;padding:7px calc(50% - 60px) 9px}
+  .fixture-track{display:flex;flex-wrap:nowrap;gap:5px;padding:7px calc(50% - 60px) 9px}
   .fixture-track::before,.fixture-track::after{left:calc(50% - 48px);right:auto;top:37px;width:calc(6 * 101px)}
   .fixture-track::after{width:606px}
-  #fixbar .fixture-node{min-width:96px!important}
+  #fixbar .fixture-node{flex:0 0 96px;min-width:96px!important}
   #fixbar .fixture-node.is-active{min-width:120px!important}
-  #fixbar .fixture-trophy{min-width:58px!important}
+  #fixbar .fixture-trophy{flex:0 0 58px;min-width:58px!important}
   .fixture-detail-stats{grid-template-columns:1fr 1fr}
   .fixture-key-event{grid-column:1/-1}
 }
