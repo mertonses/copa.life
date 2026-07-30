@@ -267,7 +267,7 @@ function applyRiskCardGain(k){
   const gain=v===1?18:10,pay=v===1?7:4;
   earn(gain,"earned");
   installmentTurns=2;installmentAmt=pay;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("💳 <b>"+L().cards[k].n+"</b> +€"+gain+"M · güven -1","buy");}
+  if(v===1){requestChairTrustChange(-1,"dark_card",70);pushFeed("💳 <b>"+L().cards[k].n+"</b> +€"+gain+"M · güven -1","buy");}
   else{pushFeed("💳 <b>"+L().cards[k].n+"</b> +€"+gain+"M","buy");}
   pushFeed("💳 "+(tr?"Sonraki 2 tur: -€"+pay+"M":"Next 2 rounds: -€"+pay+"M"),"pres");
   return;
@@ -276,7 +276,7 @@ function applyRiskCardGain(k){
   const gain=v===1?20:15;
   if(budget<-10&&!lastCreditActive){
    earn(gain,"earned");lastCreditActive=1;
-   if(v===1){chairTrust=Math.max(0,chairTrust-1);}
+   if(v===1){requestChairTrustChange(-1,"dark_card",70);}
    pushFeed("🆘 <b>"+L().cards[k].n+"</b> +€"+gain+"M"+(v===1?" · güven -1":""),"buy");
   }else{
    lastCreditActive=-1;
@@ -288,7 +288,7 @@ function applyRiskCardGain(k){
   const gain=v===1?25:15,pay=v===1?10:5;
   earn(gain,"earned");
   kumarbazInstallmentTurns=2;kumarbazInstallmentAmt=pay;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);}
+  if(v===1){requestChairTrustChange(-1,"dark_card",70);}
   pushFeed("🎲 <b>"+L().cards[k].n+"</b> +€"+gain+"M · 2 tur -€"+pay+"M"+(v===1?" · güven -1":""),"pres");
   return;
  }
@@ -456,7 +456,7 @@ function applyRiskCardGain(k){
   if(typeof opponent!=="undefined"&&opponent)opponent.power=Math.max(1,opponent.power-debuff);
   shopBlocked=2;
   cardPriceMod=1+priceRise;cardPriceModTurns=3;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);}
+  if(v===1){requestChairTrustChange(-1,"dark_card",70);}
   pushFeed("🤑 <b>"+L().cards[k].n+"</b> "+(tr?"rakip -"+debuff+" güç · gelecek pazar kapalı · sonraki fiyat +%"+Math.round(priceRise*100):"opp -"+debuff+" power · next market closed · then prices +"+Math.round(priceRise*100)+"%")+(v===1?" · güven -1":""),"pres");
   return;
  }
@@ -465,7 +465,7 @@ function applyRiskCardGain(k){
  if(k==="taraftar"){
    const pow=cardEff(k,picksBySlot.filter(Boolean),round);
    pushFeed("📣 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç (bu tur)":" power (this round)"),"buy");
-  if(v===1&&rand()<0.25){chairTrust=Math.max(0,chairTrust-1);pushFeed("📣 "+(tr?"Taraftar baskısı — güven -1":"Fan pressure — trust -1"),"lose");}
+  if(v===1&&rand()<0.25){requestChairTrustChange(-1,"fan_pressure",72);pushFeed("📣 "+(tr?"Taraftar baskısı — güven -1":"Fan pressure — trust -1"),"lose");}
   return;
  }
  if(k==="mac_sozu"){
@@ -479,15 +479,15 @@ function applyRiskCardGain(k){
  if(k==="kumarbaz"){return;} // yukarida islendi
  if(k==="sahte_evrak"){
   const pow=v===1?8:5;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Kontrat riski: güven -1":"Contract risk: trust -1"),"lose");}
-  else if(rand()<0.18){chairTrust=Math.max(0,chairTrust-1);pushFeed("📄 "+(tr?"Başkan kontratı sorguladı: güven -1":"Chairman questioned the contract: trust -1"),"lose");}
+  if(v===1){requestChairTrustChange(-1,"contract_risk",74);pushFeed("📄 "+(tr?"Kontrat riski: güven -1":"Contract risk: trust -1"),"lose");}
+  else if(rand()<0.18){requestChairTrustChange(-1,"contract_risk",74);pushFeed("📄 "+(tr?"Başkan kontratı sorguladı: güven -1":"Chairman questioned the contract: trust -1"),"lose");}
   pushFeed("📄 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur (kontrat)":" power/turn (contract)"),"buy");
   return;
  }
  if(k==="doping"){
   const pow=v===1?9:6;
   const fineChance=v===1?20:25,fineAmt=v===1?18:10;
-  if(v===1||rand()<0.20){chairTrust=Math.max(0,chairTrust-1);pushFeed("🧪 "+(tr?"Doping şüphesi: güven -1":"Doping suspicion: trust -1"),"lose");}
+  if(v===1||rand()<0.20){requestChairTrustChange(-1,"doping_risk",76);pushFeed("🧪 "+(tr?"Doping şüphesi: güven -1":"Doping suspicion: trust -1"),"lose");}
   pushFeed("🧪 <b>"+L().cards[k].n+"</b> +"+pow+(tr?" güç/tur; her tur %"+fineChance+" -€"+fineAmt+"M · en fazla 2 ceza":" power/round; "+fineChance+"% -€"+fineAmt+"M each round · max 2 fines")+(v===1?" · finalde -8":""),"pres");
   return;
  }
@@ -513,7 +513,7 @@ function processRiskCards(){
  if(lastCreditActive<0&&budget<-10){
   const v=variantOf("son_kredi");const gain=v===1?20:15;
   earn(gain,"earned");lastCreditActive=1;
-  if(v===1){chairTrust=Math.max(0,chairTrust-1);}
+  if(v===1){requestChairTrustChange(-1,"dark_card",70);}
   pushFeed("🆘 <b>"+(L().cards.son_kredi&&L().cards.son_kredi.n||"Son Kredi")+"</b> +€"+gain+"M"+(v===1?" · güven -1":""),"buy");
  }
  /* Doping ceza sansi */

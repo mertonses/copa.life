@@ -38,6 +38,25 @@ test("a new run does not silently reuse the previous deterministic seed",async({
   expect(seed).toBe("");
 });
 
+test("club aliases cannot create repeated group opponents",async({page})=>{
+  await startDraw(page);await finishDraw(page);
+  const result=await page.evaluate(()=>{
+    const w=globalThis as any,engine=w.CopaTournamentEngine,group=engine.getPlayerGroup(w.tournament);
+    const opponentIds=group.teamIds.filter((id:string)=>id!=="player");
+    w.tournament.teams[opponentIds[0]].name="Adana Demirspor";
+    w.tournament.teams[opponentIds[1]].name="A. Demirspor";
+    w.CopaTournamentRuntime.renderHub();
+    const names=opponentIds.map((id:string)=>w.tournament.teams[id].name);
+    const fixtures=w.fixtures.slice(0,3).map((fixture:any)=>fixture.opp);
+    return{names,fixtures,unique:names.every((name:string,index:number)=>names.slice(index+1).every((other:string)=>!engine.sameClubIdentity(name,other)))};
+  });
+  expect(result.unique).toBe(true);
+  expect(result.names.filter((name:string)=>name==="Adana Demirspor")).toHaveLength(1);
+  expect(result.names).not.toContain("A. Demirspor");
+  expect(result.fixtures).toHaveLength(3);
+  expect(new Set(result.fixtures).size).toBe(3);
+});
+
 test("manual draw is resumable and quick draw preserves the predetermined groups",async({page})=>{
   await startDraw(page);
   const original=await page.evaluate(()=>JSON.stringify((globalThis as any).tournament.draw.entries));

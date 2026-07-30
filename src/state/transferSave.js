@@ -74,14 +74,19 @@
     if(global.navigator&&typeof global.navigator.share==="function")return global.navigator.share({title:"Copa Life",text:code});
     return copyExport();
   }
+  function closeAdvancedSettings(){
+    if(document.getElementById("advancedSettingsLayer")&&global.CopaLazy&&typeof global.CopaLazy.closeAdvancedSettings==="function")global.CopaLazy.closeAdvancedSettings();
+  }
   function openExport(){
     const code=exportCode();
     if(typeof global.showModal!=="function")return code;
+    closeAdvancedSettings();
     global.showModal(`<div class="transfer-save"><div class="kithdr">${text("KAYDI AKTAR","TRANSFER SAVE")}</div><p>${text("Bu kod mevcut turu, kulüp kariyerini ve cihaz tercihlerini taşır. Ghost Club kimliği ve çevrim içi izinler aktarılmaz.","This code transfers the current run, club career and device preferences. Ghost Club identity and online permissions are not included.")}</p><textarea readonly aria-label="${text("Kayıt aktarım kodu","Save transfer code")}">${escape(code)}</textarea><div class="bact"><button class="btn btn-primary" type="button" onclick="CopaTransferSave.copyExport()">${text("KODU KOPYALA","COPY CODE")}</button><button class="btn btn-ghost" type="button" onclick="CopaTransferSave.shareExport()">${text("PAYLAŞ","SHARE")}</button></div></div>`,{label:text("Kaydı aktar","Transfer save")});
     return code;
   }
   function openImport(){
     if(typeof global.showModal!=="function")return;
+    closeAdvancedSettings();
     global.showModal(`<div class="transfer-save"><div class="kithdr">${text("KAYDI İÇE AKTAR","IMPORT SAVE")}</div><p>${text("Aktarım mevcut tur ve kariyer kaydının yerini alır. İşlemden önce kendi kodunu dışa aktarman önerilir.","Import replaces the current run and career save. Export your current code first if you may need it.")}</p><textarea id="copaTransferImport" spellcheck="false" autocomplete="off" aria-label="${text("Kayıt aktarım kodu","Save transfer code")}" placeholder="COPA1-…"></textarea><div class="bact"><button class="btn btn-primary" type="button" onclick="CopaTransferSave.confirmImport()">${text("DOĞRULA VE AKTAR","VERIFY & IMPORT")}</button><button class="btn btn-ghost" type="button" onclick="closeModal()">${text("VAZGEÇ","CANCEL")}</button></div></div>`,{label:text("Kaydı içe aktar","Import save")});
   }
   async function confirmImport(){

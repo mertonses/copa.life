@@ -85,6 +85,7 @@
 
   function importDialog(){
     const tr=global.LANG==="tr";
+    if(document.getElementById("advancedSettingsLayer")&&global.CopaLazy&&typeof global.CopaLazy.closeAdvancedSettings==="function")global.CopaLazy.closeAdvancedSettings();
     global.showModal(`<div class="scoutmodal final-replay-import"><h4>${tr?"Final tekrar kodu":"Final replay code"}</h4><p>${tr?"Paylaşılan CFS4 kodunu yapıştır. Kod yalnız simülasyon girdilerini içerir.":"Paste a shared CFS4 code. It contains simulation inputs only."}</p><textarea id="finalReplayImportValue" maxlength="2300" spellcheck="false"></textarea><div class="bact"><button class="btn btn-primary" type="button" onclick="inspectFinalReplayInput()">${tr?"TEKRARI DOĞRULA":"VERIFY REPLAY"}</button><button class="btn btn-ghost" type="button" onclick="closeModal()">${tr?"KAPAT":"CLOSE"}</button></div></div>`,{label:tr?"Final tekrar kodu":"Final replay code"});
     setTimeout(()=>document.getElementById("finalReplayImportValue")?.focus(),30);
   }

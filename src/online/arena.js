@@ -223,7 +223,8 @@
       shield:"<path d='M12 2 20 6v6c0 5-3 8-8 10-5-2-8-5-8-10V6z'/><path d='m8 12 2.4 2.4L16 9'/>",
       rank:"<path d='M5 20V10h4v10M10 20V4h4v16M15 20v-7h4v7'/>",
       ball:"<circle cx='12' cy='12' r='9'/><path d='m12 7 3 2-1 4h-4L9 9zM12 7V3M15 9l4-1M14 13l3 4M10 13l-3 4M9 9 5 8'/>",
-      settings:"<path d='M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z'/><circle cx='12' cy='12' r='3'/>"
+      settings:"<path d='M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z'/><circle cx='12' cy='12' r='3'/>",
+      guide:"<path d='M4 4h6.5c1 0 1.5.5 1.5 1.5V20c0-1.2-.8-2-2.2-2H4z'/><path d='M20 4h-6.5c-1 0-1.5.5-1.5 1.5V20c0-1.2.8-2 2.2-2H20z'/><path d='M7 8h2M15 8h2M7 11h2M15 11h2'/>"
     };
     return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.arena}</svg>`;
   }
@@ -233,7 +234,8 @@
     const status=isLive?`LIVE${state.latency==null?"":` · ${state.latency}ms`}`:quality?`${text("network"+quality[0].toUpperCase()+quality.slice(1))} ${state.latency}ms`:local("ÇEVRİMİÇİ","ONLINE");
     const reconnect=state.connection==="reconnecting"?`<div class="arena-reconnect-banner" role="status"><i></i><span><b>${esc(text("reconnecting"))}</b><small data-arena-reconnect-countdown>${Math.max(1,Math.ceil((state.reconnectAt-Date.now())/1000))}s</small></span></div>`:"";
     const settingsLabel=({tr:"Ayarlar",en:"Settings",es:"Ajustes",de:"Einstellungen",it:"Impostazioni"}[root.LANG]||"Settings");
-    return `<div class="arena-backdrop" aria-hidden="true"><i></i><i></i><i></i></div><header class="arena-topbar"><button type="button" data-arena-action="close" aria-label="${esc(text("back"))}">←</button><div><span>${esc(kicker)}</span><b>COPA <em>ARENA</em></b></div><div class="arena-topbar-actions"><div class="arena-live-mark ${isLive?"is-live":"is-online"} is-${quality||"unknown"}"><i></i> ${esc(status)}</div><button type="button" class="arena-settings-button global-settings-proxy" onclick="event.stopPropagation();toggleSettings(this)" title="${esc(settingsLabel)}" aria-label="${esc(settingsLabel)}" aria-haspopup="true">${icon("settings")}</button></div></header>${reconnect}<div class="arena-content">${content}</div>${forfeitDialog()}`;
+    const guideLabel=({tr:"Arena rehberi",en:"Arena guide",es:"Guía de Arena",de:"Arena-Guide",it:"Guida Arena"}[root.LANG]||"Arena guide");
+    return `<div class="arena-backdrop" aria-hidden="true"><i></i><i></i><i></i></div><header class="arena-topbar"><button type="button" data-arena-action="close" aria-label="${esc(text("back"))}">←</button><div><span>${esc(kicker)}</span><b>COPA <em>ARENA</em></b></div><div class="arena-topbar-actions"><div class="arena-live-mark ${isLive?"is-live":"is-online"} is-${quality||"unknown"}"><i></i> ${esc(status)}</div><button type="button" class="arena-guide-button" data-arena-action="guide" title="${esc(guideLabel)}" aria-label="${esc(guideLabel)}">${icon("guide")}</button><button type="button" class="arena-settings-button global-settings-proxy" onclick="event.stopPropagation();toggleSettings(this)" title="${esc(settingsLabel)}" aria-label="${esc(settingsLabel)}" aria-haspopup="true">${icon("settings")}</button></div></header>${reconnect}<div class="arena-content">${content}</div>${forfeitDialog()}`;
   }
   function terms(){
     const user=state.googleUser;
@@ -896,6 +898,12 @@
     }
     if(action==="toggle-emotes"){state.emoteMenu=!state.emoteMenu;render();return;}
     if(action==="google"){nativeGoogleSignIn();return;}
+    if(action==="guide"){
+      if(root.CopaHowtoGuide)root.CopaHowtoGuide.open(null,"arena");
+      else if(typeof root._loadHowtoGuide==="function")root._loadHowtoGuide().then(api=>api.open(null,"arena")).catch(()=>{});
+      else if(typeof root.openHowtoModal==="function")root.openHowtoModal("arena");
+      return;
+    }
     if(action==="guest"){continueAsGuest();return;}
     if(action==="close"){
       if(state.screen==="room"&&state.room&&state.room.phase!=="result"&&!root.confirm(local("Devam eden Arena maçından ayrılmak istediğine emin misin? Süre dolunca otomatik karar verilir.","Leave the active Arena match? Automatic choices will be made when timers expire.")))return;

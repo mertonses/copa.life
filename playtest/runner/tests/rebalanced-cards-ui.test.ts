@@ -44,6 +44,29 @@ test("Son Dans uses the safer final-only COMMON and DARK values",async({page})=>
   });
 });
 
+test("Yıldız Krizi market preview shows its match-only power",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.budget=100;
+    game.shopOffers=["yildiz_krizi","taraftar","genc"];
+    game.shopVariants.yildiz_krizi=0;
+    game.renderHub();
+  });
+  const common=page.locator('[data-card-key="yildiz_krizi"] .market-card-impact span');
+  await expect(common).toContainText("BU MAÇ");
+  await expect(common.locator("b")).toHaveText("+3");
+
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.shopVariants.yildiz_krizi=1;
+    game.renderHub();
+  });
+  const dark=page.locator('[data-card-key="yildiz_krizi"] .market-card-impact span');
+  await expect(dark).toContainText("BU MAÇ");
+  await expect(dark.locator("b")).toHaveText("+4");
+});
+
 test("Kurban Belli injury cost reads as one natural text flow in a narrow card",async({page})=>{
   await openHub(page);
   await page.evaluate(()=>{

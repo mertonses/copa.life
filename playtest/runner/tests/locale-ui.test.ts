@@ -26,8 +26,12 @@ test("TR, EN, ES, DE and IT render the intro, guide, draft and fixture chrome",a
     expect(intro.auto.toLocaleUpperCase(language)).toContain(intro.expectedAuto.toLocaleUpperCase(language));
     await page.evaluate(()=>(globalThis as any).openHowtoModal());
     await expect(page.locator(".howto-mhdr-title")).toHaveText(copy.guide);
+    await page.locator("[data-guide-product='life']").click();
     await page.locator("[data-guide-mode='detail']").click();
-    await expect(page.locator(".howto-path-step")).toHaveCount(6);
+    await expect(page.locator(".howto-topic")).toHaveCount(10);
+    await page.locator("[data-guide-product='arena']").click();
+    await expect(page.locator(".howto-topic")).toHaveCount(6);
+    await expect(page.locator(".howto-step-description")).not.toBeEmpty();
     await page.evaluate(()=>(globalThis as any).closeModal());
     await page.evaluate(async()=>{
       const game=globalThis as any;

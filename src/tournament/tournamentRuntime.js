@@ -24,9 +24,42 @@
     return state.teams[opponentId]||null;
   }
   function currentMatch(){return active()?root.CopaTournamentEngine.getCurrentPlayerMatch(root.tournament):null;}
+  function repairDuplicateClubNames(state){
+    const engine=root.CopaTournamentEngine;
+    if(!state||!state.teams||!engine||typeof engine.sameClubIdentity!=="function")return false;
+    const data=root.countryGameData(root.selectedCountry),officials=Array.isArray(data&&data[1])?data[1].filter(Boolean):[];
+    const playerClubs=(Array.isArray(data&&data[0])?data[0]:[]).map(player=>{
+      if(!player)return"";
+      if(typeof player==="object"&&!Array.isArray(player))return player.club||player.team||"";
+      return Array.isArray(player)?player[3]||"":"";
+    }).filter(Boolean);
+    const teams=Object.values(state.teams).filter(team=>team&&!team.isPlayer),canonical=name=>officials.find(item=>engine.sameClubIdentity(item,name))||name;
+    let changed=false;
+    for(const team of teams){const name=canonical(team.name);if(name!==team.name){team.name=name;changed=true;}}
+    const occupied=[String(root.teamName||"").trim(),...teams.map(team=>team.name)].filter(Boolean),used=[String(root.teamName||"").trim()].filter(Boolean);
+    const available=[...officials,...playerClubs];
+    const orderedTeams=teams.slice().sort((left,right)=>{
+      const score=name=>String(name||"").replace(/[^A-Za-z0-9\u00c0-\u024f]/g,"").length;
+      return score(right.name)-score(left.name)||String(left.name).localeCompare(String(right.name));
+    });
+    for(const team of orderedTeams){
+      if(!used.some(name=>engine.sameClubIdentity(name,team.name))){used.push(team.name);continue;}
+      let replacement=available.find(name=>!occupied.some(current=>engine.sameClubIdentity(current,name)));
+      if(!replacement){
+        const domesticLabel=typeof root.countryDisplayName==="function"?root.countryDisplayName(root.selectedCountry,root.LANG):root.selectedCountry;
+        for(let index=1;!replacement;index++){
+          const candidate=`${domesticLabel} ${root.LANG==="tr"?"B\u00f6lgesel Kul\u00fcp":"Regional Club"} ${String(index).padStart(2,"0")}`;
+          if(!occupied.some(current=>engine.sameClubIdentity(current,candidate)))replacement=candidate;
+        }
+      }
+      team.name=replacement;occupied.push(replacement);used.push(replacement);changed=true;
+    }
+    return changed;
+  }
   function syncSchedule(){
-    if(!active())return;
+    if(!active())return false;
     const engine=root.CopaTournamentEngine,state=root.tournament,group=engine.getPlayerGroup(state);
+    const repaired=repairDuplicateClubNames(state);
     const groupMatches=group.matchIds.map(id=>state.matches[id]).filter(match=>match.homeId==="player"||match.awayId==="player").sort((a,b)=>a.matchday-b.matchday);
     const byRound=[...groupMatches,null,null,null,null];
     const stageIndex={roundof16:3,quarterfinal:4,semifinal:5,final:6};
@@ -36,6 +69,7 @@
     });
     root.fixtures=Array.from({length:7},(_,index)=>Object.assign({opp:root.bracket[index].name,res:null,gf:null,ga:null},oldFixtures[index]||{},{opp:root.bracket[index].name,matchId:byRound[index]&&byRound[index].id||""}));
     const match=currentMatch();if(match)root.opponent=teamAsOpponent(opponentForMatch(state,match));
+    return repaired;
   }
   function aiSimulator(match,state){
     const home=state.teams[match.homeId],away=state.teams[match.awayId],core=root.CopaFinalSimCore;
@@ -141,9 +175,9 @@
     match.ghostOpponent={originalTeamId:opponentId,name:String(ghost.name||original.name),power:Math.max(35,Math.min(115,Math.round(Number(ghost.power)||original.power))),formation:ghost.formation||ghost.ghostMeta&&ghost.ghostMeta.formation||original.formation,style:ghost.style||original.style,ghost:true,ghostId:ghost.ghostId||"",ghostProfile:ghost.ghostProfile||null,ghostMeta:ghost.ghostMeta||null};
     syncSchedule();return true;
   }
-  function renderHub(){const panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());if(root.CopaFixtureRoad)root.CopaFixtureRoad.render();else if(typeof root.renderFixtures==="function")root.renderFixtures();}
+  function renderHub(){const repaired=syncSchedule(),panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());if(root.CopaFixtureRoad)root.CopaFixtureRoad.render();else if(typeof root.renderFixtures==="function")root.renderFixtures();if(repaired&&typeof root._saveState==="function")root._saveState("hub");}
   function showOverview(){if(!active()||!root.CopaTournamentUI)return;root.showModal(root.CopaTournamentUI.overviewMarkup(root.tournament,copy()),{dismissOnOverlay:true,label:copy().tournamentOverview,sheetClass:"sheet-tournament-overview"});}
   function stage(){if(!active())return"legacy";if(root.tournament.phase==="group")return"group";if(root.tournament.phase==="knockout")return root.tournament.knockout.round;return"complete";}
-  root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator});
+  root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,repairDuplicateClubNames,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator});
   root.startTournamentDraw=startDraw;root.revealTournamentBall=()=>reveal(1);root.fastTournamentDraw=()=>{if(root.CopaAnalytics)root.CopaAnalytics.track("group_draw_skipped",{country:root.selectedCountry,mode:"fast"});reveal(99);};root.finishTournamentDraw=finishDraw;root.showTournamentOverview=showOverview;
 })(window);

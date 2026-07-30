@@ -31,7 +31,7 @@ function addFinalPenalty(amount,source){
  if(overflow>0){
   cash=Math.min(12,overflow*2);
   spend(cash,"spent");
-  if(typeof chairTrust!=="undefined"&&overflow>=3)chairTrust=Math.max(0,chairTrust-1);
+  if(typeof chairTrust!=="undefined"&&overflow>=3)requestChairTrustChange(-1,"final_risk_overflow",85);
  }
  if(typeof trackCardPenalty==="function")trackCardPenalty(source||"system",added,overflow,cash);
  return{added,overflow,cash};
@@ -44,6 +44,36 @@ function chairmanTrustDebtAdjustment(value){
 }
 function chairmanSackLimitForTrust(value){let lim=baseChairmanSackLimit()+chairmanTrustDebtAdjustment(value);if(lastCreditActive)lim+=(typeof LAST_CREDIT_TIGHTEN==="number"?LAST_CREDIT_TIGHTEN:5);if(chairman&&chairman.id==="torpilci"&&torpilDebtPenalty>0)lim+=torpilDebtPenalty*3;return lim;}
 function chairmanSackLimit(){return chairmanSackLimitForTrust();}
+function resetChairTrustRoundLedger(value){
+ const current=Math.max(0,Math.min(3,Math.round(value==null?(typeof chairTrust==="number"?chairTrust:1):value)));
+ chairTrustChangeRound=Math.max(1,Number(typeof round!=="undefined"?round:1)||1);
+ chairTrustRoundBase=current;chairTrustRoundDelta=0;chairTrustChangePriority=-1;
+}
+function requestChairTrustChange(delta,reason,priority){
+ if(typeof chairTrust==="undefined")return false;
+ const currentRound=Math.max(1,Number(typeof round!=="undefined"?round:1)||1),direction=Math.sign(Number(delta)||0);
+ if(!direction)return false;
+ if(Number(chairTrustChangeRound)!==currentRound)resetChairTrustRoundLedger(chairTrust);
+ const weight=Math.max(0,Number(priority)||0);
+ if(chairTrustRoundDelta!==0&&weight<=Number(chairTrustChangePriority))return false;
+ const next=Math.max(0,Math.min(3,Number(chairTrustRoundBase)+direction));
+ const applied=next-Number(chairTrustRoundBase);
+ chairTrust=next;chairTrustRoundDelta=applied;chairTrustChangePriority=weight;
+ if(applied){
+  chairTrustLastReason=String(reason||"board");
+  chairTrustLastDelta=applied;
+ }
+ return !!applied;
+}
+function resetChairTrustForNewChair(value){
+ chairTrust=Math.max(0,Math.min(3,Math.round(value==null?1:value)));
+ chairTrustLastReason="";chairTrustLastDelta=0;resetChairTrustRoundLedger(chairTrust);
+ return chairTrust;
+}
+function chairTrustLedgerSnapshot(){return{round:chairTrustChangeRound,base:chairTrustRoundBase,delta:chairTrustRoundDelta,priority:chairTrustChangePriority,reason:chairTrustLastReason,lastDelta:chairTrustLastDelta};}
+function restoreChairTrustLedger(value){
+ const source=value||{};chairTrustChangeRound=Number(source.round)||Math.max(1,Number(round)||1);chairTrustRoundBase=Number.isFinite(Number(source.base))?Number(source.base):chairTrust;chairTrustRoundDelta=Number(source.delta)||0;chairTrustChangePriority=Number.isFinite(Number(source.priority))?Number(source.priority):-1;chairTrustLastReason=String(source.reason||"");chairTrustLastDelta=Number(source.lastDelta)||0;
+}
 function checkChairmanSack(reason){if(runEnded||budget>=chairmanSackLimit())return false;lastSackReason=reason||"debt";endRun(false,null,"sacked");return true;}
 function chairmanMarketMod(){const id=chairman&&chairman.id;if(id==="pinti")return -1;if(id==="sansasyoncu")return 2+(sansMediaPressure>0?3:0);if(id==="babacan")return 1;if(id==="torpilci")return -1;return 0;}
 function chairmanTransferMultiplier(){return chairman&&chairman.id==="pinti"?0.90:1;}
@@ -56,7 +86,12 @@ function chairmanSpendTrustLoss(cost,context,payload){
 }
 function canAffordChairmanSpend(cost,context,payload){
  payload=payload||{};
- const loss=chairmanSpendTrustLoss(cost,context,payload),projectedTrust=Math.max(0,(Number(chairTrust)||0)-loss),reserve=Math.max(0,Number(payload.reserve)||0);
+ const loss=chairmanSpendTrustLoss(cost,context,payload),currentRound=Math.max(1,Number(typeof round!=="undefined"?round:1)||1);
+ let projectedTrust=Math.max(0,(Number(chairTrust)||0)-loss);
+ if(loss&&Number(chairTrustChangeRound)===currentRound){
+  projectedTrust=Number(chairTrustChangePriority)<80?Math.max(0,Math.min(3,Number(chairTrustRoundBase)-1)):Number(chairTrust);
+ }
+ const reserve=Math.max(0,Number(payload.reserve)||0);
  return budgetAfterCost((Number(cost)||0)+reserve)>=chairmanSackLimitForTrust(projectedTrust);
 }
 function chairmanReactToSpend(cost,context,payload){
@@ -64,17 +99,18 @@ function chairmanReactToSpend(cost,context,payload){
  if(!chairman||cost<=0||typeof chairTrust==="undefined")return;
  const tr=typeof LANG==="undefined"||LANG==="tr";
  if(chairman.id==="pinti"&&chairmanSpendTrustLoss(cost,context,payload)>0){
-  chairTrust=Math.max(0,chairTrust-1);
+  requestChairTrustChange(-1,"miser_spending",80);
   if(typeof pushFeed==="function")pushFeed("🪙 "+(tr?"Pinti harcama kuralı: güven -1":"Miser spending rule: trust -1"),"lose");
  }
  if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov>=85&&sansStarBonusRound!==round){
   sansStarBonusRound=round;
   const bonus=payload.ov>=90?3:2;
   if(typeof riskPowerMod!=="undefined")riskPowerMod+=bonus;
+  requestChairTrustChange(1,"showman_star_transfer",75);
   if(typeof trackChairmanMetric==="function")trackChairmanMetric("starTransferBonuses",1);
   if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Manşet transferi: +"+bonus+" güç":"Headline signing: +"+bonus+" power"),"buy");
  }else if(chairman.id==="sansasyoncu"&&context==="transfer"&&payload.ov&&payload.ov<72&&cost>=6){
-  chairTrust=Math.max(0,chairTrust-1);
+  requestChairTrustChange(-1,"showman_boring_transfer",80);
  if(typeof pushFeed==="function")pushFeed("🎤 "+(tr?"Sıkıcı transfer: Şovmen güveni -1":"Boring signing: Showman trust -1"),"lose");
  }
 }

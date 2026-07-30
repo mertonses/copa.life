@@ -343,10 +343,11 @@ test("chairman picker separates personality from mechanics and collapses safely 
   await expect(modal.locator(".chairpopup-name")).toHaveText("Patron Başkan");
   await expect(modal.locator(".cp-persona-role")).toHaveText("Büyük Patron");
   await expect(modal.locator(".cp-role-badge")).toHaveText("Ekonomi");
-  await expect(modal.locator(".cp-fx-hdr")).toHaveText(["AVANTAJLAR","DEZAVANTAJ","OYUN TARZI"]);
-  await expect(modal.locator(".cp-fx-item")).toContainText([
-    "Borç limiti €28M — en geniş marj",
-    "Kartlar €1M daha pahalı",
+  await expect(modal.locator(".cp-fx-hdr")).toHaveText(["ANA AVANTAJ","TETİKLEYİCİ","KIRMIZI ÇİZGİ","OYUN TARZI"]);
+  await expect(modal.locator(".cp-contract-row p")).toContainText([
+    "En geniş borç alanı: −€28M.",
+    "Güven 3/3: danışma €1M.",
+    "Kartlar +€1M. Borç disiplinini koru.",
   ]);
   await expect(modal.locator(".cp-playstyle")).toContainText("Geniş borç limitiyle rahat harcama yaparsın. Finalde borcu kontrol etmen gerekir.");
   await expect(modal.locator(".cp-sel-btn")).toHaveText("BAŞKANI SEÇ");
@@ -356,16 +357,15 @@ test("chairman picker separates personality from mechanics and collapses safely 
     const persona=(root.querySelector(".cp-persona") as HTMLElement).getBoundingClientRect();
     const mechanics=(root.querySelector(".cp-mechanics") as HTMLElement).getBoundingClientRect();
     const footer=root.querySelector(".cp-bot-row") as HTMLElement;
-    const pros=(root.querySelector(".cp-fx-pro") as HTMLElement).getBoundingClientRect();
-    const cons=(root.querySelector(".cp-fx-con") as HTMLElement).getBoundingClientRect();
+    const advantage=(root.querySelector(".cp-contract-adv") as HTMLElement).getBoundingClientRect();
+    const trigger=(root.querySelector(".cp-contract-trigger") as HTMLElement).getBoundingClientRect();
+    const redline=(root.querySelector(".cp-contract-red") as HTMLElement).getBoundingClientRect();
     const play=(root.querySelector(".cp-playstyle") as HTMLElement).getBoundingClientRect();
     const portrait=(root.querySelector(".cp-portrait-frame") as HTMLElement).getBoundingClientRect();
     const personaCopy=(root.querySelector(".cp-persona-copy") as HTMLElement).getBoundingClientRect();
     const badge=(root.querySelector(".cp-role-badge") as HTMLElement).getBoundingClientRect();
-    const firstPro=(root.querySelector(".cp-fx-pro .cp-fx-item") as HTMLElement).getBoundingClientRect();
-    const firstCon=(root.querySelector(".cp-fx-con .cp-fx-item") as HTMLElement).getBoundingClientRect();
-    const effectSymbol=(root.querySelector(".cp-fx-item .cp-fx-sym") as HTMLElement).getBoundingClientRect();
-    const effectCopy=(root.querySelector(".cp-fx-item span:last-child") as HTMLElement).getBoundingClientRect();
+    const contractCopy=root.querySelector(".cp-contract-row p") as HTMLElement;
+    const contextNumber=root.querySelector(".cp-context-number") as HTMLElement;
     const counter=(root.querySelector(".cp-counter") as HTMLElement).getBoundingClientRect();
     const close=(root.querySelector(".cp-close") as HTMLElement).getBoundingClientRect();
     const navButtons=[
@@ -378,17 +378,14 @@ test("chairman picker separates personality from mechanics and collapses safely 
     return{
       persona:{top:persona.top,right:persona.right,bottom:persona.bottom},
       mechanics:{top:mechanics.top,left:mechanics.left,bottom:mechanics.bottom},
-      desktopOrder:Math.abs(pros.top-cons.top)<=1&&play.top>=Math.max(pros.bottom,cons.bottom)-1,
-      mobileOrder:pros.top<cons.top&&cons.top<play.top,
+      contractOrder:advantage.top<trigger.top&&trigger.top<redline.top&&redline.top<play.top,
       portrait:{left:portrait.left,right:portrait.right,width:portrait.width},
       personaCopy:{left:personaCopy.left},
       badgeInPersona:!!root.querySelector(".cp-persona > .cp-role-badge"),
       badgeInMechanics:!!root.querySelector(".cp-mechanics .cp-role-badge"),
       badgeCenterDelta:Math.abs((badge.left+badge.width/2)-(persona.left+persona.width/2)),
-      firstEffectTopDelta:Math.abs(firstPro.top-firstCon.top),
-      firstConHeight:firstCon.height,
-      effectFontSize:Number.parseFloat(getComputedStyle(root.querySelector(".cp-fx-item") as HTMLElement).fontSize),
-      iconCopyTopDelta:Math.abs(effectSymbol.top-effectCopy.top),
+      contractFontSize:Number.parseFloat(getComputedStyle(contractCopy).fontSize),
+      numberIsEmphasized:Number.parseFloat(getComputedStyle(contextNumber).fontWeight)>=800,
       actionTopDelta:Math.max(...navButtons.map(rect=>rect.top))-Math.min(...navButtons.map(rect=>rect.top)),
       counterInTopControls:!!root.querySelector(".cp-top-controls > .cp-counter"),
       closeInTopControls:!!root.querySelector(".cp-top-controls > .cp-close"),
@@ -414,19 +411,16 @@ test("chairman picker separates personality from mechanics and collapses safely 
   expect(layout.badgeInPersona).toBe(true);
   expect(layout.badgeInMechanics).toBe(false);
   expect(layout.badgeCenterDelta).toBeLessThanOrEqual(1);
-  expect(layout.effectFontSize).toBeGreaterThanOrEqual(10.5);
-  expect(layout.iconCopyTopDelta).toBeLessThanOrEqual(1);
+  expect(layout.contractFontSize).toBeGreaterThanOrEqual(10.5);
+  expect(layout.numberIsEmphasized).toBe(true);
+  expect(layout.contractOrder).toBe(true);
   expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
   if(testInfo.project.name.includes("mobile")){
-    expect(layout.desktopOrder).toBe(true);
     expect(layout.mechanics.top).toBeGreaterThanOrEqual(layout.persona.bottom-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(88);
     expect(layout.portrait.right).toBeLessThanOrEqual(layout.personaCopy.left+1);
   }else{
-    expect(layout.desktopOrder).toBe(true);
-    expect(layout.firstEffectTopDelta).toBeLessThanOrEqual(1);
-    expect(layout.firstConHeight).toBeLessThanOrEqual(50);
     expect(Math.abs(layout.persona.top-layout.mechanics.top)).toBeLessThanOrEqual(1);
     expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(190);
