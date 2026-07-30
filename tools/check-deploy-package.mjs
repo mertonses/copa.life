@@ -87,6 +87,12 @@ const distServiceWorker = fs.readFileSync(path.join(DIST, "sw.js"), "utf8");
 const distIndex = fs.readFileSync(path.join(DIST, "index.html"), "utf8");
 if (distServiceWorker.includes("__COPA_BUILD_VERSION__")) fail("built service worker still contains the version placeholder");
 if (distIndex.includes("__COPA_BUILD_VERSION__")) fail("built index still contains the version placeholder");
+if (process.env.COPA_ADSENSE_CLIENT) {
+  const expectedAdSenseLoader = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.COPA_ADSENSE_CLIENT}`;
+  if (!distIndex.includes(expectedAdSenseLoader) || !distIndex.includes(`data-ad-client="${process.env.COPA_ADSENSE_CLIENT}"`)) {
+    fail("built index is missing the static AdSense loader in the document head");
+  }
+}
 if (!distFiles.includes("assets/data/copa/player_profiles.json")) fail("copa player profile data is missing from dist");
 if (!distFiles.includes("assets/data/copa/player_profiles.js")) fail("file-mode player profile fallback is missing from dist");
 const forbiddenDistPrefixes = ["node_modules/", "tools/", "playtest/", "outputs/", "assets/chairs/", ".git/"];
