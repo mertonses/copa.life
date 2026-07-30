@@ -1,6 +1,7 @@
 (function(root){
   "use strict";
   const gate=()=>document.getElementById("modeGate");
+  const lifeBack=()=>document.getElementById("lifeModeBack");
   const COPY={
     tr:{slogan:"HİKÂYENİ SEÇ. SAHAYA ÇIK.",kicker:"OYUN MODU",title:"Nasıl oynamak istersin?",intro:"Tek oyunculu hikâyeni yaşa veya Arena'da rakiplere meydan oku.",solo:"TEK OYUNCULU",lifeDesc:"Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.",lifeMeta:"KLASİK DENEYİM",lifeCta:"OYNA →",multiplayer:"ÇOK OYUNCULU",arenaDesc:"Canlı eşleşmeler, dereceli yolculuk ve rövanş heyecanı.",arenaMeta:"REKABETÇİ · CANLI",arenaCta:"ARENA'YA GİR →",note:"İki modda da aynı kadro kurma deneyimi, farklı bir mücadele."},
     en:{slogan:"CHOOSE YOUR STORY. TAKE THE FIELD.",kicker:"GAME MODE",title:"How do you want to play?",intro:"Write your solo story or challenge opponents in the Arena.",solo:"SINGLE PLAYER",lifeDesc:"Build your squad, make your choices and write your own football story.",lifeMeta:"CLASSIC EXPERIENCE",lifeCta:"PLAY →",multiplayer:"MULTIPLAYER",arenaDesc:"Live matchmaking, a ranked journey and rematch drama.",arenaMeta:"COMPETITIVE · LIVE",arenaCta:"ENTER ARENA →",note:"The same squad-building core in both modes, with a different challenge."},
@@ -15,6 +16,16 @@
     if(document.documentElement.classList.contains("mode-gate-active")!==visible)document.documentElement.classList.toggle("mode-gate-active",visible);
     if(document.body.classList.contains("mode-gate-active")!==visible)document.body.classList.toggle("mode-gate-active",visible);
     if(visible)element.scrollTop=0;
+    syncLifeBack();
+  }
+  function syncLifeBack(){
+    const button=lifeBack(),intro=document.getElementById("intro"),element=gate();if(!button)return;
+    const visible=document.body.dataset.copaMode==="classic"&&!document.body.classList.contains("run-active")&&intro&&!intro.classList.contains("hidden")&&element?.hidden;
+    const hidden=!visible;if(button.hidden!==hidden)button.hidden=hidden;
+  }
+  function returnToModes(){
+    delete document.body.dataset.copaMode;
+    setVisible(true);
   }
   function choose(mode){
     if(mode==="classic"){
@@ -36,6 +47,8 @@
     element.querySelectorAll("[data-mode-copy]").forEach(node=>{const value=copy[node.dataset.modeCopy];if(value)node.textContent=value;});
     const settings=element.querySelector(".mode-settings-button");
     if(settings){const label={tr:"Ayarlar",en:"Settings",es:"Ajustes",de:"Einstellungen",it:"Impostazioni"}[root.LANG]||"Settings";settings.title=label;settings.setAttribute("aria-label",label);}
+    const button=lifeBack();
+    if(button){const label={tr:"GERİ",en:"BACK",es:"VOLVER",de:"ZURÜCK",it:"INDIETRO"}[root.LANG]||"BACK";button.querySelector("span").textContent=label;button.setAttribute("aria-label",label);}
   }
   function hasRestorableSession(){
     try{
@@ -55,13 +68,15 @@
     return shouldBypassForAutomation()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
   }
   document.addEventListener("click",event=>{
-    const button=event.target.closest("[data-mode-choice]");if(button)choose(button.dataset.modeChoice);
+    const button=event.target.closest("[data-mode-choice]");if(button){root.sfxModeChoice?.(button.dataset.modeChoice,"select");choose(button.dataset.modeChoice);}
   });
-  root.CopaModeGate=Object.freeze({show:()=>setVisible(true),hide:()=>setVisible(false),choose,refreshCopy});
+  const finePointer=()=>!root.CopaPlatform?.isNative&&!!root.matchMedia?.("(hover: hover) and (pointer: fine)").matches;
+  gate()?.querySelectorAll("[data-mode-choice]").forEach(button=>button.addEventListener("mouseenter",()=>{if(finePointer())root.sfxModeChoice?.(button.dataset.modeChoice,"hover");},{passive:true}));
+  root.CopaModeGate=Object.freeze({show:()=>setVisible(true),hide:()=>setVisible(false),choose,returnToModes,refreshCopy});
   document.addEventListener("DOMContentLoaded",()=>{
     refreshCopy();
     setVisible(!shouldYieldToGame());
-    new MutationObserver(()=>{if(shouldYieldToGame())setVisible(false);})
-      .observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:["class","hidden"]});
+    new MutationObserver(()=>{if(shouldYieldToGame())setVisible(false);syncLifeBack();})
+      .observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:["class","hidden","data-copa-mode"]});
   });
 })(window);
