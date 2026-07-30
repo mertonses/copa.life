@@ -235,15 +235,28 @@
   function readGuideState(){try{return JSON.parse(localStorage.getItem(STATE_KEY)||"{}")||{};}catch(_){return{};}}
   function saveGuideState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({product,mode,activeByProduct}));}catch(_){}}
 
+  let styleReady=null;
   function ensureStyle(){
-    if(document.querySelector("link[data-copa-howto]"))return;
-    const link=document.createElement("link");
-    link.rel="stylesheet";
-    link.href="src/styles/howtoGuide.css?v=20260730-product-themes2";
-    link.dataset.copaHowto="1";
-    const palette=document.querySelector('link[href*="src/styles/palette.css"]');
-    if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);
-    else document.head.appendChild(link);
+    if(styleReady)return styleReady;
+    const existing=document.querySelector("link[data-copa-howto]");
+    if(existing&&existing.sheet)return Promise.resolve();
+    styleReady=new Promise(resolve=>{
+      if(existing){
+        existing.addEventListener("load",resolve,{once:true});
+        existing.addEventListener("error",resolve,{once:true});
+        return;
+      }
+      const link=document.createElement("link");
+      link.rel="stylesheet";
+      link.href="src/styles/howtoGuide.css?v=20260730-product-themes2";
+      link.dataset.copaHowto="1";
+      link.addEventListener("load",resolve,{once:true});
+      link.addEventListener("error",resolve,{once:true});
+      const palette=document.querySelector('link[href*="src/styles/palette.css"]');
+      if(palette&&palette.parentNode)palette.parentNode.insertBefore(link,palette);
+      else document.head.appendChild(link);
+    });
+    return styleReady;
   }
 
   function actionLabel(c,action){
@@ -397,7 +410,7 @@
     mode=initialMode==="detail"||initialMode==="quick"?initialMode:stored.mode==="detail"?"detail":"quick";
     if(stored.activeByProduct)activeByProduct={life:Number(stored.activeByProduct.life)||0,arena:Number(stored.activeByProduct.arena)||0};
     searchQuery="";saveGuideState();analytics("guide_opened");
-    render();
+    ensureStyle().then(render);
   }
 
   function runAction(action){

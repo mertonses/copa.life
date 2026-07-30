@@ -3334,7 +3334,7 @@ function _loadHowtoGuide(){
   if(_howtoGuidePromise)return _howtoGuidePromise;
   _howtoGuidePromise=new Promise((resolve,reject)=>{
     const script=document.createElement("script");
-    script.src="src/ui/howtoGuide.js?v=20260730-product-themes2";
+    script.src="src/ui/howtoGuide.js?v=20260731-style-ready1";
     script.async=true;
     script.onload=()=>window.CopaHowtoGuide?resolve(window.CopaHowtoGuide):reject(new Error("guide_api_missing"));
     script.onerror=reject;
