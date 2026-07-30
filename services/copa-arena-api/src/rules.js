@@ -580,6 +580,7 @@ export function publicState(state,owner){
     liveStage:state.liveStage||"decision",
     matchMinute:Number(state.matchMinute)||0,
     windowResult:state.windowResult||null,
+    windowHistory:Array.isArray(state.windowHistory)?state.windowHistory.map(item=>({...item,events:Array.isArray(item.events)?item.events.map(event=>({...event})):[],scoreAfter:Array.isArray(item.scoreAfter)?[...item.scoreAfter]:null})):[],
     liveSegments:LIVE_SEGMENTS,
     penalty:state.phase==="penalty"&&state.penalty?{
       stage:state.penalty.stage,
@@ -620,7 +621,9 @@ export function publicState(state,owner){
       training:state.phase==="training"?null:opponent.training,
       tactics:state.phase==="result"
         ?opponent.tactics
-        :(state.phase==="live"&&state.liveStage==="reveal"?opponent.tactics.slice(0,state.window+1):[]),
+        :(state.phase==="live"
+          ?opponent.tactics.slice(0,state.window+(state.liveStage==="reveal"?1:0))
+          :[]),
       tacticLocked:opponent.tactics.length>state.window
     }:null,
     offers:state.offers&&selfIndex>=0?state.offers[selfIndex]:null,

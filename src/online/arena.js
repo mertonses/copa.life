@@ -285,6 +285,22 @@
     market:{twelfth:"12th Player",counter:"Counter",wall:"Defensive Wall",wonderkid:"Wonderkid",captain:"Captain",none:"No Card"}
   };
   const choiceLabel=(kind,value)=>((root.LANG==="tr"?choiceLabels:choiceLabelsEn)[kind]||{})[value]||value;
+  const arenaLocale=values=>(values[root.LANG]||values.en||values.tr);
+  const tacticInsights={
+    press:{risk:3,reward:3,counters:"control"},
+    balanced:{risk:1,reward:1,counters:""},
+    counter:{risk:2,reward:3,counters:"press"},
+    control:{risk:2,reward:2,counters:"counter"}
+  };
+  function tacticPreview(value){
+    const insight=tacticInsights[value]||tacticInsights.balanced;
+    const risk=arenaLocale({tr:"RİSK",en:"RISK",es:"RIESGO",de:"RISIKO",it:"RISCHIO"});
+    const reward=arenaLocale({tr:"GETİRİ",en:"REWARD",es:"PREMIO",de:"ERTRAG",it:"RESA"});
+    const edge=insight.counters
+      ?arenaLocale({tr:`${choiceLabel("tactics",insight.counters)} karşısında üstün`,en:`Edge vs ${choiceLabel("tactics",insight.counters)}`,es:`Ventaja vs ${choiceLabel("tactics",insight.counters)}`,de:`Vorteil gg. ${choiceLabel("tactics",insight.counters)}`,it:`Vantaggio vs ${choiceLabel("tactics",insight.counters)}`})
+      :arenaLocale({tr:"Güvenli ve nötr",en:"Safe and neutral",es:"Seguro y neutral",de:"Sicher und neutral",it:"Sicuro e neutrale"});
+    return `<span class="arena-risk-preview"><i>${esc(risk)} ${"●".repeat(insight.risk)}${"○".repeat(3-insight.risk)}</i><i>${esc(reward)} ${"●".repeat(insight.reward)}${"○".repeat(3-insight.reward)}</i><strong>${esc(edge)}</strong></span>`;
+  }
   function options(kind,values,selected="",locked=false){
     const descriptions={
       tactics:{
@@ -301,7 +317,7 @@
     return `<div class="arena-choice-grid ${kind}">${values.map(value=>{
       const active=value===selected;
       const detail=descriptions[kind]&&descriptions[kind][value];
-      return `<button class="${active?"is-selected":""}" data-arena-choice="${esc(kind)}:${esc(value)}" aria-pressed="${active}" ${locked?"disabled":""}><i></i><b>${esc(choiceLabel(kind,value))}</b><span>${kind==="tactics"?"↗":kind==="training"?"+":"◆"}</span>${detail?`<small>${esc(detail)}</small>`:""}<em>✓ ${esc(text("selected"))}</em></button>`;
+      return `<button class="${active?"is-selected":""}" data-arena-choice="${esc(kind)}:${esc(value)}" aria-pressed="${active}" ${locked?"disabled":""}><i></i><b>${esc(choiceLabel(kind,value))}</b><span>${kind==="tactics"?"↗":kind==="training"?"+":"◆"}</span>${detail?`<small>${esc(detail)}</small>`:""}${kind==="tactics"?tacticPreview(value):""}<em>✓ ${esc(text("selected"))}</em></button>`;
     }).join("")}</div>`;
   }
   const EMOTE_IDS=["hello","applause","fire","respect","easy","comeOn","yawn"];
@@ -473,6 +489,53 @@
   function lobby(game){
     return chrome(`${statusStrip(game)}<div class="arena-ready"><div class="arena-ready-ring">${icon("shield")}<i></i></div><h1>${esc(game.self&&game.self.ready?text("waiting"):text("ready"))}</h1><p>${esc(text("serverCopy"))}</p><button class="arena-primary" data-arena-action="ready" ${game.self&&game.self.ready?"disabled":""}>${esc(text("ready"))}</button></div>`);
   }
+  function liveHistory(game){
+    const history=Array.isArray(game.windowHistory)?game.windowHistory.slice():[];
+    const report=game.windowResult;
+    if(report&&!history.some(item=>Number(item.window)===Number(report.window)))history.push(report);
+    return history;
+  }
+  function momentumTimeline(game,segments){
+    const history=liveHistory(game),selfHome=game.selfIndex===0;
+    const title=arenaLocale({tr:"MAÇ AKIŞI",en:"MATCH FLOW",es:"FLUJO DEL PARTIDO",de:"SPIELVERLAUF",it:"ANDAMENTO"});
+    const momentum=arenaLocale({tr:"MOMENTUM / xG",en:"MOMENTUM / xG",es:"MOMENTO / xG",de:"MOMENTUM / xG",it:"MOMENTUM / xG"});
+    return `<section class="arena-momentum" aria-label="${esc(title)}"><header><b>${esc(title)}</b><span>${esc(momentum)}</span></header><div>${segments.map((segment,index)=>{
+      const item=history.find(entry=>Number(entry.window)===index);
+      const myXg=item?Number(selfHome?item.homeXg:item.awayXg):0,theirXg=item?Number(selfHome?item.awayXg:item.homeXg):0;
+      const delta=Number((myXg-theirXg).toFixed(2)),strength=Math.min(100,Math.max(8,Math.abs(delta)*95));
+      const stateClass=!item?"is-pending":Math.abs(delta)<.08?"is-neutral":delta>0?"is-mine":"is-theirs";
+      return `<article class="${stateClass} ${index===Number(game.window)?"is-current":""}"><small>${Number(segment.startMinute)}–${Number(segment.endMinute)}'</small><i><em style="--swing:${strength}%"></em></i><b>${item?`${myXg.toFixed(2)}–${theirXg.toFixed(2)}`:"—"}</b></article>`;
+    }).join("")}</div></section>`;
+  }
+  function opponentTendency(game){
+    const choices=(game.opponent&&game.opponent.tactics||[]).slice(-2);
+    const heading=arenaLocale({tr:"RAKİP EĞİLİMİ",en:"OPPONENT TENDENCY",es:"TENDENCIA RIVAL",de:"GEGNER-TENDENZ",it:"TENDENZA RIVALE"});
+    let label=arenaLocale({tr:"Veri oluşuyor",en:"Building signal",es:"Creando señal",de:"Signal entsteht",it:"Segnale in corso"});
+    if(choices.length===1)label=arenaLocale({tr:`İlk tercih: ${choiceLabel("tactics",choices[0])}`,en:`First read: ${choiceLabel("tactics",choices[0])}`,es:`Primera lectura: ${choiceLabel("tactics",choices[0])}`,de:`Erster Eindruck: ${choiceLabel("tactics",choices[0])}`,it:`Prima lettura: ${choiceLabel("tactics",choices[0])}`});
+    if(choices.length===2){
+      if(choices[0]===choices[1])label=arenaLocale({tr:`Israrcı: ${choiceLabel("tactics",choices[1])}`,en:`Repeating: ${choiceLabel("tactics",choices[1])}`,es:`Repite: ${choiceLabel("tactics",choices[1])}`,de:`Wiederholt: ${choiceLabel("tactics",choices[1])}`,it:`Insiste: ${choiceLabel("tactics",choices[1])}`});
+      else if(choices.every(item=>["press","counter"].includes(item)))label=arenaLocale({tr:"Dikey ve agresif",en:"Direct and aggressive",es:"Directo y agresivo",de:"Direkt und aggressiv",it:"Diretto e aggressivo"});
+      else if(choices.includes("control"))label=arenaLocale({tr:"Topa hükmetme arıyor",en:"Seeking control",es:"Busca el control",de:"Sucht Kontrolle",it:"Cerca controllo"});
+      else label=arenaLocale({tr:"Esnek, kalıp vermiyor",en:"Flexible, no fixed pattern",es:"Flexible, sin patrón",de:"Flexibel, kein Muster",it:"Flessibile, senza schema"});
+    }
+    return `<aside class="arena-tendency"><span>${icon("search")}</span><div><b>${esc(heading)}</b><strong>${esc(label)}</strong><small>${choices.length?choices.map(item=>choiceLabel("tactics",item)).join(" → "):arenaLocale({tr:"İlk iki karar analiz edilir",en:"Reads the last two calls",es:"Analiza las dos últimas",de:"Analysiert die letzten zwei",it:"Analizza le ultime due"})}</small></div></aside>`;
+  }
+  function turningPoints(game){
+    const selfSide=game.selfIndex===0?"home":"away",history=liveHistory(game),points=[];
+    (game.events||[]).filter(item=>item.type==="goal").forEach(item=>points.push({
+      key:`g-${item.minute}-${item.side}`,minute:Number(item.minute),priority:100+Number(item.minute)/100,
+      title:item.side===selfSide?arenaLocale({tr:"Skoru buldun",en:"Your breakthrough",es:"Tu gol",de:"Dein Treffer",it:"Il tuo gol"}):arenaLocale({tr:"Rakip skoru buldu",en:"Opponent breakthrough",es:"Gol rival",de:"Gegentreffer",it:"Gol rivale"}),
+      detail:arenaLocale({tr:"Gol, maçın dengesini değiştirdi.",en:"A goal changed the balance of the match.",es:"Un gol cambió el equilibrio.",de:"Ein Tor veränderte das Spiel.",it:"Un gol ha cambiato l'equilibrio."})
+    }));
+    history.forEach(item=>{
+      const myXg=Number(game.selfIndex===0?item.homeXg:item.awayXg),theirXg=Number(game.selfIndex===0?item.awayXg:item.homeXg),delta=Number((myXg-theirXg).toFixed(2));
+      points.push({key:`w-${item.window}`,minute:Number(item.endMinute),priority:Math.abs(delta)*10,
+        title:delta>=0?arenaLocale({tr:"Momentum sende",en:"Momentum swung your way",es:"El momento fue tuyo",de:"Momentum auf deiner Seite",it:"Momentum dalla tua parte"}):arenaLocale({tr:"Rakip baskıyı artırdı",en:"Opponent raised the pressure",es:"El rival aumentó la presión",de:"Gegner erhöhte den Druck",it:"Il rivale ha alzato la pressione"}),
+        detail:`xG ${myXg.toFixed(2)}–${theirXg.toFixed(2)} · ${choiceLabel("tactics",(game.self&&game.self.tactics||[])[Number(item.window)]||"balanced")}`
+      });
+    });
+    return points.sort((a,b)=>b.priority-a.priority).slice(0,3).sort((a,b)=>a.minute-b.minute);
+  }
   function live(game){
     const allEvents=game.events||[],events=allEvents.slice(-8).reverse(),score=game.score||[0,0],revealing=game.liveStage==="reveal";
     const report=game.windowResult||null,selfHome=game.selfIndex===0;
@@ -489,10 +552,11 @@
     return chrome(`${statusStrip(game)}<div class="arena-live">
       <div class="arena-match-clock"><b data-arena-match-clock data-start-minute="${Number(segment.startMinute)||0}" data-end-minute="${Number(segment.endMinute)||90}" data-revealing="${revealing}" data-deadline="${Number(game.deadline)||0}">${revealing?Number(segment.startMinute)||0:Number(game.matchMinute)||Number(segment.startMinute)||0}'</b><span>${revealing?local("CANLI AKSİYON","LIVE ACTION"):local("OYUN DEVAM EDERKEN KARAR VER","DECIDE WHILE PLAY CONTINUES")}</span></div>
       <div class="arena-live-score"><span>${esc(game.self&&game.self.clubName||text("you"))}</span><b data-arena-live-score data-base-mine="${baseMine}" data-base-theirs="${baseTheirs}" data-goals="${esc(segmentGoals)}">${baseMine}<i>–</i>${baseTheirs}</b><span>${esc(game.opponent&&game.opponent.clubName||text("opponent"))}</span></div>
+      ${momentumTimeline(game,segments)}
       <div class="arena-pitch-live ${revealing?"is-playing":""}" aria-label="${esc(local("Maç olay haritası; altın senin, turuncu rakibin.","Match event map; gold is you, orange is the opponent."))}"><i></i><i></i><b style="left:${Math.min(94,Math.max(6,Number(game.matchMinute)||Number(segment.startMinute)||0))}%"></b><em class="arena-live-ball"></em>${events.map(event=>`<span class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"} is-${esc(event.type)} ${revealDelay(event)?"is-reveal-event":""}" style="left:${Math.min(94,Math.max(6,event.minute))}%;--reveal-delay:${revealDelay(event)}s">${event.type==="goal"?"●":event.type==="shot"?"◆":"▪"}</span>`).join("")}<small class="arena-pitch-legend">${esc(local("ALTIN: SEN · TURUNCU: RAKİP","GOLD: YOU · ORANGE: OPPONENT"))}</small></div>
       <div class="arena-event-feed">${events.length?events.map(event=>{const labels={goal:local("GOL","GOAL"),card:local("KART","CARD"),attack:local("TEHLİKELİ ATAK","DANGEROUS ATTACK"),shot:local("ŞUT","SHOT"),save:local("KURTARIŞ","SAVE")};return `<span class="${revealDelay(event)?"is-reveal-event":""}" style="--reveal-delay:${revealDelay(event)}s"><b>${event.minute}'</b><i class="${event.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(labels[event.type]||event.type)} · ${esc(event.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`;}).join(""):`<span><b>0'</b><i>${esc(local("BAŞLAMA VURUŞU","KICK-OFF"))}</i></span>`}</div>
       ${revealing&&report?`<div class="arena-window-report"><b>${esc(local(`${report.startMinute}'–${report.endMinute}' BÖLÜM RAPORU`,`${report.startMinute}'–${report.endMinute}' WINDOW REPORT`))}</b><div><span>${esc(choiceLabel("tactics",myTactic))}</span><i>VS</i><span>${esc(choiceLabel("tactics",theirTactic))}</span></div><p>${esc(advantage)} · xG ${myXg}–${theirXg} · ${esc(local("Gol","Goals"))} ${myGoals}–${theirGoals}</p></div>`:""}
-      <div class="arena-tactic-window"><span>${game.window+1} / ${segments.length}</span><h2>${esc(revealing?local("SAHADA CANLI","LIVE ON THE PITCH"):text("tacticDecision"))}</h2>${revealing?"":options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${!revealing&&game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(local("Maç akışı sürüyor","Match flow continues"))}</p>`:""}</div>
+      <div class="arena-tactic-window"><span>${game.window+1} / ${segments.length}</span><h2>${esc(revealing?local("SAHADA CANLI","LIVE ON THE PITCH"):text("tacticDecision"))}</h2>${revealing?"":opponentTendency(game)}${revealing?"":options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${!revealing&&game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(local("Maç akışı sürüyor","Match flow continues"))}</p>`:""}</div>
     </div>`);
   }
   const penaltyZoneLabels={
@@ -536,6 +600,7 @@
     const decisionMinutes=(game.liveSegments||[]).map(segment=>Number(segment.startMinute)||0);
     const decisions=(game.self&&game.self.tactics||[]).map((choice,index)=>`${decisionMinutes[index]??index*30}' ${choiceLabel("tactics",choice)} / ${choiceLabel("tactics",game.opponent&&game.opponent.tactics&&game.opponent.tactics[index]||"balanced")}`);
     const eventRecap=(game.events||[]).filter(item=>item.type==="goal"||item.type==="card").slice(-8);
+    const keyMoments=turningPoints(game);
     const resultLabel=game.result&&game.result.voided?"voided":game.result&&game.result.forfeitIndex!==null&&game.result.forfeitIndex!==undefined?(game.result.forfeitIndex===game.selfIndex?"forfeitLoss":"forfeitWin"):outcome;
     const resultSoundKey=`${game.matchId||"match"}:${mine}:${theirs}:${outcome}`;
     if(outcome==="win"&&state.lastResultSound!==resultSoundKey){state.lastResultSound=resultSoundKey;sfx("win");}
@@ -543,7 +608,7 @@
     const rematchButton=rematch.available
       ?`<button class="arena-rematch ${rematch.opponentRequested?"is-incoming":""}" data-arena-action="rematch" ${rematch.requested||rematch.launched?"disabled":""}>${esc(rematch.launched?text("rematchStarting"):rematch.requested?text("rematchSent"):rematch.opponentRequested?text("rematchIncoming"):text("rematch"))}</button>`
       :"";
-    return chrome(`<div class="arena-result ${outcome}"><span>${esc(practice?text("practice"):text(resultLabel))}</span><h1>${mine} <i>–</i> ${theirs}</h1>${penalty?`<p>PEN ${penalty[game.selfIndex]}–${penalty[game.selfIndex===0?1:0]}</p>`:""}${practice?`<p>${esc(text("practiceCopy"))}</p>`:""}${game.result&&game.result.voided?`<p>${esc(text("voidedCopy"))}</p>`:""}<div class="arena-result-clubs"><b>${esc(game.self&&game.self.clubName)}</b><i>VS</i><b>${esc(game.opponent&&game.opponent.clubName)}</b></div><div class="arena-result-rewards"><span><small>${esc(text("rating"))}</small><b>${Number(reward.ratingBefore||game.self&&game.self.rating||1000)} → ${ratingAfter}</b><em>${Number(reward.ratingDelta||0)>=0?"+":""}${Number(reward.ratingDelta||0)}</em></span><span><small>${esc(text("season"))}</small><b>+${Number(reward.seasonPoints||0)} P</b></span><span><small>${esc(text("power"))}</small><b><i class="arena-context-power power-${powerBand(myTeam.power)}">${myTeam.power||"—"}</i> – <i class="arena-context-power power-${powerBand(theirTeam.power)}">${theirTeam.power||"—"}</i></b></span><span><small>${esc(text("chemistry"))}</small><b>${myTeam.chemistry==null?"—":myTeam.chemistry} – ${theirTeam.chemistry==null?"—":theirTeam.chemistry}</b></span></div>${eventRecap.length?`<div class="arena-result-events"><b>${esc(local("MAÇ OLAYLARI","MATCH EVENTS"))}</b>${eventRecap.map(item=>`<span><strong>${Number(item.minute)}'</strong><i class="${item.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(text(item.type==="goal"?"goal":"cardEvent"))} · ${esc(item.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`).join("")}</div>`:""}${decisions.length?`<div class="arena-result-decisions"><b>${esc(local("TAKTİK ÖZETİ","TACTICAL SUMMARY"))}</b>${decisions.map(item=>`<span>${esc(item)}</span>`).join("")}</div>`:""}<div class="arena-result-actions">${rematchButton}<button class="arena-primary" data-arena-action="${practice?"practice":"queue"}">${esc(practice?text("practiceAgain"):text("searchAgain"))}</button><button class="arena-quiet" data-arena-action="portal">${esc(text("home"))}</button></div></div>`);
+    return chrome(`<div class="arena-result ${outcome}"><span>${esc(practice?text("practice"):text(resultLabel))}</span><h1>${mine} <i>–</i> ${theirs}</h1>${penalty?`<p>PEN ${penalty[game.selfIndex]}–${penalty[game.selfIndex===0?1:0]}</p>`:""}${practice?`<p>${esc(text("practiceCopy"))}</p>`:""}${game.result&&game.result.voided?`<p>${esc(text("voidedCopy"))}</p>`:""}<div class="arena-result-clubs"><b>${esc(game.self&&game.self.clubName)}</b><i>VS</i><b>${esc(game.opponent&&game.opponent.clubName)}</b></div><div class="arena-result-rewards"><span><small>${esc(text("rating"))}</small><b>${Number(reward.ratingBefore||game.self&&game.self.rating||1000)} → ${ratingAfter}</b><em>${Number(reward.ratingDelta||0)>=0?"+":""}${Number(reward.ratingDelta||0)}</em></span><span><small>${esc(text("season"))}</small><b>+${Number(reward.seasonPoints||0)} P</b></span><span><small>${esc(text("power"))}</small><b><i class="arena-context-power power-${powerBand(myTeam.power)}">${myTeam.power||"—"}</i> – <i class="arena-context-power power-${powerBand(theirTeam.power)}">${theirTeam.power||"—"}</i></b></span><span><small>${esc(text("chemistry"))}</small><b>${myTeam.chemistry==null?"—":myTeam.chemistry} – ${theirTeam.chemistry==null?"—":theirTeam.chemistry}</b></span></div>${keyMoments.length?`<section class="arena-turning-points"><header><b>${esc(arenaLocale({tr:"3 KIRILMA ANI",en:"3 TURNING POINTS",es:"3 MOMENTOS CLAVE",de:"3 SCHLÜSSELMOMENTE",it:"3 MOMENTI CHIAVE"}))}</b><span>${esc(arenaLocale({tr:"MAÇIN HİKÂYESİ",en:"MATCH STORY",es:"HISTORIA DEL PARTIDO",de:"SPIELGESCHICHTE",it:"STORIA DELLA PARTITA"}))}</span></header><div>${keyMoments.map((item,index)=>`<article><i>${String(index+1).padStart(2,"0")}</i><span><small>${item.minute}'</small><b>${esc(item.title)}</b><p>${esc(item.detail)}</p></span></article>`).join("")}</div></section>`:""}${eventRecap.length?`<div class="arena-result-events"><b>${esc(local("MAÇ OLAYLARI","MATCH EVENTS"))}</b>${eventRecap.map(item=>`<span><strong>${Number(item.minute)}'</strong><i class="${item.side===(game.selfIndex===0?"home":"away")?"mine":"theirs"}">${esc(text(item.type==="goal"?"goal":"cardEvent"))} · ${esc(item.side===(game.selfIndex===0?"home":"away")?text("you"):text("opponent"))}</i></span>`).join("")}</div>`:""}${decisions.length?`<div class="arena-result-decisions"><b>${esc(local("TAKTİK ÖZETİ","TACTICAL SUMMARY"))}</b>${decisions.map(item=>`<span>${esc(item)}</span>`).join("")}</div>`:""}<div class="arena-result-actions">${rematchButton}<button class="arena-primary" data-arena-action="${practice?"practice":"queue"}">${esc(practice?text("practiceAgain"):text("searchAgain"))}</button><button class="arena-quiet" data-arena-action="portal">${esc(text("home"))}</button></div></div>`);
   }
   function room(){
     const game=state.room;if(!game)return loading(state.connection==="reconnecting"?text("reconnecting"):text("loading"));
