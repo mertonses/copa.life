@@ -59,7 +59,7 @@ export const DRAFT_SLOTS=Object.freeze([
 ]);
 export const DRAFT_LINES=Object.freeze(DRAFT_SLOTS.map(item=>item.line));
 export const TACTICS=Object.freeze(["press","balanced","counter","control"]);
-export const ARENA_EMOTES=Object.freeze(["hello","applause","fire","respect"]);
+export const ARENA_EMOTES=Object.freeze(["hello","applause","fire","respect","easy","comeOn","yawn"]);
 export const TRAINING=Object.freeze(["finishing","shape","chemistry","recovery"]);
 export const MATCH_PLAN_SCENARIOS=Object.freeze(["adaptive","protect","brave"]);
 export const MARKET_CARDS=Object.freeze([
@@ -317,6 +317,9 @@ export function initialPlayerState(input){
     tactics:[],
     manualDecisions:0,
     manualTactics:0,
+    missedDecisions:0,
+    forcedForfeit:false,
+    forfeitReason:null,
     connected:false,
     lastSeenAt:Date.now()
   };

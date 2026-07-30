@@ -78,7 +78,7 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await boot(page);
   const entries=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth}));
   expect(entries.overflow).toBeLessThanOrEqual(1);
-  expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")}))).toEqual({music:"0",sfx:"0"});
+  expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")}))).toEqual({music:"0",sfx:"1"});
   const gateLabels={tr:"ÇOK OYUNCULU",en:"MULTIPLAYER",es:"MULTIJUGADOR",de:"MEHRSPIELER",it:"MULTIGIOCATORE"};
   for(const [language,label] of Object.entries(gateLabels)){
     await page.evaluate((next)=>(globalThis as any).setLang(next),language);
@@ -95,7 +95,8 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator("#settingsDrop")).toBeVisible();
   await page.keyboard.press("Escape");
   await page.evaluate(()=>(globalThis as any).toggleMute());
-  expect(await page.evaluate(()=>localStorage.getItem("copa_sfx"))).toBe("1");
+  expect(await page.evaluate(()=>localStorage.getItem("copa_sfx"))).toBe("0");
+  await page.evaluate(()=>(globalThis as any).toggleMute());
   await capture(page,"02-web-arena-hub.png");
   await page.evaluate(()=>(globalThis as any).setLang("de"));
   await expect(page.locator(".arena-play")).toContainText("MATCH FINDEN");
@@ -115,10 +116,13 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   });
   expect(emotePlacement.afterName).toBe(true);
   await page.locator(".arena-emote-trigger").click();
-  await expect(page.locator(".arena-emote-picker button")).toHaveCount(4);
+  await expect(page.locator(".arena-emote-picker button")).toHaveCount(7);
   await expect(page.locator('[data-arena-emote="hello"]')).toContainText("Hello");
   await expect(page.locator('[data-arena-emote="applause"]')).toContainText("Nice play");
   await expect(page.locator('[data-arena-emote="respect"]')).toContainText("Good game");
+  await expect(page.locator('[data-arena-emote="easy"]')).toContainText("Too easy");
+  await expect(page.locator('[data-arena-emote="comeOn"]')).toContainText("Come on");
+  await expect(page.locator('[data-arena-emote="yawn"]')).toContainText("Yawn");
   await page.waitForTimeout(250);
   await capture(page,"03a-web-arena-emotes.png");
   await page.evaluate(()=>{
@@ -129,6 +133,16 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   const sentEmote=await page.evaluate(()=>(globalThis as any).__arenaEmoteMessages.at(-1));
   expect(sentEmote).toMatchObject({type:"emote",emote:"applause"});
   await page.evaluate(()=>{const arena=(globalThis as any).CopaArena;arena.state.socket=null;arena.state.emoteReadyAt=0;arena.refresh();});
+  await expect(page.locator(".arena-forfeit-trigger")).toBeVisible();
+  await page.locator(".arena-forfeit-trigger").click();
+  await expect(page.locator(".arena-forfeit-dialog")).toBeVisible();
+  await expect(page.locator('[data-arena-action="confirm-forfeit"]')).toBeDisabled();
+  await page.locator("[data-arena-forfeit-check]").check();
+  await expect(page.locator('[data-arena-action="confirm-forfeit"]')).toBeEnabled();
+  await capture(page,"03b-web-arena-forfeit-confirm.png");
+  await page.locator('[data-arena-action="cancel-forfeit"]').click();
+  await page.evaluate(()=>{const arena=(globalThis as any).CopaArena;arena.state.room={...arena.state.room,self:{...arena.state.room.self,missedDecisions:2}};arena.refresh();});
+  await expect(page.locator(".arena-inactivity-warning")).toContainText("FINAL WARNING");
   await expect(page.locator(".arena-choice-grid.chairmen")).toHaveCount(0);
   await expect(page.locator(".arena-fixed-chairman")).toContainText("BABACAN");
   await page.locator('[data-arena-choice="formations:4-4-2"]').click();
@@ -244,10 +258,14 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator('[data-arena-choice="tactics:control"]')).toContainText("Possession Play");
   await capture(page,"07-web-arena-tactics.png");
 
-  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:45,deadline:Date.now()+6500,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"shot",side:"away"},{minute:41,type:"save",side:"home"}],windowResult:{window:1,startMinute:20,endMinute:45,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
+  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:45,deadline:Date.now()+6500,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:24,type:"goal",side:"away"},{minute:33,type:"shot",side:"away"},{minute:41,type:"save",side:"home"}],windowResult:{window:1,startMinute:20,endMinute:45,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
   await expect(page.locator(".arena-window-report")).toContainText("WINDOW REPORT");
   await expect(page.locator(".arena-tactic-window")).toContainText("2 / 4");
   await expect(page.locator(".arena-pitch-live")).toHaveClass(/is-playing/);
+  await expect(page.locator("[data-arena-live-score]")).toContainText("1–0");
+  expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.liveEventCues.size)).toBe(0);
+  await expect(page.locator("[data-arena-live-score]")).toContainText("1–1",{timeout:2500});
+  expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.liveEventCues.size)).toBe(1);
   await capture(page,"07-web-arena-live.png");
 
   const shootout={stage:"choice",kick:4,round:3,turn:0,firstShooter:0,score:[2,1],kicks:[2,2],history:[
@@ -326,8 +344,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
   for(const viewport of [{width:360,height:800,name:"phone-small",scale:"130"},{width:430,height:932,name:"phone",scale:"115"},{width:768,height:1024,name:"tablet",scale:"100"}]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await boot(page,true);
-    expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")})),viewport.name).toEqual({music:"0",sfx:"0"});
-    await page.evaluate(()=>(globalThis as any).toggleMute());
+    expect(await page.evaluate(()=>({music:localStorage.getItem("copa_music"),sfx:localStorage.getItem("copa_sfx")})),viewport.name).toEqual({music:"0",sfx:"1"});
     await page.evaluate((scale:string)=>(globalThis as any).CopaMobileExperience?.setTextScale(scale),viewport.scale);
     await expect(page.locator("html")).toHaveAttribute("data-copa-text-scale",viewport.scale);
     await capture(page,`android-${viewport.name}-opening.png`);
@@ -339,7 +356,7 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     await capture(page,`android-${viewport.name}-hub.png`);
     await setRoom(page,{...base,phase:"setup",emotes:{self:null,opponent:{id:"applause",sequence:9,at:Date.now()}}});
     await page.locator(".arena-emote-trigger").click();
-    await expect(page.locator(".arena-emote-picker button")).toHaveCount(4);
+    await expect(page.locator(".arena-emote-picker button")).toHaveCount(7);
     await expect(page.locator(".arena-emote-reaction.is-opponent")).toBeVisible();
     const emotes=await audit(page);
     expect(emotes.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
