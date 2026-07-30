@@ -10,6 +10,7 @@ const RUNNER=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(RUNNER,"../..");
 const STORE=path.join(ROOT,"store/android");
 const OUTPUT=path.join(STORE,"video");
+const KEY_ART=path.join(STORE,"source","feature-background-v3.png");
 const WIDTH=1920;
 const HEIGHT=1080;
 const FPS=24;
@@ -22,27 +23,66 @@ const LOCALES=[
   {
     code:"tr-TR",
     intro:"KADRONU KUR. KUPAYA YÜRÜ.",
-    outro:"KADERİNE MEYDAN OKU.",
+    outro:"KULÜBÜNÜN HİKÂYESİNİ YAZ.",
     footer:"Her koşuda yeni bir futbol hikâyesi.",
     slides:[
-      ["HER KOŞUDA YENİ BİR HİKÂYE","Dizilişini seç. Riskini belirle."],
-      ["KADRONU KUR","Oyuncularını seç, kimyanı şekillendir."],
-      ["RAKİPLERİNİ GÖR","Grubunu geç, finale yaklaş."],
-      ["TAKTİĞİNİ SAHAYA YANSIT","Kadroyu yönet. Maça çık."],
-      ["HER OYUNCU BİR KARAR","Profilleri incele, doğru hamleyi yap."],
+      ["HER KOŞUDA YENİ BİR HİKÂYE","Başkanını ve kulüp hedefini seç."],
+      ["KADRONU KUR","Gücü, fiyatı ve kimyayı dengele."],
+      ["RAKİPLERİNİ GÖR","Grubu geç, elemelere hazırlan."],
+      ["TAKTİĞİNİ SAHAYA YANSIT","Antrenman yap, maçı yönet."],
+      ["KARİYERİNİ GELİŞTİR","Direktifleri tamamla, kulübünü büyüt."],
     ],
   },
   {
     code:"en-US",
     intro:"BUILD YOUR SQUAD. CHASE THE CUP.",
-    outro:"DEFY YOUR DESTINY.",
+    outro:"WRITE YOUR CLUB'S STORY.",
     footer:"A new football story in every run.",
     slides:[
-      ["A NEW STORY EVERY RUN","Choose your shape. Set your risk."],
-      ["BUILD YOUR SQUAD","Pick your players. Shape your chemistry."],
-      ["MEET YOUR RIVALS","Escape the group. Reach the final."],
-      ["PUT YOUR TACTICS ON THE PITCH","Manage the squad. Play the match."],
-      ["EVERY PLAYER IS A DECISION","Read the profiles. Make the right move."],
+      ["A NEW STORY EVERY RUN","Choose your chairman and club objective."],
+      ["BUILD YOUR SQUAD","Balance power, price, and chemistry."],
+      ["MEET YOUR RIVALS","Escape the group. Prepare for knockouts."],
+      ["PUT YOUR TACTICS ON THE PITCH","Train the squad. Manage the match."],
+      ["DEVELOP YOUR CAREER","Complete directives. Grow the club."],
+    ],
+  },
+  {
+    code:"es-ES",
+    intro:"CREA TU EQUIPO. VE POR LA COPA.",
+    outro:"ESCRIBE LA HISTORIA DE TU CLUB.",
+    footer:"Una nueva historia de fútbol en cada partida.",
+    slides:[
+      ["UNA HISTORIA NUEVA EN CADA PARTIDA","Elige presidente y objetivo del club."],
+      ["CREA TU EQUIPO","Equilibra nivel, precio y química."],
+      ["CONOCE A TUS RIVALES","Supera el grupo y prepara las eliminatorias."],
+      ["LLEVA TU TÁCTICA AL CAMPO","Entrena al equipo y dirige el partido."],
+      ["DESARROLLA TU CARRERA","Cumple directivas y haz crecer el club."],
+    ],
+  },
+  {
+    code:"de-DE",
+    intro:"BAU DEIN TEAM. HOL DIR DEN POKAL.",
+    outro:"SCHREIBE DIE GESCHICHTE DEINES CLUBS.",
+    footer:"In jedem Run eine neue Fußballgeschichte.",
+    slides:[
+      ["JEDER RUN SCHREIBT GESCHICHTE","Wähle Präsident und Clubziel."],
+      ["BAU DEIN TEAM","Balanciere Stärke, Preis und Chemie."],
+      ["KENNE DEINE GEGNER","Überstehe die Gruppe und plane die K.-o.-Runde."],
+      ["BRING DEINE TAKTIK AUF DEN PLATZ","Trainiere das Team und führe das Spiel."],
+      ["ENTWICKLE DEINE KARRIERE","Erfülle Direktiven und baue den Club aus."],
+    ],
+  },
+  {
+    code:"it-IT",
+    intro:"CREA LA ROSA. PUNTA ALLA COPPA.",
+    outro:"SCRIVI LA STORIA DEL TUO CLUB.",
+    footer:"Una nuova storia di calcio a ogni run.",
+    slides:[
+      ["UNA NUOVA STORIA A OGNI RUN","Scegli presidente e obiettivo del club."],
+      ["CREA LA ROSA","Bilancia forza, prezzo e chimica."],
+      ["CONOSCI GLI AVVERSARI","Supera il girone e prepara le eliminatorie."],
+      ["PORTA LA TATTICA IN CAMPO","Allena la squadra e gestisci la partita."],
+      ["SVILUPPA LA CARRIERA","Completa le direttive e fai crescere il club."],
     ],
   },
 ];
@@ -79,10 +119,10 @@ function sceneMarkup(locale,images){
   return `${intro}${slides}${outro}`;
 }
 
-function documentHtml(locale,images){
+function documentHtml(locale,images,keyArt){
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     *{box-sizing:border-box}html,body{width:${WIDTH}px;height:${HEIGHT}px;margin:0;overflow:hidden;background:#0a1118}body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#f3f5f4}
-    main{position:relative;width:100%;height:100%;overflow:hidden;background:radial-gradient(circle at 78% 45%,rgba(78,155,101,.2),transparent 38%),linear-gradient(125deg,#101d28,#0a1118)}
+    main{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(90deg,rgba(10,17,24,.74),rgba(10,17,24,.14)),url('${keyArt}') center/cover no-repeat,#0a1118}
     main::before{content:"";position:absolute;inset:-90px;opacity:.3;background-image:linear-gradient(rgba(104,117,124,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(104,117,124,.14) 1px,transparent 1px);background-size:72px 72px;transform:rotate(-4deg)}
     main::after{content:"";position:absolute;right:-150px;top:-320px;width:650px;height:560px;border:64px solid rgba(242,74,40,.18);transform:rotate(29deg)}
     .scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity,transform}
@@ -120,6 +160,7 @@ function documentHtml(locale,images){
 async function renderLocale(browser,locale){
   const phoneDir=path.join(STORE,"graphics","localized",locale.code,"phone");
   const images=SCREENSHOTS.map(file=>dataUrl(path.join(phoneDir,file)));
+  const keyArt=`data:image/png;base64,${fs.readFileSync(KEY_ART).toString("base64")}`;
   const context=await browser.newContext({viewport:{width:WIDTH,height:HEIGHT},deviceScaleFactor:1,colorScheme:"dark"});
   const output=path.join(OUTPUT,`copa-life-promo-${locale.code}.mp4`);
   const poster=path.join(OUTPUT,`copa-life-promo-${locale.code}-poster.jpg`);
@@ -133,7 +174,7 @@ async function renderLocale(browser,locale){
   encoder.stderr.on("data",chunk=>{encoderError+=chunk.toString();});
   try{
     const page=await context.newPage();
-    await page.setContent(documentHtml(locale,images),{waitUntil:"load"});
+    await page.setContent(documentHtml(locale,images,keyArt),{waitUntil:"load"});
     await page.evaluate(()=>document.fonts.ready);
     for(let frame=0;frame<TOTAL_FRAMES;frame++){
       await page.evaluate(time=>window.renderFrame(time),frame/FPS*1000);

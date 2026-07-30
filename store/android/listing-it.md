@@ -6,26 +6,29 @@ Copa Life
 
 ## Descrizione breve
 
-Crea una nuova rosa a ogni run, scegli la tattica e punta alla coppa.
+Crea la rosa, guida il club e trasforma ogni run in una storia di coppa.
 
 ## Descrizione completa
 
-Copa Life è un gioco indipendente roguelite di gestione della rosa, basato su lanci di dadi, scelte di mercato e decisioni tattiche.
+Costruisci il tuo club da un inizio incerto e scrivi una nuova storia di calcio a ogni run.
 
-Scegli paese, modulo e presidente a ogni run. Lancia i dadi, confronta i candidati, gestisci il budget e completa l'undici titolare. Chimica, tattiche, carte, fiducia del presidente ed eventi inattesi rendono ogni cammino verso la coppa diverso.
+Copa Life è un gioco indipendente roguelite di gestione calcistica in cui ogni giocatore, contratto, allenamento e scelta tattica può cambiare il cammino verso la coppa. Scegli paese, modulo e presidente. Completa l'undici titolare, proteggi il budget, migliora la chimica e preparati al prossimo avversario.
 
-Caratteristiche:
+Il presidente definisce il carattere del club. Le direttive guidano la carriera a lungo termine. Allenamento e analisi dell'avversario migliorano la squadra prima della partita. I profili mostrano i punti di forza dietro i numeri, mentre carte, infortuni, squalifiche, occasioni di mercato ed eventi inattesi ti obbligano ad adattarti.
 
-- Nuovi giocatori e nuove decisioni a ogni run
-- Più paesi, moduli e profili di presidente
-- Equilibrio tra budget, chimica e tattica
-- Profili giocatore copa a sei dimensioni
-- Carte, eventi partita e svolte imprevedibili
-- Tre gare del girone; poi quarti, semifinale e finale
-- Tema chiaro e scuro
-- Nessun account o accesso richiesto
+Vivi tutto il viaggio verso la coppa:
 
-Ghost Clubs è una funzione online facoltativa. Con il tuo consenso esplicito, un club completato può apparire come avversario in una futura run di un altro giocatore. Puoi segnalare un nome inappropriato, nasconderlo definitivamente sul dispositivo ed eliminare i dati Ghost dalle Impostazioni. La condivisione è disattivata per impostazione predefinita.
+- Crea una rosa diversa a ogni run
+- Bilancia cassa, chimica, forza della rosa e fiducia del presidente
+- Confronta profili dei giocatori e offerte di mercato
+- Sviluppa la carriera con direttive e traguardi del club
+- Allena la squadra e analizza il prossimo avversario
+- Prendi decisioni tattiche e nello spogliatoio
+- Supera fase a gironi e turni a eliminazione
+- Sfida altri club nella Copa Arena online facoltativa
+- Gioca in italiano, inglese, turco, spagnolo o tedesco
+
+Nessun cammino verso il trofeo è uguale. Accetta l'incarico, prendi le decisioni difficili e scopri fin dove può arrivare il tuo club.
 
 Copa Life è un gioco indipendente. Non è affiliato né approvato da giocatori, club, leghe, federazioni o competizioni.
 
@@ -34,5 +37,5 @@ Copa Life è un gioco indipendente. Non è affiliato né approvato da giocatori,
 - Tipo: Gioco
 - Categoria: Sport
 - Prezzo: Gratis
-- Pubblicità: Sì — annuncio interstitial a schermo intero al termine di una run
+- Pubblicità: Sì — interstitial dopo una run completata e rilancio premiato facoltativo
 - Acquisti in-app: No

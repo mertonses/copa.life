@@ -1,6 +1,6 @@
 {
-  "buildNumber": 5,
-  "marketingVersion": "1.3.0",
+  "buildNumber": 6,
+  "marketingVersion": "1.3.1",
   "bundleId": "life.copa.app",
   "minimumOSVersion": "15.0"
 }

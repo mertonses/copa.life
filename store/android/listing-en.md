@@ -6,26 +6,29 @@ Copa Life
 
 ## Short description
 
-Build a new squad each run, shape your tactics, and chase the cup.
+Build your squad, manage the club, and turn every run into a cup story.
 
 ## Full description
 
-Copa Life is an independent roguelite football squad-management game built around dice rolls, squad choices, and tactical decisions.
+Build a club from uncertain beginnings and write a new football story in every run.
 
-Choose your country, formation, and chairman for every run. Roll for players, make your picks, manage the budget, and complete your starting eleven. Squad chemistry, tactics, cards, chairman trust, and unexpected events make every road to the cup different.
+Copa Life is an independent roguelite football-management game where every player, contract, training session, and tactical call can change your road to the cup. Choose your country, formation, and chairman. Assemble your starting eleven, protect the budget, build chemistry, and prepare for the next rival.
 
-Features:
+Your chairman sets the tone. Club directives shape your long-term career. Training and opponent analysis sharpen the squad before matchday. Player profiles reveal the strengths behind the numbers, while cards, injuries, suspensions, market opportunities, and unexpected events force you to adapt.
 
-- New player choices and decisions in every run
-- Multiple countries, formations, and chairman profiles
-- Budget, squad chemistry, and tactical trade-offs
-- Six-dimensional Copa Life player profiles
-- Cards, match events, and unpredictable turns
-- Three group matches followed by the round of 16, quarter-final, semi-final and final
-- Light and dark themes
-- No account or sign-in required
+Play the complete cup journey:
 
-Ghost Clubs is an optional online feature. With your explicit consent, a completed club can appear as an opponent in another player's future run. You can report an inappropriate club name, hide it permanently on your device, and delete your Ghost data in Settings. Ghost sharing is off by default.
+- Build a different squad in every run
+- Balance cash, chemistry, squad power, and chairman trust
+- Compare clear player profiles and transfer offers
+- Develop your Club Career through directives and milestones
+- Train the team and analyze the next opponent
+- Make matchday tactical and dressing-room decisions
+- Survive the group stage and knockout rounds
+- Challenge other clubs in the optional online Copa Arena
+- Play in English, Turkish, Spanish, German, or Italian
+
+No two roads to the trophy are the same. Take the job, make the difficult calls, and see how far your club can go.
 
 Copa Life is an independent game. It is not affiliated with or endorsed by any player, club, league, federation, or competition.
 
@@ -34,5 +37,5 @@ Copa Life is an independent game. It is not affiliated with or endorsed by any p
 - Type: Game
 - Category: Sports
 - Price: Free
-- Ads: Yes — full-screen interstitial after a completed run
+- Ads: Yes — interstitial after a completed run and optional rewarded reroll
 - In-app purchases: No

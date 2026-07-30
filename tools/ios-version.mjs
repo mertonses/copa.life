@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FILE = path.join(ROOT, "release", "ios-version.json");
+const XCODE_PROJECT = path.join(ROOT, "ios", "App", "App.xcodeproj", "project.pbxproj");
 const VALID_BUMPS = new Set(["patch", "minor", "major"]);
 const read = () => JSON.parse(fs.readFileSync(FILE, "utf8"));
 const validate = (value) => {
@@ -33,4 +34,10 @@ if (bump === "major") {
 }
 const next = { ...current, buildNumber: current.buildNumber + 1, marketingVersion: parts.join(".") };
 fs.writeFileSync(FILE, `${JSON.stringify(next, null, 2)}\n`);
+if (fs.existsSync(XCODE_PROJECT)) {
+  const project = fs.readFileSync(XCODE_PROJECT, "utf8")
+    .replace(/CURRENT_PROJECT_VERSION = \d+;/g, `CURRENT_PROJECT_VERSION = ${next.buildNumber};`)
+    .replace(/MARKETING_VERSION = \d+\.\d+\.\d+;/g, `MARKETING_VERSION = ${next.marketingVersion};`);
+  fs.writeFileSync(XCODE_PROJECT, project);
+}
 console.log(`iOS version bumped: ${current.marketingVersion} (${current.buildNumber}) -> ${next.marketingVersion} (${next.buildNumber})`);

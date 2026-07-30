@@ -397,6 +397,7 @@ test("chairman picker separates personality from mechanics and collapses safely 
       footerPosition:getComputedStyle(footer).position,
       horizontalOverflow:sheet.scrollWidth-sheet.clientWidth,
       sheetRight:sheet.getBoundingClientRect().right,
+      controlsWithinModal:counter.left>=modalRect.left-1&&close.right<=modalRect.right+1&&counter.top>=modalRect.top-1&&close.bottom<=modalRect.bottom+1,
       viewportWidth:window.innerWidth,
     };
   });
@@ -416,6 +417,7 @@ test("chairman picker separates personality from mechanics and collapses safely 
   expect(layout.contractOrder).toBe(true);
   expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(layout.sheetRight).toBeLessThanOrEqual(layout.viewportWidth+1);
+  expect(layout.controlsWithinModal).toBe(true);
   if(testInfo.project.name.includes("mobile")){
     expect(layout.mechanics.top).toBeGreaterThanOrEqual(layout.persona.bottom-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(88);

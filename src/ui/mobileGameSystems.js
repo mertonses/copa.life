@@ -292,13 +292,15 @@
     const labels={career:tr()?"KARİYER":"CAREER",mastery:tr()?"USTALIK":"MASTERY",museum:tr()?"MÜZE":"MUSEUM",world:tr()?"DÜNYA":"WORLD"};
     const basePanel=root.CopaMeta&&typeof root.CopaMeta.renderPanelHTML==="function"?root.CopaMeta.renderPanelHTML(activeCareerSection):`<div class="mobile-career-metrics"><article><small>${tr()?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><b>${summary&&summary.level||1}</b></article><article><small>${tr()?"İTİBAR":"REPUTATION"}</small><b>${summary&&summary.reputation||0}</b></article><article><small>${tr()?"LİSANS":"LICENCES"}</small><b>${summary&&summary.licenses||0}</b></article></div>`;
     const fullPanel=basePanel;
-    panel.innerHTML=`<header><span>${tr()?"KULÜP KARİYERİ":"CLUB CAREER"}</span><h2>${tr()?"Mirasın, tek ekranda.":"Your legacy, in one place."}</h2></header><nav class="mobile-career-tabs" aria-label="${tr()?"Kariyer bölümleri":"Career sections"}">${Object.keys(labels).map(id=>`<button type="button" class="${id===activeCareerSection?"active":""}" onclick="CopaMobileShell.openCareerSection('${id}')">${labels[id]}</button>`).join("")}</nav><div class="mobile-career-panel">${fullPanel}</div>`;
+    panel.innerHTML=`<div class="meta-progress-modal meta-tab-${activeCareerSection} mobile-career-inline"><header class="meta-progress-head"><div><div class="kithdr">${tr()?"Kulüp Kariyeri":"Club Career"}</div><div class="kitsub">${tr()?"Kariyerinin kalıcı arşivi":"Your permanent career archive"}</div></div><div class="meta-head-actions"><button class="meta-save-menu" type="button" onclick="CopaMeta.openExport()" aria-label="${tr()?"Kayıt seçenekleri":"Save options"}"><span aria-hidden="true">⇅</span><span>${tr()?"KAYIT":"SAVE"}</span></button></div></header><nav class="meta-tabs" aria-label="${tr()?"Kariyer bölümleri":"Career sections"}">${Object.keys(labels).map(id=>`<button type="button" class="${id===activeCareerSection?"active":""}" aria-current="${id===activeCareerSection?"page":"false"}" onclick="CopaMobileShell.openCareerSection('${id}')">${labels[id]}</button>`).join("")}</nav><div class="meta-tab-panel">${fullPanel}</div></div>`;
     panel.dataset.section=activeCareerSection;
     if(activeCareerSection==="world"&&root.GhostClubs&&typeof root.GhostClubs.renderLeaderboard==="function"){
       const world=panel.querySelector("#metaWorldPanel");if(world)root.GhostClubs.renderLeaderboard(world);
     }
   }
   function openCareerSection(section){activeCareerSection=["career","mastery","museum","world"].includes(section)?section:"career";renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
+  function refreshCareerSection(section=activeCareerSection){activeCareerSection=["career","mastery","museum","world"].includes(section)?section:activeCareerSection;const panel=document.getElementById("mobileCareerRoute");if(panel)panel.dataset.section="";renderCareerRoute();}
+  function isCareerRouteActive(){const hub=document.getElementById("hub"),panel=document.getElementById("mobileCareerRoute");return !!(hub&&panel&&!hub.classList.contains("hidden")&&hub.dataset.mobileRoute==="career");}
   function enhanceHub(){
     const hub=document.getElementById("hub");
     if(!hub||hub.classList.contains("hidden"))return;
@@ -481,6 +483,6 @@
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
-  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,enhanceHub,enhanceDraftControls,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
+  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,refreshCareerSection,isCareerRouteActive,enhanceHub,enhanceDraftControls,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })(window);

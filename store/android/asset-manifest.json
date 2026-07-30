@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-07-22T13:34:25.679Z",
+  "generatedAt": "2026-07-30T20:17:24.155Z",
   "sourceBuild": {
     "schema_version": 1,
     "platform": "android",
-    "build_version": "894e6dc61119",
-    "build_fingerprint": "894e6dc611190e24e6cdc2de72bfba19055a80e47d543ec1d8f7555890f7cca9",
-    "build_input_count": 651,
-    "source_fingerprint": "400be8366dd7b8251bee12df03dd77eb047187ec5ea9a83a68f607e2f2c8db9b",
-    "source_file_count": 546,
+    "build_version": "1a7493addae7",
+    "build_fingerprint": "1a7493addae7278ee3c2dda26cbd43bc239a3faa5413caaf5346180ff31e6c66",
+    "build_input_count": 683,
+    "source_fingerprint": "fb0fc44a97624f4a8d8b4c8dafeaa3c2bb1b684f28e4caefbd84228317b3012a",
+    "source_file_count": 577,
     "source_commit": null,
     "package_id": "life.copa.app",
-    "version_code": 1,
-    "version_name": "1.0.0"
+    "version_code": 25,
+    "version_name": "1.4.1"
   },
   "locales": [
     "tr-TR",
@@ -34,568 +34,568 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 88148,
-      "sha256": "f955dd78d0824e6c842d3498baaf4ccdbf714f2d7ea7f1b5e24fc40eca314055"
+      "bytes": 183726,
+      "sha256": "23b1c75a0c1feac5ef907876dc18b23479b16d214011c2470865982691b1c2ea"
     },
     {
       "file": "graphics/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 235997,
-      "sha256": "4a326dd6dfa6f4cad968676a7015215fa1903cb2dd6541428946555592a174da"
+      "bytes": 152178,
+      "sha256": "f65ce816ea57ab03fb51c7fc985f486f29a3a93e4b518df4c9ba768244f78ac1"
     },
     {
       "file": "graphics/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 215295,
-      "sha256": "763b192c79649fba705893f3cb5c1c8fe18178a14be0071ce31f5ba91f3af591"
+      "bytes": 196462,
+      "sha256": "e7d084920390498f5536795783cd3149e87e3b05eb93ff00eac00cdf3fc11f41"
     },
     {
       "file": "graphics/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 195105,
-      "sha256": "2d8ed5c90a382d7ed4421915660a4d08997f99b0bebcb0e18daed10fe2635164"
+      "bytes": 147525,
+      "sha256": "3eacabd3b33d55b29e4d32489c6633d0d27363af96bb7afc30bbf06fe58d4627"
     },
     {
       "file": "graphics/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 258352,
-      "sha256": "693c0eaf898b2ae9e87278920ee993ad0c3dfe05dd55da76d47d9495909bef91"
+      "bytes": 261229,
+      "sha256": "6ead1ac4aa20f014b56e6700a4597f273f47a1a0ca47fc3ac5c29e0f26ee48e5"
     },
     {
       "file": "graphics/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 109787,
-      "sha256": "ad45a1335e00f386b395ca25074f65c118bffbf4ab72ae664b5acb6cda0f01f8"
+      "bytes": 123416,
+      "sha256": "1807cb5597a9f114869c1e90a87edb193519357f7a2058633f22e8e53c952373"
     },
     {
       "file": "graphics/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 212311,
-      "sha256": "2075e20bccbd8a42a04e5f717e04e379e3bfe349e997a682608a2a5bcf695165"
+      "bytes": 129659,
+      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
     },
     {
       "file": "graphics/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 155462,
-      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
+      "bytes": 160033,
+      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
     },
     {
       "file": "graphics/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 175989,
-      "sha256": "c835242332f1c41393bf48e19f773e91fb602ac94cdb77d28170682c12052374"
+      "bytes": 153900,
+      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
     },
     {
       "file": "graphics/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 249896,
-      "sha256": "342943caddb70ba676df3adf3389ea02e69901b583383c4438474d065a9fffde"
+      "bytes": 176349,
+      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
     },
     {
       "file": "graphics/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167130,
-      "sha256": "00df31fe509a8ca65d4fcf8a351d38305bc7ef2fc01c1f194e38617f61b75e18"
+      "bytes": 82105,
+      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
     },
     {
       "file": "graphics/localized/tr-TR/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 88148,
-      "sha256": "f955dd78d0824e6c842d3498baaf4ccdbf714f2d7ea7f1b5e24fc40eca314055"
+      "bytes": 183726,
+      "sha256": "23b1c75a0c1feac5ef907876dc18b23479b16d214011c2470865982691b1c2ea"
     },
     {
       "file": "graphics/localized/tr-TR/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 235997,
-      "sha256": "4a326dd6dfa6f4cad968676a7015215fa1903cb2dd6541428946555592a174da"
+      "bytes": 152178,
+      "sha256": "f65ce816ea57ab03fb51c7fc985f486f29a3a93e4b518df4c9ba768244f78ac1"
     },
     {
       "file": "graphics/localized/tr-TR/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 215295,
-      "sha256": "763b192c79649fba705893f3cb5c1c8fe18178a14be0071ce31f5ba91f3af591"
+      "bytes": 196462,
+      "sha256": "e7d084920390498f5536795783cd3149e87e3b05eb93ff00eac00cdf3fc11f41"
     },
     {
       "file": "graphics/localized/tr-TR/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 195105,
-      "sha256": "2d8ed5c90a382d7ed4421915660a4d08997f99b0bebcb0e18daed10fe2635164"
+      "bytes": 147525,
+      "sha256": "3eacabd3b33d55b29e4d32489c6633d0d27363af96bb7afc30bbf06fe58d4627"
     },
     {
       "file": "graphics/localized/tr-TR/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 258352,
-      "sha256": "693c0eaf898b2ae9e87278920ee993ad0c3dfe05dd55da76d47d9495909bef91"
+      "bytes": 261229,
+      "sha256": "6ead1ac4aa20f014b56e6700a4597f273f47a1a0ca47fc3ac5c29e0f26ee48e5"
     },
     {
       "file": "graphics/localized/tr-TR/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 109787,
-      "sha256": "ad45a1335e00f386b395ca25074f65c118bffbf4ab72ae664b5acb6cda0f01f8"
+      "bytes": 123416,
+      "sha256": "1807cb5597a9f114869c1e90a87edb193519357f7a2058633f22e8e53c952373"
     },
     {
       "file": "graphics/localized/tr-TR/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 212311,
-      "sha256": "2075e20bccbd8a42a04e5f717e04e379e3bfe349e997a682608a2a5bcf695165"
+      "bytes": 129659,
+      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
     },
     {
       "file": "graphics/localized/tr-TR/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 155462,
-      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
+      "bytes": 160033,
+      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
     },
     {
       "file": "graphics/localized/tr-TR/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 175989,
-      "sha256": "c835242332f1c41393bf48e19f773e91fb602ac94cdb77d28170682c12052374"
+      "bytes": 153900,
+      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
     },
     {
       "file": "graphics/localized/tr-TR/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 249896,
-      "sha256": "342943caddb70ba676df3adf3389ea02e69901b583383c4438474d065a9fffde"
+      "bytes": 176349,
+      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
     },
     {
       "file": "graphics/localized/tr-TR/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167130,
-      "sha256": "00df31fe509a8ca65d4fcf8a351d38305bc7ef2fc01c1f194e38617f61b75e18"
+      "bytes": 82105,
+      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
     },
     {
       "file": "graphics/localized/en-US/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 89693,
-      "sha256": "83293241a67cc634851f6c6f7d8bcd894b309b6751ecfd99fe5cb90ce02b3718"
+      "bytes": 184912,
+      "sha256": "c5c137a62e356b01870a1a2f5aab7106a6e0f31b2a416d12eeb4a575a1de5373"
     },
     {
       "file": "graphics/localized/en-US/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 241575,
-      "sha256": "4b4e19bf906aa405fc7642228f6e06a6caef0117ee78c535719882e926571dc4"
+      "bytes": 153083,
+      "sha256": "9f50c86e7544f31a56415e23b19c0d121ad8116c71269950aaa99eef65a7c9a1"
     },
     {
       "file": "graphics/localized/en-US/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 219773,
-      "sha256": "878fe6c712358694d53ace7ddc71efa56a6932cbfa8fefa55aa4c382fcc34d1b"
+      "bytes": 194349,
+      "sha256": "8689b49fe4535707da79394a505e8d6518baa60988e53d91b46d803eddafd2a4"
     },
     {
       "file": "graphics/localized/en-US/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 206280,
-      "sha256": "2920e2ce5b39bf4226548dfc74345f13571d8501453c045c97aa43bc46eb852f"
+      "bytes": 157566,
+      "sha256": "714d76490fa208412d9cfe3d6a9f97f55dad7124ce5fe1bf45eeef119d0ffa42"
     },
     {
       "file": "graphics/localized/en-US/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 256467,
-      "sha256": "782816ed4cf92e7d1e5408cf8408e765d338bbf02731c3e4e563561b1092466c"
+      "bytes": 265472,
+      "sha256": "343e0e9369d4b5c39546b24a3878c44d1d198880ba303720156c2250405eb14a"
     },
     {
       "file": "graphics/localized/en-US/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 110553,
-      "sha256": "81aeb2f87f726edcd4d7c11976eb7207b64a62dd94a278caf6ada8be471a6f63"
+      "bytes": 121537,
+      "sha256": "1dec048a9693fbccec52b5169dce15f3763cb92ff0b07b7bc82d3c1a551ea609"
     },
     {
       "file": "graphics/localized/en-US/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 219933,
-      "sha256": "64c0ed5e0467e8710ad5e5453ad6dcd2437121b0b5d65fc6047c06105097a137"
+      "bytes": 130663,
+      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
     },
     {
       "file": "graphics/localized/en-US/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 156489,
-      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+      "bytes": 158931,
+      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
     },
     {
       "file": "graphics/localized/en-US/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 184009,
-      "sha256": "b48cdaf981ee03bca0ca7f4b57299ce5b54b3f08b4c2c63defc8d1210b55a1e2"
+      "bytes": 158060,
+      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
     },
     {
       "file": "graphics/localized/en-US/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 246030,
-      "sha256": "444550a02bab1d570bb6208b6ed27b818a3e36973101d6df36178cb26d676a9d"
+      "bytes": 186970,
+      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
     },
     {
       "file": "graphics/localized/en-US/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 169702,
-      "sha256": "ee473c11a2b5ca655360aeb6904fc8795508b840a9f1291ca4ceb440367012a6"
+      "bytes": 87612,
+      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
     },
     {
       "file": "graphics/localized/es-ES/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 88924,
-      "sha256": "9662c73147bf8ae17da33e50ea5bac8d05c00cfd81ce56a4161990c5f1ad79c5"
+      "bytes": 183862,
+      "sha256": "b353ee7b2a65d092858a6a20da5c87ba408bcb4d1f6710a1e1242f7f52f72f8e"
     },
     {
       "file": "graphics/localized/es-ES/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 260040,
-      "sha256": "fc5f3ff3be6172e8248e5c01fffd520dbdbef5cf22eb44100ea47fd84a21c87a"
+      "bytes": 153119,
+      "sha256": "a2806df9b6709b40753d20293a9c26c1eb316f33e626ce3193aabd821ffe4bfd"
     },
     {
       "file": "graphics/localized/es-ES/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 218590,
-      "sha256": "597a31a95875268c4ed6f6e07273a42848bab616253f5da0fe71227848775ca0"
+      "bytes": 203384,
+      "sha256": "240e1cde47758ee53aa6fb371ad208a658a26a9a75d286f49077947379093fbd"
     },
     {
       "file": "graphics/localized/es-ES/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 223804,
-      "sha256": "908823fb5f32ab9f38c03abd2bc7d45baba535974ef337cad0eb2f8f352247ee"
+      "bytes": 173329,
+      "sha256": "357cfa26007cf07ecd59dc2f58d5937994958c99497b02d7bb2a94692c33db02"
     },
     {
       "file": "graphics/localized/es-ES/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 263347,
-      "sha256": "02e7c02d3ae89d6b43d95c70621b10ecc820e1309489fa17857050440baaf0fa"
+      "bytes": 264994,
+      "sha256": "85bb9620c5f105406ae56d3c0305c5a50f27b5ddcc0d7b0beae17220ee8f29e2"
     },
     {
       "file": "graphics/localized/es-ES/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 116707,
-      "sha256": "ba554f4d5290baa7b0990a51f7634399ef5545bb5459289720c14ffaaf2bd8fa"
+      "bytes": 122269,
+      "sha256": "82b8eec876eb699c6468a19c16e99efe85f76b18503b12fc11a43c23e760e1f9"
     },
     {
       "file": "graphics/localized/es-ES/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 231946,
-      "sha256": "badfb14ddf4ab0191e31291847b90496e2adfce4ea4244c1ed6938fd4b2f7c0e"
+      "bytes": 131303,
+      "sha256": "a728e98d3541c7ecd28a1c2fb6ac72fddc2ee0f6a373bd638af61d9de39fbe8c"
     },
     {
       "file": "graphics/localized/es-ES/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 155747,
-      "sha256": "1a66a3a512886835338deebb27a3358660855fbb1e4d577c0108e1064fd2d4ed"
+      "bytes": 161176,
+      "sha256": "aad55e56c4e9fe963b9b35c2015ab766c7322ed34dc6252ceefeed20b3074985"
     },
     {
       "file": "graphics/localized/es-ES/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 195989,
-      "sha256": "291acc348c41402583cb972d9a5bc37e186a56b34b5ae04fd72eb96e72fff15a"
+      "bytes": 164299,
+      "sha256": "bb7bbd928d3380f6185edd7e667de32ad98ea150534e4d0c742252115064146c"
     },
     {
       "file": "graphics/localized/es-ES/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 259561,
-      "sha256": "7286f2216372cd82638a265a6033c531456cbcf17b5c532e8a2e39e4b229c7d8"
+      "bytes": 185275,
+      "sha256": "a98127e47b4a2fb17c9450e6d5352fcb9fc5f401ae57b471ccb09af37d26ab6d"
     },
     {
       "file": "graphics/localized/es-ES/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 172738,
-      "sha256": "2c3dec0ddca4c5d91a6502d70b0964d1034487851e03374cdd4df5cbf979fc58"
+      "bytes": 77886,
+      "sha256": "da61717f3c23c09e0d6f95b90d4d23688f3bd63ac8d3dfbd2ac3e9757edca3ff"
     },
     {
       "file": "graphics/localized/de-DE/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 90494,
-      "sha256": "dc0af197ec01b1337c41c65344feb30f4720eab0778b3bb280d421be37a2a38b"
+      "bytes": 185848,
+      "sha256": "b2f0e787cb75d537e36747db9ccfc15b12647ab341e88d89c528c7fb7e1a055b"
     },
     {
       "file": "graphics/localized/de-DE/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 280556,
-      "sha256": "55c2c5f636154893d72851fb46669e1b14281b65d7def6c70da514112041f93f"
+      "bytes": 153080,
+      "sha256": "a130fc41ac23b86b9903cbe65860760ad74c576c6e36ca096b19b494b6b5baef"
     },
     {
       "file": "graphics/localized/de-DE/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 229678,
-      "sha256": "fc867bce50ff4f92aeabbc4381b3c472e701acd950da329a7c31120ef1ce73dd"
+      "bytes": 202488,
+      "sha256": "e266939eb5762746658087d6818e848ceb01cfc1bde8eb89651ac7f215004e4c"
     },
     {
       "file": "graphics/localized/de-DE/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 234615,
-      "sha256": "25140ff54189c23d949453a4f772e526d84df820c6e6f0db3ff9d2274160e19b"
+      "bytes": 163305,
+      "sha256": "98b85000e25656fc93772340894d25ec0ebb2203a6ac19c3121cc5aec98a778d"
     },
     {
       "file": "graphics/localized/de-DE/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 258957,
-      "sha256": "6401d4f55169ae66bae6fdad3fb6ab79cea09feee02e84407d793ba2f0c9bf86"
+      "bytes": 269950,
+      "sha256": "2484a3bd530ab44fe17878e4fdb5290331e0ef853bcd59d4b6cc7aa0e3268119"
     },
     {
       "file": "graphics/localized/de-DE/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 93799,
-      "sha256": "3efdfca024f3ea21c7e382b29aac29f5bcd787733edb3f4f9abe2d3f587cc9ea"
+      "bytes": 118605,
+      "sha256": "d99d6c364f50b34a8aa1b4d9c4cc332eafdfc1eac3869fa73328d170fca5e90b"
     },
     {
       "file": "graphics/localized/de-DE/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 239104,
-      "sha256": "f8683833ff5158e117610bf63324cc3f42aa5a50b8e65985364c9bb5d7b42850"
+      "bytes": 132569,
+      "sha256": "db77097191d8216051333f3d4d9be8d887dafe52adcbed3e71bf554a8b42f8b3"
     },
     {
       "file": "graphics/localized/de-DE/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158881,
-      "sha256": "c373393621de2707a72faf2c7f93335a83f559e36d5a604bcefacf47572763b1"
+      "bytes": 160594,
+      "sha256": "9c899977859a29963ef3cc6ba13a9e16f2f84e0ff109a435dcff415c98b04f67"
     },
     {
       "file": "graphics/localized/de-DE/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 205760,
-      "sha256": "1bfd764dc5251c5d662112de03f072c5f4be2ccd6f190dd7f9d0ecd16594bffd"
+      "bytes": 167047,
+      "sha256": "b9becc39e91a00e51a134193eaf4da74ce888a8ea5c038d5ae727b6c7a56192e"
     },
     {
       "file": "graphics/localized/de-DE/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 245845,
-      "sha256": "ac6f912ed8f6b54b08b237a5acce59b29cbfa36b259d2f00f87a827836a96987"
+      "bytes": 180046,
+      "sha256": "6567d983c9fecd7c43d6378e39076cd221c478227e9663adfb75fb7fcbaf5c82"
     },
     {
       "file": "graphics/localized/de-DE/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158500,
-      "sha256": "9f26eff1483728de6ca7f0c26832154be3f30ff146526d52657aefba2c9969eb"
+      "bytes": 81569,
+      "sha256": "7fb778332b85139dd77080ca2e0431ad71eb5527dfb1ef5bc3dd79ca45230f3d"
     },
     {
       "file": "graphics/localized/it-IT/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 89679,
-      "sha256": "6d8bb68cfe33fc313a1a67485d549d6d0686119671b28758218aacfab00c16c0"
+      "bytes": 184834,
+      "sha256": "85d9e6a118485e987bbf9eb0c57a2c30b59b14634827f79ad0d3755a2d87cee0"
     },
     {
       "file": "graphics/localized/it-IT/phone/01-run-setup.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 250402,
-      "sha256": "db67c41e4b368185fb2450e1217a7edd4f6f8977d2c16667174418502b5955f0"
+      "bytes": 152990,
+      "sha256": "57813dd496c05f4cf2f369bedaecac340369873ab812289d319997a7b0a58bfd"
     },
     {
       "file": "graphics/localized/it-IT/phone/02-player-draft.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 221304,
-      "sha256": "f83406eac08345c835e88010abed782a579aec130ba351889fbf2b6ba9fd4691"
+      "bytes": 203513,
+      "sha256": "3c454e923323617a929c2428075eb31e213a720b8f6bb8fc008a3d8153d1f3fd"
     },
     {
       "file": "graphics/localized/it-IT/phone/03-group-draw.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 230707,
-      "sha256": "dc227e895a12741ef9b376bb0be57a2fb5d8c36afe6459833749151e51f0d70e"
+      "bytes": 171593,
+      "sha256": "d73256fa9a78d9fc17747e737a0c3f510876b1dc1fc7d8248be69187d4c4e8bf"
     },
     {
       "file": "graphics/localized/it-IT/phone/04-match-hub.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 260596,
-      "sha256": "6aa051c7213954fa0023dad6d9018eb3ba809c8cc493c0245530360fa97eb490"
+      "bytes": 267616,
+      "sha256": "b0d754b5d843481f502854e8f1d24db1dc8b8216c8883be0373ab9ea13284193"
     },
     {
       "file": "graphics/localized/it-IT/phone/05-player-profile.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 108836,
-      "sha256": "a0193f3436f67c5869564a6374d665c798d6536e9a0383550b5d7ee11ce57446"
+      "bytes": 137637,
+      "sha256": "e1d73e80f02603c8480a94bde5cfb7e746e95c1ec1c8c17d41b5a25298a066e5"
     },
     {
       "file": "graphics/localized/it-IT/tablet/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 223611,
-      "sha256": "9a3f72b4b8c1a870966642cf3e2529ecd184a33b65902f0b7ae73564e8f05f63"
+      "bytes": 130120,
+      "sha256": "a224481d8e31b69a9e9ef6c77ad0d5fce8aab857912da047e24243b8f93b0b66"
     },
     {
       "file": "graphics/localized/it-IT/tablet/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 157401,
-      "sha256": "3665cc8a347b081eca9bdfadbc2d6980f165f9a14e948973c7e9c352ea6a1444"
+      "bytes": 160897,
+      "sha256": "a156db21fd989dccbc11c82079bbec84777e0476fce460c4c35156310773d6df"
     },
     {
       "file": "graphics/localized/it-IT/tablet/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 199660,
-      "sha256": "77e82bb9b43c83ad6b07dc2d2e81da55c9522212724883d9706dab05130c25c5"
+      "bytes": 166350,
+      "sha256": "69290dcda887ed72e1e343247715df6862d519001c460a83647500db383b5252"
     },
     {
       "file": "graphics/localized/it-IT/tablet/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 249036,
-      "sha256": "9b1401f5794f4ad14db600725f4e81696fca31d4fc5effd60a9c486ecb9aec9a"
+      "bytes": 178462,
+      "sha256": "b36925221019a33c4495e2fdf8a4280a321f3943b6ed674d5567d961008d6502"
     },
     {
       "file": "graphics/localized/it-IT/tablet/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 169452,
-      "sha256": "744b08815abb8c05066abce4a9d3de3592de8a14d0e7ef62f1ff3826a24cda4d"
+      "bytes": 94441,
+      "sha256": "1f2ff241d89a98c7f68610cf0ffc137eaa651b28de1bd454e8bb3c2562ee9bb1"
     },
     {
       "file": "graphics/play-games-pc/01-run-setup.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 219933,
-      "sha256": "64c0ed5e0467e8710ad5e5453ad6dcd2437121b0b5d65fc6047c06105097a137"
+      "bytes": 130663,
+      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
     },
     {
       "file": "graphics/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 156489,
-      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+      "bytes": 158931,
+      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
     },
     {
       "file": "graphics/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 184009,
-      "sha256": "b48cdaf981ee03bca0ca7f4b57299ce5b54b3f08b4c2c63defc8d1210b55a1e2"
+      "bytes": 158060,
+      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
     },
     {
       "file": "graphics/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 246030,
-      "sha256": "444550a02bab1d570bb6208b6ed27b818a3e36973101d6df36178cb26d676a9d"
+      "bytes": 186970,
+      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
     },
     {
       "file": "graphics/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 169702,
-      "sha256": "ee473c11a2b5ca655360aeb6904fc8795508b840a9f1291ca4ceb440367012a6"
+      "bytes": 87612,
+      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
     },
     {
       "file": "graphics/play-games-pc/feature-1920x1080.jpg",
@@ -618,40 +618,40 @@
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 212311,
-      "sha256": "2075e20bccbd8a42a04e5f717e04e379e3bfe349e997a682608a2a5bcf695165"
+      "bytes": 129659,
+      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 155462,
-      "sha256": "519d3ebec397bed34d8e56df7c848798285f835f5f1da2ec351c3468a5ca09ae"
+      "bytes": 160033,
+      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 175989,
-      "sha256": "c835242332f1c41393bf48e19f773e91fb602ac94cdb77d28170682c12052374"
+      "bytes": 153900,
+      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 249896,
-      "sha256": "342943caddb70ba676df3adf3389ea02e69901b583383c4438474d065a9fffde"
+      "bytes": 176349,
+      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167130,
-      "sha256": "00df31fe509a8ca65d4fcf8a351d38305bc7ef2fc01c1f194e38617f61b75e18"
+      "bytes": 82105,
+      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/feature-1920x1080.jpg",
@@ -674,40 +674,40 @@
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 219933,
-      "sha256": "64c0ed5e0467e8710ad5e5453ad6dcd2437121b0b5d65fc6047c06105097a137"
+      "bytes": 130663,
+      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 156489,
-      "sha256": "a998466b010bb66dff7035cc3db8456e0c1865b900108d5740c225b6cea87605"
+      "bytes": 158931,
+      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 184009,
-      "sha256": "b48cdaf981ee03bca0ca7f4b57299ce5b54b3f08b4c2c63defc8d1210b55a1e2"
+      "bytes": 158060,
+      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 246030,
-      "sha256": "444550a02bab1d570bb6208b6ed27b818a3e36973101d6df36178cb26d676a9d"
+      "bytes": 186970,
+      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 169702,
-      "sha256": "ee473c11a2b5ca655360aeb6904fc8795508b840a9f1291ca4ceb440367012a6"
+      "bytes": 87612,
+      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/feature-1920x1080.jpg",
@@ -730,40 +730,40 @@
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 231946,
-      "sha256": "badfb14ddf4ab0191e31291847b90496e2adfce4ea4244c1ed6938fd4b2f7c0e"
+      "bytes": 131303,
+      "sha256": "a728e98d3541c7ecd28a1c2fb6ac72fddc2ee0f6a373bd638af61d9de39fbe8c"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 155747,
-      "sha256": "1a66a3a512886835338deebb27a3358660855fbb1e4d577c0108e1064fd2d4ed"
+      "bytes": 161176,
+      "sha256": "aad55e56c4e9fe963b9b35c2015ab766c7322ed34dc6252ceefeed20b3074985"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 195989,
-      "sha256": "291acc348c41402583cb972d9a5bc37e186a56b34b5ae04fd72eb96e72fff15a"
+      "bytes": 164299,
+      "sha256": "bb7bbd928d3380f6185edd7e667de32ad98ea150534e4d0c742252115064146c"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 259561,
-      "sha256": "7286f2216372cd82638a265a6033c531456cbcf17b5c532e8a2e39e4b229c7d8"
+      "bytes": 185275,
+      "sha256": "a98127e47b4a2fb17c9450e6d5352fcb9fc5f401ae57b471ccb09af37d26ab6d"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 172738,
-      "sha256": "2c3dec0ddca4c5d91a6502d70b0964d1034487851e03374cdd4df5cbf979fc58"
+      "bytes": 77886,
+      "sha256": "da61717f3c23c09e0d6f95b90d4d23688f3bd63ac8d3dfbd2ac3e9757edca3ff"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/feature-1920x1080.jpg",
@@ -786,40 +786,40 @@
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 239104,
-      "sha256": "f8683833ff5158e117610bf63324cc3f42aa5a50b8e65985364c9bb5d7b42850"
+      "bytes": 132569,
+      "sha256": "db77097191d8216051333f3d4d9be8d887dafe52adcbed3e71bf554a8b42f8b3"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158881,
-      "sha256": "c373393621de2707a72faf2c7f93335a83f559e36d5a604bcefacf47572763b1"
+      "bytes": 160594,
+      "sha256": "9c899977859a29963ef3cc6ba13a9e16f2f84e0ff109a435dcff415c98b04f67"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 205760,
-      "sha256": "1bfd764dc5251c5d662112de03f072c5f4be2ccd6f190dd7f9d0ecd16594bffd"
+      "bytes": 167047,
+      "sha256": "b9becc39e91a00e51a134193eaf4da74ce888a8ea5c038d5ae727b6c7a56192e"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 245845,
-      "sha256": "ac6f912ed8f6b54b08b237a5acce59b29cbfa36b259d2f00f87a827836a96987"
+      "bytes": 180046,
+      "sha256": "6567d983c9fecd7c43d6378e39076cd221c478227e9663adfb75fb7fcbaf5c82"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158500,
-      "sha256": "9f26eff1483728de6ca7f0c26832154be3f30ff146526d52657aefba2c9969eb"
+      "bytes": 81569,
+      "sha256": "7fb778332b85139dd77080ca2e0431ad71eb5527dfb1ef5bc3dd79ca45230f3d"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/feature-1920x1080.jpg",
@@ -842,40 +842,40 @@
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 223611,
-      "sha256": "9a3f72b4b8c1a870966642cf3e2529ecd184a33b65902f0b7ae73564e8f05f63"
+      "bytes": 130120,
+      "sha256": "a224481d8e31b69a9e9ef6c77ad0d5fce8aab857912da047e24243b8f93b0b66"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/02-player-draft.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 157401,
-      "sha256": "3665cc8a347b081eca9bdfadbc2d6980f165f9a14e948973c7e9c352ea6a1444"
+      "bytes": 160897,
+      "sha256": "a156db21fd989dccbc11c82079bbec84777e0476fce460c4c35156310773d6df"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/03-group-draw.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 199660,
-      "sha256": "77e82bb9b43c83ad6b07dc2d2e81da55c9522212724883d9706dab05130c25c5"
+      "bytes": 166350,
+      "sha256": "69290dcda887ed72e1e343247715df6862d519001c460a83647500db383b5252"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/04-match-hub.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 249036,
-      "sha256": "9b1401f5794f4ad14db600725f4e81696fca31d4fc5effd60a9c486ecb9aec9a"
+      "bytes": 178462,
+      "sha256": "b36925221019a33c4495e2fdf8a4280a321f3943b6ed674d5567d961008d6502"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/05-player-profile.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 169452,
-      "sha256": "744b08815abb8c05066abce4a9d3de3592de8a14d0e7ef62f1ff3826a24cda4d"
+      "bytes": 94441,
+      "sha256": "1f2ff241d89a98c7f68610cf0ffc137eaa651b28de1bd454e8bb3c2562ee9bb1"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/feature-1920x1080.jpg",
