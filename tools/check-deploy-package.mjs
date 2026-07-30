@@ -63,6 +63,7 @@ if (build.status !== 0) {
 }
 
 const distFiles = walk(DIST).map((file) => toPosix(path.relative(DIST, file)));
+if (!distFiles.includes("ads.txt")) fail("ads.txt is missing from dist");
 if (!distFiles.includes("app-ads.txt")) fail("app-ads.txt is missing from dist");
 if (!distFiles.includes("support.html")) fail("dedicated mobile support page is missing from dist");
 else {
@@ -77,6 +78,10 @@ else {
 const appAds = fs.readFileSync(path.join(DIST, "app-ads.txt"), "utf8").trim();
 if (appAds !== "google.com, pub-7347507737044067, DIRECT, f08c47fec0942fa0") {
   fail("app-ads.txt does not contain the verified AdMob publisher record");
+}
+const webAds = fs.readFileSync(path.join(DIST, "ads.txt"), "utf8").trim();
+if (webAds !== "google.com, pub-7347507737044067, DIRECT, f08c47fec0942fa0") {
+  fail("ads.txt does not contain the verified AdSense publisher record");
 }
 const distServiceWorker = fs.readFileSync(path.join(DIST, "sw.js"), "utf8");
 const distIndex = fs.readFileSync(path.join(DIST, "index.html"), "utf8");
