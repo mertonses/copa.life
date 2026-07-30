@@ -7,8 +7,8 @@
 <meta name="copa-google-ios-client-id" content="910942499457-puuqtrlff1itdu0cejbg990cf1lt4e4a.apps.googleusercontent.com">
 <meta name="copa-build-version" content="__COPA_BUILD_VERSION__">
 <meta name="copa-platform" content="web">
-<title>Copa Life – Ücretsiz Roguelite Futbol Menajerlik Oyunu</title>
-<meta name="description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, kart sistemi ve sakatlıklarla ücretsiz tarayıcı futbol menajerlik oyunu.">
+<title>Copa Life – Roguelite Futbol Menajerlik Oyunu</title>
+<meta name="description" content="Kadronu kur, başkanınla hedef belirle, antrenman ve taktik kararlarıyla kupaya yürü. Copa Life web, Android ve iOS'ta oynanabilir.">
 <meta name="keywords" content="copa life, futbol oyunu, tarayıcı futbol oyunu, ücretsiz futbol yönetim oyunu, roguelite futbol, kadro kurma oyunu, free football game, futbol müdürü, ulusal kupa, futbol kart oyunu, football card game">
 <meta name="author" content="Copa Life">
 <meta name="robots" content="index, follow">
@@ -20,9 +20,9 @@
 <meta property="og:url" content="https://copa.life/">
 <meta property="og:site_name" content="Copa Life">
 <meta property="og:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
-<meta property="og:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, ücretsiz tarayıcı futbol oyunu.">
-<meta property="og:image" content="https://copa.life/assets/social.webp">
-<meta property="og:image:type" content="image/webp">
+<meta property="og:description" content="Kadronu kur, başkanınla hedef belirle, antrenman ve taktik kararlarıyla kupaya yürü. Her koşuda yeni bir futbol hikâyesi.">
+<meta property="og:image" content="https://copa.life/assets/social-v2.jpg">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
@@ -32,8 +32,8 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
-<meta name="twitter:description" content="Zar at, kadro kur, başkan seç ve kupayı kaldır. 9000+ oyuncu, 6 ülke, ücretsiz tarayıcı futbol oyunu.">
-<meta name="twitter:image" content="https://copa.life/assets/social.webp">
+<meta name="twitter:description" content="Kadronu kur, başkanınla hedef belirle, antrenman ve taktik kararlarıyla kupaya yürü. Her koşuda yeni bir futbol hikâyesi.">
+<meta name="twitter:image" content="https://copa.life/assets/social-v2.jpg">
 <meta name="twitter:image:alt" content="Copa Life futbol oyunu">
 
 <!-- Favicon & PWA -->
@@ -72,15 +72,15 @@ if("serviceWorker"in navigator){
   "@context": "https://schema.org",
   "@type": "VideoGame",
   "name": "Copa Life",
-  "description": "Roguelite futbol oyunu. Şans + strateji. 6 ülke, 9000+ oyuncu. Kadro kur, transfer yönet, kupayı kaldır.",
+  "description": "Kadronu kur, kulüp hedeflerini yönet, antrenman ve taktik kararlarıyla kupaya yürü. Her koşuda yeni bir futbol hikâyesi.",
   "url": "https://copa.life",
   "genre": ["Sports", "Strategy", "Simulation"],
   "playMode": ["SinglePlayer", "MultiPlayer"],
   "applicationCategory": "Game",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "inLanguage": ["tr", "en"],
-  "image": "https://copa.life/web-app-icon-512.png"
+  "inLanguage": ["tr", "en", "es", "de", "it"],
+  "image": "https://copa.life/assets/social-v2.jpg"
 }
 </script>
 
@@ -1090,7 +1090,7 @@ function _draftForecast(o){
 function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("draft-candidate-gallery");const reserve=(remaining-1)*0.6;let any=false;
   const tr=LANG==="tr";
   currentOpts.forEach((o,i)=>{const af=typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve}):canAffordCost((o.price||0)+reserve);if(af)any=true;const pen=o.ov-o.eff,mis=pen>0;
-    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");if(o.bargain)b.style.setProperty("--disc",`"${o.discountPct||0}%"`);
+    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");
     const tre=o.trait?` <span class="trbadge">${TRAITS[o.trait].e}</span>`:"";
     const ovb=o.hidden?`<div class="ovb" style="background:#68757C">??</div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)};color:${ovOnCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)};color:${ovOnCol(o.ov)}">${o.ov}</div>`);
     const debtAfter=typeof budgetAfterCost==="function"?budgetAfterCost(o.price||0):budget-(o.price||0),debtTxt=debtAfter<0?(tr?" · borçla alınır":" · uses credit"):"";
@@ -1101,13 +1101,13 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("dr
     let priceArea;
     const priceCls=priceToneClass(o.price||0);
     if(!af){const loss=typeof chairmanSpendTrustLoss==="function"?chairmanSpendTrustLoss(o.price||0,"transfer",o):0,projectedTrust=Math.max(0,chairTrust-loss),debtLimit=typeof chairmanSackLimitForTrust==="function"?chairmanSackLimitForTrust(projectedTrust):(typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT),cap=(typeof legacySpendable==="function"?legacySpendable():0)+budget-reserve-debtLimit,excess=Math.max(0,Math.round(((o.price||0)-cap)*10)/10);priceArea=`<div class="price${priceCls}"><div class="p">€${o.price||0}M</div><div class="cant-lbl">${tr?`+€${excess}M aşıyor`:"+€"+excess+"M over"}</div></div>`;}
-    else if(o.bargain){priceArea=`<div class="price${priceCls}"><div class="oldp">€${o.oldPrice}M</div><div class="p">€${o.price}M</div></div>`;}
+    else if(o.bargain){priceArea=`<div class="price${priceCls}"><div class="oldp">€${o.oldPrice}M</div><div class="p">€${o.price}M</div><div class="discount-badge">−${o.discountPct||0}%</div></div>`;}
     else{priceArea=`<div class="price${priceCls}"><div class="p">€${o.price||0}M</div></div>`;}
     /* hover tip for affordable */
     let hoverTip="";
     /* hover tip removed */
     const secInfo=o.hidden?"":`${o.age||"—"} yaş · ${L().abbr[o.pos]||o.pos}`;
-    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}</div><div class="ctx">${ctxLine(o)}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
+    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
     b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}requestChoose(i);};
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});
     const shell=document.createElement("div");shell.className="opt-card-shell";shell.appendChild(b);

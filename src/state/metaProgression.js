@@ -212,10 +212,18 @@
     if(id==="pure_tactics")return !!value.won&&Number(value.cards)===0;
     return false;
   }
+  function refreshProgressionView(tab){
+    const shell=global.CopaMobileShell;
+    if(shell&&typeof shell.isCareerRouteActive==="function"&&shell.isCareerRouteActive()&&typeof shell.refreshCareerSection==="function"){
+      shell.refreshCareerSection(tab);
+      return;
+    }
+    openProgression(tab);
+  }
   function selectDirective(id){
     const key=String(id||"");
     if(key&&!Object.hasOwn(DIRECTIVES,key))return false;
-    state.directives.selected=state.directives.selected===key?"":key;persist();openProgression("career");return true;
+    state.directives.selected=state.directives.selected===key?"":key;persist();refreshProgressionView("career");return true;
   }
   function completeDirective(value){
     const id=state.directives.selected;
@@ -229,7 +237,7 @@
   function selectStylePlan(styleId){
     const id=String(styleId||""),count=state.mastery.styles[id]||0;
     if(!STYLES.has(id)||count<5)return false;
-    state.career.selectedStylePlan=state.career.selectedStylePlan===id?"":id;persist();openProgression("mastery");return true;
+    state.career.selectedStylePlan=state.career.selectedStylePlan===id?"":id;persist();refreshProgressionView("mastery");return true;
   }
   function activeStylePlan(styleId){
     const id=String(styleId||"");
@@ -287,7 +295,7 @@
     if(!field||!owned.includes(id))return false;
     state.museum.collections[field]=state.museum.collections[field]===id?"":id;
     persist();
-    openProgression("museum");
+    refreshProgressionView("museum");
     return true;
   }
 
@@ -560,7 +568,7 @@
   function toggleHallFromUi(runId,playerId){
     const before=state.museum.hall.length,ok=toggleHallPlayer(runId,playerId),tr=global.LANG==="tr";
     if(!ok&&before>=HALL_LIMIT&&typeof global.showToast==="function")global.showToast(tr?"Şöhretler Karması 11 oyuncuyla dolu.":"Your Hall XI already has 11 players.");
-    openProgression("museum");
+    refreshProgressionView("museum");
   }
   function careerSummary(){
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level);

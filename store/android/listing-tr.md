@@ -6,26 +6,29 @@ Copa Life
 
 ## Kısa açıklama
 
-Her koşuda yeni bir kadro kur, taktiğini seç ve kupaya ulaşmaya çalış.
+Kadronu kur, kulübü yönet ve her koşuyu yeni bir kupa hikâyesine dönüştür.
 
 ## Tam açıklama
 
-Copa Life, zarlar, kadro tercihleri ve taktik kararları etrafında kurulan bağımsız bir roguelite futbol kadro yönetim oyunudur.
+Belirsizliklerle dolu bir başlangıçtan kendi kulübünü kur ve her koşuda yeni bir futbol hikâyesi yaz.
 
-Her koşuda ülkeni, dizilişini ve başkanını seç. Zar atarak önüne gelen oyuncular arasından karar ver, bütçeni koru ve ilk on birini tamamla. Kadro kimyası, oyun planı, kartlar, başkan güveni ve rastgele gelişmeler kupaya giden yolu her seferinde değiştirir.
+Copa Life; her oyuncunun, sözleşmenin, antrenmanın ve taktik kararının kupaya giden yolu değiştirdiği bağımsız bir roguelite futbol menajerlik oyunudur. Ülkeni, dizilişini ve başkanını seç. İlk on birini kur, bütçeyi koru, kimyayı yükselt ve sıradaki rakibe hazırlan.
 
-Öne çıkanlar:
+Başkanın kulübün karakterini belirler. Kulüp direktifleri uzun vadeli kariyerine yön verir. Antrenman ve rakip analizi maç gününden önce kadronu geliştirir. Oyuncu profilleri sayıların arkasındaki güçlü yönleri gösterirken kartlar, sakatlıklar, cezalar, pazar fırsatları ve beklenmedik olaylar seni yeni çözümler bulmaya zorlar.
 
-- Her koşuda değişen oyuncu seçenekleri ve kararlar
-- Farklı ülkeler, dizilişler ve başkan profilleri
-- Bütçe, kadro kimyası ve taktik dengesi
-- Altı boyutlu Copa Life oyuncu profilleri
-- Kartlar, maç olayları ve sürpriz gelişmeler
-- Üç grup maçı; ardından Son 16, çeyrek final, yarı final ve final
-- Açık ve koyu tema
-- Kayıt veya giriş gerektirmeyen oyun deneyimi
+Kupa yolculuğunun tamamını oyna:
 
-Ghost Clubs isteğe bağlı bir çevrim içi özelliktir. Açık rızanla tamamladığın kulübü gelecekte başka oyuncuların rakibi olarak paylaşabilirsin. Uygunsuz kulüp adlarını uygulama içinden bildirebilir ve bir daha görmemek üzere gizleyebilirsin. Ghost paylaşımı varsayılan olarak kapalıdır ve verilerini ayarlardan silebilirsin.
+- Her koşuda farklı bir kadro kur
+- Kasa, kimya, kadro gücü ve başkan güvenini dengele
+- Oyuncu profillerini ve transfer tekliflerini karşılaştır
+- Kulüp direktifleri ve kilometre taşlarıyla kariyerini geliştir
+- Takımını çalıştır, sıradaki rakibi analiz et
+- Maç günü taktik ve soyunma odası kararlarını ver
+- Grup aşamasını ve eleme turlarını geç
+- İsteğe bağlı çevrim içi Copa Arena'da diğer kulüplere meydan oku
+- Türkçe, İngilizce, İspanyolca, Almanca veya İtalyanca oyna
+
+Kupaya giden hiçbir yol birbirinin aynısı değildir. Görevi kabul et, zor kararları ver ve kulübünü ne kadar ileri taşıyabileceğini gör.
 
 Copa Life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyon veya turnuvayla bağlantılı değildir ve bunlar tarafından onaylanmamıştır.
 
@@ -34,5 +37,5 @@ Copa Life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyo
 - Tür: Oyun
 - Kategori: Spor
 - Fiyat: Ücretsiz
-- Reklam: Var — koşu sonunda tam ekran geçiş reklamı ve isteğe bağlı ödüllü yenileme reklamı
+- Reklam: Var — tamamlanan koşu sonunda geçiş reklamı ve isteğe bağlı ödüllü yenileme
 - Uygulama içi satın alma: Yok

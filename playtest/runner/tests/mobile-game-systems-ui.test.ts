@@ -215,6 +215,26 @@ test("draft candidates keep only the two useful quick actions",async({page},test
   await page.locator("#rollBtn").click();
   await expect(page.locator("#opts .opt")).toHaveCount(3);
   await expect(page.locator("#opts .opt-forecast")).toHaveCount(3);
+  await expect(page.locator("#opts .opt .ctx")).toHaveCount(0);
+  const candidateHeading=await page.locator("#opts .opt").first().evaluate((card:HTMLElement)=>{
+    const power=card.querySelector<HTMLElement>(".ovb")!.getBoundingClientRect();
+    const name=card.querySelector<HTMLElement>(".pn")!.getBoundingClientRect();
+    return{powerLeftOfName:power.right<=name.left+1,powerFont:Number.parseFloat(getComputedStyle(card.querySelector<HTMLElement>(".ovb")!).fontSize)};
+  });
+  expect(candidateHeading.powerLeftOfName).toBe(true);
+  expect(candidateHeading.powerFont).toBeGreaterThanOrEqual(18);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.eval("currentOpts[0].bargain=true;currentOpts[0].discountPct=25;currentOpts[0].oldPrice=Math.max(2,currentOpts[0].price+2);renderOpts()");
+  });
+  const discountLayout=await page.locator("#opts .opt").first().evaluate((card:HTMLElement)=>{
+    const price=card.querySelector<HTMLElement>(".price .p")!.getBoundingClientRect();
+    const badge=card.querySelector<HTMLElement>(".discount-badge")!.getBoundingClientRect();
+    return{below:badge.top>=price.bottom-1,inside:badge.right<=card.getBoundingClientRect().right+1,text:card.querySelector<HTMLElement>(".discount-badge")!.innerText};
+  });
+  expect(discountLayout.below).toBe(true);
+  expect(discountLayout.inside).toBe(true);
+  expect(discountLayout.text).toBe("−25%");
   await expect(page.locator("#draftThumbDock")).toBeVisible();
   await expect(page.locator("#draftThumbDock #allBtn")).toBeVisible();
   await expect(page.locator("#rollBtn")).toBeDisabled();
@@ -604,6 +624,19 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   expect(trainingTabStyle.color).toBe(trainingTabStyle.theme==="dark"?"rgb(125, 211, 252)":"rgb(39, 106, 139)");
   await expect(page.locator("#mobileTrainingRoute .prep-modal")).toBeVisible();
   await expect(page.locator("#mobileTrainingRoute h3")).toHaveText(/Antrenman Merkezi|Training Centre/);
+  const trainingCopy=await page.locator("#mobileTrainingRoute .prep-modal").evaluate((modal:HTMLElement)=>{
+    const eyebrow=modal.querySelector<HTMLElement>("header>span")!,title=modal.querySelector<HTMLElement>("h3")!,opponent=modal.querySelector<HTMLElement>(".mobile-opponent-analysis small")!;
+    return{
+      eyebrow:{color:getComputedStyle(eyebrow).color,opacity:getComputedStyle(eyebrow).opacity},
+      title:{color:getComputedStyle(title).color,opacity:getComputedStyle(title).opacity},
+      opponent:{color:getComputedStyle(opponent).color,opacity:getComputedStyle(opponent).opacity},
+    };
+  });
+  expect(trainingCopy.eyebrow.opacity).toBe("1");
+  expect(trainingCopy.title.opacity).toBe("1");
+  expect(trainingCopy.opponent.opacity).toBe("1");
+  expect(trainingCopy.eyebrow.color).not.toBe("rgb(10, 17, 24)");
+  expect(trainingCopy.opponent.color).not.toBe("rgb(10, 17, 24)");
   await expect(page.locator(".prep-drill")).toHaveCount(7);
   await expectSurfaceFit(page,".prep-modal");
   await expect(page.locator(".mobile-opponent-analysis .mobile-training-scout")).toBeVisible();
@@ -762,6 +795,38 @@ test("club files stay opt-in and never interrupt another hub route",async({page}
   await page.locator(".club-file-options button").first().click();
   await expect(page.locator("#modal")).toHaveClass(/hidden/);
   expect(await page.evaluate(()=>(globalThis as any).CopaClubFiles.snapshot().selected)).toBe("debt");
+  await expect(page.locator("#mobileCareerRoute .mobile-career-inline")).toBeVisible();
+  const directive=page.locator("#mobileCareerRoute .meta-directive:not([disabled])").first();
+  await directive.click();
+  await expect(page.locator("#modal")).toHaveClass(/hidden/);
+  await expect(page.locator("#mobileCareerRoute .mobile-career-inline")).toBeVisible();
+  await expect(page.locator("#mobileCareerRoute .meta-directive.is-selected")).toHaveCount(1);
+});
+
+test("narrow web cash detail follows the same below-value hierarchy as other metrics",async({page},testInfo)=>{
+  test.skip(!desktopOnly(testInfo.project.name),"browser presentation regression");
+  await reset(page);
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/?visual=narrow-web-metrics",{waitUntil:"domcontentloaded"});
+  await reachDraw(page);
+  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  const layout=await page.locator("#hub .hub-stat-row").evaluate((row:HTMLElement)=>{
+    const cash=row.querySelector<HTMLElement>("#kasaTile")!,cashValue=cash.querySelector<HTMLElement>(".kasa-main-val")!,cashDetail=cash.querySelector<HTMLElement>(".kasa-detail-link")!;
+    const chemistry=row.querySelector<HTMLElement>("#chemTile")!,chemValue=chemistry.querySelector<HTMLElement>(".mv")!,chemDetail=chemistry.querySelector<HTMLElement>(".ms")!;
+    const cashRect=cash.getBoundingClientRect(),detailRect=cashDetail.getBoundingClientRect();
+    return{
+      cashBelow:detailRect.top>=cashValue.getBoundingClientRect().bottom-1,
+      chemistryBelow:chemDetail.getBoundingClientRect().top>=chemValue.getBoundingClientRect().bottom-1,
+      cashInside:detailRect.left>=cashRect.left-1&&detailRect.right<=cashRect.right+1&&detailRect.bottom<=cashRect.bottom+1,
+      position:getComputedStyle(cashDetail).position,
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(layout.cashBelow).toBe(true);
+  expect(layout.chemistryBelow).toBe(true);
+  expect(layout.cashInside).toBe(true);
+  expect(layout.position).toBe("static");
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
 });
 
 test("browser career club-file prompt opens the objective picker",async({page},testInfo)=>{

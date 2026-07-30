@@ -10,6 +10,7 @@ const ROOT=path.resolve(RUNNER,"../..");
 const STORE=path.join(ROOT,"store/android");
 const GRAPHICS=path.join(STORE,"graphics");
 const LOCALIZED=path.join(GRAPHICS,"localized");
+const FEATURE_BACKGROUND=path.join(STORE,"source","feature-background-v3.png");
 const DEFAULT_PHONE=path.join(GRAPHICS,"phone");
 const DEFAULT_TABLET=path.join(GRAPHICS,"tablet");
 const BASE="http://127.0.0.1:5500";
@@ -71,6 +72,8 @@ async function captureFlow(browser,locale,{tablet=false}={}){
   await context.addInitScript(lang=>{
     localStorage.setItem("copa.language",lang);
     localStorage.setItem("copa_theme","dark");
+    localStorage.setItem("copa.guide.context.v2",JSON.stringify({setup:1,draft:1,hub:1,bench:1,injury:1,table:1}));
+    localStorage.setItem("copa_online_features_onboarding_v1",JSON.stringify({version:"online-features-v1",terms:true,matching:false,sharing:false,leaderboard:false,action:"store_capture"}));
     localStorage.removeItem("copa_run_state_v1");
   },locale.lang);
   try{
@@ -78,13 +81,25 @@ async function captureFlow(browser,locale,{tablet=false}={}){
     await page.screenshot({path:path.join(output,SCREENSHOTS[0]),type:"jpeg",quality:94});
 
     await page.evaluate(async({country,seed})=>{
-      const script=`pickCountry(${JSON.stringify(country)});formName="4-3-3";slots=FORMATIONS[formName];style="gegen";document.getElementById("seedInput").value=${JSON.stringify(seed)};beginDraft();`;
-      globalThis.eval(script);
+      if(globalThis.CopaMobileShell?.newRun)globalThis.CopaMobileShell.newRun();
+      const originalRandom=Math.random;
+      const countryIndex=globalThis.eval(`COUNTRY_CODES.indexOf(${JSON.stringify(country)})`);
+      const countryCount=globalThis.eval("COUNTRY_CODES.length");
+      Math.random=()=>Math.max(0,countryIndex+.01)/countryCount;
+      try{await globalThis.quickStart();}finally{Math.random=originalRandom;}
       if(globalThis._countryDraftPromise)await globalThis._countryDraftPromise;
+      globalThis.eval(`document.getElementById("seedInput").value=${JSON.stringify(seed)};makeSeed(${JSON.stringify(seed)});`);
       globalThis.roll();
     },{country:locale.country,seed:`COPA-STORE-${locale.code}-2026`});
     await page.locator("#optstage").waitFor({state:"visible"});
-    await page.evaluate(()=>document.querySelector("#draft")?.scrollIntoView({block:"start"}));
+    const firstRollCoach=page.locator("#modal:not(.hidden) .btn-primary");
+    if(await firstRollCoach.count()&&await firstRollCoach.first().isVisible())await firstRollCoach.first().click();
+    await page.evaluate(()=>globalThis.eval("currentOpts.forEach((candidate,index)=>{candidate.hidden=false;if(index===0){candidate.bargain=true;candidate.discountPct=25;candidate.oldPrice=Math.max(candidate.price+2,Math.ceil(candidate.price/0.75));}});renderOpts();"));
+    await page.evaluate(()=>{
+      const draft=document.querySelector("#draft"),gallery=document.querySelector(".draft-candidate-gallery");
+      if(gallery)gallery.scrollLeft=0;
+      if(draft)window.scrollTo(0,draft.getBoundingClientRect().top+window.scrollY);
+    });
     await page.screenshot({path:path.join(output,SCREENSHOTS[1]),type:"jpeg",quality:94});
 
     await page.evaluate(()=>globalThis.quickAll());
@@ -96,7 +111,10 @@ async function captureFlow(browser,locale,{tablet=false}={}){
     await page.screenshot({path:path.join(output,SCREENSHOTS[2]),type:"jpeg",quality:94});
     await page.evaluate(()=>globalThis.finishTournamentDraw());
     await page.locator("#hub").waitFor({state:"visible"});
-    await page.evaluate(()=>document.querySelector("#hub")?.scrollIntoView({block:"start"}));
+    await page.evaluate(()=>{
+      const hub=document.querySelector("#hub");
+      if(hub)window.scrollTo(0,hub.getBoundingClientRect().top+window.scrollY);
+    });
     await page.screenshot({path:path.join(output,SCREENSHOTS[3]),type:"jpeg",quality:94});
 
     await page.evaluate(()=>{
@@ -117,21 +135,21 @@ async function renderFeatureGraphic(browser,locale){
   const context=await browser.newContext({viewport:{width:1024,height:500},deviceScaleFactor:1,colorScheme:"dark"});
   try{
     const page=await context.newPage();
+    const background=`data:image/png;base64,${fs.readFileSync(FEATURE_BACKGROUND).toString("base64")}`;
     const [headlineLead,...headlineRest]=locale.slogan.split(". ");
     const headlineTail=headlineRest.join(". ");
     await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
       *{box-sizing:border-box}html,body{width:1024px;height:500px;margin:0;overflow:hidden;background:#101d28}
       body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#f3f5f4}
-      .art{position:relative;width:100%;height:100%;overflow:hidden;background:radial-gradient(circle at 79% 48%,rgba(78,155,101,.2),transparent 34%),linear-gradient(125deg,#101d28 0%,#101d28 48%,#0a1118 100%)}
-      .art::before{content:"";position:absolute;inset:0;opacity:.3;background-image:linear-gradient(rgba(104,117,124,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(104,117,124,.16) 1px,transparent 1px);background-size:40px 40px;transform:skewX(-8deg) scale(1.08)}
-      .art::after{content:"";position:absolute;right:-90px;top:-175px;width:380px;height:300px;border:34px solid rgba(242,74,40,.2);transform:rotate(28deg)}
+      .art{position:relative;width:100%;height:100%;overflow:hidden;background:#0a1118 url('${background}') center/cover no-repeat}
+      .art::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,17,24,.68),rgba(10,17,24,.12) 62%,rgba(10,17,24,.04))}
       .copy{position:absolute;z-index:3;left:64px;top:58px;width:535px}
       .logo{display:flex;align-items:baseline;font-size:68px;font-weight:950;line-height:.9;letter-spacing:-4.5px}.logo span{color:#f3f5f4}.logo b{color:#f24a28}.logo em{font-style:normal;color:#aab2b3}
       .eyebrow{display:flex;align-items:center;gap:10px;margin-top:46px;color:#aab2b3;font-size:12px;font-weight:850;letter-spacing:2.8px;text-transform:uppercase}.eyebrow::before{content:"";width:30px;height:3px;border-radius:99px;background:#f24a28}
       h1{max-width:530px;margin:15px 0 13px;color:#f3f5f4;font-size:39px;line-height:1.02;letter-spacing:-1.1px;text-transform:uppercase}h1 strong{color:#f24a28;font-weight:900}
       p{max-width:480px;margin:0;color:#aab2b3;font-size:17px;font-weight:650;line-height:1.35}
       .rail{position:absolute;z-index:2;left:64px;bottom:45px;display:flex;align-items:center;gap:8px}.rail i{display:block;width:34px;height:5px;border-radius:8px;background:#3a4750}.rail i:first-child{width:72px;background:#f24a28}.rail i:last-child{background:#4e9b65}
-      .board{position:absolute;z-index:2;right:50px;top:55px;width:360px;height:390px;border:1px solid rgba(243,245,244,.36);border-radius:20px;background:linear-gradient(160deg,rgba(39,52,60,.96),rgba(23,36,45,.96));box-shadow:0 24px 60px rgba(0,0,0,.36);transform:rotate(2deg);overflow:hidden}
+      .board{display:none}
       .board::before{content:"";position:absolute;inset:16px;border:1px solid rgba(243,245,244,.25);border-radius:9px;background:linear-gradient(90deg,transparent 49.7%,rgba(243,245,244,.18) 50%,transparent 50.3%)}
       .circle{position:absolute;left:50%;top:50%;width:104px;height:104px;border:1px solid rgba(243,245,244,.26);border-radius:50%;transform:translate(-50%,-50%)}
       .box{position:absolute;left:50%;width:142px;height:58px;border:1px solid rgba(243,245,244,.22);transform:translateX(-50%)}.box.top{top:16px;border-top:0}.box.bottom{bottom:16px;border-bottom:0}
@@ -139,7 +157,31 @@ async function renderFeatureGraphic(browser,locale){
       .token b{display:block;color:#f3f5f4;font-size:25px;line-height:1}.token small{display:block;margin-top:5px;color:#aab2b3;font-size:8px;font-weight:900;letter-spacing:1.2px}.token.hot{border-color:rgba(242,74,40,.7)}.token.hot b{color:#f24a28}.token.good{border-color:rgba(78,155,101,.8)}.token.good b{color:#79c890}
       .t1{left:149px;top:42px}.t2{left:70px;top:132px}.t3{right:70px;top:132px}.t4{left:149px;top:190px}.t5{left:67px;bottom:58px}.t6{right:67px;bottom:58px}
       .marker{position:absolute;right:18px;top:173px;width:9px;height:74px;border-radius:9px;background:#f24a28;box-shadow:0 0 24px rgba(242,74,40,.45)}
-    </style></head><body><main class="art"><section class="copy"><div class="logo"><span>copa</span><b>.</b><em>life</em></div><div class="eyebrow">football run manager</div><h1>${escapeHtml(headlineLead)}${headlineTail?`. <strong>${escapeHtml(headlineTail)}</strong>`:""}</h1><p>${escapeHtml(locale.subline)}</p></section><div class="rail"><i></i><i></i><i></i></div><section class="board" aria-hidden="true"><div class="circle"></div><div class="box top"></div><div class="box bottom"></div><div class="marker"></div><div class="token hot t1"><b>88</b><small>ST</small></div><div class="token good t2"><b>82</b><small>CM</small></div><div class="token t3"><b>75</b><small>CM</small></div><div class="token hot t4"><b>85</b><small>CAM</small></div><div class="token t5"><b>78</b><small>CB</small></div><div class="token good t6"><b>80</b><small>GK</small></div></section></main></body></html>`,{waitUntil:"load"});
+    </style></head><body><main class="art"><section class="copy"><div class="logo"><span>copa</span><b>.</b><em>life</em></div><div class="eyebrow">roguelite football manager</div><h1>${escapeHtml(headlineLead)}${headlineTail?`. <strong>${escapeHtml(headlineTail)}</strong>`:""}</h1><p>${escapeHtml(locale.subline)}</p></section><div class="rail"><i></i><i></i><i></i></div></main></body></html>`,{waitUntil:"load"});
+    await page.screenshot({path:output,type:"jpeg",quality:96});
+  }finally{
+    await context.close();
+  }
+}
+
+async function renderSocialGraphic(browser){
+  const output=path.join(ROOT,"assets","social-v2.jpg");
+  const context=await browser.newContext({viewport:{width:1200,height:630},deviceScaleFactor:1,colorScheme:"dark"});
+  try{
+    const page=await context.newPage();
+    const background=`data:image/png;base64,${fs.readFileSync(FEATURE_BACKGROUND).toString("base64")}`;
+    await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
+      *{box-sizing:border-box}html,body{width:1200px;height:630px;margin:0;overflow:hidden;background:#0a1118}
+      body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#f3f5f4}
+      main{position:relative;width:100%;height:100%;overflow:hidden;background:#0a1118 url('${background}') center/cover no-repeat}
+      main::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,17,24,.86),rgba(10,17,24,.3) 61%,rgba(10,17,24,.08))}
+      section{position:absolute;z-index:2;left:72px;top:82px;width:610px}
+      .logo{font-size:88px;font-weight:950;line-height:.88;letter-spacing:-6px}.logo span{color:#f3f5f4}.logo b{color:#f24a28}.logo em{color:#aab2b3;font-style:normal}
+      .eyebrow{display:flex;align-items:center;gap:12px;margin-top:64px;color:#c1c9ca;font-size:15px;font-weight:900;letter-spacing:3px;text-transform:uppercase}.eyebrow::before{content:"";width:42px;height:4px;border-radius:9px;background:#f24a28}
+      h1{max-width:600px;margin:19px 0 17px;font-size:53px;line-height:1.02;letter-spacing:-1.8px;text-transform:uppercase}h1 strong{color:#f24a28}
+      p{max-width:560px;margin:0;color:#c1c9ca;font-size:21px;font-weight:650;line-height:1.35}
+      .rail{display:flex;gap:9px;margin-top:35px}.rail i{display:block;width:38px;height:6px;border-radius:8px;background:#3a4750}.rail i:first-child{width:84px;background:#f24a28}.rail i:last-child{background:#4e9b65}
+    </style></head><body><main><section><div class="logo"><span>copa</span><b>.</b><em>life</em></div><div class="eyebrow">roguelite football manager</div><h1>KADRONU KUR. <strong>KUPAYA YÜRÜ.</strong></h1><p>Her koşuda yeni kararlar, yeni bir futbol hikâyesi.</p><div class="rail"><i></i><i></i><i></i></div></section></main></body></html>`,{waitUntil:"load"});
     await page.screenshot({path:output,type:"jpeg",quality:96});
   }finally{
     await context.close();
@@ -155,6 +197,7 @@ if(!FEATURE_ONLY&&!(await serverReady())){
 
 const browser=await chromium.launch({headless:true});
 try{
+  await renderSocialGraphic(browser);
   if(FEATURE_ONLY){
     for(const locale of LOCALES){
       console.log(`Rendering ${locale.code} feature graphic...`);

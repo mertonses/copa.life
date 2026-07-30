@@ -361,7 +361,8 @@ html[data-theme="dark"] .patreonicon-sm{filter:brightness(0) invert(1)}
 .opt .mid{flex:1;min-width:0}.opt .pn{font-family:var(--disp);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.opt .meta{font-family:var(--mono);font-size:9px;color:var(--color-slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .opt .price{flex-shrink:0;text-align:right;font-family:var(--mono)}.opt .price .p{font-weight:700;font-size:17px;color:var(--color-ink);background:var(--color-primary);border-radius:4px;padding:1px 6px}.opt .price .oldp{font-size:9px;color:var(--color-slate);text-decoration:line-through;text-decoration-thickness:2px;margin-bottom:1px}.opt.tooexp .price .p{background:var(--color-ink);color:var(--color-background)}
 .opt.bargain{border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(104,117,124,.28) inset}
-.opt.bargain::after{content:var(--disc) " İNDİRİM";position:absolute;right:-38px;top:8px;transform:rotate(34deg);width:132px;text-align:center;background:var(--color-primary);color:var(--color-ink);font-family:var(--mono);font-weight:900;font-size:8px;letter-spacing:.8px;padding:3px 0;box-shadow:0 2px 0 rgba(10,17,24,.18);pointer-events:none}
+.opt.bargain::after{display:none;content:none}
+.opt .price .discount-badge{width:max-content;margin:4px auto 0;padding:2px 5px;border:1px solid color-mix(in srgb,var(--color-primary) 62%,var(--border-default));border-radius:999px;background:color-mix(in srgb,var(--color-primary) 14%,var(--surface-bg));color:var(--status-positive-text);font:900 7px/1 var(--mono);letter-spacing:.04em;text-decoration:none}
 .opt-lbar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px}
 .optmsg{font-family:var(--mono);font-size:10px;color:var(--color-slate);text-align:center;margin-top:6px;min-height:12px}
 #rerollBtn{margin:7px 0 0}
