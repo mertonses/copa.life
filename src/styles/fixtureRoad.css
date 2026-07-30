@@ -1,5 +1,5 @@
 #fixbar.fixture-road-v2{display:block!important;width:100%;padding:7px!important;overflow:visible!important;background:var(--surface-elevated);border:1px solid var(--border-subtle);border-radius:10px;box-shadow:none}
-.fixture-track{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) 46px;gap:6px;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:5px 2px 7px}
+.fixture-track{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr)) 46px;gap:6px;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:5px 2px 7px}
 .fixture-track::before,.fixture-track::after{content:"";position:absolute;left:4%;right:4%;top:35px;height:2px;pointer-events:none}
 .fixture-track::before{background:var(--border-subtle)}
 .fixture-track::after{right:auto;width:92%;background:var(--color-primary);transform:scaleX(var(--fixture-ratio,0));transform-origin:left center;transition:transform .6s ease}

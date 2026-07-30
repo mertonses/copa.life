@@ -36,12 +36,29 @@
     const normalized=String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").toLowerCase();
     return normalized||fallback;
   }
+  const CLUB_NAME_NOISE=new Set(["fc","fk","cf","cfc","afc","ac","sc","sk","sv","vfl","tsg","dsc","rc","rcd","sd","ud","us","ssc","ss","as","club","calcio","football","futbol"]);
+  function clubIdentityTokens(value){
+    return String(value||"")
+      .normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+      .toLocaleLowerCase("en-US").replace(/ı/g,"i").replace(/ß/g,"ss").replace(/ø/g,"o").replace(/ł/g,"l")
+      .replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().split(/\s+/)
+      .filter(Boolean).filter(token=>!CLUB_NAME_NOISE.has(token))
+      .map(token=>token.length>4&&token.endsWith("spor")?token.slice(0,-4):token);
+  }
+  function sameClubIdentity(leftName,rightName){
+    const left=clubIdentityTokens(leftName),right=clubIdentityTokens(rightName);
+    if(!left.length||!right.length)return false;
+    if(left.join("")===right.join(""))return true;
+    if(left.length!==right.length)return false;
+    return left.every((token,index)=>token===right[index]||(/^[a-z]$/.test(token)&&right[index][0]===token)||(/^[a-z]$/.test(right[index])&&token[0]===right[index]));
+  }
   function uniquePool(rawPool,playerName){
-    const result=[],seen=new Set([String(playerName||"").trim().toLocaleLowerCase()]);
+    const result=[],seenNames=[String(playerName||"").trim()].filter(Boolean),seenExact=new Set(seenNames.map(name=>name.toLocaleLowerCase()));
     for(const entry of Array.isArray(rawPool)?rawPool:[]){
       const source=entry&&typeof entry==="object"?entry:{name:entry};
       const name=String(source.name||"").trim(),key=name.toLocaleLowerCase();
-      if(!name||seen.has(key))continue;seen.add(key);result.push(Object.assign({},source,{name}));
+      if(!name||seenExact.has(key)||seenNames.some(existing=>sameClubIdentity(existing,name)))continue;
+      seenExact.add(key);seenNames.push(name);result.push(Object.assign({},source,{name}));
     }
     return result;
   }
@@ -331,5 +348,5 @@
     return{ok:errors.length===0,errors:[...new Set(errors)]};
   }
 
-  return{FORMAT,GROUP_IDS,GROUP_SCHEDULE,hashSeed,rngFor,createTournament,revealedEntries,revealNext,completeDraw,rankGroup,recomputeTables,getPlayerGroup,getCurrentPlayerMatch,completePlayerMatch,playerSchedule,recordMatch,validate,clone,defaultSimulator};
+  return{FORMAT,GROUP_IDS,GROUP_SCHEDULE,hashSeed,rngFor,sameClubIdentity,createTournament,revealedEntries,revealNext,completeDraw,rankGroup,recomputeTables,getPlayerGroup,getCurrentPlayerMatch,completePlayerMatch,playerSchedule,recordMatch,validate,clone,defaultSimulator};
 });

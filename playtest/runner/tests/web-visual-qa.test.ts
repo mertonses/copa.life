@@ -292,7 +292,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   expect(matchLayout.chairmanWrapBackground).toBe("rgba(0, 0, 0, 0)");
   expect(matchLayout.cashFontSize).toBeLessThanOrEqual(18);
   expect(matchLayout.cashBackground).not.toBe("none");
-  expect(matchLayout.debtBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(matchLayout.debtBackground).toBe("rgb(255, 255, 255)");
   expect(matchLayout.cashInfoSize[0]).toBeLessThanOrEqual(matchLayout.trustInfoSize[0]);
   expect(matchLayout.cashInfoSize[1]).toBeLessThanOrEqual(matchLayout.trustInfoSize[1]);
   expect(matchLayout.debtHelpGap).toBeGreaterThanOrEqual(3);

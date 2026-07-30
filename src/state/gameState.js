@@ -20,6 +20,8 @@ var eskiKurtSlotIdx=-1,eskiKurtPenalty=0;
 var kurbanScheduled={count:0,turns:0};
 var kaynasmaDark=false;
 var pintiSavings=0,sansSpotlightIdx=-1,sansMediaPressure=0,sansHeadlineRound=0,sansStarBonusRound=0,torpilDebtPenalty=0,chairTrust=1,chairSupportDebt=0,kaosHalfReward=false,usedRiskCards=[],cardChemDebt=0;
+var chairTrustChangeRound=0,chairTrustRoundBase=1,chairTrustRoundDelta=0,chairTrustChangePriority=-1,chairTrustLastReason="",chairTrustLastDelta=0;
+var professorChaosOffers=0,professorBudgetCrises=0;
 /* Chairman interventions are persisted as an idempotent round transaction. */
 var chairmanEventRunId="",pendingChairmanEvent=null,chairmanEventSeen={};
 var NAMEP=["Anadolu","Demir","Yıldız","Kartal","Şimşek","Bordo","Gençlik","Deniz","Ankara","Toros","Çelik","Boğaz"],NAMES2=["spor","gücü FK","SK","Birliği","FK","United"];

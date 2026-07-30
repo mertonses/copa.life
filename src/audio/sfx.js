@@ -44,10 +44,7 @@ toggleMute=function(){_toggleMuteBase();try{localStorage.setItem("copa_sfx",mute
 function sfxCoin(){if(playUiSample("buy",.21))return;if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;[988,1319,1760].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="triangle";o.frequency.setValueAtTime(f,t+i*0.05);g.gain.setValueAtTime(0.0001,t+i*0.05);g.gain.exponentialRampToValueAtTime(0.035,t+i*0.05+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.05+0.18);o.connect(g);g.connect(c.destination);o.start(t+i*0.05);o.stop(t+i*0.05+0.2);});}
 function sfxGrumble(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain(),lfo=c.createOscillator(),lg=c.createGain();o.type="sawtooth";o.frequency.value=82;lfo.type="sine";lfo.frequency.value=6.5;lg.gain.value=13;lfo.connect(lg);lg.connect(o.frequency);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.04,t+0.05);g.gain.setValueAtTime(0.03,t+0.35);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(c.destination);o.start(t);lfo.start(t);o.stop(t+0.62);lfo.stop(t+0.62);}
 function sfxJingle(){if(playUiSample("reward",.21))return;if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*0.08);g.gain.exponentialRampToValueAtTime(0.025,t+i*0.08+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.08+0.22);o.connect(g);g.connect(c.destination);o.start(t+i*0.08);o.stop(t+i*0.08+0.24);});}
-function sfxFlag(country){
-  const key="flag_"+String(country||"IT").toUpperCase();
-  playUiSample(UI_SFX[key]?key:"flag_IT",.32,90);
-}
+function sfxFlag(){playUiSample("flag_IT",.32,90);}
 function sfxFormation(){return sfxFlag("IT");}
 function sfxTalk(k){playUiSample("talk_"+k,.38);}
 function sfxSave(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;const src=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();src.buffer=noiseBuf(c,0.04);f.type="bandpass";f.frequency.value=600;g.gain.setValueAtTime(0.022,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.07);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);}

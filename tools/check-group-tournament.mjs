@@ -39,6 +39,24 @@ for(const formation of supportedFormations){
 }
 
 {
+  const aliasPairs=[
+    ["Başakşehir FK","Başakşehir"],
+    ["Adana Demirspor","A. Demirspor"],
+    ["Bandırma FK","Bandırmaspor"],
+    ["Sakarya FK","Sakaryaspor"],
+    ["Erzurumspor FK","Erzurumspor"]
+  ];
+  const aliasPool=aliasPairs.flat().concat(Array.from({length:26},(_,index)=>`Identity Club ${index+1}`));
+  const state=engine.createTournament({...baseOptions,pool:aliasPool});
+  const names=Object.values(state.teams).filter(team=>!team.isPlayer).map(team=>team.name);
+  assert.equal(names.length,31);
+  for(const [official,alias] of aliasPairs){
+    assert.ok(names.includes(official),`${official} must remain in the tournament`);
+    assert.ok(!names.includes(alias),`${alias} must not create a duplicate club identity`);
+  }
+}
+
+{
   const manual=newTournament(),fast=newTournament();
   while(!manual.draw.completed)engine.revealNext(manual,1);
   engine.revealNext(fast,99);

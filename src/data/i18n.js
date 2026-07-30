@@ -543,24 +543,24 @@ var COPA_LOCALE_BUTTONS=[
 var COPA_HOWTO_TRANSLATIONS={
  es:{title:"GU\u00cdA COPA",subtitle:"6 PASOS EN COPA",close:"Cerrar",back:"VOLVER AL JUEGO",steps:[
   ["ELIGE FORMACI\u00d3N Y PRESIDENTE","La formaci\u00f3n define los puestos. El presidente modifica el presupuesto, bonificaciones y l\u00edmite de deuda."],
-  ["TIRA Y ELIGE JUGADORES","Cada puesto muestra tres candidatos. Elige con cuidado: presupuesto y qu\u00edmica importan."],
-  ["SUPERA EL GRUPO Y VE A POR LA COPA","El sorteo crea grupos de cuatro. Tras tres partidos, los dos primeros avanzan a cuartos; victoria 3 puntos y empate 1."],
+  ["TIRA Y ELIGE JUGADORES","Cada puesto muestra tres candidatos. Puedes deshacer una vez el último fichaje normal; un Jugador Misterioso no se puede deshacer."],
+  ["SUPERA EL GRUPO Y VE A POR LA COPA","El sorteo crea grupos de cuatro. Tras tres partidos, los dos primeros avanzan a octavos y después llegan cuartos, semifinal y final; victoria 3 puntos y empate 1."],
   ["EL PRESIDENTE INTERVIENE","Puede ayudarte o crear una crisis. Cada presidente tiene su propio estilo."],
   ["GESTIONA LESIONES Y SUPLENTES","Las lesiones reducen la fuerza. Usa suplentes o paga un tratamiento."],
   ["LAS CARTAS CAMBIAN EL PLAN","Compra efectos permanentes o de un uso. La carta correcta importa m\u00e1s que la suerte."]
  ]},
  de:{title:"COPA-GUIDE",subtitle:"6 SCHRITTE IN COPA",close:"Schließen",back:"ZURÜCK ZUM SPIEL",steps:[
   ["FORMATION UND PR\u00c4SIDENT W\u00c4HLEN","Die Formation bestimmt die ben\u00f6tigten Positionen. Der Pr\u00e4sident ver\u00e4ndert Budget, Boni und Schuldenlimit."],
-  ["W\u00dcRFELN UND SPIELER W\u00c4HLEN","Jede Position bietet drei Kandidaten. Budget und Chemie entscheiden mit."],
-  ["GRUPPE ÜBERSTEHEN, POKAL JAGEN","Die Auslosung bildet Vierergruppen. Nach drei Spielen erreichen die besten zwei das Viertelfinale; Sieg 3 Punkte, Remis 1."],
+  ["W\u00dcRFELN UND SPIELER W\u00c4HLEN","Jede Position bietet drei Kandidaten. Der letzte normale Transfer kann einmal rückgängig gemacht werden; ein Mystery-Spieler nicht."],
+  ["GRUPPE ÜBERSTEHEN, POKAL JAGEN","Die Auslosung bildet Vierergruppen. Nach drei Spielen erreichen die besten zwei das Achtelfinale; danach folgen Viertel-, Halbfinale und Finale. Sieg 3 Punkte, Remis 1."],
   ["DER PR\u00c4SIDENT GREIFT EIN","Er kann helfen oder eine Krise ausl\u00f6sen. Jeder Pr\u00e4sident spielt anders."],
   ["VERLETZUNGEN UND BANK VERWALTEN","Verletzungen senken die Stärke. Nutze Ersatzspieler oder zahle für Behandlung."],
   ["KARTEN VER\u00c4NDERN DEN PLAN","Kaufe dauerhafte oder einmalige Effekte. Der richtige Moment z\u00e4hlt."]
  ]},
  it:{title:"GUIDA COPA",subtitle:"6 PASSI IN COPA",close:"Chiudi",back:"TORNA AL GIOCO",steps:[
   ["SCEGLI MODULO E PRESIDENTE","Il modulo definisce i ruoli necessari. Il presidente modifica budget, bonus e limite debiti."],
-  ["LANCIA E SCEGLI I GIOCATORI","Ogni ruolo offre tre candidati. Budget e chimica contano."],
-  ["SUPERA IL GIRONE, PUNTA ALLA COPPA","Il sorteggio crea gironi da quattro. Dopo tre gare le prime due vanno ai quarti; vittoria 3 punti, pareggio 1."],
+  ["LANCIA E SCEGLI I GIOCATORI","Ogni ruolo offre tre candidati. Puoi annullare una volta l'ultimo acquisto normale; un Giocatore Misterioso non si può annullare."],
+  ["SUPERA IL GIRONE, PUNTA ALLA COPPA","Il sorteggio crea gironi da quattro. Dopo tre gare le prime due vanno agli ottavi, poi quarti, semifinale e finale; vittoria 3 punti, pareggio 1."],
   ["IL PRESIDENTE INTERVIENE","Pu\u00f2 aiutare o creare una crisi. Ogni presidente ha il suo stile."],
   ["GESTISCI INFORTUNI E PANCHINA","Gli infortuni riducono la forza. Usa le riserve o paga una cura."],
   ["LE CARTE CAMBIANO IL PIANO","Compra effetti permanenti o monouso. Il momento giusto conta."]
@@ -669,7 +669,7 @@ function _installCopaHowtoModalRuntime(){
  window.__copaHowtoModalRuntimeInstalled=true;
  var originalOpenHowtoModal=window.openHowtoModal;
  window.openHowtoModal=function(){
-  originalOpenHowtoModal();
+  originalOpenHowtoModal.apply(this,arguments);
   var translation=COPA_HOWTO_TRANSLATIONS[LANG];
   if(!translation)return;
   window.requestAnimationFrame(function(){

@@ -14,6 +14,19 @@
 .chair-picker-modal .chairpopup-desc b{color:var(--color-ink);font-weight:750}
 .chair-picker-modal .cp-role-badge{align-self:center;justify-content:center;max-width:100%;min-height:24px;margin:12px auto 0;padding:4px 9px;border-color:color-mix(in srgb,var(--color-primary) 38%,var(--border-subtle));background:var(--surface-primary-soft);color:var(--action-text);font-size:9px;letter-spacing:1px;white-space:nowrap}
 .chair-picker-modal .cp-mechanics{display:flex;flex-direction:column;min-width:0;padding:22px 24px 18px;background:var(--surface-elevated)}
+.chair-picker-modal .cp-contract{display:grid;gap:8px;width:100%;margin-top:30px}
+.chair-picker-modal .cp-contract-row{display:grid;grid-template-columns:minmax(112px,132px) minmax(0,1fr);align-items:start;gap:12px;min-height:48px;padding:10px 12px;border:1px solid var(--border-subtle);border-left:3px solid var(--border-default);border-radius:var(--radius-sm);background:var(--surface-bg)}
+.chair-picker-modal .cp-contract-row>span{padding-top:2px;color:var(--color-slate);font:800 8.5px/1.25 var(--mono);letter-spacing:1.15px}
+.chair-picker-modal .cp-contract-row>p{min-width:0;margin:0;color:var(--color-ink);font:650 11px/1.45 var(--disp);overflow-wrap:anywhere}
+.chair-picker-modal .cp-context-number{font-family:var(--mono);font-weight:900;font-variant-numeric:tabular-nums}
+.chair-picker-modal .cp-context-number.is-positive{color:var(--status-positive-text)}
+.chair-picker-modal .cp-context-number.is-negative{color:var(--status-negative-text)}
+.chair-picker-modal .cp-context-number.is-warning{color:var(--status-warning-text)}
+.chair-picker-modal .cp-context-number.is-neutral{color:var(--status-info-text)}
+.chair-picker-modal .cp-contract-adv{border-left-color:var(--color-primary)}
+.chair-picker-modal .cp-contract-trigger{border-left-color:var(--status-info)}
+.chair-picker-modal .cp-contract-red{border-left-color:var(--status-warning)}
+.chair-profile .chair-trust-change{max-width:34ch;margin:7px auto 10px;padding:7px 9px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg);color:var(--color-slate);font:650 9.5px/1.45 var(--mono);text-align:left;overflow-wrap:anywhere}
 .chair-picker-modal .cp-mechanics-head{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:30px;padding-right:88px;border-bottom:1px solid var(--border-subtle);color:var(--color-slate);font:750 9px/1.2 var(--mono);letter-spacing:1.7px;text-transform:uppercase}
 .chair-picker-modal .cp-fx{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;max-width:none;margin:16px 0 0;justify-items:stretch;text-align:left}
 .chair-picker-modal .cp-fx-group{display:grid;grid-template-rows:max-content max-content;align-content:start;gap:8px}
@@ -39,6 +52,7 @@
 .chair-picker-modal .cp-nav-spacer{display:block;width:112px;height:44px}
 html[data-theme="dark"] .chair-picker-modal .cp-persona{background:color-mix(in srgb,var(--surface-muted) 54%,var(--surface-elevated))}
 html[data-theme="dark"] .chair-picker-modal .cp-fx-item{background:color-mix(in srgb,var(--surface-bg) 88%,var(--surface-muted))}
+html[data-theme="dark"] .chair-picker-modal .cp-contract-row{background:color-mix(in srgb,var(--surface-bg) 88%,var(--surface-muted))}
 @media(max-width:720px){
   #modal>.sheet.chair-picker-sheet{width:calc(100vw - max(16px,var(--copa-safe-left)) - max(16px,var(--copa-safe-right)));max-width:calc(100vw - max(16px,var(--copa-safe-left)) - max(16px,var(--copa-safe-right)));max-height:calc(100dvh - var(--copa-safe-top) - var(--copa-safe-bottom) - 12px)}
   .chair-picker-modal .cp-top-controls{position:fixed;top:calc(var(--copa-safe-top) + 10px);right:calc(var(--copa-safe-right) + 14px)}
@@ -52,6 +66,10 @@ html[data-theme="dark"] .chair-picker-modal .cp-fx-item{background:color-mix(in 
   .chair-picker-modal .chairpopup-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin-top:7px;font-size:10.5px;line-height:1.38}
   .chair-picker-modal .cp-role-badge{grid-column:1/-1;justify-self:center;margin-top:0}
   .chair-picker-modal .cp-mechanics{padding:14px 14px 12px}
+  .chair-picker-modal .cp-contract{gap:7px;margin-top:26px}
+  .chair-picker-modal .cp-contract-row{grid-template-columns:100px minmax(0,1fr);gap:8px;min-height:44px;padding:8px 9px}
+  .chair-picker-modal .cp-contract-row>span{font-size:7.75px;letter-spacing:.9px}
+  .chair-picker-modal .cp-contract-row>p{font-size:10.5px;line-height:1.38}
   .chair-picker-modal .cp-mechanics-head{padding-right:0}
   .chair-picker-modal .cp-fx{grid-template-columns:1fr;margin-top:12px;gap:11px}
   .chair-picker-modal .cp-fx-item{min-height:40px;padding:9px 10px;font-size:10.5px}
@@ -71,4 +89,5 @@ html[data-theme="dark"] .chair-picker-modal .cp-fx-item{background:color-mix(in 
   .chair-picker-modal .cp-persona-copy{padding-right:72px}
   .chair-picker-modal .cp-portrait-frame{width:76px}
   .chair-picker-modal .cp-role-badge{font-size:8px}
+  .chair-picker-modal .cp-contract-row{grid-template-columns:1fr;gap:3px}
 }

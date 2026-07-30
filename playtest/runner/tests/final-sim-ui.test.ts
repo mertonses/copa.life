@@ -281,6 +281,27 @@ test("shareable final code can be imported and deterministically verified",async
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{(globalThis as any).openFinalReplayImport();});
   await expect(page.locator("#finalReplayImportValue")).toBeVisible();
+  const importLayout=await page.locator(".final-replay-import").evaluate(modal=>{
+    const header=modal.querySelector("h4") as HTMLElement;
+    const actions=modal.querySelector(".bact") as HTMLElement;
+    const buttons=[...actions.querySelectorAll("button")] as HTMLElement[];
+    const headerStyle=getComputedStyle(header);
+    const actionStyle=getComputedStyle(actions);
+    return{
+      headerColor:headerStyle.color,
+      headerBackground:headerStyle.backgroundColor,
+      actionDisplay:actionStyle.display,
+      actionColumns:actionStyle.gridTemplateColumns.split(" ").length,
+      buttonWidths:buttons.map(button=>button.getBoundingClientRect().width),
+      buttonTops:buttons.map(button=>button.getBoundingClientRect().top)
+    };
+  });
+  expect(importLayout.headerColor).toBe("rgb(255, 255, 255)");
+  expect(importLayout.headerBackground).toBe("rgb(23, 36, 45)");
+  expect(importLayout.actionDisplay).toBe("grid");
+  expect(importLayout.actionColumns).toBe(2);
+  expect(Math.abs(importLayout.buttonWidths[0]-importLayout.buttonWidths[1])).toBeLessThan(1);
+  expect(Math.abs(importLayout.buttonTops[0]-importLayout.buttonTops[1])).toBeLessThan(1);
   const code=await page.evaluate(()=>{
     const core=(globalThis as any).CopaFinalSimCore;
     return core.createReplayCode({seed:20260717,homePower:78,awayPower:74,tactic:"push",cards:["kontra"],decisions:[{minute:60,tactic:"hold"}]});
