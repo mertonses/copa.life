@@ -68,10 +68,8 @@
     return shouldBypassForAutomation()||hasRestorableSession()||!!document.querySelector("#modal:not(.hidden),#finalSim:not(.hidden),.final-sim-screen:not(.hidden)");
   }
   document.addEventListener("click",event=>{
-    const button=event.target.closest("[data-mode-choice]");if(button){root.sfxModeChoice?.(button.dataset.modeChoice,"select");choose(button.dataset.modeChoice);}
+    const button=event.target.closest("[data-mode-choice]");if(button){root.sfxModeChoice?.(button.dataset.modeChoice);choose(button.dataset.modeChoice);}
   });
-  const finePointer=()=>!root.CopaPlatform?.isNative&&!!root.matchMedia?.("(hover: hover) and (pointer: fine)").matches;
-  gate()?.querySelectorAll("[data-mode-choice]").forEach(button=>button.addEventListener("mouseenter",()=>{if(finePointer())root.sfxModeChoice?.(button.dataset.modeChoice,"hover");},{passive:true}));
   root.CopaModeGate=Object.freeze({show:()=>setVisible(true),hide:()=>setVisible(false),choose,returnToModes,refreshCopy});
   document.addEventListener("DOMContentLoaded",()=>{
     refreshCopy();
