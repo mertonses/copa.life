@@ -572,7 +572,17 @@ export class ArenaRoom extends DurableObject{
     const homeWon=penalty?penalty[0]>penalty[1]:this.state.score[0]>this.state.score[1];
     const draw=!penalty&&this.state.score[0]===this.state.score[1];
     const simulatedOutcomes=draw?["draw","draw"]:(homeWon?["win","loss"]:["loss","win"]);
-    const participation=this.state.mode==="practice"
+    const forcedForfeitIndex=this.state.players.findIndex(player=>player.forcedForfeit);
+    const participation=this.state.forcedVoid
+      ?{eligible:[false,false],outcomes:["draw","draw"],forfeitIndex:null,voided:true}
+      :forcedForfeitIndex>=0
+      ?{
+        eligible:this.state.players.map((_,index)=>index!==forcedForfeitIndex),
+        outcomes:forcedForfeitIndex===0?["loss","win"]:["win","loss"],
+        forfeitIndex:forcedForfeitIndex,
+        voided:false
+      }
+      :this.state.mode==="practice"
       ?{eligible:[true,true],outcomes:simulatedOutcomes,forfeitIndex:null,voided:false}
       :this.state.participationPolicy
       ?resolveParticipation(this.state.players,simulatedOutcomes,this.state.participationPolicy)
@@ -588,6 +598,7 @@ export class ArenaRoom extends DurableObject{
       score:this.state.score,penalty,outcomes,teams:[home,away],
       regulationDraw:!!penalty&&this.state.score[0]===this.state.score[1],
       participation:participation.eligible,forfeitIndex:participation.forfeitIndex,voided:participation.voided,
+      forfeitReason:participation.forfeitIndex===null?null:this.state.players[participation.forfeitIndex].forfeitReason||"participation",
       rulesVersion:this.state.rulesVersion,catalogVersion:this.state.catalogVersion||null,playerSources:this.state.playerSources||null,
       finishedAt:Date.now()
     };
@@ -707,18 +718,25 @@ export class ArenaRoom extends DurableObject{
       }else if(this.state.rematch.requests.every(Boolean))await this.startRematch();
       return "ok";
     }
+    if(data.type==="forfeit"){
+      if(this.state.mode!=="ranked"||this.state.phase==="result")return "forfeit_unavailable";
+      player.forcedForfeit=true;player.forfeitReason="surrender";
+      const teams=this.state.players.map(candidate=>teamSnapshot(candidate,this.state.rulesVersion));
+      await this.finish(teams[0],teams[1]);
+      return "ok";
+    }
     if(data.type==="emote"){
       if(this.state.mode==="practice"||!["setup","draft","market","training","live","penalty"].includes(this.state.phase))return "emote_unavailable";
       if(!ARENA_EMOTES.includes(data.emote))return "unavailable_choice";
       const now=Date.now(),cooldowns=this.state.emoteCooldowns||(this.state.emoteCooldowns=[0,0]);
-      if(now-Number(cooldowns[index]||0)<2500)return "emote_rate_limited";
+      if(now-Number(cooldowns[index]||0)<4000)return "emote_rate_limited";
       cooldowns[index]=now;
       if(!Array.isArray(this.state.emotes))this.state.emotes=[null,null];
       this.state.emoteSequence=Number(this.state.emoteSequence||0)+1;
       this.state.emotes[index]={id:data.emote,sequence:this.state.emoteSequence,at:now};
       this.persist();this.broadcast();return "ok";
     }
-    const gameplayAction=["setup","draft","market","training","tactic","penalty"].includes(data.type);
+    const gameplayAction=["ready","setup","draft","market","training","tactic","penalty"].includes(data.type);
     if(data.type==="ready"&&this.state.phase==="lobby"){
       if(player.ready)return "already_submitted";
       player.ready=true;
@@ -753,7 +771,10 @@ export class ArenaRoom extends DurableObject{
       this.state.penalty.choices[index]=data.choice;
     }
     else return "wrong_phase";
-    if(gameplayAction)player.manualDecisions=(Number(player.manualDecisions)||0)+1;
+    if(gameplayAction){
+      player.manualDecisions=(Number(player.manualDecisions)||0)+1;
+      player.missedDecisions=0;
+    }
     if(data.type==="tactic")player.manualTactics=(Number(player.manualTactics)||0)+1;
     if(gameplayAction&&this.state.botIndex>=0&&index!==this.state.botIndex&&!this.state.botDueAt)this.scheduleBotDecision();
     this.persist();await this.advance();if(!this.bothDone()){await this.armAlarm();this.broadcast();}return "ok";
@@ -838,6 +859,7 @@ export class ArenaRoom extends DurableObject{
       }
       return;
     }
+    const timedOut=[];
     for(let index=0;index<2;index++){
       const player=this.state.players[index];
       const incomplete=
@@ -848,7 +870,20 @@ export class ArenaRoom extends DurableObject{
         (this.state.phase==="training"&&!player.training)||
         (this.state.phase==="live"&&player.tactics.length<=this.state.window)||
         (this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]);
-      if(incomplete)this.defaultAction(index);
+      if(incomplete){
+        if(this.state.mode==="ranked"&&index!==this.state.botIndex){
+          player.missedDecisions=(Number(player.missedDecisions)||0)+1;
+          if(player.missedDecisions>=3)timedOut.push(index);
+        }
+        if(this.state.mode!=="ranked"||player.missedDecisions<3||index===this.state.botIndex)this.defaultAction(index);
+      }
+    }
+    if(timedOut.length){
+      if(timedOut.length===1){
+        const index=timedOut[0];this.state.players[index].forcedForfeit=true;this.state.players[index].forfeitReason="inactivity";
+      }else this.state.forcedVoid=true;
+      const teams=this.state.players.map(player=>teamSnapshot(player,this.state.rulesVersion));
+      await this.finish(teams[0],teams[1]);return;
     }
     this.persist();await this.advance();
   }

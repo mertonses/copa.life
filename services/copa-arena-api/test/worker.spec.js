@@ -161,6 +161,67 @@ describe("Arena HTTP API",()=>{
 });
 
 describe("Arena Durable Objects",()=>{
+  it("settles an explicit surrender immediately as a 0-3 forfeit",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-SURRENDER00000001");
+    await room.init("AR-SURRENDER00000001",[
+      {owner:"owner-surrender-home",clubName:"Bırakan SK",rating:1000},
+      {owner:"owner-surrender-away",clubName:"Devam SK",rating:1000}
+    ],"surrender-seed");
+    await runInDurableObject(room,async instance=>{
+      expect(await instance.action("owner-surrender-home",{type:"forfeit",actionId:"AA-SURRENDER000000000001"})).toBe("ok");
+      expect(instance.state.phase).toBe("result");
+      expect(instance.state.score).toEqual([0,3]);
+      expect(instance.state.result).toMatchObject({forfeitIndex:0,forfeitReason:"surrender",outcomes:["loss","win"]});
+      expect(instance.state.rematch.available).toBe(false);
+    });
+  });
+
+  it("warns after missed choices and forfeits the third consecutive timeout",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-INACTIVITY0000001");
+    const players=[
+      {owner:"owner-active-home",clubName:"Aktif SK",rating:1000},
+      {owner:"owner-idle-away",clubName:"Sessiz SK",rating:1000}
+    ];
+    await room.init("AR-INACTIVITY0000001",players,"inactivity-seed");
+    await runInDurableObject(room,async instance=>{
+      let sequence=0;
+      const act=(owner,data)=>instance.action(owner,{...data,actionId:`AA-INACTIVE${++sequence}ABCDEFGH`});
+      await act(players[0].owner,{type:"ready"});
+      instance.state.deadline=Date.now()-1;await instance.alarm();
+      expect(instance.state.players[1].missedDecisions).toBe(1);
+      expect(publicState(instance.state,players[1].owner).self.missedDecisions).toBe(1);
+
+      await act(players[0].owner,{type:"setup",choice:{formation:"4-4-2",style:"balanced"}});
+      instance.state.deadline=Date.now()-1;await instance.alarm();
+      expect(instance.state.players[1].missedDecisions).toBe(2);
+      expect(publicState(instance.state,players[1].owner).self.missedDecisions).toBe(2);
+
+      const offer=instance.state.offers[0].sort((a,b)=>a.cost-b.cost)[0];
+      await act(players[0].owner,{type:"draft",choice:offer.id});
+      instance.state.deadline=Date.now()-1;await instance.alarm();
+      expect(instance.state.phase).toBe("result");
+      expect(instance.state.score).toEqual([3,0]);
+      expect(instance.state.result).toMatchObject({forfeitIndex:1,forfeitReason:"inactivity",outcomes:["win","loss"]});
+    });
+  });
+
+  it("voids the match fairly when both players miss three consecutive choices",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-DUALIDLE000000001");
+    await room.init("AR-DUALIDLE000000001",[
+      {owner:"owner-idle-home",clubName:"Sessiz Ev",rating:1000},
+      {owner:"owner-idle-away",clubName:"Sessiz Deplasman",rating:1000}
+    ],"dual-inactivity-seed");
+    await runInDurableObject(room,async instance=>{
+      for(let missed=1;missed<=3;missed++){
+        instance.state.deadline=Date.now()-1;
+        await instance.alarm();
+        if(missed<3)expect(instance.state.players.map(player=>player.missedDecisions)).toEqual([missed,missed]);
+      }
+      expect(instance.state.phase).toBe("result");
+      expect(instance.state.result).toMatchObject({voided:true,forfeitIndex:null,outcomes:["draw","draw"]});
+    });
+  });
+
   it("recovers an expired live decision window when a client syncs",async()=>{
     const room=env.ARENA_ROOM.getByName("AR-EXPIREDLIVE000001");
     const players=[
@@ -241,6 +302,7 @@ describe("Arena Durable Objects",()=>{
       expect(publicState(instance.state,"owner-away").emotes.opponent).toMatchObject({id:"applause",sequence:1});
       expect(instance.state.players[0].manualDecisions).toBe(decisionsBeforeEmote);
       expect(await act("owner-home",{type:"emote",emote:"fire"})).toBe("emote_rate_limited");
+      expect(await act("owner-away",{type:"emote",emote:"easy"})).toBe("ok");
       expect(await act("owner-away",{type:"emote",emote:"taunt"})).toBe("unavailable_choice");
       for(const owner of ["owner-home","owner-away"])await act(owner,{type:"setup",choice:{formation:"4-4-2",style:"balanced",chairman:"diplomat"}});
       expect(instance.state.players.every(player=>player.setup.chairman==="babacan")).toBe(true);
