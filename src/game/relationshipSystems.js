@@ -1,7 +1,7 @@
 (function(root){
   "use strict";
 
-  const fresh=()=>({version:2,bonds:{},seenPlayers:[],pending:null,eventCount:0,matchPower:0,matchNotice:"",chairAgenda:"",chairAgendaChairId:"",chairAgendaUsed:false,startToken:0});
+  const fresh=()=>({version:3,bonds:{},seenPlayers:[],pending:null,eventCount:0,matchPower:0,matchNotice:"",matchStory:"",promises:[],journal:{},groupMood:{captain:0,youth:0,stars:0,local:0},captainPromptedRound:0,chairAgenda:"",chairAgendaChairId:"",chairAgendaUsed:false,startToken:0});
   let state=fresh();
   const cleanName=value=>String(value||"").replace(/[<>\r\n]/g,"").trim().slice(0,72);
   const keyFor=player=>cleanName(player&&player.name).toLocaleLowerCase("tr-TR")+"|"+String(player&&player.pos||"");
@@ -11,6 +11,25 @@
     if(player&&((player.ov||0)>=82||player.trait==="wonderkid"))return "ambitious";
     return "professional";
   };
+  const logDecision=(key,label,reason,round)=>{
+    if(!key)return;
+    const rows=Array.isArray(state.journal[key])?state.journal[key]:[];
+    rows.unshift({label:cleanName(label),reason:cleanName(reason),round:Math.max(1,Number(round)||1)});
+    state.journal[key]=rows.slice(0,2);
+  };
+  const groupsFor=(player,context)=>{
+    const groups=[],captain=context&&context.captain;
+    if(captain&&keyFor(captain)===keyFor(player))groups.push("captain");
+    if(Number(player&&player.age)>0&&Number(player.age)<=23)groups.push("youth");
+    if(Number(player&&player.ov)>=82)groups.push("stars");
+    const selected=String(root.selectedCountry||"TR").toUpperCase(),nation=String(player&&player.natG||player&&player.nat||"").toUpperCase();
+    if(nation&&nation===selected)groups.push("local");
+    return groups;
+  };
+  const groupLabel=(id,tr)=>({captain:tr?"Kaptan çevresi":"Captain group",youth:tr?"Gençler":"Youth",stars:tr?"Yıldızlar":"Stars",local:tr?"Yerli çekirdek":"Local core"})[id]||id;
+  function nudgeGroups(player,amount,context){
+    groupsFor(player,context).forEach(id=>{state.groupMood[id]=Math.max(-2,Math.min(2,(Number(state.groupMood[id])||0)+amount));});
+  }
   const chairCount=id=>{
     const meta=root.CopaMeta&&root.CopaMeta.getState&&root.CopaMeta.getState();
     return Math.max(0,Number(meta&&meta.mastery&&meta.mastery.chairmen&&meta.mastery.chairmen[id])||0);
@@ -37,22 +56,51 @@
     state.eventCount=Math.max(0,Math.min(2,Number(source.eventCount)||0));
     state.matchPower=Math.max(-1,Math.min(1,Number(source.matchPower)||0));
     state.matchNotice=cleanName(source.matchNotice);
+    state.matchStory=cleanName(source.matchStory);
+    state.promises=Array.isArray(source.promises)?source.promises.filter(item=>item&&item.key&&["start","captain","rest"].includes(item.type)).slice(-8).map(item=>({...item,key:cleanName(item.key),name:cleanName(item.name),dueRound:Math.max(1,Number(item.dueRound)||1),status:["active","fulfilled","broken"].includes(item.status)?item.status:"active"})):[];
+    state.journal=source.journal&&typeof source.journal==="object"?Object.fromEntries(Object.entries(source.journal).map(([key,rows])=>[cleanName(key),Array.isArray(rows)?rows.slice(0,2).map(row=>({label:cleanName(row.label),reason:cleanName(row.reason),round:Math.max(1,Number(row.round)||1)})):[]])):{};
+    state.groupMood={captain:0,youth:0,stars:0,local:0,...(source.groupMood&&typeof source.groupMood==="object"?source.groupMood:{})};
+    Object.keys(state.groupMood).forEach(id=>{state.groupMood[id]=Math.max(-2,Math.min(2,Number(state.groupMood[id])||0));});
+    state.captainPromptedRound=Math.max(0,Number(source.captainPromptedRound)||0);
     state.chairAgenda=["finance","squad","governance","different"].includes(source.chairAgenda)?source.chairAgenda:"";
     state.chairAgendaChairId=cleanName(source.chairAgendaChairId).toLowerCase();
     state.chairAgendaUsed=!!source.chairAgendaUsed;
     state.startToken=Math.max(0,Math.min(1,Number(source.startToken)||0));
   }
-  function completeMatch(players,round,rng){
-    state.matchPower=0;state.matchNotice="";
+  function evaluatePromises(players,round,context){
+    const lineup=(Array.isArray(players)?players:[]).filter(Boolean),all=lineup.concat(Array.isArray(context&&context.bench)?context.bench.filter(Boolean):[]),captain=context&&context.captain;
+    state.promises.filter(item=>item.status==="active"&&item.dueRound<=Number(round)).forEach(item=>{
+      const player=all.find(candidate=>keyFor(candidate)===item.key);
+      if(player&&(player.injured||player.suspended)){item.dueRound=Number(round)+1;logDecision(item.key,root.LANG==="tr"?"Söz ertelendi":"Promise deferred",root.LANG==="tr"?"Sakatlık veya ceza istisnası":"Injury or suspension exception",round);return;}
+      const inLineup=lineup.some(candidate=>keyFor(candidate)===item.key);
+      const kept=item.type==="start"?inLineup:item.type==="rest"?!inLineup:!!captain&&keyFor(captain)===item.key;
+      item.status=kept?"fulfilled":"broken";
+      state.bonds[item.key]=Math.max(0,Math.min(7,(state.bonds[item.key]||0)+(kept?1:-2)));
+      nudgeGroups(player||{name:item.name},kept?.25:-.5,{captain});
+      const tr=root.LANG==="tr",typeLabel=item.type==="start"?(tr?"ilk 11 sözü":"starting promise"):item.type==="captain"?(tr?"kaptanlık sözü":"captaincy promise"):(tr?"dinlenme sözü":"rest promise");
+      logDecision(item.key,kept?(tr?"Söz tutuldu":"Promise kept"):(tr?"Söz bozuldu":"Promise broken"),typeLabel,round);
+      state.matchStory=kept?(item.type==="captain"?(tr?`${item.name} kaptanlık sözünün karşılığını sahada verdi.`:`${item.name} repaid the captaincy promise on the pitch.`):(tr?`${item.name} verilen sözün tutulmasına karşılık verdi.`:`${item.name} responded to a promise kept.`)):(tr?`${item.name}, tutulmayan ${typeLabel} nedeniyle takımdan uzaklaştı.`:`${item.name} withdrew after a broken ${typeLabel}.`);
+    });
+  }
+  function completeMatch(players,round,rng,context){
+    state.matchPower=0;state.matchNotice="";state.matchStory="";
     const list=(Array.isArray(players)?players:[]).filter(Boolean);
+    evaluatePromises(list,round,context||{});
     list.forEach(player=>{const key=keyFor(player);if(key)state.bonds[key]=Math.min(7,(state.bonds[key]||0)+1);});
     if(state.pending||state.eventCount>=2||Number(round)>=7)return;
-    const eligible=list.filter(player=>{const key=keyFor(player);return (state.bonds[key]||0)>=2&&!state.seenPlayers.includes(key);});
+    const bench=Array.isArray(context&&context.bench)?context.bench.filter(player=>player&&!player.injured&&!player.suspended):[];
+    const eligible=list.concat(bench).filter(player=>{const key=keyFor(player);return (state.bonds[key]||0)>=2&&!state.seenPlayers.includes(key)&&!state.promises.some(item=>item.key===key&&item.status==="active");});
     if(!eligible.length)return;
     const random=typeof rng==="function"?rng:Math.random;
-    if(random()>.48)return;
-    const player=eligible[Math.floor(random()*eligible.length)],key=keyFor(player),bond=state.bonds[key]||0,type=personality(player)==="volatile"?"permission":random()<.5?"confidence":"permission";
-    state.pending={key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1};
+    if(random()>.58)return;
+    const player=eligible[Math.floor(random()*eligible.length)],key=keyFor(player),bond=state.bonds[key]||0,isBench=bench.includes(player),promiseRoll=random()<.62;
+    if(promiseRoll){
+      const type=isBench?"start":random()<.42?"captain":"rest";
+      state.pending={eventKind:"promise",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1};
+    }else{
+      const type=personality(player)==="volatile"?"permission":random()<.5?"confidence":"permission";
+      state.pending={eventKind:"relationship",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1};
+    }
     state.seenPlayers.push(key);state.eventCount++;
   }
   function effectFor(choice){
@@ -81,7 +129,14 @@
     const event=state.pending;if(!event||typeof root.showModal!=="function")return false;
     const modal=document.getElementById("modal");
     if(modal&&!modal.classList.contains("hidden"))return false;
-    const tr=root.LANG==="tr",permission=event.type==="permission",third=canCompromise(event);
+    const tr=root.LANG==="tr";
+    if(event.eventKind==="promise"){
+      const promiseLabel=event.type==="start"?(tr?"Sonraki maç ilk 11":"Start next match"):event.type==="captain"?(tr?"Sonraki maç kaptan":"Captain next match"):(tr?"Sonraki maç dinlenme":"Rest next match");
+      const request=event.type==="start"?(tr?`${event.name}, sonraki maça ilk 11'de başlamak istiyor.`:`${event.name} wants to start the next match.`):event.type==="captain"?(tr?`${event.name}, sonraki maçta kaptanlık bekliyor.`:`${event.name} expects the armband next match.`):(tr?`${event.name}, sonraki maçta dinlendirilmek istiyor.`:`${event.name} asks to be rested next match.`);
+      root.showModal(`<div class="relationship-modal promise-modal"><header><span>${tr?"OYUNCU SÖZÜ":"PLAYER PROMISE"}</span><b>${tr?"BAĞ":"BOND"} ${event.bond}/7</b></header><h3>${promiseLabel}</h3><p>${request}</p><div class="relationship-choices"><button type="button" onclick="CopaRelationships.resolvePromise(true)"><b>${tr?"SÖZ VER":"MAKE PROMISE"}</b><small>${tr?"Tutulursa bağ güçlenir. Bozulursa oyuncu bunu unutmaz.":"Keeping it builds trust. Breaking it will be remembered."}</small></button><button type="button" onclick="CopaRelationships.resolvePromise(false)"><b>${tr?"SÖZ VERME":"DECLINE"}</b><small>${tr?"Açık konuşursun. İlişki küçük ölçüde etkilenir.":"You are direct. The relationship takes a small hit."}</small></button></div></div>`,{dismissOnOverlay:false,label:tr?"Oyuncu sözü":"Player promise"});
+      return true;
+    }
+    const permission=event.type==="permission",third=canCompromise(event);
     const title=permission?(tr?"ÖZEL İZİN TALEBİ":"PERSONAL LEAVE REQUEST"):(tr?"GÜVEN KRİZİ":"CONFIDENCE CRISIS");
     const copy=permission?(tr?`${event.name} kişisel bir konu için izin istiyor. Kararın bu maçtaki hazırlığı ve ilişkinizi etkileyebilir.`:`${event.name} asks for personal leave. Your response may affect this match and the relationship.`):(tr?`${event.name} rolünden emin değil. Oyuncunun karakterine göre yaklaşımın farklı sonuç verebilir.`:`${event.name} is unsure about the role. Personality can change the outcome.`);
     const choices=permission?[
@@ -114,6 +169,54 @@
     if(typeof root.showToast==="function")root.showToast(result.notice);
     if(typeof root.renderHub==="function")root.renderHub();
     if(typeof root._saveState==="function")root._saveState();
+  }
+  function resolvePromise(accept){
+    const event=state.pending;if(!event||event.eventKind!=="promise")return;
+    const tr=root.LANG==="tr";
+    if(accept){
+      state.promises.push({key:event.key,name:event.name,type:event.type,dueRound:event.round,status:"active",createdRound:event.round-1});
+      logDecision(event.key,tr?"Söz verildi":"Promise made",event.type==="start"?(tr?"Sonraki maç ilk 11":"Start next match"):event.type==="captain"?(tr?"Sonraki maç kaptanlık":"Captain next match"):(tr?"Sonraki maç dinlenme":"Rest next match"),event.round-1);
+      state.matchNotice=tr?`${event.name} için söz kaydedildi.`:`Promise recorded for ${event.name}.`;
+    }else{
+      state.bonds[event.key]=Math.max(0,(state.bonds[event.key]||0)-1);
+      logDecision(event.key,tr?"Talep reddedildi":"Request declined",tr?"Açık rol görüşmesi":"Direct role talk",event.round-1);
+      state.matchNotice=tr?`${event.name} kararı not etti.`:`${event.name} noted the decision.`;
+    }
+    state.pending=null;
+    if(typeof root.closeModal==="function")root.closeModal();
+    if(typeof root.showToast==="function")root.showToast(state.matchNotice);
+    if(typeof root.renderHub==="function")root.renderHub();
+    if(typeof root._saveState==="function")root._saveState();
+  }
+  function activePromise(player,type,round){
+    const key=keyFor(player);
+    return state.promises.find(item=>item.key===key&&item.type===type&&item.status==="active"&&item.dueRound===Number(round));
+  }
+  function maybePromptCaptain(){
+    const currentRound=Math.max(1,Number(root.round)||1),promise=state.promises.find(item=>item.type==="captain"&&item.status==="active"&&item.dueRound===currentRound);
+    if(!promise||state.captainPromptedRound===currentRound||typeof root.pickCaptain!=="function")return false;
+    state.captainPromptedRound=currentRound;
+    setTimeout(()=>{const modal=document.getElementById("modal");if(!modal||modal.classList.contains("hidden"))root.pickCaptain();},500);
+    return true;
+  }
+  function canEnter(player){
+    const key=keyFor(player),broken=[...state.promises].reverse().find(item=>item.key===key&&item.type==="start"&&item.status==="broken");
+    if(!broken)return{allowed:true};
+    const tr=root.LANG==="tr";
+    return{allowed:false,message:tr?`${broken.name}, ilk 11 sözünü tutmadığını hatırlatıyor ve oyuna girmek istemiyor.`:`${broken.name} refuses to enter and reminds you of the broken starting promise.`};
+  }
+  function profileMarkup(player){
+    const key=keyFor(player),rows=state.journal[key]||[],bond=Math.max(0,Math.min(7,state.bonds[key]||0)),groups=groupsFor(player,{captain:typeof root._currentCaptainPlayer==="function"?root._currentCaptainPlayer():null}),tr=root.LANG==="tr";
+    if(!rows.length&&bond===0&&!groups.length)return"";
+    const reason=rows[0]&&rows[0].reason||(tr?"Henüz belirgin bir neden yok":"No defining reason yet");
+    return `<section class="player-relationship-journal"><header><span>${tr?"İLİŞKİ GÜNLÜĞÜ":"RELATIONSHIP JOURNAL"}</span><b>${tr?"BAĞ":"BOND"} ${bond}/7</b></header><p>${tr?"Mevcut bağ nedeni":"Current bond reason"} · <strong>${cleanName(reason)}</strong></p>${groups.length?`<div>${groups.map(id=>`<i>${groupLabel(id,tr)}</i>`).join("")}</div>`:""}${rows.length?`<ol>${rows.slice(0,2).map(row=>`<li><span>${row.round}. ${tr?"tur":"round"}</span><b>${row.label}</b><small>${row.reason}</small></li>`).join("")}</ol>`:""}</section>`;
+  }
+  function matchStory(){return state.matchStory||"";}
+  function promisedCaptainKey(round){const item=state.promises.find(p=>p.type==="captain"&&p.status==="active"&&p.dueRound===Number(round));return item&&item.key||"";}
+  function isPromisedCaptain(player,round){return !!player&&keyFor(player)===promisedCaptainKey(round);}
+  function groupSummary(){
+    const tr=root.LANG==="tr";
+    return Object.keys(state.groupMood).map(id=>({id,label:groupLabel(id,tr),mood:state.groupMood[id]}));
   }
   function chairMarkup(chairId){
     const rank=chairRank(chairId),tr=root.LANG==="tr",history=chairHistory(chairId);
@@ -154,8 +257,10 @@
     if(root.CopaLazy&&typeof root.CopaLazy.ensureMetaProgression==="function")root.CopaLazy.ensureMetaProgression().then(api=>api.recordChairDecision(chairId,outcomeId,positive)).catch(()=>{});
     return false;
   }
-  function matchModifier(){return Math.max(-1,Math.min(1,state.matchPower||0));}
-  function summary(){return {matchPower:matchModifier(),notice:state.matchNotice,pending:state.pending?{...state.pending}:null,startToken:state.startToken};}
+  function matchModifier(){const groupEffect=Object.values(state.groupMood).reduce((sum,value)=>sum+(Number(value)||0),0)*.08;return Math.max(-1,Math.min(1,(state.matchPower||0)+groupEffect));}
+  function summary(){return {matchPower:matchModifier(),notice:state.matchNotice,story:state.matchStory,pending:state.pending?{...state.pending}:null,promises:state.promises.map(item=>({...item})),groups:groupSummary(),startToken:state.startToken};}
 
-  root.CopaRelationships=Object.freeze({reset,snapshot,restore,completeMatch,queuePending,showPending,resolve,chairRank,chairMarkup,openChairAgenda,setChairAgenda,filterChairOutcomes,recordChairDecision,matchModifier,summary});
+  const baseQueuePending=queuePending;
+  queuePending=function(delay){maybePromptCaptain();return baseQueuePending(delay);};
+  root.CopaRelationships=Object.freeze({reset,snapshot,restore,completeMatch,queuePending,showPending,resolve,resolvePromise,activePromise,isPromisedCaptain,promisedCaptainKey,canEnter,profileMarkup,matchStory,groupSummary,chairRank,chairMarkup,openChairAgenda,setChairAgenda,filterChairOutcomes,recordChairDecision,matchModifier,summary});
 })(window);

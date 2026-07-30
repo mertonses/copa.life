@@ -21,6 +21,17 @@ if(prep){
   expect(prep.relevance("recovery",3,early)===4,"recovery is not prioritized for a fatigued squad");
   prep.restore({round:3,fatigue:0});
   expect(prep.relevance("recovery",3,early)<4,"recovery is always treated as the dominant drill");
+  prep.restore({round:2,fatigue:0,opponent:early});
+  const recommendation=prep.recommendedPlan();
+  expect(recommendation.length===2,"recommended plan must use the available two light slots");
+  expect(recommendation.every(item=>item.intensity==="light"),"one-tap plan must avoid silently adding intense load");
+  expect(recommendation.some(item=>item.id==="analysis"),"one-tap plan must react to a known opponent style");
+  prep.restore({round:5,fatigue:0,opponent:final,lastPlan:[{id:"finishing",intensity:"light"}]});
+  expect(Boolean(prep.priorPlanWarning()),"an unsuitable remembered plan must show a clear warning");
+  const saved=prep.snapshot();
+  prep.reset();
+  prep.restore(saved);
+  expect(prep.snapshot().lastPlan[0].id==="finishing","remembered plan must survive save and restore");
 }
 
 if(failures.length){

@@ -8,10 +8,16 @@ const OUT = path.join(ROOT, "dist");
 const webAnalyticsToken = String(process.env.CF_WEB_ANALYTICS_TOKEN || "").trim();
 const googleClientId = String(process.env.COPA_GOOGLE_CLIENT_ID || "").trim();
 const googleIosClientId = String(process.env.COPA_GOOGLE_IOS_CLIENT_ID || "").trim();
+const adsenseClient = String(process.env.COPA_ADSENSE_CLIENT || "").trim();
+const adsenseChannel = String(process.env.COPA_ADSENSE_CHANNEL || "").trim();
+const adsenseDisplaySlot = String(process.env.COPA_ADSENSE_DISPLAY_SLOT || "").trim();
 
 if (webAnalyticsToken && !/^[A-Za-z0-9_-]{16,128}$/.test(webAnalyticsToken)) {
   throw new Error("CF_WEB_ANALYTICS_TOKEN has an invalid format");
 }
+if(adsenseClient&&!/^ca-pub-\d{16}$/.test(adsenseClient))throw new Error("COPA_ADSENSE_CLIENT has an invalid format");
+if(adsenseChannel&&!/^\d{1,20}$/.test(adsenseChannel))throw new Error("COPA_ADSENSE_CHANNEL has an invalid format");
+if(adsenseDisplaySlot&&!/^\d{10}$/.test(adsenseDisplaySlot))throw new Error("COPA_ADSENSE_DISPLAY_SLOT has an invalid format");
 
 if (/^(1|true)$/i.test(process.env.PUBLIC_RELEASE || "")) {
   const rights = spawnSync(process.execPath, ["tools/check-publishing-rights.mjs", "--public"], {
@@ -129,6 +135,9 @@ if(fs.existsSync(builtIndex)){
   source=source.replaceAll("__COPA_BUILD_VERSION__",buildVersion);
   source=source.replaceAll("__COPA_GOOGLE_CLIENT_ID__",googleClientId);
   source=source.replaceAll("__COPA_GOOGLE_IOS_CLIENT_ID__",googleIosClientId);
+  source=source.replaceAll("__COPA_ADSENSE_CLIENT__",adsenseClient);
+  source=source.replaceAll("__COPA_ADSENSE_CHANNEL__",adsenseChannel);
+  source=source.replaceAll("__COPA_ADSENSE_DISPLAY_SLOT__",adsenseDisplaySlot);
   if(webAnalyticsToken){
     const beacon=`<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-copa-analytics="cloudflare-web" data-cf-beacon='${JSON.stringify({token:webAnalyticsToken,spa:true})}'></script>`;
     source=source.replace("</body>",`${beacon}</body>`);

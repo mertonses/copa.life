@@ -68,6 +68,13 @@ test("mobile road snaps and automatically centers the active round",async({page}
   expect(metrics.scrollLeft).toBeGreaterThan(0);
   expect(Math.abs(metrics.activeCenter-metrics.viewportCenter)).toBeLessThan(18);
   await expect(page.locator(".fixture-trophy")).toHaveClass(/is-near/);
+  const oneLine=await page.locator(".fixture-track").evaluate((track:HTMLElement)=>{
+    const nodes=[...track.children].filter(node=>(node as HTMLElement).matches(".fixture-node,.fixture-trophy")) as HTMLElement[];
+    const centers=nodes.map(node=>{const rect=node.getBoundingClientRect();return Math.round(rect.top+rect.height/2);});
+    return{centerSpread:Math.max(...centers)-Math.min(...centers),trophyRight:nodes.at(-1)!.getBoundingClientRect().right,scrollWidth:track.scrollWidth};
+  });
+  expect(oneLine.centerSpread,"Cup Road trophy must stay on the same horizontal track").toBeLessThanOrEqual(2);
+  expect(oneLine.trophyRight).toBeLessThanOrEqual(oneLine.scrollWidth+2);
 });
 
 test("winning the final lights the trophy node",async({page})=>{

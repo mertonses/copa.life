@@ -20,9 +20,24 @@ api.completeMatch(players,1,()=>0.1);
 assert.equal(api.summary().pending,null);
 api.completeMatch(players,2,()=>0.1);
 assert.equal(api.summary().pending.name,"Test Oyuncu");
-api.resolve("compromise");
-assert.equal(api.matchModifier(),0);
-assert.equal(api.summary().startToken,0);
+assert.equal(api.summary().pending.eventKind,"promise");
+api.resolvePromise(true);
+assert.equal(api.summary().promises[0].type,"captain");
+api.completeMatch(players,3,()=>0.99,{captain:players[0],bench:[]});
+assert.equal(api.summary().promises[0].status,"fulfilled");
+assert.match(api.profileMarkup(players[0]),/Söz tutuldu/);
+assert.match(api.matchStory(),/kaptanlık sözünün/);
+assert.equal(api.groupSummary().length,4);
+const brokenPlayer={name:"Yedek Oyuncu",pos:"ST",ov:83,age:22,trait:"wonderkid"};
+api.restore({
+  ...api.snapshot(),
+  promises:[{key:"yedek oyuncu|ST",name:"Yedek Oyuncu",type:"start",dueRound:4,status:"active"}],
+});
+api.completeMatch(players,4,()=>0.99,{captain:players[0],bench:[brokenPlayer]});
+assert.equal(api.summary().promises[0].status,"broken");
+assert.equal(api.canEnter(brokenPlayer).allowed,false);
+assert.match(api.canEnter(brokenPlayer).message,/oyuna girmek istemiyor/);
+assert.match(api.profileMarkup(brokenPlayer),/Söz bozuldu/);
 assert.equal(api.chairRank("babacan"),2);
 api.setChairAgenda("squad");
 const filtered=api.filterChairOutcomes([{id:"sale"},{id:"academy"},{id:"tax"}]);

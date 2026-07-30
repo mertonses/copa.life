@@ -129,13 +129,16 @@ jobs:
           COPA_ADMOB_APP_ID: ${{ secrets.COPA_ADMOB_APP_ID }}
           COPA_ADMOB_INTERSTITIAL_ID: ${{ secrets.COPA_ADMOB_INTERSTITIAL_ID }}
           COPA_ADMOB_REWARDED_ID: ${{ secrets.COPA_ADMOB_REWARDED_ID }}
+          COPA_ADMOB_NATIVE_ID: ${{ secrets.COPA_ADMOB_NATIVE_ID }}
         run: |
           test -n "$COPA_ADMOB_APP_ID"
           test -n "$COPA_ADMOB_INTERSTITIAL_ID"
           test -n "$COPA_ADMOB_REWARDED_ID"
+          test -n "$COPA_ADMOB_NATIVE_ID"
           test "$COPA_ADMOB_APP_ID" != "ca-app-pub-3940256099942544~3347511713"
           test "$COPA_ADMOB_INTERSTITIAL_ID" != "ca-app-pub-3940256099942544/1033173712"
           test "$COPA_ADMOB_REWARDED_ID" != "ca-app-pub-3940256099942544/5224354917"
+          test "$COPA_ADMOB_NATIVE_ID" != "ca-app-pub-3940256099942544/2247696110"
           chmod +x gradlew
           ./gradlew :app:bundleRelease --no-daemon
           jarsigner -verify -verbose -certs app/build/outputs/bundle/release/app-release.aab > /dev/null

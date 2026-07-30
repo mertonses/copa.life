@@ -52,16 +52,18 @@ Yerel temiz release için:
 $env:COPA_ADMOB_APP_ID = "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
 $env:COPA_ADMOB_INTERSTITIAL_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ"
 $env:COPA_ADMOB_REWARDED_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/RRRRRRRRRR"
+$env:COPA_ADMOB_NATIVE_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/NNNNNNNNNN"
 npm run android:release:local
 ```
 
-CI ortamına aynı adlarla üç secret eklenir:
+CI ortamına aynı adlarla dört secret eklenir:
 
 - `COPA_ADMOB_APP_ID`
 - `COPA_ADMOB_INTERSTITIAL_ID`
 - `COPA_ADMOB_REWARDED_ID`
+- `COPA_ADMOB_NATIVE_ID`
 
-Üretim hattı eksik, biçimsiz veya Google test kimliği olan üç değeri de reddeder. Debug/emülatör derlemeleri yalnız Google'ın resmî test kimliklerini kullanır.
+Üretim hattı eksik, biçimsiz veya Google test kimliği olan dört değeri de reddeder. Debug/emülatör derlemeleri yalnız Google'ın resmî test kimliklerini kullanır.
 
 ## 6. app-ads.txt
 

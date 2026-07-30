@@ -360,9 +360,9 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
     emphasis:[...modal.querySelectorAll<HTMLElement>("article em")].map(node=>node.textContent?.trim()),
     overflow:modal.scrollWidth-modal.clientWidth,
   }));
-  expect(helpLayout.numbers).toHaveLength(5);
+  expect(helpLayout.numbers).toHaveLength(6);
   expect(helpLayout.numbers.every(item=>item.size>=12&&item.color!==item.background)).toBe(true);
-  expect(helpLayout.emphasis.filter(Boolean)).toHaveLength(5);
+  expect(helpLayout.emphasis.filter(Boolean)).toHaveLength(6);
   expect(helpLayout.overflow).toBeLessThanOrEqual(1);
   await capture(page,"06b-training-help.png");
   await page.locator(".prep-help-modal>.btn").click();
