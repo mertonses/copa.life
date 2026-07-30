@@ -9,6 +9,12 @@ const opponent={clubName:"Kuzey Yıldızları FK",rating:1271,ready:false,connec
 const slots=["GK","LB","CB1","CB2","RB","CM1","CM2","AM","LW","RW","ST"];
 const squad=(prefix:string,offset=0)=>slots.map((slot,index)=>({id:`${prefix}-${slot}`,slot,line:slot==="GK"?"GK":slot.startsWith("CB")||["LB","RB"].includes(slot)?"DEF":slot==="ST"?"ST":slot.startsWith("W")?"WING":"MID",name:`${prefix} ${slot}`,position:slot.replace(/\d/g,""),power:68+((index+offset)%17),effectivePower:68+((index+offset)%17),cost:1,chemistry:0}));
 const liveSegments=[{startMinute:0,endMinute:20,prompt:"opening"},{startMinute:20,endMinute:45,prompt:"control"},{startMinute:45,endMinute:70,prompt:"response"},{startMinute:70,endMinute:90,prompt:"finish"}];
+const windowHistory=[
+  {window:0,startMinute:0,endMinute:20,homeGoals:1,awayGoals:0,homeXg:.72,awayXg:.31,tactics:["balanced","counter"],advantage:"neutral",events:[{minute:14,type:"goal",side:"home"}],scoreAfter:[1,0]},
+  {window:1,startMinute:20,endMinute:45,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home",events:[{minute:24,type:"goal",side:"away"}],scoreAfter:[1,1]},
+  {window:2,startMinute:45,endMinute:70,homeGoals:0,awayGoals:0,homeXg:.43,awayXg:.81,tactics:["counter","press"],advantage:"home",events:[],scoreAfter:[1,1]},
+  {window:3,startMinute:70,endMinute:90,homeGoals:1,awayGoals:1,homeXg:.94,awayXg:.67,tactics:["control","counter"],advantage:"home",events:[{minute:71,type:"goal",side:"home"},{minute:84,type:"goal",side:"away"}],scoreAfter:[2,2]}
+];
 const base={protocol:1,rulesVersion:"arena-rules-v10",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,liveSegments,penalty:null,score:[0,0],events:[],result:null,emotes:{self:null,opponent:null},self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
@@ -253,15 +259,20 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-choice-grid.tactics button")).toHaveCount(4);
   await expect(page.locator('[data-arena-choice="tactics:press"]')).toContainText("High Press");
   await expect(page.locator('[data-arena-choice="tactics:press"]')).toContainText("Strong against Possession Play");
+  await expect(page.locator('[data-arena-choice="tactics:press"] .arena-risk-preview')).toContainText("RISK");
+  await expect(page.locator(".arena-momentum article")).toHaveCount(4);
+  await expect(page.locator(".arena-tendency")).toContainText("Building signal");
   await expect(page.locator('[data-arena-choice="tactics:balanced"]')).toContainText("Balanced Block");
   await expect(page.locator('[data-arena-choice="tactics:counter"]')).toContainText("Fast Transition");
   await expect(page.locator('[data-arena-choice="tactics:control"]')).toContainText("Possession Play");
   await capture(page,"07-web-arena-tactics.png");
 
-  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:45,deadline:Date.now()+6500,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:24,type:"goal",side:"away"},{minute:33,type:"shot",side:"away"},{minute:41,type:"save",side:"home"}],windowResult:{window:1,startMinute:20,endMinute:45,homeGoals:0,awayGoals:1,homeXg:.61,awayXg:.73,tactics:["press","control"],advantage:"home"},self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
+  await setRoom(page,{...base,phase:"live",window:1,liveStage:"reveal",matchMinute:45,deadline:Date.now()+6500,score:[1,1],events:[{minute:14,type:"goal",side:"home"},{minute:24,type:"goal",side:"away"},{minute:33,type:"shot",side:"away"},{minute:41,type:"save",side:"home"}],windowHistory:windowHistory.slice(0,2),windowResult:windowHistory[1],self:{...self,setup:{formation:"4-4-2",style:"balanced",chairman:"diplomat"},tactics:["balanced","press"]},opponent:{...opponent,setup:{formation:"4-3-3",style:"counter",chairman:"patron"},tactics:["counter","control"]},team:{power:76},opponentTeam:{power:75}});
   await expect(page.locator(".arena-window-report")).toContainText("WINDOW REPORT");
   await expect(page.locator(".arena-tactic-window")).toContainText("2 / 4");
   await expect(page.locator(".arena-pitch-live")).toHaveClass(/is-playing/);
+  await expect(page.locator(".arena-momentum article.is-mine")).toHaveCount(1);
+  await expect(page.locator(".arena-momentum article.is-theirs")).toHaveCount(1);
   await expect(page.locator("[data-arena-live-score]")).toContainText("1–0");
   expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.liveEventCues.size)).toBe(0);
   await expect(page.locator("[data-arena-live-score]")).toContainText("1–1",{timeout:2500});
@@ -321,9 +332,10 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.audioClockActive)).toBe(false);
   await page.evaluate(()=>{(globalThis as any).muted=false;});
 
-  await setRoom(page,{...base,phase:"result",score:[2,2],events:[{minute:14,type:"goal",side:"home"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"}],rematch:{available:true,requested:false,opponentRequested:true,launched:false},self:{...self,tactics:["press","balanced","counter"]},opponent:{...opponent,tactics:["control","balanced","press"]},result:{score:[2,2],penalty:[5,4],outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
+  await setRoom(page,{...base,phase:"result",score:[2,2],windowHistory,events:[{minute:14,type:"goal",side:"home"},{minute:24,type:"goal",side:"away"},{minute:33,type:"card",side:"away"},{minute:71,type:"goal",side:"home"},{minute:84,type:"goal",side:"away"}],rematch:{available:true,requested:false,opponentRequested:true,launched:false},self:{...self,tactics:["press","balanced","counter","control"]},opponent:{...opponent,tactics:["control","balanced","press","counter"]},result:{score:[2,2],penalty:[5,4],outcomes:["win","loss"],teams:[{power:77,chemistry:4},{power:75,chemistry:2}],rewards:[{ratingBefore:1284,ratingDelta:14,seasonPoints:30,tokenProgress:3},{ratingBefore:1271,ratingDelta:-14,seasonPoints:5,tokenProgress:1}],profiles:[{...profile,rating:1298,seasonPoints:214,wins:13},{...profile,rating:1257}]}});
   await expect(page.locator(".arena-result-rewards")).toContainText("1284 → 1298");
   await expect(page.locator(".arena-result-events")).toContainText("71'");
+  await expect(page.locator(".arena-turning-points article")).toHaveCount(3);
   await expect(page.locator(".arena-rematch")).toContainText("OPPONENT WANTS A REMATCH");
   await capture(page,"10-web-arena-result.png");
   await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
@@ -408,9 +420,11 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(plan.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(plan.smallest,viewport.name).toBeGreaterThanOrEqual(7);
     await capture(page,`android-${viewport.name}-training.png`);
-    await setRoom(page,{...base,phase:"live",window:0,liveStage:"decision",matchMinute:0,deadline:Date.now()+24000,score:[0,0],events:[],self:{...self,tactics:[]},opponent:{...opponent,tactics:[],tacticLocked:false},team:{power:76},opponentTeam:{power:75}});
+    await setRoom(page,{...base,phase:"live",window:2,liveStage:"decision",matchMinute:45,deadline:Date.now()+24000,score:[1,1],windowHistory:windowHistory.slice(0,2),events:[{minute:14,type:"goal",side:"home"},{minute:24,type:"goal",side:"away"}],self:{...self,tactics:["balanced","press"]},opponent:{...opponent,tactics:["counter","control"],tacticLocked:false},team:{power:76},opponentTeam:{power:75}});
     await expect(page.locator(".arena-choice-grid.tactics button")).toHaveCount(4);
     await expect(page.locator('[data-arena-choice="tactics:control"]')).toContainText("Possession Play");
+    await expect(page.locator(".arena-tendency")).toContainText("Seeking control");
+    await expect(page.locator(".arena-momentum article")).toHaveCount(4);
     const tactics=await audit(page);
     expect(tactics.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(tactics.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
@@ -450,7 +464,8 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(mobileMotion.keeperX,viewport.name).toBeLessThan(.35);
     expect(mobileMotion.keeperY,viewport.name).toBeLessThan(.61);
     await capture(page,`android-${viewport.name}-penalty-reveal.png`);
-    await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
+    await setRoom(page,{...base,phase:"result",score:[3,0],windowHistory,events:[{minute:14,type:"goal",side:"home"},{minute:71,type:"goal",side:"home"},{minute:84,type:"goal",side:"home"}],self:{...self,tactics:["press","balanced","counter","control"]},opponent:{...opponent,tactics:["control","balanced","press","counter"]},result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
+    await expect(page.locator(".arena-turning-points article")).toHaveCount(3);
     const result=await audit(page);
     expect(result.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(result.shellOverflow,viewport.name).toBeLessThanOrEqual(1);

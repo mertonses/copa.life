@@ -320,7 +320,7 @@ export class ArenaRoom extends DurableObject{
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
       matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
-      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
+      players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,windowHistory:[],offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
     };
@@ -525,7 +525,7 @@ export class ArenaRoom extends DurableObject{
       }
     }else if(this.state.phase==="market"){this.state.phase="training";this.state.offers=null;}
     else if(this.state.phase==="training"){
-      this.state.phase="live";this.state.window=0;this.state.liveStage="decision";this.state.matchMinute=0;this.state.windowResult=null;this.state.offers=null;
+      this.state.phase="live";this.state.window=0;this.state.liveStage="decision";this.state.matchMinute=0;this.state.windowResult=null;this.state.windowHistory=[];this.state.offers=null;
     }
     else if(this.state.phase==="live"){
       const home=teamSnapshot(this.state.players[0],this.state.rulesVersion),away=teamSnapshot(this.state.players[1],this.state.rulesVersion);
@@ -534,6 +534,8 @@ export class ArenaRoom extends DurableObject{
         :resolveWindow({seed:this.state.seed,window:this.state.window,home,away,homeTactic:this.state.players[0].tactics[this.state.window],awayTactic:this.state.players[1].tactics[this.state.window]});
       this.state.score[0]+=outcome.homeGoals;this.state.score[1]+=outcome.awayGoals;
       this.state.events.push(...outcome.events);
+      if(!Array.isArray(this.state.windowHistory))this.state.windowHistory=[];
+      this.state.windowHistory.push({...outcome,scoreAfter:[...this.state.score]});
       this.state.liveStage="reveal";this.state.matchMinute=outcome.endMinute;this.state.windowResult=outcome;
     }else if(this.state.phase==="penalty"){
       const penalty=this.state.penalty,shooter=penalty.turn,keeper=shooter===0?1:0;

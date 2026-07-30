@@ -250,11 +250,18 @@ describe("Arena Durable Objects",()=>{
       expect(instance.state.liveStage).toBe("reveal");
       expect(instance.state.matchMinute).toBe(20);
       expect(instance.state.players[1].tactics).toEqual(["balanced"]);
+      expect(instance.state.windowHistory).toHaveLength(1);
+      expect(publicState(instance.state,"owner-expired-home").windowHistory[0]).toMatchObject({
+        window:0,
+        tactics:["press","balanced"],
+        scoreAfter:expect.any(Array)
+      });
       expect(instance.state.deadline).toBeGreaterThan(Date.now());
       instance.state.deadline=Date.now()-1;
       await instance.alarm();
       expect(instance.state.window).toBe(1);
       expect(instance.state.liveStage).toBe("decision");
+      expect(publicState(instance.state,"owner-expired-home").opponent.tactics).toEqual(["balanced"]);
     });
   });
 
