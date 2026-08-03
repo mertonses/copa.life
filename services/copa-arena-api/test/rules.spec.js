@@ -100,7 +100,7 @@ describe("Arena rules",()=>{
   });
 
   it("keeps v3 eleven-player rooms compatible while preserving five-player v1/v2 rooms",()=>{
-    expect(ARENA_RULES_VERSION).toBe("arena-rules-v10");
+    expect(ARENA_RULES_VERSION).toBe("arena-rules-v11");
     expect(usesFullXI("arena-rules-v3")).toBe(true);
     expect(usesFullXI("arena-rules-v2")).toBe(false);
     expect(createLegacyDraftOffers("legacy","GK",0,0)).toHaveLength(3);

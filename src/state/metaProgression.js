@@ -4,7 +4,7 @@
 
   const STORAGE_KEY="copa_meta_progression_v1";
   const FORMAT="copa-life-save";
-  const VERSION=5;
+  const VERSION=6;
   const ARCHIVE_LIMIT=20;
   const MUSEUM_LIMIT=60;
   const HALL_LIMIT=11;
@@ -12,6 +12,12 @@
   const STYLES=new Set(["gegen","kontra","tiki","uzun","blok"]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
   const CLUB_FILE_IDS=new Set(["debt","youth","tactics"]);
+  const HALL_EXHIBITION_TIERS=Object.freeze([
+    {min:74,max:78,kind:"story",reward:"story_hall_rookie",tr:"YÜKSELENLER",en:"RISING XI"},
+    {min:79,max:83,kind:"crest",reward:"crest_hall_silver",tr:"MEYDAN OKUYANLAR",en:"CHALLENGERS"},
+    {min:84,max:88,kind:"kit",reward:"kit_hall_gold",tr:"USTALAR",en:"MASTERS"},
+    {min:89,max:93,kind:"crest",reward:"crest_hall_legend",tr:"EFSANELER",en:"LEGENDS"}
+  ]);
   const BADGES=Object.freeze({
     first_run:["İlk Adım","First Step"],
     finalist:["Son Perde","Final Act"],
@@ -41,7 +47,8 @@
     archive:[],
     museum:{memories:[],hall:[],collections:{claimed:[],stories:[],kits:[],crests:[],tokens:0,selectedKit:"",selectedCrest:""}},
     clubFiles:{completed:{debt:0,youth:0,tactics:0},claimed:[]},
-    chairHistory:{}
+    chairHistory:{},
+    hallExhibition:{tier:0,wins:0,lossStreak:0,attempts:0,claimed:[]}
     ,directives:{selected:"",completed:[]}
   });
   const safeGet=()=>{try{return localStorage.getItem(STORAGE_KEY);}catch(_){return null;}};
@@ -129,7 +136,7 @@
     const hall=(Array.isArray(museumSource.hall)?museumSource.hall:[]).filter(item=>object(item)&&memoryIds.has(item.runId)).map(item=>({
       runId:text(item.runId,40),playerId:text(item.playerId,40)
     })).filter((item,index,list)=>list.findIndex(other=>other.runId===item.runId&&other.playerId===item.playerId)===index).slice(0,HALL_LIMIT);
-    const clubSource=object(source.clubFiles)?source.clubFiles:{},historySource=object(source.chairHistory)?source.chairHistory:{};
+    const clubSource=object(source.clubFiles)?source.clubFiles:{},historySource=object(source.chairHistory)?source.chairHistory:{},exhibitionSource=object(source.hallExhibition)?source.hallExhibition:{};
     const clubClaimed=Array.from(new Set((Array.isArray(clubSource.claimed)?clubSource.claimed:[]).map(item=>text(item,32)).filter(item=>CLUB_FILE_IDS.has(item)||item==="club_files_set")));
     const chairHistory={};
     for(const [chairId,raw] of Object.entries(historySource)){
@@ -165,6 +172,11 @@
       }},
       clubFiles:{completed:Object.assign({debt:0,youth:0,tactics:0},countMap(clubSource.completed,key=>CLUB_FILE_IDS.has(key))),claimed:clubClaimed},
       chairHistory,
+      hallExhibition:{
+        tier:integer(exhibitionSource.tier,0,HALL_EXHIBITION_TIERS.length-1),wins:integer(exhibitionSource.wins,0,1000000),
+        lossStreak:integer(exhibitionSource.lossStreak,0,99),attempts:integer(exhibitionSource.attempts,0,1000000),
+        claimed:Array.from(new Set((Array.isArray(exhibitionSource.claimed)?exhibitionSource.claimed:[]).map(item=>text(item,40)).filter(item=>HALL_EXHIBITION_TIERS.some(tier=>tier.reward===item))))
+      },
       directives:{
         selected:Object.hasOwn(DIRECTIVES,source.directives&&source.directives.selected)?source.directives.selected:"",
         completed:Array.from(new Set((Array.isArray(source.directives&&source.directives.completed)?source.directives.completed:[]).filter(id=>Object.hasOwn(DIRECTIVES,id))))
@@ -521,7 +533,8 @@
       </article>`;
     };
     const orderedMemories=[...state.museum.memories].reverse(),recentMemories=orderedMemories.slice(0,6).map(memoryCard).join(""),olderMemories=orderedMemories.slice(6).map(memoryCard).join("");
-    const exhibition=hall.length===HALL_LIMIT?`<button type="button" class="meta-exhibition" onclick="CopaMeta.playHallExhibition()"><span>XI</span><b>${tr?"ŞÖHRETLER MAÇINA ÇIK":"PLAY HALL EXHIBITION"}</b><small>${tr?"Ödülsüz · kadronun mirasını sahada gör":"No rewards · put your legacy XI on the pitch"}</small></button>`:"";
+    const exhibitionTier=HALL_EXHIBITION_TIERS[state.hallExhibition.tier]||HALL_EXHIBITION_TIERS[0],shield=Math.min(6,Math.max(0,state.hallExhibition.lossStreak-1)*3),range=[Math.max(65,exhibitionTier.min-shield),Math.max(69,exhibitionTier.max-shield)];
+    const exhibition=hall.length===HALL_LIMIT?`<button type="button" class="meta-exhibition" onclick="CopaMeta.playHallExhibition()"><span>XI</span><b>${tr?"ŞÖHRETLER MAÇINA ÇIK":"PLAY HALL EXHIBITION"}</b><small>${tr?`${exhibitionTier.tr} · rakip gücü ${range[0]}–${range[1]}`:`${exhibitionTier.en} · opponent power ${range[0]}–${range[1]}`}${shield?` · ${tr?"seri koruması":"streak shield"} -${shield}`:""}</small><em>${state.hallExhibition.wins}/${HALL_EXHIBITION_TIERS.length}</em></button>`:"";
     return `<div class="meta-museum-summary"><span><small>${tr?"ŞÖHRETLER KARMASI":"HALL XI"}</small><b>${hall.length}/${HALL_LIMIT}</b></span><span>${state.museum.memories.length} ${tr?"sezon hatırası":"run memories"}</span></div>${collections}${exhibition}
       <section class="meta-hall-section"><div class="meta-section-heading"><h4>${tr?"SEÇİLİ KADRO":"SELECTED XI"}</h4><small>${tr?"En fazla 11 oyuncu":"Up to 11 players"}</small></div><div class="meta-hall-grid">${hallHTML}</div></section>
       <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"Son 6 sezon":"Latest 6 runs"}</small></div><div class="meta-memory-list">${recentMemories}</div>${olderMemories?`<details class="meta-memory-archive"><summary>${tr?"DAHA ESKİ HATIRALAR":"OLDER MEMORIES"} · ${orderedMemories.length-6}<span aria-hidden="true">⌄</span></summary><div class="meta-memory-list">${olderMemories}</div></details>`:""}</section>`;
@@ -581,16 +594,41 @@
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level);
     return {level,reputation:state.career.reputation,licenses:state.career.licenses,prestige:state.career.prestige,next};
   }
+  function hallExhibitionConfig(){
+    const hall=hallEntries(),tier=HALL_EXHIBITION_TIERS[state.hallExhibition.tier]||HALL_EXHIBITION_TIERS[0];
+    const home=hall.length?Math.round(hall.reduce((sum,item)=>sum+Number(item.player.power||0),0)/hall.length):0;
+    const shield=Math.min(6,Math.max(0,state.hallExhibition.lossStreak-1)*3);
+    return {hall,tier,home,shield,min:Math.max(65,tier.min-shield),max:Math.max(69,tier.max-shield)};
+  }
   function playHallExhibition(){
-    const hall=hallEntries(),tr=global.LANG==="tr";
-    if(hall.length!==HALL_LIMIT)return false;
+    const config=hallExhibitionConfig(),tr=global.LANG==="tr";
+    if(config.hall.length!==HALL_LIMIT)return false;
+    const claimed=state.hallExhibition.claimed.includes(config.tier.reward);
+    global.showModal(`<div class="meta-exhibition-preview"><span>${tr?"ŞÖHRETLER MAÇI":"HALL EXHIBITION"}</span><h3>${tr?config.tier.tr:config.tier.en}</h3><div><span><small>${tr?"SENİN GÜCÜN":"YOUR POWER"}</small><b>${config.home}</b></span><i>VS</i><span><small>${tr?"RAKİP ARALIĞI":"OPPONENT RANGE"}</small><b>${config.min}–${config.max}</b></span></div><p>${config.shield?`${tr?"Seri kayıp koruması aktif":"Loss-streak shield active"} · -${config.shield}`:(tr?"İki üst üste mağlubiyetten sonra rakip aralığı kademeli düşer.":"After two straight losses, the opponent range steps down.")}</p><section><small>${tr?"KADEME ÖDÜLÜ":"TIER REWARD"}</small><b>${claimed?(tr?"ALINDI":"CLAIMED"):config.tier.reward.replace(/_/g," ").toUpperCase()}</b><em>${tr?"Yalnızca kozmetik · oynanış gücü vermez":"Cosmetic only · no gameplay power"}</em></section><button class="btn btn-primary" onclick="CopaMeta.startHallExhibition()">${tr?"MAÇA ÇIK":"PLAY MATCH"}</button><button class="btn btn-ghost" onclick="CopaMeta.openProgression('museum')">${tr?"GERİ":"BACK"}</button></div>`,{label:tr?"Şöhretler maçı":"Hall exhibition"});
+    return true;
+  }
+  function startHallExhibition(){
     const run=()=>{
-      const core=global.CopaFinalSimCore;
-      if(!core)return false;
-      const home=Math.round(hall.reduce((sum,item)=>sum+Number(item.player.power||0),0)/HALL_LIMIT);
-      const seed=parseInt(hash(hall.map(item=>item.player.id).join("|")),36)>>>0;
-      const result=core.simulateMatch({seed,homePower:home,awayPower:80,resolution:"full",plan:{pressResistance:.02}});
-      global.showModal(`<div class="meta-exhibition-result"><span>${tr?"ŞÖHRETLER MAÇI":"HALL EXHIBITION"}</span><h3>${tr?"Senin XI":"Your XI"} <b>${result.score[0]}–${result.score[1]}</b> ${tr?"Efsaneler":"Legends"}</h3><p>xG ${result.stats.xg[0].toFixed(1)}–${result.stats.xg[1].toFixed(1)} · ${tr?"Şut":"Shots"} ${result.stats.shots[0]}–${result.stats.shots[1]}</p><small>${tr?"Bu maç ödülsüzdür ve kariyer istatistiklerini değiştirmez.":"This match has no rewards and does not alter career records."}</small><button class="btn btn-primary" onclick="CopaMeta.openProgression('museum')">${tr?"MÜZEYE DÖN":"BACK TO MUSEUM"}</button></div>`,{label:tr?"Şöhretler maçı":"Hall exhibition"});
+      const config=hallExhibitionConfig(),core=global.CopaFinalSimCore,tr=global.LANG==="tr";
+      if(config.hall.length!==HALL_LIMIT||!core)return false;
+      const seed=parseInt(hash(`${config.hall.map(item=>item.player.id).join("|")}|${state.hallExhibition.tier}|${state.hallExhibition.attempts}`),36)>>>0;
+      const awayPower=config.min+(seed%Math.max(1,config.max-config.min+1));
+      const result=core.simulateMatch({seed,homePower:config.home,awayPower,resolution:"full",plan:{pressResistance:.02}});
+      const outcome=result.score[0]>result.score[1]?"win":result.score[0]<result.score[1]?"loss":"draw";
+      state.hallExhibition.attempts++;
+      let reward="";
+      if(outcome==="win"){
+        state.hallExhibition.wins++;state.hallExhibition.lossStreak=0;
+        if(!state.hallExhibition.claimed.includes(config.tier.reward)){
+          reward=config.tier.reward;state.hallExhibition.claimed.push(reward);
+          const field=config.tier.kind==="story"?"stories":config.tier.kind==="kit"?"kits":"crests";
+          state.museum.collections[field]=Array.from(new Set(state.museum.collections[field].concat(reward)));
+        }
+        if(state.hallExhibition.tier<HALL_EXHIBITION_TIERS.length-1)state.hallExhibition.tier++;
+      }else if(outcome==="loss")state.hallExhibition.lossStreak++;
+      persist();
+      const headline=outcome==="win"?(tr?"KADEME GEÇİLDİ":"TIER CLEARED"):outcome==="loss"?(tr?"BU KEZ OLMADI":"NOT THIS TIME"):(tr?"DENGE BOZULMADI":"ALL SQUARE");
+      global.showModal(`<div class="meta-exhibition-result is-${outcome}"><span>${tr?"ŞÖHRETLER MAÇI":"HALL EXHIBITION"}</span><h3>${headline}</h3><div class="meta-exhibition-score"><b>${result.score[0]}</b><i>–</i><b>${result.score[1]}</b></div><p>${tr?"Rakip gücü":"Opponent power"} ${awayPower} · xG ${result.stats.xg[0].toFixed(1)}–${result.stats.xg[1].toFixed(1)} · ${tr?"Şut":"Shots"} ${result.stats.shots[0]}–${result.stats.shots[1]}</p>${reward?`<strong>${tr?"KOZMETİK AÇILDI":"COSMETIC UNLOCKED"} · ${reward.replace(/_/g," ").toUpperCase()}</strong>`:""}<small>${outcome==="loss"&&state.hallExhibition.lossStreak>=2?(tr?"Bir sonraki maçta seri koruması rakip aralığını düşürecek.":"The streak shield will lower the next opponent range."):(tr?"Kariyer sonuçların ve takım gücün değişmedi.":"Career records and team power were unchanged.")}</small><button class="btn btn-primary" onclick="CopaMeta.playHallExhibition()">${tr?"SONRAKİ MAÇ":"NEXT MATCH"}</button><button class="btn btn-ghost" onclick="CopaMeta.openProgression('museum')">${tr?"MÜZEYE DÖN":"BACK TO MUSEUM"}</button></div>`,{label:tr?"Şöhretler maçı":"Hall exhibition"});
       return true;
     };
     if(global.CopaFinalSimCore)return run();
@@ -619,7 +657,7 @@
     const raw=String(code||"").trim();if(raw.length<16||raw.length>500000)throw new Error("invalid_length");
     const parts=raw.split(".");if(parts.length!==3||parts[0]!=="CPS1")throw new Error("invalid_format");
     const body=base64Decode(parts[1]);if(hash(body)!==parts[2])throw new Error("checksum");
-    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2,3,4,5].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
+    const payload=JSON.parse(body);if(!object(payload)||payload.format!==FORMAT||![1,2,3,4,5,6].includes(payload.version)||!object(payload.core))throw new Error("unsupported");
     return payload;
   }
   function importCode(code){
@@ -656,6 +694,11 @@
         selectedCrest:merged.museum.collections.selectedCrest||imported.museum.collections.selectedCrest
       }
     }}).museum;
+    merged.hallExhibition.tier=Math.max(merged.hallExhibition.tier,imported.hallExhibition.tier);
+    merged.hallExhibition.wins=Math.max(merged.hallExhibition.wins,imported.hallExhibition.wins);
+    merged.hallExhibition.attempts=Math.max(merged.hallExhibition.attempts,imported.hallExhibition.attempts);
+    merged.hallExhibition.lossStreak=Math.min(merged.hallExhibition.lossStreak,imported.hallExhibition.lossStreak);
+    merged.hallExhibition.claimed=Array.from(new Set(merged.hallExhibition.claimed.concat(imported.hallExhibition.claimed)));
     for(const id of CLUB_FILE_IDS)merged.clubFiles.completed[id]=Math.max(merged.clubFiles.completed[id]||0,imported.clubFiles.completed[id]||0);
     merged.clubFiles.claimed=Array.from(new Set(merged.clubFiles.claimed.concat(imported.clubFiles.claimed)));
     for(const [chairId,history] of Object.entries(imported.chairHistory)){
@@ -695,7 +738,7 @@
     recordRun,getState:()=>JSON.parse(JSON.stringify(state)),careerSummary,careerLevel,levelThreshold,masteryInfo,
     renderPanelHTML:(tab="career")=>panelHTML(["career","mastery","museum","world"].includes(tab)?tab:"career",global.LANG==="tr"),
     requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,consumeStartToken,evaluateCollections,activeCosmetics,selectCosmetic,
-    completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,selectDirective,selectStylePlan,activeStylePlan,playHallExhibition,
+    completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,selectDirective,selectStylePlan,activeStylePlan,playHallExhibition,startHallExhibition,
     exportCode,importCode,openProgression,openArchive,openExport,openImport,copyExport,downloadExport,submitImport,installControl
   });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installControl,{once:true});else installControl();

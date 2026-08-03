@@ -2,7 +2,7 @@ import {
   ARENA_PLAYER_CATALOG,ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_COUNTRIES,ARENA_PLAYER_SOURCES
 } from "./playerCatalog.js";
 
-export const ARENA_RULES_VERSION="arena-rules-v10";
+export const ARENA_RULES_VERSION="arena-rules-v11";
 export const MIN_MANUAL_DECISIONS=6;
 export const LEGACY_MIN_MANUAL_DECISIONS=2;
 export const PHASE_SECONDS=Object.freeze({
@@ -59,7 +59,7 @@ export const DRAFT_SLOTS=Object.freeze([
 ]);
 export const DRAFT_LINES=Object.freeze(DRAFT_SLOTS.map(item=>item.line));
 export const TACTICS=Object.freeze(["press","balanced","counter","control"]);
-export const ARENA_EMOTES=Object.freeze(["hello","applause","fire","respect","easy","comeOn","yawn"]);
+export const ARENA_EMOTES=Object.freeze(["hello","gg","nice","wow","ez","unlucky","rematch","hurry"]);
 export const TRAINING=Object.freeze(["finishing","shape","chemistry","recovery"]);
 export const MATCH_PLAN_SCENARIOS=Object.freeze(["adaptive","protect","brave"]);
 export const MARKET_CARDS=Object.freeze([
@@ -73,7 +73,7 @@ export const MARKET_CARDS=Object.freeze([
 
 const FIRST_NAMES=["Arda","Deniz","Mert","Onur","Emir","Can","Atlas","Eren","Kerem","Bora","Luca","Diego","Marco","Leo","Alex","Noah"];
 const LAST_NAMES=["Aydın","Kaya","Demir","Erdem","Yalın","Aksoy","Costa","Rossi","Silva","Santos","Meyer","Mori","Ito","King","Stone","Reed"];
-const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"]);
+const FULL_XI_RULES=new Set(["arena-rules-v3","arena-rules-v4","arena-rules-v5","arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"]);
 const DRAFT_TIERS=Object.freeze(["connector","reliable","star"]);
 const SLOT_POSITIONS=Object.freeze({
   GK:["GK"],LB:["LB"],CB1:["CB"],CB2:["CB"],RB:["RB"],
@@ -184,7 +184,7 @@ function arenaCost(player,tier){
 }
 
 function arenaChemistry(player,tier,rulesVersion){
-  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion))return 2;
+  if(tier==="connector"&&["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(rulesVersion))return 2;
   let value=round(player.age)>=30?2:round(player.age)>=24?1:0;
   if(tier==="star"&&round(player.power)>=82)value--;
   return clamp(value,-1,2);
@@ -194,7 +194,7 @@ function draftOffer(player,tier,line,slot,rulesVersion){
   const position=String(player.position||"").toUpperCase();
   const natural=(SLOT_POSITIONS[slot]||[]).includes(position);
   const positionFit=natural?"natural":"adapted";
-  const positionPenalty=positionFit==="adapted"&&["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?ADAPTED_POSITION_PENALTY:0;
+  const positionPenalty=positionFit==="adapted"&&["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(rulesVersion)?ADAPTED_POSITION_PENALTY:0;
   const power=round(player.power);
   const source=ARENA_PLAYER_SOURCES[player.sourceLeague]||{code:player.sourceLeague,label:{tr:player.sourceLeague,en:player.sourceLeague}};
   return {
@@ -318,6 +318,7 @@ export function initialPlayerState(input){
     manualDecisions:0,
     manualTactics:0,
     missedDecisions:0,
+    disconnects:0,
     forcedForfeit:false,
     forfeitReason:null,
     connected:false,
@@ -358,7 +359,7 @@ export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
   const legacy=!usesFullXI(rulesVersion);
   const expectedDraftLength=legacy?LEGACY_DRAFT_LINES.length:DRAFT_SLOTS.length;
   if(!validateSetup(player&&player.setup,rulesVersion)||!Array.isArray(player.draft)||player.draft.length!==expectedDraftLength)return null;
-  if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)){
+  if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(rulesVersion)){
     const identities=player.draft.map(item=>item.sourceId).filter(Boolean);
     if(new Set(identities).size!==identities.length)return null;
   }
@@ -368,14 +369,14 @@ export function teamSnapshot(player,rulesVersion=ARENA_RULES_VERSION){
   const linePowers=Object.fromEntries(LEGACY_DRAFT_LINES.map(line=>{
     const players=player.draft.filter(item=>item.line===line);
     return [line,players.length?players.reduce((sum,item)=>
-      sum+round(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
+      sum+round(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(rulesVersion)?(item.effectivePower??(Number(item.power)-Number(item.positionPenalty||0))):item.power),0
     )/players.length:65];
   }));
   const spent=player.draft.reduce((sum,item)=>sum+round(item.cost),0)+round(card.cost);
   const budget=(legacy?20:44)+chairman.budget-spent;
   const chemistry=clamp(
     player.draft.reduce((sum,item)=>sum+round(item.chemistry),0)+chairman.chemistry+card.chemistry+(plan.focus==="chemistry"?2:0),
-    -3,["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(rulesVersion)?18:9
+    -3,["arena-rules-v6","arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(rulesVersion)?18:9
   );
   const base={
     attack:((linePowers.ST||65)*.58+(linePowers.WING||65)*.27+(linePowers.MID||65)*.15)/1,
@@ -574,6 +575,9 @@ export function publicState(state,owner){
     matchId:state.matchId,
     phase:state.phase,
     deadline:state.deadline,
+    reconnectGraceUntil:Array.isArray(state.reconnectGraceUntil)?Number(state.reconnectGraceUntil[selfIndex]||0):0,
+    opponentReconnectGraceUntil:Array.isArray(state.reconnectGraceUntil)?Number(state.reconnectGraceUntil[opponentIndex]||0):0,
+    antiStall:{strikes:Number(self&&self.missedDecisions)||0,limit:3},
     selfIndex,
     draftStep:state.draftStep,
     window:state.window,

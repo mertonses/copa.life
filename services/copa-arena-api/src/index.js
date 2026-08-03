@@ -7,10 +7,11 @@ import {
 } from "./rules.js";
 import {ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_SOURCES} from "./playerCatalog.js";
 import {botDecisionDelay,botWaitMs,createBotIdentity} from "./botIdentity.js";
+import {TOURNAMENT_LIFETIME_MS,TOURNAMENT_LOBBY_MS,addTournamentParticipant,createTournamentState,roundPairs,tournamentPublicState,validTournamentSize} from "./tournament.js";
 
 const MAX_BODY_BYTES=16*1024;
 const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","capacitor://localhost"];
-const METHODS="GET, POST, DELETE, OPTIONS";
+const METHODS="GET, POST, PUT, DELETE, OPTIONS";
 const MODES=new Set(["ranked","practice"]);
 const REGIONS=new Set(["weur","eeur","me","apac","global"]);
 const ARENA_TOKEN=/^CAR-[A-Z0-9]{24,96}$/;
@@ -18,14 +19,22 @@ const CLIENT_ID=/^GCL-[A-Z0-9]{8,40}$/;
 const TICKET=/^AT-[A-Z0-9]{32,80}$/;
 const ROOM_ID=/^AR-[A-Z0-9]{16,40}$/;
 const CUSTOM_CODE=/^[A-HJ-NP-Z2-9]{6}$/;
+const TOURNAMENT_CODE=CUSTOM_CODE;
 const ACTION_ID=/^AA-[A-Za-z0-9_-]{8,80}$/;
-const ARENA_EVENTS=new Set(["arena_opened","arena_queue_joined","arena_matched","arena_phase_completed","arena_match_completed","arena_reconnected","arena_reconnect_started","arena_network_quality","arena_practice_started","arena_practice_completed","arena_error"]);
+const ARENA_EVENTS=new Set(["arena_opened","arena_queue_joined","arena_matched","arena_phase_completed","arena_match_completed","arena_reconnected","arena_reconnect_started","arena_network_quality","arena_practice_started","arena_practice_completed","arena_tournament_created","arena_tournament_joined","arena_tournament_completed","arena_cosmetic_equipped","arena_error"]);
 const COSMETIC_REWARDS=Object.freeze([
-  {at:5,id:"arena_badge_rookie"},
-  {at:12,id:"arena_frame_floodlights"},
-  {at:20,id:"arena_kit_nocturne"},
-  {at:35,id:"arena_title_unbroken"}
+  {at:4,id:"arena_crest_foundry",type:"crest"},
+  {at:8,id:"arena_kit_nocturne",type:"kit"},
+  {at:12,id:"arena_frame_floodlights",type:"frame"},
+  {at:18,id:"arena_stadium_night",type:"stadium"},
+  {at:25,id:"arena_crest_crown",type:"crest"},
+  {at:35,id:"arena_kit_aurora",type:"kit"},
+  {at:48,id:"arena_frame_elite",type:"frame"},
+  {at:65,id:"arena_stadium_final",type:"stadium"}
 ]);
+const COSMETIC_TYPES=new Set(["kit","crest","frame","stadium"]);
+const RECONNECT_GRACE_MS=20_000;
+const RECONNECT_GRACE_CAP_MS=40_000;
 
 const clean=(value,max=80)=>String(value==null?"":value).replace(/[<>\u0000-\u001f\u007f]/g,"").replace(/\s+/g," ").trim().slice(0,max);
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
@@ -40,9 +49,11 @@ const json=(request,env,body,status=200)=>new Response(JSON.stringify(body),{sta
 const randomId=(prefix,bytes=16)=>{const data=new Uint8Array(bytes);crypto.getRandomValues(data);return prefix+Array.from(data,value=>value.toString(16).padStart(2,"0")).join("").toUpperCase();};
 const randomCustomCode=()=>{const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",data=new Uint8Array(6);crypto.getRandomValues(data);return Array.from(data,value=>alphabet[value%alphabet.length]).join("");};
 const customMatchId=code=>`AR-CUSTOM${code}0000`;
+const tournamentId=code=>`ATN-${code}`;
 const nowIso=()=>new Date().toISOString();
 const futureIso=ms=>new Date(Date.now()+ms).toISOString();
 const jsonArray=value=>{try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch(_){return[];}};
+const jsonObject=value=>{try{const parsed=JSON.parse(value||"{}");return parsed&&typeof parsed==="object"&&!Array.isArray(parsed)?parsed:{};}catch(_){return{};}};
 const tokenFrom=request=>{const token=String(request.headers.get("x-copa-arena-token")||"");return ARENA_TOKEN.test(token)?token:"";};
 const clientFrom=request=>{const client=String(request.headers.get("x-copa-client")||"");return CLIENT_ID.test(client)?client:"";};
 const timingSafe=(a,b)=>{
@@ -102,7 +113,8 @@ function profile(row){
     losses:Number(row.losses)||0,
     streak:Number(row.streak)||0,
     tokenProgress:Number(row.token_progress)||0,
-    cosmetics:jsonArray(row.cosmetics)
+    cosmetics:jsonArray(row.cosmetics),
+    equippedCosmetics:jsonObject(row.equipped_cosmetics)
   };
 }
 async function ensureProfile(env,owner,name){
@@ -301,6 +313,111 @@ export class ArenaMatchmaker extends DurableObject{
   }
 }
 
+export class ArenaTournament extends DurableObject{
+  constructor(ctx,env){
+    super(ctx,env);this.state=null;
+    this.ctx.blockConcurrencyWhile(async()=>{
+      this.ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS tournament_state(id INTEGER PRIMARY KEY CHECK(id=1),json TEXT NOT NULL,updated_at INTEGER NOT NULL)");
+      const row=this.ctx.storage.sql.exec("SELECT json FROM tournament_state WHERE id=1").toArray()[0];
+      if(row)this.state=JSON.parse(row.json);
+    });
+  }
+  persist(){
+    this.ctx.storage.sql.exec("INSERT INTO tournament_state(id,json,updated_at) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET json=excluded.json,updated_at=excluded.updated_at",JSON.stringify(this.state),Date.now());
+  }
+  async init(code,size,host){
+    if(!TOURNAMENT_CODE.test(code)||!validTournamentSize(size))return {ok:false,reason:"invalid_tournament"};
+    if(this.state&&this.state.status!=="cancelled"&&Date.now()<Number(this.state.hardExpiresAt||0))return {ok:false,reason:"room_exists"};
+    this.state=createTournamentState(code,size,host);this.persist();
+    await this.ctx.storage.setAlarm(this.state.expiresAt);
+    return {ok:true,tournament:tournamentPublicState(this.state,host.owner)};
+  }
+  async status(owner){
+    if(!this.state)return {ok:false,reason:"room_not_found"};
+    if(Date.now()>=Number(this.state.hardExpiresAt||0))return {ok:false,reason:"room_expired"};
+    const tournament=tournamentPublicState(this.state,owner);
+    return tournament?{ok:true,tournament}:{ok:false,reason:"not_participant"};
+  }
+  async join(player){
+    if(!this.state)return {ok:false,reason:"room_not_found"};
+    const existing=tournamentPublicState(this.state,player.owner);
+    if(existing)return {ok:true,tournament:existing};
+    const joined=addTournamentParticipant(this.state,player);
+    if(!joined.ok)return joined;
+    this.persist();
+    if(joined.full)await this.startRound(this.state.participants.map(item=>item.owner));
+    else await this.ctx.storage.setAlarm(this.state.expiresAt);
+    return {ok:true,tournament:tournamentPublicState(this.state,player.owner)};
+  }
+  player(owner){return this.state&&this.state.participants.find(item=>item.owner===owner);}
+  async startRound(owners){
+    if(!this.state||this.state.advancing||this.state.status==="completed"||this.state.status==="cancelled")return;
+    const pairs=roundPairs(owners),roundNumber=Number(this.state.round||0)+1;
+    this.state.advancing=true;this.persist();
+    try{
+      const matches=[];
+      for(let slot=0;slot<pairs.length;slot++){
+        const pair=pairs[slot],players=pair.map(owner=>{
+          const item=this.player(owner);return {owner:item.owner,clubName:item.clubName,rating:Number(item.rating)};
+        });
+        const matchId=randomId("AR-",12),room=this.env.ARENA_ROOM.getByName(matchId);
+        const access=await room.init(matchId,players,randomId("",16),{mode:"tournament",tournament:{code:this.state.code,round:roundNumber,slot}});
+        matches.push({matchId,status:"ready",players:pair,winnerOwner:null,score:null});
+        for(const owner of pair)this.state.assignments[owner]={matchId,roomToken:access[owner],round:roundNumber,status:"ready"};
+      }
+      this.state.rounds.push({number:roundNumber,matches});
+      this.state.round=roundNumber;this.state.status="running";this.state.advancing=false;this.state.expiresAt=this.state.hardExpiresAt;this.persist();
+      const expiresAt=new Date(Number(this.state.hardExpiresAt)).toISOString(),updatedAt=nowIso();
+      await this.env.DB.batch(owners.map(owner=>this.env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'match',?,?,?)").bind(owner,this.state.assignments[owner].matchId,expiresAt,updatedAt)));
+      await this.ctx.storage.setAlarm(this.state.hardExpiresAt);
+    }catch(error){
+      this.state.advancing=false;this.persist();operational(this.env,"arena_tournament_round_failed",this.state.code,1,error);throw error;
+    }
+  }
+  async reportResult(matchId,winnerOwner,score){
+    if(!this.state||this.state.status!=="running")return {ok:false,reason:"tournament_inactive"};
+    const round=this.state.rounds.find(item=>item.matches.some(match=>match.matchId===matchId));
+    const match=round&&round.matches.find(item=>item.matchId===matchId);
+    if(!match)return {ok:false,reason:"match_not_found"};
+    if(match.status==="completed")return {ok:true,duplicate:true};
+    if(!match.players.includes(winnerOwner))return {ok:false,reason:"invalid_winner"};
+    const loserOwner=match.players.find(owner=>owner!==winnerOwner),loser=this.player(loserOwner);
+    match.status="completed";match.winnerOwner=winnerOwner;match.score=Array.isArray(score)?score.map(Number):null;
+    delete this.state.assignments[match.players[0]];delete this.state.assignments[match.players[1]];
+    if(loser){loser.eliminated=true;loser.place=round.matches.length===1?2:round.matches.length*2;}
+    this.persist();
+    await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(loserOwner,matchId).run();
+    await this.env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'tournament',?,?,?)")
+      .bind(winnerOwner,tournamentId(this.state.code),new Date(Number(this.state.hardExpiresAt)).toISOString(),nowIso()).run();
+    if(round.matches.every(item=>item.status==="completed")){
+      const winners=round.matches.map(item=>item.winnerOwner);
+      if(winners.length===1){
+        this.state.status="completed";this.state.champion=winners[0];const champion=this.player(winners[0]);if(champion)champion.place=1;
+        this.state.expiresAt=Date.now()+30*60_000;this.persist();
+        await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=?").bind(winners[0]).run();
+        metric(this.env,"arena_tournament_completed",String(this.state.size),1);
+      }else await this.startRound(winners);
+    }
+    return {ok:true};
+  }
+  async cancel(owner){
+    if(!this.state)return {ok:false,reason:"room_not_found"};
+    if(this.state.hostOwner!==owner)return {ok:false,reason:"not_host"};
+    if(this.state.status!=="waiting")return {ok:false,reason:"tournament_started"};
+    this.state.status="cancelled";this.persist();await this.cleanupPresence();return {ok:true};
+  }
+  async cleanupPresence(){
+    if(!this.state||!this.state.participants.length)return;
+    await this.env.DB.batch(this.state.participants.map(item=>this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=?").bind(item.owner)));
+  }
+  async alarm(){
+    if(!this.state||["completed","cancelled"].includes(this.state.status))return;
+    const expired=this.state.status==="waiting"?Date.now()>=Number(this.state.expiresAt):Date.now()>=Number(this.state.hardExpiresAt);
+    if(expired){this.state.status="cancelled";this.persist();await this.cleanupPresence();return;}
+    await this.ctx.storage.setAlarm(this.state.status==="waiting"?this.state.expiresAt:this.state.hardExpiresAt);
+  }
+}
+
 export class ArenaRoom extends DurableObject{
   constructor(ctx,env){
     super(ctx,env);
@@ -363,10 +480,10 @@ export class ArenaRoom extends DurableObject{
     const access=Object.fromEntries(players.map(player=>[player.owner,randomId("RT-",24)]));
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
-      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:["practice","custom"].includes(options.mode)?options.mode:"ranked",botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
+      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:["practice","custom","tournament"].includes(options.mode)?options.mode:"ranked",tournament:options.tournament||null,botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
       players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,windowHistory:[],offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
-      participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
+      participationPolicy:"meaningful-participation-v2",reconnectGraceUsed:[0,0],reconnectGraceUntil:[0,0],createdAt:Date.now()
     };
     if(this.state.botIndex>=0)this.state.players[this.state.botIndex].connected=true;
     this.scheduleBotDecision();this.persist();await this.armAlarm();
@@ -387,7 +504,9 @@ export class ArenaRoom extends DurableObject{
     const [client,server]=Object.values(new WebSocketPair()),index=this.state.players.findIndex(player=>player.owner===owner);
     server.serializeAttachment({owner,index,connectedAt:Date.now(),messages:0,windowStartedAt:Date.now()});
     this.ctx.acceptWebSocket(server,[`owner:${owner}`]);
-    this.state.players[index].connected=true;this.state.players[index].lastSeenAt=Date.now();this.persist();
+    this.state.players[index].connected=true;this.state.players[index].lastSeenAt=Date.now();
+    if(Array.isArray(this.state.reconnectGraceUntil))this.state.reconnectGraceUntil[index]=0;
+    this.persist();
     server.send(JSON.stringify({type:"state",state:publicState(this.state,owner)}));this.broadcastPresence();
     return new Response(null,{status:101,webSocket:client});
   }
@@ -409,7 +528,7 @@ export class ArenaRoom extends DurableObject{
     return this.usesFullXI()?DRAFT_SLOTS:LEGACY_DRAFT_LINES.map(line=>({slot:line,line}));
   }
   draftOffers(line,step,side,slot){
-    if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10"].includes(this.state.rulesVersion)&&this.state.draftPlan){
+    if(["arena-rules-v7","arena-rules-v8","arena-rules-v9","arena-rules-v10","arena-rules-v11"].includes(this.state.rulesVersion)&&this.state.draftPlan){
       return this.state.draftPlan[step][side].map(offer=>({...offer}));
     }
     return this.isCurrentRules()
@@ -526,7 +645,7 @@ export class ArenaRoom extends DurableObject{
     this.state.botDueAt=Date.now()+botDecisionDelay(this.state.seed,this.state.phase,step);
   }
   armAlarm(){
-    const candidates=[Number(this.state.deadline)||0,Number(this.state.botDueAt)||0,Number(this.state.botRematchDueAt)||0].filter(value=>value>Date.now());
+    const candidates=[Number(this.state.deadline)||0,Number(this.state.botDueAt)||0,Number(this.state.botRematchDueAt)||0,...(this.state.reconnectGraceUntil||[])].filter(value=>value>Date.now());
     return this.ctx.storage.setAlarm(candidates.length?Math.min(...candidates):Date.now()+1000);
   }
   remainingBudget(player){
@@ -661,6 +780,19 @@ export class ArenaRoom extends DurableObject{
   }
   async recordResult(outcomes){
     const match=this.state,created=nowIso(),season=seasonKey();
+    if(match.mode==="tournament"){
+      try{
+        const current=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
+        match.result.profiles=current.map(profile);
+        match.result.rewards=match.players.map(player=>({ratingBefore:Number(player.rating)||1000,ratingDelta:0,seasonPoints:0,tokenProgress:0}));
+        let winnerIndex=outcomes.findIndex(outcome=>outcome==="win");
+        if(winnerIndex<0){winnerIndex=hashSeed(`${match.seed}|tournament-tiebreak`)%2;match.result.tournamentTiebreak=true;}
+        const tournament=this.env.ARENA_TOURNAMENT.getByName(tournamentId(match.tournament.code));
+        const reported=await tournament.reportResult(match.matchId,match.players[winnerIndex].owner,match.score);
+        if(!reported.ok&&!reported.duplicate)throw new Error(reported.reason||"tournament_report_failed");
+        this.state.resultRecorded=true;this.persist();metric(this.env,"arena_tournament_match_completed",String(match.tournament.round),1);return true;
+      }catch(error){operational(this.env,"arena_tournament_finalize_failed",match.matchId,1,error);return false;}
+    }
     if(match.mode==="custom"){
       try{
         const current=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
@@ -783,7 +915,7 @@ export class ArenaRoom extends DurableObject{
         await this.finish(teams[0],teams[1]);
         return "ok";
       }
-      if(this.state.mode!=="ranked"&&this.state.mode!=="custom")return "forfeit_unavailable";
+      if(!["ranked","custom","tournament"].includes(this.state.mode))return "forfeit_unavailable";
       player.forcedForfeit=true;player.forfeitReason="surrender";
       const teams=this.state.players.map(candidate=>teamSnapshot(candidate,this.state.rulesVersion));
       await this.finish(teams[0],teams[1]);
@@ -935,11 +1067,12 @@ export class ArenaRoom extends DurableObject{
         (this.state.phase==="live"&&player.tactics.length<=this.state.window)||
         (this.state.phase==="penalty"&&this.state.penalty&&this.state.penalty.stage==="choice"&&!this.state.penalty.choices[index]);
       if(incomplete){
-        if(this.state.mode==="ranked"&&index!==this.state.botIndex){
+        const competitive=["ranked","custom","tournament"].includes(this.state.mode);
+        if(competitive&&index!==this.state.botIndex){
           player.missedDecisions=(Number(player.missedDecisions)||0)+1;
           if(player.missedDecisions>=3)timedOut.push(index);
         }
-        if(this.state.mode!=="ranked"||player.missedDecisions<3||index===this.state.botIndex)this.defaultAction(index);
+        if(!competitive||player.missedDecisions<3||index===this.state.botIndex)this.defaultAction(index);
       }
     }
     if(timedOut.length){
@@ -969,8 +1102,24 @@ export class ArenaRoom extends DurableObject{
   }
   async webSocketClose(socket){
     const attachment=socket.deserializeAttachment();if(!attachment||!this.state)return;
+    const replacement=this.ctx.getWebSockets(`owner:${attachment.owner}`).some(candidate=>candidate!==socket&&candidate.readyState===1);
+    if(replacement)return;
     const player=this.state.players.find(item=>item.owner===attachment.owner);
-    if(player){player.connected=false;player.lastSeenAt=Date.now();this.persist();this.broadcastPresence();}
+    if(player){
+      const now=Date.now(),index=this.state.players.indexOf(player);player.connected=false;player.lastSeenAt=now;player.disconnects=(Number(player.disconnects)||0)+1;
+      if(this.state.phase!=="result"&&this.state.mode!=="practice"&&index!==this.state.botIndex&&Number(this.state.deadline)>now){
+        if(!Array.isArray(this.state.reconnectGraceUsed))this.state.reconnectGraceUsed=[0,0];
+        if(!Array.isArray(this.state.reconnectGraceUntil))this.state.reconnectGraceUntil=[0,0];
+        const remaining=Math.max(0,RECONNECT_GRACE_CAP_MS-Number(this.state.reconnectGraceUsed[index]||0));
+        const granted=Math.min(RECONNECT_GRACE_MS,remaining);
+        if(granted>0){
+          this.state.reconnectGraceUsed[index]=Number(this.state.reconnectGraceUsed[index]||0)+granted;
+          this.state.reconnectGraceUntil[index]=now+granted;this.state.deadline+=granted;
+          metric(this.env,"arena_disconnect_grace",this.state.mode,granted);
+        }
+      }
+      this.persist();await this.armAlarm();this.broadcastPresence();
+    }
   }
 }
 
@@ -1052,7 +1201,22 @@ async function handleSession(request,env){
 }
 async function handleProfile(request,env){
   const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
-  return json(request,env,{profile:profile(await ensureProfile(env,id.owner,""))});
+  return json(request,env,{profile:profile(await ensureProfile(env,id.owner,"")),cosmeticCatalog:COSMETIC_REWARDS});
+}
+async function handleEquipCosmetic(request,env){
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  let data;try{data=await body(request,2048);}catch(_){return json(request,env,{error:"invalid_json"},400);}
+  const type=String(data.type||""),rewardId=String(data.id||"");
+  if(!COSMETIC_TYPES.has(type))return json(request,env,{error:"invalid_cosmetic_type"},422);
+  const row=await ensureProfile(env,id.owner,""),owned=new Set(jsonArray(row.cosmetics)),equipped=jsonObject(row.equipped_cosmetics);
+  if(rewardId){
+    const item=COSMETIC_REWARDS.find(reward=>reward.id===rewardId&&reward.type===type);
+    if(!item||!owned.has(rewardId))return json(request,env,{error:"cosmetic_locked"},403);
+    equipped[type]=rewardId;
+  }else delete equipped[type];
+  await env.DB.prepare("UPDATE arena_profiles SET equipped_cosmetics=?,updated_at=? WHERE owner_hash=?").bind(JSON.stringify(equipped),nowIso(),id.owner).run();
+  metric(env,"arena_cosmetic_equipped",type,rewardId?1:0);
+  return json(request,env,{profile:profile(await ensureProfile(env,id.owner,"")),cosmeticCatalog:COSMETIC_REWARDS});
 }
 async function handleLeaderboard(request,env,url){
   const season=seasonKey(),requested=Number(url.searchParams.get("limit")),limit=Number.isFinite(requested)&&requested>0?Math.round(clamp(requested,1,50)):25;
@@ -1067,6 +1231,59 @@ async function handleHistory(request,env){
     seasonPoints:Number(row.season_points),tokenProgress:Number(row.token_progress),createdAt:row.created_at,
     score:row.home_owner===id.owner?[Number(row.home_score),Number(row.away_score)]:[Number(row.away_score),Number(row.home_score)]
   }))});
+}
+async function handleCreateTournament(request,env){
+  if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  let data;try{data=await body(request,4096);}catch(_){return json(request,env,{error:"invalid_json"},400);}
+  const name=clubName(data.clubName),size=Number(data.size);if(!name)return json(request,env,{error:"invalid_club_name"},422);
+  if(!validTournamentSize(size))return json(request,env,{error:"invalid_tournament_size"},422);
+  const profileRow=await ensureProfile(env,id.owner,name);
+  await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const active=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=? AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  if(active)return json(request,env,{error:"arena_session_active"},409);
+  for(let attempt=0;attempt<5;attempt++){
+    const code=randomCustomCode(),stub=env.ARENA_TOURNAMENT.getByName(tournamentId(code));
+    const created=await stub.init(code,size,{owner:id.owner,clubName:profileRow.club_name,rating:Number(profileRow.rating)});
+    if(!created.ok)continue;
+    const inserted=await env.DB.prepare("INSERT OR IGNORE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'tournament',?,?,?)")
+      .bind(id.owner,tournamentId(code),new Date(Date.now()+TOURNAMENT_LOBBY_MS).toISOString(),nowIso()).run();
+    if(Number(inserted.meta&&inserted.meta.changes)!==1){await stub.cancel(id.owner);return json(request,env,{error:"arena_session_active"},409);}
+    metric(env,"arena_tournament_created",String(size),1);return json(request,env,{tournament:created.tournament},201);
+  }
+  return json(request,env,{error:"room_code_unavailable"},503);
+}
+async function handleTournamentStatus(request,env,code){
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  const status=await env.ARENA_TOURNAMENT.getByName(tournamentId(code)).status(id.owner);
+  if(!status.ok){
+    if(status.reason==="room_expired")await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(id.owner,tournamentId(code)).run();
+    return json(request,env,{error:status.reason},status.reason==="not_participant"?403:404);
+  }
+  return json(request,env,{tournament:status.tournament,directMatch:status.tournament.directMatch});
+}
+async function handleJoinTournament(request,env,code){
+  if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  let data={};try{data=await body(request,4096);}catch(_){return json(request,env,{error:"invalid_json"},400);}
+  const requestedName=data.clubName?clubName(data.clubName):"";if(data.clubName&&!requestedName)return json(request,env,{error:"invalid_club_name"},422);
+  const profileRow=await ensureProfile(env,id.owner,requestedName),idForTournament=tournamentId(code);
+  await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const active=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=? AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  if(active&&active.match_id!==idForTournament)return json(request,env,{error:"arena_session_active"},409);
+  const stub=env.ARENA_TOURNAMENT.getByName(idForTournament);
+  const joined=await stub.join({owner:id.owner,clubName:profileRow.club_name,rating:Number(profileRow.rating)});
+  if(!joined.ok)return json(request,env,{error:joined.reason},joined.reason==="room_full"||joined.reason==="tournament_started"?409:404);
+  if(joined.tournament.status==="waiting")await env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'tournament',?,?,?)")
+    .bind(id.owner,idForTournament,new Date(Date.now()+TOURNAMENT_LOBBY_MS).toISOString(),nowIso()).run();
+  metric(env,"arena_tournament_joined",String(joined.tournament.size),joined.tournament.joined);
+  return json(request,env,{tournament:joined.tournament,directMatch:joined.tournament.directMatch},200);
+}
+async function handleCancelTournament(request,env,code){
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  const cancelled=await env.ARENA_TOURNAMENT.getByName(tournamentId(code)).cancel(id.owner);
+  if(!cancelled.ok)return json(request,env,{error:cancelled.reason},cancelled.reason==="not_host"?403:409);
+  return new Response(null,{status:204,headers:responseHeaders(request,env)});
 }
 async function handleCreateCustomRoom(request,env){
   if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
@@ -1187,9 +1404,15 @@ async function route(request,env){
   if(request.method==="POST"&&url.pathname==="/v1/arena/auth/google")return handleGoogleAuth(request,env);
   if(request.method==="POST"&&url.pathname==="/v1/arena/session")return handleSession(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/arena/profile")return handleProfile(request,env);
+  if(request.method==="PUT"&&url.pathname==="/v1/arena/profile/cosmetics")return handleEquipCosmetic(request,env);
   if(request.method==="DELETE"&&url.pathname==="/v1/arena/profile")return handleDeleteProfile(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/arena/leaderboard")return handleLeaderboard(request,env,url);
   if(request.method==="GET"&&url.pathname==="/v1/arena/history")return handleHistory(request,env);
+  if(request.method==="POST"&&url.pathname==="/v1/arena/tournaments")return handleCreateTournament(request,env);
+  const tournament=url.pathname.match(/^\/v1\/arena\/tournaments\/([A-HJ-NP-Z2-9]{6})$/);
+  if(request.method==="GET"&&tournament)return handleTournamentStatus(request,env,tournament[1]);
+  if(request.method==="POST"&&tournament)return handleJoinTournament(request,env,tournament[1]);
+  if(request.method==="DELETE"&&tournament)return handleCancelTournament(request,env,tournament[1]);
   if(request.method==="POST"&&url.pathname==="/v1/arena/custom-rooms")return handleCreateCustomRoom(request,env);
   const custom=url.pathname.match(/^\/v1\/arena\/custom-rooms\/([A-HJ-NP-Z2-9]{6})$/);
   if(request.method==="GET"&&custom)return handleCustomRoomStatus(request,env,custom[1]);

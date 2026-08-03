@@ -15,7 +15,7 @@ const windowHistory=[
   {window:2,startMinute:45,endMinute:70,homeGoals:0,awayGoals:0,homeXg:.43,awayXg:.81,tactics:["counter","press"],advantage:"home",events:[],scoreAfter:[1,1]},
   {window:3,startMinute:70,endMinute:90,homeGoals:1,awayGoals:1,homeXg:.94,awayXg:.67,tactics:["control","counter"],advantage:"home",events:[{minute:71,type:"goal",side:"home"},{minute:84,type:"goal",side:"away"}],scoreAfter:[2,2]}
 ];
-const base={protocol:1,rulesVersion:"arena-rules-v10",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,liveSegments,penalty:null,score:[0,0],events:[],result:null,emotes:{self:null,opponent:null},self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
+const base={protocol:1,rulesVersion:"arena-rules-v11",catalogVersion:"qa-catalog",mode:"ranked",matchId:"AR-VISUALQA00000001",deadline:Date.now()+30_000,selfIndex:0,draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,liveSegments,penalty:null,score:[0,0],events:[],result:null,emotes:{self:null,opponent:null},self,opponent,offers:null,draftStatus:{count:0,total:11,budget:48,power:0,recommendedReserve:14},team:null,opponentTeam:null};
 
 async function boot(page:any,packaged=false){
   await page.addInitScript((mockProfile:any)=>{
@@ -105,6 +105,17 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator('[data-arena-custom-code]')).toHaveValue("ABC234");
   await page.locator('[data-arena-action="portal"]').click();
   await expect(page.locator(".arena-portal")).toBeVisible();
+  await expect(page.locator('[data-arena-action="tournament-room"]')).toContainText("PRIVATE TOURNAMENT");
+  await page.locator('[data-arena-action="tournament-room"]').click();
+  await expect(page.locator(".arena-tournament-room")).toBeVisible();
+  await expect(page.locator('[data-arena-action="create-tournament"]')).toHaveCount(2);
+  await expect(page.locator('[data-arena-action="create-tournament"][data-size="4"]')).toBeVisible();
+  await expect(page.locator('[data-arena-action="create-tournament"][data-size="8"]')).toBeVisible();
+  await page.locator('[data-arena-action="portal"]').click();
+  await page.locator('[data-arena-action="cosmetics"]').click();
+  await expect(page.locator(".arena-cosmetics")).toContainText("Cosmetic only");
+  await expect(page.locator(".arena-cosmetics section")).toHaveCount(4);
+  await page.locator('[data-arena-action="portal"]').click();
   await page.locator(".arena-settings-button").click();
   await expect(page.locator("#settingsDrop")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -120,9 +131,9 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await page.evaluate(()=>(globalThis as any).setLang("en"));
   await expect(page.locator(".arena-topbar>div:first-of-type>span")).toHaveText("MULTIPLAYER");
 
-  await setRoom(page,{...base,phase:"setup",emotes:{self:null,opponent:{id:"fire",sequence:7,at:Date.now()}}});
+  await setRoom(page,{...base,phase:"setup",emotes:{self:null,opponent:{id:"gg",sequence:7,at:Date.now()}}});
   await expect(page.locator(".arena-emote-trigger")).toBeVisible();
-  await expect(page.locator(".arena-emote-reaction.is-opponent")).toContainText("Let's go!");
+  await expect(page.locator(".arena-emote-reaction.is-opponent")).toContainText("GG");
   const emotePlacement=await page.evaluate(()=>{
     const name=document.querySelector(".arena-versus .is-self .arena-club-line>b")!.getBoundingClientRect();
     const trigger=document.querySelector(".arena-emote-trigger")!.getBoundingClientRect();
@@ -130,22 +141,21 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   });
   expect(emotePlacement.afterName).toBe(true);
   await page.locator(".arena-emote-trigger").click();
-  await expect(page.locator(".arena-emote-picker button")).toHaveCount(7);
+  await expect(page.locator(".arena-emote-picker button")).toHaveCount(8);
   await expect(page.locator('[data-arena-emote="hello"]')).toContainText("Hello");
-  await expect(page.locator('[data-arena-emote="applause"]')).toContainText("Nice play");
-  await expect(page.locator('[data-arena-emote="respect"]')).toContainText("Good game");
-  await expect(page.locator('[data-arena-emote="easy"]')).toContainText("Too easy");
-  await expect(page.locator('[data-arena-emote="comeOn"]')).toContainText("Come on");
-  await expect(page.locator('[data-arena-emote="yawn"]')).toContainText("Yawn");
+  await expect(page.locator('[data-arena-emote="gg"]')).toContainText("GG");
+  await expect(page.locator('[data-arena-emote="nice"]')).toContainText("Nice play");
+  await expect(page.locator('[data-arena-emote="ez"]')).toContainText("EZ");
+  await expect(page.locator('[data-arena-emote="hurry"]')).toContainText("Hurry up");
   await page.waitForTimeout(250);
   await capture(page,"03a-web-arena-emotes.png");
   await page.evaluate(()=>{
     (globalThis as any).__arenaEmoteMessages=[];
     (globalThis as any).CopaArena.state.socket={readyState:1,send:(message:string)=>(globalThis as any).__arenaEmoteMessages.push(JSON.parse(message)),close:()=>{}};
   });
-  await page.locator('[data-arena-emote="applause"]').click();
+  await page.locator('[data-arena-emote="nice"]').click();
   const sentEmote=await page.evaluate(()=>(globalThis as any).__arenaEmoteMessages.at(-1));
-  expect(sentEmote).toMatchObject({type:"emote",emote:"applause"});
+  expect(sentEmote).toMatchObject({type:"emote",emote:"nice"});
   await page.evaluate(()=>{const arena=(globalThis as any).CopaArena;arena.state.socket=null;arena.state.emoteReadyAt=0;arena.refresh();});
   await expect(page.locator(".arena-forfeit-trigger")).toBeVisible();
   await page.locator(".arena-forfeit-trigger").click();
@@ -374,9 +384,9 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
     expect(portal.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
     expect(portal.shellOverflow,viewport.name).toBeLessThanOrEqual(1);
     await capture(page,`android-${viewport.name}-hub.png`);
-    await setRoom(page,{...base,phase:"setup",emotes:{self:null,opponent:{id:"applause",sequence:9,at:Date.now()}}});
+    await setRoom(page,{...base,phase:"setup",emotes:{self:null,opponent:{id:"nice",sequence:9,at:Date.now()}}});
     await page.locator(".arena-emote-trigger").click();
-    await expect(page.locator(".arena-emote-picker button")).toHaveCount(7);
+    await expect(page.locator(".arena-emote-picker button")).toHaveCount(8);
     await expect(page.locator(".arena-emote-reaction.is-opponent")).toBeVisible();
     const emotes=await audit(page);
     expect(emotes.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
