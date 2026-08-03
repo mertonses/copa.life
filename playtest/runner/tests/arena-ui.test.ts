@@ -491,6 +491,97 @@ test("Copa Arena Android package remains compact at phone and tablet widths",asy
   }
 });
 
+test("private-room polling opens exactly one match socket on a slow mobile response",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","slow private-room race regression");
+  await boot(page,true);
+  await page.locator('[data-mode-choice="arena"]:visible').first().click();
+  await page.locator('[data-arena-action="custom-room"]').click();
+  await page.evaluate(()=>{
+    const previousFetch=globalThis.fetch.bind(globalThis);
+    (globalThis as any).__customStatusRequests=0;
+    (globalThis as any).__customActiveStatus=0;
+    (globalThis as any).__customMaxConcurrentStatus=0;
+    (globalThis as any).__customNoStore=true;
+    (globalThis as any).__customRoomSockets=0;
+    class PrivateRoomSocket extends EventTarget{
+      readyState=0;
+      url:string;
+      constructor(url:string){
+        super();this.url=url;
+        if(url.includes("/v1/arena/rooms/"))(globalThis as any).__customRoomSockets++;
+        setTimeout(()=>{if(this.readyState!==0)return;this.readyState=1;this.dispatchEvent(new Event("open"));},10);
+      }
+      send(){}
+      close(code=1000,reason=""){if(this.readyState>=2)return;this.readyState=3;this.dispatchEvent(new CloseEvent("close",{code,reason}));}
+    }
+    (globalThis as any).WebSocket=PrivateRoomSocket;
+    globalThis.fetch=async(input:any,init?:RequestInit)=>{
+      const url=String(typeof input==="string"?input:input&&input.url||"");
+      if(!url.includes("/v1/arena/custom-rooms"))return previousFetch(input,init);
+      (globalThis as any).__customNoStore=(globalThis as any).__customNoStore&&init?.cache==="no-store";
+      if((init?.method||"GET")==="POST")return new Response(JSON.stringify({room:{code:"SLOW23",status:"waiting",expiresAt:new Date(Date.now()+60_000).toISOString()}}),{status:201,headers:{"content-type":"application/json"}});
+      (globalThis as any).__customStatusRequests++;
+      (globalThis as any).__customActiveStatus++;
+      (globalThis as any).__customMaxConcurrentStatus=Math.max((globalThis as any).__customMaxConcurrentStatus,(globalThis as any).__customActiveStatus);
+      await new Promise(resolve=>setTimeout(resolve,1900));
+      (globalThis as any).__customActiveStatus--;
+      return new Response(JSON.stringify({room:{code:"SLOW23",status:"matched"},directMatch:{matchId:"AR-CUSTOMSLOW230000",roomToken:"RT-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}}),{status:200,headers:{"content-type":"application/json"}});
+    };
+  });
+  await page.locator('[data-arena-action="create-custom"]').click();
+  await expect(page.locator(".arena-custom-code")).toContainText("SLOW23");
+  await page.waitForTimeout(4000);
+  const result=await page.evaluate(()=>({
+    screen:(globalThis as any).CopaArena.state.screen,
+    statusRequests:(globalThis as any).__customStatusRequests,
+    maxConcurrentStatus:(globalThis as any).__customMaxConcurrentStatus,
+    roomSockets:(globalThis as any).__customRoomSockets,
+    noStore:(globalThis as any).__customNoStore
+  }));
+  expect(result).toMatchObject({screen:"room",maxConcurrentStatus:1,roomSockets:1,noStore:true});
+  expect(result.statusRequests).toBeGreaterThanOrEqual(1);
+});
+
+test("private-room close race recovers the host into the match",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","private-room host recovery regression");
+  await boot(page,true);
+  await page.locator('[data-mode-choice="arena"]:visible').first().click();
+  await page.locator('[data-arena-action="custom-room"]').click();
+  await page.evaluate(()=>{
+    const previousFetch=globalThis.fetch.bind(globalThis);
+    (globalThis as any).__closeRaceGets=0;(globalThis as any).__closeRaceSockets=0;
+    class CloseRaceSocket extends EventTarget{
+      readyState=0;
+      constructor(){super();(globalThis as any).__closeRaceSockets++;setTimeout(()=>{this.readyState=1;this.dispatchEvent(new Event("open"));},10);}
+      send(){}
+      close(code=1000,reason=""){this.readyState=3;this.dispatchEvent(new CloseEvent("close",{code,reason}));}
+    }
+    (globalThis as any).WebSocket=CloseRaceSocket;
+    globalThis.fetch=async(input:any,init?:RequestInit)=>{
+      const url=String(typeof input==="string"?input:input&&input.url||"");
+      if(!url.includes("/v1/arena/custom-rooms"))return previousFetch(input,init);
+      const method=init?.method||"GET";
+      if(method==="POST")return new Response(JSON.stringify({room:{code:"RACE24",status:"waiting",expiresAt:new Date(Date.now()+60_000).toISOString()}}),{status:201,headers:{"content-type":"application/json"}});
+      if(method==="DELETE")return new Response(JSON.stringify({error:"room_started"}),{status:409,headers:{"content-type":"application/json"}});
+      const requestNumber=++(globalThis as any).__closeRaceGets;
+      await new Promise(resolve=>setTimeout(resolve,requestNumber===1?1800:40));
+      return new Response(JSON.stringify({room:{code:"RACE24",status:"matched"},directMatch:{matchId:"AR-CUSTOMRACE240000",roomToken:"RT-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"}}),{status:200,headers:{"content-type":"application/json"}});
+    };
+  });
+  await page.locator('[data-arena-action="create-custom"]').click();
+  await expect(page.locator(".arena-custom-code")).toContainText("RACE24");
+  await page.locator('[data-arena-action="cancel-custom"]').click();
+  await expect.poll(()=>page.evaluate(()=>(globalThis as any).CopaArena.state.screen)).toBe("room");
+  const recovered=await page.evaluate(()=>({
+    sockets:(globalThis as any).__closeRaceSockets,
+    saved:JSON.parse(localStorage.getItem("copa_arena_room_v1")||"null"),
+    custom:localStorage.getItem("copa_arena_custom_room_v1")
+  }));
+  expect(recovered.sockets).toBe(1);
+  expect(recovered.saved).toMatchObject({matchId:"AR-CUSTOMRACE240000",mode:"custom"});
+  expect(recovered.custom).toBeNull();
+});
+
 test("Copa Arena blocks ranked queue cleanly while offline",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single offline behavior check");
   await boot(page);

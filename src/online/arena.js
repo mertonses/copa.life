@@ -80,7 +80,7 @@
   Object.assign(COPY.es,{multiplayer:"MULTIJUGADOR",queueCopy:"Buscando un club adecuado de nivel similar.",authentic:"EMPAREJAMIENTO RÁPIDO",noBots:"Encuentra un rival de nivel similar en segundos.",fair:"MISMAS CONDICIONES",fairCopy:"Ambos clubes compiten con el mismo tiempo y oportunidades.",server:"RESULTADO VERIFICADO",serverCopy:"El marcador y las decisiones se verifican de forma segura.",forfeitWin:"VICTORIA POR ABANDONO",forfeitLoss:"DERROTA POR ABANDONO",voided:"PARTIDO ANULADO",voidedCopy:"Ningún equipo tomó suficientes decisiones. La puntuación y el progreso de temporada no cambiaron.",rematch:"PEDIR REVANCHA",rematchSent:"SOLICITUD DE REVANCHA ENVIADA",rematchIncoming:"EL RIVAL QUIERE LA REVANCHA",rematchStarting:"COMIENZA LA REVANCHA",leave:"ABANDONAR",leaveTitle:"ABANDONAR PARTIDO",leaveCopy:"El partido terminará de inmediato con una derrota por 0–3.",leaveCheck:"Acepto la derrota por 0–3.",leaveConfirm:"ABANDONAR Y TERMINAR",leaveCancel:"CANCELAR",inactivityOne:"Se automatizó una decisión. Tres omisiones seguidas causan derrota.",inactivityTwo:"ÚLTIMO AVISO: Otra omisión causará una derrota por 0–3."});
   Object.assign(COPY.de,{multiplayer:"MEHRSPIELER",queueCopy:"Ein passender Club mit ähnlicher Wertung wird gesucht.",authentic:"SCHNELLES MATCHMAKING",noBots:"Finde in Sekunden einen passenden Gegner.",fair:"GLEICHE BEDINGUNGEN",fairCopy:"Beide Clubs spielen mit derselben Zeit und denselben Chancen.",server:"GEPRÜFTES ERGEBNIS",serverCopy:"Spielstand und Entscheidungen werden sicher geprüft.",forfeitWin:"SIEG DURCH AUFGABE",forfeitLoss:"NIEDERLAGE DURCH AUFGABE",voided:"MATCH ANNULLIERT",voidedCopy:"Keine Seite traf genug Entscheidungen. Wertung und Saisonfortschritt blieben unverändert.",rematch:"REVANCHE ANFRAGEN",rematchSent:"REVANCHE ANGEFRAGT",rematchIncoming:"GEGNER WILL EINE REVANCHE",rematchStarting:"REVANCHE STARTET",leave:"AUFGEBEN",leaveTitle:"MATCH AUFGEBEN",leaveCopy:"Das Match endet sofort mit einer 0–3-Niederlage.",leaveCheck:"Ich akzeptiere die 0–3-Niederlage.",leaveConfirm:"AUFGEBEN UND BEENDEN",leaveCancel:"ABBRECHEN",inactivityOne:"Eine Entscheidung wurde automatisiert. Drei Versäumnisse in Folge führen zur Niederlage.",inactivityTwo:"LETZTE WARNUNG: Noch ein Versäumnis führt zu einer 0–3-Niederlage."});
   Object.assign(COPY.it,{multiplayer:"MULTIGIOCATORE",queueCopy:"Cerchiamo un club adatto di livello simile.",authentic:"MATCHMAKING RAPIDO",noBots:"Trova in pochi secondi un avversario adatto.",fair:"STESSE CONDIZIONI",fairCopy:"Entrambi i club giocano con lo stesso tempo e le stesse opportunità.",server:"RISULTATO VERIFICATO",serverCopy:"Punteggio e decisioni vengono verificati in sicurezza.",forfeitWin:"VITTORIA A TAVOLINO",forfeitLoss:"SCONFITTA A TAVOLINO",voided:"PARTITA ANNULLATA",voidedCopy:"Nessuna squadra ha preso abbastanza decisioni. Punteggio e progresso stagionale non sono cambiati.",rematch:"CHIEDI RIVINCITA",rematchSent:"RICHIESTA DI RIVINCITA INVIATA",rematchIncoming:"L'AVVERSARIO VUOLE UNA RIVINCITA",rematchStarting:"INIZIA LA RIVINCITA",leave:"ABBANDONA",leaveTitle:"ABBANDONA PARTITA",leaveCopy:"La partita termina subito con una sconfitta per 0–3.",leaveCheck:"Accetto la sconfitta per 0–3.",leaveConfirm:"ABBANDONA E TERMINA",leaveCancel:"ANNULLA",inactivityOne:"Una scelta è stata automatica. Tre assenze consecutive causano la sconfitta.",inactivityTwo:"ULTIMO AVVISO: Un'altra assenza causerà una sconfitta per 0–3."});
-  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,emoteHideTimer:null,forfeitConfirm:false,liveEventCues:new Set(),queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false,searchAudio:null,searchFadeTimer:null,lastArenaAdMatchId:"",customRoom:null,customInput:"",customBusy:false,customPoll:null,tournament:null,tournamentInput:"",tournamentBusy:false,tournamentPoll:null,cosmeticCatalog:REWARDS};
+  const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,emoteHideTimer:null,forfeitConfirm:false,liveEventCues:new Set(),queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false,searchAudio:null,searchFadeTimer:null,lastArenaAdMatchId:"",customRoom:null,customInput:"",customBusy:false,customPoll:null,customPollInFlight:false,customPollGeneration:0,tournament:null,tournamentInput:"",tournamentBusy:false,tournamentPoll:null,tournamentPollInFlight:false,tournamentPollGeneration:0,roomConnectionKey:"",roomConnectGeneration:0,cosmeticCatalog:REWARDS};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const api=()=>String((document.querySelector(API_META)||{}).content||root.COPA_ARENA_API||"").trim().replace(/\/$/,"");
@@ -160,7 +160,7 @@
     }
   }
   async function request(path,options={}){
-    const response=await fetch(api()+path,{...options,headers:{...headers(),...(options.headers||{})}});
+    const response=await fetch(api()+path,{cache:"no-store",...options,headers:{...headers(),...(options.headers||{})}});
     const data=response.status===204?null:await response.json().catch(()=>({error:"invalid_response"}));
     if(!response.ok)throw new Error(data&&data.error||`http_${response.status}`);return data;
   }
@@ -734,19 +734,29 @@
       connectQueue(data.ticket);
     }catch(error){stopSearchMusic(false);state.lastError=error.message;setScreen("error");sfx("error");}
   }
-  function stopCustomPolling(){clearInterval(state.customPoll);state.customPoll=null;}
+  function stopCustomPolling(){clearInterval(state.customPoll);state.customPoll=null;state.customPollGeneration++;state.customPollInFlight=false;}
   function enterCustomMatch(data){
     if(!data||!data.directMatch)return false;
     stopCustomPolling();remove(CUSTOM_ROOM_KEY);
     const saved={matchId:data.directMatch.matchId,token:data.directMatch.roomToken,mode:"custom"};
     set(ROOM_KEY,JSON.stringify(saved));connectRoom(saved);return true;
   }
-  async function pollCustomRoom(){
+  async function pollCustomRoom(generation=state.customPollGeneration){
     const code=state.customRoom&&state.customRoom.code;if(!code)return;
-    try{const data=await request(`/v1/arena/custom-rooms/${encodeURIComponent(code)}`);if(enterCustomMatch(data))return;state.customRoom=data.room||state.customRoom;if(state.screen==="custom")render();}
-    catch(error){stopCustomPolling();state.lastError=error.message;remove(CUSTOM_ROOM_KEY);state.customRoom=null;if(state.screen==="custom")render();}
+    if(state.customPollInFlight)return;state.customPollInFlight=true;
+    try{
+      const data=await request(`/v1/arena/custom-rooms/${encodeURIComponent(code)}`);
+      if(generation!==state.customPollGeneration||state.screen!=="custom")return;
+      if(enterCustomMatch(data))return;
+      state.customRoom=data.room||state.customRoom;render();
+    }catch(error){
+      if(generation!==state.customPollGeneration)return;
+      state.lastError=error.message;
+      if(["room_expired","room_not_found","not_participant"].includes(error.message)){stopCustomPolling();remove(CUSTOM_ROOM_KEY);state.customRoom=null;}
+      if(state.screen==="custom")render();
+    }finally{if(generation===state.customPollGeneration)state.customPollInFlight=false;}
   }
-  function startCustomPolling(){stopCustomPolling();pollCustomRoom();state.customPoll=setInterval(pollCustomRoom,1500);}
+  function startCustomPolling(){stopCustomPolling();const generation=state.customPollGeneration;pollCustomRoom(generation);state.customPoll=setInterval(()=>pollCustomRoom(generation),1500);}
   async function createCustomRoom(){
     if(state.customBusy)return;state.customBusy=true;state.lastError="";render();
     try{const data=await request("/v1/arena/custom-rooms",{method:"POST",body:JSON.stringify({clubName:clubName()})});state.customRoom=data.room;set(CUSTOM_ROOM_KEY,JSON.stringify(data.room));startCustomPolling();}
@@ -760,10 +770,17 @@
   }
   async function cancelCustomRoom(){
     const code=state.customRoom&&state.customRoom.code;stopCustomPolling();
-    try{if(code)await request(`/v1/arena/custom-rooms/${encodeURIComponent(code)}`,{method:"DELETE"});}catch(_){}
-    state.customRoom=null;remove(CUSTOM_ROOM_KEY);loadPortal();
+    try{
+      if(code)await request(`/v1/arena/custom-rooms/${encodeURIComponent(code)}`,{method:"DELETE"});
+      state.customRoom=null;remove(CUSTOM_ROOM_KEY);loadPortal();
+    }catch(error){
+      if(code&&error.message==="room_started"){
+        try{const data=await request(`/v1/arena/custom-rooms/${encodeURIComponent(code)}`);if(enterCustomMatch(data))return;}catch(_){}
+      }
+      state.lastError=error.message;if(state.customRoom){set(CUSTOM_ROOM_KEY,JSON.stringify(state.customRoom));startCustomPolling();}if(state.screen==="custom")render();
+    }
   }
-  function stopTournamentPolling(){clearInterval(state.tournamentPoll);state.tournamentPoll=null;}
+  function stopTournamentPolling(){clearInterval(state.tournamentPoll);state.tournamentPoll=null;state.tournamentPollGeneration++;state.tournamentPollInFlight=false;}
   function enterTournamentMatch(data){
     if(!data||!data.directMatch)return false;
     stopTournamentPolling();
@@ -772,17 +789,24 @@
     const saved={matchId:data.directMatch.matchId,token:data.directMatch.roomToken,mode:"tournament"};
     set(ROOM_KEY,JSON.stringify(saved));connectRoom(saved);return true;
   }
-  async function pollTournament(){
+  async function pollTournament(generation=state.tournamentPollGeneration){
     const code=state.tournament&&state.tournament.code;if(!code)return;
+    if(state.tournamentPollInFlight)return;state.tournamentPollInFlight=true;
     try{
       const data=await request(`/v1/arena/tournaments/${encodeURIComponent(code)}`);
+      if(generation!==state.tournamentPollGeneration||state.screen!=="tournament")return;
       state.tournament=data.tournament||state.tournament;set(TOURNAMENT_KEY,JSON.stringify({code}));
       if(enterTournamentMatch(data))return;
       if(state.tournament&&["completed","cancelled"].includes(state.tournament.status))stopTournamentPolling();
       if(state.screen==="tournament")render();
-    }catch(error){stopTournamentPolling();state.lastError=error.message;remove(TOURNAMENT_KEY);state.tournament=null;if(state.screen==="tournament")render();}
+    }catch(error){
+      if(generation!==state.tournamentPollGeneration)return;
+      state.lastError=error.message;
+      if(["room_expired","room_not_found","not_participant"].includes(error.message)){stopTournamentPolling();remove(TOURNAMENT_KEY);state.tournament=null;}
+      if(state.screen==="tournament")render();
+    }finally{if(generation===state.tournamentPollGeneration)state.tournamentPollInFlight=false;}
   }
-  function startTournamentPolling(){stopTournamentPolling();pollTournament();state.tournamentPoll=setInterval(pollTournament,1500);}
+  function startTournamentPolling(){stopTournamentPolling();const generation=state.tournamentPollGeneration;pollTournament(generation);state.tournamentPoll=setInterval(()=>pollTournament(generation),1500);}
   async function createTournament(size){
     if(state.tournamentBusy)return;state.tournamentBusy=true;state.lastError="";render();
     try{const data=await request("/v1/arena/tournaments",{method:"POST",body:JSON.stringify({clubName:clubName(),size:Number(size)})});state.tournament=data.tournament;set(TOURNAMENT_KEY,JSON.stringify({code:data.tournament.code}));startTournamentPolling();}
@@ -821,10 +845,15 @@
     socket.addEventListener("error",()=>{if(state.screen==="queue"){stopSearchMusic(false);state.lastError="queue_connection";setScreen("error");}});
   }
   function connectRoom(saved){
+    const connectionKey=`${saved.matchId}|${saved.token}`;
+    if(state.roomConnectionKey===connectionKey&&state.socket&&state.socket.readyState<=1)return state.socket;
+    const previousSocket=state.socket,generation=++state.roomConnectGeneration;state.roomConnectionKey=connectionKey;
     state.screen="room";if(!state.room)state.room=null;state.connection=state.retries?"reconnecting":"connecting";render();
     const socket=new WebSocket(`${wsBase()}/v1/arena/rooms/${encodeURIComponent(saved.matchId)}/connect?token=${encodeURIComponent(saved.token)}`);state.socket=socket;
-    socket.addEventListener("open",()=>{state.retries=0;state.connection="connected";state.reconnectAt=0;startHeartbeat(socket);if(state.room)socket.send(JSON.stringify({type:"sync"}));render();});
+    if(previousSocket&&previousSocket!==socket&&previousSocket.readyState<2)try{previousSocket.close(1000,"replaced");}catch(_){}
+    socket.addEventListener("open",()=>{if(state.socket!==socket||generation!==state.roomConnectGeneration)return;state.retries=0;state.connection="connected";state.reconnectAt=0;startHeartbeat(socket);if(state.room)socket.send(JSON.stringify({type:"sync"}));render();});
     socket.addEventListener("message",event=>{
+      if(state.socket!==socket||generation!==state.roomConnectGeneration)return;
       let data;try{data=JSON.parse(event.data);}catch(_){return;}
       if(data.type==="state"){
         const previous=state.room;
@@ -876,7 +905,7 @@
     });
     socket.addEventListener("close",event=>{
       if(state.socket===socket){clearInterval(state.heartbeat);state.heartbeat=null;}
-      if(state.socket!==socket)return;
+      if(state.socket!==socket||generation!==state.roomConnectGeneration)return;
       if(state.screen!=="room"||state.room&&state.room.phase==="result"||event.code===1000)return;
       if(state.retries>=8){state.lastError="room_reconnect_failed";telemetry("arena_error","reconnect_exhausted",state.retries);setScreen("error");return;}
       state.retries++;const delay=Math.min(8000,700*Math.pow(2,state.retries));
@@ -884,16 +913,17 @@
       clearTimeout(state.retryTimer);state.retryTimer=setTimeout(()=>{telemetry("arena_reconnected","retry",state.retries);connectRoom(saved);},delay);
     });
     socket.addEventListener("error",()=>{});
+    return socket;
   }
   function disconnect(cancel=true){
     clearInterval(state.timer);state.timer=null;
     clearInterval(state.heartbeat);state.heartbeat=null;
     clearInterval(state.deadlineTimer);state.deadlineTimer=null;
     stopArenaClock();
-    clearTimeout(state.retryTimer);state.retryTimer=null;state.connection="idle";state.reconnectAt=0;
+    clearTimeout(state.retryTimer);state.retryTimer=null;state.connection="idle";state.reconnectAt=0;state.roomConnectionKey="";state.roomConnectGeneration++;
     clearTimeout(state.emoteCooldownTimer);state.emoteCooldownTimer=null;clearTimeout(state.emoteHideTimer);state.emoteHideTimer=null;state.emoteMenu=false;state.emoteReadyAt=0;state.forfeitConfirm=false;state.liveEventCues.clear();stopCustomPolling();stopTournamentPolling();
     if(state.screen==="queue"||cancel)stopSearchMusic(false);
-    if(state.socket){if(cancel&&state.screen==="queue"&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"cancel"}));try{state.socket.close(1000,"client");}catch(_){}state.socket=null;}
+    const socket=state.socket;state.socket=null;if(socket){if(cancel&&state.screen==="queue"&&socket.readyState===1)socket.send(JSON.stringify({type:"cancel"}));try{socket.close(1000,"client");}catch(_){}}
   }
   function send(payload){
     if(!state.socket||state.socket.readyState!==1){state.lastError="socket_not_ready";sfx("error");return false;}
@@ -1096,6 +1126,16 @@
     const saved=get(ROOM_KEY);if(!saved)return false;
     try{document.body.classList.add("arena-active");rootEl().classList.remove("hidden");const intro=document.getElementById("intro");if(intro)intro.classList.add("hidden");connectRoom(JSON.parse(saved));return true;}catch(_){remove(ROOM_KEY);return false;}
   }
-  document.addEventListener("visibilitychange",()=>syncArenaAudio(state.screen==="room"?state.room:null));
+  function recoverArenaNetwork(){
+    syncArenaAudio(state.screen==="room"?state.room:null);if(document.hidden)return;
+    if(state.screen==="custom"&&state.customRoom){startCustomPolling();return;}
+    if(state.screen==="tournament"&&state.tournament){startTournamentPolling();return;}
+    if(state.screen==="room"&&(!state.socket||state.socket.readyState>1)){
+      const saved=jsonGet(ROOM_KEY);if(saved&&saved.matchId&&saved.token)connectRoom(saved);
+    }
+  }
+  document.addEventListener("visibilitychange",recoverArenaNetwork);
+  root.addEventListener("pageshow",recoverArenaNetwork);
+  root.addEventListener("online",recoverArenaNetwork);
   root.CopaArena={open,close,refresh,resume,state,finishGoogleSignIn};
 })(window);
