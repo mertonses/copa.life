@@ -103,6 +103,34 @@ describe("Arena HTTP API",()=>{
     });
   });
 
+  it("creates and joins a private room with a short friend code",async()=>{
+    const createdResponse=await SELF.fetch("https://arena.test/v1/arena/custom-rooms",{
+      method:"POST",headers:headers("customhost"),body:JSON.stringify({clubName:"Ev Sahibi SK"})
+    });
+    const created=await createdResponse.json();
+    expect(createdResponse.status).toBe(201);
+    expect(created.room).toMatchObject({status:"waiting"});
+    expect(created.room.code).toMatch(/^[A-HJ-NP-Z2-9]{6}$/);
+
+    const joinedResponse=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${created.room.code}`,{
+      method:"POST",headers:headers("customguest"),body:JSON.stringify({clubName:"Deplasman SK"})
+    });
+    const joined=await joinedResponse.json();
+    expect(joinedResponse.status).toBe(200);
+    expect(joined.directMatch.roomToken).toMatch(/^RT-/);
+
+    const hostStatus=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${created.room.code}`,{headers:headers("customhost")});
+    const hostData=await hostStatus.json();
+    expect(hostData.directMatch.roomToken).toMatch(/^RT-/);
+    expect(hostData.directMatch.matchId).toBe(joined.directMatch.matchId);
+    const room=env.ARENA_ROOM.getByName(joined.directMatch.matchId);
+    await runInDurableObject(room,instance=>{
+      expect(instance.state.mode).toBe("custom");
+      expect(instance.state.customCode).toBe(created.room.code);
+      expect(instance.state.players.map(player=>player.clubName)).toEqual(["Ev Sahibi SK","Deplasman SK"]);
+    });
+  });
+
   it("returns only public leaderboard fields",async()=>{
     await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("board"),body:JSON.stringify({clubName:"Kuzey FK",mode:"ranked"})});
     const response=await SELF.fetch("https://arena.test/v1/arena/leaderboard");
@@ -161,6 +189,20 @@ describe("Arena HTTP API",()=>{
 });
 
 describe("Arena Durable Objects",()=>{
+  it("lets the player end AI practice without rating or season penalties",async()=>{
+    const matchId="AR-PRACTICEEXIT0001",owner="owner-practice-exit";
+    const created=new Date().toISOString();
+    await env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(owner,"AC-PRACTICEEXIT","Prova SK",1000,seasonKey(),0,0,0,0,0,0,"[]",created,created).run();
+    const room=env.ARENA_ROOM.getByName(matchId);
+    await room.init(matchId,[{owner,clubName:"Prova SK",rating:1000},{owner:"practice-bot:exit",clubName:"AI XI",rating:1000}],"practice-exit",{mode:"practice",botIndex:1});
+    await runInDurableObject(room,async instance=>{
+      expect(await instance.action(owner,{type:"forfeit"})).toBe("ok");
+      expect(instance.state.result).toMatchObject({practiceExit:true,voided:true,score:[0,0]});
+      expect(instance.state.result.rewards[0]).toMatchObject({ratingDelta:0,seasonPoints:0,tokenProgress:0});
+    });
+  });
+
   it("settles an explicit surrender immediately as a 0-3 forfeit",async()=>{
     const room=env.ARENA_ROOM.getByName("AR-SURRENDER00000001");
     await room.init("AR-SURRENDER00000001",[

@@ -27,11 +27,11 @@
   function afterAd(name){activeBreak=false;document.documentElement.classList.remove("copa-ad-break-active");emit("copa:ad-break-end",{name});configureSound();}
   function webInterstitial(name){
     if(!ensureWebSdk()||typeof root.adBreak!=="function")return Promise.resolve({shown:false,reason:"not_configured"});
-    return new Promise(resolve=>{let shown=false,settled=false;const done=placementInfo=>{if(settled)return;settled=true;if(activeBreak)afterAd(name);resolve({shown,reason:shown?"shown":"not_available",placementInfo:placementInfo||null});};try{root.adBreak({type:"next",name,beforeAd:()=>{shown=true;beforeAd(name);},afterAd:()=>afterAd(name),adBreakDone:done});}catch(_){done(null);}setTimeout(()=>done(null),8000);});
+    return new Promise(resolve=>{let shown=false,settled=false;const done=placementInfo=>{if(settled)return;settled=true;if(activeBreak)afterAd(name);resolve({shown,reason:shown?"shown":"not_available",placementInfo:placementInfo||null});};try{root.adBreak({type:"next",name,beforeAd:()=>{shown=true;beforeAd(name);},afterAd:()=>afterAd(name),adBreakDone:done});}catch(_){done(null);}setTimeout(()=>done(null),3500);});
   }
   function webReward(name){
     if(!ensureWebSdk()||typeof root.adBreak!=="function")return Promise.resolve({earned:false,reason:"not_configured"});
-    return new Promise(resolve=>{let earned=false,offered=false,settled=false;const done=placementInfo=>{if(settled)return;settled=true;if(activeBreak)afterAd(name);resolve({earned,reason:earned?"earned":offered?"dismissed":"not_available",placementInfo:placementInfo||null});};try{root.adBreak({type:"reward",name,beforeReward:showAdFn=>{offered=true;showAdFn();},beforeAd:()=>beforeAd(name),afterAd:()=>afterAd(name),adDismissed:()=>{earned=false;},adViewed:()=>{earned=true;},adBreakDone:done});}catch(_){done(null);}setTimeout(()=>done(null),45000);});
+    return new Promise(resolve=>{let earned=false,offered=false,settled=false;const done=placementInfo=>{if(settled)return;settled=true;if(activeBreak)afterAd(name);resolve({earned,reason:earned?"earned":offered?"dismissed":"not_available",placementInfo:placementInfo||null});};try{root.adBreak({type:"reward",name,beforeReward:showAdFn=>{offered=true;showAdFn();},beforeAd:()=>beforeAd(name),afterAd:()=>afterAd(name),adDismissed:()=>{earned=false;},adViewed:()=>{earned=true;},adBreakDone:done});}catch(_){done(null);}setTimeout(()=>done(null),12000);});
   }
   function callNative(method,key){const api=nativeApi();return api&&typeof api[method]==="function"?api[method](key):null;}
   function showRunEnd(runKey){return callNative("showRunEnd",runKey)||webInterstitial("copa_life_run_end");}

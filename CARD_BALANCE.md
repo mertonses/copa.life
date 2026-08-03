@@ -1,6 +1,6 @@
 # Kart Balance Tablosu
 
-Bu dosya `npm run report:cards` ile gerçek kart kodundan üretilir. Etki değerleri örnek 4-4-2 kadro üzerinde 1-6. tur aralığına göre hesaplanır. Tek kullanımlık ve event tabanlı kartlarda nihai etki oyun akışında uygulanabilir; tablo bu kartları ayrıca notlar.
+Bu dosya `npm run report:cards` ile gerçek kart kodundan üretilir. Etki değerleri örnek 4-4-2 kadro üzerinde 1-7. tur aralığına göre hesaplanır. Tek kullanımlık ve event tabanlı kartlarda nihai etki oyun akışında uygulanabilir; tablo bu kartları ayrıca notlar.
 
 - Toplam kart: 37
 - Risk içeren kart: 13

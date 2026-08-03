@@ -369,7 +369,9 @@
   }
   async function joinLeaderboard(){
     const accepted=await requestLeaderboardConsent();
-    if(accepted&&window.CopaMeta)window.CopaMeta.openProgression("world");
+    const panel=document.getElementById("metaWorldPanel");
+    if(accepted&&panel)await renderLeaderboard(panel);
+    else if(accepted&&window.CopaMeta)window.CopaMeta.openProgression("world");
     return accepted;
   }
   async function deleteLeaderboardData(){

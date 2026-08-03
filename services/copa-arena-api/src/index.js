@@ -17,6 +17,7 @@ const ARENA_TOKEN=/^CAR-[A-Z0-9]{24,96}$/;
 const CLIENT_ID=/^GCL-[A-Z0-9]{8,40}$/;
 const TICKET=/^AT-[A-Z0-9]{32,80}$/;
 const ROOM_ID=/^AR-[A-Z0-9]{16,40}$/;
+const CUSTOM_CODE=/^[A-HJ-NP-Z2-9]{6}$/;
 const ACTION_ID=/^AA-[A-Za-z0-9_-]{8,80}$/;
 const ARENA_EVENTS=new Set(["arena_opened","arena_queue_joined","arena_matched","arena_phase_completed","arena_match_completed","arena_reconnected","arena_reconnect_started","arena_network_quality","arena_practice_started","arena_practice_completed","arena_error"]);
 const COSMETIC_REWARDS=Object.freeze([
@@ -37,6 +38,8 @@ const responseHeaders=(request,env)=>{
 };
 const json=(request,env,body,status=200)=>new Response(JSON.stringify(body),{status,headers:responseHeaders(request,env)});
 const randomId=(prefix,bytes=16)=>{const data=new Uint8Array(bytes);crypto.getRandomValues(data);return prefix+Array.from(data,value=>value.toString(16).padStart(2,"0")).join("").toUpperCase();};
+const randomCustomCode=()=>{const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",data=new Uint8Array(6);crypto.getRandomValues(data);return Array.from(data,value=>alphabet[value%alphabet.length]).join("");};
+const customMatchId=code=>`AR-CUSTOM${code}0000`;
 const nowIso=()=>new Date().toISOString();
 const futureIso=ms=>new Date(Date.now()+ms).toISOString();
 const jsonArray=value=>{try{const parsed=JSON.parse(value||"[]");return Array.isArray(parsed)?parsed:[];}catch(_){return[];}};
@@ -303,13 +306,54 @@ export class ArenaRoom extends DurableObject{
     super(ctx,env);
     this.state=null;
     this.ctx.blockConcurrencyWhile(async()=>{
-      this.ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS room_state(id INTEGER PRIMARY KEY CHECK(id=1),json TEXT NOT NULL,updated_at INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS accepted_actions(owner TEXT NOT NULL,action_id TEXT NOT NULL,created_at INTEGER NOT NULL,PRIMARY KEY(owner,action_id))");
+      this.ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS room_state(id INTEGER PRIMARY KEY CHECK(id=1),json TEXT NOT NULL,updated_at INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS accepted_actions(owner TEXT NOT NULL,action_id TEXT NOT NULL,created_at INTEGER NOT NULL,PRIMARY KEY(owner,action_id));CREATE TABLE IF NOT EXISTS custom_lobby(id INTEGER PRIMARY KEY CHECK(id=1),code TEXT NOT NULL,host_json TEXT NOT NULL,guest_json TEXT,status TEXT NOT NULL,expires_at INTEGER NOT NULL,updated_at INTEGER NOT NULL)");
       const row=this.ctx.storage.sql.exec("SELECT json FROM room_state WHERE id=1").toArray()[0];
       if(row)this.state=JSON.parse(row.json);
     });
   }
   persist(){
     this.ctx.storage.sql.exec("INSERT INTO room_state(id,json,updated_at) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET json=excluded.json,updated_at=excluded.updated_at",JSON.stringify(this.state),Date.now());
+  }
+  async createCustom(matchId,code,host){
+    if(this.state||!CUSTOM_CODE.test(code))return {ok:false,reason:"room_exists"};
+    const current=this.ctx.storage.sql.exec("SELECT status,expires_at FROM custom_lobby WHERE id=1").toArray()[0];
+    if(current&&Number(current.expires_at)>Date.now()&&current.status!=="cancelled")return {ok:false,reason:"room_exists"};
+    const expiresAt=Date.now()+15*60_000;
+    this.ctx.storage.sql.exec("INSERT INTO custom_lobby(id,code,host_json,guest_json,status,expires_at,updated_at) VALUES(1,?,?,NULL,'waiting',?,?) ON CONFLICT(id) DO UPDATE SET code=excluded.code,host_json=excluded.host_json,guest_json=NULL,status='waiting',expires_at=excluded.expires_at,updated_at=excluded.updated_at",code,JSON.stringify(host),expiresAt,Date.now());
+    return {ok:true,matchId,code,status:"waiting",expiresAt:new Date(expiresAt).toISOString()};
+  }
+  async customStatus(owner){
+    if(this.state){
+      const roomToken=this.accessFor(owner);
+      return roomToken?{ok:true,matchId:this.state.matchId,code:this.state.customCode,status:"matched",roomToken}:{ok:false,reason:"not_participant"};
+    }
+    const lobby=this.ctx.storage.sql.exec("SELECT * FROM custom_lobby WHERE id=1").toArray()[0];
+    if(!lobby)return {ok:false,reason:"room_not_found"};
+    const host=JSON.parse(lobby.host_json),guest=lobby.guest_json?JSON.parse(lobby.guest_json):null;
+    if(host.owner!==owner&&(!guest||guest.owner!==owner))return {ok:false,reason:"not_participant"};
+    if(Number(lobby.expires_at)<=Date.now())return {ok:false,reason:"room_expired"};
+    return {ok:true,matchId:customMatchId(lobby.code),code:lobby.code,status:lobby.status,expiresAt:new Date(Number(lobby.expires_at)).toISOString()};
+  }
+  async joinCustom(matchId,code,guest){
+    if(this.state){const roomToken=this.accessFor(guest.owner);return roomToken?{ok:true,matchId,code,status:"matched",roomToken}:{ok:false,reason:"room_full"};}
+    const lobby=this.ctx.storage.sql.exec("SELECT * FROM custom_lobby WHERE id=1").toArray()[0];
+    if(!lobby||lobby.code!==code)return {ok:false,reason:"room_not_found"};
+    if(Number(lobby.expires_at)<=Date.now())return {ok:false,reason:"room_expired"};
+    const host=JSON.parse(lobby.host_json);
+    if(host.owner===guest.owner)return {ok:false,reason:"cannot_join_own_room"};
+    if(lobby.status!=="waiting")return {ok:false,reason:"room_full"};
+    const access=await this.init(matchId,[host,guest],randomId("",16),{mode:"custom"});
+    this.state.customCode=code;this.persist();
+    this.ctx.storage.sql.exec("UPDATE custom_lobby SET guest_json=?,status='matched',updated_at=? WHERE id=1",JSON.stringify(guest),Date.now());
+    return {ok:true,matchId,code,status:"matched",roomToken:access[guest.owner]};
+  }
+  async cancelCustom(owner){
+    if(this.state)return {ok:false,reason:"room_started"};
+    const lobby=this.ctx.storage.sql.exec("SELECT host_json FROM custom_lobby WHERE id=1").toArray()[0];
+    if(!lobby)return {ok:false,reason:"room_not_found"};
+    const host=JSON.parse(lobby.host_json);if(host.owner!==owner)return {ok:false,reason:"not_host"};
+    this.ctx.storage.sql.exec("DELETE FROM custom_lobby WHERE id=1");
+    return {ok:true};
   }
   async init(matchId,players,seed,options={}){
     if(this.state){
@@ -319,7 +363,7 @@ export class ArenaRoom extends DurableObject{
     const access=Object.fromEntries(players.map(player=>[player.owner,randomId("RT-",24)]));
     const draftPlan=createDraftPlan(seed,ARENA_RULES_VERSION,ARENA_PLAYER_CATALOG_VERSION);
     this.state={
-      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:options.mode==="practice"?"practice":"ranked",botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
+      matchId,seed,access,rulesVersion:ARENA_RULES_VERSION,mode:["practice","custom"].includes(options.mode)?options.mode:"ranked",botIndex:Number.isInteger(options.botIndex)?Number(options.botIndex):-1,botProfile:options.botProfile||null,botDueAt:0,botRematchDueAt:0,phase:"lobby",deadline:Date.now()+PHASE_SECONDS.lobby*1000,
       players:players.map(initialPlayerState),draftStep:0,window:0,liveStage:"decision",matchMinute:0,windowResult:null,windowHistory:[],offers:null,score:[0,0],events:[],penalty:null,result:null,rematch:null,rematchUsed:!!options.rematchUsed,rematchOf:options.rematchOf||null,emotes:[null,null],emoteCooldowns:[0,0],emoteSequence:0,completed:false,resultRecorded:false,
       catalogVersion:ARENA_PLAYER_CATALOG_VERSION,playerSources:ARENA_PLAYER_SOURCES,draftPlan,
       participationPolicy:"meaningful-participation-v2",createdAt:Date.now()
@@ -601,6 +645,7 @@ export class ArenaRoom extends DurableObject{
       regulationDraw:!!penalty&&this.state.score[0]===this.state.score[1],
       participation:participation.eligible,forfeitIndex:participation.forfeitIndex,voided:participation.voided,
       forfeitReason:participation.forfeitIndex===null?null:this.state.players[participation.forfeitIndex].forfeitReason||"participation",
+      practiceExit:!!this.state.practiceExit,
       rulesVersion:this.state.rulesVersion,catalogVersion:this.state.catalogVersion||null,playerSources:this.state.playerSources||null,
       finishedAt:Date.now()
     };
@@ -616,6 +661,15 @@ export class ArenaRoom extends DurableObject{
   }
   async recordResult(outcomes){
     const match=this.state,created=nowIso(),season=seasonKey();
+    if(match.mode==="custom"){
+      try{
+        const current=await Promise.all(match.players.map(player=>ensureProfile(this.env,player.owner,"")));
+        match.result.profiles=current.map(profile);
+        match.result.rewards=match.players.map(player=>({ratingBefore:Number(player.rating)||1000,ratingDelta:0,seasonPoints:0,tokenProgress:0}));
+        await this.env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash IN (?,?) AND match_id=?").bind(match.players[0].owner,match.players[1].owner,match.matchId).run();
+        this.state.resultRecorded=true;this.persist();metric(this.env,"custom_room_completed",outcomes.join("-"),match.score[0]+match.score[1]);return true;
+      }catch(error){operational(this.env,"arena_custom_finalize_failed",match.matchId,1,error);return false;}
+    }
     if(match.mode==="practice"){
       try{
         const humanIndex=match.botIndex===0?1:0,human=match.players[humanIndex];
@@ -721,7 +775,15 @@ export class ArenaRoom extends DurableObject{
       return "ok";
     }
     if(data.type==="forfeit"){
-      if(this.state.mode!=="ranked"||this.state.phase==="result")return "forfeit_unavailable";
+      if(this.state.phase==="result")return "forfeit_unavailable";
+      if(this.state.mode==="practice"){
+        this.state.practiceExit=true;
+        this.state.forcedVoid=true;
+        const teams=this.state.players.map(candidate=>teamSnapshot(candidate,this.state.rulesVersion));
+        await this.finish(teams[0],teams[1]);
+        return "ok";
+      }
+      if(this.state.mode!=="ranked"&&this.state.mode!=="custom")return "forfeit_unavailable";
       player.forcedForfeit=true;player.forfeitReason="surrender";
       const teams=this.state.players.map(candidate=>teamSnapshot(candidate,this.state.rulesVersion));
       await this.finish(teams[0],teams[1]);
@@ -1006,6 +1068,62 @@ async function handleHistory(request,env){
     score:row.home_owner===id.owner?[Number(row.home_score),Number(row.away_score)]:[Number(row.away_score),Number(row.home_score)]
   }))});
 }
+async function handleCreateCustomRoom(request,env){
+  if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  let data;try{data=await body(request,4096);}catch(_){return json(request,env,{error:"invalid_json"},400);}
+  const name=clubName(data.clubName);if(!name)return json(request,env,{error:"invalid_club_name"},422);
+  const profileRow=await ensureProfile(env,id.owner,name);
+  await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const active=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=? AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  if(active)return json(request,env,{error:"arena_session_active"},409);
+  for(let attempt=0;attempt<5;attempt++){
+    const code=randomCustomCode(),matchId=customMatchId(code),room=env.ARENA_ROOM.getByName(matchId);
+    const created=await room.createCustom(matchId,code,{owner:id.owner,clubName:profileRow.club_name,rating:Number(profileRow.rating)});
+    if(!created.ok)continue;
+    const inserted=await env.DB.prepare("INSERT OR IGNORE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'custom',?,?,?)").bind(id.owner,matchId,created.expiresAt,nowIso()).run();
+    if(Number(inserted.meta&&inserted.meta.changes)!==1){await room.cancelCustom(id.owner);return json(request,env,{error:"arena_session_active"},409);}
+    metric(env,"custom_room_created","private",1);
+    return json(request,env,{room:{code,status:"waiting",expiresAt:created.expiresAt}},201);
+  }
+  return json(request,env,{error:"room_code_unavailable"},503);
+}
+async function handleCustomRoomStatus(request,env,code){
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  const room=env.ARENA_ROOM.getByName(customMatchId(code)),status=await room.customStatus(id.owner);
+  if(!status.ok){
+    if(status.reason==="room_expired")await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(id.owner,customMatchId(code)).run();
+    return json(request,env,{error:status.reason},status.reason==="not_participant"?403:404);
+  }
+  return json(request,env,{room:{code:status.code,status:status.status,expiresAt:status.expiresAt},directMatch:status.roomToken?{matchId:status.matchId,roomToken:status.roomToken}:null});
+}
+async function handleJoinCustomRoom(request,env,code){
+  if(!await rateLimit(env,request,"session",8))return json(request,env,{error:"rate_limited"},429);
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  let data={};try{data=await body(request,4096);}catch(_){return json(request,env,{error:"invalid_json"},400);}
+  const requestedName=data.clubName?clubName(data.clubName):"";if(data.clubName&&!requestedName)return json(request,env,{error:"invalid_club_name"},422);
+  const profileRow=await ensureProfile(env,id.owner,requestedName);
+  await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND expires_at<?").bind(id.owner,nowIso()).run();
+  const active=await env.DB.prepare("SELECT match_id FROM arena_presence WHERE owner_hash=? AND expires_at>? LIMIT 1").bind(id.owner,nowIso()).first();
+  const matchId=customMatchId(code);
+  if(active&&active.match_id!==matchId)return json(request,env,{error:"arena_session_active"},409);
+  const room=env.ARENA_ROOM.getByName(matchId),joined=await room.joinCustom(matchId,code,{owner:id.owner,clubName:profileRow.club_name,rating:Number(profileRow.rating)});
+  if(!joined.ok)return json(request,env,{error:joined.reason},joined.reason==="cannot_join_own_room"?409:404);
+  const hostStatus=await room.customStatus(id.owner);
+  await env.DB.batch([
+    env.DB.prepare("UPDATE arena_presence SET status='match',expires_at=?,updated_at=? WHERE match_id=?").bind(futureIso(45*60_000),nowIso(),matchId),
+    env.DB.prepare("INSERT OR REPLACE INTO arena_presence(owner_hash,status,match_id,expires_at,updated_at) VALUES(?,'match',?,?,?)").bind(id.owner,matchId,futureIso(45*60_000),nowIso())
+  ]);
+  metric(env,"custom_room_joined","private",1);
+  return json(request,env,{room:{code,status:"matched"},directMatch:{matchId,roomToken:joined.roomToken},hostReady:!!hostStatus.ok},200);
+}
+async function handleCancelCustomRoom(request,env,code){
+  const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
+  const matchId=customMatchId(code),room=env.ARENA_ROOM.getByName(matchId),cancelled=await room.cancelCustom(id.owner);
+  if(!cancelled.ok)return json(request,env,{error:cancelled.reason},cancelled.reason==="not_host"?403:409);
+  await env.DB.prepare("DELETE FROM arena_presence WHERE owner_hash=? AND match_id=?").bind(id.owner,matchId).run();
+  return new Response(null,{status:204,headers:responseHeaders(request,env)});
+}
 async function handleDeleteProfile(request,env){
   const id=await identity(request,env);if(!id)return json(request,env,{error:"identity_required"},428);
   const deletedOwner=`deleted:${randomId("",12)}`;
@@ -1072,6 +1190,11 @@ async function route(request,env){
   if(request.method==="DELETE"&&url.pathname==="/v1/arena/profile")return handleDeleteProfile(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/arena/leaderboard")return handleLeaderboard(request,env,url);
   if(request.method==="GET"&&url.pathname==="/v1/arena/history")return handleHistory(request,env);
+  if(request.method==="POST"&&url.pathname==="/v1/arena/custom-rooms")return handleCreateCustomRoom(request,env);
+  const custom=url.pathname.match(/^\/v1\/arena\/custom-rooms\/([A-HJ-NP-Z2-9]{6})$/);
+  if(request.method==="GET"&&custom)return handleCustomRoomStatus(request,env,custom[1]);
+  if(request.method==="POST"&&custom)return handleJoinCustomRoom(request,env,custom[1]);
+  if(request.method==="DELETE"&&custom)return handleCancelCustomRoom(request,env,custom[1]);
   if(request.method==="POST"&&url.pathname==="/v1/arena/events")return handleEvent(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/arena/connect"&&request.headers.get("upgrade")==="websocket")return handleQueueSocket(request,env,url);
   const room=url.pathname.match(/^\/v1\/arena\/rooms\/(AR-[A-Z0-9]{16,40})\/connect$/);

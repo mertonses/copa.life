@@ -726,7 +726,7 @@ function _resetBenchPanelPosition(panel){
   if(!panel)return;panel.style.removeProperty("left");panel.style.removeProperty("top");panel.style.removeProperty("right");panel.style.removeProperty("max-height");panel.classList.remove("bench-panel-dragging");
 }
 
-let _hubDragScrollLock=null,_hubDragPreview=null;
+let _hubDragScrollLock=null,_hubDragPreview=null,_hubIgnoreScrollCleanupUntil=0;
 function _hubDragStyleSnapshot(style,properties){
   const snapshot={};
   properties.forEach(property=>snapshot[property]={value:style.getPropertyValue(property),priority:style.getPropertyPriority(property)});
@@ -742,22 +742,22 @@ function _hubLockDragScroll(){
   if(_hubDragScrollLock)return;
   const root=document.documentElement,body=document.body,scrolling=document.scrollingElement||root;
   const x=window.scrollX||scrolling.scrollLeft||0,y=window.scrollY||scrolling.scrollTop||0;
-  const props=["position","top","right","bottom","left","width","overflow","touch-action"];
-  _hubDragScrollLock={x,y,body,styles:_hubDragStyleSnapshot(body.style,props)};
+  const props=["overflow","touch-action"];
+  _hubDragScrollLock={x,y,body,root,styles:_hubDragStyleSnapshot(body.style,props),rootStyles:_hubDragStyleSnapshot(root.style,props)};
   root.classList.add("hub-player-dragging");
-  body.style.setProperty("position","fixed","important");
-  body.style.setProperty("top",`${-y}px`,"important");
-  body.style.setProperty("right","0","important");
-  body.style.setProperty("left",`${-x}px`,"important");
-  body.style.setProperty("width","100%","important");
+  root.style.setProperty("overflow","hidden","important");
+  root.style.setProperty("touch-action","none","important");
   body.style.setProperty("overflow","hidden","important");
   body.style.setProperty("touch-action","none","important");
+  window.scrollTo(x,y);
 }
 function _hubUnlockDragScroll(){
   const lock=_hubDragScrollLock;
   document.documentElement.classList.remove("hub-player-dragging");
   if(lock){
     _hubRestoreDragStyles(lock.body.style,lock.styles);
+    _hubRestoreDragStyles(lock.root.style,lock.rootStyles);
+    _hubIgnoreScrollCleanupUntil=performance.now()+700;
     const restore=()=>window.scrollTo(lock.x,lock.y);
     restore();window.requestAnimationFrame(restore);
   }
@@ -858,7 +858,9 @@ function _initHubDragDrop(){
     document.querySelectorAll(".touch-drag-ghost").forEach(el=>el.remove());
     if(_tEl)_tEl.classList.remove("hub-drag-source");
     _tEl=null;_tGhost=null;_tSrc=null;_tStart=null;_clearOver();
-    _hubUnlockDragScroll();
+    // A native HTML drag locks scrolling too. Ignore unrelated scroll events
+    // unless a touch drag actually owns this cleanup path.
+    if(_wasDragging)_hubUnlockDragScroll();
     if(_wasDragging&&window.PlayerProfiles)PlayerProfiles.setDragging(false);
   }
   window.cleanupTouchDragGhosts=_cleanupTouchDragGhosts;
@@ -866,7 +868,7 @@ function _initHubDragDrop(){
     window._touchDragCleanupHooksReady=true;
     ["resize","orientationchange","pagehide","blur"].forEach(ev=>window.addEventListener(ev,()=>{if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true}));
     window.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true});
-    window.addEventListener("scroll",()=>{if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true,capture:true});
+    window.addEventListener("scroll",()=>{if(performance.now()<_hubIgnoreScrollCleanupUntil)return;if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true,capture:true});
   }
   function _touchDrop(x,y){
     _clearOver();
@@ -949,7 +951,12 @@ function _initHubDragDrop(){
    valid targets highlight, tap a target to place/swap. Long-press drag stays
    as a secondary method. Desktop mouse drag/drop is untouched. */
 let _tapSel=null;
-function _tapCoarse(){return !!(window.matchMedia&&window.matchMedia("(pointer: coarse)").matches);}
+function _tapCoarse(){
+  if(window.COPA_IS_NATIVE||document.documentElement.dataset.copaPlatform==="android"||document.documentElement.dataset.copaPlatform==="ios")return true;
+  const coarse=!!(window.matchMedia&&window.matchMedia("(pointer: coarse)").matches);
+  const touchPhone=Number(navigator.maxTouchPoints||0)>0&&!!(window.matchMedia&&window.matchMedia("(max-width:760px)").matches);
+  return coarse||touchPhone;
+}
 function _renderEmptyHubSlot(i){
   const r=document.getElementById("h"+i);if(!r)return;
   r.className="roundel empty";r.style.background="";r.style.color="";r.style.borderColor="";
@@ -1037,6 +1044,11 @@ function _tapSelectBench(bi){
   const bp=_benched[bi];if(!bp)return;
   if(_tapSel&&_tapSel.type==="bench"&&_tapSel.idx===bi){_tapCancel();return;}
   _tapSel={type:"bench",idx:bi};
+  /* On the native phone layout the bench is a modal sheet. Once a player is
+     selected the sheet must get out of the way so the pitch can receive the
+     second tap. Keeping the selection in this module makes the transition
+     seamless and also preserves the long-press drag alternative. */
+  if(window.CopaMobileExperience&&typeof CopaMobileExperience.closeNativeBench==="function")CopaMobileExperience.closeNativeBench({restoreFocus:false});
   _tapHighlightTargets();
   const nm=typeof surOf==="function"?surOf(bp):(bp.name||"?");
   _tapShowBar("<b>"+(bp.name||nm).toUpperCase()+"</b> "+(LANG==="tr"?"seçildi · hedef pozisyon seç":"selected · tap a position"),bp);
@@ -1092,20 +1104,14 @@ function _tapPlaceOnSlot(i){
 function _initTapPlacement(){
   if(!_tapCoarse())return;
   slots.forEach((_,i)=>{
-    const el=document.getElementById("h"+i);if(!el||el._tapReady)return;el._tapReady=true;
-    el.addEventListener("click",e=>{
-      if(!_tapCoarse())return;
-      e.stopPropagation();
-      if(_tapSel)_tapPlaceOnSlot(i);
-      else _tapSelectSlot(i);
-    });
+    const el=document.getElementById("h"+i);if(!el)return;el._tapReady=true;
   });
   const be=document.getElementById("hubBenchSection");
   if(be)be.querySelectorAll("[data-bench-idx]").forEach(card=>{
-    if(card._tapReady)return;card._tapReady=true;
+    card._tapReady=true;
     card.setAttribute("role","button");
-    card.addEventListener("click",e=>{if(!_tapCoarse())return;e.stopPropagation();_tapSelectBench(parseInt(card.dataset.benchIdx));});
   });
+  _ensureTapPlacementDelegation();
   if(!window._tapGlobalReady){
     window._tapGlobalReady=true;
     document.addEventListener("click",e=>{
@@ -1116,6 +1122,21 @@ function _initTapPlacement(){
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&_tapSel)_tapCancel();});
   }
 }
+function _ensureTapPlacementDelegation(){
+  if(window._tapPlacementDelegated)return;
+  window._tapPlacementDelegated=true;
+  document.addEventListener("click",e=>{
+    if(!_tapCoarse())return;
+    const benchCard=e.target.closest&&e.target.closest("#hubBenchSection [data-bench-idx]");
+    if(benchCard){e.preventDefault();e.stopPropagation();_tapSelectBench(parseInt(benchCard.dataset.benchIdx));return;}
+    const slot=e.target.closest&&e.target.closest("#hubPitch .roundel[id^='h']");
+    if(!slot)return;
+    const index=parseInt(slot.id.slice(1));if(!Number.isInteger(index))return;
+    e.preventDefault();e.stopPropagation();
+    if(_tapSel)_tapPlaceOnSlot(index);else _tapSelectSlot(index);
+  },true);
+}
+_ensureTapPlacementDelegation();
 function showCardPopup(k){const x=L(),cd=x.cards[k];if(!cd)return;const v=cardEff(k,picksBySlot.filter(Boolean),round);const kin=kindLabel(k);const tr=LANG==="tr";
   /* Contract cards pay out on purchase and bill later; surface the outstanding debt */
   let effRow=`<div style="margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700;color:${v>=0?"var(--good)":"var(--red)"}">${tr?"Bu tur etkisi":"Effect now"}: ${v>=0?"+":""}${v}</div>`;

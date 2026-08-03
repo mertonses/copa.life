@@ -74,7 +74,9 @@ function effectOf(key, variant, round) {
 }
 
 function variantStats(key, variant) {
-  const values = [1, 2, 3, 4, 5, 6].map((round) => effectOf(key, variant, round));
+  // The run has seven rounds. Sampling only rounds 1-6 made final-only cards
+  // look powerless in the generated economy report.
+  const values = [1, 2, 3, 4, 5, 6, 7].map((round) => effectOf(key, variant, round));
   const min = Math.min(...values);
   const max = Math.max(...values);
   const price = priceOf(key, variant);
@@ -141,7 +143,7 @@ const instant = rows.filter((row) => row.mode === "instant");
 const lines = [];
 lines.push("# Kart Balance Tablosu");
 lines.push("");
-lines.push("Bu dosya `npm run report:cards` ile gerçek kart kodundan üretilir. Etki değerleri örnek 4-4-2 kadro üzerinde 1-6. tur aralığına göre hesaplanır. Tek kullanımlık ve event tabanlı kartlarda nihai etki oyun akışında uygulanabilir; tablo bu kartları ayrıca notlar.");
+lines.push("Bu dosya `npm run report:cards` ile gerçek kart kodundan üretilir. Etki değerleri örnek 4-4-2 kadro üzerinde 1-7. tur aralığına göre hesaplanır. Tek kullanımlık ve event tabanlı kartlarda nihai etki oyun akışında uygulanabilir; tablo bu kartları ayrıca notlar.");
 lines.push("");
 lines.push(`- Toplam kart: ${rows.length}`);
 lines.push(`- Risk içeren kart: ${risky.length}`);

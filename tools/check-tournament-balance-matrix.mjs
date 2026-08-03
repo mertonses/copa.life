@@ -11,7 +11,9 @@ const penalty=require(path.join(ROOT,"src/game/penaltyCore.js"));
 const resolver=require(path.join(ROOT,"src/tournament/matchResolver.js"));
 const pool=Array.from({length:36},(_,index)=>({name:`Matrix Club ${index+1}`}));
 const styles=["gegen","kontra","tiki","uzun","blok"];
-const sampleSize=360;
+const runsArg=process.argv.find(arg=>arg.startsWith("--runs="));
+const sampleSize=Math.max(100,Math.floor(Number(runsArg?.split("=")[1]||360)));
+if(!Number.isFinite(sampleSize))throw new Error("--runs must be a finite number");
 
 function resolveMatch(state,match,seed){
   return resolver.resolveMatch({state,match,core,normal,penalty,seed:engine.hashSeed(`${seed}|${match.id}`)});
@@ -54,7 +56,7 @@ for(const style of styles)report.styles[style]=cohort(style);
 const values=Object.values(report.styles),qualification=values.map(value=>value.qualificationRate),champions=values.map(value=>value.championRate);
 for(const [style,value] of Object.entries(report.styles)){
   if(value.qualificationRate<.42||value.qualificationRate>.92)throw new Error(`${style}: qualification rate outside playable band: ${value.qualificationRate}`);
-  if(value.championRate<.004||value.championRate>.18)throw new Error(`${style}: champion rate outside seven-match replayable band: ${value.championRate}`);
+  if(value.championRate<.03||value.championRate>.18)throw new Error(`${style}: champion rate outside seven-match replayable band: ${value.championRate}`);
   if(value.groupDrawRate<.12||value.groupDrawRate>.4)throw new Error(`${style}: draw rate outside plausible band: ${value.groupDrawRate}`);
   if(value.averageGroupPoints<3.5||value.averageGroupPoints>7.5)throw new Error(`${style}: average points outside playable band: ${value.averageGroupPoints}`);
 }

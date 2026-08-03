@@ -152,7 +152,8 @@
     return dock;
   }
 
-  function closeNativeBench(){
+  function closeNativeBench(options){
+    const opts=options||{};
     document.documentElement.classList.remove("native-bench-open");
     const panel=document.getElementById("hubBenchSection");
     if(panel)panel.classList.remove("native-bench-sheet");
@@ -161,7 +162,7 @@
       nativeBenchHome.parent.insertBefore(panel,anchor);nativeBenchHome=null;
     }
     const trigger=document.getElementById("nativeBenchTrigger");
-    if(trigger){trigger.setAttribute("aria-expanded","false");try{trigger.focus({preventScroll:true});}catch(_){}}
+    if(trigger){trigger.setAttribute("aria-expanded","false");if(opts.restoreFocus!==false){try{trigger.focus({preventScroll:true});}catch(_){}}}
   }
 
   function openNativeBench(){

@@ -218,6 +218,13 @@
       shell.refreshCareerSection(tab);
       return;
     }
+    const modal=document.querySelector(".meta-progress-modal"),panel=modal&&modal.querySelector(".meta-tab-panel");
+    if(modal&&panel&&tab==="career"){
+      const top=panel.scrollTop,tr=global.LANG==="tr";
+      panel.innerHTML=panelHTML("career",tr);
+      panel.scrollTop=top;
+      return;
+    }
     openProgression(tab);
   }
   function selectDirective(id){

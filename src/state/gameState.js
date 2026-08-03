@@ -1,5 +1,5 @@
 /* Aktif run durumu: bu dosya tur icindeki degisen oyun verilerini tutar. */
-var slots=[],filled=[],picksBySlot=[],remaining=0,currentSlot=-1,budget=BUDGET,currentOpts=[],formName="4-3-3",style="gegen",selectedCountry="TR";
+var slots=[],filled=[],picksBySlot=[],remaining=0,currentSlot=-1,budget=BUDGET,currentOpts=[],formName="4-3-3",style="gegen",selectedCountry=(typeof _savedCountry==="string"&&["TR","ENG","ES","IT","DE","JP"].includes(_savedCountry))?_savedCountry:"TR";
 var round=1,cards=[],cardInv={},cardVariant={},shopOffers=[],shopVariants={},shopPriceChaos={},bracket=[],fixtures=[],opponent=null,lastResult=null,muted=false,autoPlay=false,kit={bg:"#DA3D2E",fg:"#FFFFFF",sec:"#FFFFFF"},talkUsed=false,talkMod={all:0,def:0,atk:0},talkHistory=[],deadlineH=24,oppXI=[],motm=null,runEnded=false;
 var tournament=null,tournamentFormat="groups32_v2";
 var injuredIdx=-1,medicalProtectionTurns=0,oppLineup=[],weakFlank="C",matchupBonus=0,autoTimer=null,undoData=null,undoUsed=false,lastMatchEvents=[],lastSackReason="";

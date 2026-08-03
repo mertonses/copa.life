@@ -482,6 +482,7 @@ test("Mükâfat keeps its save key while using the reduced contract values and f
     const commonPrice=game.cardPrice("sahte_evrak");
     const commonPower=game.cardEff("sahte_evrak",game.picksBySlot.filter(Boolean),game.round);
     game.chairTrust=2;
+    game.resetChairTrustRoundLedger(2);
     game.rand=()=>0;
     game.applyRiskCardGain("sahte_evrak");
     const commonTrust=game.chairTrust;
@@ -490,6 +491,7 @@ test("Mükâfat keeps its save key while using the reduced contract values and f
     const darkPrice=game.cardPrice("sahte_evrak");
     const darkPower=game.cardEff("sahte_evrak",game.picksBySlot.filter(Boolean),game.round);
     game.chairTrust=2;
+    game.resetChairTrustRoundLedger(2);
     game.applyRiskCardGain("sahte_evrak");
     return{
       keyStillStable:Object.hasOwn(game.CARDDEFS,"sahte_evrak"),
