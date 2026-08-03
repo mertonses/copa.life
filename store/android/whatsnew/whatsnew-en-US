@@ -1,1 +1,1 @@
-Private Arena rooms now connect the host and guest to the same match reliably. Slow mobile networks, app resume, delayed ready actions, close-room races, disconnections, and reconnections are handled more safely.
+Arena private-room connection and ready flows are more reliable. Mobile lineup and scrolling behavior, mode selection, interface readability, and overall game stability have been improved.
