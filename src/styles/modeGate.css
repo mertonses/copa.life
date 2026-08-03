@@ -73,7 +73,7 @@ html.mode-gate-active,html.mode-gate-active body{overflow:hidden!important}
 /* Keep the first interactive frame cheap on mobile WebViews and compact browsers. */
 @media(max-width:760px){
   .mode-gate-brand,.mode-card-emblem,.mode-card-features>span{backdrop-filter:none}
-  .mode-card-backdrop,.mode-card-backdrop::before,.mode-card-backdrop::after,.mode-card-live i,.mode-title-arena::before{animation:none!important;transition:none!important}
+  .mode-card-backdrop,.mode-card-backdrop::before,.mode-card-backdrop::after,.mode-card-live i{animation:none!important;transition:none!important}
 }
 html[data-copa-platform="android"] .mode-gate-brand,
 html[data-copa-platform="android"] .mode-card-emblem,
@@ -81,5 +81,4 @@ html[data-copa-platform="android"] .mode-card-features>span{backdrop-filter:none
 html[data-copa-platform="android"] .mode-card-backdrop,
 html[data-copa-platform="android"] .mode-card-backdrop::before,
 html[data-copa-platform="android"] .mode-card-backdrop::after,
-html[data-copa-platform="android"] .mode-card-live i,
-html[data-copa-platform="android"] .mode-title-arena::before{animation:none!important;transition:none!important}
+html[data-copa-platform="android"] .mode-card-live i{animation:none!important;transition:none!important}
