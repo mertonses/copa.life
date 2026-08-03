@@ -12,6 +12,7 @@ const LOCALES=[
   ["de-DE","listing-de.md"],
   ["it-IT","listing-it.md"],
 ];
+const SCREENSHOTS=["01-two-modes.jpg","02-life-stars-tr-eng.jpg","03-life-stars-es-de.jpg","04-life-stars-it-jp.jpg","05-life-cup-journey.jpg","06-arena-season-road.jpg","07-arena-live-pvp.jpg","08-arena-private-tournaments.jpg"];
 const failures=[];
 const fail=message=>failures.push(message);
 
@@ -52,7 +53,7 @@ checkImage("graphics/feature-graphic.jpg",1024,500,"jpeg");
 for(const root of ["graphics/play-games-pc",...LOCALES.map(([locale])=>`graphics/localized/${locale}/play-games-pc`)]){
   checkImage(`${root}/logo-600x400.png`,600,400,"png");
   checkImage(`${root}/feature-1920x1080.jpg`,1920,1080,"jpeg");
-  for(const file of ["01-run-setup.jpg","02-player-draft.jpg","03-group-draw.jpg","04-match-hub.jpg","05-player-profile.jpg"])checkImage(`${root}/${file}`,1920,1080,"jpeg");
+  for(const file of SCREENSHOTS)checkImage(`${root}/${file}`,1920,1080,"jpeg");
 }
 for(const [locale,listing] of LOCALES){
   const root=`graphics/localized/${locale}`;
@@ -60,7 +61,8 @@ for(const [locale,listing] of LOCALES){
   for(const folder of ["phone","tablet"]){
     const directory=path.join(STORE,root,folder);
     const files=fs.existsSync(directory)?fs.readdirSync(directory).filter(file=>file.endsWith(".jpg")).sort():[];
-    if(files.length!==5)fail(`${root}/${folder} must contain exactly five JPG screenshots`);
+    if(files.length!==8)fail(`${root}/${folder} must contain exactly eight JPG screenshots`);
+    if(files.join("|")!==SCREENSHOTS.join("|"))fail(`${root}/${folder} screenshot names or order are stale`);
     for(const file of files)checkImage(`${root}/${folder}/${file}`,folder==="phone"?1080:1920,folder==="phone"?1920:1080,"jpeg");
   }
   const listingPath=path.join(STORE,listing);
@@ -89,4 +91,4 @@ if(failures.length){
   failures.forEach(message=>console.error(`[android store] ${message}`));
   process.exit(1);
 }
-console.log("[android store] passed: 5 listings plus localized phone, tablet and Google Play Games on PC assets");
+console.log("[android store] passed: 5 listings plus eight localized dual-mode phone/tablet screenshots and Google Play Games on PC assets");

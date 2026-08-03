@@ -1,21 +1,23 @@
-# Copa Life Google Play tanıtım videoları
+# Copa Life + Copa Arena Google Play tanıtım videoları
 
 ## Dosyalar
 
-- `copa-life-promo-tr-TR.mp4` — Türkçe, 18 sn, 1920×1080, H.264/AAC
-- `copa-life-promo-en-US.mp4` — İngilizce, 18 sn, 1920×1080, H.264/AAC
-- `copa-life-promo-es-ES.mp4` — İspanyolca, 18 sn, 1920×1080, H.264/AAC
-- `copa-life-promo-de-DE.mp4` — Almanca, 18 sn, 1920×1080, H.264/AAC
-- `copa-life-promo-it-IT.mp4` — İtalyanca, 18 sn, 1920×1080, H.264/AAC
-- Her video için aynı adla biten `-poster.jpg` YouTube küçük resim kaynağı
+- `copa-dual-mode-promo-tr-TR.mp4` — Türkçe, 26 sn, 1920×1080, H.264/AAC
+- `copa-dual-mode-promo-en-US.mp4` — İngilizce, 26 sn, 1920×1080, H.264/AAC
+- `copa-dual-mode-promo-es-ES.mp4` — İspanyolca, 26 sn, 1920×1080, H.264/AAC
+- `copa-dual-mode-promo-de-DE.mp4` — Almanca, 26 sn, 1920×1080, H.264/AAC
+- `copa-dual-mode-promo-it-IT.mp4` — İtalyanca, 26 sn, 1920×1080, H.264/AAC
+- Her video için aynı adla biten `-poster.jpg` YouTube küçük resim kaynağıdır.
+
+Videolar; çift-mod seçimini, altı ligden yıldız draftlarını, Copa Life kupa yolunu, Copa Arena Sezon Yolu'nu, canlı taktik maçını ve 4/8 kulüplü özel turnuvayı gösterir.
 
 ## YouTube başlıkları
 
-- TR: `Copa Life — Kadronu Kur, Kupaya Yürü | Resmî Oynanış`
-- EN: `Copa Life — Build Your Squad, Chase the Cup | Official Gameplay`
-- ES: `Copa Life — Crea tu equipo, ve por la copa | Gameplay oficial`
-- DE: `Copa Life — Bau dein Team, hol dir den Pokal | Offizielles Gameplay`
-- IT: `Copa Life — Crea la rosa, punta alla coppa | Gameplay ufficiale`
+- TR: `Copa Life + Copa Arena — İki Mod, Tek Futbol Hikâyesi | Resmî Oynanış`
+- EN: `Copa Life + Copa Arena — Two Modes, One Football Story | Official Gameplay`
+- ES: `Copa Life + Copa Arena — Dos modos, una historia de fútbol | Gameplay oficial`
+- DE: `Copa Life + Copa Arena — Zwei Modi, eine Fußballgeschichte | Offizielles Gameplay`
+- IT: `Copa Life + Copa Arena — Due modalità, una storia di calcio | Gameplay ufficiale`
 
 ## Yükleme ayarları
 
@@ -23,6 +25,6 @@
 - Para kazanma/reklamlar: Kapalı
 - Yaş kısıtlaması: Kapalı
 - Yerleştirmeye izin ver: Açık
-- Play Console alanına doğrudan video URL'sini girin; oynatma listesi, kanal veya zaman kodlu URL kullanmayın.
+- Play Console alanına doğrudan YouTube video URL'sini girin; oynatma listesi, kanal veya zaman kodlu URL kullanmayın.
 
-Videoları güncel mağaza ekran görüntülerinden yeniden üretmek için proje kökünde `npm run assets:store:video` komutunu çalıştırın.
+Videoları yeniden üretmek için proje kökünde `npm run assets:store:video` komutunu çalıştırın.

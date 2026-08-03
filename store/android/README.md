@@ -27,9 +27,9 @@
 - `de-DE`: Almanca (Almanya)
 - `it-IT`: İtalyanca (İtalya)
 
-Her yerelleştirme klasöründe bir 1024×500 feature graphic, beş 1080×1920 telefon ve beş 1920×1080 tablet görseli bulunur.
+Her yerelleştirme klasöründe bir 1024×500 çift-mod feature graphic, sekiz 1080×1920 telefon ve sekiz 1920×1080 tablet görseli bulunur. Sahneler Copa Life, altı ligden yıldız draftları, Copa Arena, canlı PvP, Sezon Yolu ve 4/8 kulüplü özel turnuvaları kapsar.
 
-Google Play Games on PC için varsayılan ve beş yerel klasörde ayrıca `play-games-pc/` bulunur: 600×400 şeffaf logo, metinsiz 1920×1080 kapak ve beş 1920×1080 ekran görüntüsü. `npm run assets:store:pc` ile yeniden üretilir.
+Google Play Games on PC için varsayılan ve beş yerel klasörde ayrıca `play-games-pc/` bulunur: 600×400 şeffaf çift-mod logo, metinsiz 1920×1080 kapak ve sekiz 1920×1080 ekran görüntüsü. `npm run assets:store:pc` ile yeniden üretilir.
 
 ## Yeniden üretme ve doğrulama
 
@@ -41,7 +41,7 @@ npm run android:notes:stamp
 npm run check:android:release
 ```
 
-`assets:store`, son Android web artifact'ini derler ve sabit seed ile beş dilin görsellerini yeniden alır. `asset-manifest.json`, her dosyanın ölçüsünü, boyutunu ve SHA-256 değerini taşır. `assets:store:localization-packs`, Play Console'da henüz bulunmayan `es-ES`, `de-DE` ve `it-IT` girişlerini `outputs/google-play-localizations/` altında kopyala-yapıştır metinleri ve yüklemeye hazır görsellerle paketler.
+`assets:store`, son Android web artifact'ini derler ve sabit verilerle beş dilin çift-mod görsellerini yeniden alır. `asset-manifest.json`, her dosyanın ölçüsünü, boyutunu ve SHA-256 değerini taşır. `assets:store:localization-packs`, beş dilin tamamını `outputs/google-play-localizations/` altında kopyala-yapıştır metinleri ve yüklemeye hazır görsellerle paketler.
 
 ## Not
 
