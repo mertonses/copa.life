@@ -10,8 +10,8 @@ ACTIVITY="$PACKAGE/.MainActivity"
 
 mkdir -p "$OUTPUT_DIR"
 capture_diagnostics() {
-  adb exec-out screencap -p > "$OUTPUT_DIR/launch.png" 2>/dev/null || true
-  adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt" 2>/dev/null || true
+  timeout 10s adb exec-out screencap -p > "$OUTPUT_DIR/launch.png" 2>/dev/null || true
+  timeout 10s adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt" 2>/dev/null || true
 }
 
 has_app_crash() {
@@ -37,21 +37,24 @@ launch_and_assert_foreground() {
   local start_output
   local focus
 
-  adb shell am force-stop "$PACKAGE"
-  start_output="$(adb shell am start -W -n "$ACTIVITY")"
+  timeout 15s adb shell am force-stop "$PACKAGE" >/dev/null 2>&1 || return 1
+  start_output="$(timeout 30s adb shell am start -W -n "$ACTIVITY" 2>&1)" || {
+    printf '%s\n' "$start_output" >&2
+    return 1
+  }
   printf '%s\n' "$start_output"
   grep -q "Status: ok" <<<"$start_output" || return 1
 
   sleep 8
-  pid="$(adb shell pidof "$PACKAGE" | tr -d '\r')"
+  pid="$(timeout 10s adb shell pidof "$PACKAGE" 2>/dev/null | tr -d '\r')" || pid=""
   if [[ -z "$pid" ]]; then
     echo "Android smoke launch ended before the foreground assertion" >&2
     return 1
   fi
 
-  focus="$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity|ResumedActivity' || true)"
+  focus="$(timeout 10s adb shell dumpsys activity activities 2>/dev/null | grep -E 'mResumedActivity|topResumedActivity|ResumedActivity' || true)"
   if ! grep -q "$PACKAGE" <<<"$focus"; then
-    focus="$(adb shell dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' || true)"
+    focus="$(timeout 10s adb shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|mFocusedApp' || true)"
   fi
   printf '%s\n' "$focus"
   grep -q "$PACKAGE" <<<"$focus"
@@ -64,12 +67,12 @@ chmod +x gradlew
 ./gradlew :app:assembleDebug :app:connectedDebugAndroidTest --no-daemon
 test -f "$APK"
 
-adb install -r "$APK"
+timeout 90s adb install -r "$APK"
 # A package install wakes Play services and package-indexing work on a fresh AVD.
 # Let those broadcasts drain before measuring the application's cold-start focus.
 timeout 15s adb shell am wait-for-broadcast-idle >/dev/null 2>&1 || true
 sleep 5
-adb logcat -c
+timeout 10s adb logcat -c || true
 
 pid=""
 for attempt in 1 2; do
@@ -77,7 +80,7 @@ for attempt in 1 2; do
     break
   fi
 
-  adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt" 2>/dev/null || true
+  timeout 10s adb logcat -d -t 1200 > "$OUTPUT_DIR/logcat.txt" 2>/dev/null || true
   if has_app_crash "$OUTPUT_DIR/logcat.txt"; then
     echo "Native Android smoke test detected an app crash or ANR" >&2
     exit 1
