@@ -228,13 +228,21 @@ test("draft candidates keep only the two useful quick actions",async({page},test
     game.eval("currentOpts[0].bargain=true;currentOpts[0].discountPct=25;currentOpts[0].oldPrice=Math.max(2,currentOpts[0].price+2);renderOpts()");
   });
   const discountLayout=await page.locator("#opts .opt").first().evaluate((card:HTMLElement)=>{
+    const power=card.querySelector<HTMLElement>(".ovb")!.getBoundingClientRect();
+    const priceStackElement=card.querySelector<HTMLElement>(".price")!;
+    const priceStack=priceStackElement.getBoundingClientRect();
     const price=card.querySelector<HTMLElement>(".price .p")!.getBoundingClientRect();
     const badge=card.querySelector<HTMLElement>(".discount-badge")!.getBoundingClientRect();
-    return{below:badge.top>=price.bottom-1,inside:badge.right<=card.getBoundingClientRect().right+1,text:card.querySelector<HTMLElement>(".discount-badge")!.innerText};
+    const oldPrice=card.querySelector<HTMLElement>(".oldp")!;
+    return{below:badge.top>=price.bottom-1,inside:badge.right<=card.getBoundingClientRect().right+1,text:card.querySelector<HTMLElement>(".discount-badge")!.innerText,oldPrice:oldPrice.innerText,unified:priceStackElement.classList.contains("bargain-price")&&!!card.querySelector(".dealmeta"),aligned:Math.abs(power.height-priceStack.height)<=1,oldPriceStruck:getComputedStyle(oldPrice).textDecorationLine.includes("line-through")};
   });
   expect(discountLayout.below).toBe(true);
   expect(discountLayout.inside).toBe(true);
   expect(discountLayout.text).toBe("−25%");
+  expect(discountLayout.oldPrice).toMatch(/^€\d+M$/);
+  expect(discountLayout.unified).toBe(true);
+  expect(discountLayout.aligned).toBe(true);
+  expect(discountLayout.oldPriceStruck).toBe(true);
   await expect(page.locator("#draftThumbDock")).toBeVisible();
   await expect(page.locator("#draftThumbDock #allBtn")).toBeVisible();
   await expect(page.locator("#rollBtn")).toBeDisabled();
@@ -252,7 +260,14 @@ test("draft candidates keep only the two useful quick actions",async({page},test
   const gallery=await page.locator("#opts").evaluate((element:HTMLElement)=>({overflow:element.scrollWidth-element.clientWidth,pageOverflow:document.documentElement.scrollWidth-innerWidth,columns:getComputedStyle(element).gridAutoColumns}));
   expect(gallery.overflow).toBeGreaterThan(0);
   expect(gallery.pageOverflow).toBeLessThanOrEqual(1);
-  await page.locator("#opts .opt").first().click();
+  const selectionFeedback=await page.evaluate(()=>{
+    const game=globalThis as any,card=document.querySelector<HTMLElement>("#opts .opt")!;
+    let haptic:unknown=null;
+    game.CopaMobileExperience.haptic=(pattern:unknown)=>{haptic=pattern;};
+    card.click();
+    return{selecting:card.classList.contains("is-selecting"),busy:card.getAttribute("aria-busy"),haptic};
+  });
+  expect(selectionFeedback).toEqual({selecting:true,busy:"true",haptic:10});
   await expect(page.locator("#draftThumbDock #undoBtn")).toBeVisible();
   await expect(page.locator("#draftThumbDock #allBtn")).toBeVisible();
   await expect(page.locator("#draftThumbDock #undoBtn")).toContainText(/geri al|undo/i);
