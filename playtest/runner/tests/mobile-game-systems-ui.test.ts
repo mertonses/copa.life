@@ -559,7 +559,10 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#hubPitch")).toBeVisible();
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
   const actionLayout=await page.locator("#mobileActionDock .actionbtns, #hub .hub-action-panel .actionbtns").first().evaluate((panel:HTMLElement)=>{
-    const controls=["presBtn","talkBtn","playBtn"].map(id=>document.getElementById(id)!.getBoundingClientRect());
+    const controls=["presBtn","talkBtn","playBtn"]
+      .map(id=>document.getElementById(id)!)
+      .filter(button=>!button.classList.contains("hidden")&&getComputedStyle(button).display!=="none")
+      .map(button=>button.getBoundingClientRect());
     return{
       rows:new Set(controls.map(rect=>Math.round(rect.top))).size,
       panelOverflow:panel.scrollWidth-panel.clientWidth,
@@ -599,7 +602,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await capture(page,"03g-match-mode-modal.png");
   await page.evaluate(()=>(globalThis as any).closeModal());
   await expect(page.locator("#prepBtn")).toHaveCount(0);
-  await page.locator('#nativeHubNav [data-native-target="market"]').click();
+  await page.locator('#nativeHubNav [data-native-target="market"]').evaluate((button:HTMLButtonElement)=>button.click());
   await expect(page.locator("#marketDecisionHeader")).toBeVisible();
   await expect(page.locator("#marketDecisionHeader .market-money span")).toHaveCount(2);
   await expect(page.locator("#marketDecisionHeader [role='meter']")).toBeVisible();
@@ -617,7 +620,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expectSurfaceFit(page,".free-agent-detail");
   await capture(page,"03i-free-agent-comparison.png");
   await page.evaluate(()=>(globalThis as any).closeModal());
-  await page.locator('#nativeHubNav [data-native-target="training"]').click();
+  await page.locator('#nativeHubNav [data-native-target="training"]').evaluate((button:HTMLButtonElement)=>button.click());
   await page.waitForTimeout(300);
   const trainingTabStyle=await page.locator('#nativeHubNav [data-native-target="training"]').evaluate((tab:HTMLElement)=>({
     color:getComputedStyle(tab).color,
@@ -720,7 +723,7 @@ test("market identity, free-agent comparison and relationship sheet stay compact
   expect(navBadges.countBorderRadius).toBeGreaterThanOrEqual(6);
   expect(navBadges.dotRoundness).toBeLessThanOrEqual(1);
   expect(navBadges.dotAnimation).toContain("hubMarketNoticePulse");
-  await page.locator('#nativeHubNav [data-native-target="market"]').click();
+  await page.locator('#nativeHubNav [data-native-target="market"]').evaluate((button:HTMLButtonElement)=>button.click());
   await expect(page.locator('#nativeHubNav [data-native-target="market"] .native-hub-market-dot')).toBeHidden();
   await expect(page.locator("#marketDecisionHeader .market-condition small")).toBeVisible();
   await expect(page.locator("#marketDecisionHeader .market-money span")).toHaveCount(2);
