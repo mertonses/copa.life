@@ -1325,7 +1325,7 @@ async function handleJoinCustomRoom(request,env,code){
   const matchId=customMatchId(code);
   if(active&&active.match_id!==matchId)return json(request,env,{error:"arena_session_active"},409);
   const room=env.ARENA_ROOM.getByName(matchId),joined=await room.joinCustom(matchId,code,{owner:id.owner,clubName:profileRow.club_name,rating:Number(profileRow.rating)});
-  if(!joined.ok)return json(request,env,{error:joined.reason},joined.reason==="cannot_join_own_room"?409:404);
+  if(!joined.ok)return json(request,env,{error:joined.reason},["cannot_join_own_room","room_full"].includes(joined.reason)?409:404);
   const hostStatus=await room.customStatus(id.owner);
   await env.DB.batch([
     env.DB.prepare("UPDATE arena_presence SET status='match',expires_at=?,updated_at=? WHERE match_id=?").bind(futureIso(45*60_000),nowIso(),matchId),

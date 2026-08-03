@@ -18,6 +18,15 @@ const waitMessage=(socket,type,timeout=2000)=>new Promise((resolve,reject)=>{
   };
   socket.addEventListener("message",listener);
 });
+const waitState=(socket,predicate,timeout=3000)=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>reject(new Error("timeout:state")),timeout);
+  const listener=event=>{
+    const value=JSON.parse(event.data);
+    if(value.type!=="state"||!predicate(value.state))return;
+    clearTimeout(timer);socket.removeEventListener("message",listener);resolve(value.state);
+  };
+  socket.addEventListener("message",listener);
+});
 const ownerFor=async suffix=>{
   const token=headers(suffix)["x-copa-arena-token"];
   const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(`arena-owner:${token}`));
@@ -151,6 +160,70 @@ describe("Arena HTTP API",()=>{
       expect(instance.state.customCode).toBe(created.room.code);
       expect(instance.state.players.map(player=>player.clubName)).toEqual(["Ev Sahibi SK","Deplasman SK"]);
     });
+  });
+
+  it("keeps host and guest in one private-room socket through delayed join, ready and reconnect",async()=>{
+    const hostSuffix="customflowhost",guestSuffix="customflowguest";
+    const createdResponse=await SELF.fetch("https://arena.test/v1/arena/custom-rooms",{
+      method:"POST",headers:headers(hostSuffix),body:JSON.stringify({clubName:"Bekleyen Ev"})
+    });
+    const created=await createdResponse.json(),code=created.room.code;
+    const beforeJoin=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{headers:headers(hostSuffix)});
+    expect(await beforeJoin.json()).toMatchObject({room:{status:"waiting"},directMatch:null});
+
+    const joinedResponse=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{
+      method:"POST",headers:headers(guestSuffix),body:JSON.stringify({clubName:"Hazır Misafir"})
+    });
+    const joined=await joinedResponse.json();
+    const repeatedJoin=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{
+      method:"POST",headers:headers(guestSuffix),body:JSON.stringify({clubName:"Hazır Misafir"})
+    });
+    expect((await repeatedJoin.json()).directMatch).toEqual(joined.directMatch);
+    const full=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{
+      method:"POST",headers:headers("customthird"),body:JSON.stringify({clubName:"Üçüncü Kulüp"})
+    });
+    expect(full.status).toBe(409);
+    expect((await full.json()).error).toBe("room_full");
+
+    const lateCancel=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{method:"DELETE",headers:headers(hostSuffix)});
+    expect(lateCancel.status).toBe(409);
+    expect((await lateCancel.json()).error).toBe("room_started");
+
+    const hostStatus=await SELF.fetch(`https://arena.test/v1/arena/custom-rooms/${code}`,{headers:headers(hostSuffix)});
+    const hostMatch=(await hostStatus.json()).directMatch;
+    expect(hostMatch.matchId).toBe(joined.directMatch.matchId);
+    const roomUrl=token=>`https://arena.test/v1/arena/rooms/${joined.directMatch.matchId}/connect?token=${encodeURIComponent(token)}`;
+
+    const guestConnection=await SELF.fetch(roomUrl(joined.directMatch.roomToken),{headers:{...headers(guestSuffix),upgrade:"websocket"}});
+    guestConnection.webSocket.accept();
+    const guestLobby=await waitState(guestConnection.webSocket,state=>state.phase==="lobby");
+    expect(guestLobby).toMatchObject({mode:"custom",self:{connected:true},opponent:{connected:false}});
+    const guestReady=waitState(guestConnection.webSocket,state=>state.phase==="lobby"&&state.self.ready===true);
+    guestConnection.webSocket.send(JSON.stringify({type:"ready",actionId:"AA-CUSTOMGUESTREADY01"}));
+    await guestReady;
+
+    const guestSeesHost=waitState(guestConnection.webSocket,state=>state.opponent.connected===true);
+    const hostConnection=await SELF.fetch(roomUrl(hostMatch.roomToken),{headers:{...headers(hostSuffix),upgrade:"websocket"}});
+    hostConnection.webSocket.accept();
+    await Promise.all([guestSeesHost,waitState(hostConnection.webSocket,state=>state.phase==="lobby"&&state.opponent.ready===true)]);
+    const guestSetup=waitState(guestConnection.webSocket,state=>state.phase==="setup");
+    const hostSetup=waitState(hostConnection.webSocket,state=>state.phase==="setup");
+    hostConnection.webSocket.send(JSON.stringify({type:"ready",actionId:"AA-CUSTOMHOSTREADY001"}));
+    await Promise.all([guestSetup,hostSetup]);
+
+    const hostSeesDisconnect=waitState(hostConnection.webSocket,state=>state.opponent.connected===false);
+    guestConnection.webSocket.close(1001,"network-change");
+    const disconnected=await hostSeesDisconnect;
+    expect(disconnected.opponentReconnectGraceUntil).toBeGreaterThan(Date.now());
+    const hostSeesReconnect=waitState(hostConnection.webSocket,state=>state.opponent.connected===true);
+    const guestReconnect=await SELF.fetch(roomUrl(joined.directMatch.roomToken),{headers:{...headers(guestSuffix),upgrade:"websocket"}});
+    guestReconnect.webSocket.accept();
+    const [reconnectedGuest]=await Promise.all([
+      waitState(guestReconnect.webSocket,state=>state.phase==="setup"&&state.self.connected===true),
+      hostSeesReconnect
+    ]);
+    expect(reconnectedGuest.self.ready).toBe(true);
+    hostConnection.webSocket.close(1000,"done");guestReconnect.webSocket.close(1000,"done");
   });
 
   it("returns only public leaderboard fields",async()=>{
