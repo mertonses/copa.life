@@ -5,6 +5,7 @@ import {fileURLToPath} from "node:url";
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const STORE=path.join(ROOT,"store/android");
+const VIDEO_URLS_FILE=path.join(STORE,"video/youtube-urls.json");
 const PACKAGE=process.env.GOOGLE_PLAY_PACKAGE_NAME||"life.copa.app";
 const COMMIT=process.argv.includes("--commit");
 const LOCALES=[
@@ -24,13 +25,16 @@ function listingFields(file){
 }
 
 function localPayloads(){
+  const videoUrls=fs.existsSync(VIDEO_URLS_FILE)?JSON.parse(fs.readFileSync(VIDEO_URLS_FILE,"utf8")):{};
   return LOCALES.map(locale=>{
     const root=path.join(STORE,"graphics/localized",locale.code);
     const feature=path.join(root,"feature-graphic.jpg");
     const phone=SCREENSHOTS.map(file=>path.join(root,"phone",file));
     const tablet=SCREENSHOTS.map(file=>path.join(root,"tablet",file));
     for(const file of [feature,...phone,...tablet])if(!fs.existsSync(file))throw new Error(`Missing store asset: ${file}`);
-    return{...locale,fields:listingFields(path.join(STORE,locale.listing)),feature,phone,tablet};
+    const video=videoUrls[locale.code]||"";
+    if(video&&!/^https:\/\/(?:www\.)?youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(video))throw new Error(`Invalid YouTube URL for ${locale.code}: ${video}`);
+    return{...locale,fields:listingFields(path.join(STORE,locale.listing)),feature,phone,tablet,video};
   });
 }
 
@@ -73,7 +77,7 @@ try{
   const current=await api(token,`${base}/edits/${encodeURIComponent(editId)}/listings`),videos=new Map((current.listings||[]).map(listing=>[listing.language,listing.video||""]));
   for(const locale of payloads){
     const listing={language:locale.code,...locale.fields};
-    const existingVideo=videos.get(locale.code);if(existingVideo)listing.video=existingVideo;
+    const existingVideo=videos.get(locale.code);if(locale.video)listing.video=locale.video;else if(existingVideo)listing.video=existingVideo;
     await api(token,`${base}/edits/${encodeURIComponent(editId)}/listings/${encodeURIComponent(locale.code)}`,{method:"PUT",body:listing});
     const imageGroups=[
       ["featureGraphic",[locale.feature]],

@@ -26,5 +26,6 @@ Videolar; çift-mod seçimini, altı ligden yıldız draftlarını, Copa Life ku
 - Yaş kısıtlaması: Kapalı
 - Yerleştirmeye izin ver: Açık
 - Play Console alanına doğrudan YouTube video URL'sini girin; oynatma listesi, kanal veya zaman kodlu URL kullanmayın.
+- Yayındaki yerelleştirilmiş video bağlantıları `youtube-urls.json` dosyasında tutulur ve mağaza yayın iş akışı tarafından ilgili dil girişine uygulanır.
 
 Videoları yeniden üretmek için proje kökünde `npm run assets:store:video` komutunu çalıştırın.
