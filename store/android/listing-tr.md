@@ -6,29 +6,38 @@ Copa Life
 
 ## Kısa açıklama
 
-Kadronu kur, kulübü yönet ve her koşuyu yeni bir kupa hikâyesine dönüştür.
+Life'ta kulübünü kur, Arena'da canlı rakiplere meydan oku.
 
 ## Tam açıklama
 
-Belirsizliklerle dolu bir başlangıçtan kendi kulübünü kur ve her koşuda yeni bir futbol hikâyesi yaz.
+Tek oyunculu kupa hikâyeni yaz veya Copa Arena'da canlı rakiplere karşı sahaya çık.
 
-Copa Life; her oyuncunun, sözleşmenin, antrenmanın ve taktik kararının kupaya giden yolu değiştirdiği bağımsız bir roguelite futbol menajerlik oyunudur. Ülkeni, dizilişini ve başkanını seç. İlk on birini kur, bütçeyi koru, kimyayı yükselt ve sıradaki rakibe hazırlan.
+COPA LIFE
 
-Başkanın kulübün karakterini belirler. Kulüp direktifleri uzun vadeli kariyerine yön verir. Antrenman ve rakip analizi maç gününden önce kadronu geliştirir. Oyuncu profilleri sayıların arkasındaki güçlü yönleri gösterirken kartlar, sakatlıklar, cezalar, pazar fırsatları ve beklenmedik olaylar seni yeni çözümler bulmaya zorlar.
+Belirsizliklerle dolu bir başlangıçtan kendi kulübünü kur. Ülkeni, dizilişini ve başkanını seç. Türkiye, İngiltere, İspanya, Almanya, İtalya ve Japonya liglerinden yıldızlarla her koşuda farklı bir kadro oluştur.
 
-Kupa yolculuğunun tamamını oyna:
+- Oyuncu gücü, fiyat, mevki uyumu ve kimyayı dengele
+- Kasanı yönet, pazarı kullan ve doğru kartları seç
+- Takımını çalıştır, rakibini analiz et ve maç planını kur
+- Grup aşamasından elemelere, finalden kupaya ilerle
+- Kulüp direktifleri ve kariyer kilometre taşlarıyla kalıcı gelişim sağla
+- Sakatlıklar, cezalar ve beklenmedik olaylara yeni çözümler bul
 
-- Her koşuda farklı bir kadro kur
-- Kasa, kimya, kadro gücü ve başkan güvenini dengele
-- Oyuncu profillerini ve transfer tekliflerini karşılaştır
-- Kulüp direktifleri ve kilometre taşlarıyla kariyerini geliştir
-- Takımını çalıştır, sıradaki rakibi analiz et
-- Maç günü taktik ve soyunma odası kararlarını ver
-- Grup aşamasını ve eleme turlarını geç
-- İsteğe bağlı çevrim içi Copa Arena'da diğer kulüplere meydan oku
-- Türkçe, İngilizce, İspanyolca, Almanca veya İtalyanca oyna
+COPA ARENA
 
-Kupaya giden hiçbir yol birbirinin aynısı değildir. Görevi kabul et, zor kararları ver ve kulübünü ne kadar ileri taşıyabileceğini gör.
+Kulübünü gerçek zamanlı rekabete taşı. Aynı kurallar altında kadronu kur, taktik kararlarını süre içinde ver ve rakibinin hamlelerine cevap ver.
+
+- Canlı dereceli eşleşmeler ve görünür rating yolculuğu
+- Oyun akışında dört taktik penceresi ve kararların anlaşılır sonuçları
+- Arkadaşlarınla özel odalarda derecesiz maçlar
+- 4 veya 8 kulüplü özel tek eleme turnuvaları
+- Güvenli hazır mesajlar, yeniden bağlantı koruması ve anti-stall süreleri
+- Sezon Yolu'nda forma, arma, çerçeve ve stadyum kozmetikleri
+- Şöhretler maçlarında görünür güç aralığı, kademeli ödüller ve seri kayıp koruması
+
+Her koşu başka bir hikâye, her Arena maçı yeni bir rakip demek. Kulübünü kur, kararını ver ve kupaya yürü.
+
+Türkçe, İngilizce, İspanyolca, Almanca ve İtalyanca oynanabilir.
 
 Copa Life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyon veya turnuvayla bağlantılı değildir ve bunlar tarafından onaylanmamıştır.
 
@@ -37,5 +46,5 @@ Copa Life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyo
 - Tür: Oyun
 - Kategori: Spor
 - Fiyat: Ücretsiz
-- Reklam: Var — tamamlanan koşu sonunda geçiş reklamı ve isteğe bağlı ödüllü yenileme
+- Reklam: Var
 - Uygulama içi satın alma: Yok

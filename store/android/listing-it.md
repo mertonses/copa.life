@@ -6,36 +6,45 @@ Copa Life
 
 ## Descrizione breve
 
-Crea la rosa, guida il club e trasforma ogni run in una storia di coppa.
+Crea il club in Life. Sfida avversari dal vivo in Arena.
 
 ## Descrizione completa
 
-Costruisci il tuo club da un inizio incerto e scrivi una nuova storia di calcio a ogni run.
+Scrivi una storia di coppa in singolo o porta il tuo club nella competizione live di Copa Arena.
 
-Copa Life è un gioco indipendente roguelite di gestione calcistica in cui ogni giocatore, contratto, allenamento e scelta tattica può cambiare il cammino verso la coppa. Scegli paese, modulo e presidente. Completa l'undici titolare, proteggi il budget, migliora la chimica e preparati al prossimo avversario.
+COPA LIFE
 
-Il presidente definisce il carattere del club. Le direttive guidano la carriera a lungo termine. Allenamento e analisi dell'avversario migliorano la squadra prima della partita. I profili mostrano i punti di forza dietro i numeri, mentre carte, infortuni, squalifiche, occasioni di mercato ed eventi inattesi ti obbligano ad adattarti.
+Crea un club da un inizio incerto. Scegli paese, modulo e presidente. Costruisci una rosa diversa a ogni partita con stelle di Turchia, Inghilterra, Spagna, Germania, Italia e Giappone.
 
-Vivi tutto il viaggio verso la coppa:
+- Bilancia forza, prezzo, ruolo e intesa
+- Gestisci il budget, il mercato e le carte
+- Allena la squadra, analizza l'avversario e prepara la partita
+- Supera gironi, eliminatorie e finale fino alla coppa
+- Cresci con direttive del club e traguardi carriera permanenti
+- Reagisci a infortuni, squalifiche ed eventi inattesi
 
-- Crea una rosa diversa a ogni run
-- Bilancia cassa, chimica, forza della rosa e fiducia del presidente
-- Confronta profili dei giocatori e offerte di mercato
-- Sviluppa la carriera con direttive e traguardi del club
-- Allena la squadra e analizza il prossimo avversario
-- Prendi decisioni tattiche e nello spogliatoio
-- Supera fase a gironi e turni a eliminazione
-- Sfida altri club nella Copa Arena online facoltativa
-- Gioca in italiano, inglese, turco, spagnolo o tedesco
+COPA ARENA
 
-Nessun cammino verso il trofeo è uguale. Accetta l'incarico, prendi le decisioni difficili e scopri fin dove può arrivare il tuo club.
+Porta il club nella competizione in tempo reale. Crea la rosa con le stesse regole, prendi decisioni tattiche a tempo e rispondi all'avversario.
 
-Copa Life è un gioco indipendente. Non è affiliato né approvato da giocatori, club, leghe, federazioni o competizioni.
+- Matchmaking classificato live e rating visibile
+- Quattro finestre tattiche con conseguenze chiare
+- Stanze private non classificate per giocare con gli amici
+- Tornei privati a eliminazione diretta per 4 o 8 club
+- Messaggi rapidi sicuri, riconnessione e timer anti-stallo
+- Divise, stemmi, cornici e stadi cosmetici nel Percorso Stagione
+- Partite Leggende con intervallo di forza visibile, premi progressivi e protezione dopo più sconfitte
+
+Ogni partita Life racconta una storia diversa. Ogni partita Arena porta un nuovo avversario. Crea il club, decidi e punta alla coppa.
+
+Disponibile in turco, inglese, spagnolo, tedesco e italiano.
+
+Copa Life è un gioco indipendente e non è affiliato né approvato da calciatori, club, leghe, federazioni o tornei.
 
 ## Classificazione
 
 - Tipo: Gioco
 - Categoria: Sport
-- Prezzo: Gratis
-- Pubblicità: Sì — interstitial dopo una run completata e rilancio premiato facoltativo
+- Prezzo: Gratuito
+- Contiene annunci: Sì
 - Acquisti in-app: No

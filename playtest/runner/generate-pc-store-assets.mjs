@@ -10,9 +10,9 @@ const STORE=path.join(ROOT,"store/android");
 const GRAPHICS=path.join(STORE,"graphics");
 const LOCALIZED=path.join(GRAPHICS,"localized");
 const DEFAULT=path.join(GRAPHICS,"play-games-pc");
-const SOURCE=path.join(STORE,"source/feature-background-v2.png");
+const SOURCE=path.join(STORE,"source/feature-background-dual-mode-v3.png");
 const LOCALES=["tr-TR","en-US","es-ES","de-DE","it-IT"];
-const SCREENSHOTS=["01-run-setup.jpg","02-player-draft.jpg","03-group-draw.jpg","04-match-hub.jpg","05-player-profile.jpg"];
+const SCREENSHOTS=["01-two-modes.jpg","02-life-stars-tr-eng.jpg","03-life-stars-es-de.jpg","04-life-stars-it-jp.jpg","05-life-cup-journey.jpg","06-arena-season-road.jpg","07-arena-live-pvp.jpg","08-arena-private-tournaments.jpg"];
 
 function prepareDirectory(directory){
   fs.rmSync(directory,{recursive:true,force:true});
@@ -32,7 +32,7 @@ try{
   const featureBuffer=await page.screenshot({type:"jpeg",quality:95});
 
   await page.setViewportSize({width:600,height:400});
-  await page.setContent(`<!doctype html><style>*{box-sizing:border-box}html,body{margin:0;width:600px;height:400px;overflow:hidden;background:transparent;display:grid;place-items:center}.logo{display:flex;align-items:baseline;padding:36px;font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:104px;font-weight:950;line-height:1;letter-spacing:-7px;filter:drop-shadow(0 7px 10px rgba(0,0,0,.28))}.copa{color:#f3f5f4}.dot{color:#f24a28}.life{color:#f3f5f4}</style><div class="logo"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></div>`);
+  await page.setContent(`<!doctype html><style>*{box-sizing:border-box}html,body{margin:0;width:600px;height:400px;overflow:hidden;background:transparent;display:grid;place-items:center}.logo{display:flex;flex-direction:column;align-items:center;padding:30px;font-family:Inter,"Segoe UI",Arial,sans-serif;font-weight:950;line-height:1;filter:drop-shadow(0 7px 10px rgba(0,0,0,.28))}.main{font-size:98px;letter-spacing:-7px}.copa,.life{color:#f3f5f4}.dot{color:#f24a28}.arena{margin-top:24px;color:#d6a21f;font-size:33px;letter-spacing:2px}</style><div class="logo"><div class="main"><span class="copa">copa</span><span class="dot">.</span><span class="life">life</span></div><small class="arena">× COPA ARENA</small></div>`);
   const logoBuffer=await page.screenshot({type:"png",omitBackground:true});
   await context.close();
 

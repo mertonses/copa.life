@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-07-30T20:17:24.155Z",
+  "generatedAt": "2026-08-03T14:47:38.233Z",
   "sourceBuild": {
     "schema_version": 1,
     "platform": "android",
-    "build_version": "1a7493addae7",
-    "build_fingerprint": "1a7493addae7278ee3c2dda26cbd43bc239a3faa5413caaf5346180ff31e6c66",
+    "build_version": "deeecbf5a3bc",
+    "build_fingerprint": "deeecbf5a3bcc1fa28b8ce5451dfba9a40930a8d2376c9d7be828f25e218847d",
     "build_input_count": 683,
-    "source_fingerprint": "fb0fc44a97624f4a8d8b4c8dafeaa3c2bb1b684f28e4caefbd84228317b3012a",
+    "source_fingerprint": "1c2d6dbbf93dd75a68b66d672a5ef233b8ad0a58172b866b212f2d0a9c97a08a",
     "source_file_count": 577,
     "source_commit": null,
     "package_id": "life.copa.app",
-    "version_code": 25,
-    "version_name": "1.4.1"
+    "version_code": 28,
+    "version_name": "1.5.1"
   },
   "locales": [
     "tr-TR",
@@ -19,6 +19,16 @@
     "es-ES",
     "de-DE",
     "it-IT"
+  ],
+  "screenshots": [
+    "01-two-modes.jpg",
+    "02-life-stars-tr-eng.jpg",
+    "03-life-stars-es-de.jpg",
+    "04-life-stars-it-jp.jpg",
+    "05-life-cup-journey.jpg",
+    "06-arena-season-road.jpg",
+    "07-arena-live-pvp.jpg",
+    "08-arena-private-tournaments.jpg"
   ],
   "assets": [
     {
@@ -34,864 +44,1296 @@
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 183726,
-      "sha256": "23b1c75a0c1feac5ef907876dc18b23479b16d214011c2470865982691b1c2ea"
+      "bytes": 196082,
+      "sha256": "36720d706952593b2000cca5bf115afb4ae45291238a13adccfa3968e4b412d6"
     },
     {
-      "file": "graphics/phone/01-run-setup.jpg",
+      "file": "graphics/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 152178,
-      "sha256": "f65ce816ea57ab03fb51c7fc985f486f29a3a93e4b518df4c9ba768244f78ac1"
+      "bytes": 216454,
+      "sha256": "2df844ceb65b9309c2725d12f3b59a137c4dc8960bcb88317b0e9fb399775c7a"
     },
     {
-      "file": "graphics/phone/02-player-draft.jpg",
+      "file": "graphics/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 196462,
-      "sha256": "e7d084920390498f5536795783cd3149e87e3b05eb93ff00eac00cdf3fc11f41"
+      "bytes": 209535,
+      "sha256": "115198c7480cdeb081cc98f3a4f3e0d29a2a57de5c762705f51d65b3b9226511"
     },
     {
-      "file": "graphics/phone/03-group-draw.jpg",
+      "file": "graphics/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 147525,
-      "sha256": "3eacabd3b33d55b29e4d32489c6633d0d27363af96bb7afc30bbf06fe58d4627"
+      "bytes": 204994,
+      "sha256": "2e60197813980a49d95a2966f345d5e2d41cf85d68db5291726695ac900f1db8"
     },
     {
-      "file": "graphics/phone/04-match-hub.jpg",
+      "file": "graphics/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 261229,
-      "sha256": "6ead1ac4aa20f014b56e6700a4597f273f47a1a0ca47fc3ac5c29e0f26ee48e5"
+      "bytes": 201095,
+      "sha256": "f57b6b156763b20c9c14087f27557ba6f09d7381015e8987970c6520151809d9"
     },
     {
-      "file": "graphics/phone/05-player-profile.jpg",
+      "file": "graphics/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 123416,
-      "sha256": "1807cb5597a9f114869c1e90a87edb193519357f7a2058633f22e8e53c952373"
+      "bytes": 156571,
+      "sha256": "418dac52a4e836d26fc1803a0e9885f46b4c96ece95c3580cf266e8d425d8350"
     },
     {
-      "file": "graphics/tablet/01-run-setup.jpg",
+      "file": "graphics/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 232760,
+      "sha256": "0e600be699d86ad2f8a978b9c6b37ee4c8665f7ba2739a52ab08bd0d200566ac"
+    },
+    {
+      "file": "graphics/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 192781,
+      "sha256": "c4148ec9e915190fe2d3d83046693a61c2e188a93d42972845a08a2058601788"
+    },
+    {
+      "file": "graphics/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 189374,
+      "sha256": "6cb87529e69c4955141d6053213caefd4a7c96859b5a56c667f6b2768d878cc0"
+    },
+    {
+      "file": "graphics/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 129659,
-      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
+      "bytes": 174021,
+      "sha256": "e150e888442d274d35319285eaf9112a45bffc27f924a61c20789a00be1e64d2"
     },
     {
-      "file": "graphics/tablet/02-player-draft.jpg",
+      "file": "graphics/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160033,
-      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
+      "bytes": 183812,
+      "sha256": "e2bb5f8645c47d273945ee9a2ff4fe2f78818e3e8d92ce8640519acc5f47867a"
     },
     {
-      "file": "graphics/tablet/03-group-draw.jpg",
+      "file": "graphics/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 153900,
-      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
+      "bytes": 181548,
+      "sha256": "e928324320732335df936549da2010a421617a9aa11cdd1a85e14214263fb190"
     },
     {
-      "file": "graphics/tablet/04-match-hub.jpg",
+      "file": "graphics/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 176349,
-      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
+      "bytes": 176356,
+      "sha256": "e78df0823b9429188f1e30b58491952726e2608afb6ab351a6c40244206a1727"
     },
     {
-      "file": "graphics/tablet/05-player-profile.jpg",
+      "file": "graphics/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 82105,
-      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
+      "bytes": 167684,
+      "sha256": "b4ae2c61241a4d50e4f1d8ed4475cb9e9d15393464e612a3ffb967366b98ce55"
+    },
+    {
+      "file": "graphics/tablet/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150706,
+      "sha256": "46e5f0d4926fef134819949d74893a34809d3e190e4b17b63fff594733ca645c"
+    },
+    {
+      "file": "graphics/tablet/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 131093,
+      "sha256": "7f5e58ddaf824d4c7211cf49d6dac52da28d7cc1dd6ad84c8c62ce55039de9a2"
+    },
+    {
+      "file": "graphics/tablet/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 137360,
+      "sha256": "174c3b77dea60d5c794815a277d967f86db8c108fcac50938fe7364097e90ad4"
     },
     {
       "file": "graphics/localized/tr-TR/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 183726,
-      "sha256": "23b1c75a0c1feac5ef907876dc18b23479b16d214011c2470865982691b1c2ea"
+      "bytes": 196082,
+      "sha256": "36720d706952593b2000cca5bf115afb4ae45291238a13adccfa3968e4b412d6"
     },
     {
-      "file": "graphics/localized/tr-TR/phone/01-run-setup.jpg",
+      "file": "graphics/localized/tr-TR/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 152178,
-      "sha256": "f65ce816ea57ab03fb51c7fc985f486f29a3a93e4b518df4c9ba768244f78ac1"
+      "bytes": 216454,
+      "sha256": "2df844ceb65b9309c2725d12f3b59a137c4dc8960bcb88317b0e9fb399775c7a"
     },
     {
-      "file": "graphics/localized/tr-TR/phone/02-player-draft.jpg",
+      "file": "graphics/localized/tr-TR/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 196462,
-      "sha256": "e7d084920390498f5536795783cd3149e87e3b05eb93ff00eac00cdf3fc11f41"
+      "bytes": 209535,
+      "sha256": "115198c7480cdeb081cc98f3a4f3e0d29a2a57de5c762705f51d65b3b9226511"
     },
     {
-      "file": "graphics/localized/tr-TR/phone/03-group-draw.jpg",
+      "file": "graphics/localized/tr-TR/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 147525,
-      "sha256": "3eacabd3b33d55b29e4d32489c6633d0d27363af96bb7afc30bbf06fe58d4627"
+      "bytes": 204994,
+      "sha256": "2e60197813980a49d95a2966f345d5e2d41cf85d68db5291726695ac900f1db8"
     },
     {
-      "file": "graphics/localized/tr-TR/phone/04-match-hub.jpg",
+      "file": "graphics/localized/tr-TR/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 261229,
-      "sha256": "6ead1ac4aa20f014b56e6700a4597f273f47a1a0ca47fc3ac5c29e0f26ee48e5"
+      "bytes": 201095,
+      "sha256": "f57b6b156763b20c9c14087f27557ba6f09d7381015e8987970c6520151809d9"
     },
     {
-      "file": "graphics/localized/tr-TR/phone/05-player-profile.jpg",
+      "file": "graphics/localized/tr-TR/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 123416,
-      "sha256": "1807cb5597a9f114869c1e90a87edb193519357f7a2058633f22e8e53c952373"
+      "bytes": 156571,
+      "sha256": "418dac52a4e836d26fc1803a0e9885f46b4c96ece95c3580cf266e8d425d8350"
     },
     {
-      "file": "graphics/localized/tr-TR/tablet/01-run-setup.jpg",
+      "file": "graphics/localized/tr-TR/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 232760,
+      "sha256": "0e600be699d86ad2f8a978b9c6b37ee4c8665f7ba2739a52ab08bd0d200566ac"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 192781,
+      "sha256": "c4148ec9e915190fe2d3d83046693a61c2e188a93d42972845a08a2058601788"
+    },
+    {
+      "file": "graphics/localized/tr-TR/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 189374,
+      "sha256": "6cb87529e69c4955141d6053213caefd4a7c96859b5a56c667f6b2768d878cc0"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 129659,
-      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
+      "bytes": 174021,
+      "sha256": "e150e888442d274d35319285eaf9112a45bffc27f924a61c20789a00be1e64d2"
     },
     {
-      "file": "graphics/localized/tr-TR/tablet/02-player-draft.jpg",
+      "file": "graphics/localized/tr-TR/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160033,
-      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
+      "bytes": 183812,
+      "sha256": "e2bb5f8645c47d273945ee9a2ff4fe2f78818e3e8d92ce8640519acc5f47867a"
     },
     {
-      "file": "graphics/localized/tr-TR/tablet/03-group-draw.jpg",
+      "file": "graphics/localized/tr-TR/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 153900,
-      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
+      "bytes": 181548,
+      "sha256": "e928324320732335df936549da2010a421617a9aa11cdd1a85e14214263fb190"
     },
     {
-      "file": "graphics/localized/tr-TR/tablet/04-match-hub.jpg",
+      "file": "graphics/localized/tr-TR/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 176349,
-      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
+      "bytes": 176356,
+      "sha256": "e78df0823b9429188f1e30b58491952726e2608afb6ab351a6c40244206a1727"
     },
     {
-      "file": "graphics/localized/tr-TR/tablet/05-player-profile.jpg",
+      "file": "graphics/localized/tr-TR/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 82105,
-      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
+      "bytes": 167684,
+      "sha256": "b4ae2c61241a4d50e4f1d8ed4475cb9e9d15393464e612a3ffb967366b98ce55"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150706,
+      "sha256": "46e5f0d4926fef134819949d74893a34809d3e190e4b17b63fff594733ca645c"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 131093,
+      "sha256": "7f5e58ddaf824d4c7211cf49d6dac52da28d7cc1dd6ad84c8c62ce55039de9a2"
+    },
+    {
+      "file": "graphics/localized/tr-TR/tablet/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 137360,
+      "sha256": "174c3b77dea60d5c794815a277d967f86db8c108fcac50938fe7364097e90ad4"
     },
     {
       "file": "graphics/localized/en-US/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 184912,
-      "sha256": "c5c137a62e356b01870a1a2f5aab7106a6e0f31b2a416d12eeb4a575a1de5373"
+      "bytes": 197659,
+      "sha256": "a272ddbd8da9a7591332cf40235da96bf95b617e7f573896686fed153d0a1990"
     },
     {
-      "file": "graphics/localized/en-US/phone/01-run-setup.jpg",
+      "file": "graphics/localized/en-US/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 153083,
-      "sha256": "9f50c86e7544f31a56415e23b19c0d121ad8116c71269950aaa99eef65a7c9a1"
+      "bytes": 213157,
+      "sha256": "30a2daa847e0c3b7e1ab78ff3678485d194dfc26d9032dc0a7b0f33939aa94ed"
     },
     {
-      "file": "graphics/localized/en-US/phone/02-player-draft.jpg",
+      "file": "graphics/localized/en-US/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 194349,
-      "sha256": "8689b49fe4535707da79394a505e8d6518baa60988e53d91b46d803eddafd2a4"
+      "bytes": 201209,
+      "sha256": "12dc660350345a8f2703dd9c9b0b68f6eaee38d42a1925924e006f723ae173d5"
     },
     {
-      "file": "graphics/localized/en-US/phone/03-group-draw.jpg",
+      "file": "graphics/localized/en-US/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 157566,
-      "sha256": "714d76490fa208412d9cfe3d6a9f97f55dad7124ce5fe1bf45eeef119d0ffa42"
+      "bytes": 203231,
+      "sha256": "476bc8f58fe063f4dd451d9fa9901ac1348777fd7f32bca2c4dedb6b6168f607"
     },
     {
-      "file": "graphics/localized/en-US/phone/04-match-hub.jpg",
+      "file": "graphics/localized/en-US/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 265472,
-      "sha256": "343e0e9369d4b5c39546b24a3878c44d1d198880ba303720156c2250405eb14a"
+      "bytes": 191273,
+      "sha256": "f3f7ae80edd82ec3ff40e9704e4ad4a997d691edef46331cd9dd407183533cf9"
     },
     {
-      "file": "graphics/localized/en-US/phone/05-player-profile.jpg",
+      "file": "graphics/localized/en-US/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 121537,
-      "sha256": "1dec048a9693fbccec52b5169dce15f3763cb92ff0b07b7bc82d3c1a551ea609"
+      "bytes": 158054,
+      "sha256": "83469bc5fcfdb2a8b934cc6b590438d6813186ef8e78b54c94b12f482d235c85"
     },
     {
-      "file": "graphics/localized/en-US/tablet/01-run-setup.jpg",
+      "file": "graphics/localized/en-US/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 235353,
+      "sha256": "9e9e7251cbcc6f80467e70291421ffc2fb0dc4eef68bd232d7d888d661991707"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 195582,
+      "sha256": "b136b5890c266f52d3f7021620c1379dd5c6a7ae57051f657609a09a67190912"
+    },
+    {
+      "file": "graphics/localized/en-US/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 193809,
+      "sha256": "1a3c9468d1bbab8ac27b21512003dd9baabde7aa446debc35d45c3ebc981272e"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 130663,
-      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
+      "bytes": 177522,
+      "sha256": "fe442eb7afa16894b75a3370351981b4d80fd9c5c66ec34e4b5750f9f42703d8"
     },
     {
-      "file": "graphics/localized/en-US/tablet/02-player-draft.jpg",
+      "file": "graphics/localized/en-US/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158931,
-      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
+      "bytes": 182486,
+      "sha256": "f59312388aeb8971cbc4881e72b08d5b996fc2a6e13ceae58b5a58992759a17d"
     },
     {
-      "file": "graphics/localized/en-US/tablet/03-group-draw.jpg",
+      "file": "graphics/localized/en-US/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158060,
-      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
+      "bytes": 179825,
+      "sha256": "1e9f8ec9bf683922bb6c549f6e22a09f579e7d90c55cd5ad8346388d1f0534ab"
     },
     {
-      "file": "graphics/localized/en-US/tablet/04-match-hub.jpg",
+      "file": "graphics/localized/en-US/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 186970,
-      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
+      "bytes": 174208,
+      "sha256": "8283f7e80243fe05b76d7384a2357f49d75713802ac5d20e45e9f1bd33bdf251"
     },
     {
-      "file": "graphics/localized/en-US/tablet/05-player-profile.jpg",
+      "file": "graphics/localized/en-US/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 87612,
-      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
+      "bytes": 166695,
+      "sha256": "bb90ebadec0a37cb7a2ef8831d8b3087b631d2d7a1e259d4054a775d763b7b14"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150605,
+      "sha256": "83e3e7e8a2451c2aa0e635cd879263ac5f69f97c106025cb910f33788e45a150"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 129538,
+      "sha256": "73655c3d1a75c5f12ae9c9962b2ef782343c2b4cbbd32f74ecdbe05edc94857c"
+    },
+    {
+      "file": "graphics/localized/en-US/tablet/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 140579,
+      "sha256": "2eabbad5c6fa8975291cb1c323d93a0609c6d8518d772c75a1dcb242ec328d06"
     },
     {
       "file": "graphics/localized/es-ES/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 183862,
-      "sha256": "b353ee7b2a65d092858a6a20da5c87ba408bcb4d1f6710a1e1242f7f52f72f8e"
+      "bytes": 197669,
+      "sha256": "baea993ef9f760dc32e761e7b6cd0f9c5aee3dda1bc0cc94f9edd09b85309ba9"
     },
     {
-      "file": "graphics/localized/es-ES/phone/01-run-setup.jpg",
+      "file": "graphics/localized/es-ES/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 153119,
-      "sha256": "a2806df9b6709b40753d20293a9c26c1eb316f33e626ce3193aabd821ffe4bfd"
+      "bytes": 225020,
+      "sha256": "d025bb130dc677086cb4bde442c3e646696917739c1a719758f33d04adec45e0"
     },
     {
-      "file": "graphics/localized/es-ES/phone/02-player-draft.jpg",
+      "file": "graphics/localized/es-ES/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 203384,
-      "sha256": "240e1cde47758ee53aa6fb371ad208a658a26a9a75d286f49077947379093fbd"
+      "bytes": 218236,
+      "sha256": "03697aaee25d6b7870972c4ae8de6201c32da058c7223dfa0245a04402b63651"
     },
     {
-      "file": "graphics/localized/es-ES/phone/03-group-draw.jpg",
+      "file": "graphics/localized/es-ES/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 173329,
-      "sha256": "357cfa26007cf07ecd59dc2f58d5937994958c99497b02d7bb2a94692c33db02"
+      "bytes": 213492,
+      "sha256": "7b26e06232c523672076cb9b7bb051527089625236248b088cab8121f839afee"
     },
     {
-      "file": "graphics/localized/es-ES/phone/04-match-hub.jpg",
+      "file": "graphics/localized/es-ES/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 264994,
-      "sha256": "85bb9620c5f105406ae56d3c0305c5a50f27b5ddcc0d7b0beae17220ee8f29e2"
+      "bytes": 208319,
+      "sha256": "81a85cae853e7b8c1072ed20d2eeda49bdfc7edb18e2c3d198793985917700bf"
     },
     {
-      "file": "graphics/localized/es-ES/phone/05-player-profile.jpg",
+      "file": "graphics/localized/es-ES/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 122269,
-      "sha256": "82b8eec876eb699c6468a19c16e99efe85f76b18503b12fc11a43c23e760e1f9"
+      "bytes": 165959,
+      "sha256": "916dc5a8524e4c2d5a7618583d4f2e2d648898afecf4bf143adb608a145efeb7"
     },
     {
-      "file": "graphics/localized/es-ES/tablet/01-run-setup.jpg",
+      "file": "graphics/localized/es-ES/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 243778,
+      "sha256": "86d3c0dfb150a6fb08cf0797b0371f1bfe0c99017a8dc45df0be9f9e08c97460"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 196882,
+      "sha256": "a5987cccb275cd9ce5cb6c1695306282617b20a1f4ed5fd1ce763704cfcc0113"
+    },
+    {
+      "file": "graphics/localized/es-ES/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 198264,
+      "sha256": "152e098cede2a98c73da738c7b826ddf2721eb0ca609b70c831ce9711f444f99"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 131303,
-      "sha256": "a728e98d3541c7ecd28a1c2fb6ac72fddc2ee0f6a373bd638af61d9de39fbe8c"
+      "bytes": 183808,
+      "sha256": "e31d6b7749c588942ac6f5d479a5ac63d60fe1fdf2d932b77af2cacaacc0374c"
     },
     {
-      "file": "graphics/localized/es-ES/tablet/02-player-draft.jpg",
+      "file": "graphics/localized/es-ES/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 161176,
-      "sha256": "aad55e56c4e9fe963b9b35c2015ab766c7322ed34dc6252ceefeed20b3074985"
+      "bytes": 187841,
+      "sha256": "a0f25be7ce39ebb1d81dd5f67da0b9b39884e137768318bbacf720a5eeca819b"
     },
     {
-      "file": "graphics/localized/es-ES/tablet/03-group-draw.jpg",
+      "file": "graphics/localized/es-ES/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 164299,
-      "sha256": "bb7bbd928d3380f6185edd7e667de32ad98ea150534e4d0c742252115064146c"
+      "bytes": 184575,
+      "sha256": "3698d78e6bbbb6bf7c935075b63672ff3d6486c0cb3c0e34312188ca479024c5"
     },
     {
-      "file": "graphics/localized/es-ES/tablet/04-match-hub.jpg",
+      "file": "graphics/localized/es-ES/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 185275,
-      "sha256": "a98127e47b4a2fb17c9450e6d5352fcb9fc5f401ae57b471ccb09af37d26ab6d"
+      "bytes": 178355,
+      "sha256": "d2b5fca72d272d38ea9d4b6f41cec6e284d8a980f4e4bd9c8eddcf03c376aebf"
     },
     {
-      "file": "graphics/localized/es-ES/tablet/05-player-profile.jpg",
+      "file": "graphics/localized/es-ES/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 77886,
-      "sha256": "da61717f3c23c09e0d6f95b90d4d23688f3bd63ac8d3dfbd2ac3e9757edca3ff"
+      "bytes": 173315,
+      "sha256": "c547d1f6193f385ec731e40f60887410857d05fe65dfe361943e7841e5e000dc"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 154517,
+      "sha256": "a3c9a9cf521663d18eab4b37aa5825dceaa670def6a812a028a6eb23a7253a12"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 129706,
+      "sha256": "d0a6319c176a4fe583eae8f67ab81297b3d61519e8f8a17541081c3330f035ce"
+    },
+    {
+      "file": "graphics/localized/es-ES/tablet/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 139871,
+      "sha256": "2df00061e6abd90b9a2b39f3c42ffe48c71e26e57585cf709cda4d620de38a4a"
     },
     {
       "file": "graphics/localized/de-DE/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 185848,
-      "sha256": "b2f0e787cb75d537e36747db9ccfc15b12647ab341e88d89c528c7fb7e1a055b"
+      "bytes": 199608,
+      "sha256": "5e783625740a4f5b2dddd3c109c3f09659fe9997a703c76de8f0a63046c59434"
     },
     {
-      "file": "graphics/localized/de-DE/phone/01-run-setup.jpg",
+      "file": "graphics/localized/de-DE/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 153080,
-      "sha256": "a130fc41ac23b86b9903cbe65860760ad74c576c6e36ca096b19b494b6b5baef"
+      "bytes": 224708,
+      "sha256": "e9aa30d1cd04502607ddf769ba21a2115bff6813b883053dcecb74186235d6ba"
     },
     {
-      "file": "graphics/localized/de-DE/phone/02-player-draft.jpg",
+      "file": "graphics/localized/de-DE/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 202488,
-      "sha256": "e266939eb5762746658087d6818e848ceb01cfc1bde8eb89651ac7f215004e4c"
+      "bytes": 207227,
+      "sha256": "fbe2b1df7a88916c680b1709efedfb5e333a53ce00e5f9e9658a4b3e7684c541"
     },
     {
-      "file": "graphics/localized/de-DE/phone/03-group-draw.jpg",
+      "file": "graphics/localized/de-DE/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 163305,
-      "sha256": "98b85000e25656fc93772340894d25ec0ebb2203a6ac19c3121cc5aec98a778d"
+      "bytes": 210860,
+      "sha256": "ce3463694636afe26edaed18597400e3d11a3cf4b5444c16afd77fd4f4bef3c3"
     },
     {
-      "file": "graphics/localized/de-DE/phone/04-match-hub.jpg",
+      "file": "graphics/localized/de-DE/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 269950,
-      "sha256": "2484a3bd530ab44fe17878e4fdb5290331e0ef853bcd59d4b6cc7aa0e3268119"
+      "bytes": 201335,
+      "sha256": "7653c279b05a1f871b6c7872d435a1cc076e3b0eb4fc5a827e8952196004afd2"
     },
     {
-      "file": "graphics/localized/de-DE/phone/05-player-profile.jpg",
+      "file": "graphics/localized/de-DE/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 118605,
-      "sha256": "d99d6c364f50b34a8aa1b4d9c4cc332eafdfc1eac3869fa73328d170fca5e90b"
+      "bytes": 160122,
+      "sha256": "abf180c81656a3f6a0e5fa3f9c0ee03d533aa2393818e642813ad75eec1b8b02"
     },
     {
-      "file": "graphics/localized/de-DE/tablet/01-run-setup.jpg",
+      "file": "graphics/localized/de-DE/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 238565,
+      "sha256": "56a355b623b09c499f76a5c1443afe9c9aec576b1d92bd04f9445f5069a236be"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 198668,
+      "sha256": "ce3f25e625eb01770759bfe364c85bf58e9834d5fbe53d3ae9bbcff6513256b0"
+    },
+    {
+      "file": "graphics/localized/de-DE/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 189754,
+      "sha256": "ea86b789d04d2844643d50b36cd91264899d3bb9c9c6a60b54e9f33f00ab0d49"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 132569,
-      "sha256": "db77097191d8216051333f3d4d9be8d887dafe52adcbed3e71bf554a8b42f8b3"
+      "bytes": 185222,
+      "sha256": "9786b0b71eb5b52a1c5e95a191f3be00ff0a533bc41387377ee159a722504523"
     },
     {
-      "file": "graphics/localized/de-DE/tablet/02-player-draft.jpg",
+      "file": "graphics/localized/de-DE/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160594,
-      "sha256": "9c899977859a29963ef3cc6ba13a9e16f2f84e0ff109a435dcff415c98b04f67"
+      "bytes": 186352,
+      "sha256": "d2bf7ed50e0af7e2a948dcdc5fa2ab639ed43f781a18317ff3aa6ad921a9ac69"
     },
     {
-      "file": "graphics/localized/de-DE/tablet/03-group-draw.jpg",
+      "file": "graphics/localized/de-DE/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167047,
-      "sha256": "b9becc39e91a00e51a134193eaf4da74ce888a8ea5c038d5ae727b6c7a56192e"
+      "bytes": 184768,
+      "sha256": "ad34ac0e32b94062cc640c59ade4cbf3f509c9a6397a8060a87cd0ea98d93516"
     },
     {
-      "file": "graphics/localized/de-DE/tablet/04-match-hub.jpg",
+      "file": "graphics/localized/de-DE/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 180046,
-      "sha256": "6567d983c9fecd7c43d6378e39076cd221c478227e9663adfb75fb7fcbaf5c82"
+      "bytes": 177040,
+      "sha256": "7d62fadbcdc41ac2ee4bf5bf063f8e8de9c8f43dbff75b1280a78cedf025c9d2"
     },
     {
-      "file": "graphics/localized/de-DE/tablet/05-player-profile.jpg",
+      "file": "graphics/localized/de-DE/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 81569,
-      "sha256": "7fb778332b85139dd77080ca2e0431ad71eb5527dfb1ef5bc3dd79ca45230f3d"
+      "bytes": 182182,
+      "sha256": "8dabb2fbcee80dd28ed8b5060190015ab7e2124627d87740c90b1021676f10e4"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 153035,
+      "sha256": "2e502fbe9139b36ef33895505cf29af43509936525c914957746d5e42032bc2b"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 130599,
+      "sha256": "a92c81edaab3e220ab58337e2a49fbc46022e14496cc809255f789f82138ff75"
+    },
+    {
+      "file": "graphics/localized/de-DE/tablet/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 137476,
+      "sha256": "282ad27bb04409cca8cd5e578bebea1f308527487462d30426a6358f1a59f82b"
     },
     {
       "file": "graphics/localized/it-IT/feature-graphic.jpg",
       "width": 1024,
       "height": 500,
       "mime": "image/jpeg",
-      "bytes": 184834,
-      "sha256": "85d9e6a118485e987bbf9eb0c57a2c30b59b14634827f79ad0d3755a2d87cee0"
+      "bytes": 197436,
+      "sha256": "736e88d38fb77f5662367d4166d37944230b78925c96bde7d8b9aa210751acd5"
     },
     {
-      "file": "graphics/localized/it-IT/phone/01-run-setup.jpg",
+      "file": "graphics/localized/it-IT/phone/01-two-modes.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 152990,
-      "sha256": "57813dd496c05f4cf2f369bedaecac340369873ab812289d319997a7b0a58bfd"
+      "bytes": 217553,
+      "sha256": "e3d8d2476f743173133a31b1b19e26b3981e1d95f60952e4225686245dd39b42"
     },
     {
-      "file": "graphics/localized/it-IT/phone/02-player-draft.jpg",
+      "file": "graphics/localized/it-IT/phone/02-life-stars-tr-eng.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 203513,
-      "sha256": "3c454e923323617a929c2428075eb31e213a720b8f6bb8fc008a3d8153d1f3fd"
+      "bytes": 214085,
+      "sha256": "4549f6f12b9253dd926106259c41c1b5b8284875840fa57059b3c0faadd3a8ef"
     },
     {
-      "file": "graphics/localized/it-IT/phone/03-group-draw.jpg",
+      "file": "graphics/localized/it-IT/phone/03-life-stars-es-de.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 171593,
-      "sha256": "d73256fa9a78d9fc17747e737a0c3f510876b1dc1fc7d8248be69187d4c4e8bf"
+      "bytes": 215223,
+      "sha256": "8c95938d31ec485fbafe4da1186ee9ccc45886e234bf9973e5bbf5890f44e8c8"
     },
     {
-      "file": "graphics/localized/it-IT/phone/04-match-hub.jpg",
+      "file": "graphics/localized/it-IT/phone/04-life-stars-it-jp.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 267616,
-      "sha256": "b0d754b5d843481f502854e8f1d24db1dc8b8216c8883be0373ab9ea13284193"
+      "bytes": 205494,
+      "sha256": "fe241e32b2da8ebcdbfd0088a18fe305eabed9015e7b167b9f24e69392eb4f14"
     },
     {
-      "file": "graphics/localized/it-IT/phone/05-player-profile.jpg",
+      "file": "graphics/localized/it-IT/phone/05-life-cup-journey.jpg",
       "width": 1080,
       "height": 1920,
       "mime": "image/jpeg",
-      "bytes": 137637,
-      "sha256": "e1d73e80f02603c8480a94bde5cfb7e746e95c1ec1c8c17d41b5a25298a066e5"
+      "bytes": 173556,
+      "sha256": "468c0cb14b49f1750c2cdbd9152cbf58fb62f0e1c1ea4a0a449524088f5c56f1"
     },
     {
-      "file": "graphics/localized/it-IT/tablet/01-run-setup.jpg",
+      "file": "graphics/localized/it-IT/phone/06-arena-season-road.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 242725,
+      "sha256": "9e4e71986f29ae1f78fd91832e9e845fded419c36732a21a04a8c3862e2dec0b"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/07-arena-live-pvp.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 197659,
+      "sha256": "2d5bfb354a8845829c0aea4490138398d41669a57599d75bec18b272d37f2b0f"
+    },
+    {
+      "file": "graphics/localized/it-IT/phone/08-arena-private-tournaments.jpg",
+      "width": 1080,
+      "height": 1920,
+      "mime": "image/jpeg",
+      "bytes": 195062,
+      "sha256": "179e72014db72ceffb25664b00391dfb987f80812b021d92db876667ce9d3b3e"
+    },
+    {
+      "file": "graphics/localized/it-IT/tablet/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 130120,
-      "sha256": "a224481d8e31b69a9e9ef6c77ad0d5fce8aab857912da047e24243b8f93b0b66"
+      "bytes": 178113,
+      "sha256": "7ae77dac609e67678ec8b8ac7d15c6b343237b51e2681486f010831c044b6da3"
     },
     {
-      "file": "graphics/localized/it-IT/tablet/02-player-draft.jpg",
+      "file": "graphics/localized/it-IT/tablet/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160897,
-      "sha256": "a156db21fd989dccbc11c82079bbec84777e0476fce460c4c35156310773d6df"
+      "bytes": 187454,
+      "sha256": "4d2854e4643ddb430bac9fb6b2e3a6886f6daae9d4223b0d74166764d628304c"
     },
     {
-      "file": "graphics/localized/it-IT/tablet/03-group-draw.jpg",
+      "file": "graphics/localized/it-IT/tablet/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 166350,
-      "sha256": "69290dcda887ed72e1e343247715df6862d519001c460a83647500db383b5252"
+      "bytes": 184535,
+      "sha256": "a2ada28094e4cae34a37928b5e48394e2ac32a29c58367b0989cde60b6e48c93"
     },
     {
-      "file": "graphics/localized/it-IT/tablet/04-match-hub.jpg",
+      "file": "graphics/localized/it-IT/tablet/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 178462,
-      "sha256": "b36925221019a33c4495e2fdf8a4280a321f3943b6ed674d5567d961008d6502"
+      "bytes": 177965,
+      "sha256": "39d925cae79d4d2bd119d7f38b73311bb551ed718044fab6f685ff9ada52ef1b"
     },
     {
-      "file": "graphics/localized/it-IT/tablet/05-player-profile.jpg",
+      "file": "graphics/localized/it-IT/tablet/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 94441,
-      "sha256": "1f2ff241d89a98c7f68610cf0ffc137eaa651b28de1bd454e8bb3c2562ee9bb1"
+      "bytes": 172951,
+      "sha256": "81b71079879ef275f9cf46a86b34b9ec060221ebc0ca428778b495c06e574dba"
     },
     {
-      "file": "graphics/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/it-IT/tablet/06-arena-season-road.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 130663,
-      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
+      "bytes": 154167,
+      "sha256": "b5dc7743ae0e26c27adadf3a36a7cc3b3d4e925962cb0836199a84a1288e8da7"
     },
     {
-      "file": "graphics/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/it-IT/tablet/07-arena-live-pvp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158931,
-      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
+      "bytes": 130363,
+      "sha256": "7a7974c739d84bcd9793fe5f2e91b100503faaf18f633bd0eee84d63b9cdc4b0"
     },
     {
-      "file": "graphics/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/it-IT/tablet/08-arena-private-tournaments.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158060,
-      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
+      "bytes": 141216,
+      "sha256": "637733dad88546d1eaed76187566181a20f02d2998074d8715d0c46d57e4d2c1"
     },
     {
-      "file": "graphics/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 186970,
-      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
+      "bytes": 177522,
+      "sha256": "fe442eb7afa16894b75a3370351981b4d80fd9c5c66ec34e4b5750f9f42703d8"
     },
     {
-      "file": "graphics/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 87612,
-      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
+      "bytes": 182486,
+      "sha256": "f59312388aeb8971cbc4881e72b08d5b996fc2a6e13ceae58b5a58992759a17d"
+    },
+    {
+      "file": "graphics/play-games-pc/03-life-stars-es-de.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 179825,
+      "sha256": "1e9f8ec9bf683922bb6c549f6e22a09f579e7d90c55cd5ad8346388d1f0534ab"
+    },
+    {
+      "file": "graphics/play-games-pc/04-life-stars-it-jp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 174208,
+      "sha256": "8283f7e80243fe05b76d7384a2357f49d75713802ac5d20e45e9f1bd33bdf251"
+    },
+    {
+      "file": "graphics/play-games-pc/05-life-cup-journey.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 166695,
+      "sha256": "bb90ebadec0a37cb7a2ef8831d8b3087b631d2d7a1e259d4054a775d763b7b14"
+    },
+    {
+      "file": "graphics/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150605,
+      "sha256": "83e3e7e8a2451c2aa0e635cd879263ac5f69f97c106025cb910f33788e45a150"
+    },
+    {
+      "file": "graphics/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 129538,
+      "sha256": "73655c3d1a75c5f12ae9c9962b2ef782343c2b4cbbd32f74ecdbe05edc94857c"
+    },
+    {
+      "file": "graphics/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 140579,
+      "sha256": "2eabbad5c6fa8975291cb1c323d93a0609c6d8518d772c75a1dcb242ec328d06"
     },
     {
       "file": "graphics/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     },
     {
-      "file": "graphics/localized/tr-TR/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/tr-TR/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 129659,
-      "sha256": "31a84abf0f4dd98359b0f954e2fdedb78bc170decdff9607c862ddf23255485e"
+      "bytes": 174021,
+      "sha256": "e150e888442d274d35319285eaf9112a45bffc27f924a61c20789a00be1e64d2"
     },
     {
-      "file": "graphics/localized/tr-TR/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/tr-TR/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160033,
-      "sha256": "1d914827f74c6100fad8341e7fbc6d1aa4826fed60a52ce3f647edaabf0b7e8c"
+      "bytes": 183812,
+      "sha256": "e2bb5f8645c47d273945ee9a2ff4fe2f78818e3e8d92ce8640519acc5f47867a"
     },
     {
-      "file": "graphics/localized/tr-TR/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/tr-TR/play-games-pc/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 153900,
-      "sha256": "6cc76a6920324f28b3200d994b3c9bc4b7b70fb5bd651e217c3fb9a893840281"
+      "bytes": 181548,
+      "sha256": "e928324320732335df936549da2010a421617a9aa11cdd1a85e14214263fb190"
     },
     {
-      "file": "graphics/localized/tr-TR/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/localized/tr-TR/play-games-pc/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 176349,
-      "sha256": "09f8e86633990fe9ee850c02ddf6b297cb48d7b9d1ccebccadc1ca20a3a4aee2"
+      "bytes": 176356,
+      "sha256": "e78df0823b9429188f1e30b58491952726e2608afb6ab351a6c40244206a1727"
     },
     {
-      "file": "graphics/localized/tr-TR/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/localized/tr-TR/play-games-pc/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 82105,
-      "sha256": "2f0f539dfa99f0c1820a18436781525b6dc57fd69800a13f10727ce2e3a4d935"
+      "bytes": 167684,
+      "sha256": "b4ae2c61241a4d50e4f1d8ed4475cb9e9d15393464e612a3ffb967366b98ce55"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150706,
+      "sha256": "46e5f0d4926fef134819949d74893a34809d3e190e4b17b63fff594733ca645c"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 131093,
+      "sha256": "7f5e58ddaf824d4c7211cf49d6dac52da28d7cc1dd6ad84c8c62ce55039de9a2"
+    },
+    {
+      "file": "graphics/localized/tr-TR/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 137360,
+      "sha256": "174c3b77dea60d5c794815a277d967f86db8c108fcac50938fe7364097e90ad4"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/localized/tr-TR/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     },
     {
-      "file": "graphics/localized/en-US/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/en-US/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 130663,
-      "sha256": "e8cc03c4c91b67912fe33c81b572a46b792c36701830bfeebae73f1a0dc1e6f1"
+      "bytes": 177522,
+      "sha256": "fe442eb7afa16894b75a3370351981b4d80fd9c5c66ec34e4b5750f9f42703d8"
     },
     {
-      "file": "graphics/localized/en-US/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/en-US/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158931,
-      "sha256": "5170b679a9bf9ce8642880e4c59d4deaa88c772c88d9bef8ffaa9bb721c03823"
+      "bytes": 182486,
+      "sha256": "f59312388aeb8971cbc4881e72b08d5b996fc2a6e13ceae58b5a58992759a17d"
     },
     {
-      "file": "graphics/localized/en-US/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/en-US/play-games-pc/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 158060,
-      "sha256": "93bc2e36a20d669957ffa827fa2d8430ccbac38338a8b762d7751e070c33363a"
+      "bytes": 179825,
+      "sha256": "1e9f8ec9bf683922bb6c549f6e22a09f579e7d90c55cd5ad8346388d1f0534ab"
     },
     {
-      "file": "graphics/localized/en-US/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/localized/en-US/play-games-pc/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 186970,
-      "sha256": "1239cc752e0b74b39f8cefddf813affd568b6fba0079c777b56ad1bbb5c8e4aa"
+      "bytes": 174208,
+      "sha256": "8283f7e80243fe05b76d7384a2357f49d75713802ac5d20e45e9f1bd33bdf251"
     },
     {
-      "file": "graphics/localized/en-US/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/localized/en-US/play-games-pc/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 87612,
-      "sha256": "073dcdafd4f08794c8e68827421f13c0578d81628220619be27f1b9f70063d3b"
+      "bytes": 166695,
+      "sha256": "bb90ebadec0a37cb7a2ef8831d8b3087b631d2d7a1e259d4054a775d763b7b14"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 150605,
+      "sha256": "83e3e7e8a2451c2aa0e635cd879263ac5f69f97c106025cb910f33788e45a150"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 129538,
+      "sha256": "73655c3d1a75c5f12ae9c9962b2ef782343c2b4cbbd32f74ecdbe05edc94857c"
+    },
+    {
+      "file": "graphics/localized/en-US/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 140579,
+      "sha256": "2eabbad5c6fa8975291cb1c323d93a0609c6d8518d772c75a1dcb242ec328d06"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/localized/en-US/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     },
     {
-      "file": "graphics/localized/es-ES/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/es-ES/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 131303,
-      "sha256": "a728e98d3541c7ecd28a1c2fb6ac72fddc2ee0f6a373bd638af61d9de39fbe8c"
+      "bytes": 183808,
+      "sha256": "e31d6b7749c588942ac6f5d479a5ac63d60fe1fdf2d932b77af2cacaacc0374c"
     },
     {
-      "file": "graphics/localized/es-ES/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/es-ES/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 161176,
-      "sha256": "aad55e56c4e9fe963b9b35c2015ab766c7322ed34dc6252ceefeed20b3074985"
+      "bytes": 187841,
+      "sha256": "a0f25be7ce39ebb1d81dd5f67da0b9b39884e137768318bbacf720a5eeca819b"
     },
     {
-      "file": "graphics/localized/es-ES/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/es-ES/play-games-pc/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 164299,
-      "sha256": "bb7bbd928d3380f6185edd7e667de32ad98ea150534e4d0c742252115064146c"
+      "bytes": 184575,
+      "sha256": "3698d78e6bbbb6bf7c935075b63672ff3d6486c0cb3c0e34312188ca479024c5"
     },
     {
-      "file": "graphics/localized/es-ES/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/localized/es-ES/play-games-pc/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 185275,
-      "sha256": "a98127e47b4a2fb17c9450e6d5352fcb9fc5f401ae57b471ccb09af37d26ab6d"
+      "bytes": 178355,
+      "sha256": "d2b5fca72d272d38ea9d4b6f41cec6e284d8a980f4e4bd9c8eddcf03c376aebf"
     },
     {
-      "file": "graphics/localized/es-ES/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/localized/es-ES/play-games-pc/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 77886,
-      "sha256": "da61717f3c23c09e0d6f95b90d4d23688f3bd63ac8d3dfbd2ac3e9757edca3ff"
+      "bytes": 173315,
+      "sha256": "c547d1f6193f385ec731e40f60887410857d05fe65dfe361943e7841e5e000dc"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 154517,
+      "sha256": "a3c9a9cf521663d18eab4b37aa5825dceaa670def6a812a028a6eb23a7253a12"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 129706,
+      "sha256": "d0a6319c176a4fe583eae8f67ab81297b3d61519e8f8a17541081c3330f035ce"
+    },
+    {
+      "file": "graphics/localized/es-ES/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 139871,
+      "sha256": "2df00061e6abd90b9a2b39f3c42ffe48c71e26e57585cf709cda4d620de38a4a"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/localized/es-ES/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     },
     {
-      "file": "graphics/localized/de-DE/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/de-DE/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 132569,
-      "sha256": "db77097191d8216051333f3d4d9be8d887dafe52adcbed3e71bf554a8b42f8b3"
+      "bytes": 185222,
+      "sha256": "9786b0b71eb5b52a1c5e95a191f3be00ff0a533bc41387377ee159a722504523"
     },
     {
-      "file": "graphics/localized/de-DE/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/de-DE/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160594,
-      "sha256": "9c899977859a29963ef3cc6ba13a9e16f2f84e0ff109a435dcff415c98b04f67"
+      "bytes": 186352,
+      "sha256": "d2bf7ed50e0af7e2a948dcdc5fa2ab639ed43f781a18317ff3aa6ad921a9ac69"
     },
     {
-      "file": "graphics/localized/de-DE/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/de-DE/play-games-pc/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 167047,
-      "sha256": "b9becc39e91a00e51a134193eaf4da74ce888a8ea5c038d5ae727b6c7a56192e"
+      "bytes": 184768,
+      "sha256": "ad34ac0e32b94062cc640c59ade4cbf3f509c9a6397a8060a87cd0ea98d93516"
     },
     {
-      "file": "graphics/localized/de-DE/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/localized/de-DE/play-games-pc/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 180046,
-      "sha256": "6567d983c9fecd7c43d6378e39076cd221c478227e9663adfb75fb7fcbaf5c82"
+      "bytes": 177040,
+      "sha256": "7d62fadbcdc41ac2ee4bf5bf063f8e8de9c8f43dbff75b1280a78cedf025c9d2"
     },
     {
-      "file": "graphics/localized/de-DE/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/localized/de-DE/play-games-pc/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 81569,
-      "sha256": "7fb778332b85139dd77080ca2e0431ad71eb5527dfb1ef5bc3dd79ca45230f3d"
+      "bytes": 182182,
+      "sha256": "8dabb2fbcee80dd28ed8b5060190015ab7e2124627d87740c90b1021676f10e4"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 153035,
+      "sha256": "2e502fbe9139b36ef33895505cf29af43509936525c914957746d5e42032bc2b"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 130599,
+      "sha256": "a92c81edaab3e220ab58337e2a49fbc46022e14496cc809255f789f82138ff75"
+    },
+    {
+      "file": "graphics/localized/de-DE/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 137476,
+      "sha256": "282ad27bb04409cca8cd5e578bebea1f308527487462d30426a6358f1a59f82b"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/localized/de-DE/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     },
     {
-      "file": "graphics/localized/it-IT/play-games-pc/01-run-setup.jpg",
+      "file": "graphics/localized/it-IT/play-games-pc/01-two-modes.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 130120,
-      "sha256": "a224481d8e31b69a9e9ef6c77ad0d5fce8aab857912da047e24243b8f93b0b66"
+      "bytes": 178113,
+      "sha256": "7ae77dac609e67678ec8b8ac7d15c6b343237b51e2681486f010831c044b6da3"
     },
     {
-      "file": "graphics/localized/it-IT/play-games-pc/02-player-draft.jpg",
+      "file": "graphics/localized/it-IT/play-games-pc/02-life-stars-tr-eng.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 160897,
-      "sha256": "a156db21fd989dccbc11c82079bbec84777e0476fce460c4c35156310773d6df"
+      "bytes": 187454,
+      "sha256": "4d2854e4643ddb430bac9fb6b2e3a6886f6daae9d4223b0d74166764d628304c"
     },
     {
-      "file": "graphics/localized/it-IT/play-games-pc/03-group-draw.jpg",
+      "file": "graphics/localized/it-IT/play-games-pc/03-life-stars-es-de.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 166350,
-      "sha256": "69290dcda887ed72e1e343247715df6862d519001c460a83647500db383b5252"
+      "bytes": 184535,
+      "sha256": "a2ada28094e4cae34a37928b5e48394e2ac32a29c58367b0989cde60b6e48c93"
     },
     {
-      "file": "graphics/localized/it-IT/play-games-pc/04-match-hub.jpg",
+      "file": "graphics/localized/it-IT/play-games-pc/04-life-stars-it-jp.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 178462,
-      "sha256": "b36925221019a33c4495e2fdf8a4280a321f3943b6ed674d5567d961008d6502"
+      "bytes": 177965,
+      "sha256": "39d925cae79d4d2bd119d7f38b73311bb551ed718044fab6f685ff9ada52ef1b"
     },
     {
-      "file": "graphics/localized/it-IT/play-games-pc/05-player-profile.jpg",
+      "file": "graphics/localized/it-IT/play-games-pc/05-life-cup-journey.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 94441,
-      "sha256": "1f2ff241d89a98c7f68610cf0ffc137eaa651b28de1bd454e8bb3c2562ee9bb1"
+      "bytes": 172951,
+      "sha256": "81b71079879ef275f9cf46a86b34b9ec060221ebc0ca428778b495c06e574dba"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/06-arena-season-road.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 154167,
+      "sha256": "b5dc7743ae0e26c27adadf3a36a7cc3b3d4e925962cb0836199a84a1288e8da7"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/07-arena-live-pvp.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 130363,
+      "sha256": "7a7974c739d84bcd9793fe5f2e91b100503faaf18f633bd0eee84d63b9cdc4b0"
+    },
+    {
+      "file": "graphics/localized/it-IT/play-games-pc/08-arena-private-tournaments.jpg",
+      "width": 1920,
+      "height": 1080,
+      "mime": "image/jpeg",
+      "bytes": 141216,
+      "sha256": "637733dad88546d1eaed76187566181a20f02d2998074d8715d0c46d57e4d2c1"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/feature-1920x1080.jpg",
       "width": 1920,
       "height": 1080,
       "mime": "image/jpeg",
-      "bytes": 514509,
-      "sha256": "dc50d8c97ea69f34f155e19ecfb4c944507344b07fda831b936e7a4ec798b55a"
+      "bytes": 453094,
+      "sha256": "f3263f0cb9c1beb38c33c1d1828615e6b4ef57e94a21938cfa449c0324d8b9ed"
     },
     {
       "file": "graphics/localized/it-IT/play-games-pc/logo-600x400.png",
       "width": 600,
       "height": 400,
       "mime": "image/png",
-      "bytes": 20656,
-      "sha256": "145f709e9b2594986297e2e716716ba5c7c009540a3967f56cae13870f680a3e"
+      "bytes": 27648,
+      "sha256": "2c3d13204842e4cfa88d455250bc8dddfa4904ed3a297dddddf2f7a49a42a4f4"
     }
   ]
 }

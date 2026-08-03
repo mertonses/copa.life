@@ -8,10 +8,13 @@ const STORE=path.join(ROOT,"store/android");
 const OUTPUT=path.join(ROOT,"outputs/google-play-localizations");
 const ALT_TEXT_PATH=path.join(STORE,"asset-alt-text.md");
 const LOCALES=[
+  {code:"tr-TR",label:"Türkçe",listing:"listing-tr.md"},
+  {code:"en-US",label:"English",listing:"listing-en.md"},
   {code:"es-ES",label:"Español",listing:"listing-es.md"},
   {code:"de-DE",label:"Deutsch",listing:"listing-de.md"},
   {code:"it-IT",label:"Italiano",listing:"listing-it.md"},
 ];
+const SCREENSHOTS=["01-two-modes.jpg","02-life-stars-tr-eng.jpg","03-life-stars-es-de.jpg","04-life-stars-it-jp.jpg","05-life-cup-journey.jpg","06-arena-season-road.jpg","07-arena-live-pvp.jpg","08-arena-private-tournaments.jpg"];
 
 function markdownSections(content){
   return content.split(/^##\s+/m).slice(1).map(section=>{
@@ -87,7 +90,7 @@ for(const locale of LOCALES){
   const assets=[];
   for(const relative of [
     "graphics/feature-graphic.jpg",
-    ...["01-run-setup.jpg","02-player-draft.jpg","03-group-draw.jpg","04-match-hub.jpg","05-player-profile.jpg"].flatMap(file=>[
+    ...SCREENSHOTS.flatMap(file=>[
       `graphics/phone/${file}`,
       `graphics/tablet/${file}`,
     ]),
@@ -105,20 +108,20 @@ for(const locale of LOCALES){
   });
 }
 
-const readme=`# Google Play yerelleştirme teslim paketi
+const readme=`# Google Play çift mod yerelleştirme teslim paketi
 
-Bu paket, varsayılan İngilizce ve mevcut Türkçe girişe ek olarak oyunun desteklediği üç dili içerir.
+Bu paket, oyunun desteklediği beş mağaza dilinin tamamını içerir.
 
 Her dil klasöründe:
 
 - \`app-name.txt\`, \`short-description.txt\` ve \`full-description.txt\`: Play Console alanlarına doğrudan yapıştırılacak metinler
 - \`graphics/feature-graphic.jpg\`: 1024×500 özellik görseli
-- \`graphics/phone/\`: beş adet 1080×1920 telefon ekran görüntüsü
-- \`graphics/tablet/\`: beş adet 1920×1080 tablet ekran görüntüsü
+- \`graphics/phone/\`: sekiz adet 1080×1920 telefon ekran görüntüsü
+- \`graphics/tablet/\`: sekiz adet 1920×1080 tablet ekran görüntüsü
 - \`alt-text.md\`: özellik görseli ve ekran görüntüleri için 140 karakterin altındaki erişilebilirlik metinleri
 - \`fields.json\`: metinler ve karakter sayıları
 
-Play Console'da \`Çevirileri yönet > Kendi çevirilerinizi yönetin\` yoluyla sırasıyla \`es-ES\`, \`de-DE\` ve \`it-IT\` girişlerini ekleyin. Her klasördeki metinleri ve görselleri aynı dil girişine yükleyin.
+Play Console'da her klasördeki metinleri ve görselleri aynı dil girişine yükleyin. Fragman dosyaları \`store/android/video/\` altındadır.
 `;
 
 fs.writeFileSync(path.join(OUTPUT,"README.md"),readme);
