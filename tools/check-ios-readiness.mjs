@@ -10,8 +10,8 @@ const exists = (relative) => fs.existsSync(path.join(ROOT, relative));
 
 const pkg = JSON.parse(read("package.json"));
 const version = JSON.parse(read("release/ios-version.json"));
-if (pkg.devDependencies?.["@capacitor/ios"] !== "8.4.2") fail("@capacitor/ios must be pinned to 8.4.2");
-if (pkg.dependencies?.["@capacitor/core"] !== "8.4.2") fail("Capacitor core version drift");
+if (pkg.devDependencies?.["@capacitor/ios"] !== "8.5.0") fail("@capacitor/ios must be pinned to 8.5.0");
+if (pkg.dependencies?.["@capacitor/core"] !== "8.5.0") fail("Capacitor core version drift");
 if (pkg.dependencies?.["@capacitor/haptics"] !== "8.0.2") fail("@capacitor/haptics must be pinned to 8.0.2");
 if (!Number.isInteger(version.buildNumber) || version.buildNumber < 1) fail("invalid iOS build number");
 if (!/^\d+\.\d+\.\d+$/.test(version.marketingVersion)) fail("invalid iOS marketing version");
@@ -55,7 +55,7 @@ for (const marker of [
 
 const swiftPackage = read("ios/App/CapApp-SPM/Package.swift");
 if (/path:\s*"[^"]*\\/.test(swiftPackage)) fail("Swift Package contains Windows path separators");
-if (!swiftPackage.includes('exact: "8.4.2"')) fail("Capacitor Swift package version drift");
+if (!swiftPackage.includes('exact: "8.5.0"')) fail("Capacitor Swift package version drift");
 if (!swiftPackage.includes('package(name: "CapacitorHaptics"') || !swiftPackage.includes('.product(name: "CapacitorHaptics"')) fail("iOS Haptics plugin is not linked");
 
 const info = read("ios/App/App/Info.plist");

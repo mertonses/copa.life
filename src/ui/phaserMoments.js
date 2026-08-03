@@ -7,7 +7,7 @@
     if(root.Phaser)return Promise.resolve(root.Phaser);
     if(loadPromise)return loadPromise;
     loadPromise=new Promise((resolve,reject)=>{
-      const script=document.createElement("script");script.src="src/vendor/phaser.min.js?v=3.90.0";script.async=true;
+      const script=document.createElement("script");script.src="src/vendor/phaser.min.js?v=4.2.1";script.async=true;
       script.onload=()=>resolve(root.Phaser);script.onerror=()=>reject(new Error("phaser_load_failed"));document.head.appendChild(script);
     });
     return loadPromise;
