@@ -65,6 +65,10 @@ chmod +x gradlew
 test -f "$APK"
 
 adb install -r "$APK"
+# A package install wakes Play services and package-indexing work on a fresh AVD.
+# Let those broadcasts drain before measuring the application's cold-start focus.
+adb shell am wait-for-broadcast-idle >/dev/null 2>&1 || true
+sleep 5
 adb logcat -c
 
 pid=""
