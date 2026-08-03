@@ -36,9 +36,9 @@
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260729-directives1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260803-hall-tiers";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
-    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260729-directives1",()=>!!global.CopaMeta).then(()=>{
+    return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260803-hall-tiers",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
       if(typeof global.buildFormButtons==="function")global.buildFormButtons();
       if(typeof global.buildChairButtons==="function")global.buildChairButtons();
@@ -64,7 +64,7 @@
     return loadScriptOnce("hidden-draft","src/ui/hiddenDraft.js?v=20260720-hidden-draft2",()=>!!global.CopaHiddenDraft).then(()=>global.CopaHiddenDraft);
   }
   function ensureArena(){
-    return loadScriptOnce("copa-arena","src/online/arena.js?v=20260730-arena-guide1",()=>!!global.CopaArena).then(()=>global.CopaArena);
+    return loadScriptOnce("copa-arena","src/online/arena.js?v=20260803-tournament-v2",()=>!!global.CopaArena).then(()=>global.CopaArena);
   }
   function ensureCountryPlayers(country){
     const code=String(country||"TR").toUpperCase();

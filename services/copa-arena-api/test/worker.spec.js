@@ -87,6 +87,28 @@ describe("Arena HTTP API",()=>{
     socketResponse.webSocket.close(1000,"done");
   });
 
+  it("equips only unlocked cosmetic rewards and can clear a cosmetic slot",async()=>{
+    const suffix="cosmetics",owner=await ownerFor(suffix);
+    const first=await SELF.fetch("https://arena.test/v1/arena/profile",{headers:headers(suffix)});
+    const catalog=(await first.json()).cosmeticCatalog;
+    expect(catalog.map(item=>item.type)).toEqual(expect.arrayContaining(["kit","crest","frame","stadium"]));
+    const locked=await SELF.fetch("https://arena.test/v1/arena/profile/cosmetics",{
+      method:"PUT",headers:headers(suffix),body:JSON.stringify({type:"kit",id:"arena_kit_nocturne"})
+    });
+    expect(locked.status).toBe(403);
+    await env.DB.prepare("UPDATE arena_profiles SET cosmetics=? WHERE owner_hash=?")
+      .bind(JSON.stringify(["arena_kit_nocturne"]),owner).run();
+    const equipped=await SELF.fetch("https://arena.test/v1/arena/profile/cosmetics",{
+      method:"PUT",headers:headers(suffix),body:JSON.stringify({type:"kit",id:"arena_kit_nocturne"})
+    });
+    expect(equipped.status).toBe(200);
+    expect((await equipped.json()).profile.equippedCosmetics).toEqual({kit:"arena_kit_nocturne"});
+    const cleared=await SELF.fetch("https://arena.test/v1/arena/profile/cosmetics",{
+      method:"PUT",headers:headers(suffix),body:JSON.stringify({type:"kit",id:""})
+    });
+    expect((await cleared.json()).profile.equippedCosmetics).toEqual({});
+  });
+
   it("creates a separate rewardless server-authoritative practice room",async()=>{
     const suffix="practice",owner=await ownerFor(suffix);
     const response=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(suffix),body:JSON.stringify({clubName:"Prova SK",mode:"practice",region:"weur"})});
@@ -189,10 +211,30 @@ describe("Arena HTTP API",()=>{
 });
 
 describe("Arena Durable Objects",()=>{
+  it("grants capped reconnect time without allowing endless deadline extension",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-RECONNECTGRACE001");
+    const players=[
+      {owner:"owner-reconnect-home",clubName:"Dönüş SK",rating:1000},
+      {owner:"owner-reconnect-away",clubName:"Rakip SK",rating:1000}
+    ];
+    await room.init("AR-RECONNECTGRACE001",players,"reconnect-seed");
+    await runInDurableObject(room,async instance=>{
+      const socket={deserializeAttachment:()=>({owner:players[0].owner})};
+      const initialDeadline=instance.state.deadline;
+      await instance.webSocketClose(socket);
+      await instance.webSocketClose(socket);
+      await instance.webSocketClose(socket);
+      expect(instance.state.deadline-initialDeadline).toBe(40_000);
+      expect(instance.state.reconnectGraceUsed[0]).toBe(40_000);
+      expect(instance.state.players[0].disconnects).toBe(3);
+      expect(publicState(instance.state,players[1].owner).opponentReconnectGraceUntil).toBeGreaterThan(Date.now());
+    });
+  });
+
   it("lets the player end AI practice without rating or season penalties",async()=>{
     const matchId="AR-PRACTICEEXIT0001",owner="owner-practice-exit";
     const created=new Date().toISOString();
-    await env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    await env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
       .bind(owner,"AC-PRACTICEEXIT","Prova SK",1000,seasonKey(),0,0,0,0,0,0,"[]",created,created).run();
     const room=env.ARENA_ROOM.getByName(matchId);
     await room.init(matchId,[{owner,clubName:"Prova SK",rating:1000},{owner:"practice-bot:exit",clubName:"AI XI",rating:1000}],"practice-exit",{mode:"practice",botIndex:1});
@@ -331,8 +373,8 @@ describe("Arena Durable Objects",()=>{
       {owner:"owner-away",clubName:"Deplasman",rating:1000}
     ];
     await env.DB.batch([
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind("owner-home","AC-HOME","Ev Sahibi",1000,"2026-Q3",0,0,0,0,0,0,"[]",new Date().toISOString(),new Date().toISOString()),
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind("owner-away","AC-AWAY","Deplasman",1000,"2026-Q3",0,0,0,0,0,0,"[]",new Date().toISOString(),new Date().toISOString())
+      env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind("owner-home","AC-HOME","Ev Sahibi",1000,"2026-Q3",0,0,0,0,0,0,"[]",new Date().toISOString(),new Date().toISOString()),
+      env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind("owner-away","AC-AWAY","Deplasman",1000,"2026-Q3",0,0,0,0,0,0,"[]",new Date().toISOString(),new Date().toISOString())
     ]);
     await room.init("AR-TESTROOM000000001",players,"room-seed");
     await runInDurableObject(room,async instance=>{
@@ -346,12 +388,12 @@ describe("Arena Durable Objects",()=>{
       const act=(owner,data)=>instance.action(owner,{...data,actionId:`AA-${++sequence}ABCDEFGH`});
       await act("owner-home",{type:"ready"});await act("owner-away",{type:"ready"});
       const decisionsBeforeEmote=instance.state.players[0].manualDecisions;
-      expect(await act("owner-home",{type:"emote",emote:"applause"})).toBe("ok");
-      expect(publicState(instance.state,"owner-home").emotes.self).toMatchObject({id:"applause",sequence:1});
-      expect(publicState(instance.state,"owner-away").emotes.opponent).toMatchObject({id:"applause",sequence:1});
+      expect(await act("owner-home",{type:"emote",emote:"gg"})).toBe("ok");
+      expect(publicState(instance.state,"owner-home").emotes.self).toMatchObject({id:"gg",sequence:1});
+      expect(publicState(instance.state,"owner-away").emotes.opponent).toMatchObject({id:"gg",sequence:1});
       expect(instance.state.players[0].manualDecisions).toBe(decisionsBeforeEmote);
-      expect(await act("owner-home",{type:"emote",emote:"fire"})).toBe("emote_rate_limited");
-      expect(await act("owner-away",{type:"emote",emote:"easy"})).toBe("ok");
+      expect(await act("owner-home",{type:"emote",emote:"wow"})).toBe("emote_rate_limited");
+      expect(await act("owner-away",{type:"emote",emote:"ez"})).toBe("ok");
       expect(await act("owner-away",{type:"emote",emote:"taunt"})).toBe("unavailable_choice");
       for(const owner of ["owner-home","owner-away"])await act(owner,{type:"setup",choice:{formation:"4-4-2",style:"balanced",chairman:"diplomat"}});
       expect(instance.state.players.every(player=>player.setup.chairman==="babacan")).toBe(true);
@@ -410,7 +452,7 @@ describe("Arena Durable Objects",()=>{
       {owner:"owner-concurrent-away",clubName:"Tek Yazım Dep",rating:1000}
     ];
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-CONCUR${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
     ));
     const room=env.ARENA_ROOM.getByName(matchId);
@@ -440,7 +482,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-VOID${index}`,player.clubName,1000,"2026-Q3",0,0,0,0,0,0,"[]",created,created)
     ));
     await room.init("AR-AFKVOID000000001",players,"void-seed");
@@ -474,7 +516,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-FORFEIT${index}`,player.clubName,1000,"2026-Q3",0,0,0,0,0,0,"[]",created,created)
     ));
     await room.init("AR-AFKFORFEIT000001",players,"forfeit-seed");
@@ -514,7 +556,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-DRAW${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
     ));
     await room.init("AR-REGULATIONDRAW001",players,"draw-seed");
@@ -557,7 +599,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-REMATCH${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
     ));
     await room.init(originalId,players,"rematch-seed");
@@ -618,7 +660,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-PENALTY${index}`,player.clubName,1000,seasonKey(),0,0,0,0,0,0,"[]",created,created)
     ));
     await room.init(matchId,players,"penalty-rematch-seed");
@@ -645,7 +687,7 @@ describe("Arena Durable Objects",()=>{
     ];
     const created=new Date().toISOString();
     await env.DB.batch(players.map((player,index)=>
-      env.DB.prepare("INSERT INTO arena_profiles VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
         .bind(player.owner,`AC-SEASON${index}`,player.clubName,1800,"2000-Q1",999,4,2,3,2,99,"[]",created,created)
     ));
     await room.init("AR-SEASONRESET00001",players,"season-seed");

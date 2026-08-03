@@ -14,10 +14,12 @@
   "durable_objects": {
     "bindings": [
       {"name": "ARENA_MATCHMAKER", "class_name": "ArenaMatchmaker"},
-      {"name": "ARENA_ROOM", "class_name": "ArenaRoom"}
+      {"name": "ARENA_ROOM", "class_name": "ArenaRoom"},
+      {"name": "ARENA_TOURNAMENT", "class_name": "ArenaTournament"}
     ]
   },
   "migrations": [
-    {"tag": "v1", "new_sqlite_classes": ["ArenaMatchmaker", "ArenaRoom"]}
+    {"tag": "v1", "new_sqlite_classes": ["ArenaMatchmaker", "ArenaRoom"]},
+    {"tag": "v2", "new_sqlite_classes": ["ArenaTournament"]}
   ]
 }
