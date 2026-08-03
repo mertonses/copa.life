@@ -17,5 +17,11 @@
     "@cloudflare/workers-types": "latest",
     "vitest": "^4.1.0",
     "wrangler": "latest"
+  },
+  "overrides": {
+    "undici": "7.29.0"
+  },
+  "dependencies": {
+    "copa-life": "file:../.."
   }
 }
