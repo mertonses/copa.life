@@ -562,6 +562,19 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
   const actionPanel=page.locator("#mobileActionDock .actionbtns:visible, #hub .hub-action-panel .actionbtns:visible").first();
   await expect(actionPanel).toBeVisible();
+  const removedDockMarker=await page.evaluate(()=>{
+    const column=document.querySelector("#hub .hcol-l");
+    const marker=[...(column?.childNodes||[])].find(node=>node.nodeType===Node.COMMENT_NODE&&node.textContent==="copa-mobile-action-origin");
+    if(!marker)return false;
+    marker.remove();
+    (globalThis as any).showModal('<div data-dock-redraw-test>HUB redraw</div>');
+    return true;
+  });
+  expect(removedDockMarker).toBe(true);
+  await expect(page.locator("[data-dock-redraw-test]")).toBeVisible();
+  await expect(page.locator("#hub .hub-action-panel")).toHaveCount(1);
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await expect(actionPanel).toBeVisible();
   const readActionLayout=()=>actionPanel.evaluate((panel:HTMLElement)=>{
     const controls=["presBtn","talkBtn","playBtn"]
       .map(id=>document.getElementById(id)!)

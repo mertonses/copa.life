@@ -9,13 +9,34 @@
     de:{slogan:"WÄHLE DEINE STORY. AB AUFS FELD.",kicker:"SPIELMODUS",title:"Wie möchtest du spielen?",intro:"Erlebe deine Solo-Story oder fordere Gegner in der Arena heraus.",solo:"EINZELSPIELER",lifeDesc:"Baue deinen Kader, entscheide und schreibe deine eigene Fußballgeschichte.",lifeMeta:"KLASSISCHES ERLEBNIS",lifeCta:"SPIELEN →",multiplayer:"MEHRSPIELER",arenaDesc:"Live-Matchmaking, Ranglistenreise und Revanche-Spannung.",arenaMeta:"WETTKAMPF · LIVE",arenaCta:"ARENA BETRETEN →",note:"LIFE ist eine Solo-Reise; ARENA bringt Zeitentscheidungen und Live-Wettkampf."},
     it:{slogan:"SCEGLI LA TUA STORIA. SCENDI IN CAMPO.",kicker:"MODALITÀ DI GIOCO",title:"Come vuoi giocare?",intro:"Vivi la storia in singolo o sfida gli avversari nell'Arena.",solo:"GIOCATORE SINGOLO",lifeDesc:"Crea la rosa, scegli e scrivi la tua storia di calcio.",lifeMeta:"ESPERIENZA CLASSICA",lifeCta:"GIOCA →",multiplayer:"MULTIGIOCATORE",arenaDesc:"Matchmaking live, percorso classificato ed emozione della rivincita.",arenaMeta:"COMPETITIVO · LIVE",arenaCta:"ENTRA NELL'ARENA →",note:"LIFE è un viaggio in singolo; ARENA aggiunge decisioni a tempo e competizione live."}
   };
+  Object.assign(COPY.tr,{storyMode:"HİKÂYE MODU",lifeFeatureStory:"HİKÂYE",lifeFeatureLength:"7 MAÇ",lifeFeatureSave:"OTOMATİK KAYIT",arenaFeatureRanked:"DERECELİ",arenaFeatureLive:"CANLI EŞLEŞME",arenaFeatureSeason:"SEZON YOLU",lifeStatusLabel:"KARİYER DURUMU",arenaStatusLabel:"ARENA DURUMU",lifeCta:"COPA LIFE'I BAŞLAT",arenaCta:"ARENA'YA GİR",selectionLabel:"Oyun modu seçimi",lifeFeatures:"Copa Life özellikleri",arenaFeatures:"Copa Arena özellikleri",newCareer:"YENİ KARİYER · 7 MAÇ",continueCareer:"KALDIĞIN YERDEN · MAÇ {round}/7",arenaReady:"SERVİS HAZIR · DERECELİ",arenaClub:"{club} · DERECELİ",arenaOffline:"ÇEVRİMDIŞI · ANTRENMAN AÇIK",continueCta:"KARİYERE DEVAM ET"});
+  Object.assign(COPY.en,{storyMode:"STORY MODE",lifeFeatureStory:"STORY",lifeFeatureLength:"7 MATCHES",lifeFeatureSave:"AUTO SAVE",arenaFeatureRanked:"RANKED",arenaFeatureLive:"LIVE MATCH",arenaFeatureSeason:"SEASON TRACK",lifeStatusLabel:"CAREER STATUS",arenaStatusLabel:"ARENA STATUS",lifeCta:"START COPA LIFE",arenaCta:"ENTER ARENA",selectionLabel:"Game mode selection",lifeFeatures:"Copa Life features",arenaFeatures:"Copa Arena features",newCareer:"NEW CAREER · 7 MATCHES",continueCareer:"CONTINUE · MATCH {round}/7",arenaReady:"SERVICE READY · RANKED",arenaClub:"{club} · RANKED",arenaOffline:"OFFLINE · PRACTICE OPEN",continueCta:"CONTINUE CAREER"});
+  Object.assign(COPY.es,{storyMode:"MODO HISTORIA",lifeFeatureStory:"HISTORIA",lifeFeatureLength:"7 PARTIDOS",lifeFeatureSave:"AUTOGUARDADO",arenaFeatureRanked:"CLASIFICATORIO",arenaFeatureLive:"PARTIDA EN VIVO",arenaFeatureSeason:"RUTA DE TEMPORADA",lifeStatusLabel:"ESTADO DE CARRERA",arenaStatusLabel:"ESTADO DE ARENA",lifeCta:"INICIAR COPA LIFE",arenaCta:"ENTRAR EN ARENA",selectionLabel:"Selección de modo de juego",lifeFeatures:"Características de Copa Life",arenaFeatures:"Características de Copa Arena",newCareer:"NUEVA CARRERA · 7 PARTIDOS",continueCareer:"CONTINUAR · PARTIDO {round}/7",arenaReady:"SERVICIO LISTO · CLASIFICATORIO",arenaClub:"{club} · CLASIFICATORIO",arenaOffline:"SIN CONEXIÓN · PRÁCTICA ABIERTA",continueCta:"CONTINUAR CARRERA"});
+  Object.assign(COPY.de,{storyMode:"STORY-MODUS",lifeFeatureStory:"STORY",lifeFeatureLength:"7 SPIELE",lifeFeatureSave:"AUTOSAVE",arenaFeatureRanked:"RANGLISTE",arenaFeatureLive:"LIVE-SPIEL",arenaFeatureSeason:"SAISONPFAD",lifeStatusLabel:"KARRIERESTATUS",arenaStatusLabel:"ARENASTATUS",lifeCta:"COPA LIFE STARTEN",arenaCta:"ARENA BETRETEN",selectionLabel:"Spielmodusauswahl",lifeFeatures:"Copa-Life-Funktionen",arenaFeatures:"Copa-Arena-Funktionen",newCareer:"NEUE KARRIERE · 7 SPIELE",continueCareer:"FORTSETZEN · SPIEL {round}/7",arenaReady:"DIENST BEREIT · RANGLISTE",arenaClub:"{club} · RANGLISTE",arenaOffline:"OFFLINE · TRAINING OFFEN",continueCta:"KARRIERE FORTSETZEN"});
+  Object.assign(COPY.it,{storyMode:"MODALITÀ STORIA",lifeFeatureStory:"STORIA",lifeFeatureLength:"7 PARTITE",lifeFeatureSave:"SALVATAGGIO AUTO",arenaFeatureRanked:"CLASSIFICATA",arenaFeatureLive:"PARTITA LIVE",arenaFeatureSeason:"PERCORSO STAGIONE",lifeStatusLabel:"STATO CARRIERA",arenaStatusLabel:"STATO ARENA",lifeCta:"AVVIA COPA LIFE",arenaCta:"ENTRA NELL'ARENA",selectionLabel:"Selezione modalità di gioco",lifeFeatures:"Funzioni Copa Life",arenaFeatures:"Funzioni Copa Arena",newCareer:"NUOVA CARRIERA · 7 PARTITE",continueCareer:"CONTINUA · PARTITA {round}/7",arenaReady:"SERVIZIO PRONTO · CLASSIFICATA",arenaClub:"{club} · CLASSIFICATA",arenaOffline:"OFFLINE · ALLENAMENTO APERTO",continueCta:"CONTINUA CARRIERA"});
+  const format=(template,values)=>String(template||"").replace(/\{(\w+)\}/g,(_,key)=>values[key]??"");
+  function runState(){try{return root.CopaRunPersistence?.read?.().state||null;}catch(_){return null;}}
+  function arenaClub(){try{return root.localStorage.getItem("copa_arena_club_v1")||"";}catch(_){return "";}}
+  function refreshState(copy){
+    const element=gate();if(!element)return;
+    const run=runState(),life=element.querySelector('[data-mode-state="life"]'),lifeCta=element.querySelector('.mode-card-classic [data-mode-copy="lifeCta"]');
+    if(life)life.textContent=run?format(copy.continueCareer,{round:Math.max(1,Math.min(7,Number(run.round)||1))}):copy.newCareer;
+    if(lifeCta)lifeCta.textContent=run?copy.continueCta:copy.lifeCta;
+    const arena=element.querySelector('[data-mode-state="arena"]'),club=arenaClub();
+    if(arena)arena.textContent=!root.navigator.onLine?copy.arenaOffline:(club?format(copy.arenaClub,{club}):copy.arenaReady);
+  }
+  function selectCard(card,focus=false){
+    const element=gate();if(!element||!card)return;
+    element.querySelectorAll(".mode-card").forEach(item=>item.classList.toggle("is-selected",item===card));
+    if(focus)card.focus({preventScroll:true});
+  }
   function setVisible(visible){
     const element=gate();if(!element)return;
     const hidden=!visible;
     if(element.hidden!==hidden)element.hidden=hidden;
     if(document.documentElement.classList.contains("mode-gate-active")!==visible)document.documentElement.classList.toggle("mode-gate-active",visible);
     if(document.body.classList.contains("mode-gate-active")!==visible)document.body.classList.toggle("mode-gate-active",visible);
-    if(visible)element.scrollTop=0;
+    if(visible){element.scrollTop=0;refreshCopy();}
     syncLifeBack();
   }
   function syncLifeBack(){
@@ -45,6 +66,8 @@
     const copy=COPY[root.LANG]||COPY.en;
     const title=element.querySelector("#modeGateTitle");if(title)title.textContent=copy.title;
     element.querySelectorAll("[data-mode-copy]").forEach(node=>{const value=copy[node.dataset.modeCopy];if(value)node.textContent=value;});
+    element.querySelectorAll("[data-mode-aria]").forEach(node=>{const value=copy[node.dataset.modeAria];if(value)node.setAttribute("aria-label",value);});
+    refreshState(copy);
     const settings=element.querySelector(".mode-settings-button");
     if(settings){const label={tr:"Ayarlar",en:"Settings",es:"Ajustes",de:"Einstellungen",it:"Impostazioni"}[root.LANG]||"Settings";settings.title=label;settings.setAttribute("aria-label",label);}
     const button=lifeBack();
@@ -71,6 +94,14 @@
   document.addEventListener("click",event=>{
     const button=event.target.closest("[data-mode-choice]");if(button){root.sfxModeChoice?.(button.dataset.modeChoice);choose(button.dataset.modeChoice);}
   });
+  document.addEventListener("pointerover",event=>{const card=event.target.closest?.(".mode-card");if(card&&gate()?.contains(card))selectCard(card);});
+  document.addEventListener("focusin",event=>{const card=event.target.closest?.(".mode-card");if(card&&gate()?.contains(card))selectCard(card);});
+  document.addEventListener("keydown",event=>{
+    if(!gate()||gate().hidden||!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;
+    const cards=[...gate().querySelectorAll(".mode-card")],focused=document.activeElement?.closest?.(".mode-card"),current=cards.indexOf(focused);
+    event.preventDefault();selectCard(cards[current===0?1:0]||cards[0],true);
+  });
+  root.addEventListener("online",refreshCopy);root.addEventListener("offline",refreshCopy);
   root.CopaModeGate=Object.freeze({show:()=>setVisible(true),hide:()=>setVisible(false),choose,returnToModes,refreshCopy});
   document.addEventListener("DOMContentLoaded",()=>{
     refreshCopy();

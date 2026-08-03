@@ -24,6 +24,7 @@ body:has(#modal:not(.hidden)) #toastContainer{z-index:79}
   html.copa-mobile-game body.mobile-game-landing-open,html.copa-mobile-game body.mobile-game-setup-open{height:100dvh;overflow:hidden}
   html.copa-mobile-game body:not(.run-active) .wrap{padding:0;max-width:none}
   html.copa-mobile-game body:not(.run-active) .top{position:fixed;z-index:51;top:max(10px,env(safe-area-inset-top));right:12px;left:auto;width:auto;border:0;background:transparent}
+  html.copa-mobile-game body:not(.run-active) .top .life-mode-back:not([hidden]){position:fixed;z-index:2;top:max(10px,env(safe-area-inset-top));right:auto;left:12px}
   html.copa-mobile-game body:not(.run-active) .top .logo,html.copa-mobile-game body:not(.run-active) .top .budget{display:none}
   html.copa-mobile-game .global-footer-bar{display:none!important}
   html.copa-mobile-game body.mobile-game-landing-open #mobileActionDock,

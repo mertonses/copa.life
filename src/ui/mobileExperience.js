@@ -220,11 +220,27 @@
 
   function restoreMounted(){
     if(!mounted)return;
-    const {node,placeholder}=mounted;
+    const {node,placeholder,homeParent,homeNext,kind}=mounted;
     if(placeholder.parentNode){
       placeholder.parentNode.insertBefore(node,placeholder);
       placeholder.remove();
-    }else if(dockInner&&dockInner.contains(node))node.remove();
+    }else if(dockInner&&dockInner.contains(node)){
+      /* The hub can redraw while its action panel lives in the mobile dock.
+         In that case the placeholder and its original parent are detached.
+         Recover the still-live controls instead of deleting them. */
+      if(homeParent&&homeParent.isConnected){
+        const anchor=homeNext&&homeNext.parentNode===homeParent?homeNext:null;
+        homeParent.insertBefore(node,anchor);
+      }else if(kind==="hub"){
+        const current=document.querySelector("#hub .hub-action-panel");
+        const fallback=document.querySelector("#hub .hcol-l")||document.querySelector("#hub .hubcols");
+        if(current&&current!==node)node.remove();
+        else if(fallback){
+          const versus=fallback.querySelector(":scope > .vsbar");
+          fallback.insertBefore(node,versus&&versus.nextSibling||fallback.firstChild);
+        }else node.remove();
+      }else node.remove();
+    }
     mounted=null;
   }
 
@@ -266,10 +282,11 @@
     }
     restoreMounted();
     if(!candidate.node||!candidate.node.parentNode)return;
+    const homeParent=candidate.node.parentNode,homeNext=candidate.node.nextSibling;
     const placeholder=document.createComment("copa-mobile-action-origin");
-    candidate.node.parentNode.insertBefore(placeholder,candidate.node);
+    homeParent.insertBefore(placeholder,candidate.node);
     dockInner.appendChild(candidate.node);
-    mounted={node:candidate.node,placeholder};
+    mounted={node:candidate.node,placeholder,homeParent,homeNext,kind:candidate.kind};
     dock.dataset.dockKind=candidate.kind;
     dock.classList.remove("hidden");
     document.documentElement.classList.add("mobile-dock-active");
