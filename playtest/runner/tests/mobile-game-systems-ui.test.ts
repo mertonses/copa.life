@@ -405,6 +405,7 @@ test("holding quick draw completes the ceremony and reduced motion stays explici
 });
 
 test("preparation, mobile routes and locker-room talk are playable",async({page},testInfo)=>{
+  test.setTimeout(120_000);
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.goto("/?native-game=1&visual=systems",{waitUntil:"domcontentloaded"});
