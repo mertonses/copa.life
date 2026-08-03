@@ -22,7 +22,7 @@
     }
   });
   const fresh=()=>({version:1,selected:"",checkpoints:[],completed:false,success:false,rewardClaimed:false});
-  let state=fresh();
+  let state=fresh(),selectionTimer=0;
   const tr=()=>root.LANG==="tr";
   const copy=value=>JSON.parse(JSON.stringify(value));
   const valid=id=>Object.hasOwn(DEFINITIONS,id);
@@ -30,7 +30,7 @@
     const choices=preparation&&Array.isArray(preparation.choices)?preparation.choices:[];
     return Array.from(new Set(choices.map(item=>String(item&&item.id||"")).filter(Boolean)));
   };
-  function reset(){state=fresh();}
+  function reset(){state=fresh();if(typeof clearTimeout==="function")clearTimeout(selectionTimer);selectionTimer=0;}
   function snapshot(){return copy(state);}
   function restore(value){
     const source=value&&typeof value==="object"?value:{};
@@ -63,7 +63,7 @@
     return route==="match";
   }
   function showSelection(explicit){
-    if(state.selected||Number(root.round)!==1||typeof root.showModal!=="function")return false;
+    if(state.selected||state.checkpoints.length||typeof root.showModal!=="function")return false;
     if(!explicit&&!selectionSurfaceReady())return false;
     const modal=document.getElementById("modal");
     /* An explicit click comes from the career modal itself, so it must be
@@ -73,7 +73,16 @@
     return true;
   }
   function queueSelection(delay){
-    return false;
+    if(typeof clearTimeout==="function")clearTimeout(selectionTimer);
+    let attempts=0;
+    const tryOpen=()=>{
+      selectionTimer=0;
+      if(state.selected||state.checkpoints.length)return;
+      if(showSelection(false))return;
+      if(++attempts<4)selectionTimer=setTimeout(tryOpen,1200);
+    };
+    selectionTimer=setTimeout(tryOpen,Math.max(0,Number(delay)||0));
+    return true;
   }
   function checkpointFor(context){
     const round=Math.max(1,Number(context&&context.round)||1);

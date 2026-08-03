@@ -892,15 +892,15 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   await capture(page,"09-phaser-penalty.png");
 });
 
-test("native run restart returns to the redesigned Copa Life landing",async({page},testInfo)=>{
+test("native run restart returns to the Life and Arena mode choice",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.goto("/?native-game=1&visual=restart-landing",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{const game=globalThis as any;game.CopaMobileShell.newRun();game.restart();});
-  await expect(page.locator("#mobileGameLanding")).toBeVisible();
+  await expect(page.locator("#modeGate")).toBeVisible();
   await expect(page.locator("#introSetup")).toBeHidden();
-  await expect(page.locator(".mgl-road li")).toHaveCount(4);
-  await expect(page.locator(".mgl-brand")).toContainText(/COPA LİFE|COPA LIFE/i);
+  await expect(page.locator('[data-mode-choice="classic"]')).toBeVisible();
+  await expect(page.locator('[data-mode-choice="arena"]')).toBeVisible();
 });
 
 test("web preparation board stays inside its modal shell",async({page})=>{

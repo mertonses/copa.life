@@ -149,7 +149,7 @@ for(const theme of ["dark"] as const){
     await page.evaluate(()=>(globalThis as any).closeModal());
 
     await page.evaluate(async()=>{const global=globalThis as any;await global.CopaLazy.ensureChairPicker();global.showChairPopup("babacan");});
-    const disadvantage=page.locator(".chair-picker-modal .cp-hl-con");
+    const disadvantage=page.locator(".chair-picker-modal .cp-contract-red");
     await expect(disadvantage).toHaveCount(1);
     await expect(disadvantage).not.toHaveText("");
     const disadvantageStyle=await disadvantage.evaluate(element=>{const style=getComputedStyle(element);return{color:style.color,background:style.backgroundColor,border:style.borderTopColor};});

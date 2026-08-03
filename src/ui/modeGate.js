@@ -61,7 +61,8 @@
   function shouldBypassForAutomation(){
     try{
       const params=new URLSearchParams(root.location.search);
-      return !!root.navigator.webdriver&&!params.has("arena-visual-qa");
+      const modeGateQa=params.get("visual")==="restart-landing"||params.has("mode-gate-qa");
+      return !!root.navigator.webdriver&&!params.has("arena-visual-qa")&&!modeGateQa;
     }catch(_){return false;}
   }
   function shouldYieldToGame(){

@@ -97,6 +97,14 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await capture(page,"01-web-opening-with-arena.png");
   await page.locator('[data-mode-choice="arena"]').click();
   await expect(page.locator(".arena-portal")).toBeVisible();
+  await expect(page.locator('[data-arena-action="custom-room"]')).toContainText("PRIVATE ROOM");
+  await page.locator('[data-arena-action="custom-room"]').click();
+  await expect(page.locator(".arena-custom-room")).toBeVisible();
+  await expect(page.locator('[data-arena-action="create-custom"]')).toBeVisible();
+  await page.locator('[data-arena-custom-code]').fill("abc234");
+  await expect(page.locator('[data-arena-custom-code]')).toHaveValue("ABC234");
+  await page.locator('[data-arena-action="portal"]').click();
+  await expect(page.locator(".arena-portal")).toBeVisible();
   await page.locator(".arena-settings-button").click();
   await expect(page.locator("#settingsDrop")).toBeVisible();
   await page.keyboard.press("Escape");

@@ -102,7 +102,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-chair-action3">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/arena.css?v=20260730-arena-guide1" data-copa-arena-styles>
-<link rel="stylesheet" href="src/styles/modeGate.css?v=20260730-mode-gate4">
+<link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate5">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -431,7 +431,7 @@ try{
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260727-advanced-sheet1"></script>
-<script src="src/ui/modeGate.js?v=20260730-mode-gate4"></script>
+<script src="src/ui/modeGate.js?v=20260803-mode-gate5"></script>
 <script src="src/runtime/finalReplay.js?v=20260730-import-ui2"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
@@ -768,7 +768,7 @@ function randomClubName(){
     ES:["Real CF","Racing CF","Atlético CF","Deportivo FC","Sporting CF","Cultural CF","Unión CF","Numancia FC","Granada CF","Córdoba CF","Mérida FC","Alavés CF","Betis CF","Rayo FC","Levante UD","Xerez FC"],
     IT:["Calcio FC","Unione FC","Virtus FC","Aurora FC","Cosenza FC","Salernitana FC","Benevento FC","Alessandria FC","Reggiana FC","Ancona FC","Piacenza FC","Vigor FC","Fano FC","Rieti FC"],
     DE:["Borussia FK","Hertha SC","Eintracht FK","Fortuna FK","Werder FK","Alemannia FK","Viktoria FK","Rot-Weiß FK","Tennis Borussia","SpVgg FK","SSV FK","1860 FK","Kickers FK","Arminia FK"],
-    JP:["Sakura FC","Fuji SC","Kanto United","Kansai FC","Seto FC","Hikari SC","Aoi FC","Yamato United","Mirai FC","Nippon Athletic"],
+    JP:["Sapporo FC","Sendai United","Chiba SC","Yokohama Athletic","Kanazawa FC","Nagano United","Shizuoka SC","Hamamatsu FC","Nara Athletic","Matsuyama FC","Takamatsu SC","Nagasaki United","Kumamoto SC","Kagoshima FC","Okinawa United"],
   };
   const pool=_pools[selectedCountry]||(_pools[LANG==="tr"?"TR":"ENG"]);
   const inp=$("postClubName");
@@ -1106,7 +1106,7 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("dr
     /* hover tip for affordable */
     let hoverTip="";
     /* hover tip removed */
-    const secInfo=o.hidden?"":`${o.age||"—"} yaş · ${L().abbr[o.pos]||o.pos}`;
+    const secInfo=o.hidden?ctxLine(o):`${o.age||"—"} yaş · ${L().abbr[o.pos]||o.pos}`;
     b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
     b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}requestChoose(i);};
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});
@@ -1707,6 +1707,10 @@ let _modalPrevFocus=null,_modalTrapFn=null,_modalScrollSnapshot=null;
 function showModal(html,{dismissOnOverlay=false,dismissOnEscape=true,label="",bare=false,sheetClass=""}={}){
   if(window.PlayerProfiles)PlayerProfiles.close();
   const m=$("modal");
+  /* Keep fixed dialogs outside the scaled desktop game canvas. A fixed child
+     of the zoomed .wrap is positioned in that transformed coordinate space,
+     which made Career and other large dialogs look off-centre. */
+  if(m.parentNode!==document.body)document.body.appendChild(m);
   if(m.classList.contains("hidden")||!_modalScrollSnapshot){
     const scrolling=document.scrollingElement||document.documentElement;
     _modalScrollSnapshot={
@@ -1979,6 +1983,13 @@ function _normalMatchLiveRender(){
   const bar=document.getElementById("momBar");if(bar)bar.style.background=`linear-gradient(90deg,var(--green,#4E9B65) ${momentum}%,var(--red,#DA3D2E) ${momentum}%)`;
   const meter=document.getElementById("matchMomentum");if(meter)meter.setAttribute("aria-valuenow",String(momentum));
   set("simState",minute<45?(LANG==="tr"?"İlk yarı":"First half"):minute<90?(LANG==="tr"?"İkinci yarı":"Second half"):(LANG==="tr"?"Maç tamamlandı":"Full time"));
+  const latestEvent=state.events.filter(event=>Number(event.m||0)<=minute).at(-1);
+  set("simRadio",latestEvent
+    ?`${latestEvent.m||"·"}' · ${_normalMatchEventLabel(latestEvent)} · ${latestEvent.home?clip(teamName||"XI",18):clip(opponent&&opponent.name||"RAKİP",18)}`
+    :minute<15?(LANG==="tr"?"İki takım da orta sahada kontrol arıyor":"Both teams are competing for midfield control")
+    :minute<45?(LANG==="tr"?"İlk yarıda tempo yükseliyor":"The first-half tempo is rising")
+    :minute<75?(LANG==="tr"?"İkinci yarıda alanlar açılıyor":"Spaces are opening in the second half")
+    :(LANG==="tr"?"Son bölümde her pozisyon kritik":"Every chance matters in the closing stage"));
   if(ratio>=1)finishMatchPresentation();
 }
 function _presentNormalMatchLive(duration){
@@ -2689,7 +2700,7 @@ function ensureHtml2Canvas(){
 function fb(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){$("copied").textContent=L().copyfail;}document.body.removeChild(ta);}
 let _runRestartInFlight=false;
 async function restartAfterRunAd(){if(_runRestartInFlight)return;_runRestartInFlight=true;const btn=$("againBtn"),original=btn&&btn.innerHTML;if(btn){btn.disabled=true;btn.setAttribute("aria-busy","true");btn.textContent=LT("YENİ TUR HAZIRLANIYOR…","PREPARING NEW RUN…","PREPARANDO NUEVA PARTIDA…","NEUER LAUF WIRD VORBEREITET…","PREPARAZIONE NUOVA PARTITA…");}try{if(window.CopaAds&&typeof window.CopaAds.showRunEnd==="function")await window.CopaAds.showRunEnd(window._completedGhostRunKey);}catch(_){ }finally{_runRestartInFlight=false;if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.innerHTML=original||"";}restart();}}
-function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();const _seedInput=$("seedInput");if(_seedInput)_seedInput.value="";document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");if(window.CopaMobileShell&&CopaMobileShell.gameMode&&CopaMobileShell.gameMode()){CopaMobileShell.showLanding(null);}else{$("introLand").classList.remove("hidden");$("introSetup").classList.remove("hidden");}}
+function restart(){clearTimeout(autoTimer);crowdStop();closeModal();_clearState();const _seedInput=$("seedInput");if(_seedInput)_seedInput.value="";document.body.classList.remove("run-active");$("result").classList.add("hidden");$("fixbar").classList.add("hidden");$("ddbanner").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("sim").classList.add("hidden");$("intro").classList.remove("hidden");budget=BUDGET;legacyCash=0;setBudget();buildFormButtons();applyMeta();applyStatic();{const _top=document.querySelector(".top");const _bb=$("budgetBox");if(_top&&_bb&&!_top.contains(_bb))_top.appendChild(_bb);}$("budgetBox").classList.add("introhide");$("introLand").classList.remove("hidden");$("introSetup").classList.add("hidden");if(window.CopaModeGate)CopaModeGate.returnToModes();}
 
 
 /* ===== v5: categories, identity, helpers ===== */

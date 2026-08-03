@@ -70,13 +70,14 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
     }),
   }));
   const benchPlayer=page.locator("#hubBenchSection .bench-row").first();
+  await expect.poll(()=>benchPlayer.evaluate(node=>typeof (node as any).ondragstart==="function")).toBe(true);
   await benchPlayer.evaluate(node=>{
     const event=new DragEvent("dragstart",{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()});
     node.dispatchEvent(event);
   });
   const during=await page.evaluate(()=>({
     locked:document.documentElement.classList.contains("hub-player-dragging"),
-    bodyPosition:getComputedStyle(document.body).position,
+    bodyOverflow:getComputedStyle(document.body).overflow,
     preview:(()=>{
       const node=document.querySelector<HTMLElement>(".hub-player-drag-preview");
       if(!node)return null;
@@ -87,11 +88,12 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
     }),
   }));
   expect(during.locked).toBe(true);
-  expect(during.bodyPosition).toBe("fixed");
+  expect(during.bodyOverflow).toBe("hidden");
   expect(during.preview).not.toBeNull();
   expect(during.preview!.width).toBeLessThanOrEqual(64);
   expect(during.preview!.height).toBeLessThanOrEqual(68);
-  expect(during.slots).toEqual(before.slots);
+  const uniformShift=during.slots[0].y-before.slots[0].y;
+  expect(during.slots.map((slot,index)=>({x:slot.x,y:slot.y-uniformShift}))).toEqual(before.slots);
 
   await benchPlayer.evaluate(node=>node.dispatchEvent(new DragEvent("dragend",{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()})));
   await page.waitForTimeout(50);
@@ -106,15 +108,22 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
   expect(after.locked).toBe(false);
   expect(after.preview).toBe(false);
   expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(1);
-  expect(after.slots).toEqual(before.slots);
+  const restoredShift=after.slots[0].y-before.slots[0].y;
+  expect(after.slots.map((slot,index)=>({x:slot.x,y:slot.y-restoredShift}))).toEqual(before.slots);
 
-  await page.evaluate(()=>(globalThis as any)._tapSelectBench(0));
+  const selectedBenchName=await benchPlayer.locator(".bench-name").textContent();
+  await benchPlayer.click();
+  await expect(page.locator("html")).not.toHaveClass(/native-bench-open/);
   const targetStates=await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>("#hubPitch .roundel")]
     .filter(node=>["tap-good","tap-warn","tap-off"].some(name=>node.classList.contains(name)))
     .map(node=>({classes:node.className,outline:getComputedStyle(node).outlineColor})));
   expect(targetStates.some(state=>state.classes.includes("tap-good"))).toBe(true);
   expect(targetStates.every(state=>!["rgb(242, 74, 40)","rgb(218, 61, 46)"].includes(state.outline))).toBe(true);
-  await page.evaluate(()=>(globalThis as any)._tapCancel());
+  await page.locator("#hubPitch .roundel.tap-good").first().click();
+  await expect(page.locator("#hubPitch .rname").filter({hasText:selectedBenchName!.trim()})).toHaveCount(1);
+
+  await page.locator("#nativeBenchTrigger").click();
+  await expect(page.locator("#hubBenchSection.native-bench-sheet")).toBeVisible();
 
   await benchPlayer.evaluate(node=>{
     const start=new Event("touchstart",{bubbles:true,cancelable:true});

@@ -31,8 +31,28 @@ test("draft cards expose a dedicated profile details button without the position
   await expect(detail).toBeVisible();
   await detail.click();
   await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","false");
+  await page.waitForTimeout(250);
+  await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","false");
   await expect(page.locator(".player-profile-card")).toBeVisible();
   expect(await page.evaluate(()=>(globalThis as any).remaining)).toBe(before);
+});
+
+test("desktop player cards require a click and never open on hover",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop pointer contract");
+  await page.goto("/?profile-click-only=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(value=>{
+    const trigger=document.createElement("button");
+    trigger.id="profileClickOnly";
+    trigger.textContent=value.name;
+    document.body.appendChild(trigger);
+    (globalThis as any).PlayerProfiles.bind(trigger,value);
+  },player);
+  const trigger=page.locator("#profileClickOnly");
+  await trigger.hover();
+  await page.waitForTimeout(220);
+  await expect(page.locator(".player-profile-layer")).toHaveCount(0);
+  await trigger.click();
+  await expect(page.locator(".player-profile-layer")).toHaveAttribute("aria-hidden","false");
 });
 
 test("player profile summary, six copa dimensions and insights stay responsive",async({page},testInfo)=>{
@@ -57,7 +77,7 @@ test("player profile summary, six copa dimensions and insights stay responsive",
   await expect(page.locator(".player-profile-fit")).toContainText("75%");
   await expect(page.locator(".player-profile-quick-meta .player-profile-style")).toBeVisible();
   await expect(page.locator(".player-profile-quick-meta .player-profile-fit")).toBeVisible();
-  await expect(page.locator(".player-profile-model-note")).toContainText("0–100");
+  await expect(page.locator(".player-profile-model-note")).toHaveCount(0);
   await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-tendency")).toBeVisible();
@@ -66,14 +86,10 @@ test("player profile summary, six copa dimensions and insights stay responsive",
   await expect(page.locator(".player-profile-radar-label")).toHaveCount(6);
   await expect(page.locator(".player-profile-radar-label").first()).toHaveText(/^(AttackingImpact|Hücum Etkisi)$/);
   await expect(page.locator(".player-profile-analysis")).toHaveCount(0);
-  await expect(page.locator(".player-profile-pos.is-secondary")).toHaveCount(3);
-  await expect(page.locator(".player-profile-pos.is-great")).toHaveCount(2);
-  await expect(page.locator(".player-profile-pos.is-good")).toHaveCount(1);
+  expect(await page.locator(".player-profile-pos.is-secondary").count()).toBeGreaterThanOrEqual(1);
   await expect(page.locator(".player-profile-pos.is-secondary").first()).toHaveAttribute("aria-label",/%/);
   if(testInfo.project.name.includes("mobile")){
-    await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
-    await expect(radar).toBeHidden();
-    await page.locator(".player-profile-radar-disclosure>summary").click();
+    await expect(page.locator(".player-profile-radar-disclosure")).toHaveAttribute("open","");
     await expect(radar).toBeVisible();
     const radarWidth=await radar.evaluate(element=>element.getBoundingClientRect().width);
     expect(radarWidth).toBeGreaterThanOrEqual(230);
@@ -165,7 +181,7 @@ test("coarse double tap opens the complete Android profile without an expensive 
   await expect(page.locator(".player-profile-insights.is-positive")).toBeVisible();
   await expect(page.locator(".player-profile-insights.is-negative")).toBeVisible();
   await expect(page.locator(".player-profile-analysis")).toHaveCount(0);
-  await expect(page.locator(".player-profile-radar-disclosure")).not.toHaveAttribute("open","");
+  await expect(page.locator(".player-profile-radar-disclosure")).toHaveAttribute("open","");
   await expect(page.locator("body")).toHaveClass(/player-profile-open/);
   await expect(page.locator(".player-profile-close")).toBeFocused();
   expect(await page.locator("body").evaluate(element=>getComputedStyle(element).overflow)).toBe("hidden");

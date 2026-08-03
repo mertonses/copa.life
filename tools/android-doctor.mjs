@@ -34,7 +34,7 @@ if (java) {
 
 const localProperties = path.join(ROOT, "android", "local.properties");
 const propertySdk = fs.existsSync(localProperties)
-  ? fs.readFileSync(localProperties, "utf8").match(/^sdk\.dir=(.+)$/m)?.[1]?.replaceAll("\\\\", "\\")
+  ? fs.readFileSync(localProperties, "utf8").match(/^sdk\.dir=(.+)$/m)?.[1]?.replace(/\\([\\:= ])/g, "$1")
   : null;
 const androidSdk = process.env.ANDROID_SDK_ROOT || process.env.ANDROID_HOME || propertySdk ||
   (process.platform === "win32" && process.env.LOCALAPPDATA

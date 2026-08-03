@@ -126,6 +126,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   await openHub(page,platform);
 
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
+  await expect(page.locator("#mobileActionDock")).toBeVisible();
   await page.evaluate(()=>(globalThis as any).showToast("Native visual QA",{type:"info",duration:5000}));
   const match=await page.evaluate(()=>{
     const dock=document.getElementById("mobileActionDock")!;

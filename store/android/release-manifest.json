@@ -2,34 +2,26 @@
   "package_id": "life.copa.app",
   "version_code": 25,
   "version_name": "1.4.1",
-  "release_status": "closed_test_submitted",
-  "store_upload_eligible": true,
+  "release_status": "local_candidate",
+  "store_upload_eligible": false,
   "source": {
-    "build_version": "22fb5369fa09",
-    "build_fingerprint": "0d87957779ab69ee4deb33ea6dbf8e5d35a9a8e78a231aaf4f780eeef9e597bd",
-    "fingerprint": "8fb4cf6b22b8945b24955af78de5d14e65f9ebf7559e52db56df7772d42dccdb",
-    "commit": "22fb5369fa090072eb99711c9df67d8b4673830c"
+    "build_version": "55cd54242417",
+    "build_fingerprint": "55cd54242417f1dc79c1d94df2de0b2a2a19f4004d4969ba592b4f4a88441b45",
+    "fingerprint": "2ddd43a7611e655402a612227130e163b1f926a6e2f1710a4f46a9a712cc510b",
+    "commit": null
   },
   "min_sdk": 24,
   "target_sdk": 36,
   "compile_sdk": 36,
   "signed_aab": {
-    "file": "signed-android-1.4.1-25/app-release.aab",
-    "bytes": 17525136,
-    "sha256": "01CAE01E6833F4A3054E6B363DFC0E7E380DE80A045C4BB4970A30F6502FB4F2",
-    "artifact_name": "signed-android-1.4.1-25",
-    "artifact_id": 8775052779,
-    "workflow_run": "https://github.com/mertonses/copa.life/actions/runs/30580952290",
-    "expires_at": "2026-08-29T21:09:11Z"
+    "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
+    "bytes": 17580684,
+    "sha256": "AD1C115C10578309161093DCD4A9DAB3BFB2E9721C94AE6F59E32C6D1D5177A0"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "admob": {
-    "mode": "production",
-    "production_ids_present": true,
-    "google_play_store_linked": true,
-    "app_verification": "verified",
-    "app_review": "pending",
-    "ump_european_regulations_message": "published"
+    "mode": "test",
+    "production_ids_present": false
   },
   "permissions": [
     "android.permission.INTERNET",
@@ -46,9 +38,8 @@
     "web_android_parity": "passed",
     "android_package_scan": "passed",
     "signed_aab_signature": "passed",
-    "pr_candidate_emulator_smoke": "passed",
-    "exact_signed_release_emulator_smoke": "not recorded for v1.4.1",
-    "physical_device_smoke": "collect through closed testing"
+    "exact_release_emulator_smoke": "required after candidate build",
+    "physical_device_smoke": "required before track promotion"
   },
   "external_prerequisites": [
     "obtain AdMob app approval after Google Play store linking",

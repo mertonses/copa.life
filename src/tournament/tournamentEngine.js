@@ -67,7 +67,7 @@
     const low=values[0]||60,rawHigh=values[values.length-1]||94;
     /* Keep elite clubs dangerous without making a seven-match run collapse into
        an almost automatic round-of-16 exit for a well-built 80-power squad. */
-    const high=rawHigh>86?86+(rawHigh-86)*.40:rawHigh,span=Math.max(22,high-low);
+    const high=rawHigh>86?86:rawHigh,span=Math.max(22,high-low);
     const total=Math.max(1,Number(count)||31);
     return Array.from({length:total},(_,index)=>Math.round(low+span*(1-index/Math.max(1,total-1))));
   }

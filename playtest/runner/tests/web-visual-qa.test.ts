@@ -379,7 +379,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   await capture(page,"07-career.png");
   await page.evaluate(()=>(globalThis as any).CopaMobileShell.openCareerSection("museum"));
   await expect(page.locator(".meta-collection-grid")).toBeVisible();
-  const museumLayout=await page.locator(".mobile-career-panel").evaluate((panel:HTMLElement)=>({
+  const museumLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>({
     collections:panel.querySelectorAll(".meta-collection-grid article").length,
     visibleMemories:panel.querySelectorAll(".meta-memory-section>.meta-memory-list>.meta-memory-card").length,
     archiveOpen:panel.querySelector("details.meta-memory-archive")?.hasAttribute("open")||false,
@@ -604,6 +604,8 @@ test("source-web hub routes stay bounded and keep every primary action visible",
 
     await page.locator('#nativeHubNav [data-native-target="training"]').click();
     await expect(page.locator("#mobileTrainingRoute")).toBeVisible();
+    const trainingCta=page.locator("#mobileTrainingRoute .bact .btn").first();
+    await trainingCta.scrollIntoViewIfNeeded();
     await capture(page,`responsive-${viewport.name}-training.png`);
     const training=await page.evaluate(()=>{
       const route=document.querySelector<HTMLElement>("#mobileTrainingRoute")!;
@@ -613,6 +615,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
       return{
         overflow:document.documentElement.scrollWidth-innerWidth,
         routeOverflow:route.scrollWidth-route.clientWidth,
+        routeTop:routeRect.top,
         routeBottom:routeRect.bottom,
         visibleDrills:drills.filter(drill=>drill.offsetParent).length,
         totalDrills:drills.length,
@@ -624,6 +627,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     expect(training.cta.left,viewport.name).toBeGreaterThanOrEqual(-1);
     expect(training.cta.right,viewport.name).toBeLessThanOrEqual(viewport.width+1);
     expect(training.cta.height,viewport.name).toBeGreaterThanOrEqual(44);
+    expect(training.cta.bottom-training.cta.height,viewport.name).toBeGreaterThanOrEqual(training.routeTop-1);
     expect(training.cta.bottom,viewport.name).toBeLessThanOrEqual(training.routeBottom+1);
     expect(training.visibleDrills,viewport.name).toBe(training.totalDrills);
     expect(training.totalDrills,viewport.name).toBeGreaterThanOrEqual(7);
