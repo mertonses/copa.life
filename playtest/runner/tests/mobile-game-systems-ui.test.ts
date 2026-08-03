@@ -557,7 +557,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
   await expect(page.locator("#hubPitch")).toBeVisible();
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
-  const actionLayout=await page.locator("#mobileActionDock .actionbtns").evaluate((panel:HTMLElement)=>{
+  const actionLayout=await page.locator("#mobileActionDock .actionbtns, #hub .hub-action-panel .actionbtns").first().evaluate((panel:HTMLElement)=>{
     const controls=["presBtn","talkBtn","playBtn"].map(id=>document.getElementById(id)!.getBoundingClientRect());
     return{
       rows:new Set(controls.map(rect=>Math.round(rect.top))).size,
