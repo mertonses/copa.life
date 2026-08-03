@@ -555,10 +555,14 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await page.setViewportSize({width:430,height:932});
   await page.locator("#presBtn").evaluate((button:HTMLButtonElement)=>button.click());
   await expect(page.locator("#toastContainer")).toContainText(/quarter-final|çeyrek final/i);
-  await page.locator('#nativeHubNav [data-native-target="match"]').click();
+  const matchRoute=page.locator('#nativeHubNav [data-native-target="match"]');
+  if(await matchRoute.getAttribute("aria-current")!=="page")await matchRoute.click();
+  await expect(matchRoute).toHaveAttribute("aria-current","page");
   await expect(page.locator("#hubPitch")).toBeVisible();
   await expect(page.locator("#hubPitch .roundel.full")).toHaveCount(11);
-  const actionLayout=await page.locator("#mobileActionDock .actionbtns, #hub .hub-action-panel .actionbtns").first().evaluate((panel:HTMLElement)=>{
+  const actionPanel=page.locator("#mobileActionDock .actionbtns:visible, #hub .hub-action-panel .actionbtns:visible").first();
+  await expect(actionPanel).toBeVisible();
+  const readActionLayout=()=>actionPanel.evaluate((panel:HTMLElement)=>{
     const controls=["presBtn","talkBtn","playBtn"]
       .map(id=>document.getElementById(id)!)
       .filter(button=>!button.classList.contains("hidden")&&getComputedStyle(button).display!=="none")
@@ -569,6 +573,11 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
       widths:controls.map(rect=>Math.round(rect.width)),
     };
   });
+  await expect.poll(async()=>{
+    const layout=await readActionLayout();
+    return layout.rows===1&&layout.panelOverflow<=1&&layout.widths.every(width=>width>=44);
+  }).toBe(true);
+  const actionLayout=await readActionLayout();
   expect(actionLayout.rows).toBe(1);
   expect(actionLayout.panelOverflow).toBeLessThanOrEqual(1);
   expect(actionLayout.widths.every(width=>width>=44)).toBe(true);

@@ -591,7 +591,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 
   html[data-copa-platform="web"] .mobile-action-dock[data-dock-kind="hub"] :is(#talkBtn,#presBtn,#playBtn){
     width:100%!important;
-    min-width:0!important;
+    min-width:44px!important;
     min-height:48px!important;
     padding:7px 5px!important;
   }
