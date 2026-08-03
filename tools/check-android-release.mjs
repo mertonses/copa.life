@@ -38,8 +38,8 @@ if (read(".nvmrc").trim() !== "22") fail(".nvmrc must pin Node 22");
 if (read(".java-version").trim() !== "21") fail(".java-version must pin JDK 21");
 
 const wrapper = read("android/gradle/wrapper/gradle-wrapper.properties");
-if (!wrapper.includes("gradle-8.14.3-all.zip")) fail("unexpected Gradle wrapper version");
-if (!wrapper.includes("distributionSha256Sum=ed1a8d686605fd7c23bdf62c7fc7add1c5b23b2bbc3721e661934ef4a4911d7c")) {
+if (!wrapper.includes("gradle-9.6.1-all.zip")) fail("unexpected Gradle wrapper version");
+if (!wrapper.includes("distributionSha256Sum=61ba77b3ff7167e60962763eb4bae79db7120c189b9544358d0ade3c1e712a83")) {
   fail("Gradle wrapper checksum is missing or incorrect");
 }
 
