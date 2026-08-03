@@ -18,7 +18,7 @@
     "assets:promo-video": "node render-promo-videos.mjs"
   },
   "dependencies": {
-    "@playwright/test": "^1.44.0",
+    "@playwright/test": "^1.62.1",
     "playwright": "^1.44.0"
   },
   "devDependencies": {
