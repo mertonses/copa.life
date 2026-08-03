@@ -69,3 +69,16 @@ html.mode-gate-active,html.mode-gate-active body{overflow:hidden!important}
 @media(max-width:760px){.mode-gate-brand{height:64px;padding:max(11px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 9px max(16px,env(safe-area-inset-left))}.mode-gate-main{width:min(100% - 24px,540px);padding:22px 0 max(22px,env(safe-area-inset-bottom))}.mode-gate-heading{margin-bottom:18px}.mode-gate-grid{grid-template-columns:1fr;gap:12px}.mode-card{min-height:228px!important;padding:19px;border-radius:13px}.mode-card::after{left:19px;right:19px}.mode-card:hover,.mode-card:focus-visible,.mode-card.is-selected{transform:none}.mode-card-emblem{top:45px;right:19px;width:45px;height:45px}.mode-card-emblem svg{width:26px;height:26px}.mode-card-copy{max-width:calc(100% - 42px)}.mode-card-copy strong{font-size:27px}.mode-card-features{gap:5px;margin-top:12px}.mode-card-features>span{padding:5px 7px;font-size:7px}.mode-card-status{gap:10px;margin-top:14px;padding-top:12px}.mode-card-status small{font-size:7px}.mode-card-status b{font-size:8px}.mode-card-cta{min-height:37px;padding:0 11px;font-size:8px}.mode-card-cta svg{width:13px;height:13px}}
 @media(max-width:380px){.mode-card{min-height:236px!important}.mode-card-cta{padding:0 9px}.mode-card-cta span{max-width:108px;text-align:center}.mode-card-status b{max-width:132px}.mode-card-features>span{letter-spacing:.4px}}
 @media(prefers-reduced-motion:reduce){.mode-card-backdrop,.mode-card-backdrop::before,.mode-card-backdrop::after,.mode-card-cta{transition:none;animation:none}}
+
+/* Keep the first interactive frame cheap on mobile WebViews and compact browsers. */
+@media(max-width:760px){
+  .mode-gate-brand,.mode-card-emblem,.mode-card-features>span{backdrop-filter:none}
+  .mode-card-backdrop,.mode-card-backdrop::before,.mode-card-backdrop::after,.mode-card-live i{animation:none!important;transition:none!important}
+}
+html[data-copa-platform="android"] .mode-gate-brand,
+html[data-copa-platform="android"] .mode-card-emblem,
+html[data-copa-platform="android"] .mode-card-features>span{backdrop-filter:none}
+html[data-copa-platform="android"] .mode-card-backdrop,
+html[data-copa-platform="android"] .mode-card-backdrop::before,
+html[data-copa-platform="android"] .mode-card-backdrop::after,
+html[data-copa-platform="android"] .mode-card-live i{animation:none!important;transition:none!important}
