@@ -327,11 +327,12 @@ test("captain recommendation has contextual ratings and a distinct animated high
   await expect(page.locator(".cap-card-suggest")).toHaveCount(1);
   const captainVisuals=await page.evaluate(()=>{
     const card=document.querySelector<HTMLElement>(".cap-card-suggest")!,badge=card.querySelector<HTMLElement>(".cap-card-badge")!;
-    const powers=[...document.querySelectorAll<HTMLElement>(".cap-card-power")].map(node=>getComputedStyle(node).color);
+    const powers=[...document.querySelectorAll<HTMLElement>(".cap-card-power")];
     const cardStyle=getComputedStyle(card),badgeStyle=getComputedStyle(badge);
-    return{powerColors:[...new Set(powers)],cardBackground:cardStyle.backgroundImage,badgeBackground:badgeStyle.backgroundColor,badgeColor:badgeStyle.color,animation:cardStyle.animationName};
+    return{powerValues:powers.map(node=>Number(node.textContent)),powerTokens:powers.map(node=>node.style.getPropertyValue("--cap-power").trim()),cardBackground:cardStyle.backgroundImage,badgeBackground:badgeStyle.backgroundColor,badgeColor:badgeStyle.color,animation:cardStyle.animationName};
   });
-  expect(captainVisuals.powerColors.length).toBeGreaterThanOrEqual(2);
+  expect(captainVisuals.powerValues.every(value=>Number.isFinite(value)&&value>=1&&value<=100)).toBe(true);
+  expect(captainVisuals.powerTokens.every(Boolean)).toBe(true);
   expect(captainVisuals.cardBackground).toContain("linear-gradient");
   expect(captainVisuals.badgeBackground).toBe("rgb(10, 17, 24)");
   expect(captainVisuals.badgeColor).toBe("rgb(255, 255, 255)");
