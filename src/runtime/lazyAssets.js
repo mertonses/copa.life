@@ -36,7 +36,7 @@
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260804-interface-future1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260804-interface-future2";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
     return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260804-interface-future1",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
@@ -65,7 +65,7 @@
   }
   function ensureArena(){
     return Promise.all([
-      loadStyleOnce("copa-arena-style","src/styles/arena.css?v=20260804-interface-future1",'link[href*="src/styles/arena.css"]'),
+      loadStyleOnce("copa-arena-style","src/styles/arena.css?v=20260804-interface-future2",'link[href*="src/styles/arena.css"]'),
       loadScriptOnce("copa-arena","src/online/arena.js?v=20260804-interface-future1",()=>!!global.CopaArena)
     ]).then(()=>global.CopaArena);
   }

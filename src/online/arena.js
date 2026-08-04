@@ -11,7 +11,7 @@
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
     const current=document.querySelector('link[href*="src/styles/arena.css"]');if(current){current.dataset.copaArenaStyles="true";return;}
-    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260804-interface-future1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
+    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260804-interface-future2";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
   }
   ensureArenaStyles();
   const REWARDS=[

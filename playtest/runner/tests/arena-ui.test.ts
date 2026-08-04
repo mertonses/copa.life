@@ -357,10 +357,10 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-rematch")).toContainText("OPPONENT WANTS A REMATCH");
   await capture(page,"10-web-arena-result.png");
   await setRoom(page,{...base,phase:"result",score:[3,0],result:{score:[3,0],penalty:null,outcomes:["win","loss"],forfeitIndex:1,voided:false}});
-  await expect(page.locator(".arena-result>span")).toContainText("FORFEIT VICTORY");
+  await expect(page.locator(".arena-result-hero>span")).toContainText("FORFEIT VICTORY");
   await capture(page,"11-web-arena-forfeit-result.png");
   await setRoom(page,{...base,phase:"result",score:[0,0],result:{score:[0,0],penalty:null,outcomes:["draw","draw"],forfeitIndex:null,voided:true}});
-  await expect(page.locator(".arena-result>span")).toContainText("VOID MATCH");
+  await expect(page.locator(".arena-result-hero>span")).toContainText("VOID MATCH");
   await capture(page,"12-web-arena-void-result.png");
   const layout=await audit(page);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);

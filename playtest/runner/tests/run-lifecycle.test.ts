@@ -56,8 +56,8 @@ test.describe("run lifecycle and recovery",()=>{
     expect(result.licenses).toBeGreaterThan(0);
     await page.locator(".career-open-link").click();
     await expect(page.locator(".meta-progress-modal")).toBeVisible();
-    await expect(page.locator(".meta-tabs button")).toHaveCount(4);
-    await page.locator(".meta-tabs button").nth(2).click();
+    await expect(page.locator(".meta-tabs button")).toHaveCount(7);
+    await page.locator('.meta-tabs button[onclick*="trophies"]').click();
     await expect(page.locator(".meta-memory-card")).toHaveCount(1);
   });
 
@@ -82,10 +82,10 @@ test.describe("run lifecycle and recovery",()=>{
     await page.locator(".meta-see-all").click();
     await expect(page.locator(".meta-history-modal .meta-run-row")).toHaveCount(8);
     await page.locator(".meta-history-back").click();
-    await page.locator(".meta-tabs button").nth(1).click();
+    await page.locator('.meta-tabs button[onclick*="management"]').click();
     await expect(page.locator(".meta-mastery-row")).toHaveCount(5);
     await expect(page.locator(".meta-mastery-track")).toHaveCount(5);
-    await page.locator(".meta-tabs button").nth(2).click();
+    await page.locator('.meta-tabs button[onclick*="trophies"]').click();
     await expect(page.locator(".meta-memory-card")).toHaveCount(8);
   });
 

@@ -177,7 +177,7 @@ html[data-theme="light"] .meta-career-disclosure{background:#FFFFFF;border-color
   .meta-transfer-modal{width:calc(100vw - 22px);min-width:0;max-height:calc(100dvh - 26px)}
   .meta-progress-head{padding:13px 14px 9px}.meta-progress-head .kithdr{font-size:18px}.meta-progress-head .kitsub{margin-top:3px;font-size:9px}
   .meta-save-menu{width:40px;padding:0;justify-content:center}.meta-save-menu>span:last-child{display:none}.meta-save-menu,.meta-close{min-height:44px}.meta-close{width:44px}
-  .meta-tabs{grid-template-columns:repeat(7,minmax(88px,1fr));margin:0 12px;scroll-snap-type:x proximity}.meta-tabs button{min-height:42px;font-size:8px;letter-spacing:.25px;scroll-snap-align:start}
+  .meta-tabs{grid-template-columns:repeat(4,minmax(0,1fr));margin:0 12px;overflow:visible}.meta-tabs button{min-height:42px;font-size:8px;letter-spacing:.15px}
   .meta-tab-panel{gap:9px;padding:8px 10px calc(14px + env(safe-area-inset-bottom,0px))}
   .meta-career-hero{grid-template-columns:62px minmax(0,1fr)!important;gap:10px;padding:12px!important}.meta-license-count{grid-column:1/-1;grid-template-columns:auto 1fr auto;padding:8px}.meta-license-count>span{grid-row:auto}.meta-next-reward{grid-template-columns:auto minmax(0,1fr);padding:9px}.meta-next-reward>strong{grid-column:2;text-align:left}
   .meta-level-lockup{padding-right:12px}.meta-level-lockup strong{font-size:32px}.meta-career-progress b{font-size:12px}
