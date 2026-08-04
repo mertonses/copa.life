@@ -485,7 +485,16 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   });
   expect(versusLayout).toEqual({youOrdered:true,oppOrdered:true,scoutInMiddle:false});
   expect(await page.locator(".context-metric").evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).backgroundColor!=="rgba(0, 0, 0, 0)"||getComputedStyle(node).backgroundImage!=="none"))).toBe(true);
-  await expect(page.locator("#nativeHubNav button")).toHaveCount(4);
+  await expect(page.locator("#nativeHubNav button")).toHaveCount(5);
+  await page.locator('#nativeHubNav [data-native-target="sidefield"]').click();
+  await expect(page.locator("#sideFieldRoute")).toBeVisible();
+  await expect(page.locator(".ys-hero h1")).toHaveText("YAN SAHA");
+  await expect(page.locator(".ys-match-card")).toHaveCount(15);
+  await page.locator(".ys-match-card .ys-odds button:not([disabled])").first().click();
+  await expect(page.locator(".ys-slip")).toBeVisible();
+  await expect(page.locator(".ys-fineprint")).toContainText(/oyun içi kulüp kasası|in-game club funds/i);
+  await page.locator(".ys-slip-close").click();
+  await page.locator('#nativeHubNav [data-native-target="match"]').click();
   const coachmark=page.locator(".copa-coachmark");
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
   await page.locator(".kasa-detail-btn").click();
@@ -1006,4 +1015,24 @@ test("match result events keep card consequences on one aligned row",async({page
   expect(eventLayout.redCardFill).toBe("rgb(218, 61, 46)");
   await expectSurfaceFit(page,".tele");
   await capture(page,"10-match-result-events.png");
+});
+
+test("knockout result CTA names the stage the winner advances to",async({page})=>{
+  await reset(page);
+  await page.goto("/?autotest=1&visual=knockout-advance-cta",{waitUntil:"domcontentloaded"});
+  const labels=await page.evaluate(()=>{
+    const game=globalThis as any;
+    (0,eval)("LANG='tr'");
+    const copy=game.L();
+    return{
+      quarterfinal:game._knockoutAdvanceLabel("quarterfinal",5,copy),
+      semifinal:game._knockoutAdvanceLabel("semifinal",6,copy),
+      roundOf16:game._knockoutAdvanceLabel("roundof16",4,copy),
+      legacyQuarterfinal:game._knockoutAdvanceLabel("legacy",5,copy),
+    };
+  });
+  expect(labels.quarterfinal).toBe("YARI FİNALE!");
+  expect(labels.semifinal).toBe("Finale!");
+  expect(labels.roundOf16).toBe("Devam");
+  expect(labels.legacyQuarterfinal).toBe("YARI FİNALE!");
 });

@@ -95,11 +95,12 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/match.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
-<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260728-ui-fixes1">
+<link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260805-five-tab-nav1">
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260804-career-center2">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260805-five-tab-nav1">
+<link rel="stylesheet" href="src/styles/sideField.css?v=20260805-yan-saha-nav1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -420,9 +421,11 @@ try{
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/game/penaltyCore.js?v=20260722-shared-penalties1"></script>
 <script src="src/tournament/tournamentEngine.js?v=20260721-groups1"></script>
+<script src="src/sidefield/sideFieldEngine.js?v=20260804-yan-saha1"></script>
 <script src="src/tournament/tournamentUI.js?v=20260728-ui-fixes1"></script>
 <script src="src/tournament/matchResolver.js?v=20260722-knockout-rules1"></script>
 <script src="src/tournament/tournamentRuntime.js?v=20260727-fast-draw2"></script>
+<script src="src/sidefield/sideFieldUI.js?v=20260804-yan-saha1"></script>
 <script src="src/state/runPersistence.js?v=20260720-match-integrity1"></script>
 <script src="src/state/transferSave.js?v=20260730-mobile-transfer2"></script>
 <script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
@@ -462,9 +465,9 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   const style=document.createElement("link"),script=document.createElement("script");
   let pending=2;const done=()=>{pending--;if(pending===0)resolve();};
   style.rel="stylesheet";
-  style.href=platform==="web"?"src/styles/webOnly.css?v=20260729-responsive-result7":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
+  style.href=platform==="web"?"src/styles/webOnly.css?v=20260805-five-tab-nav1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260804-interface-future1";
+  script.src="src/ui/mobileGameSystems.js?v=20260805-yan-saha-nav1";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });
@@ -1898,6 +1901,12 @@ function _suspendedInLineup(){return picksBySlot.find(p=>p&&p.suspended)||null;}
 function suspendedBlockModalHTML(nm,noticeOnly=false){const tr=LANG==="tr";return `<div class="scoutmodal suspended-modal"><header class="suspended-modal-head"><span class="suspended-modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="3" width="12" height="18" rx="2" fill="currentColor"/></svg></span><span><small>${tr?"KIRMIZI KART CEZASI":"RED-CARD SUSPENSION"}</small><h4>${tr?"Cezalı oyuncu sahada":"Suspended player in lineup"}</h4></span></header><p><b>${nm}</b> ${tr?"bu maçta oynayamaz. Maça devam etmek için oyuncuyu yedeğe al veya başka bir oyuncuyla yer değiştir.":"cannot play this match. Move the player to the bench or swap them with another player before continuing."}</p><div class="suspended-modal-note"><b>${tr?"GEREKLİ İŞLEM":"ACTION REQUIRED"}</b><span>${tr?"İlk 11’de cezalı oyuncu kalmamalı.":"No suspended player can remain in the starting XI."}</span></div><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${noticeOnly?(tr?"ANLADIM":"GOT IT"):(tr?"KADROYU DÜZELT":"FIX THE LINEUP")}</button></div></div>`;}
 function _showSuspendedBlock(){const p=_suspendedInLineup();if(!p)return false;const idx=picksBySlot.indexOf(p),html=suspendedBlockModalHTML(shortName(p)).replace('onclick="closeModal()"',`onclick="closeModal();openSuspendedBackup(${idx})"`);showModal(html);try{sfxWhistle&&sfxWhistle();}catch(e){}return true;}
 var pendingMatchResolution=null;
+function _knockoutAdvanceLabel(stage,currentRound,copy){
+  const resolvedStage=stage&&stage!=="legacy"?stage:(Number(currentRound)===5?"quarterfinal":Number(currentRound)===6?"semifinal":stage);
+  if(resolvedStage==="quarterfinal")return LT("YARI FİNALE!","TO THE SEMI-FINAL!","¡A SEMIFINALES!","INS HALBFINALE!","IN SEMIFINALE!");
+  if(resolvedStage==="semifinal")return copy.toFinal;
+  return copy.cont;
+}
 function _showPendingMatchResult(){
   const pending=pendingMatchResolution;
   if(!pending||Number(pending.round)!==Number(round)||!lastMatchPerf)return false;
@@ -1906,7 +1915,7 @@ function _showPendingMatchResult(){
   const win=!draw&&advance,vcls=win?"win":draw?"draw":"lose";
   const vtxt=groupMatch?(win?tc.winPoints:draw?tc.drawPoint:tc.lossPoints):(draw?(LANG==="tr"?"PENALTILAR":"PENALTIES"):(advance?x.matchWin:x.matchLose));
   const drawBtn=groupMatch?`<button class="btn btn-primary" onclick="afterMatch(${advance})">${tc.backToTable}</button>`:(draw?`<button class="btn btn-primary" onclick="showPenaltyShootout()">${LANG==="tr"?"PENALTILARA →":"PENALTIES →"}</button>`:
-    `<button class="btn btn-primary" onclick="afterMatch(${advance})">${advance?(round===5?x.toFinal:x.cont):x.again}</button>`);
+    `<button class="btn btn-primary" onclick="afterMatch(${advance})">${advance?_knockoutAdvanceLabel(pending.stage,round,x):x.again}</button>`);
   const analysisLink=window.CopaMatchAnalysis?CopaMatchAnalysis.triggerHTML():"";
   showModal(`<div class="tele tele-${vcls}"><div class="thead">${x.teleHead} · ${x.rounds[round-1]}</div><div class="tele-body"><div class="tscore"><div class="tt ${win?"winner":""}">${clip(teamName||"US",13)}</div><div class="scoreblock"><span class="tn">${gf}</span><span class="score-sep">-</span><span class="tn">${ga}</span></div><div class="tt ${!win&&!draw?"winner":""}">${clip(opponent.name,13)}</div></div><div class="match-summary"><div class="perfnote">${lastMatchPerf.note}</div><div class="perfwhy">${lastMatchPerf.why}</div></div>${analysisLink}${matchEventsHTML(lastMatchEvents)}<div class="tv ${vcls}"><span>${vtxt}</span></div></div><div class="bact tele-footer">${drawBtn}</div></div>`,{dismissOnEscape:false,label:LANG==="tr"?"Maç sonucu":"Match result"});
   if(window.PlayerProfiles)document.querySelectorAll(".goalsum [data-profile-event-index]").forEach(row=>{const ev=lastMatchEvents[+row.dataset.profileEventIndex];if(!ev)return;const pool=ev.home?picksBySlot:oppLineup;const p=pool&&pool.find(p=>p&&(p.name===ev.name||(ev.home&&surOf(p)===ev.name)||(!ev.home&&p.name&&p.name.split(" ").pop()===ev.name)));if(p)PlayerProfiles.bind(row,p);});
@@ -2085,6 +2094,7 @@ function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;
   if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
   const attendance=creditMatchdayIncome(round,sp.power,opponent.power).attendance;
   pendingMatchResolution={round,advance,draw,gf,ga,fairPlay:_fairPlay,attendance,stage:_groupStage?"group":(window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active()?window.CopaTournamentRuntime.stage():"legacy")};
+  if(window.CopaSideField&&window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active())CopaSideField.lockCurrent();
   _saveState("match");
   if(mode==="quick"){_selectedMatchPresentation="";_showPendingMatchResult();}else presentResolvedMatch(mode);
   if(autoPlay)setTimeout(()=>{if(!$("modal").classList.contains("hidden")){draw&&!_groupStage?showPenaltyShootout():afterMatch(advance);}},1300);}
@@ -2168,7 +2178,9 @@ function afterMatch(advance){
   const tournamentActive=window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active()&&pending.stage!=="legacy";
   if(tournamentActive){
     const wasGroup=pending.stage==="group",outcome=pending.draw?"draw":pending.advance?"win":"loss";
+    const sideFieldMarketKey=window.CopaSideField?CopaSideField.currentKey():"";
     const tournamentResult=window.CopaTournamentRuntime.completePlayer(pending.gf,pending.ga,{playerWon:pending.draw?!!advance:!!pending.advance,decidedBy:pending.penalty?"penalties":"regulation",fairPlay:pending.fairPlay});
+    if(window.CopaSideField)CopaSideField.settleMarket(sideFieldMarketKey);
     resolvePostMatchStateBeforeReward();
     if(wasGroup){
       if(tournamentResult&&tournamentResult.qualified===false){if(_finishTournamentRoundWithoutReward(outcome,false)!==false)endRun(false,null,"group_eliminated");return;}
@@ -3393,7 +3405,7 @@ function _saveState(phaseOverride){
     feed:[...feed].slice(-30),
     finalPenalty,riskPowerMod,econStats:Object.assign({},econStats),
     bracket:bracket.map(f=>f?Object.assign({},f):null),fixtures:fixtures.map(f=>f?Object.assign({},f):null),
-    tournamentFormat,tournament:_runCheckpointClone(tournament),
+    tournamentFormat,tournament:_runCheckpointClone(tournament),sideField:window.CopaSideField?CopaSideField.snapshot():_runCheckpointClone(sideFieldState),
     opponent:opponent?Object.assign({},opponent):null,currentWeather:currentWeather?Object.assign({},currentWeather):null,
     oppChar:oppChar?Object.assign({},oppChar):null,oppLineup:(oppLineup||[]).map(p=>Object.assign({},p)),weakFlank,matchupBonus,
     shopOffers:[...shopOffers],shopVariants:Object.assign({},shopVariants),shopPriceChaos:Object.assign({},shopPriceChaos),
@@ -3434,7 +3446,7 @@ function _tryRestoreState(){
     document.querySelectorAll("#countryPick button").forEach(button=>button.classList.toggle("on",button.dataset.country===selectedCountry));
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
-    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;
+    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):null;
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
     formName=restoreForm;teamName=ClubNamePolicy.sanitize(st.teamName,"COPA XI");style=st.style||style||"gegen";

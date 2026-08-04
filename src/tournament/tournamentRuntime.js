@@ -99,6 +99,7 @@
   }
   function createState(){
     const data=root.countryGameData(root.selectedCountry),power=root.squadPower(1).power;
+    if(root.CopaSideField)root.CopaSideField.reset();
     /* A national cup must remain national. Small country datasets are completed
        with domestic reserve clubs instead of silently importing foreign teams. */
     const tournamentPool=Array.isArray(data&&data[1])?data[1].slice():[];

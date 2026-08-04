@@ -49,7 +49,9 @@ Play App Signing etkinleştirilecek. Mevcut gizli yükleme anahtarı yalnız AAB
 - Kullanıcıların çevrim içi içerik paylaşması veya birbirlerinin oluşturduğu içeriği görmesi: **Evet** — yalnız Ghost kulüp adı ve tamamlanmış oyun/kadro anlık görüntüsü.
 - Serbest sohbet, özel mesaj, fotoğraf, ses veya video yükleme: **Hayır**.
 - Kullanıcı konumu paylaşımı: **Hayır**.
-- Kumar/bahis, gerçek para veya satın alınabilir rastgele ödül: **Hayır**.
+- Simüle kumar / sonuç tahmini: **Evet** — YAN SAHA, yalnızca oyunda kazanılan kulüp kasasıyla diğer kurgu maç sonuçlarına seçim yaptırır.
+- Gerçek para, nakde çevirme, transfer edilebilir değer veya satın alınabilir tahmin bakiyesi: **Hayır**.
+- Satın alınabilir rastgele ödül: **Hayır**.
 - Grafik şiddet, cinsel içerik, uyuşturucu, nefret söylemi veya küfür: **Hayır**.
 - Metinsel, grafik olmayan spor sakatlığı ve rastgele maç olayları bulunabilir.
 - Son IARC derecesi yalnız Console anketinin gerçek soruları görülerek kabul edilecek; tahmini derece mağaza metnine yazılmayacak.
@@ -82,6 +84,7 @@ Play App Signing etkinleştirilecek. Mevcut gizli yükleme anahtarı yalnız AAB
 | VPN service | Hayır |
 | Dating | Hayır |
 | Real-money gambling/games/contests | Hayır |
+| Simulated gambling | Evet — YAN SAHA, gerçek para veya gerçek ödül içermez |
 | Ads ID | Evet — Google Mobile Ads SDK |
 
 ## Data Safety cevap haritası
