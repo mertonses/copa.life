@@ -1249,6 +1249,23 @@ html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #playBtn .dock-p
     border-radius:14px!important;
     background:var(--surface-elevated)!important;
   }
+  html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-inline{
+    box-sizing:border-box!important;
+    width:min(920px,100%)!important;
+    min-width:0!important;
+    max-width:920px!important;
+    margin-inline:auto!important;
+  }
+  html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-inline .meta-tabs{
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    overflow:visible!important;
+  }
+  html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-inline .meta-tabs button{
+    min-width:0!important;
+    padding-inline:6px!important;
+    font-size:8px!important;
+    letter-spacing:.025em!important;
+  }
   html:not(.copa-mobile-game) #hub[data-mobile-route="training"] .mobile-training-route,
   html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-route{
     box-sizing:border-box!important;

@@ -367,8 +367,29 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   await capture(page,"06b-training-help.png");
   await page.locator(".prep-help-modal>.btn").click();
 
+  await page.setViewportSize({width:2048,height:1080});
   await page.locator('#nativeHubNav [data-native-target="career"]').click();
   await expect(page.locator("#mobileCareerRoute")).toBeVisible();
+  const careerTabs=page.locator("#mobileCareerRoute .meta-tabs button");
+  await expect(careerTabs).toHaveCount(7);
+  await careerTabs.last().click();
+  await expect(careerTabs.last()).toHaveClass(/active/);
+  const careerLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>{
+    const panelRect=panel.getBoundingClientRect(),tabs=panel.querySelector<HTMLElement>(".meta-tabs")!;
+    const tabsRect=tabs.getBoundingClientRect(),buttons=[...tabs.querySelectorAll<HTMLElement>("button")];
+    return{
+      centerDelta:Math.abs(panelRect.left+panelRect.width/2-innerWidth/2),
+      panelInside:panelRect.left>=0&&panelRect.right<=innerWidth,
+      tabOverflow:tabs.scrollWidth-tabs.clientWidth,
+      tabsInside:buttons.every(button=>{const rect=button.getBoundingClientRect();return rect.left>=tabsRect.left-1&&rect.right<=tabsRect.right+1;}),
+      labels:buttons.map(button=>button.textContent?.trim()),
+    };
+  });
+  expect(careerLayout.centerDelta).toBeLessThanOrEqual(1);
+  expect(careerLayout.panelInside).toBe(true);
+  expect(careerLayout.tabOverflow).toBeLessThanOrEqual(1);
+  expect(careerLayout.tabsInside).toBe(true);
+  expect(careerLayout.labels.at(-1)).toMatch(/^(DÜNYA|WORLD)$/);
   const surfaceContract=await page.evaluate(()=>{
     const game=globalThis as any;
     game.CopaSurfaceContract.audit();
@@ -377,7 +398,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   expect(surfaceContract.candidates).toBeGreaterThan(20);
   expect(surfaceContract.transparent).toEqual([]);
   await capture(page,"07-career.png");
-  await page.evaluate(()=>(globalThis as any).CopaMobileShell.openCareerSection("museum"));
+  await page.evaluate(()=>(globalThis as any).CopaMobileShell.openCareerSection("trophies"));
   await expect(page.locator(".meta-collection-grid")).toBeVisible();
   const museumLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>({
     collections:panel.querySelectorAll(".meta-collection-grid article").length,
