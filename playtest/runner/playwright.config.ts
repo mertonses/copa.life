@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
 const externalServer=process.env.PLAYWRIGHT_EXTERNAL_SERVER==="1";
+const port=Number(process.env.COPA_TEST_PORT)||5500;
+const baseURL=`http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./tests",
@@ -9,13 +11,13 @@ export default defineConfig({
   workers: 1,
   webServer: externalServer?undefined:{
     command: "node static-server.mjs",
-    url: "http://127.0.0.1:5500",
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 30_000,
   },
   use: {
     headless: process.env.HEADED!=="1",
-    baseURL: "http://127.0.0.1:5500",
+    baseURL,
   },
   projects: [
     {name:"mobile-chromium",use:{browserName:"chromium",viewport:{width:430,height:932},hasTouch:true,isMobile:true}},

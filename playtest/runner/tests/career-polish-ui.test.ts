@@ -101,7 +101,7 @@ test("museum and World surfaces keep deliberate spacing on both viewports",async
     await game.CopaLazy.ensureMetaProgression();
     game.CopaMeta.openProgression("museum");
   });
-  await expect(page.locator(".meta-progress-modal.meta-tab-museum")).toBeVisible();
+  await expect(page.locator(".meta-progress-modal.meta-tab-trophies")).toBeVisible();
   await expect(page.locator(".meta-collection-grid article")).toHaveCount(8);
   const museum=await page.locator(".meta-progress-modal").evaluate((modal:HTMLElement)=>({
     overflow:modal.scrollWidth-modal.clientWidth,
