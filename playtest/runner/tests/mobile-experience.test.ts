@@ -139,7 +139,7 @@ test("native phone hub exposes section navigation and a back-safe bench sheet",a
   });
   const nav=page.locator("#nativeHubNav");
   await expect(nav).toBeVisible();
-  await expect(nav.locator("button")).toHaveCount(4);
+  await expect(nav.locator("button")).toHaveCount(5);
   const trigger=page.locator("#nativeBenchTrigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toContainText("1");
