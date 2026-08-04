@@ -48,11 +48,18 @@
     delete document.body.dataset.copaMode;
     setVisible(true);
   }
+  function restoreLifeSetup(){
+    const land=document.getElementById("introLand"),setup=document.getElementById("introSetup");
+    land?.classList.remove("hidden");
+    if(!root.CopaMobileShell?.gameMode?.())setup?.classList.remove("hidden");
+    root.requestAnimationFrame(()=>root.scrollTo(0,0));
+  }
   function choose(mode){
     if(mode==="classic"){
       setVisible(false);
       document.body.dataset.copaMode="classic";
       document.getElementById("intro")?.classList.remove("hidden");
+      restoreLifeSetup();
       return;
     }
     if(mode==="arena"){

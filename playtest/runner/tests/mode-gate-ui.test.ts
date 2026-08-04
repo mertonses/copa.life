@@ -50,7 +50,8 @@ test("mode gate remains complete and unclipped on mobile",async({page},testInfo)
   expect(audit.clipped).toEqual([]);
 });
 
-test("mode choices preserve sound, return and reset behavior",async({page})=>{
+test("mode choices preserve sound, return and reset behavior",async({page},testInfo)=>{
+  if(testInfo.project.name==="desktop-chromium")await page.setViewportSize({width:2048,height:1080});
   await boot(page);
   await page.evaluate(()=>{
     (globalThis as any).__modeSounds=[];
@@ -59,10 +60,17 @@ test("mode choices preserve sound, return and reset behavior",async({page})=>{
   await page.locator(".mode-card-classic").click();
   await expect(page.locator("#modeGate")).toBeHidden();
   await expect(page.locator("#lifeModeBack")).toBeVisible();
+  await expect(page.locator("#introSetup")).toBeVisible();
+  await expect(page.locator("#startBtn")).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>(globalThis as any).__modeSounds.join(","))).toBe("classic");
   await page.locator("#lifeModeBack").click();
   await expect(page.locator("#modeGate")).toBeVisible();
   await page.locator(".mode-card-classic").click();
   await page.evaluate(()=>(globalThis as any).restart());
   await expect(page.locator("#modeGate")).toBeVisible();
+  await expect(page.locator("#introSetup")).toBeHidden();
+  await page.locator(".mode-card-classic").click();
+  await expect(page.locator("#introLand")).toBeVisible();
+  await expect(page.locator("#introSetup")).toBeVisible();
+  await expect(page.locator("#startBtn")).toBeVisible();
 });
