@@ -96,12 +96,11 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/palette.css?v=20260721-rating-scale1">
+<link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260728-chair-action3">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
-<link rel="stylesheet" href="src/styles/arena.css?v=20260803-tournament-v2" data-copa-arena-styles>
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
@@ -430,7 +429,7 @@ try{
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260727-advanced-sheet1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260804-interface-future1"></script>
 <script src="src/ui/modeGate.js?v=20260803-mode-gate7"></script>
 <script src="src/runtime/finalReplay.js?v=20260730-import-ui2"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
@@ -465,7 +464,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   style.rel="stylesheet";
   style.href=platform==="web"?"src/styles/webOnly.css?v=20260729-responsive-result7":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260728-ui-fixes2";
+  script.src="src/ui/mobileGameSystems.js?v=20260804-interface-future1";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });
@@ -1098,7 +1097,7 @@ function _draftChooseWithFeedback(card,action){
 function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("draft-candidate-gallery");const reserve=(remaining-1)*0.6;let any=false;
   const tr=LANG==="tr";
   currentOpts.forEach((o,i)=>{const af=typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve}):canAffordCost((o.price||0)+reserve);if(af)any=true;const pen=o.ov-o.eff,mis=pen>0;
-    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"")+(o.hidden?" hidden-player":"");
+    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"")+(o.hidden?" hidden-player":"");b.dataset.country=selectedCountry||"TR";
     const tre=o.trait?` <span class="trbadge">${TRAITS[o.trait].e}</span>`:"";
     const ovb=o.hidden?`<div class="ovb mystery-ovb" aria-hidden="true"><svg viewBox="0 0 24 30"><circle cx="12" cy="8" r="5"/><path d="M3 29c.7-8.2 3.7-12.3 9-12.3S20.3 20.8 21 29Z"/></svg><small>??</small></div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)};color:${ovOnCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)};color:${ovOnCol(o.ov)}">${o.ov}</div>`);
     const debtAfter=typeof budgetAfterCost==="function"?budgetAfterCost(o.price||0):budget-(o.price||0),debtTxt=debtAfter<0?(tr?" · borçla alınır":" · uses credit"):"";
@@ -1115,7 +1114,8 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("dr
     let hoverTip="";
     /* hover tip removed */
     const secInfo=o.hidden?ctxLine(o):`${o.age||"—"} yaş · ${L().abbr[o.pos]||o.pos}`;
-    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
+    const leagueIdentity=`<small class="opt-league-id">${countryDisplayName(selectedCountry,LANG)}</small>`;
+    b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid">${leagueIdentity}<div class="pn">${nm}${tre}</div><div class="meta">${meta}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
     b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}_draftChooseWithFeedback(b,()=>requestChoose(i));};
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});
     const shell=document.createElement("div");shell.className="opt-card-shell";shell.appendChild(b);

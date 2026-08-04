@@ -242,7 +242,7 @@
   function selectDirective(id){
     const key=String(id||"");
     if(key&&!Object.hasOwn(DIRECTIVES,key))return false;
-    state.directives.selected=state.directives.selected===key?"":key;persist();refreshProgressionView("career");return true;
+    state.directives.selected=state.directives.selected===key?"":key;persist();refreshProgressionView("directives");return true;
   }
   function completeDirective(value){
     const id=state.directives.selected;
@@ -565,16 +565,27 @@
   function worldHTML(tr){
     return `<section class="meta-world meta-world-panel" id="metaWorldPanel"><div class="meta-world-skeleton" aria-label="${tr?"Dünya sıralaması yükleniyor":"Loading world rankings"}"><i></i><i></i><i></i><i></i></div></section>`;
   }
+  function financeHTML(tr){
+    const runs=[...state.archive].reverse(),total=runs.reduce((sum,item)=>sum+Number(item.cash||0),0),positive=runs.filter(item=>Number(item.cash)>=0).length,average=runs.length?Math.round(total/runs.length):0;
+    const ledger=runs.slice(0,10).map(item=>{const cash=Number(item.cash||0),result=resultMeta(item,tr);return `<article class="meta-finance-row ${cash<0?"is-debt":"is-positive"}"><span><b>${escapeHTML(item.team)}</b><small>${new Date(item.finishedAt).toLocaleDateString(tr?"tr-TR":"en-GB",{day:"2-digit",month:"short"})} · ${result.label}</small></span><strong>${cash<0?"−":"+"}€${Math.abs(cash)}M</strong></article>`;}).join("");
+    return `<section class="meta-finance"><div class="meta-finance-hero"><span><small>${tr?"KARİYER BAKİYESİ":"CAREER BALANCE"}</small><b>${total<0?"−":"+"}€${Math.abs(total)}M</b></span><span><small>${tr?"TUR ORTALAMASI":"RUN AVERAGE"}</small><b>${average<0?"−":"+"}€${Math.abs(average)}M</b></span><span><small>${tr?"BORÇSUZ BİTİŞ":"DEBT-FREE FINISHES"}</small><b>${positive}/${runs.length}</b></span></div><div class="meta-section-heading"><h4>${tr?"SON MALİ KAYITLAR":"RECENT FINANCIAL RECORDS"}</h4><small>${tr?"Tur sonu kasa değeri":"End-of-run cash"}</small></div><div class="meta-finance-list">${ledger||`<div class="meta-inline-empty">${tr?"İlk tamamlanan turun mali kaydı burada görünecek.":"Your first completed run will create a financial record."}</div>`}</div></section>`;
+  }
+  const DOSSIER_TABS=["career","directives","management","history","trophies","finance","world"];
+  function normalizeDossierTab(tab){if(tab==="mastery")return"management";if(tab==="museum")return"trophies";return DOSSIER_TABS.includes(tab)?tab:"career";}
   function panelHTML(tab,tr){
-    if(tab==="mastery")return `<div class="meta-mastery-intro"><span aria-hidden="true">◎</span><p><b>${tr?"Deneyim kalıcıdır, güç sağlamaz.":"Experience is permanent, but grants no power."}</b><small>${tr?"Her tamamlanan tur bir sonraki ustalık kademesine ilerletir.":"Every completed run advances the next mastery tier."}</small></p></div>${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}`;
-    if(tab==="museum")return museumHTML(tr);
+    tab=normalizeDossierTab(tab);
+    if(tab==="directives")return `<div class="meta-focus-directives">${careerHTML(tr)}</div>`;
+    if(tab==="management")return `<div class="meta-mastery-intro"><span aria-hidden="true">◎</span><p><b>${tr?"Deneyim kalıcıdır, güç sağlamaz.":"Experience is permanent, but grants no power."}</b><small>${tr?"Her tamamlanan tur bir sonraki ustalık kademesine ilerletir.":"Every completed run advances the next mastery tier."}</small></p></div>${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}<div class="meta-focus-management">${careerHTML(tr)}</div>`;
+    if(tab==="history")return `<section class="meta-dossier-history"><div class="meta-section-heading"><h4>${tr?"KULÜP GEÇMİŞİ":"CLUB HISTORY"}</h4><small>${state.archive.length} ${tr?"tamamlanmış tur":"completed runs"}</small></div><div class="meta-history-list">${archiveRowsHTML(tr)||`<div class="meta-inline-empty">${tr?"Tamamlanan turlar burada arşivlenecek.":"Completed runs will be archived here."}</div>`}</div></section>`;
+    if(tab==="trophies")return museumHTML(tr);
+    if(tab==="finance")return financeHTML(tr);
     if(tab==="world")return worldHTML(tr);
     return careerHTML(tr);
   }
   function openProgression(tab="career"){
-    const tr=global.LANG==="tr",active=["career","mastery","museum","world"].includes(tab)?tab:"career";
+    const tr=global.LANG==="tr",active=normalizeDossierTab(tab);
     global.showModal(`<div class="meta-progress-modal meta-tab-${active}"><header class="meta-progress-head"><div><div class="kithdr">${tr?"Kulüp Kariyeri":"Club Career"}</div><div class="kitsub">${tr?"Kariyerinin kalıcı arşivi":"Your permanent career archive"}</div></div><div class="meta-head-actions"><button class="meta-close" type="button" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">×</button><button class="meta-save-menu" type="button" onclick="CopaMeta.openExport()" aria-label="${tr?"Kayıt seçenekleri":"Save options"}"><span aria-hidden="true">⇅</span><span>${tr?"KAYIT":"SAVE"}</span></button></div></header><nav class="meta-tabs" aria-label="${tr?"Kariyer bölümleri":"Career sections"}">${[
-      ["career",tr?"KARİYER":"CAREER"],["mastery",tr?"USTALIK":"MASTERY"],["museum",tr?"MÜZE":"MUSEUM"],["world",tr?"DÜNYA":"WORLD"]
+      ["career",tr?"ÖZET":"OVERVIEW"],["directives",tr?"YÖNERGELER":"DIRECTIVES"],["management",tr?"YÖNETİM":"MANAGEMENT"],["history",tr?"GEÇMİŞ":"HISTORY"],["trophies",tr?"KUPALAR":"TROPHIES"],["finance",tr?"FİNANS":"FINANCE"],["world",tr?"DÜNYA":"WORLD"]
     ].map(([id,label])=>`<button type="button" class="${id===active?"active":""}" aria-current="${id===active?"page":"false"}" onclick="CopaMeta.openProgression('${id}')">${label}</button>`).join("")}</nav><div class="meta-tab-panel">${panelHTML(active,tr)}</div></div>`,{dismissOnOverlay:true,label:tr?"Kulüp kariyeri":"Club career"});
     const activeTab=document.querySelector(".meta-progress-modal .meta-tabs button.active");
     if(activeTab)try{activeTab.focus({preventScroll:true});}catch(_){}
@@ -736,7 +747,7 @@
 
   global.CopaMeta=Object.freeze({
     recordRun,getState:()=>JSON.parse(JSON.stringify(state)),careerSummary,careerLevel,levelThreshold,masteryInfo,
-    renderPanelHTML:(tab="career")=>panelHTML(["career","mastery","museum","world"].includes(tab)?tab:"career",global.LANG==="tr"),
+    renderPanelHTML:(tab="career")=>panelHTML(normalizeDossierTab(tab),global.LANG==="tr"),
     requestFormationUnlock,setFeaturedPlayer,toggleHallPlayer,toggleHallFromUi,consumeStartToken,evaluateCollections,activeCosmetics,selectCosmetic,
     completeClubFile,clubFileSummary,chairHistory:chairHistoryFor,recordChairDecision,recordChairRun,selectDirective,selectStylePlan,activeStylePlan,playHallExhibition,startHallExhibition,
     exportCode,importCode,openProgression,openArchive,openExport,openImport,copyExport,downloadExport,submitImport,installControl
