@@ -1087,12 +1087,20 @@ function _draftForecast(o){
   const tr=LANG==="tr",current=picksBySlot.filter(Boolean),currentPower=current.length?Math.round(current.reduce((sum,p)=>sum+effOf(p),0)/current.length):0,publicPower=_draftPublicRating(o),projectedCount=current.length+1,projectedPower=Math.round((current.reduce((sum,p)=>sum+effOf(p),0)+publicPower)/projectedCount),powerDelta=projectedPower-currentPower,cashAfter=typeof budgetAfterCost==="function"?budgetAfterCost(o.price||0):budget-(o.price||0),debtLimit=Math.abs(typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT),cashRange=Math.max(1,BUDGET+debtLimit),cashPct=Math.max(4,Math.min(100,((cashAfter+debtLimit)/cashRange)*100)),powerPct=Math.max(4,Math.min(100,publicPower));
   return `<div class="opt-forecast" aria-label="${tr?"Seçim tahmini":"Selection forecast"}"><span><b>${tr?"KASA":"CASH"}</b><em class="${cashAfter<0?"is-negative":"is-positive"}">${cashAfter<0?"−":""}€${Math.abs(cashAfter)}M</em><i style="--forecast:${cashPct}%"></i></span><span><b>${tr?"KADRO":"SQUAD"}</b><em class="${powerDelta<0?"is-negative":"is-positive"}">${powerDelta>=0?"+":""}${powerDelta}</em><i style="--forecast:${powerPct}%"></i></span></div>`;
 }
+function _draftChooseWithFeedback(card,action){
+  if(!card||card.dataset.selecting==="true")return;
+  card.dataset.selecting="true";card.classList.add("is-selecting");card.setAttribute("aria-busy","true");
+  const mobile=document.documentElement.classList.contains("copa-mobile-game")||(window.matchMedia&&window.matchMedia("(pointer:coarse)").matches);
+  if(mobile){try{if(window.CopaMobileExperience&&typeof CopaMobileExperience.haptic==="function")CopaMobileExperience.haptic(10);else if(navigator.vibrate)navigator.vibrate(10);}catch(_){}}
+  const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(()=>{action();if(card.isConnected){card.classList.remove("is-selecting");card.removeAttribute("aria-busy");delete card.dataset.selecting;}},reduced?0:340);
+}
 function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("draft-candidate-gallery");const reserve=(remaining-1)*0.6;let any=false;
   const tr=LANG==="tr";
   currentOpts.forEach((o,i)=>{const af=typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(o.price||0,"transfer",{...o,reserve}):canAffordCost((o.price||0)+reserve);if(af)any=true;const pen=o.ov-o.eff,mis=pen>0;
-    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"");
+    const b=document.createElement("button");b.className="opt"+(af?"":" tooexp")+(mis?" mis":"")+(o.bargain?" bargain":"")+(o.hidden?" hidden-player":"");
     const tre=o.trait?` <span class="trbadge">${TRAITS[o.trait].e}</span>`:"";
-    const ovb=o.hidden?`<div class="ovb" style="background:#68757C">??</div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)};color:${ovOnCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)};color:${ovOnCol(o.ov)}">${o.ov}</div>`);
+    const ovb=o.hidden?`<div class="ovb mystery-ovb" aria-hidden="true"><svg viewBox="0 0 24 30"><circle cx="12" cy="8" r="5"/><path d="M3 29c.7-8.2 3.7-12.3 9-12.3S20.3 20.8 21 29Z"/></svg><small>??</small></div>`:(mis?`<div class="ovb" style="background:${ovCol(o.eff)};color:${ovOnCol(o.eff)}">${o.eff}<small>${o.ov}</small></div>`:`<div class="ovb" style="background:${ovCol(o.ov)};color:${ovOnCol(o.ov)}">${o.ov}</div>`);
     const debtAfter=typeof budgetAfterCost==="function"?budgetAfterCost(o.price||0):budget-(o.price||0),debtTxt=debtAfter<0?(tr?" · borçla alınır":" · uses credit"):"";
     const meta=o.hidden?x.hiddenMeta:((o.free?x.free:x.grp[o.natG]||"")+debtTxt+(o.bargain?(tr?" ·  fırsat":" ·  deal"):""));
     const nm=o.hidden?x.hiddenName:o.name;
@@ -1101,14 +1109,14 @@ function renderOpts(){const c=$("opts"),x=L();c.innerHTML="";c.classList.add("dr
     let priceArea;
     const priceCls=priceToneClass(o.price||0);
     if(!af){const loss=typeof chairmanSpendTrustLoss==="function"?chairmanSpendTrustLoss(o.price||0,"transfer",o):0,projectedTrust=Math.max(0,chairTrust-loss),debtLimit=typeof chairmanSackLimitForTrust==="function"?chairmanSackLimitForTrust(projectedTrust):(typeof activeDebtLimit==="function"?activeDebtLimit():DEBT_LIMIT),cap=(typeof legacySpendable==="function"?legacySpendable():0)+budget-reserve-debtLimit,excess=Math.max(0,Math.round(((o.price||0)-cap)*10)/10);priceArea=`<div class="price${priceCls}"><div class="p">€${o.price||0}M</div><div class="cant-lbl">${tr?`+€${excess}M aşıyor`:"+€"+excess+"M over"}</div></div>`;}
-    else if(o.bargain){priceArea=`<div class="price${priceCls}"><div class="oldp">€${o.oldPrice}M</div><div class="p">€${o.price}M</div><div class="discount-badge">−${o.discountPct||0}%</div></div>`;}
+    else if(o.bargain){priceArea=`<div class="price bargain-price${priceCls}"><div class="p">€${o.price}M</div><div class="dealmeta"><span class="oldp">€${o.oldPrice}M</span><span class="discount-badge">−${o.discountPct||0}%</span></div></div>`;}
     else{priceArea=`<div class="price${priceCls}"><div class="p">€${o.price||0}M</div></div>`;}
     /* hover tip for affordable */
     let hoverTip="";
     /* hover tip removed */
     const secInfo=o.hidden?ctxLine(o):`${o.age||"—"} yaş · ${L().abbr[o.pos]||o.pos}`;
     b.innerHTML=`<div class="opt-lbar" style="background:${o.hidden?"#68757C":ovCol(o.ov)}"></div>${ovb}<div class="mid"><div class="pn">${nm}${tre}</div><div class="meta">${meta}${eliteBadge}</div><div class="opt-sec">${secInfo}</div></div>${priceArea}${_draftForecast(o)}${hoverTip}`;
-    b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}requestChoose(i);};
+    b.onclick=()=>{if(!af){const msg=$("optmsg");if(msg){msg.textContent=tr?`€${o.price||0}M · kasa limiti aşıyor`:`€${o.price||0}M · exceeds budget limit`;msg.style.color="var(--color-slate)";}return;}_draftChooseWithFeedback(b,()=>requestChoose(i));};
     b.addEventListener("mouseenter",()=>{const s=$("r"+currentSlot);if(s)s.classList.add("slot-hover");},{passive:true});b.addEventListener("mouseleave",()=>{const s=$("r"+currentSlot);if(s)s.classList.remove("slot-hover");},{passive:true});
     const shell=document.createElement("div");shell.className="opt-card-shell";shell.appendChild(b);
     const detail=document.createElement("button");detail.type="button";detail.className="opt-detail-btn";detail.disabled=!!o.hidden;detail.innerHTML=`<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="4.5" r=".65" fill="currentColor" stroke="none"/></svg><span>${o.hidden?LT("GİZLİ","LOCKED","BLOQUEADO","GESPERRT","BLOCCATO"):LT("DETAY","DETAILS","DETALLES","DETAILS","DETTAGLI")}</span>`;if(!o.hidden){detail.setAttribute("aria-label",`${nm} · ${LT("Oyuncu detayını aç","Open player details","Abrir detalles del jugador","Spielerdetails öffnen","Apri dettagli giocatore")}`);detail.onclick=event=>{event.preventDefault();event.stopPropagation();if(window.PlayerProfiles)PlayerProfiles.open(o,detail,"button");};if(window.PlayerProfiles)PlayerProfiles.bind(b,o,{delayCoarseAction:true});}shell.appendChild(detail);c.appendChild(shell);});

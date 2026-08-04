@@ -22,6 +22,9 @@ test("mystery player reveals inline without interrupting the dice flow and block
   });
 
   await expect(page.locator("#opts .opt").first()).toContainText("Tavan yüksek");
+  await expect(page.locator("#opts .opt").first()).toHaveClass(/hidden-player/);
+  await expect(page.locator("#opts .opt").first().locator(".mystery-ovb svg")).toHaveCount(1);
+  expect(await page.locator("#opts .opt").first().evaluate((card:HTMLElement)=>getComputedStyle(card).backgroundImage)).toContain("repeating-linear-gradient");
   await page.evaluate(()=>(globalThis as any).setLang("en"));
   await expect(page.locator("#opts .opt").first()).toContainText("High ceiling");
 
