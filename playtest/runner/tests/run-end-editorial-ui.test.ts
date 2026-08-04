@@ -88,7 +88,7 @@ async function finishSackedRun(page:Page){
 test("sacked result keeps a compact visual hierarchy without horizontal overflow",async({page},testInfo)=>{
   if(testInfo.project.name==="mobile-chromium")await page.setViewportSize({width:360,height:800});
   await finishSackedRun(page);
-  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
+  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("/webOnly.css")));
   const layout=await page.evaluate(()=>{
     const rect=(selector:string)=>document.querySelector(selector)!.getBoundingClientRect();
     const board=rect("#result .scoreboard");

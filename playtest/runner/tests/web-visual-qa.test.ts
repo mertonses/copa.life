@@ -26,7 +26,7 @@ test("web play-style modal keeps summaries and effects aligned",async({page},tes
     (globalThis as any).normalStart();
   });
   await expect(page.locator(".style-select-modal")).toBeVisible();
-  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
+  await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("/webOnly.css")));
   await page.waitForTimeout(100);
   const layout=await page.locator(".style-select-modal").evaluate((modal:HTMLElement)=>{
     const cards=[...modal.querySelectorAll<HTMLElement>(".style-choice-modern")];
@@ -530,7 +530,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await reset(page);
     await page.goto(`/?web-hub-${viewport.name}-visual-qa=1`,{waitUntil:"domcontentloaded"});
-    await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("responsive-result7")));
+    await page.waitForFunction(()=>[...document.styleSheets].some(sheet=>sheet.href?.includes("/webOnly.css")));
     await page.evaluate(async()=>{
       const game=globalThis as any;
       game.CopaMobileShell.newRun();
@@ -588,7 +588,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     expect(match.clipped,viewport.name).toEqual([]);
     expect(match.tiny,viewport.name).toEqual([]);
     expect(match.presidentSpans,viewport.name).toBe(1);
-    expect(match.navIconCount,viewport.name).toBe(4);
+    expect(match.navIconCount,viewport.name).toBe(5);
     expect(match.malformedNavIcons,viewport.name).toBe(0);
     expect(match.feedVisible,viewport.name).toBe(true);
     expect(match.feedHeight,viewport.name).toBeGreaterThanOrEqual(80);
