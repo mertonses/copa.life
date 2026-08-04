@@ -148,6 +148,7 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
   buildPitch($("hubPitch"));slots.forEach((s,i)=>{const p=picksBySlot[i];if(p)renderRoundel("h"+i,p);});
   opponent=opponent||bracket[round-1]||bracket[0]||{name:"Opponent",power:60};
   if(restoring){
+    if(window.CopaSideField)CopaSideField.ensureCurrent();
     prepareChairmanRoundEvent();
     if(!currentWeather&&typeof pickWeather==="function")pickWeather();
     if(!oppChar&&typeof assignOppChar==="function")assignOppChar();
@@ -162,6 +163,7 @@ function enterHub(restoring=false,ghostLocked=false){if(window._wantFinal){windo
 if(chairman.id==="leydi"&&round>1){const _chem=chemBonus(picksBySlot.filter(Boolean)).total;if(_chem>=3){riskPowerMod+=1;requestChairTrustChange(1,"diplomat_chemistry",65);pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><path d="M9 12l2 2l4 -4"/></svg> `+(LANG==="tr"?"Diplomat: uyumlu kadro — bu maç +1 güç":"Diplomat: cohesive squad — +1 power"),"pres");}else if(_chem<0){riskPowerMod-=1;requestChairTrustChange(-1,"diplomat_bad_chemistry",75);pushFeed(`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v3a9 9 0 0 1 -9 9a9 9 0 0 1 -9 -9v-3z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> `+(LANG==="tr"?"Diplomat: dağınık kadro — bu maç -1 güç":"Diplomat: disjointed squad — -1 power"),"lose");}}
   assignOppChar();genOppLineup();maybeInjure();processRiskCards();if(round>=3&&checkChairmanSack("risk"))return;
   {const _sp=picksBySlot.find(p=>p&&p.suspended);if(_sp){const _sn=typeof shortName==="function"?shortName(_sp):(_sp.name||"?");setTimeout(()=>_queueSuspendedNotice(_sn,round),400);}}
+  if(window.CopaSideField)CopaSideField.ensureCurrent();
   newShopOffers();_genFreeAgents();renderFixtures();renderHub();maybeDraftEvent();
   if(round===1&&!hasSelectedCaptain()&&typeof pickCaptain==="function"){
     setTimeout(()=>{if(!hasSelectedCaptain())pickCaptain();},500);

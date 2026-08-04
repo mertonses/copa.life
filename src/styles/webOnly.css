@@ -61,7 +61,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 @media(min-width:901px){
   html[data-copa-platform="web"] .tournament-draw .td-groups{
     display:grid!important;
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
     grid-auto-flow:row!important;
     grid-auto-columns:auto!important;
     gap:10px!important;
@@ -457,7 +457,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 @media(max-width:760px){
   html[data-copa-platform="web"] #nativeHubNav{
     display:grid!important;
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
     grid-template-rows:60px!important;
     width:100%!important;
     min-height:60px!important;

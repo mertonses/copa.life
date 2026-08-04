@@ -30,7 +30,7 @@
 
   html[data-copa-platform="android"] .native-hub-nav,
   html[data-copa-platform="ios"] .native-hub-nav{
-    position:sticky;top:var(--copa-safe-top);z-index:70;display:grid;grid-template-columns:repeat(4,1fr);
+    position:sticky;top:var(--copa-safe-top);z-index:70;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
     width:min(100% - 20px,620px);margin:0 auto 10px;padding:4px;box-sizing:border-box;
     border:1px solid var(--border-subtle);border-radius:10px;background:color-mix(in srgb,var(--surface-bg) 94%,transparent);
     box-shadow:0 4px 14px rgba(10,17,24,.1);backdrop-filter:blur(10px);

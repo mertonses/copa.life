@@ -21,6 +21,7 @@
     state.bracket=Array.isArray(state.bracket)?state.bracket:[];
     state.fixtures=Array.isArray(state.fixtures)?state.fixtures:[];
     state.tournament=object(state.tournament)?state.tournament:null;
+    state.sideField=global.CopaSideFieldEngine?global.CopaSideFieldEngine.normalizeState(state.sideField):null;
     state.tournamentFormat=state.tournament&&state.tournament.format==="groups32_v2"?"groups32_v2":"legacy_knockout_v1";
     state.chairmanEventRunId=typeof state.chairmanEventRunId==="string"?state.chairmanEventRunId:"";
     state.chairmanEventSeen=object(state.chairmanEventSeen)?state.chairmanEventSeen:{};
@@ -85,6 +86,7 @@
       if(value.phase==="draw"&&(!value.tournament||value.tournament.phase!=="draw"))errors.push(issue("invalid_draw_phase","tournament.phase"));
       if(value.phase!=="draw"&&value.tournament&&value.tournament.phase==="draw")errors.push(issue("incomplete_draw","tournament.phase"));
     }else if(value.tournamentFormat!=="legacy_knockout_v1")errors.push(issue("invalid_tournament_format","tournamentFormat"));
+    if(value.sideField&&global.CopaSideFieldEngine){const checked=global.CopaSideFieldEngine.validate(value.sideField);if(!checked.ok)errors.push(issue("invalid_side_field","sideField"));}
     if(value.phase==="match"){
       const pending=value.pendingMatchResolution;
       const liveFinal=Number(value.round)===7;

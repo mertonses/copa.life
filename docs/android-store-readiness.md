@@ -8,7 +8,8 @@ Bu dosya ilk Android mağaza sürümü için ürün ve beyan kararlarının tek 
 - Koşu tamamlandıktan sonra Google AdMob tam ekran geçiş reklamı.
 - Uygulama içi satın alma yok.
 - Patreon veya başka bir harici ödeme/bağış bağlantısı yok.
-- Gerçek para ile ödül, bahis veya ücretli rastgele ödül yok.
+- Gerçek para ile ödül, nakde çevirme, transfer edilebilir değer veya ücretli rastgele ödül yok.
+- YAN SAHA, yalnızca oyunda kazanılan kulüp kasasıyla çalışan simüle sonuç tahmini içerir; IARC anketinde **simulated gambling** olarak doğru beyan edilir.
 
 Android paket kontrolü gerçek kulüp armalarını, Patreon varlık ve bağlantılarını, ödeme entegrasyonlarını ve eski oyuncu niteliklerini engeller. Reklam tarafında yalnız sabitlenmiş GMA Next‑Gen ve UMP sürümleri ile yerel `CopaAds` köprüsüne izin verir.
 
