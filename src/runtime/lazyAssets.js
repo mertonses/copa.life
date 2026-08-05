@@ -69,6 +69,12 @@
       loadScriptOnce("copa-arena","src/online/arena.js?v=20260805-system-club1",()=>!!global.CopaArena)
     ]).then(()=>global.CopaArena);
   }
+  function ensureSideField(){
+    return Promise.all([
+      loadStyleOnce("side-field-style","src/styles/sideField.css?v=20260805-yan-saha-insights3",'link[href*="src/styles/sideField.css"]'),
+      loadScriptOnce("side-field-ui","src/sidefield/sideFieldUI.js?v=20260805-yan-saha3",()=>!!global.CopaSideField)
+    ]).then(()=>global.CopaSideField);
+  }
   function ensureCountryPlayers(country){
     const code=String(country||"TR").toUpperCase();
     const sources={
@@ -104,9 +110,9 @@
   }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
   function openArena(){return ensureArena().then(api=>api.open()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureArena,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression,openArena});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureArena,ensureSideField,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression,openArena});
   global.addEventListener("load",()=>{
-    const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression()]).catch(()=>{});};
+    const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression(),ensureSideField()]).catch(()=>{});};
     if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(warm,{timeout:1500});
     else global.setTimeout(warm,250);
   },{once:true});

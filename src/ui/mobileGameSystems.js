@@ -193,6 +193,12 @@
     play.innerHTML=`<span>${escapeHtml(play.dataset.mobileLabel)}</span><span class="dock-play-arrow" aria-hidden="true">→</span>`;
   }
 
+  function ensureSideFieldRoute(){
+    if(root.CopaSideField){root.CopaSideField.ensureCurrent();root.CopaSideField.mount();return Promise.resolve(root.CopaSideField);}
+    if(!root.CopaLazy||typeof root.CopaLazy.ensureSideField!=="function")return Promise.resolve(null);
+    return root.CopaLazy.ensureSideField().then(api=>{api.ensureCurrent();api.mount();return api;}).catch(()=>null);
+  }
+
   function activateRoute(route){
     const hub=document.getElementById("hub");if(!hub)return;
     const previousRoute=hub.dataset.mobileRoute||"";
@@ -209,7 +215,7 @@
     if(previousRoute&&previousRoute!==activeRoute)playRouteSound(activeRoute);
     normalizePlayButton();
     if(activeRoute==="training")renderTrainingRoute();
-    if(activeRoute==="sidefield"&&root.CopaSideField)root.CopaSideField.mount();
+    if(activeRoute==="sidefield")ensureSideFieldRoute().then(()=>{if(activeRoute==="sidefield")document.getElementById("sideFieldRoute")?.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});});
     if(activeRoute==="career")renderCareerRoute();
     updateTrainingBadge();
     updateMarketBadge(activeRoute==="market");
@@ -226,7 +232,7 @@
     if(scout&&scout.parentElement!==trainingRoute){
       trainingRoute.appendChild(scout);
     }
-    if(root.CopaSideField)root.CopaSideField.mount();
+    ensureSideFieldRoute();
     const feed=document.getElementById("feedwrap"),matchColumn=hub.querySelector(".hcol-l");
     if(feed&&matchColumn&&feed.parentElement===matchColumn)matchColumn.appendChild(feed);
     let nav=document.getElementById("nativeHubNav");
