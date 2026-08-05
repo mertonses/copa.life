@@ -426,7 +426,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await reset(page);
   await page.goto("/?native-game=1&visual=systems",{waitUntil:"domcontentloaded"});
   await reachDraw(page);
-  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.pendingChairmanEvent=null;game.CopaClubFiles.select("debt");game.closeModal();});
   await expect(page.locator("#hub")).toBeVisible();
   const metricSurfaces=await page.locator("#hub .hub-stat-row").evaluate((row:HTMLElement)=>
     [...row.children].map(node=>{
