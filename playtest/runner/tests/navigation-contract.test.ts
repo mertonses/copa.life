@@ -9,6 +9,12 @@ async function reachHub(page:any){
   await expect(page.locator("#hub")).toBeVisible();
 }
 
+async function dismissIncidentalGameModal(page:any){
+  const modal=page.locator("#modal");
+  if(await modal.isVisible())await page.evaluate(()=>{const game=globalThis as any;game.closeModal();});
+  await expect(modal).toBeHidden();
+}
+
 test("hub navigation stays on one row on desktop, narrow desktop and mobile",async({page})=>{
   await reachHub(page);
   const matrix=[
@@ -33,8 +39,10 @@ test("hub navigation stays on one row on desktop, narrow desktop and mobile",asy
       };
     });
     expect(layout,viewport.name).toEqual({rows:1,targets:["match","market","training","sidefield","career"],contained:true,overflow:0,pageOverflow:0});
+    await dismissIncidentalGameModal(page);
     await nav.locator('[data-native-target="sidefield"]').click();
     await expect(page.locator("#sideFieldRoute"),viewport.name).toBeVisible();
+    await dismissIncidentalGameModal(page);
     await nav.locator('[data-native-target="match"]').click();
     await expect(page.locator('#nativeHubNav [data-native-target="match"]'),viewport.name).toHaveClass(/active/);
   }
