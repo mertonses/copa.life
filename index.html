@@ -100,7 +100,6 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260805-five-tab-nav2">
-<link rel="stylesheet" href="src/styles/sideField.css?v=20260805-yan-saha-insights2">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -426,7 +425,6 @@ try{
 <script src="src/tournament/tournamentUI.js?v=20260728-ui-fixes1"></script>
 <script src="src/tournament/matchResolver.js?v=20260722-knockout-rules1"></script>
 <script src="src/tournament/tournamentRuntime.js?v=20260727-fast-draw2"></script>
-<script src="src/sidefield/sideFieldUI.js?v=20260805-yan-saha2"></script>
 <script src="src/state/runPersistence.js?v=20260805-subsystem-versions1"></script>
 <script src="src/state/transferSave.js?v=20260730-mobile-transfer2"></script>
 <script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
@@ -3467,7 +3465,7 @@ function _tryRestoreState(){
     document.querySelectorAll("#countryPick button").forEach(button=>button.classList.toggle("on",button.dataset.country===selectedCountry));
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
-    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):null;runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
+    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
     formName=restoreForm;teamName=ClubNamePolicy.sanitize(st.teamName,"COPA XI");style=st.style||style||"gegen";
