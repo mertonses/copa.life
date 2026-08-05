@@ -37,8 +37,8 @@ jobs:
       - name: Install Copa Arena API dependencies
         run: npm ci --prefix services/copa-arena-api
 
-      - name: Test
-        run: npm test
+      - name: Fast behavior contracts
+        run: npm run test:contracts
 
       - name: Install Ghost API dependencies
         run: npm ci --prefix services/ghost-club-api
@@ -52,14 +52,11 @@ jobs:
       - name: Install browser test dependencies
         run: npm ci --prefix playtest/runner
 
-      - name: Install browser engines
-        run: npx --prefix playtest/runner playwright install --with-deps chromium firefox webkit
+      - name: Install browser engine
+        run: npx --prefix playtest/runner playwright install --with-deps chromium
 
-      - name: Mobile browser integrity tests
-        run: npm run test:ci --prefix playtest/runner
-
-      - name: Cross-browser boot tests
-        run: npm run test:cross --prefix playtest/runner
+      - name: Release browser contracts
+        run: npm run test:release --prefix playtest/runner
 
       - name: Verify web and Android parity
         run: npm run check:parity

@@ -65,8 +65,8 @@
   }
   function ensureArena(){
     return Promise.all([
-      loadStyleOnce("copa-arena-style","src/styles/arena.css?v=20260804-interface-future2",'link[href*="src/styles/arena.css"]'),
-      loadScriptOnce("copa-arena","src/online/arena.js?v=20260804-interface-future1",()=>!!global.CopaArena)
+      loadStyleOnce("copa-arena-style","src/styles/arena.css?v=20260805-system-club1",'link[href*="src/styles/arena.css"]'),
+      loadScriptOnce("copa-arena","src/online/arena.js?v=20260805-system-club1",()=>!!global.CopaArena)
     ]).then(()=>global.CopaArena);
   }
   function ensureCountryPlayers(country){

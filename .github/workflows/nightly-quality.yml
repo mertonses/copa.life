@@ -1,0 +1,48 @@
+name: Nightly exhaustive quality
+
+on:
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-exhaustive-quality
+  cancel-in-progress: false
+
+jobs:
+  exhaustive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix services/copa-arena-api
+      - run: npm ci --prefix services/ghost-club-api
+      - name: Full deterministic, statistical and Monte Carlo suite
+        run: npm run test:nightly
+      - name: Ghost API contract suite
+        run: npm run test:worker
+
+  cross-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix playtest/runner
+      - run: npx --prefix playtest/runner playwright install --with-deps chromium firefox webkit
+      - name: Full UI regression
+        run: npm run test:ci --prefix playtest/runner
+      - name: Cross-browser contracts
+        run: npm run test:cross --prefix playtest/runner

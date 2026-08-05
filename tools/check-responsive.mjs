@@ -4,6 +4,8 @@ const layout = fs.readFileSync("src/styles/layout.css", "utf8");
 const match = fs.readFileSync("src/styles/match.css", "utf8");
 const cards = fs.readFileSync("src/styles/cards.css", "utf8");
 const mobile = fs.readFileSync("src/styles/mobileExperience.css", "utf8");
+const mobileGameSystems = fs.readFileSync("src/styles/mobileGameSystems.css", "utf8");
+const webOnly = fs.readFileSync("src/styles/webOnly.css", "utf8");
 const mobileScript = fs.readFileSync("src/ui/mobileExperience.js", "utf8");
 const hubScript = fs.readFileSync("src/ui/hub.js", "utf8");
 const chairPicker = fs.readFileSync("src/ui/chairPicker.js", "utf8");
@@ -11,6 +13,12 @@ const chairPickerCss = fs.readFileSync("src/styles/chairPicker.css", "utf8");
 const html = fs.readFileSync("index.html", "utf8");
 
 const checks = [
+  {
+    name: "five-route navigation is a non-wrapping grid at every layout tier",
+    pass: /#hub \.native-hub-nav\{[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important[\s\S]*overflow:hidden/s.test(mobileGameSystems)
+      && /@media\(max-width:760px\)\{[\s\S]*#nativeHubNav\{[\s\S]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/s.test(webOnly)
+      && /#nativeHubNav button\{min-width:0!important/.test(fs.readFileSync("src/styles/sideField.css","utf8")),
+  },
   {
     name: "global overflow guard",
     pass: /html,\s*\nbody\{[\s\S]*?overflow-x:hidden/s.test(layout),
@@ -191,7 +199,11 @@ const checks = [
   },
 ];
 
-const matrix = [390, 412, 768, 820, 1024];
+const matrix = [
+  {name:"mobile",width:390},
+  {name:"narrow desktop",width:820},
+  {name:"desktop",width:1440}
+];
 let failed = false;
 for (const check of checks) {
   if (!check.pass) {
@@ -200,5 +212,5 @@ for (const check of checks) {
   }
 }
 
-console.log(`responsive matrix widths: ${matrix.join(", ")}px`);
+console.log(`responsive matrix: ${matrix.map(item=>`${item.name}=${item.width}px`).join(", ")}`);
 if (failed) process.exit(1);

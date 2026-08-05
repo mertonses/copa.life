@@ -8,10 +8,15 @@ tournamentEngine.revealNext(tournament,32);tournamentEngine.completeDraw(tournam
 
 let state=sideField.createState();
 const opened=sideField.ensureMarket(state,tournament,30);state=opened.state;
+assert.equal(state.version,2,"Yan Saha state must use subsystem schema v2");
+assert.equal(state.oddsVersion,"yan-saha-v2","persisted odds need an explicit model version");
+assert.equal(state.insightVersion,"form-v1","persisted insights need an explicit model version");
 assert.equal(opened.created,true,"the first visit must freeze a market snapshot");
 assert.equal(opened.market.quotes.length,15,"group matchday must expose all 15 non-player fixtures");
 assert.equal(opened.market.riskLimit,4,"a healthy starting budget must receive the €4M round ceiling");
 assert.ok(opened.market.quotes.every(quote=>quote.homeId!=="player"&&quote.awayId!=="player"),"the player's own fixture must never be offered");
+assert.ok(opened.market.quotes.every(quote=>quote.intel&&["high","medium","balanced"].includes(quote.intel.confidence)),"every quote must expose a bounded public confidence insight");
+assert.ok(opened.market.quotes.every(quote=>Number.isInteger(quote.intel.powerGap)&&Number.isInteger(quote.intel.homeForm.points)&&Number.isInteger(quote.intel.awayForm.points)),"power gap and recent form must be deterministic public data");
 
 for(const quote of opened.market.quotes){
   const picks=Object.keys(quote.odds),overround=picks.reduce((sum,pick)=>sum+1/quote.odds[pick],0);
@@ -30,6 +35,7 @@ const quote=opened.market.quotes.find(item=>Object.values(item.odds).some(odds=>
 const pick=Object.keys(quote.odds).find(key=>sideField.minStakeForOdds(quote.odds[key])<=4),stake=sideField.minStakeForOdds(quote.odds[pick]);
 const placed=sideField.place(state,opened.market.key,quote.matchId,pick,stake,30);state=placed.state;
 assert.equal(placed.ok,true,"a valid selection must be accepted");
+assert.deepEqual(sideField.exposure(state,opened.market),{used:stake,limit:4,remaining:4-stake,ratio:Math.round(stake/4*100)/100,level:stake/4>=1?"max":stake/4>=.5?"watch":"low"},"risk exposure must be derived from the immutable market cap");
 assert.equal(sideField.place(state,opened.market.key,quote.matchId,pick,stake,30).reason,"match_already_selected","duplicate fixture exposure must be rejected");
 assert.equal(sideField.place(state,opened.market.key,opened.market.quotes[1].matchId,"H",5,30).reason,"risk_limit","stake above the round ceiling must be rejected");
 
@@ -44,8 +50,15 @@ assert.ok(["won","lost"].includes(state.tickets[0].status));
 const repeated=sideField.settle(state,tournament,opened.market.key);
 assert.equal(repeated.payout,0,"settlement must be idempotent");
 assert.equal(repeated.settled.length,0,"settlement must not process a ticket twice");
+const metrics=sideField.metrics(state);
+assert.equal(metrics.stakes,stake,"record must count the stake once");
+assert.equal(metrics.settled,1,"record must count one resolved selection");
+assert.equal(metrics.net,metrics.payouts-metrics.stakes,"record net must reconcile with the ledger");
 assert.equal(sideField.validate(JSON.parse(JSON.stringify(state))).ok,true,"persisted state must remain valid");
 const corrupted=JSON.parse(JSON.stringify(state));corrupted.markets[opened.market.key].riskLimit=99;
 assert.equal(sideField.validate(corrupted).ok,false,"tampered market limits must be rejected by persistence validation");
+const migrated=sideField.normalizeState({version:1,markets:{},tickets:[],ledger:[],nextTicketId:3});
+assert.equal(migrated.version,2,"v1 Yan Saha saves must migrate independently to v2");
+assert.equal(migrated.nextTicketId,3,"subsystem migration must preserve ticket sequencing");
 
 console.log(`Yan Saha checks passed: 15 fixtures, ${(averageRtp*100).toFixed(1)}% modeled RTP, risk caps and idempotent settlement verified.`);

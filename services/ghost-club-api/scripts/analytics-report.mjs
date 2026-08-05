@@ -4,7 +4,7 @@ const output=process.env.ANALYTICS_REPORT_OUTPUT||"outputs/analytics/weekly.json
 const generatedAt=new Date().toISOString();
 const eventOrder=["session_started","draft_started","xi_completed","run_finished","profile_open_error"];
 
-const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes]=await Promise.all([queryAnalytics(`
+const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField]=await Promise.all([queryAnalytics(`
   SELECT blob1 AS event, SUM(_sample_interval * double1) AS total
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
@@ -57,9 +57,17 @@ const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisi
     AND blob1 = 'run_finished' AND blob14 != ''
   GROUP BY chairman, outcome, end_type
   ORDER BY runs DESC
+`),queryAnalytics(`
+  SELECT blob1 AS event, blob5 AS outcome, blob19 AS economy_band, blob20 AS dimensions,
+    SUM(_sample_interval * double1) AS total
+  FROM copa_life_product_events
+  WHERE timestamp >= NOW() - INTERVAL '7' DAY
+    AND blob1 IN ('sidefield_opened','sidefield_pick_placed','sidefield_settled')
+  GROUP BY event, outcome, economy_band, dimensions
+  ORDER BY total DESC LIMIT 100
 `)]);
 
-const queries=[funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes];
+const queries=[funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField];
 const configured=queries.every(query=>query.configured);
 const ready=queries.every(query=>query.available);
 const totals=Object.fromEntries(eventOrder.map(event=>[event,0]));
@@ -67,7 +75,7 @@ for(const row of funnel.rows)if(Object.hasOwn(totals,row.event))totals[row.event
 const sessions=totals.session_started;
 const workerSummary=worker.rows[0]||{};
 const report={
-  schema_version:3,
+  schema_version:4,
   generated_at:generatedAt,
   period_days:7,
   status:!configured?"not_configured":ready?"ready":"waiting_for_first_data",
@@ -83,6 +91,7 @@ const report={
   final_simulation:finalSim.rows.map(row=>({model_version:row.model_version||"unknown",power_gap:row.power_gap||"unknown",end_type:row.end_type||"unknown",tactic:row.tactic||"unknown",finals:numeric(row.finals)})),
   balance_decisions:balanceDecisions.rows.map(row=>({event:row.event||"unknown",outcome:row.outcome||"",chairman:row.chairman||"",formation:row.formation||"",style:row.style||"",reward:row.reward||"",card_kind:row.card_kind||"",economy_band:row.economy_band||"",total:numeric(row.total)})),
   chairman_outcomes:chairmanOutcomes.rows.map(row=>({chairman:row.chairman||"unknown",outcome:row.outcome||"unknown",end_type:row.end_type||"unknown",runs:numeric(row.runs)})),
+  side_field:sideField.rows.map(row=>({event:row.event||"unknown",outcome:row.outcome||"",economy_band:row.economy_band||"",dimensions:row.dimensions||"",total:numeric(row.total)})),
   worker:{requests:numeric(workerSummary.requests),server_errors:numeric(workerSummary.server_errors),avg_latency_ms:numeric(workerSummary.avg_latency_ms),routes:workerRoutes.rows.map(row=>({route:row.route,requests:numeric(row.requests),server_errors:numeric(row.server_errors)}))}
 };
 writeReport(output,report);

@@ -2,6 +2,7 @@
 (function(global){
   "use strict";
   const VERSION=6;
+  const SUBSYSTEM_VERSIONS=Object.freeze({run:VERSION,tournament:2,sideField:2,cards:4,journal:1,meta:6});
   const KEYS=Object.freeze({primary:"copa_run_v6",backup:"copa_run_v6_last_good",session:"copa_run",legacyPrimary:"copa_run_v5",legacyBackup:"copa_run_v5_last_good"});
   const durableStorage=global.CopaPlatform&&global.CopaPlatform.storage||global.localStorage;
   const object=value=>!!value&&typeof value==="object"&&!Array.isArray(value);
@@ -22,6 +23,8 @@
     state.fixtures=Array.isArray(state.fixtures)?state.fixtures:[];
     state.tournament=object(state.tournament)?state.tournament:null;
     state.sideField=global.CopaSideFieldEngine?global.CopaSideFieldEngine.normalizeState(state.sideField):null;
+    state.transactionJournal=global.CopaRunJournal?global.CopaRunJournal.normalizeState(state.transactionJournal):null;
+    state.subsystemVersions=Object.assign({},SUBSYSTEM_VERSIONS,object(state.subsystemVersions)?state.subsystemVersions:{});
     state.tournamentFormat=state.tournament&&state.tournament.format==="groups32_v2"?"groups32_v2":"legacy_knockout_v1";
     state.chairmanEventRunId=typeof state.chairmanEventRunId==="string"?state.chairmanEventRunId:"";
     state.chairmanEventSeen=object(state.chairmanEventSeen)?state.chairmanEventSeen:{};
@@ -87,6 +90,8 @@
       if(value.phase!=="draw"&&value.tournament&&value.tournament.phase==="draw")errors.push(issue("incomplete_draw","tournament.phase"));
     }else if(value.tournamentFormat!=="legacy_knockout_v1")errors.push(issue("invalid_tournament_format","tournamentFormat"));
     if(value.sideField&&global.CopaSideFieldEngine){const checked=global.CopaSideFieldEngine.validate(value.sideField);if(!checked.ok)errors.push(issue("invalid_side_field","sideField"));}
+    if(!object(value.subsystemVersions)||Object.entries(SUBSYSTEM_VERSIONS).some(([key,version])=>Number(value.subsystemVersions[key])!==version))errors.push(issue("invalid_subsystem_versions","subsystemVersions"));
+    if(global.CopaRunJournal){const checked=value.transactionJournal&&global.CopaRunJournal.validate(value.transactionJournal);if(!checked||!checked.ok)errors.push(issue("invalid_transaction_journal","transactionJournal"));}
     if(value.phase==="match"){
       const pending=value.pendingMatchResolution;
       const liveFinal=Number(value.round)===7;
@@ -146,5 +151,5 @@
   }
   function clear(){safeRemove(durableStorage,KEYS.primary);safeRemove(durableStorage,KEYS.backup);safeRemove(durableStorage,KEYS.legacyPrimary);safeRemove(durableStorage,KEYS.legacyBackup);safeRemove(global.sessionStorage,KEYS.session);}
   function flush(){return durableStorage&&typeof durableStorage.flush==="function"?durableStorage.flush():Promise.resolve();}
-  global.CopaRunPersistence=Object.freeze({VERSION,KEYS,migrate,validate,parse,persist,read,clear,flush});
+  global.CopaRunPersistence=Object.freeze({VERSION,SUBSYSTEM_VERSIONS,KEYS,migrate,validate,parse,persist,read,clear,flush});
 })(window);

@@ -5,11 +5,11 @@ const METHODS="GET, POST, DELETE, OPTIONS";
 const CONSENT_VERSION="ghost-terms-v1";
 const LEADERBOARD_CONSENT_VERSION="leaderboard-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
-const ANALYTICS_EVENTS=new Set(["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved"]);
+const ANALYTICS_EVENTS=new Set(["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed"]);
 const ANALYTICS_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
 const ANALYTICS_OUTCOMES=new Set(["","win","draw","loss","sacked"]);
-const ANALYTICS_DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
+const ANALYTICS_DETAILS=new Set(["","load_failed","missing_model","retry_failed","round","results","tickets","market","all_hit","mixed","all_miss"]);
 const ANALYTICS_POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
 const ANALYTICS_END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
 const ANALYTICS_TACTICS=new Set(["","balanced","more","push","calm","hold"]);
@@ -22,6 +22,9 @@ const ANALYTICS_ECONOMY_BANDS=new Set(["","debt_20_plus","debt_10_19","debt_1_9"
 const ANALYTICS_TOURNAMENT_STAGES=new Set(["","group","roundof16","quarterfinal","semifinal","final"]);
 const ANALYTICS_DRAW_MODES=new Set(["","manual","fast","complete"]);
 const ANALYTICS_QUALIFICATION_STATES=new Set(["","yes","no","pending"]);
+const ANALYTICS_SIDEFIELD_PICKS=new Set(["","H","D","A"]);
+const ANALYTICS_CONFIDENCE_LEVELS=new Set(["","high","medium","balanced"]);
+const ANALYTICS_STAKE_BANDS=new Set(["","m1","m2","m3","m4"]);
 const GHOST_POSITIONS=new Set(["GK","LB","CB","RB","WB","DM","CM","LM","RM","AM","LW","RW","ST"]);
 const GHOST_FORMATIONS=Object.freeze({
   "4-4-2":["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"],
@@ -61,7 +64,7 @@ async function readJsonLimited(request,limit=MAX_BODY_BYTES){
 }
 
 function normalizeAnalyticsEvent(value){
-  if(!object(value)||![1,2,3,4].includes(Number(value.schema_version)))return null;
+  if(!object(value)||![1,2,3,4,5].includes(Number(value.schema_version)))return null;
   const schemaVersion=Number(value.schema_version);
   const event=String(value.event||"");if(!ANALYTICS_EVENTS.has(event))return null;
   if(event==="final_sim_completed"&&schemaVersion<2)return null;
@@ -91,7 +94,11 @@ function normalizeAnalyticsEvent(value){
   const drawMode=String(value.draw_mode||"");if(!ANALYTICS_DRAW_MODES.has(drawMode))return null;
   const qualification=String(value.qualification||"");if(!ANALYTICS_QUALIFICATION_STATES.has(qualification))return null;
   const groupMatchday=Math.max(0,Math.min(3,Math.round(Number(value.group_matchday)||0)));
-  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday};
+  if(schemaVersion===4)return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday};
+  const sidefieldPick=String(value.sidefield_pick||"");if(!ANALYTICS_SIDEFIELD_PICKS.has(sidefieldPick))return null;
+  const confidence=String(value.confidence||"");if(!ANALYTICS_CONFIDENCE_LEVELS.has(confidence))return null;
+  const stakeBand=String(value.stake_band||"");if(!ANALYTICS_STAKE_BANDS.has(stakeBand))return null;
+  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday,sidefieldPick,confidence,stakeBand};
 }
 
 async function handleAnalytics(request,env){
@@ -106,7 +113,7 @@ async function handleAnalytics(request,env){
       event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion,
       event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1),
       event.chairman||"",event.formation||"",event.style||"",event.reward||"",event.cardKind||"",event.economyBand||"",
-      [event.tournamentStage||"",event.drawMode||"",event.qualification||""].join("|")
+      [event.tournamentStage||"",event.drawMode||"",event.qualification||"",event.sidefieldPick||"",event.confidence||"",event.stakeBand||""].join("|")
     ],
     doubles:[1,event.round,event.schemaVersion||1,event.groupMatchday||0]
   });

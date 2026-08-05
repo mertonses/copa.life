@@ -23,11 +23,17 @@
     "group_draw_started",
     "group_draw_completed",
     "group_draw_skipped",
-    "tournament_match_resolved"
+    "tournament_match_resolved",
+    "sidefield_opened",
+    "sidefield_view_changed",
+    "sidefield_selection_viewed",
+    "sidefield_pick_placed",
+    "sidefield_settled",
+    "card_effect_summary_viewed"
   ]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
   const OUTCOMES=new Set(["","win","draw","loss","sacked"]);
-  const DETAILS=new Set(["","load_failed","missing_model","retry_failed"]);
+  const DETAILS=new Set(["","load_failed","missing_model","retry_failed","round","results","tickets","market","all_hit","mixed","all_miss"]);
   const POWER_GAPS=new Set(["","away_12_plus","away_4_11","even","home_4_11","home_12_plus"]);
   const END_TYPES=new Set(["","regulation","golden_goal","penalties"]);
   const TACTICS=new Set(["","balanced","more","push","calm","hold"]);
@@ -40,6 +46,9 @@
   const TOURNAMENT_STAGES=new Set(["","group","roundof16","quarterfinal","semifinal","final"]);
   const DRAW_MODES=new Set(["","manual","fast","complete"]);
   const QUALIFICATION_STATES=new Set(["","yes","no","pending"]);
+  const SIDEFIELD_PICKS=new Set(["","H","D","A"]);
+  const CONFIDENCE_LEVELS=new Set(["","high","medium","balanced"]);
+  const STAKE_BANDS=new Set(["","m1","m2","m3","m4"]);
   const PRODUCTION_HOSTS=new Set(["copa.life","www.copa.life"]);
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
@@ -85,9 +94,12 @@
     const drawMode=DRAW_MODES.has(String(props.mode||""))?String(props.mode||""):"";
     const qualification=QUALIFICATION_STATES.has(String(props.qualified||""))?String(props.qualified||""):"";
     const groupMatchday=Math.max(0,Math.min(3,Math.round(Number(props.group_matchday)||0)));
-    const round=Math.max(0,Math.min(6,Math.round(Number(props.round)||0)));
+    const sidefieldPick=SIDEFIELD_PICKS.has(String(props.sidefield_pick||""))?String(props.sidefield_pick||""):"";
+    const confidence=CONFIDENCE_LEVELS.has(String(props.confidence||""))?String(props.confidence||""):"";
+    const stakeBand=STAKE_BANDS.has(String(props.stake_band||""))?String(props.stake_band||""):"";
+    const round=Math.max(0,Math.min(7,Math.round(Number(props.round)||0)));
     return {
-      schema_version:4,
+      schema_version:5,
       event:eventName,
       platform:platform(),
       locale:locale(),
@@ -110,7 +122,10 @@
       tournament_stage:tournamentStage,
       draw_mode:drawMode,
       qualification,
-      group_matchday:groupMatchday
+      group_matchday:groupMatchday,
+      sidefield_pick:sidefieldPick,
+      confidence,
+      stake_band:stakeBand
     };
   }
 
@@ -151,8 +166,14 @@
     const slot=document.getElementById("advancedAnalyticsSlot");if(!slot)return;
     if(!global.CopaPlatform||!global.CopaPlatform.isNative){slot.hidden=true;return;}
     slot.hidden=false;
-    const tr=global.LANG==="tr",on=nativeOptIn();
-    slot.innerHTML=`<div class="ghost-setting-option"><div class="ghost-setting-header">${tr?"ANONİM KULLANIM ÖLÇÜMÜ":"ANONYMOUS USAGE METRICS"}</div><div class="ghost-setting-copy">${tr?"Kimlik, kulüp adı veya kayıt kodu olmadan toplu oynanış olayları gönderir. İstediğin zaman kapatabilirsin.":"Sends aggregate gameplay events without an identity, club name or save code. You can turn it off at any time."}</div><button class="ghost-setting-toggle${on?" on":""}" type="button" aria-pressed="${on}" onclick="CopaAnalytics.setNativeEnabled(${!on})">${on?(tr?"AÇIK":"ON"):(tr?"KAPALI":"OFF")}</button></div>`;
+    const copy={
+      tr:{title:"ANONİM KULLANIM ÖLÇÜMÜ",body:"Kimlik, kulüp adı veya kayıt kodu olmadan toplu oynanış olayları gönderir. İstediğin zaman kapatabilirsin.",on:"AÇIK",off:"KAPALI"},
+      en:{title:"ANONYMOUS USAGE METRICS",body:"Sends aggregate gameplay events without an identity, club name or save code. You can turn it off at any time.",on:"ON",off:"OFF"},
+      es:{title:"MÉTRICAS DE USO ANÓNIMAS",body:"Envía eventos de juego agregados sin identidad, nombre de club ni código de guardado. Puedes desactivarlo cuando quieras.",on:"ACTIVADO",off:"DESACTIVADO"},
+      de:{title:"ANONYME NUTZUNGSMESSUNG",body:"Sendet zusammengefasste Spielereignisse ohne Identität, Clubnamen oder Speichercode. Du kannst dies jederzeit ausschalten.",on:"AN",off:"AUS"},
+      it:{title:"METRICHE DI UTILIZZO ANONIME",body:"Invia eventi di gioco aggregati senza identità, nome del club o codice di salvataggio. Puoi disattivarli in qualsiasi momento.",on:"ATTIVE",off:"DISATTIVE"}
+    }[global.LANG]||{title:"ANONYMOUS USAGE METRICS",body:"Sends aggregate gameplay events without an identity, club name or save code. You can turn it off at any time.",on:"ON",off:"OFF"},on=nativeOptIn();
+    slot.innerHTML=`<div class="ghost-setting-option"><div class="ghost-setting-header">${copy.title}</div><div class="ghost-setting-copy">${copy.body}</div><button class="ghost-setting-toggle${on?" on":""}" type="button" aria-pressed="${on}" onclick="CopaAnalytics.setNativeEnabled(${!on})">${on?copy.on:copy.off}</button></div>`;
   }
 
   global.CopaAnalytics=Object.freeze({track,enabled,payloadFor,nativeOptIn,setNativeEnabled,installSetting});

@@ -13,6 +13,7 @@ var bench=[],benchUsed=0,tempPrime=0,tempPrimePenalty=0,shortCamp=0,shortCampPen
 var loanPlayer=null;
 var legacyFund=0,legacyCash=0;
 var sideFieldState=null;
+var runTransactionJournal=null;
 var shopBlocked=0,presidentBlocked=0,cardPriceMod=1.0,cardPriceModTurns=0,lotteryCouponAmount=0,lotteryCouponTurns=0,dopingInvestigationResolved=0;
 var deferredBudgetPenalty=0,deferredPowerPenalty=0,oppPowerMod=0;
 var draftFatigueTurns=0,draftDebtTurns=0,draftPendingInjury=0;

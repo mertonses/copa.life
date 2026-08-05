@@ -6,6 +6,7 @@ const hub=fs.readFileSync(new URL("../src/ui/hub.js",import.meta.url),"utf8");
 const state=fs.readFileSync(new URL("../src/state/gameState.js",import.meta.url),"utf8");
 const lifecycle=fs.readFileSync(new URL("../src/state/runLifecycle.js",import.meta.url),"utf8");
 const persistence=fs.readFileSync(new URL("../src/state/runPersistence.js",import.meta.url),"utf8");
+const journal=fs.readFileSync(new URL("../src/state/runTransactionJournal.js",import.meta.url),"utf8");
 const tournamentEngine=fs.readFileSync(new URL("../src/tournament/tournamentEngine.js",import.meta.url),"utf8");
 const finalPersistence=fs.readFileSync(new URL("../src/state/finalSimPersistence.js",import.meta.url),"utf8");
 const finalSim=fs.readFileSync(new URL("../src/sim/finalSim.js",import.meta.url),"utf8");
@@ -15,7 +16,7 @@ const expect=(condition,message)=>{if(!condition)throw new Error(message);};
 
 for(const marker of [
   "v:6","phase","savedAt","seedNum","seedStr","rngCalls","bracket","fixtures","opponent","tournamentFormat","tournament",
-  "currentWeather","oppChar","oppLineup","shopOffers","freeAgents","powerHist",
+  "currentWeather","oppChar","oppLineup","shopOffers","freeAgents","powerHist","subsystemVersions","transactionJournal",
   "ghostOpponentId","ghostCheckedRounds","ghostSeenIds",
   "enterHub(true)","CopaRunPersistence","applyStorageMigrations"
 ])expect(html.includes(marker),`Save v6 alanı/geri yükleme işareti eksik: ${marker}`);
@@ -45,13 +46,27 @@ const makeStorage=()=>{const values=new Map();return{getItem:key=>values.has(key
 const sandbox={window:null,localStorage:makeStorage(),sessionStorage:makeStorage(),Date,JSON,Object,Array,Number,Math,Set};
 sandbox.window=sandbox;
 vm.runInNewContext(tournamentEngine,sandbox,{filename:"tournamentEngine.js"});
+vm.runInNewContext(journal,sandbox,{filename:"runTransactionJournal.js"});
 vm.runInNewContext(persistence,sandbox,{filename:"runPersistence.js"});
 const api=sandbox.CopaRunPersistence;
+const journalApi=sandbox.CopaRunJournal;
 const picks=Array.from({length:11},(_,index)=>({name:`P${index}`,pos:"ST",ov:70}));
 const legacy={v:4,picks,budget:10,round:2,seedNum:42,formName:"4-4-2",country:"TR"};
 const migrated=api.migrate(legacy);
 expect(migrated.v===6&&migrated.phase==="hub"&&migrated.tournamentFormat==="legacy_knockout_v1","v4 hub kaydı v6 legacy formatına migrate edilemedi");
 expect(api.validate(migrated).ok,"Migrate edilen hub kaydı şema doğrulamasından geçmedi");
+expect(migrated.subsystemVersions.run===6&&migrated.subsystemVersions.sideField===2&&migrated.subsystemVersions.journal===1,"Alt sistem sürümleri bağımsız saklanmıyor");
+expect(journalApi.validate(migrated.transactionJournal).ok,"Eski kayıt için merkezi işlem günlüğü oluşturulmadı");
+let transaction=journalApi.begin(migrated.transactionJournal,{id:"round-reward:2",kind:"round_reward",round:2,payload:{kind:"cash"}});
+expect(transaction.ok&&!transaction.replay&&journalApi.pending(transaction.state).length===1,"İşlem hazırlama kaydı üretilemedi");
+const resumed=journalApi.begin(transaction.state,{id:"round-reward:2",kind:"round_reward",round:2});
+expect(resumed.ok&&resumed.replay&&resumed.reason==="resume","Yarım kalan işlem güvenli şekilde sürdürülemiyor");
+transaction=journalApi.commit(transaction.state,"round-reward:2",1000);
+expect(transaction.ok&&journalApi.isCommitted(transaction.state,"round-reward:2"),"İşlem atomik olarak tamamlanmadı");
+const duplicate=journalApi.begin(transaction.state,{id:"round-reward:2",kind:"round_reward",round:2});
+expect(!duplicate.ok&&duplicate.reason==="already_committed","Tamamlanan ödül/ceza ikinci kez çalıştırılabiliyor");
+expect(api.validate({...migrated,transactionJournal:transaction.state}).ok,"Tamamlanan işlem günlüğü kayıt şemasını bozdu");
+expect(!api.validate({...migrated,subsystemVersions:{...migrated.subsystemVersions,sideField:99}}).ok,"Uyumsuz alt sistem sürümü kabul edildi");
 const partial=picks.map((player,index)=>index===3?null:player);
 const draft=api.migrate({v:4,picks:partial,budget:20,round:1,seedNum:7,formName:"4-4-2",country:"TR"});
 expect(draft.phase==="draft"&&draft.draft.remaining===1&&api.validate(draft).ok,"Eski kısmi draft kaydı migrate edilemedi");

@@ -91,7 +91,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260727-balance-cleanup1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260722-cost-flow1">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260805-effect-summary1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
@@ -99,8 +99,8 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260805-five-tab-nav1">
-<link rel="stylesheet" href="src/styles/sideField.css?v=20260805-yan-saha-nav1">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260805-five-tab-nav2">
+<link rel="stylesheet" href="src/styles/sideField.css?v=20260805-yan-saha-insights2">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -421,18 +421,19 @@ try{
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/game/penaltyCore.js?v=20260722-shared-penalties1"></script>
 <script src="src/tournament/tournamentEngine.js?v=20260721-groups1"></script>
-<script src="src/sidefield/sideFieldEngine.js?v=20260804-yan-saha1"></script>
+<script src="src/sidefield/sideFieldEngine.js?v=20260805-yan-saha2"></script>
+<script src="src/state/runTransactionJournal.js?v=20260805-atomic-journal1"></script>
 <script src="src/tournament/tournamentUI.js?v=20260728-ui-fixes1"></script>
 <script src="src/tournament/matchResolver.js?v=20260722-knockout-rules1"></script>
 <script src="src/tournament/tournamentRuntime.js?v=20260727-fast-draw2"></script>
-<script src="src/sidefield/sideFieldUI.js?v=20260804-yan-saha1"></script>
-<script src="src/state/runPersistence.js?v=20260720-match-integrity1"></script>
+<script src="src/sidefield/sideFieldUI.js?v=20260805-yan-saha2"></script>
+<script src="src/state/runPersistence.js?v=20260805-subsystem-versions1"></script>
 <script src="src/state/transferSave.js?v=20260730-mobile-transfer2"></script>
 <script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260804-interface-future1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260805-system-club1"></script>
 <script src="src/ui/modeGate.js?v=20260804-mode-gate8"></script>
 <script src="src/runtime/finalReplay.js?v=20260730-import-ui2"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
@@ -440,10 +441,11 @@ try{
 <script src="src/cards/cardBalance.js?v=20260720-explicit-power1"></script>
 <script src="src/balance/telemetry.js?v=20260720-hidden-draft1"></script>
 <script src="src/balance/finalCalibration.js?v=20260717-weekly-calibration1"></script>
-<script src="src/runtime/productAnalytics.js?v=20260716-analytics1"></script>
+<script src="src/runtime/productAnalytics.js?v=20260805-analytics5"></script>
 <script>window.COPA_WEB_ADS_CONFIG={client:"__COPA_ADSENSE_CLIENT__",channel:"__COPA_ADSENSE_CHANNEL__",displaySlot:"__COPA_ADSENSE_DISPLAY_SLOT__",frequencyHint:"600s"};</script>
 <script src="src/runtime/adGateway.js?v=20260730-ads1"></script>
 <script src="src/cards/cardEffects.js?v=20260720-lottery-copy1"></script>
+<script src="src/cards/cardEffectSummary.js?v=20260805-effect-summary1"></script>
 <script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
 <script src="src/game/chemistry.js?v=20260726-systems1"></script>
 <script src="src/game/preMatchPreparation.js?v=20260729-strategic1"></script>
@@ -467,7 +469,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   style.rel="stylesheet";
   style.href=platform==="web"?"src/styles/webOnly.css?v=20260805-five-tab-nav1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260805-yan-saha-nav1";
+  script.src="src/ui/mobileGameSystems.js?v=20260805-yan-saha-nav2";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });
@@ -946,6 +948,8 @@ function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(
   chairmanEventRunId=String(seedNum)+"-"+Date.now().toString(36);pendingChairmanEvent=null;chairmanEventSeen={};window._kaosOfferRound=0;window._kaosOfferPendingRound=0;
   if(window.CopaRelationships)CopaRelationships.reset({startToken:window.CopaMeta&&typeof CopaMeta.consumeStartToken==="function"?CopaMeta.consumeStartToken():0});
   if(window.CopaClubFiles)CopaClubFiles.reset();
+  if(window.CopaSideField)CopaSideField.reset();
+  runTransactionJournal=window.CopaRunJournal?CopaRunJournal.createState():null;
   medicalProtectionTurns=0;
   window._postMatchResolvedRound=0;
   window._ghostSeenIds=[];window._ghostCheckedRounds=[];window._ghostOpponentUsed=false;window._ghostOpponentId="";
@@ -2094,6 +2098,7 @@ function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;
   if(typeof _flashGoalScorers==="function")_flashGoalScorers(lastMatchEvents);
   const attendance=creditMatchdayIncome(round,sp.power,opponent.power).attendance;
   pendingMatchResolution={round,advance,draw,gf,ga,fairPlay:_fairPlay,attendance,stage:_groupStage?"group":(window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active()?window.CopaTournamentRuntime.stage():"legacy")};
+  {const _matchTx=`match-result:${round}`;if(!_journalCommitted(_matchTx)){_journalBegin(_matchTx,"match_result",{gf,ga,advance,draw,stage:pendingMatchResolution.stage});_journalCommit(_matchTx);}}
   if(window.CopaSideField&&window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active())CopaSideField.lockCurrent();
   _saveState("match");
   if(mode==="quick"){_selectedMatchPresentation="";_showPendingMatchResult();}else presentResolvedMatch(mode);
@@ -2114,6 +2119,9 @@ function expireRewardLoanBeforeChoice(){
 }
 function resolvePostMatchStateBeforeReward(){
   if(window._postMatchResolvedRound===round)return;
+  const _postMatchTx=`post-match:${round}`;
+  if(_journalCommitted(_postMatchTx)){window._postMatchResolvedRound=round;return;}
+  _journalBegin(_postMatchTx,"post_match",{round});
   window._postMatchResolvedRound=round;
   const injuredBefore=(typeof injuredSlotIndices==="function"?injuredSlotIndices():[]).map(i=>picksBySlot[i]).filter(Boolean);
   const spotlightPlayer=sansSpotlightIdx>=0?picksBySlot[sansSpotlightIdx]:null;
@@ -2147,8 +2155,12 @@ function resolvePostMatchStateBeforeReward(){
   sansSpotlightIdx=-1;
   if(typeof syncInjuredIdx==="function")syncInjuredIdx();
   if(medicalProtectionTurns>0)medicalProtectionTurns--;
+  _journalCommit(_postMatchTx);
 }
 function _finishTournamentRoundWithoutReward(outcome,continueRun=true){
+  const _roundTx=`round-finalize:${round}:${outcome}`;
+  if(_journalCommitted(_roundTx))return false;
+  _journalBegin(_roundTx,"round_finalize",{outcome,continueRun:!!continueRun});
   if(sansMediaPressure>0)sansMediaPressure--;
   if(deferredBudgetPenalty>0){spend(deferredBudgetPenalty,"spent");pushFeed(" "+(LANG==="tr"?"Ertelenmiş maliyet: -€":"Deferred cost: -€")+deferredBudgetPenalty+"M","lose");deferredBudgetPenalty=0;}
   if(deferredPowerPenalty>0){riskPowerMod-=deferredPowerPenalty;pushFeed(" "+(LANG==="tr"?"Ertelenmiş güç cezası: -":"Deferred power penalty: -")+deferredPowerPenalty,"lose");deferredPowerPenalty=0;}
@@ -2165,6 +2177,7 @@ function _finishTournamentRoundWithoutReward(outcome,continueRun=true){
   if(chairman.id==="torpilci")picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){const gain=Math.min(3,80-p.ov);p.ov+=gain;p.eff=effOf(p);renderRoundel("h"+i,p);}});
   if(window.CopaAnalytics)window.CopaAnalytics.track("round_completed",analyticsBalanceProps({round,outcome}));window._roundCompletionTracked=round;
   devWonderkids();
+  _journalCommit(_roundTx);
   if(continueRun){round++;enterHub();pushFeed("📰 "+rnd(L().heads),"pres");setTimeout(()=>{if(!$("hub").classList.contains("hidden"))renderHub();},1600);}
   return true;
 }
@@ -2354,6 +2367,9 @@ function finishRoundReward(kind,extraText,careSlotIdx){
     const hasInjury=typeof injuredSlotIndices==="function"&&injuredSlotIndices().length>0;
     if(hasInjury&&(!candidate||!candidate.injured)){showRewardCareModal();return;}
   }
+  const _rewardTx=`round-reward:${round}`;
+  if(_journalCommitted(_rewardTx))return;
+  _journalBegin(_rewardTx,"round_reward",{kind});
   _rewardActionLocked=true;window._rewardResolvedRound=round;
   try{
   if(kind!=="_done"&&window.CopaAnalytics)window.CopaAnalytics.track("reward_selected",analyticsBalanceProps({reward:kind}));
@@ -2408,6 +2424,7 @@ function finishRoundReward(kind,extraText,careSlotIdx){
   /* Torpilci: yeğen gelişimi */
   if(chairman.id==="torpilci"){picksBySlot.forEach((p,i)=>{if(p&&p.isNephew&&p.ov<80){const _nephewGain=Math.min(3,80-p.ov);p.ov+=_nephewGain;p.eff=effOf(p);renderRoundel("h"+i,p);pushFeed(`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.1em"><path d="M17 6.1h3v12h-3"/><path d="M13 6h3v7"/><path d="M9 6h3v10"/><path d="M5 10h3v6"/></svg> <b>`+shortName(p)+"</b> "+(LANG==="tr"?"yeğen gelişiyor (+"+_nephewGain+" Güç)":"nephew developing (+"+_nephewGain+" Power)"),"pres");}});}
   if(window.CopaAnalytics)window.CopaAnalytics.track("round_completed",analyticsBalanceProps({round,outcome:"win"}));
+  _journalCommit(_rewardTx);
   devWonderkids();round++;enterHub();
   pushFeed("\u{1f4f0} "+rnd(L().heads),"pres");$("roundtag").textContent=rewardText;
   setTimeout(()=>{if(!$("hub").classList.contains("hidden"))renderHub();},1600);
@@ -3385,6 +3402,10 @@ function showChemBreak(){
 }
 
 /* ===== versioned run persistence ===== */
+function _journalState(){runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(runTransactionJournal):null;return runTransactionJournal;}
+function _journalCommitted(id){return !!(window.CopaRunJournal&&CopaRunJournal.isCommitted(_journalState(),id));}
+function _journalBegin(id,kind,payload){if(!window.CopaRunJournal)return true;const result=CopaRunJournal.begin(_journalState(),{id,kind,round,payload:payload||null});runTransactionJournal=result.state;return result.ok;}
+function _journalCommit(id){if(!window.CopaRunJournal)return true;const result=CopaRunJournal.commit(_journalState(),id);runTransactionJournal=result.state;return result.ok;}
 function _persistRunState(payload){
   if(!window.CopaRunPersistence)return{ok:false,errors:[{code:"persistence_unavailable"}]};
   return window.CopaRunPersistence.persist(payload);
@@ -3395,7 +3416,7 @@ function _readRunState(){
 function _runCheckpointClone(value){if(value==null)return value;try{return JSON.parse(JSON.stringify(value));}catch(_){return null;}}
 function _saveState(phaseOverride){
   if(runEnded)return;const phase=phaseOverride||(window.CopaRunState?window.CopaRunState.safeCheckpointPhase():"hub");if(!["draft","draw","hub","match","reward"].includes(phase))return;
-  try{_persistRunState({v:6,phase,savedAt:Date.now(),
+  try{_persistRunState({v:6,phase,savedAt:Date.now(),subsystemVersions:window.CopaRunPersistence&&CopaRunPersistence.SUBSYSTEM_VERSIONS,transactionJournal:_runCheckpointClone(_journalState()),
     picks:picksBySlot.map(p=>p?Object.assign({},p):null),
     budget,legacyCash:legacyCash||0,round,cards:[...cards],cardInv:Object.assign({},cardInv),cardVariant:Object.assign({},cardVariant),
     chairId:chairman&&chairman.id,formName,teamName,country:selectedCountry,style,
@@ -3446,7 +3467,7 @@ function _tryRestoreState(){
     document.querySelectorAll("#countryPick button").forEach(button=>button.classList.toggle("on",button.dataset.country===selectedCountry));
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
-    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):null;
+    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):null;runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
     formName=restoreForm;teamName=ClubNamePolicy.sanitize(st.teamName,"COPA XI");style=st.style||style||"gegen";

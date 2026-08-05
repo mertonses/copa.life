@@ -1,0 +1,62 @@
+name: Fast PR gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      suites: ${{ steps.matrix.outputs.suites }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - id: matrix
+        name: Build changed-file test matrix
+        shell: bash
+        run: echo "suites=$(node tools/changed-test-matrix.mjs --base '${{ github.event.pull_request.base.sha }}' --head '${{ github.sha }}')" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(needs.changes.outputs.suites) }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install application dependencies
+        run: npm ci
+      - name: Install Arena dependencies
+        if: matrix.suite == 'arena'
+        run: npm ci --prefix services/copa-arena-api
+      - name: Install Ghost dependencies
+        if: matrix.suite == 'ghost'
+        run: npm ci --prefix services/ghost-club-api
+      - name: Install browser dependencies
+        if: matrix.suite == 'navigation'
+        run: npm ci --prefix playtest/runner && npx --prefix playtest/runner playwright install --with-deps chromium
+      - name: Run behavior-contract suite
+        shell: bash
+        run: |
+          case "${{ matrix.suite }}" in
+            contracts) npm run test:contracts ;;
+            arena) npm run test:arena ;;
+            ghost) npm run test:worker ;;
+            navigation) npm run test:navigation --prefix playtest/runner ;;
+            native) npm run check:mobile-readiness ;;
+          esac

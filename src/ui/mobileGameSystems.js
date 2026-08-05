@@ -6,6 +6,14 @@
   const mobile=()=>phone()||native();
   const gameMode=()=>native()||new URLSearchParams(root.location.search).has("native-game");
   const tr=()=>root.LANG==="tr";
+  const NAV_COPY={
+    tr:{labels:{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"YAN SAHA",career:"KARİYER"},offers:"yeni alınabilir teklifler"},
+    en:{labels:{match:"MATCH",market:"MARKET",training:"TRAINING",sidefield:"SIDE FIELD",career:"CAREER"},offers:"new affordable offers"},
+    es:{labels:{match:"PARTIDO",market:"MERCADO",training:"ENTRENO",sidefield:"CAMPO LATERAL",career:"CARRERA"},offers:"nuevas ofertas asequibles"},
+    de:{labels:{match:"SPIEL",market:"MARKT",training:"TRAINING",sidefield:"NEBENPLATZ",career:"KARRIERE"},offers:"neue bezahlbare Angebote"},
+    it:{labels:{match:"PARTITA",market:"MERCATO",training:"ALLENAMENTO",sidefield:"CAMPO LATERALE",career:"CARRIERA"},offers:"nuove offerte accessibili"}
+  };
+  const navCopy=()=>NAV_COPY[root.LANG]||NAV_COPY.en;
   function matchAttendance(matchRound,homePower,awayPower){
     const bases=[8000,14000,22000,34000,52000,75000,90000],index=Math.max(0,Math.min(6,(Number(matchRound)||1)-1));
     return Math.round(bases[index]*(.65+Math.min(.33,Math.max(0,((Number(homePower)||0)-(Number(awayPower)||0))/100)))/1000)*1000;
@@ -31,7 +39,7 @@
     career:'<svg class="hub-tab-svg hub-tab-svg-career" viewBox="0 0 36 36" aria-hidden="true"><path class="hub-tab-icon-frame" d="M9 5.5h18v25H9z"/><path d="M13 12h10m-10 6h10m-10 6h6"/><path class="hub-tab-motion" d="m20.5 25 2.2-4.5 2.3 4.5 5 .7-3.6 3.5.8 1.3"/><circle class="hub-tab-token" cx="23" cy="9" r="2.4"/></svg>'
   };
   function navMarkup(){
-    const labels=tr()?{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"YAN SAHA",career:"KARİYER"}:{match:"MATCH",market:"MARKET",training:"TRAINING",sidefield:"SIDE FIELD",career:"CAREER"};
+    const labels=navCopy().labels;
     const remaining=root.CopaPreparation&&typeof root.CopaPreparation.spent==="function"?Math.max(0,2-root.CopaPreparation.spent()):2;
     return Object.keys(labels).map(route=>`<button type="button" data-native-target="${route}" aria-label="${labels[route]}" data-tab-label="${labels[route]}">${NAV_ICONS[route]}<span class="native-hub-tab-label">${labels[route]}</span>${route==="market"?'<i class="native-hub-market-dot hidden" aria-hidden="true"></i>':""}${route==="training"?`<em class="native-hub-tab-count">${remaining}/2</em>`:""}</button>`).join("");
   }
@@ -60,8 +68,8 @@
     const show=activeRoute!=="market"&&state.hasAffordable&&!!state.signature&&state.signature!==seenMarketSignature;
     dot.classList.toggle("hidden",!show);
     button.classList.toggle("has-market-notice",show);
-    const label=button.dataset.tabLabel||(tr()?"PAZAR":"MARKET");
-    button.setAttribute("aria-label",show?`${label}, ${tr()?"yeni alınabilir teklifler":"new affordable offers"}`:label);
+    const label=button.dataset.tabLabel||navCopy().labels.market;
+    button.setAttribute("aria-label",show?`${label}, ${navCopy().offers}`:label);
     return show;
   }
   function playRouteSound(route){
@@ -224,14 +232,14 @@
     let nav=document.getElementById("nativeHubNav");
     if(!nav){
       nav=document.createElement("nav");nav.id="nativeHubNav";nav.className="native-hub-nav";hub.prepend(nav);
-      nav.innerHTML=`<button type="button" data-native-target="match">${NAV_ICONS.match}<span>${tr()?"MAÇ":"MATCH"}</span></button><button type="button" data-native-target="market">${NAV_ICONS.market}<span>${tr()?"PAZAR":"MARKET"}</span></button><button type="button" data-native-target="career">${NAV_ICONS.career}<span>${tr()?"KARİYER":"CAREER"}</span></button>`;
+      nav.innerHTML=navMarkup();
       nav.onclick=event=>{
         const button=event.target.closest("[data-native-target]");if(!button)return;
         const route=button.dataset.nativeTarget;
         activateRoute(route);
       };
     }
-    const navKey=tr()?"tr":"en";
+    const navKey=NAV_COPY[root.LANG]?root.LANG:"en";
     const targets=[...nav.querySelectorAll("[data-native-target]")].map(button=>button.dataset.nativeTarget).join("|");
     if(nav.dataset.markupKey!==navKey||targets!=="match|market|training|sidefield|career"){
       nav.innerHTML=navMarkup();

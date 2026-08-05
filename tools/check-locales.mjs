@@ -119,6 +119,10 @@ const fixtureRoadSource=fs.readFileSync(new URL("../src/ui/fixtureRoad.js",impor
 const tournamentSource=fs.readFileSync(new URL("../src/tournament/tournamentRuntime.js",import.meta.url),"utf8");
 const arenaSource=fs.readFileSync(new URL("../src/online/arena.js",import.meta.url),"utf8");
 const modeGateSource=fs.readFileSync(new URL("../src/ui/modeGate.js",import.meta.url),"utf8");
+const sideFieldSource=fs.readFileSync(new URL("../src/sidefield/sideFieldUI.js",import.meta.url),"utf8");
+const cardSummarySource=fs.readFileSync(new URL("../src/cards/cardEffectSummary.js",import.meta.url),"utf8");
+const mobileSystemsSource=fs.readFileSync(new URL("../src/ui/mobileGameSystems.js",import.meta.url),"utf8");
+const analyticsSource=fs.readFileSync(new URL("../src/runtime/productAnalytics.js",import.meta.url),"utf8");
 const indexSource=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8");
 const tournamentWindow={LANG:"en"};tournamentWindow.window=tournamentWindow;
 const tournamentContext={window:tournamentWindow};vm.createContext(tournamentContext);vm.runInContext(tournamentSource,tournamentContext);
@@ -167,6 +171,44 @@ for(const sourceName of ["src/ui/modeGate.js","src/online/arena.js"]){
   const sourceText=sourceName.includes("modeGate")?modeGateSource:arenaSource;
   for(const language of required)if(!sourceText.includes(`${language}:`))errors.push(`${sourceName} is missing ${language} copy`);
 }
+
+const newSurfaceMarkers={
+  tr:{side:"KEHANET KAYDI",power:"GÜÇ",nav:"YAN SAHA",analytics:"ANONİM KULLANIM ÖLÇÜMÜ",arena:"SİSTEM KULÜBÜ"},
+  en:{side:"PROPHECY RECORD",power:"POWER",nav:"SIDE FIELD",analytics:"ANONYMOUS USAGE METRICS",arena:"SYSTEM CLUB"},
+  es:{side:"REGISTRO",power:"FUERZA",nav:"CAMPO LATERAL",analytics:"MÉTRICAS DE USO ANÓNIMAS",arena:"CLUB DEL SISTEMA"},
+  de:{side:"BILANZ",power:"STÄRKE",nav:"NEBENPLATZ",analytics:"ANONYME NUTZUNGSMESSUNG",arena:"SYSTEMCLUB"},
+  it:{side:"REGISTRO",power:"FORZA",nav:"CAMPO LATERALE",analytics:"METRICHE DI UTILIZZO ANONIME",arena:"CLUB DI SISTEMA"}
+};
+for(const [language,markers] of Object.entries(newSurfaceMarkers)){
+  if(!sideFieldSource.includes(markers.side))errors.push(`Yan Saha ${language} record copy is missing`);
+  if(!cardSummarySource.includes(markers.power))errors.push(`card effect summary ${language} power copy is missing`);
+  if(!mobileSystemsSource.includes(markers.nav))errors.push(`hub navigation ${language} Yan Saha copy is missing`);
+  if(!analyticsSource.includes(markers.analytics))errors.push(`analytics setting ${language} copy is missing`);
+  if(!arenaSource.includes(markers.arena))errors.push(`Arena ${language} system-club copy is missing`);
+}
+for(const language of required){
+  if(!new RegExp(`(?:^|\\n)\\s*${language}:\\{`).test(sideFieldSource))errors.push(`Yan Saha ${language} dictionary is missing`);
+  if(!new RegExp(`(?:^|\\n)\\s*${language}:\\{`).test(cardSummarySource))errors.push(`card effect summary ${language} dictionary is missing`);
+}
+function objectLiteral(source,startMarker,endMarker,label){
+  const start=source.indexOf(startMarker),end=source.indexOf(endMarker,start+startMarker.length);
+  if(start<0||end<0){errors.push(`${label} dictionary could not be audited`);return{};}
+  try{return vm.runInNewContext(`(${source.slice(start+startMarker.length,end)})`);}catch(error){errors.push(`${label} dictionary is not evaluable: ${error.message}`);return{};}
+}
+function equalKeysets(dictionary,label){
+  const canonical=Object.keys(dictionary.en||{}).sort().join("|");
+  for(const language of required){
+    const copy=dictionary[language];
+    if(!copy){errors.push(`${label} ${language} dictionary is missing`);continue;}
+    if(Object.keys(copy).sort().join("|")!==canonical)errors.push(`${label} ${language} keys do not match English`);
+    for(const [key,value] of Object.entries(copy))if(value==null||value==="")errors.push(`${label} ${language}.${key} is empty`);
+  }
+}
+equalKeysets(objectLiteral(sideFieldSource,"const COPY=",";\n  const c=","Yan Saha"),"Yan Saha");
+equalKeysets(objectLiteral(cardSummarySource,"const TEXT=",";\n  const t=","card effect summary"),"card effect summary");
+const navDictionary=objectLiteral(mobileSystemsSource,"const NAV_COPY=",";\n  const navCopy=","hub navigation");
+equalKeysets(navDictionary,"hub navigation");
+equalKeysets(Object.fromEntries(required.map(code=>[code,navDictionary[code]&&navDictionary[code].labels])),"hub navigation labels");
 
 if(errors.length){
   console.error("Locale check failed:\n- "+errors.join("\n- "));

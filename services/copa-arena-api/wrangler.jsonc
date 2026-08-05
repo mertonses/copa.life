@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "copa-life-arena",
   "main": "src/index.js",
-  "compatibility_date": "2026-07-28",
+  "compatibility_date": "2026-07-29",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life,https://localhost,capacitor://localhost",

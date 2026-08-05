@@ -190,6 +190,9 @@ describe("Ghost Club Worker",()=>{
     const tournamentEvent={...balanceEvent,schema_version:4,event:"tournament_match_resolved",tournament_stage:"group",draw_mode:"",qualification:"yes",group_matchday:3};
     expect(normalizeAnalyticsEvent(tournamentEvent)).toMatchObject({event:"tournament_match_resolved",schemaVersion:4,tournamentStage:"group",qualification:"yes",groupMatchday:3});
     expect(normalizeAnalyticsEvent({...tournamentEvent,tournament_stage:"roundof16"})).toMatchObject({tournamentStage:"roundof16"});
+    const sideFieldEvent={...tournamentEvent,schema_version:5,event:"sidefield_pick_placed",sidefield_pick:"D",confidence:"medium",stake_band:"m3"};
+    expect(normalizeAnalyticsEvent(sideFieldEvent)).toMatchObject({event:"sidefield_pick_placed",schemaVersion:5,sidefieldPick:"D",confidence:"medium",stakeBand:"m3"});
+    expect(normalizeAnalyticsEvent({...sideFieldEvent,stake_band:"m99"})).toBeNull();
     expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });
 

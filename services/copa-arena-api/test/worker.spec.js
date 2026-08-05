@@ -312,6 +312,7 @@ describe("Arena Durable Objects",()=>{
     const room=env.ARENA_ROOM.getByName(matchId);
     await room.init(matchId,[{owner,clubName:"Prova SK",rating:1000},{owner:"practice-bot:exit",clubName:"AI XI",rating:1000}],"practice-exit",{mode:"practice",botIndex:1});
     await runInDurableObject(room,async instance=>{
+      expect(publicState(instance.state,owner).opponent).toMatchObject({clubName:"AI XI",systemManaged:true});
       expect(await instance.action(owner,{type:"forfeit"})).toBe("ok");
       expect(instance.state.result).toMatchObject({practiceExit:true,voided:true,score:[0,0]});
       expect(instance.state.result.rewards[0]).toMatchObject({ratingDelta:0,seasonPoints:0,tokenProgress:0});
@@ -325,6 +326,7 @@ describe("Arena Durable Objects",()=>{
       {owner:"owner-surrender-away",clubName:"Devam SK",rating:1000}
     ],"surrender-seed");
     await runInDurableObject(room,async instance=>{
+      expect(publicState(instance.state,"owner-surrender-home").opponent.systemManaged).toBe(false);
       expect(await instance.action("owner-surrender-home",{type:"forfeit",actionId:"AA-SURRENDER000000000001"})).toBe("ok");
       expect(instance.state.phase).toBe("result");
       expect(instance.state.score).toEqual([0,3]);

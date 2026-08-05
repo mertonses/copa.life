@@ -21,7 +21,7 @@ const ROOM_ID=/^AR-[A-Z0-9]{16,40}$/;
 const CUSTOM_CODE=/^[A-HJ-NP-Z2-9]{6}$/;
 const TOURNAMENT_CODE=CUSTOM_CODE;
 const ACTION_ID=/^AA-[A-Za-z0-9_-]{8,80}$/;
-const ARENA_EVENTS=new Set(["arena_opened","arena_queue_joined","arena_matched","arena_phase_completed","arena_match_completed","arena_reconnected","arena_reconnect_started","arena_network_quality","arena_practice_started","arena_practice_completed","arena_tournament_created","arena_tournament_joined","arena_tournament_completed","arena_cosmetic_equipped","arena_error"]);
+const ARENA_EVENTS=new Set(["arena_opened","arena_queue_joined","arena_matched","arena_phase_completed","arena_match_completed","arena_reconnected","arena_reconnect_started","arena_network_quality","arena_practice_started","arena_practice_completed","arena_tournament_created","arena_tournament_joined","arena_tournament_completed","arena_cosmetic_equipped","arena_system_opponent_shown","arena_error"]);
 const COSMETIC_REWARDS=Object.freeze([
   {at:4,id:"arena_crest_foundry",type:"crest"},
   {at:8,id:"arena_kit_nocturne",type:"kit"},

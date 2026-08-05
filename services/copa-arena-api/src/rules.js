@@ -615,6 +615,7 @@ export function publicState(state,owner){
     self:self?{...self}:null,
     opponent:opponent?{
       clubName:opponent.clubName,
+      systemManaged:opponentIndex===state.botIndex,
       rating:opponent.rating,
       ready:opponent.ready,
       connected:opponent.connected,
