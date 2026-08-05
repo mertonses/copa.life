@@ -5,7 +5,7 @@ async function reachHub(page:any){
   await page.goto("/?autotest=1&groups=1&visual=navigation-contract",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{const game=globalThis as any;await game.quickStart();if(game._countryDraftPromise)await game._countryDraftPromise;await game.quickAll();});
   await page.locator("#postClubName").fill("Kırılım FK");
-  await page.evaluate(()=>{const game=globalThis as any;game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();game.CopaMobileShell.enhanceHub();});
+  await page.evaluate(()=>{const game=globalThis as any;game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.pendingChairmanEvent=null;game.closeModal();game.CopaMobileShell.enhanceHub();});
   await expect(page.locator("#hub")).toBeVisible();
 }
 
