@@ -60,7 +60,7 @@ body.reduced-motion .cash-digit-ghost{display:none!important}body.reduced-motion
 #hub .kasa-compact .kasa-compact-foot>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #hub .kasa-compact .kasa-compact-debt-label{font:inherit!important;letter-spacing:.35px!important;opacity:.7}
 #hub .kasa-compact .kasa-compact-debt-value{display:inline!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#D9C88F!important;font:900 7px/1 var(--mono)!important;letter-spacing:0!important}
-#hub .kasa-compact .kasa-compact-detail{flex:0 0 auto;opacity:.78;text-transform:lowercase}
+#hub .kasa-compact .kasa-compact-detail{position:static!important;left:auto!important;bottom:auto!important;flex:0 0 auto;margin:0!important;padding:0!important;border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;opacity:.78;text-transform:lowercase;cursor:pointer}
 #hub .kasa-compact .kasa-detail-btn{position:absolute!important;top:3px!important;right:3px!important;bottom:auto!important;left:auto!important;width:14px!important;height:14px!important;padding:0!important;border-radius:50%!important;background:#0A1118!important;font-size:8px!important}
 #hub .kasa-compact .cash-delta-toast{top:18px;right:4px;max-width:55%;padding:3px 4px}
 #hub .kasa-compact .cash-delta-toast b{font-size:7px}
