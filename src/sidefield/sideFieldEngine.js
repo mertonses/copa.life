@@ -5,15 +5,17 @@
   if(root)root.CopaSideFieldEngine=api;
 })(typeof window!=="undefined"?window:globalThis,function(){
   "use strict";
-  const VERSION=2,ODDS_VERSION="yan-saha-v2",INSIGHT_VERSION="form-v1",MARGIN=1.10,MAX_TICKETS=3,MAX_ROUND_STAKE=4,MAX_PAYOUT=12,CASH_FLOOR=-10;
+  const VERSION=3,ODDS_VERSION="yan-saha-v3",INSIGHT_VERSION="form-v1",MARGIN=1.10,MAX_TICKETS=4,MIN_ROUND_STAKE=2,MAX_ROUND_STAKE=5,MAX_PAYOUT=12,DEFAULT_CASH_FLOOR=-28;
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
   const round2=value=>Math.round(Number(value)*100)/100;
+  const roundHalf=value=>Math.round((Number(value)||0)*2)/2;
   const isObject=value=>!!value&&typeof value==="object"&&!Array.isArray(value);
   function createState(){return{version:VERSION,oddsVersion:ODDS_VERSION,insightVersion:INSIGHT_VERSION,markets:{},tickets:[],ledger:[],nextTicketId:1};}
   function normalizeState(value){
-    if(!isObject(value)||![1,VERSION].includes(Number(value.version)))return createState();
+    if(!isObject(value)||![1,2,VERSION].includes(Number(value.version)))return createState();
     const state=createState();
     state.markets=isObject(value.markets)?value.markets:{};
+    for(const market of Object.values(state.markets))if(isObject(market))market.riskLimit=clamp(Math.max(MIN_ROUND_STAKE,Math.floor(Number(market.riskLimit)||0)),MIN_ROUND_STAKE,MAX_ROUND_STAKE);
     state.tickets=Array.isArray(value.tickets)?value.tickets.filter(item=>isObject(item)).slice(-80):[];
     state.ledger=Array.isArray(value.ledger)?value.ledger.filter(item=>isObject(item)).slice(-160):[];
     state.nextTicketId=Math.max(1,Math.floor(Number(value.nextTicketId)||1));
@@ -29,7 +31,7 @@
     const marketEntries=isObject(value.markets)?Object.entries(value.markets):[];
     if(marketEntries.length>8)errors.push("invalid_market_count");
     for(const [key,market] of marketEntries){
-      if(!isObject(market)||market.key!==key||!["group","knockout"].includes(market.stage)||!["open","locked","settled"].includes(market.status)||!Number.isInteger(market.riskLimit)||market.riskLimit<0||market.riskLimit>MAX_ROUND_STAKE||!Array.isArray(market.quotes)||market.quotes.length>15){errors.push("invalid_market");continue;}
+      if(!isObject(market)||market.key!==key||!["group","knockout"].includes(market.stage)||!["open","locked","settled"].includes(market.status)||!Number.isInteger(market.riskLimit)||market.riskLimit<MIN_ROUND_STAKE||market.riskLimit>MAX_ROUND_STAKE||!Array.isArray(market.quotes)||market.quotes.length>15){errors.push("invalid_market");continue;}
       const seenMatches=new Set();
       for(const quote of market.quotes){
         const picks=market.stage==="group"?["H","D","A"]:["H","A"];
@@ -40,7 +42,7 @@
     for(const ticket of Array.isArray(value.tickets)?value.tickets:[]){
       if(!ticket||typeof ticket.id!=="string"||typeof ticket.marketKey!=="string"||typeof ticket.matchId!=="string")errors.push("invalid_ticket_identity");
       if(!["H","D","A"].includes(ticket.pick)||!["open","locked","won","lost"].includes(ticket.status))errors.push("invalid_ticket_status");
-      if(!Number.isInteger(ticket.stake)||ticket.stake<1||ticket.stake>MAX_ROUND_STAKE||!Number.isFinite(ticket.odds)||ticket.odds<1.01||!Number.isInteger(ticket.potentialPayout)||ticket.potentialPayout<ticket.stake||ticket.potentialPayout>MAX_PAYOUT)errors.push("invalid_ticket_value");
+      if(!Number.isInteger(ticket.stake)||ticket.stake<1||ticket.stake>MAX_ROUND_STAKE||!Number.isFinite(ticket.odds)||ticket.odds<1.01||!Number.isFinite(ticket.potentialPayout)||ticket.potentialPayout*2%1!==0||ticket.potentialPayout<ticket.stake||ticket.potentialPayout>MAX_PAYOUT)errors.push("invalid_ticket_value");
       if(isObject(value.markets)&&!value.markets[ticket.marketKey])errors.push("orphan_ticket");
     }
     for(const entry of Array.isArray(value.ledger)?value.ledger:[])if(!entry||typeof entry.id!=="string"||!["stake","payout"].includes(entry.type)||!Number.isFinite(Number(entry.amount))||Math.abs(Number(entry.amount))>MAX_PAYOUT)errors.push("invalid_ledger_entry");
@@ -90,10 +92,14 @@
     const odds={};for(const pick of picks)odds[pick]=decimalOdds(fair[pick]);
     return{matchId:match.id,homeId:match.homeId,awayId:match.awayId,homeName:String(home.name||"Home"),awayName:String(away.name||"Away"),stage:info.stage,round:info.round,matchday:info.matchday,odds,fair:Object.fromEntries(picks.map(pick=>[pick,round2(fair[pick])])),intel:publicInsight(tournament,match,info,home,away,fair)};
   }
-  function riskLimit(cash){return clamp(Math.floor(((Number(cash)||0)-CASH_FLOOR)/3),0,MAX_ROUND_STAKE);}
+  function riskLimit(cash){return clamp(MIN_ROUND_STAKE+Math.floor(Math.max(0,Number(cash)||0)/10),MIN_ROUND_STAKE,MAX_ROUND_STAKE);}
   function ensureMarket(stateValue,tournament,cash){
     const state=normalizeState(stateValue),info=stageInfo(tournament);if(!info)return{state,market:null,created:false};
-    if(state.markets[info.key])return{state,market:state.markets[info.key],created:false};
+    if(state.markets[info.key]){
+      const market=state.markets[info.key],nextLimit=riskLimit(cash);
+      if(market.status==="open"&&nextLimit>market.riskLimit)market.riskLimit=nextLimit;
+      return{state,market,created:false};
+    }
     const quotes=matchesFor(tournament,info).map(match=>quoteForMatch(tournament,match,info)).filter(Boolean);
     const market={key:info.key,stage:info.stage,round:info.round,matchday:info.matchday,status:quotes.length?"open":"settled",riskLimit:riskLimit(cash),quotes,createdRevision:Number(tournament.revision)||0,settledRevision:null};
     state.markets[info.key]=market;return{state,market,created:true};
@@ -106,26 +112,26 @@
     return{stakes,payouts,net:payouts-stakes,settled:settled.length,wins,hitRate:settled.length?round2(wins/settled.length):0,currentStreak:streak,bestStreak};
   }
   function exposure(stateValue,market){const used=market?roundTickets(normalizeState(stateValue),market.key).reduce((sum,ticket)=>sum+ticket.stake,0):0,limit=market?market.riskLimit:0,ratio=limit?used/limit:0;return{used,limit,remaining:Math.max(0,limit-used),ratio:round2(ratio),level:ratio>=1?"max":ratio>=.5?"watch":"low"};}
-  function minStakeForOdds(odds){
-    const value=Number(odds)||1;for(let stake=value>=2?1:2;stake<=MAX_ROUND_STAKE;stake++)if(Math.round(stake*value)>=stake+1)return stake;return MAX_ROUND_STAKE+1;
-  }
+  function minStakeForOdds(){return 1;}
+  function payoutFor(stake,odds){return roundHalf((Number(stake)||0)*(Number(odds)||0));}
+  function maxStakeForOdds(odds){let maximum=0;for(let stake=1;stake<=MAX_ROUND_STAKE;stake++)if(payoutFor(stake,odds)<=MAX_PAYOUT)maximum=stake;return maximum;}
   function quoteSelection(market,matchId,pick){const quote=market&&market.quotes.find(item=>item.matchId===matchId);return{quote,odds:quote&&quote.odds&&Number(quote.odds[pick])};}
-  function canPlace(stateValue,market,matchId,pick,stake,cash){
+  function canPlace(stateValue,market,matchId,pick,stake,cash,cashFloor){
     const state=normalizeState(stateValue),amount=Number(stake),selected=quoteSelection(market,matchId,pick),tickets=market?roundTickets(state,market.key):[];
     if(!market||market.status!=="open")return{ok:false,reason:"market_closed"};
     if(!selected.quote||!Number.isFinite(selected.odds))return{ok:false,reason:"selection_missing"};
-    if(!Number.isInteger(amount)||amount<1)return{ok:false,reason:"invalid_stake"};
+    if(!Number.isInteger(amount)||amount<1||amount>MAX_ROUND_STAKE)return{ok:false,reason:"invalid_stake"};
     if(tickets.length>=MAX_TICKETS)return{ok:false,reason:"ticket_limit"};
     if(tickets.some(ticket=>ticket.matchId===matchId))return{ok:false,reason:"match_already_selected"};
-    const used=tickets.reduce((sum,ticket)=>sum+ticket.stake,0),remaining=Math.max(0,market.riskLimit-used),minimum=minStakeForOdds(selected.odds),payout=Math.round(amount*selected.odds);
+    const used=tickets.reduce((sum,ticket)=>sum+ticket.stake,0),remaining=Math.max(0,market.riskLimit-used),minimum=minStakeForOdds(selected.odds),payout=payoutFor(amount,selected.odds),reserve=Number.isFinite(Number(cashFloor))?Number(cashFloor):DEFAULT_CASH_FLOOR;
     if(amount<minimum)return{ok:false,reason:"minimum_stake",minimum};
     if(amount>remaining)return{ok:false,reason:"risk_limit",remaining};
-    if((Number(cash)||0)-amount<CASH_FLOOR)return{ok:false,reason:"cash_reserve"};
-    if(payout>MAX_PAYOUT)return{ok:false,reason:"payout_limit",maximum:Math.floor(MAX_PAYOUT/selected.odds)};
+    if((Number(cash)||0)-amount<reserve)return{ok:false,reason:"cash_reserve",shortfall:roundHalf(reserve-((Number(cash)||0)-amount)),floor:reserve};
+    if(payout>MAX_PAYOUT)return{ok:false,reason:"payout_limit",maximum:maxStakeForOdds(selected.odds)};
     return{ok:true,odds:selected.odds,payout,minimum,remaining};
   }
-  function place(stateValue,marketKey,matchId,pick,stake,cash){
-    const state=normalizeState(stateValue),market=state.markets[marketKey],check=canPlace(state,market,matchId,pick,stake,cash);if(!check.ok)return{state,ok:false,...check};
+  function place(stateValue,marketKey,matchId,pick,stake,cash,cashFloor){
+    const state=normalizeState(stateValue),market=state.markets[marketKey],check=canPlace(state,market,matchId,pick,stake,cash,cashFloor);if(!check.ok)return{state,ok:false,...check};
     const id=`YS-${String(state.nextTicketId++).padStart(4,"0")}`,ticket={id,marketKey,matchId,pick,odds:check.odds,stake:Number(stake),potentialPayout:check.payout,status:"open",settledScore:null,payout:0};
     state.tickets.push(ticket);state.ledger.push({id:`${id}-stake`,type:"stake",ticketId:id,marketKey,amount:-ticket.stake});
     return{state,ok:true,ticket};
@@ -150,5 +156,5 @@
     return{state,payout,settled};
   }
   function currentMarket(stateValue,tournament){const state=normalizeState(stateValue),info=stageInfo(tournament);return info?state.markets[info.key]||null:null;}
-  return Object.freeze({VERSION,ODDS_VERSION,INSIGHT_VERSION,MARGIN,MAX_TICKETS,MAX_ROUND_STAKE,MAX_PAYOUT,CASH_FLOOR,createState,normalizeState,validate,stageInfo,matchesFor,recentForm,publicInsight,fairProbabilities,decimalOdds,riskLimit,minStakeForOdds,ensureMarket,currentMarket,roundTickets,metrics,exposure,canPlace,place,lock,settle});
+  return Object.freeze({VERSION,ODDS_VERSION,INSIGHT_VERSION,MARGIN,MAX_TICKETS,MIN_ROUND_STAKE,MAX_ROUND_STAKE,MAX_PAYOUT,DEFAULT_CASH_FLOOR,createState,normalizeState,validate,stageInfo,matchesFor,recentForm,publicInsight,fairProbabilities,decimalOdds,riskLimit,minStakeForOdds,payoutFor,maxStakeForOdds,ensureMarket,currentMarket,roundTickets,metrics,exposure,canPlace,place,lock,settle});
 });

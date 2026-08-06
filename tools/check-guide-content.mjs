@@ -4,6 +4,8 @@ const html=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8");
 const locales=fs.readFileSync(new URL("../src/data/i18n.js",import.meta.url),"utf8");
 const guide=fs.readFileSync(new URL("../src/ui/howtoGuide.js",import.meta.url),"utf8");
 const arena=fs.readFileSync(new URL("../src/online/arena.js",import.meta.url),"utf8");
+const lifeGuideCopy=guide.slice(0,guide.indexOf("const STATE_KEY"));
+const obsoleteLifeTimeClaims=[/2 saat/i,/2 hours?/i,/transfer saati/i,/before the deadline/i];
 
 const checks=[
   ["Life guide documents the round of 16",html.includes("ilk iki</b> Son 16")&&html.includes("top two</b> reach the round of 16")],
@@ -16,6 +18,7 @@ const checks=[
   ["Mobile guide uses compact navigation instead of a horizontal path",guide.includes("data-guide-step-select")&&!guide.includes("howto-path-wrap")],
   ["Arena exposes a permanent guide action",arena.includes('data-arena-action="guide"')&&arena.includes('openHowtoModal("arena")')],
   ["Guide records state and acknowledges tips explicitly",guide.includes("copa.guide.state.v3")&&guide.includes("dismissTip(true)")&&guide.includes("dismissTip(false)")],
+  ["Life copy has no obsolete time-cost claims",obsoleteLifeTimeClaims.every(pattern=>!pattern.test(locales)&&!pattern.test(lifeGuideCopy))],
 ];
 
 const failed=checks.filter(([,pass])=>!pass);

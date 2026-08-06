@@ -337,7 +337,7 @@ if("serviceWorker"in navigator){
         <div class="mtile clickable" id="chemTile" onclick="showChemBreak()"><button class="mtile-info" onclick="event.stopPropagation();showChemInfo()" title="Kimya nasıl çalışır?">?</button><div class="mh" id="chemHdr">KİMYA</div><div class="mv" id="chemV">+0</div><div class="ms" id="chemList">detay →</div></div>
         <div class="mtile clickable" id="powTile" onclick="showPowerBreak()"><button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="Kadro gücü nasıl hesaplanır?">?</button><div class="mh" id="powHdr">KADRO GÜCÜ</div><div class="mv" id="powV">0</div><div class="ms" id="powHint"><span onclick="event.stopPropagation();showPowerGraph()" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px"> grafik →</span></div></div>
         <div class="mtile" id="trustTile"><button type="button" class="mtile-info" id="trustInfoBtn" onclick="event.stopPropagation();showTrustInfo()" title="Başkan güveni nasıl çalışır?" aria-label="Başkan güveni nasıl çalışır?">?</button><div class="mh" id="trustHdr">BAŞKAN GÜVENİ</div><div class="mv" id="trustV">—</div><div class="ms" id="trustHint"></div></div>
-        <div class="kasa-card clickable" id="kasaTile" role="button" tabindex="0" onclick="showCashDetails()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showCashDetails()}"><div class="kasa-top-row"><div class="kasa-status-badge" id="kasaStatus">KASA RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="kasa-sub" id="kasaSub"></div><div class="kasa-metrics"><div class="kasa-metric"><div class="kasa-metric-lbl">BORÇ LİMİTİ</div><div class="kasa-metric-val" id="kasaDebt">—</div></div></div><button type="button" class="kasa-detail-link" onclick="event.stopPropagation();showCashDetails()">detay →</button><button type="button" class="kasa-detail-btn mtile-info" onclick="event.stopPropagation();showCashInfo()" aria-label="Kasa ve ekonomi mekaniği" title="Kasa ve ekonomi mekaniği">?</button></div>
+        <div class="kasa-card kasa-compact clickable" id="kasaTile" role="button" tabindex="0" onclick="showCashDetails()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showCashDetails()}"><div class="kasa-top-row"><div class="mh kasa-compact-title" id="kasaHdr">KASA</div><div class="kasa-status-badge" id="kasaStatus">RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="ms kasa-compact-foot"><span><span class="kasa-compact-debt-label">BORÇ LİMİTİ</span> <b class="kasa-compact-debt-value" id="kasaDebt">—</b></span><span class="kasa-compact-detail" aria-hidden="true">detay →</span></div><button type="button" class="kasa-detail-btn mtile-info" onclick="event.stopPropagation();showCashInfo()" aria-label="Kasa ve ekonomi mekaniği" title="Kasa ve ekonomi mekaniği">?</button></div>
       </div>
       <div class="styletag" id="styletag">—</div>
       <div class="final-pills" id="finalPills"></div>
@@ -414,13 +414,13 @@ try{
 <script src="src/core/clubName.js?v=20260714-club-security1"></script>
 <script src="src/core/squad.js?v=20260720-player-balance1"></script>
 <script src="src/game/generate.js?v=20260729-role-gameplay1"></script>
-<script src="src/balance/config.js?v=20260712d"></script>
+<script src="src/balance/config.js?v=20260806-premium-cash1"></script>
 <script src="src/state/metaState.js?v=20260711-stability1g"></script>
 <script src="src/state/gameState.js?v=20260714-save4"></script>
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/game/penaltyCore.js?v=20260722-shared-penalties1"></script>
 <script src="src/tournament/tournamentEngine.js?v=20260721-groups1"></script>
-<script src="src/sidefield/sideFieldEngine.js?v=20260805-yan-saha2"></script>
+<script src="src/sidefield/sideFieldEngine.js?v=20260806-yan-saha3"></script>
 <script src="src/state/runTransactionJournal.js?v=20260805-atomic-journal1"></script>
 <script src="src/tournament/tournamentUI.js?v=20260728-ui-fixes1"></script>
 <script src="src/tournament/matchResolver.js?v=20260722-knockout-rules1"></script>
@@ -431,7 +431,7 @@ try{
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260805-system-club1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260806-premium-cash1"></script>
 <script src="src/ui/modeGate.js?v=20260804-mode-gate8"></script>
 <script src="src/runtime/finalReplay.js?v=20260730-import-ui2"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
@@ -903,7 +903,7 @@ function _ensureDraftKasa(){
     <div class="kasa-bar-wrap"><div class="kasa-bar-track"><div class="kasa-bar-safe" id="draftKasaSafe"></div><div class="kasa-bar-marker" id="draftKasaBarMarker"></div></div><div class="kasa-bar-labels"><span>Limit</span><span>0</span><span>${tr?"Kasa":"Cash"}</span></div></div>
   </div>`;
 }
-function _fmtMoney(v){return (v<0?"−":"")+"€"+Math.abs(Math.round(v))+"M";}
+function _fmtMoney(v){const n=Math.round((Number(v)||0)*2)/2,f=Number.isInteger(n)?Math.abs(n):Math.abs(n).toFixed(1);return (n<0?"−":"")+"€"+f+"M";}
 function _resetMobileDraftScroll(){
   if(!window.matchMedia||!window.matchMedia("(max-width:760px)").matches)return;
   const reset=()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;window.scrollTo(0,0);};
@@ -912,9 +912,9 @@ function _resetMobileDraftScroll(){
 }
 function _renderKasaTile(rootId,prefix){
   const kt=$(rootId);if(!kt)return;
-  const tr=LANG==="tr",bv=Math.round(budget||0);
+  const tr=LANG==="tr",bv=Math.round((Number(budget)||0)*2)/2;
   const lim=typeof activeDebtLimit==="function"?activeDebtLimit():(typeof chairmanSackLimit==="function"?chairmanSackLimit():DEBT_LIMIT);
-  const spent=econStats&&econStats.spent?Math.round(econStats.spent):0;
+  const spent=econStats&&econStats.spent?Math.round(econStats.spent*2)/2:0;
   const near=lim&&bv<0&&(bv<=-18||Math.abs(bv)>=Math.abs(lim)*0.62);
   let cls,label;
   if(near){cls="kasa-deep-debt";label=tr?"SINIRA YAKIN":"CRITICAL";}
@@ -924,10 +924,14 @@ function _renderKasaTile(rootId,prefix){
   else{cls="kasa-rich";label=tr?"RAHAT":"HEALTHY";}
   kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");kt.classList.add(cls);
   const v=$(prefix+"V"),st=$(prefix+"Status"),debt=$(prefix+"Debt"),sp=$(prefix+"Spent"),mk=$(prefix+"BarMarker"),safe=$(prefix+"Safe");
-  if(v){const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));v.innerHTML=`<span>${_fmtMoney(bv)}</span>${lc>0?`<span class="legacy-cash-chip" title="${tr?"Miras önce harcanır":"Legacy spends first"}"><svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15h12"/><path d="M4 7h10"/><path d="M5 7v8M9 7v8M13 7v8"/><path d="M9 2l6 5H3z"/><path d="M9 4v1"/></svg>+€${lc}M</span>`:""}`;}
+  const compactTitle=kt.querySelector(".kasa-compact-title"),compactDebt=kt.querySelector(".kasa-compact-debt-label"),compactDetail=kt.querySelector(".kasa-compact-detail");
+  if(compactTitle)compactTitle.textContent=LT("KASA","CASH","CAJA","KASSE","CASSA");
+  if(compactDebt)compactDebt.textContent=LT("LİMİT","LIMIT","LÍMITE","LIMIT","LIMITE");
+  if(compactDetail)compactDetail.textContent=LT("detay →","details →","detalle →","Details →","dettagli →");
+  if(v){const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));if(window.CopaCashDisplay)CopaCashDisplay.render(v,bv,{target:rootId,legacy:lc});else v.innerHTML=`<span>${_fmtMoney(bv)}</span>${lc>0?`<span class="legacy-cash-chip cash-legacy-inline"><small>${tr?"MİRAS":"LEGACY"}</small><b>+€${lc}M</b></span>`:""}`;}
   if(st)st.textContent=label;
   if(debt)debt.textContent=_fmtMoney(lim);
-  if(sp)sp.textContent="€"+spent+"M";
+  if(sp)sp.textContent=_fmtMoney(spent);
   const total=Math.abs(lim)+Math.max(BUDGET,30);
   const pos=Math.max(0,Math.min(1,(bv-lim)/total));
   const zero=Math.max(0,Math.min(1,(0-lim)/total));
@@ -941,6 +945,7 @@ function _showCountryDraftLoadError(country,error){if(window.CopaDiagnostics)win
 function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(selectedCountry!=="TR"&&(!Array.isArray(_countryPool)||!_countryPool.length)&&window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function"){if(window._countryDraftPromise)return window._countryDraftPromise;_setCountryDraftLoading(true);const _loadingCountry=selectedCountry,_draftPromise=window.CopaLazy.ensureCountryPlayers(_loadingCountry).then(()=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;return beginDraft();}).catch(error=>{_setCountryDraftLoading(false);if(window._countryDraftPromise===_draftPromise)window._countryDraftPromise=null;_showCountryDraftLoadError(_loadingCountry,error);return false;});window._countryDraftPromise=_draftPromise;return _draftPromise;}document.body.classList.add("run-active");window._finalTacticDone=false;window.lastMatchReportData=null;window.lastMatchRatings=null;window.motm=null;makeSeed($("seedInput")&&$("seedInput").value.trim());panicCount=0;wkDevName="";powerHist=[];usedNames.clear();fabCount=0;runEnded=false;injuredIdx=-1;suspendedSlotIdx=-1;feed=[];chairman=CHAIRMEN.find(c=>c.id===selectedChairId)||CHAIRMEN[0];undoData=null;undoUsed=false;draftRerollUsed=false;draftRerollsLeft=DRAFT_REROLLS;panicDone=false;managerName="";lastSackReason="";lastMatchEvents=[];pendingMatchResolution=null;pendingLoanReward=null;rewardCardSwapState=null;tournament=null;tournamentFormat="groups32_v2";window._rewardPendingRound=0;window._rewardResolvedRound=0;teamName=canonicalClubName(teamName||rnd(NAMEP)+" FK","COPA XI");kit={bg:KITS[_kp].bg,fg:fgFor(KITS[_kp].bg),sec:KITS[_ks].bg};{const _cosmetics=window.CopaMeta&&typeof CopaMeta.activeCosmetics==="function"?CopaMeta.activeCosmetics():{};if(_cosmetics.kit==="kit_tactical_journey")kit={bg:"#183F3A",fg:"#F3F5F4",sec:"#D6A21F"};}slots=FORMATIONS[formName];filled=slots.map(()=>false);picksBySlot=slots.map(()=>null);remaining=slots.length;currentSlot=-1;budget=BUDGET;legacyCash=0;round=1;cards=[];cardInv={};cardVariant={};shopVariants={};loanPlayer=null;window._legacyBet=window._legacyBet||null;riskPowerMod=0;finalPenalty=0;eventSeen={};bench=[];benchUsed=0;captainIdx=-1;tempPrime=0;tempPrimePenalty=0;shortCamp=0;shortCampPenalty=0;installmentTurns=0;installmentAmt=0;quietCamp=0;primFreeze=0;lastCreditActive=0;lotteryCouponAmount=0;lotteryCouponTurns=0;econStats={earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:""};presCharges=1;autoPlay=false;talkUsed=false;talkMod={all:0,def:0,atk:0};deadlineH=24;pintiSavings=0;window._pintiSavingsUsed=false;sansSpotlightIdx=-1;sansMediaPressure=0;sansHeadlineRound=0;sansStarBonusRound=0;torpilDebtPenalty=0;chairTrust=1;chairSupportDebt=0;usedRiskCards=[];cardChemDebt=0;kaosHalfReward=false;matchPromiseState=null;matchPromiseReward=null;matchPromisePromptedRound=0;captainDecisionUsed=false;captainDecisionActive=null;if(typeof krizActive!=="undefined")krizActive=false;if(typeof krizVariant!=="undefined")krizVariant=0;if(typeof startBalanceTelemetry==="function")startBalanceTelemetry({chairman:chairman.id});
   chairTrustChangeRound=1;chairTrustRoundBase=chairTrust;chairTrustRoundDelta=0;chairTrustChangePriority=-1;chairTrustLastReason="";chairTrustLastDelta=0;professorChaosOffers=0;professorBudgetCrises=0;
   _consumePendingLegacyStart();
+  window.CopaCashDisplay?.sync(budget);
   teamName="";
   draftRewardedRerollsEarned=0;draftRewardInFlight=false;rewardedInjuryHealsEarned=0;injuryRewardInFlight=false;rewardedMarketRerollsEarned=0;shopRewardInFlight=false;rewardedFreeAgentRerollsEarned=0;freeAgentRewardInFlight=false;freeAgentRerolledThisTurn=0;
   chairmanEventRunId=String(seedNum)+"-"+Date.now().toString(36);pendingChairmanEvent=null;chairmanEventSeen={};window._kaosOfferRound=0;window._kaosOfferPendingRound=0;
@@ -970,7 +975,7 @@ function beginDraft(){const _countryPool=countryGameData(selectedCountry)[0];if(
     setTimeout(()=>quickAll(),0);
   }
 }
-const _beginDraftCore=beginDraft;beginDraft=function(){return window.COPA_REGEN_NAMES?_beginDraftCore():CopaLazy.loadScriptOnce("regen-names","src/data/regenNames.js",()=>!!window.COPA_REGEN_NAMES).then(_beginDraftCore);};
+const _beginDraftCore=beginDraft;beginDraft=function(){const cashReady=window.CopaCashDisplay||window._cashDisplayUnavailable?Promise.resolve():CopaLazy.ensureCashDisplay().catch(()=>{window._cashDisplayUnavailable=true;});return cashReady.then(()=>window.COPA_REGEN_NAMES?_beginDraftCore():CopaLazy.loadScriptOnce("regen-names","src/data/regenNames.js",()=>!!window.COPA_REGEN_NAMES).then(_beginDraftCore));};
 function updateDeadline(){const cl=$("ddClock");if(cl)cl.textContent=String(deadlineH).padStart(2,"0")+":00";const sub=$("ddSub");if(sub)sub.textContent=L().squad+" "+(slots.length-remaining)+"/"+slots.length;const bb=$("ddbanner");if(bb){bb.classList.toggle("urgent",deadlineH<=8);bb.classList.toggle("alarm",deadlineH<=5);}if(cl)cl.style.color=deadlineH<=5?"#DA3D2E":"";_updateSquadSils();}
 function _drawConnectors(p){
   const old=p.querySelector(".pclines");if(old)old.remove();
@@ -1046,7 +1051,7 @@ function renderDraftExtra(){
 }
 function buildPitch(p){p.querySelectorAll(".roundel,.pitch-zone,.pclines").forEach(e=>e.remove());const pre=p.id==="pitch"?"r":"h";slots.forEach((s,i)=>{const d=document.createElement("div");d.className="roundel empty";d.id=pre+i;d.style.left=s[1]+"%";d.style.top=s[2]+"%";d.tabIndex=0;d.setAttribute("role","button");d.setAttribute("aria-label",`${L().abbr[s[0]]||s[0]} ${LANG==="tr"?"boş slot":"empty slot"}`);const sil=_SLOT_SIL[groupOf(s[0])]||"";d.innerHTML=`${sil}<span class="rp">${L().abbr[s[0]]}</span>`;if(pre==="r"){d.addEventListener("mouseenter",()=>{if(d.classList.contains("cur")){const os=$("optstage");if(os&&!os.classList.contains("hidden"))os.classList.add("stage-hover");}},{passive:true});d.addEventListener("mouseleave",()=>{const os=$("optstage");if(os)os.classList.remove("stage-hover");},{passive:true});}p.appendChild(d);});_drawConnectors(p);}
 function setBudget(){
-  $("budgetV").textContent="€"+budget+"M";
+  const cashTarget=$("budgetV");if(window.CopaCashDisplay)CopaCashDisplay.render(cashTarget,budget,{target:"top"});else cashTarget.textContent=_fmtMoney(budget);
   {let lf=$("legacyChip");const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));if(lc>0){if(!lf){lf=document.createElement("div");lf.id="legacyChip";lf.className="legacy-cash-chip";$("budgetBox").prepend(lf);}lf.innerHTML=`<svg viewBox="0 0 18 18" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15h12"/><path d="M4 7h10"/><path d="M5 7v8M9 7v8M13 7v8"/><path d="M9 2l6 5H3z"/><path d="M9 4v1"/></svg>+€${lc}M`;}else if(lf){lf.remove();}}{const bb=$("budgetBox");["plenty","safe","warn","tight","low","debt"].forEach(c=>bb.classList.remove(c));if(budget>=25)bb.classList.add("plenty");else if(budget>=12)bb.classList.add("safe");else if(budget>=5)bb.classList.add("warn");else if(budget>=0)bb.classList.add("tight");else bb.classList.add("debt");}
   let lim=$("budgetLimit");if(!lim){lim=document.createElement("div");lim.id="budgetLimit";lim.className="lim";$("budgetBox").appendChild(lim);}
   let ladder=$("debtLadder");if(!ladder){ladder=document.createElement("div");ladder.id="debtLadder";ladder.className="debtladder";$("budgetBox").appendChild(ladder);}
@@ -3466,6 +3471,7 @@ function _tryRestoreState(){
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
     picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
+    window.CopaCashDisplay?.sync(budget);
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
     formName=restoreForm;teamName=ClubNamePolicy.sanitize(st.teamName,"COPA XI");style=st.style||style||"gegen";
