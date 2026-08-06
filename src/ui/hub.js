@@ -253,7 +253,7 @@ function hiddenScoutNote(signal){if(window.CopaHiddenDraft)return CopaHiddenDraf
 function ctxLine(o){const x=L();if(o.hidden){const legacy=o.hiddenTier==="gem"?"positive":o.hiddenTier==="bust"?"negative":"neutral";return hiddenScoutNote(o.scoutSignal||legacy);}if(o.trait==="wonderkid")return x.ctxWonder;if(o.ov>=84)return x.ctxStar;if(o.trait==="buyukmac")return x.ctxBig;if(o.trait==="lider")return x.ctxLead;if(o.age<=20)return x.ctxYoung;if(o.tr)return x.ctxLocal;if(o.age>=32)return x.ctxVet;if(o.ov>=78)return x.ctxForm;return x.ctxSolid;}
 function clearRoundel(idx){const r=$("r"+idx);if(!r)return;r.className="roundel";const pos=slots[idx][0];const sil=typeof _SLOT_SIL!=="undefined"?(_SLOT_SIL[groupOf(pos)]||""):"";r.innerHTML=`${sil}<span class="rp">${L().abbr[pos]||""}</span>`;}
 function updateUndoBtn(){const b=$("undoBtn");if(!b)return;const show=!!(undoData&&!undoUsed);b.classList.toggle("hidden",!show);const dock=b.closest(".draft-thumb-dock");if(dock)dock.classList.toggle("has-undo",show);if(show&&undoData){const nm=undoData.name?undoData.name.trim().split(" ").slice(-1)[0]:"";b.textContent=nm?(LANG==="tr"?`↩ ${nm} transferini geri al`:`↩ Undo ${nm}`):(LANG==="tr"?"↩ Son hamleyi geri al":"↩ Undo last pick");}}
-function undoPick(){if(!undoData||undoUsed)return;const u=undoData;if(u.blockedByHidden){undoData=null;updateUndoBtn();showToast(LT("Gizli Oyuncu seçiminden sonra geri alma kullanılamaz.","Undo cannot be used after selecting a Mystery Player.","No se puede deshacer tras elegir un Jugador Misterioso.","Nach der Wahl eines Mystery-Spielers kann nicht rückgängig gemacht werden.","Non puoi annullare dopo aver scelto un Giocatore Misterioso."),{type:"info",duration:2400});return;}picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;if(Number.isFinite(u.legacyCash))legacyCash=u.legacyCash;if(Number.isFinite(u.chairTrust))chairTrust=u.chairTrust;if(u.chairTrustLedger)restoreChairTrustLedger(u.chairTrustLedger);if(Number.isFinite(u.riskPowerMod))riskPowerMod=u.riskPowerMod;if(Number.isFinite(u.sansStarBonusRound))sansStarBonusRound=u.sansStarBonusRound;if(u.econStats)econStats=Object.assign({},u.econStats);if(Number.isInteger(u.feedLength))feed=feed.slice(0,u.feedLength);setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();if(typeof _saveState==="function")_saveState();}
+function undoPick(){if(!undoData||undoUsed)return;const u=undoData;if(u.blockedByHidden){undoData=null;updateUndoBtn();showToast(LT("Gizli Oyuncu seçiminden sonra geri alma kullanılamaz.","Undo cannot be used after selecting a Mystery Player.","No se puede deshacer tras elegir un Jugador Misterioso.","Nach der Wahl eines Mystery-Spielers kann nicht rückgängig gemacht werden.","Non puoi annullare dopo aver scelto un Giocatore Misterioso."),{type:"info",duration:2400});return;}const beforeBudget=budget,beforeLegacy=Number(legacyCash)||0;picksBySlot[u.idx]=null;filled[u.idx]=false;remaining++;budget=u.budget;if(Number.isFinite(u.legacyCash))legacyCash=u.legacyCash;if(Number.isFinite(u.chairTrust))chairTrust=u.chairTrust;if(u.chairTrustLedger)restoreChairTrustLedger(u.chairTrustLedger);if(Number.isFinite(u.riskPowerMod))riskPowerMod=u.riskPowerMod;if(Number.isFinite(u.sansStarBonusRound))sansStarBonusRound=u.sansStarBonusRound;if(u.econStats)econStats=Object.assign({},u.econStats);if(Number.isInteger(u.feedLength))feed=feed.slice(0,u.feedLength);const returnedLegacy=Math.max(0,(Number(legacyCash)||0)-beforeLegacy),returnedCash=Math.max(0,(Number(budget)||0)-beforeBudget),returnedTotal=returnedCash+returnedLegacy;if(returnedTotal>0&&typeof recordCashFlow==="function")recordCashFlow("income",returnedTotal,"undo",beforeBudget,budget,returnedLegacy);setBudget();if(u.name)usedNames.delete(u.name);clearRoundel(u.idx);undoUsed=true;undoData=null;updateUndoBtn();sfxStamp();loadRollStage();if(typeof _saveState==="function")_saveState();}
 function toggleCardActive(k){if(invOf(k)<=0)return;if(hasCard(k)){if(typeof cardHasLockedCommitment==="function"&&cardHasLockedCommitment(k)){showToast(LANG==="tr"?"Aktif sözleşme tamamlanmadan kart çıkarılamaz.":"Finish the active contract before removing this card.");return;}cards=cards.filter(c=>c!==k);sfxStamp();renderHub();return;}if(cards.length>=activeCardSlots()){pushFeed((LANG==="tr"?"🃏 aktif kart slotu dolu":"🃏 active card slots full"),"ch");renderFeed();return;}cards.push(k);sfxStamp();renderHub();}
 function cardArt(k){return "assets/cards/"+k+".png";}
 function kindLabel(k){const kind=cardKind(k),m={power:LT("GÜÇ","POWER","POTENCIA","STÄRKE","FORZA"),economy:LT("EKONOMİ","ECONOMY","ECONOMÍA","FINANZEN","ECONOMIA"),risk:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),temporary:LT("ÖZEL","SPECIAL","ESPECIAL","SPEZIAL","SPECIALE"),final:LT("FİNAL","FINAL","FINAL","FINALE","FINALE"),defense:LT("SAVUNMA","DEFENSE","DEFENSA","ABWEHR","DIFESA"),squad:LT("KADRO","SQUAD","PLANTILLA","KADER","ROSA"),injury:LT("SAKATLIK","INJURY","LESIÓN","VERLETZUNG","INFORTUNIO")};const lbl=m[kind]||m.power;if(kind==="defense")return `<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9" style="vertical-align:-.05em;margin-right:2px;opacity:.8"><path d="M11.884 2.007l.114 -.007l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021z"/></svg>${lbl}`;return lbl;}
@@ -574,20 +574,20 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     let statusLabel,subText,kasaState;
     if(nearLimit){
       kasaState="kasa-deep-debt";
-      statusLabel=tr2?"KASA SINIRDA":"CASH CRITICAL";
+      statusLabel=LT("SINIRA YAKIN","CRITICAL","CRÍTICO","KRITISCH","CRITICA");
       subText=tr2?`Borç limitine €${Math.abs(debtLim)-Math.abs(bv)}M kaldı`:`€${Math.abs(debtLim)-Math.abs(bv)}M to debt limit`;
     }else if(bv<0){
       kasaState="kasa-debt";
-      statusLabel=tr2?"KASA BORÇTA":"CASH IN DEBT";subText="";
+      statusLabel=LT("BORÇTA","IN DEBT","EN DEUDA","VERSCHULDET","IN DEBITO");subText="";
     }else if(bv<=3){
       kasaState="kasa-zero";
-      statusLabel=tr2?"KASA SINIRDA":"CASH LOW";subText="";
+      statusLabel=LT("SINIRDA","LOW","BAJA","KNAPP","BASSA");subText="";
     }else if(bv<20){
       kasaState="kasa-positive";
-      statusLabel=tr2?"KASA DENGEDE":"CASH BALANCED";subText="";
+      statusLabel=LT("DENGEDE","BALANCED","ESTABLE","STABIL","STABILE");subText="";
     }else{
       kasaState="kasa-rich";
-      statusLabel=tr2?"KASA RAHAT":"CASH HEALTHY";subText="";
+      statusLabel=LT("RAHAT","HEALTHY","CÓMODA","KOMFORTABEL","COMODA");subText="";
     }
     kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");
     kt.classList.add(kasaState);
@@ -595,7 +595,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     kt.classList.add("context-metric");kt.style.setProperty("--metric-accent",kasaAccent);
     kt.style.background="";kt.style.color="";kt.style.borderColor="";
     subText="";
-    const vEl=$("kasaV");if(vEl)vEl.textContent=(bv>=0?"+":"−")+"€"+Math.abs(bv)+"M";
+    const vEl=$("kasaV");if(vEl){const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));if(window.CopaCashDisplay)CopaCashDisplay.render(vEl,bv,{target:"kasaTile",legacy:lc});else vEl.innerHTML=`<span>${(bv>=0?"+":"−")+"€"+Math.abs(bv)+"M"}</span>${lc>0?`<span class="legacy-cash-chip cash-legacy-inline"><small>${LT("MİRAS","LEGACY","LEGADO","ERBE","EREDITÀ")}</small><b>+€${lc}M</b></span>`:""}`;}
     const subEl=$("kasaSub");if(subEl)subEl.textContent=subText;
     const stEl=$("kasaStatus");if(stEl){stEl.textContent=statusLabel;stEl.style.background="";stEl.style.color="";}
     const dEl=$("kasaDebt");if(dEl)dEl.textContent="−€"+Math.abs(debtLim)+"M";

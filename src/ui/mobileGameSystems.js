@@ -337,8 +337,8 @@
   }
 
   function cashMoney(value){
-    const amount=Math.round(Number(value)||0);
-    return `${amount<0?"−":amount>0?"+":""}€${Math.abs(amount)}M`;
+    const amount=Math.round((Number(value)||0)*2)/2,shown=Number.isInteger(amount)?Math.abs(amount):Math.abs(amount).toFixed(1);
+    return `${amount<0?"−":amount>0?"+":""}€${shown}M`;
   }
   function cashTone(value){return Number(value)<0?"negative":Number(value)>0?"positive":"neutral";}
   function openCashMechanics(){
@@ -362,7 +362,7 @@
     const points=values.map((value,index)=>`${(index/Math.max(1,values.length-1)*320).toFixed(1)},${(76-(value-min)/range*64).toFixed(1)}`).join(" ");
     const zeroY=(76-(0-min)/range*64).toFixed(1),limitY=(76-(limit-min)/range*64).toFixed(1),buffer=cash-limit,gauge=Math.max(0,Math.min(100,(cash-limit)/Math.max(1,start-limit)*100));
     const earned=Number(stats.earned)||0,spent=Number(stats.spent)||0,president=Number(stats.president)||0,net=earned-spent-president,worst=Math.min(cash,Number(stats.worstDebt)||0);
-    const labels=tr()?{spent:"Harcama",earned:"Gelir",matchday:"Maç günü geliri",president:"Başkan işlemi",expense:"Gider",income:"Gelir"}:{spent:"Expense",earned:"Income",matchday:"Matchday income",president:"Board action",expense:"Expense",income:"Income"};
+    const labels=tr()?{spent:"Harcama",earned:"Gelir",matchday:"Maç günü geliri",president:"Başkan işlemi",yan_saha:"Yan Saha",yanSahaPayout:"Yan Saha dönüşü",undo:"Transfer geri alındı",expense:"Gider",income:"Gelir"}:{spent:"Expense",earned:"Income",matchday:"Matchday income",president:"Board action",yan_saha:"Side Field",yanSahaPayout:"Side Field return",undo:"Transfer undone",expense:"Expense",income:"Income"};
     let history=transactions.slice().reverse();
     if(!history.length){
       if(spent)history.push({round:info.round,kind:"expense",tag:"spent",amount:spent,after:cash});

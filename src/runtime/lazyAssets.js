@@ -71,9 +71,15 @@
   }
   function ensureSideField(){
     return Promise.all([
-      loadStyleOnce("side-field-style","src/styles/sideField.css?v=20260805-yan-saha-insights3",'link[href*="src/styles/sideField.css"]'),
-      loadScriptOnce("side-field-ui","src/sidefield/sideFieldUI.js?v=20260805-yan-saha3",()=>!!global.CopaSideField)
+      loadStyleOnce("side-field-style","src/styles/sideField.css?v=20260806-yan-saha4",'link[href*="src/styles/sideField.css"]'),
+      loadScriptOnce("side-field-ui","src/sidefield/sideFieldUI.js?v=20260806-yan-saha4",()=>!!global.CopaSideField)
     ]).then(()=>global.CopaSideField);
+  }
+  function ensureCashDisplay(){
+    return Promise.all([
+      loadStyleOnce("cash-display-style","src/styles/cashDisplay.css?v=20260806-premium-cash1",'link[href*="src/styles/cashDisplay.css"]'),
+      loadScriptOnce("cash-display","src/ui/cashDisplay.js?v=20260806-premium-cash1",()=>!!global.CopaCashDisplay)
+    ]).then(()=>global.CopaCashDisplay);
   }
   function ensureCountryPlayers(country){
     const code=String(country||"TR").toUpperCase();
@@ -110,9 +116,9 @@
   }
   function openMetaProgression(){return ensureMetaProgression().then(api=>api.openProgression()).catch(()=>{});}
   function openArena(){return ensureArena().then(api=>api.open()).catch(()=>{});}
-  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureArena,ensureSideField,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression,openArena});
+  global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureArena,ensureSideField,ensureCashDisplay,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression,openArena});
   global.addEventListener("load",()=>{
-    const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression(),ensureSideField()]).catch(()=>{});};
+    const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression(),ensureSideField(),ensureCashDisplay()]).catch(()=>{});};
     if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(warm,{timeout:1500});
     else global.setTimeout(warm,250);
   },{once:true});

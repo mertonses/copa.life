@@ -40,7 +40,7 @@
       actions:{formation:"Diziliş ekranına git",market:"Kart pazarını göster",unavailable:"Bu aksiyon ilgili oyun ekranında açılır."},
       tips:{
         setup:["İLK TUR İPUCU","Diziliş, dolduracağın mevkileri belirler. Başkan ise bütçe ve borç alanını değiştirir."],
-        draft:["İLK ZAR","Her atış bir mevkiyi belirler ve 2 saat harcar. Animasyonlar kapalıysa sonuç yine kısa bir titreşim ve zar yüzüyle gösterilir."],
+        draft:["İLK ZAR","Her atış rastgele bir mevkiyi açar ve o mevki için üç aday getirir. Animasyonlar kapalıysa sonuç yine kısa bir titreşim ve zar yüzüyle gösterilir."],
         hub:["MAÇ MERKEZİ","Kimya kutusuna dokunarak güç katkısını; kartlarda ise para dışındaki riskleri görebilirsin."],
         bench:["YEDEK KULÜBESİ","Yedekler düğmesi kadroyu alt panelde açar. Android geri tuşu paneli kapatır."],
         injury:["SAKATLIK KARARI","Güç kaybını karşılaştır; yedek, ücretli tedavi veya opsiyonel ücretsiz reklam tedavisinden birini seç."],
@@ -74,7 +74,7 @@
       actions:{formation:"Go to formation",market:"Show card market",unavailable:"This action becomes available on the relevant game screen."},
       tips:{
         setup:["FIRST-RUN TIP","Formation sets the roles you must fill. The chairman changes your budget and debt room."],
-        draft:["FIRST ROLL","Each roll chooses a role and costs 2 hours. Reduced motion still shows the result with a die face and haptic."],
+        draft:["FIRST ROLL","Each roll opens a random position and presents three candidates for it. Reduced motion still shows the result with a die face and haptic."],
         hub:["MATCH HUB","Tap Chemistry to inspect its power contribution; check every non-cash cost on cards."],
         bench:["BENCH","The Bench button opens your substitutes in a bottom sheet. Android Back closes it."],
         injury:["INJURY DECISION","Compare the power loss, then choose a substitute, paid treatment, or the optional rewarded treatment."],
