@@ -1,22 +1,22 @@
 {
   "package_id": "life.copa.app",
-  "version_code": 25,
-  "version_name": "1.4.1",
+  "version_code": 33,
+  "version_name": "1.6.0",
   "release_status": "local_candidate",
   "store_upload_eligible": false,
   "source": {
-    "build_version": "55cd54242417",
-    "build_fingerprint": "55cd54242417f1dc79c1d94df2de0b2a2a19f4004d4969ba592b4f4a88441b45",
-    "fingerprint": "2ddd43a7611e655402a612227130e163b1f926a6e2f1710a4f46a9a712cc510b",
-    "commit": null
+    "build_version": "88057a975031",
+    "build_fingerprint": "41c8bf06ea2ee261dbac85b9add4b17256ad10082d8ec3586ef6a7ca31bff916",
+    "fingerprint": "c7becc1e9a46c54c150adc29b4773be376404a24b79640e1c44553aa312e7569",
+    "commit": "88057a9750316fcbf3692e0c973928201159d438"
   },
   "min_sdk": 24,
   "target_sdk": 36,
   "compile_sdk": 36,
   "signed_aab": {
     "file": "android/app/build/outputs/bundle/release/app-release-signed.aab",
-    "bytes": 17580684,
-    "sha256": "AD1C115C10578309161093DCD4A9DAB3BFB2E9721C94AE6F59E32C6D1D5177A0"
+    "bytes": 17662609,
+    "sha256": "BBE9F8EC381B04119AECE0BFC4CD6C868FEE29E74B126E3D9B86C2CE74565E73"
   },
   "upload_certificate_sha256": "64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56",
   "admob": {

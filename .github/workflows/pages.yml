@@ -69,9 +69,10 @@ jobs:
         env:
           PUBLIC_RELEASE: '1'
           CF_WEB_ANALYTICS_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
-          COPA_ADSENSE_CLIENT: ${{ secrets.COPA_ADSENSE_CLIENT }}
-          COPA_ADSENSE_CHANNEL: ${{ secrets.COPA_ADSENSE_CHANNEL }}
-          COPA_ADSENSE_DISPLAY_SLOT: ${{ secrets.COPA_ADSENSE_DISPLAY_SLOT }}
+          # Web AdSense stays disabled until Google approves the interactive
+          # game screens. Keep the publisher records in ads.txt, but do not
+          # request Google-served ads on game UI, menus, or empty states.
+          COPA_WEB_ADS_APPROVED: '0'
 
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
