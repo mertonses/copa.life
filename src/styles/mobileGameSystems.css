@@ -825,6 +825,14 @@ html.copa-mobile-game #hub .hub-stat-row>#kasaTile.kasa-rich{
 html.copa-mobile-game.tournament-draw-open,
 html.copa-mobile-game body.run-active.tournament-draw-open{overflow:hidden!important}
 
+@keyframes copaDraftCardIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.draft-candidate-gallery .opt-card-shell{animation:copaDraftCardIn .58s cubic-bezier(.2,.8,.2,1) both}
+.draft-candidate-gallery .opt-card-shell:nth-child(2){animation-delay:.12s}
+.draft-candidate-gallery .opt-card-shell:nth-child(3){animation-delay:.24s}
+.draft-candidate-gallery .opt .pn{font-weight:950;letter-spacing:.01em}
+.draft-candidate-gallery .opt .ovb{font-size:clamp(20px,2.1vw,28px);font-weight:950;line-height:1;box-shadow:0 0 0 1px rgba(255,255,255,.13),0 5px 16px rgba(0,0,0,.18)}
+@media(prefers-reduced-motion:reduce){.draft-candidate-gallery .opt-card-shell{animation:none}}
+
 /* Draft decision surface: three comparable candidates and reachable controls. */
 .draft-candidate-gallery{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px!important}
 .opt-card-shell{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -894,6 +902,21 @@ html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] .mobile-action-d
 html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] .hub-action-panel{padding:0!important;border:0!important;border-radius:11px!important;background:#27343C!important;box-shadow:none!important}
 html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #playBtn{border-color:#F24A28!important;background:#F24A28!important;color:#101D28!important;box-shadow:0 5px 14px rgba(242,74,40,.24)!important}
 html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #playBtn .dock-play-arrow{flex:0 0 auto;overflow:visible;font:900 20px/1 var(--mono);text-overflow:clip}
+html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #talkBtn,
+html[data-copa-platform="android"] .mobile-action-dock[data-dock-kind="hub"] #talkBtn,
+html[data-copa-platform="android"] #mobileActionDock #talkBtn{border-color:#4E9B65!important;background:#1F6B45!important;color:#F3F5F4!important;box-shadow:0 5px 14px rgba(31,107,69,.28)!important}
+html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #talkBtn .talk-ico,
+html[data-copa-platform="android"] .mobile-action-dock[data-dock-kind="hub"] #talkBtn .talk-ico,
+html[data-copa-platform="android"] #mobileActionDock #talkBtn .talk-ico{stroke:currentColor!important}
+html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #playBtn .dock-play-arrow,
+html[data-copa-platform="android"] .mobile-action-dock[data-dock-kind="hub"] #playBtn .dock-play-arrow,
+html[data-copa-platform="android"] #mobileActionDock #playBtn .dock-play-arrow{display:inline-flex;align-items:center;justify-content:center;line-height:1;transform:translateY(-.02em)}
+html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #talkBtn:disabled,
+html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #talkBtn.used,
+html[data-copa-platform="android"] .mobile-action-dock[data-dock-kind="hub"] #talkBtn:disabled,
+html[data-copa-platform="android"] .mobile-action-dock[data-dock-kind="hub"] #talkBtn.used,
+html[data-copa-platform="android"] #mobileActionDock #talkBtn:disabled,
+html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#27343C!important;color:#AAB2B3!important;border-color:#46535C!important;box-shadow:none!important}
 .prep-drill mark{display:inline-block;margin-top:5px;padding:3px 6px;border-radius:9px;background:color-mix(in srgb,var(--status-success) 18%,var(--surface-bg));color:var(--status-positive-text);font:900 7px/1 var(--mono);letter-spacing:.06em}.prep-drill mark.is-muted{background:color-mix(in srgb,var(--color-slate) 10%,var(--surface-bg));color:var(--color-slate)}.prep-drill.is-recommended{border-color:color-mix(in srgb,var(--status-success) 64%,var(--border-subtle));box-shadow:inset 3px 0 var(--status-success)}
 .prep-grid>.prep-drill:last-child:nth-child(odd){grid-column:1/-1}
 .market-card-impact span,#freeAgentRow .free-agent-impact span{font-size:7px!important}.market-card-impact b,#freeAgentRow .free-agent-impact b{font-size:9px!important}.ct-contract,.ct-cost-line,.ct-detail{font-size:max(7px,.62rem)!important}

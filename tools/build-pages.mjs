@@ -8,9 +8,12 @@ const OUT = path.join(ROOT, "dist");
 const webAnalyticsToken = String(process.env.CF_WEB_ANALYTICS_TOKEN || "").trim();
 const googleClientId = String(process.env.COPA_GOOGLE_CLIENT_ID || "").trim();
 const googleIosClientId = String(process.env.COPA_GOOGLE_IOS_CLIENT_ID || "").trim();
-const adsenseClient = String(process.env.COPA_ADSENSE_CLIENT || "").trim();
-const adsenseChannel = String(process.env.COPA_ADSENSE_CHANNEL || "").trim();
-const adsenseDisplaySlot = String(process.env.COPA_ADSENSE_DISPLAY_SLOT || "").trim();
+// Keep web ads off until the site has explicit AdSense approval for its
+// interactive game screens. Native Android ads are configured separately.
+const webAdsApproved = /^(1|true)$/i.test(String(process.env.COPA_WEB_ADS_APPROVED || ""));
+const adsenseClient = webAdsApproved ? String(process.env.COPA_ADSENSE_CLIENT || "").trim() : "";
+const adsenseChannel = webAdsApproved ? String(process.env.COPA_ADSENSE_CHANNEL || "").trim() : "";
+const adsenseDisplaySlot = webAdsApproved ? String(process.env.COPA_ADSENSE_DISPLAY_SLOT || "").trim() : "";
 
 if (webAnalyticsToken && !/^[A-Za-z0-9_-]{16,128}$/.test(webAnalyticsToken)) {
   throw new Error("CF_WEB_ANALYTICS_TOKEN has an invalid format");
