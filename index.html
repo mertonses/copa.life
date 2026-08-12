@@ -730,7 +730,7 @@ window.setCopaHeroTitle=setCopaHeroTitle;
 function _installHumanCopyGuard(){
   if(window._humanCopyGuardInstalled||typeof MutationObserver==="undefined")return;
   window._humanCopyGuardInstalled=true;
-  const clean=root=>{if(!root)return;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(node=>{if(node.nodeValue.includes("???"))node.nodeValue=node.nodeValue.replace(/\?{3,}/g,"GİZLİ");if(node.nodeValue.includes("??"))node.nodeValue=node.nodeValue.replace(/\?{2,}/g,"");});};
+  const clean=root=>{if(!root)return;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(node=>{if(node.parentElement&&node.parentElement.closest(".fixture-road-v2"))return;if(node.nodeValue.includes("???"))node.nodeValue=node.nodeValue.replace(/\?{3,}/g,"GİZLİ");if(node.nodeValue.includes("??"))node.nodeValue=node.nodeValue.replace(/\?{2,}/g,"");});};
   clean(document.body);
   new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(clean))).observe(document.body,{subtree:true,childList:true});
 }
