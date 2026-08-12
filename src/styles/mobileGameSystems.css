@@ -942,8 +942,8 @@ html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#2
   }
   .postcard .pc-band{font-weight:900;box-shadow:0 2px 0 rgba(10,17,24,.08)}
   .postcard .pc-insights .is-strong{background:#F3F5F4!important}
-  .postcard .pc-insights .is-risk{background:#ECEFED!important}
-  .postcard .pc-insights .is-debt,.postcard .pc-insights .is-safe{background:#E6EAE8!important}
+  .postcard .pc-insights .is-risk{background:#F3F5F4!important}
+  .postcard .pc-insights .is-debt,.postcard .pc-insights .is-safe{background:#E4E8E7!important}
   .postcard .pc-insights article{border-left:3px solid var(--insight-tone,#68757C)!important}
   .postcard .pc-insights small,
   .postcard .pc-insights b,
