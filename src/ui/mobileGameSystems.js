@@ -13,6 +13,7 @@
     de:{labels:{match:"SPIEL",market:"MARKT",training:"TRAINING",sidefield:"NEBENPLATZ",career:"KARRIERE"},offers:"neue bezahlbare Angebote"},
     it:{labels:{match:"PARTITA",market:"MERCATO",training:"ALLENAMENTO",sidefield:"CAMPO LATERALE",career:"CARRIERA"},offers:"nuove offerte accessibili"}
   };
+  NAV_COPY.tr.labels.sidefield="YAN SAHA";NAV_COPY.en.labels.sidefield="SIDE FIELD";NAV_COPY.es.labels.sidefield="CAMPO DE APUESTAS";NAV_COPY.de.labels.sidefield="NEBENWETTE";NAV_COPY.it.labels.sidefield="CAMPO SCOMMESSE";
   const navCopy=()=>NAV_COPY[root.LANG]||NAV_COPY.en;
   function matchAttendance(matchRound,homePower,awayPower){
     const bases=[8000,14000,22000,34000,52000,75000,90000],index=Math.max(0,Math.min(6,(Number(matchRound)||1)-1));

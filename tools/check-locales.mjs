@@ -173,11 +173,11 @@ for(const sourceName of ["src/ui/modeGate.js","src/online/arena.js"]){
 }
 
 const newSurfaceMarkers={
-  tr:{side:"KEHANET KAYDI",power:"GÜÇ",nav:"YAN SAHA",analytics:"ANONİM KULLANIM ÖLÇÜMÜ",arena:"SİSTEM KULÜBÜ"},
-  en:{side:"PROPHECY RECORD",power:"POWER",nav:"SIDE FIELD",analytics:"ANONYMOUS USAGE METRICS",arena:"SYSTEM CLUB"},
-  es:{side:"REGISTRO",power:"FUERZA",nav:"CAMPO LATERAL",analytics:"MÉTRICAS DE USO ANÓNIMAS",arena:"CLUB DEL SISTEMA"},
-  de:{side:"BILANZ",power:"STÄRKE",nav:"NEBENPLATZ",analytics:"ANONYME NUTZUNGSMESSUNG",arena:"SYSTEMCLUB"},
-  it:{side:"REGISTRO",power:"FORZA",nav:"CAMPO LATERALE",analytics:"METRICHE DI UTILIZZO ANONIME",arena:"CLUB DI SISTEMA"}
+  tr:{side:"KEHANET KAYDI",power:"GÜÇ",nav:"YAN SAHA",analytics:"ANONİM KULLANIM ÖLÇÜMÜ",arena:"HAZIR KULÜP"},
+  en:{side:"PROPHECY RECORD",power:"POWER",nav:"SIDE FIELD",analytics:"ANONYMOUS USAGE METRICS",arena:"READY-MADE CLUB"},
+  es:{side:"REGISTRO",power:"FUERZA",nav:"CAMPO LATERAL",analytics:"MÉTRICAS DE USO ANÓNIMAS",arena:"CLUB PREPARADO"},
+  de:{side:"BILANZ",power:"STÄRKE",nav:"NEBENPLATZ",analytics:"ANONYME NUTZUNGSMESSUNG",arena:"BEREITER CLUB"},
+  it:{side:"REGISTRO",power:"FORZA",nav:"CAMPO LATERALE",analytics:"METRICHE DI UTILIZZO ANONIME",arena:"CLUB PRONTO"}
 };
 for(const [language,markers] of Object.entries(newSurfaceMarkers)){
   if(!sideFieldSource.includes(markers.side))errors.push(`Yan Saha ${language} record copy is missing`);
@@ -191,7 +191,7 @@ for(const language of required){
   if(!new RegExp(`(?:^|\\n)\\s*${language}:\\{`).test(cardSummarySource))errors.push(`card effect summary ${language} dictionary is missing`);
 }
 function objectLiteral(source,startMarker,endMarker,label){
-  const start=source.indexOf(startMarker),end=source.indexOf(endMarker,start+startMarker.length);
+  const start=source.indexOf(startMarker),close=source.indexOf("\n  };",start+startMarker.length),end=close<0?source.indexOf(endMarker,start+startMarker.length):close+4;
   if(start<0||end<0){errors.push(`${label} dictionary could not be audited`);return{};}
   try{return vm.runInNewContext(`(${source.slice(start+startMarker.length,end)})`);}catch(error){errors.push(`${label} dictionary is not evaluable: ${error.message}`);return{};}
 }

@@ -118,7 +118,7 @@ describe("Arena HTTP API",()=>{
     expect((await cleared.json()).profile.equippedCosmetics).toEqual({});
   });
 
-  it("creates a separate rewardless server-authoritative practice room",async()=>{
+  it("creates a separate rewardless practice room with verified results",async()=>{
     const suffix="practice",owner=await ownerFor(suffix);
     const response=await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers(suffix),body:JSON.stringify({clubName:"Prova SK",mode:"practice",region:"weur"})});
     const data=await response.json();
@@ -665,7 +665,7 @@ env.DB.prepare("INSERT INTO arena_profiles(owner_hash,public_id,club_name,rating
     )).toBe(true);
   });
 
-  it("starts exactly one server-authoritative rematch after both players approve",async()=>{
+  it("starts exactly one verified rematch after both players approve",async()=>{
     const originalId="AR-REMATCHFLOW000001";
     const room=env.ARENA_ROOM.getByName(originalId);
     const players=[

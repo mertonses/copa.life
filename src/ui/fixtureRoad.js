@@ -8,7 +8,7 @@
     de:{current:"Nächstes Spiel",scheduled:"Angesetzt",won:"Sieg",draw:"Remis",lost:"Niederlage",locked:"Gesperrt",reveal:"Gegner erscheint, sobald das Duell feststeht",opponent:"Gegner",score:"Ergebnis",penalties:"Elfmeterschießen",event:"Schlüsselmoment",noEvent:"Kein Schlüsselmoment gespeichert",close:"Details schließen",cup:"Pokal",champion:"Meister",progress:"Pokalfortschritt"},
     it:{current:"Prossima partita",scheduled:"In calendario",won:"Vittoria",draw:"Pareggio",lost:"Sconfitta",locked:"Bloccato",reveal:"L'avversario appare quando si definisce l'incrocio",opponent:"Avversario",score:"Risultato",penalties:"Rigori",event:"Momento chiave",noEvent:"Nessun momento chiave registrato",close:"Chiudi dettagli",cup:"Coppa",champion:"Campione",progress:"Progresso coppa"}
   };
-  Object.values(COPY).forEach(item=>{item.reveal="???";});
+  COPY.tr.reveal="GİZLİ";COPY.en.reveal="HIDDEN";COPY.es.reveal="OCULTO";COPY.de.reveal="GEHEIM";COPY.it.reveal="NASCOSTO";
   const LOCK='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M7 8V6a3 3 0 0 1 6 0v2"/></svg>';
   const CUP='<svg viewBox="0 0 28 32" aria-hidden="true"><path d="M8 3h12v11a6 6 0 0 1-12 0Z"/><path d="M8 7H4Q4 17 8 15M20 7h4Q24 17 20 15M14 20v6M9 26h10M7 30h14"/></svg>';
   let selected=-1;
