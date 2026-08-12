@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" role="img" aria-label="Japonya bayrağı">
-  <rect width="3" height="2" fill="#fff"/>
-  <circle cx="1.5" cy="1" r="0.6" fill="#bc002d"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Japonya bayrağı" role="img" viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><circle cx="1.5" cy="1" r=".6" fill="#bc002d"/></svg>
