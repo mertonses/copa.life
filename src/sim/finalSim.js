@@ -1614,6 +1614,17 @@ function buildSim(myPow, oppPow) {
   /* DOM helpers */
   function _dom(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
   function _html(id,v){const e=document.getElementById(id);if(e)e.innerHTML=v;}
+  let _broadcastCueTimer=null;
+  function _broadcastCue(type,html){
+    let cue=document.getElementById('simBroadcastCue');
+    if(!cue){const comm=document.getElementById('simComm');if(!comm||!comm.parentNode)return;cue=document.createElement('div');cue.id='simBroadcastCue';cue.className='sim-broadcast-cue';cue.setAttribute('aria-live','polite');cue.setAttribute('aria-atomic','true');comm.insertAdjacentElement('afterend',cue);}
+    const text=String(html||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+    if(!text)return;
+    cue.textContent=text;cue.dataset.eventType=String(type||'moment').replace(/_/g,'-');
+    cue.classList.remove('is-active');void cue.offsetWidth;cue.classList.add('is-active');
+    if(_broadcastCueTimer)clearTimeout(_broadcastCueTimer);
+    _broadcastCueTimer=setTimeout(()=>cue.classList.remove('is-active'),2400);
+  }
   function _addRow(side,html,major,type,marker,recordReplay=true){
     const el=document.getElementById("simGoals");if(!el)return;
     const userReviewing=el.scrollTop>8,previousTop=el.scrollTop;
@@ -1642,6 +1653,7 @@ function buildSim(myPow, oppPow) {
       d.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();highlight();}});
     }
     el.prepend(d);
+    _broadcastCue(eventType,d.textContent);
     // trim minor rows first so goals/cards stay visible in the story
     while(el.children.length>14){
       let victim=null;

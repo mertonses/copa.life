@@ -110,6 +110,22 @@
     const context=root.ac&&root.ac(),tone=({open:[260,.12],queue:[330,.16],match:[523,.3],pick:[410,.09],emote:[620,.13],error:[80,.16]}[kind]||[410,.09]);
     if(context&&root.click)root.click(context,context.currentTime,tone[0],.05,tone[1]);
   }
+  function announceLiveEvent(game,event,index){
+    if(!event)return;
+    const live=document.querySelector(".arena-live");if(!live)return;
+    let cue=live.querySelector("[data-arena-live-cue]");
+    if(!cue){cue=document.createElement("div");cue.className="arena-live-cue";cue.dataset.arenaLiveCue="true";cue.setAttribute("aria-live","polite");cue.setAttribute("aria-atomic","true");const score=live.querySelector(".arena-live-score");if(score)score.insertAdjacentElement("afterend",cue);}
+    const labels={goal:local("GOL","GOAL"),save:local("KURTARIŞ","SAVE"),post:local("DİREK","POST"),shot:local("ŞUT","SHOT"),card:local("KART","CARD"),attack:local("TEHLİKELİ ATAK","DANGEROUS ATTACK")};
+    cue.textContent=`${Number(event.minute)||0}' · ${labels[event.type]||String(event.type||"MOMENT").toUpperCase()}`;
+    cue.dataset.eventType=String(event.type||"moment").replace(/_/g,"-");
+    live.classList.remove("is-event-flash");void live.offsetWidth;live.classList.add("is-event-flash");
+    clearTimeout(cue._hideTimer);cue.classList.add("is-visible");cue._hideTimer=setTimeout(()=>cue.classList.remove("is-visible"),1800);
+    if(event.type!=="goal"){
+      if(["save","post","shot"].includes(event.type)&&root.sfxArena)root.sfxArena(event.type);
+      else if(event.type==="card"&&root.sfxStamp)root.sfxStamp();
+      else if(event.type==="attack"&&root.sfxPass)root.sfxPass();
+    }
+  }
   function startSearchMusic(){
     stopSearchMusic(false);
     if(soundMuted())return false;
@@ -995,12 +1011,22 @@
             if(goalMinute<=minute){
               if(side===0)mine++;else theirs++;
               const room=state.room||{},cue=`${room.matchId||"match"}:${room.window}:${goalMinute}:${side}:${index}`;
-              if(!state.liveEventCues.has(cue)){state.liveEventCues.add(cue);sfx("goal");}
+              if(!state.liveEventCues.has(cue)){state.liveEventCues.add(cue);sfx("goal");const event={type:"goal",minute:goalMinute};if(state.room)announceLiveEvent(state.room,event,index);}
             }
           });
           liveScore.innerHTML=`${mine}<i>–</i>${theirs}`;
         }
       }
+      const activeEvents=(state.room&&Array.isArray(state.room.events)?state.room.events:[]);
+      const eventNow=Number(String(matchClock&&matchClock.textContent||state.room&&state.room.matchMinute||0).replace(/[^0-9.]/g,""))||0;
+      activeEvents.forEach((event,index)=>{
+        if(event.type==="goal")return;
+        const eventMinute=Number(event.minute)||0;
+        const eventStart=Number(matchClock&&matchClock.dataset.startMinute)||0;
+        if(eventMinute<eventStart||eventMinute>eventNow)return;
+        const room=state.room||{},cue=`${room.matchId||"match"}:${room.window}:${eventMinute}:${event.type||"moment"}:${index}`;
+        if(!state.liveEventCues.has(cue)){state.liveEventCues.add(cue);announceLiveEvent(room,event,index);}
+      });
       const reconnect=document.querySelector("[data-arena-reconnect-countdown]");if(reconnect)reconnect.textContent=`${Math.max(0,Math.ceil((state.reconnectAt-Date.now())/1000))}s`;
       if(seconds===0&&state.socket&&state.socket.readyState===1)state.socket.send(JSON.stringify({type:"sync"}));
     };
