@@ -132,7 +132,9 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
     };
   });
   expect(mobileViewportFit.horizontalOverflow).toBeLessThanOrEqual(1);
-  expect(mobileViewportFit.simBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
+  // The simulator is intentionally page-scrollable on short phones; only the
+  // interactive controls must stay within the initial viewport.
+  expect(mobileViewportFit.simBottom).toBeGreaterThanOrEqual(mobileViewportFit.controlsBottom);
   expect(mobileViewportFit.controlsBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
   // The match surface stays page-scrollable on short phones so event-heavy
   // reports and lower controls remain reachable.
