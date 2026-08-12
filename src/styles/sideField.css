@@ -1,7 +1,7 @@
 .side-field-route{display:none;min-height:620px;color:#F3F5F4;font-family:Inter,system-ui,sans-serif}
 #hub[data-mobile-route="sidefield"] .hubcols,#hub[data-mobile-route="sidefield"] .hub-action-panel,#hub[data-mobile-route="sidefield"]>.roundtag{display:none!important}
 #hub[data-mobile-route="sidefield"] .side-field-route{display:block}
-.ys-shell{position:relative;overflow:hidden;max-width:1180px;margin:0 auto 90px;border:1px solid rgba(214,162,31,.24);border-radius:20px;background:radial-gradient(circle at 78% -8%,rgba(214,162,31,.25),transparent 31%),linear-gradient(155deg,#101D28 0%,#17242D 55%,#0A1118 100%);box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.ys-shell{position:relative;overflow:hidden;max-width:1180px;margin:0 auto 90px;border:1px solid rgba(214,162,31,.24);border-radius:20px;background:radial-gradient(circle at 78% -8%,rgba(214,162,31,.25),transparent 31%),linear-gradient(155deg,#101D28 0%,#17242D 55%,#0A1118 100%);box-shadow:0 24px 70px rgba(0,0,0,.28);contain:paint;backface-visibility:hidden}
 .ys-shell:before{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:32px 32px;content:"";mask-image:linear-gradient(to bottom,#000,transparent 70%)}
 .ys-hero{position:relative;display:flex;justify-content:space-between;gap:24px;padding:34px 38px 28px;border-bottom:1px solid rgba(214,162,31,.18)}
 .ys-hero>div>span,.ys-hero aside small{color:#D9C88F;font:800 10px/1.2 var(--mono,monospace);letter-spacing:.18em}

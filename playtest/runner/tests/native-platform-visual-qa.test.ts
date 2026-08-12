@@ -137,6 +137,8 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     return{
       overflow:document.documentElement.scrollWidth-innerWidth,
       navCount:nav.querySelectorAll("button").length,
+      talkStyle:(()=>{const talk=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #talkBtn")!;const play=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #playBtn")!;const talkRect=talk.getBoundingClientRect();const playRect=play.getBoundingClientRect();const content=[...play.children].map(node=>(node as HTMLElement).getBoundingClientRect());const contentLeft=Math.min(...content.map(rect=>rect.left));const contentRight=Math.max(...content.map(rect=>rect.right));return{background:getComputedStyle(talk).backgroundColor,color:getComputedStyle(talk).color,centerDelta:Math.abs((contentLeft+contentRight)/2-(playRect.left+playRect.right)/2),verticalCenterDelta:Math.abs((talkRect.top+talkRect.bottom)/2-(playRect.top+playRect.bottom)/2)}})(),
+      kasa:(()=>{const card=document.getElementById("kasaTile")!;const label=card.querySelector<HTMLElement>(".kasa-compact-debt-label")!;const value=card.querySelector<HTMLElement>(".kasa-compact-debt-value")!;const labelRect=label.getBoundingClientRect();const valueRect=value.getBoundingClientRect();return{hasDetailText:/detay/i.test(card.textContent||""),label:label.textContent?.trim(),value:value.textContent?.trim(),labelFont:Number.parseFloat(getComputedStyle(label).fontSize),valueFont:Number.parseFloat(getComputedStyle(value).fontSize),overlap:labelRect.right>valueRect.left+1}})(),
       visibleToasts:[...document.querySelectorAll<HTMLElement>(".toast")].filter(item=>item.offsetParent).length,
       navBottom:nav.getBoundingClientRect().bottom,
       toast:{top:toast.getBoundingClientRect().top,bottom:toast.getBoundingClientRect().bottom},
@@ -146,7 +148,17 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     };
   });
   expect(match.overflow).toBeLessThanOrEqual(1);
-  expect(match.navCount).toBe(4);
+  expect(match.navCount).toBe(5);
+  expect(match.talkStyle.background).toBe("rgb(31, 107, 69)");
+  expect(match.talkStyle.color).toBe("rgb(243, 245, 244)");
+  expect(match.talkStyle.centerDelta).toBeLessThanOrEqual(2);
+  expect(match.talkStyle.verticalCenterDelta).toBeLessThanOrEqual(1);
+  expect(match.kasa.hasDetailText).toBe(false);
+  expect(match.kasa.label).toBe("BORÇ LİMİTİ");
+  expect(match.kasa.value).toMatch(/€/);
+  expect(match.kasa.labelFont).toBeGreaterThanOrEqual(7);
+  expect(match.kasa.valueFont).toBeGreaterThanOrEqual(9);
+  expect(match.kasa.overlap).toBe(false);
   expect(match.visibleToasts).toBe(1);
   expect(match.toast.top).toBeGreaterThan(match.navBottom);
   expect(match.toast.bottom).toBeLessThanOrEqual(match.dockTop-8);
@@ -158,6 +170,27 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
   await capture(page,platform,"hub-market");
+
+  await page.locator('#nativeHubNav [data-native-target="sidefield"]').click();
+  await expect(page.locator("#sideFieldRoute")).toBeVisible();
+  const sidefield=await page.evaluate(()=>{
+    const route=document.getElementById("sideFieldRoute")!;
+    const hero=route.querySelector<HTMLElement>(".ys-hero")!;
+    const buttons=[...route.querySelectorAll<HTMLElement>("button")].filter(button=>button.offsetParent);
+    return{
+      overflow:document.documentElement.scrollWidth-innerWidth,
+      heading:route.querySelector("h1")?.textContent?.trim(),
+      heroVisible:hero.getBoundingClientRect().height>0,
+      offscreen:buttons.filter(button=>{const rect=button.getBoundingClientRect();return rect.left<0||rect.right>innerWidth+1;}).map(button=>button.textContent?.trim()),
+      clipped:buttons.filter(button=>button.scrollWidth>button.clientWidth+1).map(button=>button.textContent?.trim()),
+    };
+  });
+  expect(sidefield.overflow).toBeLessThanOrEqual(1);
+  expect(sidefield.heading).toBe("YAN SAHA");
+  expect(sidefield.heroVisible).toBe(true);
+  expect(sidefield.offscreen).toEqual([]);
+  expect(sidefield.clipped).toEqual([]);
+  await capture(page,platform,"hub-sidefield");
 
   await page.locator('#nativeHubNav [data-native-target="training"]').click();
   await expect(page.locator("#mobileTrainingRoute")).toBeVisible();

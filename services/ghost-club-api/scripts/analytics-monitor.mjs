@@ -10,7 +10,8 @@ const thresholds={
 const [product,worker]=await Promise.all([queryAnalytics(`
   SELECT
     sumIf(_sample_interval * double1, blob1 = 'session_started') AS sessions,
-    sumIf(_sample_interval * double1, blob1 = 'profile_open_error') AS profile_errors
+    sumIf(_sample_interval * double1, blob1 = 'profile_open_error') AS profile_errors,
+    COUNT(DISTINCT blob21) AS active_visitors
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '1' HOUR
 `),queryAnalytics(`
@@ -21,7 +22,7 @@ const [product,worker]=await Promise.all([queryAnalytics(`
   WHERE timestamp >= NOW() - INTERVAL '1' HOUR
 `)]);
 const productRow=product.rows[0]||{},workerRow=worker.rows[0]||{};
-const metrics={sessions:numeric(productRow.sessions),profile_errors:numeric(productRow.profile_errors),worker_requests:numeric(workerRow.requests),worker_5xx:numeric(workerRow.server_errors)};
+const metrics={sessions:numeric(productRow.sessions),active_visitors:numeric(productRow.active_visitors),profile_errors:numeric(productRow.profile_errors),worker_requests:numeric(workerRow.requests),worker_5xx:numeric(workerRow.server_errors)};
 metrics.profile_error_rate=metrics.sessions?metrics.profile_errors/metrics.sessions:metrics.profile_errors?1:0;
 metrics.worker_5xx_rate=metrics.worker_requests?metrics.worker_5xx/metrics.worker_requests:0;
 const configured=product.configured&&worker.configured;
@@ -37,6 +38,8 @@ appendStepSummary(`
 Status: **${report.status}**
 
 Sessions: ${metrics.sessions.toFixed(0)}
+
+Active visitors (last hour): ${metrics.active_visitors.toFixed(0)}
 
 Profile errors: ${metrics.profile_errors.toFixed(0)} (${(metrics.profile_error_rate*100).toFixed(1)}%)
 

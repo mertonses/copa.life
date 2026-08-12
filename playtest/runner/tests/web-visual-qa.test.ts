@@ -227,10 +227,10 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
     const talkContentRight=Math.max(...talkParts.map(rect=>rect.right));
     const presWrap=panel.querySelector<HTMLElement>(".presbtngp")!;
     const cashValue=document.querySelector<HTMLElement>("#kasaTile .kasa-main-val")!;
-    const debtValue=document.querySelector<HTMLElement>("#kasaTile .kasa-metric-val")!;
+    const debtValue=document.querySelector<HTMLElement>("#kasaTile .kasa-compact-debt-value")!;
     const cashInfo=document.querySelector<HTMLElement>("#kasaTile .kasa-detail-btn")!.getBoundingClientRect();
     const trustInfo=document.querySelector<HTMLElement>("#trustInfoBtn")!.getBoundingClientRect();
-    const debtLabel=document.querySelector<HTMLElement>("#kasaTile .kasa-metric-lbl")!.getBoundingClientRect();
+    const debtLabel=document.querySelector<HTMLElement>("#kasaTile .kasa-compact-debt-label")!.getBoundingClientRect();
     return{
       panelWidth:panel.getBoundingClientRect().width,
       actionWidth:panel.querySelector<HTMLElement>(".actionbtns")!.getBoundingClientRect().width,
@@ -262,7 +262,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
       chairmanWrapBackground:getComputedStyle(presWrap).backgroundColor,
       cashFontSize:parseFloat(getComputedStyle(cashValue).fontSize),
       cashBackground:getComputedStyle(cashValue).backgroundImage,
-      debtBackground:getComputedStyle(debtValue).backgroundColor,
+      debtColor:getComputedStyle(debtValue).color,
       cashInfoSize:[cashInfo.width,cashInfo.height],
       trustInfoSize:[trustInfo.width,trustInfo.height],
       debtHelpGap:cashInfo.left-debtLabel.right,
@@ -292,7 +292,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   expect(matchLayout.chairmanWrapBackground).toBe("rgba(0, 0, 0, 0)");
   expect(matchLayout.cashFontSize).toBeLessThanOrEqual(18);
   expect(matchLayout.cashBackground).not.toBe("none");
-  expect(matchLayout.debtBackground).toBe("rgb(255, 255, 255)");
+  expect(matchLayout.debtColor).toBe("rgb(217, 200, 143)");
   expect(matchLayout.cashInfoSize[0]).toBeLessThanOrEqual(matchLayout.trustInfoSize[0]);
   expect(matchLayout.cashInfoSize[1]).toBeLessThanOrEqual(matchLayout.trustInfoSize[1]);
   expect(matchLayout.debtHelpGap).toBeGreaterThanOrEqual(3);

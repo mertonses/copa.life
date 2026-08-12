@@ -134,7 +134,9 @@ test("real final engine pause, resume, speed, shout and skip controls remain coh
   expect(mobileViewportFit.horizontalOverflow).toBeLessThanOrEqual(1);
   expect(mobileViewportFit.simBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
   expect(mobileViewportFit.controlsBottom).toBeLessThanOrEqual(mobileViewportFit.viewportHeight);
-  expect(mobileViewportFit.bodyOverflowY).toBe("hidden");
+  // The match surface stays page-scrollable on short phones so event-heavy
+  // reports and lower controls remain reachable.
+  expect(mobileViewportFit.bodyOverflowY).toBe("auto");
   await page.evaluate(()=>{(globalThis as any).CopaMobileExperience.setSimView("events");});
   await expect(page.locator("#sim .eventpanel")).toBeVisible();
   const eventHeight=await page.locator("#simGoals .event-tactic").evaluate(element=>element.getBoundingClientRect().height);

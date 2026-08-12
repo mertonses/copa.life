@@ -30,13 +30,14 @@ for(const event of ["session_started","country_selected","formation_selected","c
   expect(runtime.includes(`"${event}"`),`product event is missing: ${event}`);
   expect(worker.includes(`"${event}"`),`Worker allowlist is missing: ${event}`);
 }
-for(const forbidden of ["localStorage","sessionStorage","document.cookie","session_id","player_name","club_name","email"]){
-  expect(!runtime.includes(forbidden),`analytics runtime contains forbidden identifier/storage marker: ${forbidden}`);
+for(const forbidden of ["session_id","player_name","club_name","email"]){
+  expect(!runtime.includes(forbidden),`analytics runtime contains forbidden identifier marker: ${forbidden}`);
 }
+expect(runtime.includes("copa.analytics.daily")&&runtime.includes("visitor_key"),"daily anonymous visitor measurement is missing");
 expect(runtime.includes("globalPrivacyControl")&&runtime.includes("doNotTrack"),"browser privacy signals are not respected");
 expect(runtime.includes("copa_analytics_enabled")&&runtime.includes("nativeOptIn"),"native analytics is not protected by explicit opt-in");
 expect(runtime.includes('new Set(["web","android","ios"])')&&runtime.includes("platform:platform()"),"analytics platform segmentation is missing");
-expect(runtime.includes("schema_version:5")&&worker.includes("[1,2,3,4,5].includes"),"versioned analytics schema compatibility is missing");
+expect(runtime.includes("schema_version:6")&&worker.includes("[1,2,3,4,5,6].includes"),"versioned analytics schema compatibility is missing");
 expect(runtime.includes("power_gap")&&runtime.includes("end_type")&&runtime.includes("model_version"),"coarse final simulation telemetry is missing");
 for(const dimension of ["chairman","formation","style","reward","card_kind","economy_band"]){
   expect(runtime.includes(dimension),`balance telemetry dimension is missing: ${dimension}`);
@@ -50,7 +51,7 @@ for(const dimension of ["sidefield_pick","confidence","stake_band"]){
 }
 expect(runtime.includes("Math.min(7"),"analytics round contract must include the final");
 expect(!runtime.includes("seed")&&!runtime.includes("replay"),"final analytics must not transmit a seed or replay code");
-expect(worker.includes("No user/session index is written"),"Analytics Engine privacy schema is not documented in code");
+expect(worker.includes("daily rotating")&&worker.includes("never written as an Analytics Engine index"),"Analytics Engine privacy schema is not documented in code");
 expect(workerConfig.includes('"binding": "PRODUCT_ANALYTICS"')&&workerConfig.includes('"dataset": "copa_life_product_events"'),"production Analytics Engine binding is missing");
 expect(stagingConfig.includes('"dataset": "copa_life_product_events_staging"'),"staging analytics dataset is not isolated");
 expect(workerConfig.includes('"binding": "WORKER_ANALYTICS"')&&workerConfig.includes('"dataset": "copa_life_worker_health"'),"production Worker health analytics binding is missing");
@@ -58,6 +59,7 @@ expect(stagingConfig.includes('"dataset": "copa_life_worker_health_staging"'),"s
 expect(worker.includes("routeBucket(url.pathname)")&&worker.includes('return "not_found"'),"Worker metrics do not use a fixed privacy-safe route bucket");
 expect(!worker.includes("writeDataPoint({indexes"),"Analytics Engine metrics must not write an identifier index");
 expect(reportWorkflow.includes("CLOUDFLARE_ANALYTICS_TOKEN")&&reportScript.includes("_sample_interval"),"weekly sampled KPI report is missing");
+expect(reportScript.includes("COUNT(DISTINCT blob21)")&&reportScript.includes("daily_active"),"daily active visitor report is missing");
 expect(reportScript.includes("blob14 AS chairman")&&reportScript.includes("blob17 AS reward"),"weekly balance decision report is missing");
 expect(reportScript.includes("blob20 AS dimensions")&&reportScript.includes("side_field:"),"weekly Yan Saha report is missing");
 expect(reportScript.includes("chairman_outcomes")&&reportScript.includes("blob5 AS outcome"),"weekly chairman outcome report is missing");
@@ -67,7 +69,7 @@ expect(monitorWorkflow.includes("PROFILE_ERROR_RATE")&&monitorWorkflow.includes(
 expect(monitorScript.includes('blob1 = \'profile_open_error\'')&&monitorScript.includes("blob3 = '5xx'"),"profile and Worker error monitor queries are incomplete");
 expect(pagesBuilder.includes("CF_WEB_ANALYTICS_TOKEN")&&pagesBuilder.includes("static.cloudflareinsights.com/beacon.min.js"),"Cloudflare Web Analytics build injection is missing");
 expect(pagesWorkflow.includes("vars.CF_WEB_ANALYTICS_TOKEN"),"Pages workflow does not consume the Web Analytics token variable");
-expect(privacy.includes("Toplu kullanım ve performans ölçümü")&&privacy.includes("kullanıcı veya oturum kimliği"),"privacy policy does not disclose aggregate analytics");
+expect(privacy.includes("Toplu kullanım ve performans ölçümü")&&privacy.includes("Günlük aktif kullanım")&&privacy.includes("rastgele ve anonim"),"privacy policy does not disclose aggregate analytics");
 expect(webIndex.includes("src/runtime/productAnalytics.js"),"web artifact is missing product analytics runtime");
 
 for(const [name,index] of [["Android",androidIndex],["iOS",iosIndex]]){

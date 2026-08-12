@@ -41,7 +41,7 @@
   function navMarkup(){
     const labels=navCopy().labels;
     const remaining=root.CopaPreparation&&typeof root.CopaPreparation.spent==="function"?Math.max(0,2-root.CopaPreparation.spent()):2;
-    return Object.keys(labels).map(route=>`<button type="button" data-native-target="${route}" aria-label="${labels[route]}" data-tab-label="${labels[route]}">${NAV_ICONS[route]}<span class="native-hub-tab-label">${labels[route]}</span>${route==="market"?'<i class="native-hub-market-dot hidden" aria-hidden="true"></i>':""}${route==="training"?`<em class="native-hub-tab-count">${remaining}/2</em>`:""}</button>`).join("");
+    return Object.keys(labels).map(route=>`<button type="button" data-native-target="${route}" aria-label="${labels[route]}" data-tab-label="${labels[route]}">${NAV_ICONS[route]}<span class="native-hub-tab-label">${labels[route]}</span>${route==="market"?'<i class="native-hub-market-dot hidden" aria-hidden="true"></i>':""}${route==="sidefield"?'<i class="native-hub-sidefield-dot hidden" aria-hidden="true"></i>':""}${route==="training"?`<em class="native-hub-tab-count">${remaining}/2</em>`:""}</button>`).join("");
   }
   function updateTrainingBadge(){
     const badge=document.querySelector('[data-native-target="training"] .native-hub-tab-count');
@@ -70,6 +70,15 @@
     button.classList.toggle("has-market-notice",show);
     const label=button.dataset.tabLabel||navCopy().labels.market;
     button.setAttribute("aria-label",show?`${label}, ${navCopy().offers}`:label);
+    return show;
+  }
+  function updateSideFieldBadge(){
+    const button=document.querySelector('[data-native-target="sidefield"]'),dot=button&&button.querySelector(".native-hub-sidefield-dot");
+    if(!button||!dot)return false;
+    const market=root.CopaSideField&&typeof root.CopaSideField.ensureCurrent==="function"?root.CopaSideField.ensureCurrent():null;
+    const show=activeRoute!=="sidefield"&&!!market&&market.status==="open";
+    dot.classList.toggle("hidden",!show);
+    button.classList.toggle("has-sidefield-notice",show);
     return show;
   }
   function playRouteSound(route){
@@ -219,6 +228,7 @@
     if(activeRoute==="career")renderCareerRoute();
     updateTrainingBadge();
     updateMarketBadge(activeRoute==="market");
+    updateSideFieldBadge();
     if(root.CopaMobileExperience&&typeof root.CopaMobileExperience.refresh==="function")root.CopaMobileExperience.refresh();
     const target=nav||(activeRoute==="market"?document.getElementById("shopcards"):activeRoute==="training"?document.getElementById("mobileTrainingRoute"):activeRoute==="sidefield"?document.getElementById("sideFieldRoute"):activeRoute==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar"));
     if(target)target.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});
@@ -402,7 +412,8 @@
     const currentTone=typeof root.ovTextCol==="function"?root.ovTextCol(currentPower):"var(--color-slate)",candidateTone=typeof root.ovTextCol==="function"?root.ovTextCol(power):"var(--fa-tone)";
     const comparison=current?`<div class="free-agent-versus"><article class="is-current"><small>${tr()?"MEVCUT OYUNCU":"CURRENT PLAYER"}</small><b>${escapeHtml(current.name||"")}</b><span>${escapeHtml(currentPos)} · ${tr()?"Güç":"Power"} <strong style="--power-tone:${currentTone}">${currentPower}</strong></span></article><i aria-hidden="true">→</i><article class="is-candidate"><small>${tr()?"ADAY":"CANDIDATE"}</small><b>${escapeHtml(p.name||"")}</b><span>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <strong style="--power-tone:${candidateTone}">${power}</strong></span><em class="${delta>=0?"is-positive":"is-negative"}">${delta>=0?"+":""}${delta}</em></article></div>`:`<div class="free-agent-empty-compare">${tr()?"Karşılaştırılabilir kadro oyuncusu yok.":"No comparable squad player."}</div>`;
     const locked=blocked?`<div class="free-agent-detail-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${escapeHtml(lockReason)}</span></div>`:"";
-    root.showModal(`<div class="free-agent-detail" style="--fa-tone:${getComputedStyle(card).getPropertyValue("--fa-tone")}"><div class="mobile-sheet-grip"></div><header><span>${tr()?"SERBEST TRANSFER":"FREE AGENT"}</span><b>${item.fee?`€${item.fee}M`:(tr()?"ÜCRETSİZ":"FREE")}</b></header><div class="free-agent-detail-id"><i>${escapeHtml(typeof root._playerMonogram==="function"?root._playerMonogram(p.name):String(p.name||"FA").slice(0,2))}</i><div><h3>${escapeHtml(p.name||"")}</h3><p>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <b>${power}</b></p></div></div><div class="free-agent-compare-title">${tr()?"KADRO KARŞILAŞTIRMASI":"SQUAD COMPARISON"}</div>${comparison}${locked}<div class="bact"><button class="btn btn-primary free-agent-transfer-next" ${blocked?"disabled":""}>${blocked?(tr()?"TRANSFER KİLİTLİ":"TRANSFER LOCKED"):(tr()?"SATIN AL":"BUY")}</button><button class="btn btn-ghost" onclick="closeModal()">${tr()?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:true,label:p.name||""});
+    const detailTone=typeof root.ovTextCol==="function"?root.ovTextCol(power):getComputedStyle(card).getPropertyValue("--fa-tone");
+    root.showModal(`<div class="free-agent-detail" style="--fa-tone:${getComputedStyle(card).getPropertyValue("--fa-tone")}"><div class="mobile-sheet-grip"></div><header><span>${tr()?"SERBEST TRANSFER":"FREE AGENT"}</span><b>${item.fee?`€${item.fee}M`:(tr()?"ÜCRETSİZ":"FREE")}</b></header><div class="free-agent-detail-id"><i>${escapeHtml(typeof root._playerMonogram==="function"?root._playerMonogram(p.name):String(p.name||"FA").slice(0,2))}</i><div><h3>${escapeHtml(p.name||"")}</h3><p>${escapeHtml(pos)} · ${tr()?"Güç":"Power"} <b class="free-agent-power-value" style="--power-tone:${detailTone}">${power}</b></p></div></div><div class="free-agent-compare-title">${tr()?"KADRO KARŞILAŞTIRMASI":"SQUAD COMPARISON"}</div>${comparison}${locked}<div class="bact"><button class="btn btn-primary free-agent-transfer-next" ${blocked?"disabled":""}>${blocked?(tr()?"TRANSFER KİLİTLİ":"TRANSFER LOCKED"):(tr()?"SATIN AL":"BUY")}</button><button class="btn btn-ghost" onclick="closeModal()">${tr()?"KAPAT":"CLOSE"}</button></div></div>`,{dismissOnOverlay:true,label:p.name||""});
     const next=document.querySelector(".free-agent-transfer-next");if(next&&!blocked)next.onclick=()=>{root.closeModal();root._signFreeAgent(index);};
   }
   function bindCardUX(){

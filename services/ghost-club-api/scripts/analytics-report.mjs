@@ -4,12 +4,22 @@ const output=process.env.ANALYTICS_REPORT_OUTPUT||"outputs/analytics/weekly.json
 const generatedAt=new Date().toISOString();
 const eventOrder=["session_started","draft_started","xi_completed","run_finished","profile_open_error"];
 
-const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField]=await Promise.all([queryAnalytics(`
+const [funnel,activeDay,activeWeek,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField]=await Promise.all([queryAnalytics(`
   SELECT blob1 AS event, SUM(_sample_interval * double1) AS total
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
     AND blob1 IN ('${eventOrder.join("','")}')
   GROUP BY event
+`),queryAnalytics(`
+  SELECT COUNT(DISTINCT blob21) AS daily_active
+  FROM copa_life_product_events
+  WHERE timestamp >= NOW() - INTERVAL '1' DAY
+    AND blob1 = 'session_started'
+`),queryAnalytics(`
+  SELECT COUNT(DISTINCT blob21) AS weekly_active
+  FROM copa_life_product_events
+  WHERE timestamp >= NOW() - INTERVAL '7' DAY
+    AND blob1 = 'session_started'
 `),queryAnalytics(`
   SELECT blob4 AS game_country, SUM(_sample_interval * double1) AS completed_runs
   FROM copa_life_product_events
@@ -67,13 +77,14 @@ const [funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisi
   ORDER BY total DESC LIMIT 100
 `)]);
 
-const queries=[funnel,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField];
+const queries=[funnel,activeDay,activeWeek,countries,profileErrors,worker,workerRoutes,finalSim,balanceDecisions,chairmanOutcomes,sideField];
 const configured=queries.every(query=>query.configured);
 const ready=queries.every(query=>query.available);
 const totals=Object.fromEntries(eventOrder.map(event=>[event,0]));
 for(const row of funnel.rows)if(Object.hasOwn(totals,row.event))totals[row.event]=numeric(row.total);
 const sessions=totals.session_started;
 const workerSummary=worker.rows[0]||{};
+const activeDaySummary=activeDay.rows[0]||{},activeWeekSummary=activeWeek.rows[0]||{};
 const report={
   schema_version:4,
   generated_at:generatedAt,
@@ -86,6 +97,7 @@ const report={
     completion_rate:sessions?totals.run_finished/sessions:0,
     profile_error_rate:sessions?totals.profile_open_error/sessions:0
   },
+  active_users:{daily_active:numeric(activeDaySummary.daily_active),weekly_active:numeric(activeWeekSummary.weekly_active)},
   completed_runs_by_country:countries.rows.map(row=>({game_country:row.game_country||"unknown",completed_runs:numeric(row.completed_runs)})),
   profile_errors_by_build:profileErrors.rows.map(row=>({build_version:row.build_version||"unknown",detail:row.detail||"unknown",errors:numeric(row.errors)})),
   final_simulation:finalSim.rows.map(row=>({model_version:row.model_version||"unknown",power_gap:row.power_gap||"unknown",end_type:row.end_type||"unknown",tactic:row.tactic||"unknown",finals:numeric(row.finals)})),
@@ -108,6 +120,8 @@ Generated: ${generatedAt}
 | KPI | Value |
 | --- | ---: |
 | Sessions | ${totals.session_started.toFixed(0)} |
+| Daily active visitors | ${report.active_users.daily_active.toFixed(0)} |
+| Weekly active visitors | ${report.active_users.weekly_active.toFixed(0)} |
 | Draft starts | ${totals.draft_started.toFixed(0)} (${percent(report.funnel.draft_rate)}) |
 | Completed XI | ${totals.xi_completed.toFixed(0)} (${percent(report.funnel.xi_rate)}) |
 | Completed runs | ${totals.run_finished.toFixed(0)} (${percent(report.funnel.completion_rate)}) |

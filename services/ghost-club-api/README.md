@@ -57,10 +57,10 @@ node scripts/check-health.mjs
 
 - `POST /v1/analytics/events` accepts only the fixed event and dimension allowlists in `src/index.js`.
 - The production Analytics Engine dataset is `copa_life_product_events`; staging writes to `copa_life_product_events_staging`.
-- No user ID, session ID, install ID, player name, club name, email, free text or Analytics Engine index is stored.
-- `blob1..8` and `double1..2` are documented in `docs/analytics.md`.
+- No account ID, player name, club name, email, free text, IP address or Analytics Engine index is stored. A random client token rotates daily and is used only to count aggregate DAU/WAU; it is not an account, session or install identity.
+- `blob1..21` and `double1..4` are documented in `docs/analytics.md`.
 - The dataset is created automatically on the first production write after deployment.
-- Android does not ship the analytics client; the endpoint currently receives web events only.
+- Web events are automatic unless a browser privacy signal blocks them; Android and iOS product events require explicit opt-in in Advanced Settings.
 
 ## World Club Ranking
 
