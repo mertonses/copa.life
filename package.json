@@ -57,6 +57,8 @@
     "ios:version:major": "node tools/ios-version.mjs bump major",
     "audit:security": "npm audit --audit-level=high && npm audit --audit-level=high --prefix services/ghost-club-api && npm audit --audit-level=high --prefix services/copa-arena-api && npm audit --audit-level=high --prefix playtest/runner",
     "check:encoding": "node tools/check-encoding.mjs",
+    "check:natural-copy": "node tools/check-natural-copy.mjs",
+    "check:localized-inline": "node tools/check-localized-inline.mjs",
     "check:locales": "node tools/check-locales.mjs",
     "check:responsive": "node tools/check-responsive.mjs",
     "check:faq": "node tools/check-faq.mjs",

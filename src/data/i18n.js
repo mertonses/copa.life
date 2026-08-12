@@ -504,6 +504,42 @@ function _detectCopaLocale(){
 }
 
 function _copaLifeBrand(value){return typeof value==="string"?value.replace(/copa\.life/gi,"Copa Life"):value;}
+function _humanizeCopaCopy(value,language){
+ if(typeof value!=="string")return value;
+ var replacements={
+  tr:[["??? Antrenman","Antrenman"],["?? Rakip kadrosunu gör","Rakip kadrosunu incele"],["?? Yeni diziliş açıldı","Yeni diziliş açıldı"],["?? HEDEFLER","HEDEFLER"],["??? · cevher mi balon mu","Gizli oyuncu · cevher mi, balon mu?"],["Kupaya Başla ??","Kupaya başla"],["? Son hamleyi geri al","Son hamleyi geri al"],["Takım Coştu!","Takım coştu!"],["Deadline","transferin son saati"],["daha iyi bir build kur","daha iyi bir kadro kur"]],
+  en:[["??? Training","Training"],["?? Scout opponent","Scout the opponent"],["?? New formation unlocked","New formation unlocked"],["?? OBJECTIVES","OBJECTIVES"],["??? · gem or dud","Hidden player · gem or dud?"],["Start the Cup ??","Start the cup"],["? Undo last pick","Undo last pick"],["Team Fired Up!","The team is fired up!"],["Deadline","transfer deadline"],["build","squad"]],
+  es:[["?? New formation unlocked: 4-3-3!","Nueva formación desbloqueada: 4-3-3!"],["??? · joya o fiasco","Jugador oculto · ¿joya o fiasco?"],["Team Fired Up!","¡El equipo está encendido!"],["whole squad +2","toda la plantilla +2"]],
+  de:[["?? New formation unlocked: 4-3-3!","Neue Formation freigeschaltet: 4-3-3!"],["??? · Juwel oder Flop","Geheimspieler · Juwel oder Flop?"],["Team Fired Up!","Die Mannschaft ist heiß!"],["whole squad +2","gesamte Mannschaft +2"]],
+  it:[["?? New formation unlocked: 4-3-3!","Nuovo modulo sbloccato: 4-3-3!"],["??? · talento o bidone","Giocatore nascosto · talento o bidone?"],["Team Fired Up!","La squadra è carica!"],["whole squad +2","tutta la rosa +2"]]
+ }[language]||[];
+ for(var i=0;i<replacements.length;i++)value=value.split(replacements[i][0]).join(replacements[i][1]);
+ value=value.replace(/\?{2,}/g,"").replace(/^\s+/,"");
+ if(/^\?{2,}$/.test(value.trim()))return "";
+ var transferCentre={tr:"TRANSFER MERKEZİ",en:"TRANSFER MARKET",es:"CENTRO DE FICHAJES",de:"TRANSFERZENTRALE",it:"CENTRO TRASFERIMENTI"};
+ if(value==="TRANSFER CENTRE")return transferCentre[language]||value;
+ return value;
+}
+function _humanizeCopaTree(value,language){
+ if(typeof value==="function")return function(){return _humanizeCopaTree(value.apply(this,arguments),language);};
+ if(Array.isArray(value))return value.map(function(item){return _humanizeCopaTree(item,language);});
+ if(value&&typeof value==="object"){Object.keys(value).forEach(function(key){value[key]=_humanizeCopaTree(value[key],language);});return value;}
+ return _humanizeCopaCopy(value,language);
+}
+Object.keys(T).forEach(function(language){_humanizeCopaTree(T[language],language);});
+T.tr.fan.s=["Kızgın","Kararsız","Memnun","Coşkulu"];
+T.en.fan.s=["Angry","Uneasy","Happy","Buzzing"];
+T.es.fan.s=["Furiosa","Inquieta","Feliz","Eufórica"];
+T.de.fan.s=["Wütend","Unruhig","Zufrieden","Begeistert"];
+T.it.fan.s=["Furiosi","Inquieti","Felici","Entusiasti"];
+var _humanStoryTemplates={
+ tr:function(mgr,team,chair,reached,motm,won,panic,wk){var lead=panic>0?"Son gün telaşında "+panic+" transfer yaptın. ":"Kadroyu son güne kadar sabırla kurdun. ";var middle=wk?"Genç "+wk+" turnuvanın en güzel sürprizi oldu. ":"Takım her maç biraz daha birbirine alıştı. ";return lead+middle+(won?team+" finalde kupayı kaldırdı.":team+" için yol "+reached+". turda sona erdi.")+" Turnuvanın oyuncusu: "+motm+".";},
+ en:function(mgr,team,chair,reached,motm,won,panic,wk){var lead=panic>0?"The final hours brought "+panic+" emergency signing"+(panic===1?".":"s."):"You took your time and built the squad carefully.";var middle=wk?" Young "+wk+" became the tournament's surprise package.":" The team grew into the tournament one match at a time.";return lead+middle+(won?" "+team+" lifted the cup in the final.":" "+team+"'s run ended in round "+reached+".")+" Player of the tournament: "+motm+".";},
+ es:function(mgr,team,chair,reached,motm,won,panic,wk){var lead=panic>0?"En las últimas horas llegaron "+panic+" fichaje"+(panic===1?" de urgencia.":"s de urgencia."):"La plantilla se fue formando con calma hasta el último día.";var middle=wk?" "+wk+" fue la gran sorpresa del torneo.":" El equipo creció partido a partido.";return lead+middle+(won?" "+team+" levantó la copa en la final.":" El camino de "+team+" terminó en la ronda "+reached+".")+" Jugador del torneo: "+motm+".";},
+ de:function(mgr,team,chair,reached,motm,won,panic,wk){var lead=panic>0?"In den letzten Stunden kamen "+panic+" Nottransfers hinzu.":"Der Kader wuchs bis zum letzten Tag in Ruhe zusammen.";var middle=wk?" "+wk+" wurde zur großen Überraschung des Turniers.":" Die Mannschaft fand von Spiel zu Spiel besser zusammen.";return lead+middle+(won?" "+team+" holte im Finale den Pokal.":" Für "+team+" endete der Lauf in Runde "+reached+".")+" Spieler des Turniers: "+motm+".";},
+ it:function(mgr,team,chair,reached,motm,won,panic,wk){var lead=panic>0?"Nelle ultime ore sono arrivati "+panic+" acquisto"+(panic===1?" d'emergenza.":" d'emergenza."):"La rosa ha preso forma con calma fino all'ultimo giorno.";var middle=wk?" "+wk+" è stata la sorpresa più bella del torneo.":" La squadra è cresciuta partita dopo partita.";return lead+middle+(won?" "+team+" ha alzato la coppa in finale.":" Il cammino di "+team+" si è fermato al turno "+reached+".")+" Giocatore del torneo: "+motm+".";}
+};
+Object.keys(_humanStoryTemplates).forEach(function(language){if(T[language])T[language].story=_humanStoryTemplates[language];});
 Object.values(T).forEach(function(locale){
  locale.coverTitle="Copa Life";
  locale.patreonText=_copaLifeBrand(locale.patreonText);
@@ -521,7 +557,23 @@ function LT(tr,en,es,de,it){
  if(value===undefined||value===null)value=values.tr;
  return value;
 }
+var _copaInlineCopy={};if(typeof window!=="undefined")window.COPA_INLINE_COPY=_copaInlineCopy;
+function CopaText(tr,en,es,de,it){
+ var values={tr:tr,en:en,es:es,de:de,it:it},value=values[LANG];
+ if(value!==undefined&&value!==null)return value;
+ var inline=_copaInlineCopy[String(en||"")]||_copaInlineCopy[String(en||"").trim()];
+ if(inline&&inline[LANG]!==undefined)return inline[LANG];
+ return values.en!==undefined&&values.en!==null?values.en:values.tr;
+}
 if(typeof window!=="undefined")window.LT=LT;
+if(typeof window!=="undefined")window.CopaText=CopaText;
+if(typeof document!=="undefined"&&typeof window!=="undefined"&&!window.__copaInlineCopyLoader){
+ window.__copaInlineCopyLoader=true;
+ var _inlineCopyScript=document.createElement("script");
+ _inlineCopyScript.src="src/data/inlineCopy.js?v=20260812-copy1";
+ _inlineCopyScript.async=true;
+ (document.head||document.documentElement).appendChild(_inlineCopyScript);
+}
 
 var COPA_LOCALE_UI={
  tr:{label:"DİL",a11y:"ERİŞİLEBİLİRLİK",sound:"SES VE MÜZİK",guide:"COPA REHBERİ",anim:"ANİMASYONU AZALT",audio:"SES",music:"MÜZİK",advanced:"GELİŞMİŞ AYARLAR",country:"ÜLKENİ SEÇ",title:"Copa Life — Roguelite futbol kadro yönetim oyunu",contact:"İLETİŞİM",settings:"Ayarlar",reduceMotion:"Animasyonu azalt",soundEffects:"Ses efektleri",heroTitle:"Zar at. Kadronu kur.<br><span class=\"v7-tagline-accent\">Kadere meydan oku.</span>",heroDesc:"Her seçiminle yeni bir futbol hikâyesi yaz.",newLabel:"YENİ",contactPrompt:"Soru, fikir, hata? · ",activeEffects:"AKTİF ETKİLER",noEvents:"Henüz olay yok"},

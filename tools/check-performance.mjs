@@ -86,7 +86,10 @@ const budgets = [
   // The mobile interaction hardening keeps the full navigation surface in the
   // first-party runtime. Keep a small, explicit headroom for that shared CSS
   // instead of letting device-specific fixes silently push the budget.
-  ["critical html/js/css gzip", criticalGzip, 622 * 1024],
+  // The centralized five-language copy layer adds a small, intentional
+  // first-party runtime cost while removing hundreds of duplicated fallbacks
+  // from the main game surface.
+  ["critical html/js/css gzip", criticalGzip, 624 * 1024],
   ["referenced media asset bytes", referencedAssetBytes, 6 * 1024 * 1024],
   ["largest referenced asset", largestReferencedAsset?.size || 0, 2 * 1024 * 1024],
 ];
