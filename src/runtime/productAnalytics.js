@@ -53,7 +53,9 @@
   const API_META="meta[name='copa-analytics-api']";
   const BUILD_META="meta[name='copa-build-version']";
   const NATIVE_OPT_IN_KEY="copa_analytics_enabled";
+  const DAILY_KEY="copa.analytics.daily";
   let sessionSent=false;
+  let dailyVisitorKey="";
 
   const metaContent=selector=>{
     const node=document.querySelector(selector);
@@ -73,6 +75,21 @@
     if(!new Set(["web","android","ios"]).has(current))return false;
     return /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(endpoint());
   };
+  const storage=()=>global.CopaPlatform&&global.CopaPlatform.storage||global.localStorage;
+  const randomToken=()=>{
+    try{if(global.crypto&&typeof global.crypto.randomUUID==="function")return global.crypto.randomUUID().replace(/-/g,"");}catch(_){ }
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  };
+  function visitorKey(){
+    if(dailyVisitorKey)return dailyVisitorKey;
+    const today=new Date().toISOString().slice(0,10),store=storage();
+    try{
+      const raw=store&&store.getItem(DAILY_KEY),parsed=raw&&JSON.parse(raw);
+      if(parsed&&parsed.day===today&&/^[a-z0-9]{16,64}$/.test(String(parsed.key||"")))dailyVisitorKey=String(parsed.key);
+      else{dailyVisitorKey=randomToken().slice(0,32);store?.setItem(DAILY_KEY,JSON.stringify({day:today,key:dailyVisitorKey}));}
+    }catch(_){dailyVisitorKey=randomToken().slice(0,32);}
+    return dailyVisitorKey;
+  }
 
   function payloadFor(eventName,properties){
     if(!EVENTS.has(eventName))return null;
@@ -99,7 +116,7 @@
     const stakeBand=STAKE_BANDS.has(String(props.stake_band||""))?String(props.stake_band||""):"";
     const round=Math.max(0,Math.min(7,Math.round(Number(props.round)||0)));
     return {
-      schema_version:5,
+      schema_version:6,
       event:eventName,
       platform:platform(),
       locale:locale(),
@@ -125,7 +142,8 @@
       group_matchday:groupMatchday,
       sidefield_pick:sidefieldPick,
       confidence,
-      stake_band:stakeBand
+      stake_band:stakeBand,
+      visitor_key:visitorKey()
     };
   }
 

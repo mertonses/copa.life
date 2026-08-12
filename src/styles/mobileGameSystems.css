@@ -494,7 +494,8 @@ html.copa-mobile-game .mobile-legal-links .sdbtn{min-width:0!important;padding-i
   html.copa-mobile-game #hub .native-hub-nav button.active::after{transform:scaleX(1)}
   html.copa-mobile-game #hub .native-hub-tab-label{min-width:0;overflow:hidden;text-overflow:ellipsis;font:900 9px/1 var(--mono);letter-spacing:.105em}
   html.copa-mobile-game #hub .native-hub-tab-count{position:absolute;z-index:2;right:7px;top:6px;left:auto;display:grid;place-items:center;box-sizing:border-box;min-width:25px;height:16px;padding:0 5px;border:1px solid color-mix(in srgb,var(--tab-tone) 54%,var(--border-subtle));border-radius:7px;background:color-mix(in srgb,var(--tab-tone) 13%,var(--surface-elevated));box-shadow:0 2px 8px rgba(var(--tab-rgb),.12);color:var(--tab-tone);font:900 7px/1 var(--mono);font-style:normal;letter-spacing:.04em;text-align:center}
-  html.copa-mobile-game #hub .native-hub-market-dot{position:absolute;z-index:3;right:9px;top:8px;box-sizing:border-box;width:9px;height:9px;border:2px solid var(--surface-elevated);border-radius:50%;background:var(--tab-tone);box-shadow:0 0 0 0 rgba(var(--tab-rgb),.55);pointer-events:none;animation:hubMarketNoticePulse 1.45s ease-out infinite}
+  html.copa-mobile-game #hub .native-hub-market-dot,
+  html.copa-mobile-game #hub .native-hub-sidefield-dot{position:absolute;z-index:3;right:9px;top:8px;box-sizing:border-box;width:9px;height:9px;border:2px solid var(--surface-elevated);border-radius:50%;background:var(--tab-tone);box-shadow:0 0 0 0 rgba(var(--tab-rgb),.55);pointer-events:none;animation:hubMarketNoticePulse 1.45s ease-out infinite}
   html.copa-mobile-game #hub .native-hub-market-dot.hidden{display:none!important}
   html.copa-mobile-game #hub .native-hub-nav .hub-tab-svg{flex:0 0 26px;width:26px!important;height:26px!important;overflow:visible}
   html.copa-mobile-game #hub .native-hub-nav .hub-tab-icon-frame{fill:rgba(var(--tab-rgb),.055);stroke-width:1.7}
@@ -523,7 +524,8 @@ html.copa-mobile-game .mobile-legal-links .sdbtn{min-width:0!important;padding-i
     html.copa-mobile-game #hub .native-hub-nav .hub-tab-svg{flex-basis:19px;width:19px!important;height:19px!important}
     html.copa-mobile-game #hub .native-hub-tab-label{font-size:7px;letter-spacing:.035em}
     html.copa-mobile-game #hub .native-hub-tab-count{left:auto;right:5px;top:5px;min-width:23px;height:15px;padding-inline:4px}
-    html.copa-mobile-game #hub .native-hub-market-dot{right:7px;top:7px}
+    html.copa-mobile-game #hub .native-hub-market-dot,
+    html.copa-mobile-game #hub .native-hub-sidefield-dot{right:7px;top:7px}
     html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #talkBtn,
     html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #presBtn,
     html.copa-mobile-game .mobile-action-dock[data-dock-kind="hub"] #playBtn{gap:4px!important;padding-inline:5px!important}
@@ -927,6 +929,31 @@ html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#2
   #hub .hub-action-panel .actionbtns>.presbtngp,#hub .hub-action-panel #talkBtn,#hub .hub-action-panel #presBtn,#hub .hub-action-panel #playBtn{height:56px!important;min-height:56px!important}
   html.copa-mobile-game #hub .native-hub-tab-label{font-size:8.5px!important;letter-spacing:.045em!important}
 }
+
+/* Insight chips read as a single, high-contrast pre-match confirmation. The
+   colored edge preserves meaning without putting low-contrast text on tinted
+   surfaces. */
+@media(max-width:760px){
+  .postcard .pc-band,
+  .postcard .pc-insights article{
+    background:#F3F5F4!important;
+    color:#101D28!important;
+    border-color:#F3F5F4!important;
+  }
+  .postcard .pc-band{font-weight:900;box-shadow:0 2px 0 rgba(10,17,24,.08)}
+  .postcard .pc-insights .is-strong{background:#F3F5F4!important}
+  .postcard .pc-insights .is-risk{background:#ECEFED!important}
+  .postcard .pc-insights .is-debt,.postcard .pc-insights .is-safe{background:#E6EAE8!important}
+  .postcard .pc-insights article{border-left:3px solid var(--insight-tone,#68757C)!important}
+  .postcard .pc-insights small,
+  .postcard .pc-insights b,
+  .postcard .pc-insights em{color:#101D28!important}
+  .style-select-modal{width:calc(100vw - 24px)!important;max-width:none!important;margin-inline:auto!important}
+  .style-select-modal .stylelist{padding-inline:0!important}
+}
+
+.free-agent-power-value,
+.free-agent-detail-id p b.free-agent-power-value{color:var(--power-tone,var(--fa-tone))!important;font-variant-numeric:tabular-nums}
 
 @media(max-width:480px){
   #hub>.native-hub-nav button{

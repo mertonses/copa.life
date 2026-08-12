@@ -699,6 +699,7 @@ test("bench stays compact, draggable and height-bounded on wide screens and retu
 test("phone portrait and landscape matrices stay inside the viewport with usable hit areas",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   const sizes=[
+    {width:320,height:568},
     {width:360,height:800},
     {width:390,height:844},
     {width:430,height:932},
@@ -730,4 +731,23 @@ test("phone portrait and landscape matrices stay inside the viewport with usable
     expect(audit.overflow,`${size.width}x${size.height} horizontal overflow`).toBeLessThanOrEqual(1);
     expect(audit.undersized,`${size.width}x${size.height} undersized controls`).toEqual([]);
   }
+});
+
+test("mobile match surface stays vertically scrollable when the simulator is open",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"phone scroll contract");
+  await page.goto("/?mobile-scroll-contract=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    document.documentElement.classList.add("copa-mobile-game");
+    document.getElementById("sim")?.classList.remove("hidden");
+  });
+  await page.waitForTimeout(50);
+  const state=await page.evaluate(()=>{
+    const sim=document.getElementById("sim")!,html=getComputedStyle(document.documentElement),body=getComputedStyle(document.body),simStyle=getComputedStyle(sim);
+    return{htmlOverflow:html.overflowY,bodyOverflow:body.overflowY,simOverflow:simStyle.overflowY,simMaxHeight:simStyle.maxHeight,simTouch:simStyle.touchAction};
+  });
+  expect(state.htmlOverflow).toBe("auto");
+  expect(state.bodyOverflow).toBe("auto");
+  expect(state.simOverflow).toBe("visible");
+  expect(state.simMaxHeight).toBe("none");
+  expect(state.simTouch).toBe("pan-y");
 });

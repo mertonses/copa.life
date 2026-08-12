@@ -64,7 +64,7 @@ async function readJsonLimited(request,limit=MAX_BODY_BYTES){
 }
 
 function normalizeAnalyticsEvent(value){
-  if(!object(value)||![1,2,3,4,5].includes(Number(value.schema_version)))return null;
+  if(!object(value)||![1,2,3,4,5,6].includes(Number(value.schema_version)))return null;
   const schemaVersion=Number(value.schema_version);
   const event=String(value.event||"");if(!ANALYTICS_EVENTS.has(event))return null;
   if(event==="final_sim_completed"&&schemaVersion<2)return null;
@@ -98,7 +98,9 @@ function normalizeAnalyticsEvent(value){
   const sidefieldPick=String(value.sidefield_pick||"");if(!ANALYTICS_SIDEFIELD_PICKS.has(sidefieldPick))return null;
   const confidence=String(value.confidence||"");if(!ANALYTICS_CONFIDENCE_LEVELS.has(confidence))return null;
   const stakeBand=String(value.stake_band||"");if(!ANALYTICS_STAKE_BANDS.has(stakeBand))return null;
-  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday,sidefieldPick,confidence,stakeBand};
+  if(schemaVersion===5)return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday,sidefieldPick,confidence,stakeBand};
+  const visitorKey=String(value.visitor_key||"");if(!/^[a-z0-9]{16,64}$/.test(visitorKey))return null;
+  return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday,sidefieldPick,confidence,stakeBand,visitorKey};
 }
 
 async function handleAnalytics(request,env){
@@ -106,14 +108,16 @@ async function handleAnalytics(request,env){
   let body;try{body=await readJsonLimited(request,4096);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
   const event=normalizeAnalyticsEvent(body);if(!event)return json(request,env,{error:"invalid_analytics_event"},422);
   if(!env.PRODUCT_ANALYTICS)return json(request,env,{error:"analytics_unavailable"},503);
-  /* copa_life_product_events: blob1..20 below; double1=count, double2=round,
-     double3=schema version, double4=group matchday. No user/session index is written. */
+  /* copa_life_product_events: blob1..21 below; blob21 is a daily rotating,
+     random client token for aggregate DAU/WAU only. It is not an account or
+     install identity and is never written as an Analytics Engine index. */
   env.PRODUCT_ANALYTICS.writeDataPoint({
     blobs:[
       event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion,
       event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1),
       event.chairman||"",event.formation||"",event.style||"",event.reward||"",event.cardKind||"",event.economyBand||"",
-      [event.tournamentStage||"",event.drawMode||"",event.qualification||"",event.sidefieldPick||"",event.confidence||"",event.stakeBand||""].join("|")
+      [event.tournamentStage||"",event.drawMode||"",event.qualification||"",event.sidefieldPick||"",event.confidence||"",event.stakeBand||""].join("|"),
+      event.visitorKey||""
     ],
     doubles:[1,event.round,event.schemaVersion||1,event.groupMatchday||0]
   });

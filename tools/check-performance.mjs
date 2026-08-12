@@ -83,7 +83,10 @@ const budgets = [
   // journals and the persisted chairman-trust ledger form the validated
   // first-party runtime baseline. Heavy reports, guides, ad SDKs and match
   // simulation still stay lazy.
-  ["critical html/js/css gzip", criticalGzip, 620 * 1024],
+  // The mobile interaction hardening keeps the full navigation surface in the
+  // first-party runtime. Keep a small, explicit headroom for that shared CSS
+  // instead of letting device-specific fixes silently push the budget.
+  ["critical html/js/css gzip", criticalGzip, 622 * 1024],
   ["referenced media asset bytes", referencedAssetBytes, 6 * 1024 * 1024],
   ["largest referenced asset", largestReferencedAsset?.size || 0, 2 * 1024 * 1024],
 ];
