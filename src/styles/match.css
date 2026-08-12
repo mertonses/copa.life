@@ -3581,3 +3581,11 @@ html[data-theme="dark"] #sim .shoutbtn.lit{
 }
 
 .lmr-event.lmr-yellow{background:#F0C44D!important}
+
+.sim-broadcast-cue{min-height:0;margin:0 auto;color:var(--text-primary);font:850 9px/1.35 var(--mono);letter-spacing:.04em;text-align:center;opacity:0;transform:translateY(4px);transition:opacity .22s ease,transform .22s ease;pointer-events:none}
+.sim-broadcast-cue.is-active{min-height:22px;margin:7px auto 0;padding:5px 10px;border:1px solid color-mix(in srgb,var(--color-primary) 42%,var(--border-subtle));border-radius:8px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-primary) 12%,var(--surface-elevated)),transparent);opacity:1;transform:none}
+.sim-broadcast-cue[data-event-type="goal"]{color:var(--status-success);border-color:color-mix(in srgb,var(--status-success) 48%,var(--border-subtle))}
+.sim-broadcast-cue[data-event-type="save"]{color:var(--color-slate)}
+.sim-broadcast-cue[data-event-type="danger"],.sim-broadcast-cue[data-event-type="post"]{color:var(--status-risk)}
+.sim-broadcast-cue[data-event-type="red-card"],.sim-broadcast-cue[data-event-type="yellow-card"]{color:var(--status-warning)}
+body.reduced-motion .sim-broadcast-cue{transition:none}

@@ -53,8 +53,8 @@
   }
   function ensureAdvancedSettings(){
     return Promise.all([
-      loadStyleOnce("advanced-settings-style","src/styles/advancedSettings.css?v=20260727-sheet1",'link[href*="advancedSettings.css"]'),
-      loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260727-sheet1",()=>!!global.CopaAdvancedSettings)
+      loadStyleOnce("advanced-settings-style","src/styles/advancedSettings.css?v=20260812-settings-fix1",'link[href*="advancedSettings.css"]'),
+      loadScriptOnce("advanced-settings","src/ui/advancedSettings.js?v=20260812-settings-fix1",()=>!!global.CopaAdvancedSettings)
     ]).then(()=>global.CopaAdvancedSettings);
   }
   function ensureScoutReport(){

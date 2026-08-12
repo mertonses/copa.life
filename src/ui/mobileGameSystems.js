@@ -505,6 +505,7 @@
       group.innerHTML=`<div class="sd-hdr">${tr()?"YASAL":"LEGAL"}</div><div class="sdgrid"><a class="sdbtn" href="privacy.html">${tr()?"Gizlilik":"Privacy"}</a><a class="sdbtn" href="terms.html">${tr()?"Koşullar":"Terms"}</a><a class="sdbtn" href="support.html">${tr()?"Destek":"Support"}</a></div>`;
       settings.appendChild(group);
     }
+    ensureSettingsExtras();
     const hub=document.getElementById("hub");
     if(hub){
       const observer=new MutationObserver(()=>{if(!hub.classList.contains("hidden"))enhanceHub();});
@@ -513,6 +514,13 @@
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
-  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,refreshCareerSection,isCareerRouteActive,enhanceHub,enhanceDraftControls,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
+  function ensureSettingsExtras(){
+    const settings=document.getElementById("settingsDrop");
+    if(!settings||settings.querySelector(".settings-advanced-entry"))return;
+    const advanced=document.createElement("div");advanced.className="sd-group settings-advanced-entry";
+    advanced.innerHTML=`<div class="sd-hdr" id="settingsAdvancedHdr">${tr()?"OYUN AYARLARI":"GAME SETTINGS"}</div><button class="sdbtn sd-full settings-advanced-btn" type="button" onclick="CopaLazy.openAdvancedSettings().catch(()=>{})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span id="settingsAdvancedBtnLbl">${tr()?"GELİŞMİŞ AYARLAR":"ADVANCED SETTINGS"}</span><span aria-hidden="true">→</span></button>`;
+    settings.appendChild(advanced);
+  }
+  root.CopaMobileShell={mobile,native,gameMode,shouldGateResume,showLanding,continueRun,newRun,prepareStepper,setSetupStep,step,handleBack,activateRoute,openCareerSection,refreshCareerSection,isCareerRouteActive,enhanceHub,enhanceDraftControls,ensureSettingsExtras,openCashMechanics,openCashDetails,openCard,openMarketCard,openFreeAgent,openFreeAgentProfile,openTeamTalk,chooseTalkTarget,chooseTalkTone,resolveTalk,showTalkResult,updateMarketBadge,refreshLanguage,init};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })(window);
