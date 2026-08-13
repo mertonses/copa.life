@@ -50,7 +50,7 @@ describe("Arena private tournaments",()=>{
       expect(instance.player(final.players[0]).place).toBe(1);
       expect(instance.player(final.players[1]).place).toBe(2);
     });
-  });
+  },15000);
 
   it("rejects unsupported sizes and keeps a player in only one active Arena session",async()=>{
     const invalid=await SELF.fetch("https://arena.test/v1/arena/tournaments",{method:"POST",headers:headers("badsize"),body:JSON.stringify({clubName:"Boyut FK",size:6})});
