@@ -44,7 +44,8 @@ Copa Life es un juego independiente y no está afiliado ni respaldado por ningú
 ## Clasificación
 
 - Tipo: Juego
-- Categoría: Deportes
+- Categoría principal: Estrategia
+- Etiquetas: Deportes, Simulación
 - Precio: Gratis
 - Contiene anuncios: Sí
 - Compras integradas: No

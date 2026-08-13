@@ -10,7 +10,7 @@ Son teknik kontrol: 21 Temmuz 2026. Bu dosya, Console açıldığında cevaplar�
 | Ad | Copa Life |
 | Uygulama veya oyun | Oyun |
 | Ücretsiz veya ücretli | Ücretsiz |
-| Kategori | Spor |
+| Kategori | Strateji |
 | Paket adı | `life.copa.app` |
 | Reklam içeriyor | Evet |
 | Uygulama içi satın alma | Hayır |

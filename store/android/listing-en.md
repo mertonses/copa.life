@@ -44,7 +44,8 @@ Copa Life is an independent game and is not affiliated with or endorsed by any f
 ## Classification
 
 - Type: Game
-- Category: Sports
+- Primary category: Strategy
+- Tags: Sports, Simulation
 - Price: Free
 - Contains ads: Yes
 - In-app purchases: No
