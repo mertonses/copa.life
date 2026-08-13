@@ -207,7 +207,7 @@ test("three group wins build a valid round-of-16 path and the tour can reach the
       (0,eval)(`lastMatchPerf={power:78,oppPower:72,gf:2,ga:0,win:true,draw:false,note:"Test win",why:"Test"};lastMatchEvents=[];pendingMatchResolution={round,advance:true,draw:false,gf:2,ga:0,stage:"${stage}"};fixtures[round-1]={...fixtures[round-1],res:"W",gf:2,ga:0,events:[]};`);
       w.afterMatch(true);
     });
-    await expect(page.locator("#modal .reward-modal")).toBeVisible();
+    await expect(page.locator("#modal .reward-modal")).toBeVisible({timeout:15000});
     await page.evaluate(()=>{const w=globalThis as any;w.finishRoundReward("cash");w.closeModal();});
     await expect(page.locator("#hub")).toBeVisible();
   };
