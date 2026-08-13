@@ -45,7 +45,7 @@ Copa Life è un gioco indipendente e non è affiliato né approvato da calciator
 
 - Tipo: Gioco
 - Categoria principale: Strategia
-- Tag: Sport, Simulazione
+- Tag: Calcio, Gestione sportiva, Giochi di strategia
 - Prezzo: Gratuito
 - Contiene annunci: Sì
 - Acquisti in-app: No

@@ -45,7 +45,7 @@ Copa Life bağımsız bir oyundur. Herhangi bir futbolcu, kulüp, lig, federasyo
 
 - Tür: Oyun
 - Ana kategori: Strateji
-- Etiketler: Spor, Simülasyon
+- Etiketler: Futbol, Spor yönetimi, Strateji Oyunları
 - Fiyat: Ücretsiz
 - Reklam: Var
 - Uygulama içi satın alma: Yok
