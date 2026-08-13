@@ -4,7 +4,7 @@
 
 - Uygulama türü: **Oyun**
 - Ana kategori: **Strategy / Strateji**
-- Etiketler: **Sports / Spor**, **Simulation / Simülasyon**
+- Etiketler: **Football / Futbol**, **Sports management / Spor yönetimi**, **Strategy Games / Strateji Oyunları**
 
 Bu seçim oyunun futbol temasını korurken asıl oynanışını da doğru anlatır: kadro kurma,
 bütçe ve pazar yönetimi, taktik kararlar, sezon ilerlemesi ve Copa Arena'daki canlı
@@ -14,11 +14,12 @@ rekabet. “Sports” tek başına oyunun yönetim ve strateji katmanını eksik
 
 Play Console → **Grow users → Store presence → Store settings → App category** yolundan
 uygulama türünü **Game**, ana kategoriyi **Strategy** olarak seçin. **Manage tags** altında
-**Sports** ve **Simulation** etiketlerini ekleyip kaydedin.
+**Football**, **Sports management** ve **Strategy Games** etiketlerini koruyup kaydedin.
 
 Google Play kategori ve etiketleri en fazla beş seçimle sınırlar; etiketler yalnızca oyunun
 mağaza metni veya ilk oyun deneyiminde açıkça desteklenen mekanikleri yansıtmalıdır. Bu
-nedenle RPG, Action, Board veya Racing gibi oyunda olmayan etiketler eklenmemelidir.
+nedenle RPG, Action, Board, Racing veya Simulation gibi oyunda Console'da seçili olmayan
+etiketler eklenmemelidir.
 
 ## Kaynak doğruluğu
 
