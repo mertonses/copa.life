@@ -58,6 +58,16 @@ body.reduced-motion .cash-digit-ghost{display:none!important}body.reduced-motion
   #hub .kasa-compact .kasa-compact-debt-value{font-size:10px!important}
 }
 
+/* Android compact vault: keep the debt line readable and pin the detail affordance to the card corner. */
+@media(max-width:760px){
+  html[data-copa-platform="android"] #hub .hub-stat-row>.kasa-compact{position:relative!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-foot{justify-content:flex-start!important;padding-right:20px!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group{max-width:100%!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-debt-label{font-size:7px!important;letter-spacing:.2px!important;opacity:1!important;color:#F3F5F4!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-debt-value{font-size:9px!important;color:#F4D879!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-detail{position:absolute!important;right:5px!important;bottom:5px!important;display:grid!important;width:15px!important;height:15px!important;margin:0!important;place-items:center!important;color:#F3F5F4!important;font-size:12px!important;line-height:1!important;opacity:1!important}
+}
+
 /* Match-preparation cash: the premium vault language in the same footprint as
    Chemistry, Squad Power and Chairman Trust. Full economy detail stays in the
    existing cash sheet opened by the tile. */
