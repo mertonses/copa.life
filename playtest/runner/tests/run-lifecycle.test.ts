@@ -56,9 +56,9 @@ test.describe("run lifecycle and recovery",()=>{
     expect(result.licenses).toBeGreaterThan(0);
     await page.locator(".career-open-link").click();
     await expect(page.locator(".meta-progress-modal")).toBeVisible();
-    await expect(page.locator(".meta-tabs button")).toHaveCount(7);
-    await page.locator('.meta-tabs button[onclick*="trophies"]').click();
-    await expect(page.locator(".meta-memory-card")).toHaveCount(1);
+    await expect(page.locator(".meta-tabs button")).toHaveCount(3);
+    await expect(page.locator(".meta-tabs")).toContainText(/OVERVIEW|GENEL BAKIŞ/);
+    await expect(page.locator(".meta-overview-snapshot")).toBeVisible();
   });
 
   test("club career keeps one scroll hierarchy and progressively discloses history",async({page})=>{
@@ -77,15 +77,14 @@ test.describe("run lifecycle and recovery",()=>{
     await expect(page.locator(".meta-progress-modal")).toBeVisible();
     await expect(page.locator(".meta-progress-actions")).toHaveCount(0);
     await expect(page.locator(".meta-close")).toBeVisible();
-    await expect(page.locator(".meta-run-row")).toHaveCount(5);
-    if(!(await page.locator(".meta-see-all").isVisible()))await page.locator(".meta-archive > summary").click();
+    await expect(page.locator(".meta-run-row")).toHaveCount(3);
     await page.locator(".meta-see-all").click();
     await expect(page.locator(".meta-history-modal .meta-run-row")).toHaveCount(8);
     await page.locator(".meta-history-back").click();
-    await page.locator('.meta-tabs button[onclick*="management"]').click();
+    await page.locator('.meta-tabs button[onclick*="growth"]').click();
     await expect(page.locator(".meta-mastery-row")).toHaveCount(5);
     await expect(page.locator(".meta-mastery-track")).toHaveCount(5);
-    await page.locator('.meta-tabs button[onclick*="trophies"]').click();
+    await page.evaluate(()=>{(globalThis as any).CopaMeta.openProgression("museum");});
     await expect(page.locator(".meta-memory-card")).toHaveCount(8);
   });
 
