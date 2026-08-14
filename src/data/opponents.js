@@ -68,9 +68,9 @@ var OPP_BASES_DE=[62,67,73,79,87,95];
 
 /* Japonya — copa.life kulüp havuzundaki 20 takım */
 var OPP_POOL_JP=[
- "Kashima","Urawa","Kashiwa","Tokyo","Machida",
- "Kawasaki","Yokohama","Hiratsuka","Niigata","Shimizu",
- "Nagoya","Kyoto","Suita","Osaka","Kobe",
- "Okayama","Hiroshima","Fukuoka","Sagamihara","Tosu"
+ "Kashima","Urawa","Kashiwa","FC Tokyo","Tokyo-V",
+ "FC Machida","Kawasaki-F","Yokohama F･M","Yokohama FC","Shonan",
+ "Niigata","Shimizu","Nagoya","Kyoto","G-Osaka",
+ "C-Osaka","Kobe","Okayama","Hiroshima","Fukuoka"
 ];
 var OPP_BASES_JP=[61,66,72,78,87,95];

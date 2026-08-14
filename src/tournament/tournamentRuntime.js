@@ -112,7 +112,9 @@
     const domesticLabel=typeof root.countryDisplayName==="function"?root.countryDisplayName(root.selectedCountry,root.LANG):root.selectedCountry;
     const japanReserveCities=["Kofu","Uji","Matsue","Hida","Mito","Nara","Iwaki","Aomori","Hirosaki","Sakai","Tottori","Kamakura","Fukui","Toyama","Oita","Morioka","Akita","Nagano","Tsu","Yamagata","Numazu","Kochi","Tokushima","Hachinohe","Otaru","Fukushima","Kure","Sasebo","Matsumoto","Kumamoto","Kagoshima","Naha","Nikko"];
     const existing=new Set(tournamentPool.map(name=>String(name||"").trim().toLocaleLowerCase()).filter(Boolean));
-    if(root.selectedCountry==="JP")japanReserveCities.forEach(city=>{if(existing.size>=31)return;const key=city.toLocaleLowerCase();if(existing.has(key))return;existing.add(key);tournamentPool.push(city);});
+    const sameClub=typeof root.CopaTournamentEngine?.sameClubIdentity==="function"?root.CopaTournamentEngine.sameClubIdentity:(left,right)=>String(left).toLocaleLowerCase()===String(right).toLocaleLowerCase();
+    const uniqueTournamentCount=()=>{const names=[];for(const entry of tournamentPool){const name=String(entry||"").trim();if(!name||name===root.teamName||names.some(existingName=>sameClub(existingName,name)))continue;names.push(name);}return names.length;};
+    if(root.selectedCountry==="JP")for(const city of japanReserveCities){if(uniqueTournamentCount()>=31)break;const key=city.toLocaleLowerCase();if(existing.has(key)||tournamentPool.some(entry=>sameClub(entry,city)))continue;existing.add(key);tournamentPool.push(city);}
     for(let index=1;existing.size<31;index++){
       const name=`${domesticLabel} ${root.LANG==="tr"?"Bölgesel Kulüp":"Regional Club"} ${String(index).padStart(2,"0")}`;
       const key=name.toLocaleLowerCase();if(existing.has(key))continue;
