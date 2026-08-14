@@ -370,7 +370,7 @@
   }
   function openCashDetails(data){
     const info=data||{},stats=info.stats||{},transactions=Array.isArray(stats.transactions)?stats.transactions:[],cash=Number(info.cash)||0,limit=Number(info.limit)||-28,start=Number(info.start)||30;
-    const values=[start,...transactions.map(item=>Number(item.after)||0),cash],min=Math.min(limit,...values),max=Math.max(start,...values),range=Math.max(1,max-min);
+    const roundSnapshots=[];transactions.forEach(item=>{const roundIndex=Math.max(1,Number(item.round)||1),after=Number(item.after)||0,known=roundSnapshots.find(snapshot=>snapshot.round===roundIndex);if(known)known.after=after;else roundSnapshots.push({round:roundIndex,after});});const chartTransactions=roundSnapshots.slice(-5),values=[start,...chartTransactions.map(item=>item.after),cash],min=Math.min(limit,...values),max=Math.max(start,...values),range=Math.max(1,max-min);
     const points=values.map((value,index)=>`${(index/Math.max(1,values.length-1)*320).toFixed(1)},${(76-(value-min)/range*64).toFixed(1)}`).join(" ");
     const zeroY=(76-(0-min)/range*64).toFixed(1),limitY=(76-(limit-min)/range*64).toFixed(1),buffer=cash-limit,gauge=Math.max(0,Math.min(100,(cash-limit)/Math.max(1,start-limit)*100));
     const earned=Number(stats.earned)||0,spent=Number(stats.spent)||0,president=Number(stats.president)||0,net=earned-spent-president,worst=Math.min(cash,Number(stats.worstDebt)||0);
