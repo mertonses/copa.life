@@ -1786,3 +1786,7 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-detail-link{display:none
 html.copa-mobile-game #hub #kasaTile.kasa-compact{height:86px!important;min-height:86px!important;padding:6px 8px!important;grid-template-rows:minmax(0,1fr) 24px!important;grid-template-areas:"kasa-value" "kasa-foot"!important;gap:2px!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-top-row{display:none!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-main-val{min-height:0!important;align-self:center!important}
+html.copa-mobile-game #hub .hub-stat-row>.mtile{box-sizing:border-box!important;height:86px!important;min-height:86px!important;padding:6px 8px!important;display:grid!important;grid-template-rows:14px minmax(0,1fr) 18px!important;grid-template-areas:"stat-head" "stat-value" "stat-foot"!important;align-items:center!important;gap:2px!important}
+html.copa-mobile-game #hub .hub-stat-row>.mtile>.mh{grid-area:stat-head!important;align-self:start!important;min-width:0!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html.copa-mobile-game #hub .hub-stat-row>.mtile>.mv{grid-area:stat-value!important;align-self:center!important;min-width:0!important;line-height:1!important}
+html.copa-mobile-game #hub .hub-stat-row>.mtile>.ms{grid-area:stat-foot!important;align-self:end!important;min-width:0!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
