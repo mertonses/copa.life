@@ -598,7 +598,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     subText="";
     const vEl=$("kasaV");if(vEl){const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));if(window.CopaCashDisplay)CopaCashDisplay.render(vEl,bv,{target:"kasaTile",legacy:lc});else vEl.innerHTML=`<span>${(bv>=0?"+":"−")+"€"+Math.abs(bv)+"M"}</span>${lc>0?`<span class="legacy-cash-chip cash-legacy-inline"><small>${LT("MİRAS","LEGACY","LEGADO","ERBE","EREDITÀ")}</small><b>+€${lc}M</b></span>`:""}`;}
     const subEl=$("kasaSub");if(subEl)subEl.textContent=subText;
-    const stEl=$("kasaStatus");if(stEl){stEl.textContent=statusLabel;stEl.style.background="";stEl.style.color="";}
+    const stEl=$("kasaStatus");if(stEl){stEl.textContent=LANG==="tr"?`KASA ${statusLabel}`:`CASH ${statusLabel}`;stEl.style.background="";stEl.style.color="";}
     const dEl=$("kasaDebt");if(dEl)dEl.textContent="−€"+Math.abs(debtLim)+"M";
     const _total=Math.abs(debtLim)+30;const _pos=Math.max(0,Math.min(1,(bv-debtLim)/_total));
     const marker=$("kasaBarMarker");if(marker)marker.style.left=(_pos*100).toFixed(1)+"%";
