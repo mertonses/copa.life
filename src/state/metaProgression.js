@@ -318,15 +318,20 @@
     return true;
   }
 
-  function reputationFor(value){
+  function reputationBreakdown(value){
     const played=integer(value.playedMatches==null?value.round:value.playedMatches,1,7);
     const wins=integer(value.wins,0,7);
     const draws=integer(value.draws,0,7);
-    return 10+played*6+wins*4+draws*2+(value.personalBest?10:0)+(value.won?25:0);
+    const items=[
+      {key:"base",points:10},{key:"participation",points:played*3},{key:"wins",points:wins*7},{key:"draws",points:draws*3},
+      {key:"finale",points:played>=6?15:0},{key:"champion",points:value.won?35:0},{key:"cleanBooks",points:Number(value.cash)>=0?10:0},{key:"personalBest",points:value.personalBest?10:0}
+    ].filter(item=>item.points>0);
+    return {played,wins,draws,items,total:items.reduce((sum,item)=>sum+item.points,0)};
   }
+  function reputationFor(value){return reputationBreakdown(value).total;}
   function recordRun(context){
     const value=object(context)?context:{},result=value.won?"win":value.endType==="sacked"?"sacked":"loss";
-    const reputation=reputationFor(value),oldReputation=state.career.reputation,oldLevel=careerLevel(oldReputation);
+    const reputationDetail=reputationBreakdown(value),reputation=reputationDetail.total,oldReputation=state.career.reputation,oldLevel=careerLevel(oldReputation);
     const newReputation=oldReputation+reputation,newLevel=careerLevel(newReputation);
     let levelLicenses=0;
     for(let level=oldLevel+1;level<=newLevel;level++)if(LICENSE_LEVELS.has(level))levelLicenses++;
@@ -374,7 +379,7 @@
     };
     return {
       entry,reputation,oldReputation,newReputation,oldLevel,newLevel,licensesEarned,prestigeEarned,
-      licensesAvailable:state.career.licenses,memory,
+      licensesAvailable:state.career.licenses,memory,reputationDetail,
       mastery:{before:masteryBefore,after:masteryAfter},collectionsUnlocked,directiveReward
     };
   }
@@ -539,6 +544,13 @@
       <section class="meta-hall-section"><div class="meta-section-heading"><h4>${tr?"SEÇİLİ KADRO":"SELECTED XI"}</h4><small>${tr?"En fazla 11 oyuncu":"Up to 11 players"}</small></div><div class="meta-hall-grid">${hallHTML}</div></section>
       <section class="meta-memory-section"><div class="meta-section-heading"><h4>${tr?"SEZON HATIRALARI":"RUN MEMORIES"}</h4><small>${tr?"Son 6 sezon":"Latest 6 runs"}</small></div><div class="meta-memory-list">${recentMemories}</div>${olderMemories?`<details class="meta-memory-archive"><summary>${tr?"DAHA ESKİ HATIRALAR":"OLDER MEMORIES"} · ${orderedMemories.length-6}<span aria-hidden="true">⌄</span></summary><div class="meta-memory-list">${olderMemories}</div></details>`:""}</section>`;
   }
+  function careerPathHTML(tr,level,next,nextThreshold){
+    const selected=state.directives.selected&&DIRECTIVES[state.directives.selected];
+    const runs=Math.max(integer(global.metaRuns,0,1000000),state.archive.length),remaining=Math.max(0,nextThreshold-state.career.reputation);
+    const target=selected?(tr?selected.tr:selected.en):(next?(next.type==="prestige"?(tr?"Prestij arması":"Prestige crest"):(tr?"Taktik lisansı":"Tactical licence")):(tr?"Kariyer zirvesi":"Career peak"));
+    const targetSub=selected?(tr?selected.trGoal:selected.enGoal):(next?`${remaining.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"itibar kaldı":"reputation left"}`:(tr?"Tüm seviyeler tamamlandı":"All levels completed"));
+    return `<section class="meta-career-path"><div class="meta-career-path-head"><span>${tr?"KARİYER YOLU":"CAREER PATH"}</span><small>${runs} ${tr?"tamamlanan tur":"completed runs"}</small></div><div class="meta-career-path-grid"><div class="meta-career-path-target"><small>${selected?(tr?"AKTİF DİREKTİF":"ACTIVE DIRECTIVE"):(tr?"SONRAKİ HEDEF":"NEXT TARGET")}</small><b>${escapeHTML(target)}</b><span>${escapeHTML(targetSub)}</span></div><div class="meta-career-path-level"><small>${tr?"MEVCUT SEVİYE":"CURRENT LEVEL"}</small><strong>${level}</strong><span>${state.career.reputation.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"itibar":"reputation"}</span></div></div></section>`;
+  }
   function careerHTML(tr){
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level),threshold=levelThreshold(level),nextThreshold=levelThreshold(level+1);
     const earned=Math.max(0,state.career.reputation-threshold),required=Math.max(1,nextThreshold-threshold);
@@ -548,7 +560,7 @@
     const activeFile=global.CopaClubFiles&&typeof global.CopaClubFiles.panelMarkup==="function"?global.CopaClubFiles.panelMarkup():"";
     const directiveCards=Object.entries(DIRECTIVES).map(([id,def])=>{const done=state.directives.completed.includes(id),selected=state.directives.selected===id;return `<button type="button" class="meta-directive ${done?"is-complete":""} ${selected?"is-selected":""}" onclick="CopaMeta.selectDirective('${id}')" ${done?"disabled":""}><span>${done?"✓":"◇"}</span><b>${escapeHTML(def[tr?"tr":"en"])}</b><small>${escapeHTML(def[tr?"trGoal":"enGoal"])}</small></button>`;}).join("");
     const chairArchive=Object.entries(state.chairHistory).filter(([,history])=>history&&(history.runs||history.decisionCount)).sort((a,b)=>(b[1].runs||0)-(a[1].runs||0)).map(([id,history])=>`<article><span aria-hidden="true">♙</span><p><b>${escapeHTML(masteryName("chairmen",id,tr))}</b><small>${history.runs||0} ${tr?"ortak tur":"shared runs"} · ${history.decisionCount||0} ${tr?"karar":"decisions"}</small></p><em>${history.positive||0}↑ · ${history.negative||0}↓</em></article>`).join("");
-    return `${activeFile}<section class="meta-career-hero ${progressTone} ${levelTone}">
+    return `${activeFile}${careerPathHTML(tr,level,next,nextThreshold)}<section class="meta-career-hero ${progressTone} ${levelTone}">
       <div class="meta-level-lockup ${levelTone}"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div>
       <div class="meta-career-progress ${progressTone}">
         <div><b>${state.career.reputation.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"İtibar":"Reputation"}</b><small>${earned}/${required}</small></div>
@@ -562,6 +574,21 @@
     <details class="meta-career-disclosure meta-badge-section" open><summary><span>${tr?"ROZETLER":"BADGES"}</span><small>${state.badges.length}/${Object.keys(BADGES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body"><div class="meta-badges">${badgesHTML(tr)}</div></div></details>
     <details class="meta-career-disclosure meta-archive" open><summary><span>${tr?"SON TURLAR":"RECENT RUNS"}</span><small>${Math.min(5,state.archive.length)}/${state.archive.length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body">${archiveHTML(tr)}</div></details>`;
   }
+  function careerCoreHTML(tr){
+    const level=careerLevel(state.career.reputation),next=nextCareerReward(level),threshold=levelThreshold(level),nextThreshold=levelThreshold(level+1),earned=Math.max(0,state.career.reputation-threshold),required=Math.max(1,nextThreshold-threshold),progress=Math.max(0,Math.min(100,Math.round(earned/required*100))),progressTone=progress>=75?"is-high":progress>=35?"is-mid":"is-low",levelTone=level>=8?"is-elite":level>=4?"is-established":"is-building",activeFile=global.CopaClubFiles&&typeof global.CopaClubFiles.panelMarkup==="function"?global.CopaClubFiles.panelMarkup():"";
+    return `${activeFile}${careerPathHTML(tr,level,next,nextThreshold)}<section class="meta-career-hero ${progressTone} ${levelTone}"><div class="meta-level-lockup ${levelTone}"><small>${tr?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><strong>${level}</strong></div><div class="meta-career-progress ${progressTone}"><div><b>${state.career.reputation.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"İtibar":"Reputation"}</b><small>${earned}/${required}</small></div><span><i style="width:${progress}%"></i></span><small>${tr?"Seviye":"Level"} ${level+1}: ${nextThreshold.toLocaleString(tr?"tr-TR":"en-GB")} ${tr?"itibar":"reputation"}</small></div><div class="meta-license-count ${state.career.licenses?"has-license":""}"><span aria-hidden="true">◇</span><small>${tr?"TAKTİK LİSANSI":"TACTICAL LICENCE"}</small><strong>${state.career.licenses}</strong></div>${next?`<div class="meta-next-reward"><span aria-hidden="true">◇</span><p><small>${tr?"SONRAKİ BÜYÜK ÖDÜL":"NEXT MAJOR REWARD"}</small><b>${next.type==="prestige"?(tr?"Prestij Arması":"Prestige Crest"):(tr?"Taktik Lisansı":"Tactical Licence")}</b></p><strong>${Math.max(0,next.threshold-state.career.reputation)} ${tr?"itibar kaldı":"reputation left"}</strong></div>`:""}</section>`;
+  }
+  function directiveCardsHTML(tr){
+    return Object.entries(DIRECTIVES).map(([id,def])=>{const done=state.directives.completed.includes(id),selected=state.directives.selected===id;return `<button type="button" class="meta-directive ${done?"is-complete":""} ${selected?"is-selected":""}" onclick="CopaMeta.selectDirective('${id}')" ${done?"disabled":""}><span>${done?"✓":"◇"}</span><b>${escapeHTML(def[tr?"tr":"en"])}</b><small>${escapeHTML(def[tr?"trGoal":"enGoal"])}</small></button>`;}).join("");
+  }
+  function overviewHTML(tr){
+    const runs=Math.max(integer(global.metaRuns,0,1000000),state.archive.length),latest=state.archive.length?state.archive[state.archive.length-1]:null,latestResult=latest&&resultMeta(latest,tr),cash=latest?Number(latest.cash||0):0,recent=state.archive.length?archiveRowsHTML(tr,3):`<div class="meta-inline-empty">${tr?"İlk tamamlanan turun burada görünecek.":"Your first completed run will appear here."}</div>`;
+    return `${careerCoreHTML(tr)}<section class="meta-overview-snapshot"><div class="meta-section-heading"><h4>${tr?"KARİYER ÖZETİ":"CAREER SNAPSHOT"}</h4><small>${runs} ${tr?"tamamlanan tur":"completed runs"}</small></div>${latest?`<div class="meta-overview-latest"><span><small>${tr?"SON TUR":"LAST RUN"}</small><b>${escapeHTML(latest.team)}</b><em>${latestResult.label} · +${latest.reputation} ${tr?"itibar":"rep"}</em></span><strong class="${cash<0?"is-negative":"is-positive"}">${cash<0?"−":"+"}€${Math.abs(cash)}M</strong></div>`:""}<div class="meta-overview-history">${recent}</div><button type="button" class="meta-see-all" onclick="CopaMeta.openArchive()">${tr?"Kariyer geçmişini aç":"Open career history"} <span aria-hidden="true">→</span></button></section><details class="meta-optional-details"><summary><span>${tr?"DİĞER GELİŞİM HEDEFLERİ":"OTHER DEVELOPMENT TARGETS"}</span><small>${state.directives.completed.length}/${Object.keys(DIRECTIVES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-directive-grid">${directiveCardsHTML(tr)}</div></details>`;
+  }
+  function growthHTML(tr){
+    const chairArchive=Object.entries(state.chairHistory).filter(([,history])=>history&&(history.runs||history.decisionCount)).sort((a,b)=>(b[1].runs||0)-(a[1].runs||0)).map(([id,history])=>`<article><span aria-hidden="true">♙</span><p><b>${escapeHTML(masteryName("chairmen",id,tr))}</b><small>${history.runs||0} ${tr?"ortak tur":"shared runs"} · ${history.decisionCount||0} ${tr?"karar":"decisions"}</small></p><em>${history.positive||0}↑ · ${history.negative||0}↓</em></article>`).join("");
+    return `<section class="meta-growth-intro"><span aria-hidden="true">◇</span><p><b>${tr?"Bir sonraki açılımına odaklan.":"Focus on your next unlock."}</b><small>${tr?"Direktifler ve ustalıklar burada; ayrıntılar gerektiğinde açılır.":"Directives and mastery live here; details stay collapsed until needed."}</small></p></section><section class="meta-directives"><div class="meta-section-heading"><h4>${tr?"AKTİF GELİŞİM":"ACTIVE DEVELOPMENT"}</h4><small>${state.directives.completed.length}/${Object.keys(DIRECTIVES).length}</small></div><div class="meta-directive-grid">${directiveCardsHTML(tr)}</div></section><details class="meta-mastery-section" open><summary><span>${tr?"USTALIKLAR":"MASTERY"}</span><small>${tr?"Stil, diziliş, başkan":"Style, formation, chairman"}</small><i aria-hidden="true">⌄</i></summary><div class="meta-mastery-list">${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}</div></details><details class="meta-optional-details"><summary><span>${tr?"ROZETLER VE YÖNETİM ARŞİVİ":"BADGES AND BOARD ARCHIVE"}</span><small>${state.badges.length}/${Object.keys(BADGES).length}</small><i aria-hidden="true">⌄</i></summary><div class="meta-career-disclosure-body"><div class="meta-badges">${badgesHTML(tr)}</div>${chairArchive?`<div class="meta-management-archive"><div class="meta-section-heading"><h4>${tr?"YÖNETİM ARŞİVİ":"BOARD ARCHIVE"}</h4></div><div>${chairArchive}</div></div>`:""}</div></details>`;
+  }
   function worldHTML(tr){
     return `<section class="meta-world meta-world-panel" id="metaWorldPanel"><div class="meta-world-skeleton" aria-label="${tr?"Dünya sıralaması yükleniyor":"Loading world rankings"}"><i></i><i></i><i></i><i></i></div></section>`;
   }
@@ -570,10 +597,16 @@
     const ledger=runs.slice(0,10).map(item=>{const cash=Number(item.cash||0),result=resultMeta(item,tr);return `<article class="meta-finance-row ${cash<0?"is-debt":"is-positive"}"><span><b>${escapeHTML(item.team)}</b><small>${new Date(item.finishedAt).toLocaleDateString(tr?"tr-TR":"en-GB",{day:"2-digit",month:"short"})} · ${result.label}</small></span><strong>${cash<0?"−":"+"}€${Math.abs(cash)}M</strong></article>`;}).join("");
     return `<section class="meta-finance"><div class="meta-finance-hero"><span><small>${tr?"KARİYER BAKİYESİ":"CAREER BALANCE"}</small><b>${total<0?"−":"+"}€${Math.abs(total)}M</b></span><span><small>${tr?"TUR ORTALAMASI":"RUN AVERAGE"}</small><b>${average<0?"−":"+"}€${Math.abs(average)}M</b></span><span><small>${tr?"BORÇSUZ BİTİŞ":"DEBT-FREE FINISHES"}</small><b>${positive}/${runs.length}</b></span></div><div class="meta-section-heading"><h4>${tr?"SON MALİ KAYITLAR":"RECENT FINANCIAL RECORDS"}</h4><small>${tr?"Tur sonu kasa değeri":"End-of-run cash"}</small></div><div class="meta-finance-list">${ledger||`<div class="meta-inline-empty">${tr?"İlk tamamlanan turun mali kaydı burada görünecek.":"Your first completed run will create a financial record."}</div>`}</div></section>`;
   }
-  const DOSSIER_TABS=["career","directives","management","history","trophies","finance","world"];
-  function normalizeDossierTab(tab){if(tab==="mastery")return"management";if(tab==="museum")return"trophies";return DOSSIER_TABS.includes(tab)?tab:"career";}
+  const DOSSIER_TABS=["career","growth","world"];
+  function normalizeDossierTab(tab){if(["directives","management","mastery"].includes(tab))return"growth";if(["museum","trophies"].includes(tab))return"trophies";if(["history","finance"].includes(tab))return tab;return DOSSIER_TABS.includes(tab)?tab:"career";}
   function panelHTML(tab,tr){
     tab=normalizeDossierTab(tab);
+    if(tab==="growth")return growthHTML(tr);
+    if(tab==="world")return worldHTML(tr);
+    if(tab==="trophies")return museumHTML(tr);
+    if(tab==="finance")return financeHTML(tr);
+    if(tab==="history")return `<section class="meta-dossier-history"><div class="meta-section-heading"><h4>${tr?"KULÜP GEÇMİŞİ":"CLUB HISTORY"}</h4><small>${state.archive.length} ${tr?"tamamlanmış tur":"completed runs"}</small></div><div class="meta-history-list">${archiveRowsHTML(tr)||`<div class="meta-inline-empty">${tr?"Tamamlanan turlar burada arşivlenecek.":"Completed runs will be archived here."}</div>`}</div></section>`;
+    return overviewHTML(tr);
     if(tab==="directives")return `<div class="meta-focus-directives">${careerHTML(tr)}</div>`;
     if(tab==="management")return `<div class="meta-mastery-intro"><span aria-hidden="true">◎</span><p><b>${tr?"Deneyim kalıcıdır, güç sağlamaz.":"Experience is permanent, but grants no power."}</b><small>${tr?"Her tamamlanan tur bir sonraki ustalık kademesine ilerletir.":"Every completed run advances the next mastery tier."}</small></p></div>${masterySectionHTML("styles",tr?"OYUN ANLAYIŞI":"STYLE MASTERY",tr)}${masterySectionHTML("formations",tr?"DİZİLİŞ":"FORMATION MASTERY",tr)}${masterySectionHTML("chairmen",tr?"BAŞKAN":"CHAIRMAN MASTERY",tr)}<div class="meta-focus-management">${careerHTML(tr)}</div>`;
     if(tab==="history")return `<section class="meta-dossier-history"><div class="meta-section-heading"><h4>${tr?"KULÜP GEÇMİŞİ":"CLUB HISTORY"}</h4><small>${state.archive.length} ${tr?"tamamlanmış tur":"completed runs"}</small></div><div class="meta-history-list">${archiveRowsHTML(tr)||`<div class="meta-inline-empty">${tr?"Tamamlanan turlar burada arşivlenecek.":"Completed runs will be archived here."}</div>`}</div></section>`;
@@ -585,7 +618,7 @@
   function openProgression(tab="career"){
     const tr=global.LANG==="tr",active=normalizeDossierTab(tab);
     global.showModal(`<div class="meta-progress-modal meta-tab-${active}"><header class="meta-progress-head"><div><div class="kithdr">${tr?"Kulüp Kariyeri":"Club Career"}</div><div class="kitsub">${tr?"Kariyerinin kalıcı arşivi":"Your permanent career archive"}</div></div><div class="meta-head-actions"><button class="meta-close" type="button" onclick="closeModal()" aria-label="${tr?"Kapat":"Close"}">×</button><button class="meta-save-menu" type="button" onclick="CopaMeta.openExport()" aria-label="${tr?"Kayıt seçenekleri":"Save options"}"><span aria-hidden="true">⇅</span><span>${tr?"KAYIT":"SAVE"}</span></button></div></header><nav class="meta-tabs" aria-label="${tr?"Kariyer bölümleri":"Career sections"}">${[
-      ["career",tr?"ÖZET":"OVERVIEW"],["directives",tr?"YÖNERGELER":"DIRECTIVES"],["management",tr?"YÖNETİM":"MANAGEMENT"],["history",tr?"GEÇMİŞ":"HISTORY"],["trophies",tr?"KUPALAR":"TROPHIES"],["finance",tr?"FİNANS":"FINANCE"],["world",tr?"DÜNYA":"WORLD"]
+      ["career",tr?"GENEL BAKIŞ":"OVERVIEW"],["growth",tr?"GELİŞİM":"PROGRESS"],["world",tr?"DÜNYA":"WORLD"]
     ].map(([id,label])=>`<button type="button" class="${id===active?"active":""}" aria-current="${id===active?"page":"false"}" onclick="CopaMeta.openProgression('${id}')">${label}</button>`).join("")}</nav><div class="meta-tab-panel">${panelHTML(active,tr)}</div></div>`,{dismissOnOverlay:true,label:tr?"Kulüp kariyeri":"Club career"});
     const activeTab=document.querySelector(".meta-progress-modal .meta-tabs button.active");
     if(activeTab)try{activeTab.focus({preventScroll:true});}catch(_){}
@@ -603,7 +636,7 @@
   }
   function careerSummary(){
     const level=careerLevel(state.career.reputation),next=nextCareerReward(level);
-    return {level,reputation:state.career.reputation,licenses:state.career.licenses,prestige:state.career.prestige,next};
+    return {level,reputation:state.career.reputation,licenses:state.career.licenses,prestige:state.career.prestige,next,completedRuns:Math.max(integer(global.metaRuns,0,1000000),state.archive.length),activeDirective:state.directives.selected||""};
   }
   function hallExhibitionConfig(){
     const hall=hallEntries(),tier=HALL_EXHIBITION_TIERS[state.hallExhibition.tier]||HALL_EXHIBITION_TIERS[0];

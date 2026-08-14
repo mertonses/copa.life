@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "287184478707",
+    "project_id": "copa-life",
+    "storage_bucket": "copa-life.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287184478707:android:810811fe615100a2a43286",
+        "android_client_info": {
+          "package_name": "life.copa.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "287184478707-pevqitlg6g6a24fedj8aurggera5du07.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "life.copa.app",
+            "certificate_hash": "C8B92F10CF41FBA6478D9544D9D19C0795D5D9B8"
+          }
+        },
+        {
+          "client_id": "287184478707-bi41uvih1dpco10kegoe2i6dsf8u2phb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "life.copa.app",
+            "certificate_hash": "A9554394E86D122C738C84E8CBF2CE0BE19BAD2F"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACmfed_kW2OFRJYBDRfo0ty-Ac8bkhL8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

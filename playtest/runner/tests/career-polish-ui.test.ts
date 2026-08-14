@@ -126,6 +126,55 @@ test("museum and World surfaces keep deliberate spacing on both viewports",async
   await capture(page,`world-${testInfo.project.name}.png`);
 });
 
+test("career path summary keeps one visible target and progress hierarchy",async({page},testInfo)=>{
+  await page.goto("/?career-polish=meta",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    await game.CopaLazy.ensureMetaProgression();
+    game.CopaMeta.openProgression("career");
+  });
+  await expect(page.locator(".meta-progress-modal.meta-tab-career")).toBeVisible();
+  await expect(page.locator(".meta-career-path")).toHaveCount(1);
+  await expect(page.locator(".meta-career-path-target b")).toBeVisible();
+  const worldTab=page.locator(".meta-tabs button").filter({hasText:"DÜNYA"});
+  await expect(worldTab).toBeVisible();
+  const worldBox=await worldTab.boundingBox();
+  expect(worldBox).not.toBeNull();
+  const viewportWidth=await page.evaluate(()=>innerWidth);
+  expect((worldBox?.x||0)+(worldBox?.width||0)).toBeLessThanOrEqual(viewportWidth);
+  const fit=await page.locator(".meta-progress-modal").evaluate((modal:HTMLElement)=>({
+    overflow:modal.scrollWidth-modal.clientWidth,
+    pathHeight:modal.querySelector<HTMLElement>(".meta-career-path")!.getBoundingClientRect().height,
+    target:modal.querySelector<HTMLElement>(".meta-career-path-target b")!.textContent?.trim(),
+  }));
+  expect(fit.overflow).toBeLessThanOrEqual(1);
+  expect(fit.pathHeight).toBeGreaterThan(60);
+  expect(fit.target).toBeTruthy();
+  await capture(page,`career-path-${testInfo.project.name}.png`);
+});
+
+test("career navigation is reduced to overview, progress and world",async({page},testInfo)=>{
+  await page.goto("/?career-polish=meta",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    await game.CopaLazy.ensureMetaProgression();
+    game.CopaMeta.openProgression("growth");
+  });
+  await expect(page.locator(".meta-progress-modal .meta-tabs button")).toHaveCount(3);
+  await expect(page.locator(".meta-progress-modal .meta-tabs")).toContainText("GENEL BAKIŞ");
+  await expect(page.locator(".meta-progress-modal .meta-tabs")).toContainText("GELİŞİM");
+  await expect(page.locator(".meta-progress-modal .meta-tabs")).toContainText("DÜNYA");
+  await expect(page.locator(".meta-growth-intro")).toBeVisible();
+  await expect(page.locator(".meta-directive")).toHaveCount(3);
+  await expect(page.locator(".meta-mastery-section").first()).toBeVisible();
+  await capture(page,`career-growth-${testInfo.project.name}.png`);
+  await page.locator(".meta-tabs button").filter({hasText:"DÜNYA"}).click();
+  await expect(page.locator(".meta-progress-modal.meta-tab-world")).toBeVisible();
+  await capture(page,`career-world-${testInfo.project.name}.png`);
+});
+
 test("relationship journal stays readable and compact in player profiles",async({page},testInfo)=>{
   await page.goto("/?career-polish=relationships",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>{

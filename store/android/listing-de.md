@@ -44,7 +44,8 @@ Copa Life ist ein unabhängiges Spiel und steht in keiner Verbindung zu Fußball
 ## Einstufung
 
 - Typ: Spiel
-- Kategorie: Sport
+- Hauptkategorie: Strategie
+- Tags: Fußball, Sportmanagement, Strategiespiele
 - Preis: Kostenlos
 - Enthält Werbung: Ja
 - In-App-Käufe: Nein

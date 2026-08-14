@@ -49,7 +49,7 @@ if (!manifest.includes('android:usesCleartextTraffic="false"')) fail("cleartext 
 if (!manifest.includes('android:screenOrientation="portrait"')) fail("Android orientation contract changed");
 if (!manifest.includes('android:resizeableActivity="true"')) fail("Google Play Games on PC resizable activity support is missing");
 const permissions = [...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map((match) => match[1]);
-const expectedPermissions = new Set(["android.permission.INTERNET", "com.google.android.gms.permission.AD_ID"]);
+const expectedPermissions = new Set(["android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS", "com.google.android.gms.permission.AD_ID"]);
 if (permissions.length !== expectedPermissions.size || permissions.some((permission) => !expectedPermissions.has(permission))) {
   fail(`unexpected Android permissions: ${permissions.join(", ") || "none"}`);
 }

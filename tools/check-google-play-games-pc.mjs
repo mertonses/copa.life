@@ -14,7 +14,7 @@ requireText(manifest,/android:configChanges="[^"]*(screenSize|smallestScreenSize
 requireText(html,/addEventListener\("keydown"|document\.onkeydown|onkeydown/,"no keyboard input path was found");
 requireText(mobile,/@media\s*\(min-width:|@media\s*\(max-width:/,"responsive UI rules are missing");
 for(const permission of [...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map(match=>match[1])){
-  if(!["android.permission.INTERNET","com.google.android.gms.permission.AD_ID"].includes(permission))fail(`review unsupported PC permission: ${permission}`);
+  if(!["android.permission.INTERNET","android.permission.POST_NOTIFICATIONS","com.google.android.gms.permission.AD_ID"].includes(permission))fail(`review unsupported PC permission: ${permission}`);
 }
 
 if(!process.exitCode)console.log("Google Play Games on PC baseline OK: optional touch, resizable window, dynamic display handling, keyboard path, no blocking permissions.");

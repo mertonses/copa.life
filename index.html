@@ -448,6 +448,7 @@ try{
 <script src="src/balance/telemetry.js?v=20260720-hidden-draft1"></script>
 <script src="src/balance/finalCalibration.js?v=20260717-weekly-calibration1"></script>
 <script src="src/runtime/productAnalytics.js?v=20260805-analytics5"></script>
+<script src="src/runtime/copaPlayGames.js?v=20260813-pgs-push1"></script>
 <script>window.COPA_WEB_ADS_CONFIG={client:"__COPA_ADSENSE_CLIENT__",channel:"__COPA_ADSENSE_CHANNEL__",displaySlot:"__COPA_ADSENSE_DISPLAY_SLOT__",frequencyHint:"600s"};</script>
 <script src="src/runtime/adGateway.js?v=20260730-ads1"></script>
 <script src="src/cards/cardEffects.js?v=20260720-lottery-copy1"></script>
@@ -2205,6 +2206,7 @@ function afterMatch(advance){
   if(window.CopaRunState&&window.CopaRunState.phase!=="match")return;
   if(!pending.draw&&!!advance!==!!pending.advance)return;
   pendingMatchResolution=null;
+  if(advance&&!pending.draw&&window.CopaPlayGames)window.CopaPlayGames.report("first_match_won");
   closeModal();
   const tournamentActive=window.CopaTournamentRuntime&&window.CopaTournamentRuntime.active()&&pending.stage!=="legacy";
   if(tournamentActive){
@@ -2458,6 +2460,21 @@ function endRun(won,score,endType){const _parsedScore=_parseRunScore(score);if(w
   /* Miras Kasa: pozitif kapanışın %30'u, run başına en fazla €8M; toplam tavan €20M. */
   const finalCashTotal=Math.round((budget||0)+(legacyCash||0));
   if(finalCashTotal>0){const gain=Math.min(8,Math.floor(finalCashTotal*0.30));legacyFund=Math.min(20,legacyFund+gain);}
+  if(window.CopaPlayGames){
+    if(won){
+      window.CopaPlayGames.report("cup_won");
+      window.CopaPlayGames.report("career_completed");
+      if(fixtures.slice(0,7).every(f=>f&&f.res==="W"))window.CopaPlayGames.report("unbeaten_champion");
+      if(finalCashTotal>=0)window.CopaPlayGames.report("low_budget_champion");
+    }
+    let _copaCountries=[];try{_copaCountries=JSON.parse(localStorage.getItem("copa_pgs_countries_v1")||"[]");}catch(_){}
+    if(selectedCountry&&!_copaCountries.includes(selectedCountry))_copaCountries.push(selectedCountry);
+    try{localStorage.setItem("copa_pgs_countries_v1",JSON.stringify(_copaCountries.slice(-6)));}catch(_){}
+    window.CopaPlayGames.progress("three_countries",_copaCountries.length);
+    window.CopaPlayGames.progress("five_formations",Array.isArray(unlockedForms)?unlockedForms.length:0);
+    window.CopaPlayGames.progress("five_careers",Math.max(0,Number(metaRuns)||0));
+    window.CopaPlayGames.progress("all_chairmen",Array.isArray(unlockedChairs)?unlockedChairs.length:0);
+  }
   const reached=won?7:round,previousBest=metaBest,personalBest=reached>previousBest;
   metaRuns++;if(reached>metaBest)metaBest=reached;let newForm=null,newChair=null,chairChoices=[];if(won){chairChoices=prepareChairUnlockChoices();eliteBonus=true;saveMeta();pushFeed("⭐ "+(CopaText("Bir sonraki draftta ELİT BAĞLANTI açıldı; aday piyasa fiyatından gelecek.","Next draft: ELITE CONTACT unlocked at market price.")),"win");}else{saveMeta();}applyMeta();pushFeed((won?" "+L().champTitle:"❌ "+L().outTitle)+(score?" "+score:""),won?"win":"lose");
   const baseSackLine=typeof baseChairmanSackLimit==="function"?baseChairmanSackLimit(chairman&&chairman.id):DEBT_LIMIT;
@@ -2559,6 +2576,11 @@ function renderCareerProgress(r,x){
   ].map(item=>{const before=summary.mastery.before[item.key],after=summary.mastery.after[item.key];return `<li><span>${item.label}</span><b>${before} → ${after}${[2,5,10,20].includes(after)?` · ${tr?"YENİ KADEME":"NEW TIER"}`:""}</b></li>`;}).join("");
   const memory=summary.memory,featured=memory&&memory.players[memory.featuredIndex||0];
   root.innerHTML=`<div class="career-progress-head"><span>${tr?"KULÜP KARİYERİ":"CLUB CAREER"}</span><strong>+${summary.reputation} ${tr?"İTİBAR":"REPUTATION"}</strong></div><div class="career-level-row"><b>${tr?"Seviye":"Level"} ${career.level}</b><span><i style="width:${pct}%"></i></span><small>${career.reputation}/${nextThreshold}</small></div><ul>${masteryRows}</ul>${summary.licensesEarned?`<button type="button" class="career-reward-row" onclick="showTacticalLicencePicker()"><span>${tr?"Taktik Lisansı kazandın":"Tactical Licence earned"}</span><b>${career.licenses} ${tr?"hazır":"available"} →</b></button>`:""}${memory&&featured?`<button type="button" class="career-memory-row" onclick="showMuseumPlayerPicker('${memory.id}')"><span><small>${tr?"MÜZE HATIRASI":"MUSEUM MEMORY"}</small><b>${featured.name}</b></span><span>${featured.pos} · ${featured.power}<small>${tr?"Değiştir":"Change"}</small></span></button>`:""}<button type="button" class="career-open-link" onclick="CopaMeta.openProgression('career')">${tr?"Kulüp Kariyerini aç":"Open Club Career"} →</button>`;
+  if(summary.reputationDetail&&summary.reputationDetail.items){
+    const labels={base:tr?"Kariyer başlangıcı":"Career start",participation:tr?"Katılım":"Participation",wins:tr?"Galibiyetler":"Wins",draws:tr?"Beraberlikler":"Draws",finale:tr?"Final turu":"Final run",champion:tr?"Şampiyonluk":"Championship",cleanBooks:tr?"Pozitif kasa":"Positive cash",personalBest:tr?"Kariyer rekoru":"Personal best"};
+    const breakdown=summary.reputationDetail.items.map(item=>`<li><span>${labels[item.key]||item.key}</span><b>+${item.points}</b></li>`).join("");
+    root.insertAdjacentHTML("afterbegin",`<div class="career-reputation-note"><span>${tr?"Bu turun itibar dökümü":"This run's reputation breakdown"}</span><b>${summary.reputationDetail.total}</b></div><ul class="career-reputation-breakdown">${breakdown}</ul>`);
+  }
   root.classList.remove("hidden");
 }
 function renderResult(){_renderResultFx(lastResult);const x=L(),r=lastResult,wasSacked=r.endType==="sacked",chairName=(r.chairmanId&&x.chair&&x.chair[r.chairmanId]?x.chair[r.chairmanId].n:(chairman&&x.chair[chairman.id]?x.chair[chairman.id].n:"Başkan"));$("rLn").textContent=resultHeroLabel(r,wasSacked,x);$("rFinish").textContent=wasSacked?(CopaText("KOVULDUN","SACKED")):(r.won?x.champTitle:(r.score?(CopaText("FİNALDE KAYBETTİN","LOST THE FINAL")):x.outTitle));$("rFinish").className="big "+(r.won?"gold":wasSacked?"sacked-hdl":"acc");const _sb=document.querySelector(".scoreboard");_sb.classList.toggle("sacked",wasSacked);_sb.classList.toggle("champ",!wasSacked&&r.won);_sb.classList.toggle("elendi",!wasSacked&&!r.won);$("rRound").textContent=resultHeroSubline(r,wasSacked,x,chairName);$("rVerdict").textContent=wasSacked?(CopaText("${chairName} sabır eşiğini aştı. Kasa ${runMoney(r.budgetAtEnd)} seviyesine düşünce yönetimle yolların ayrıldı. Genel kredi tabanı ${runMoney(r.debtLimit)}.","${chairName}'s patience ran out. Funds fell to ${runMoney(r.budgetAtEnd)} and the board parted ways with you. Base credit floor was ${runMoney(r.debtLimit)}.")):(r.won?x.champV:x.outV(r.round))+(r.newForm?(" "+x.formUnlocked(r.newForm)):"");$("rStoryHdr").textContent=x.storyHdr;$("rStory").innerHTML=genStory();const _et=$("econTile");if(_et){_et.innerHTML=econSummaryHTML();_et.classList.remove("hidden");}setTimeout(_startEconTicker,400);$("rSeedLbl").innerHTML=`<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12" style="vertical-align:-.1em;margin-right:3px;opacity:.7"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-2.833 12a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3zm-3.5 -3.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3zm-3.5 -3.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0 -3z"/></svg>${CopaText("TUR KİMLİĞİ","RUN ID")}`;$("rSeed").textContent="#"+String(seedNum).padStart(4,"0");$("rTur").textContent=x.rounds[Math.max(0,r.round-1)];$("rGuc").textContent=r.power;$("rKart").textContent=r.cards;if($("rCash")){$("rCash").textContent=runMoney(r.budgetAtEnd);$("rCash").className="v money "+(r.budgetAtEnd<0?"neg":r.budgetAtEnd>0?"pos":"neutral");}$("lblTur").textContent=x.lblTur;$("lblGuc").textContent=x.lblGuc;$("lblKart").textContent=x.lblKart;if($("lblCash"))$("lblCash").textContent=CopaText("Kasa","Cash");$("copyBtn").innerHTML=x.copy;$("againBtn").textContent=LANG==="tr"?"BAŞLA":x.again;

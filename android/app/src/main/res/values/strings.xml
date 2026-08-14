@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="game_services_project_id" translatable="false">287184478707</string>
     <string name="app_name">Copa Life</string>
     <string name="title_activity_main">Copa Life</string>
     <string name="package_name">life.copa.app</string>

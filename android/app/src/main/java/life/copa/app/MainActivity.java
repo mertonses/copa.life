@@ -18,6 +18,7 @@ public class MainActivity extends BridgeActivity {
         long previousVersion = preferences.getLong(VERSION_CODE_KEY, -1L);
 
         registerPlugin(CopaAdsPlugin.class);
+        registerPlugin(CopaPlayGamesPlugin.class);
         super.onCreate(savedInstanceState);
 
         if (currentVersion >= 0L && previousVersion >= 0L && previousVersion != currentVersion && getBridge() != null) {
