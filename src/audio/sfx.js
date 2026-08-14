@@ -20,7 +20,11 @@ const UI_SFX={
  mode_arena_select:"assets/audio/ui/copa-arena-selected.ogg"
 };
 function playUiSample(k,vol,cooldown){if(typeof muted!=="undefined"&&muted)return false;const src=UI_SFX[k];if(!src)return false;const now=performance.now(),wait=cooldown==null?65:cooldown,last=UI_SFX_LAST[k]||0;if(last&&now-last<wait)return false;UI_SFX_LAST[k]=now;try{const a=new Audio(src);a.preload="none";a.volume=vol==null?.22:vol;a.onended=()=>{a.removeAttribute("src");a.load();};const p=a.play();if(p&&p.catch)p.catch(()=>{});return true;}catch(e){return false;}}
-function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==="suspended")AC.resume().catch(()=>{});return AC;}
+function unlockAudio(){const c=ac();if(c&&c.state==="suspended")c.resume().catch(()=>{});}
+document.addEventListener("pointerdown",unlockAudio,true);
+document.addEventListener("touchstart",unlockAudio,true);
+document.addEventListener("keydown",unlockAudio,true);
 function noiseBuf(c,dur){const n=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;return b;}
 function click(c,t,f,v,du){const o=c.createOscillator(),g=c.createGain();o.type="square";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+du);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+du+0.01);}
 function sfxRoll(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;let tt=0;for(let i=0;i<14;i++){click(c,t+tt,ri(160,360),0.03,0.03);tt+=0.03+i*0.006;}const src=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();src.buffer=noiseBuf(c,0.5);f.type="bandpass";f.frequency.value=900;g.gain.setValueAtTime(0.025,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.5);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);}

@@ -196,10 +196,12 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
         const card=group.getBoundingClientRect(),strip=groups.getBoundingClientRect();
         return card.left>=strip.left-1&&card.right<=strip.right+1;
       }),
+    columns:getComputedStyle(groups).gridTemplateColumns.split(" ").filter(Boolean).length,
   }));
   expect(drawLayout.visibleWidth).toBeGreaterThan(650);
   expect(drawLayout.firstFour).toBe(true);
   expect(drawLayout.allEight).toBe(true);
+  expect(drawLayout.columns).toBe(4);
 
   await page.evaluate(()=>{
     const game=globalThis as any;
