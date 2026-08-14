@@ -56,9 +56,11 @@ test("training recommendation, three-line preview and help remain compact",async
     overflow:modal.scrollWidth-modal.clientWidth,
     pageOverflow:document.documentElement.scrollWidth-innerWidth,
     labels:[...modal.querySelectorAll<HTMLElement>(".prep-preview-row small")].map(node=>node.textContent?.trim()),
+    previewColors:[...modal.querySelectorAll<HTMLElement>(".prep-preview-head b,.prep-preview-head span,.prep-preview-row small,.prep-preview-row strong")].map(node=>getComputedStyle(node).color),
   }));
   expect(fit.overflow).toBeLessThanOrEqual(1);
   expect(fit.pageOverflow).toBeLessThanOrEqual(1);
+  expect(new Set(fit.previewColors)).toEqual(new Set(["rgb(243, 245, 244)"]));
   expect(fit.labels).toEqual(["MAÇ ETKİSİ","YORGUNLUK","SAKATLIK RİSKİ"]);
   await page.locator(".prep-help").click();
   await expect(page.locator(".prep-help-modal article")).toHaveCount(6);
