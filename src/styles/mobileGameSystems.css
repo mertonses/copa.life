@@ -1747,3 +1747,7 @@ html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#2
 .nephew-picker-grid .sstyle .sst{font-size:15px!important}.nephew-picker-grid .sstyle .ssd{font-size:8px!important}
 @media(max-width:420px){.nephew-picker{padding:16px 11px}.nephew-picker-grid{gap:6px!important}.nephew-picker-grid .sstyle{min-height:94px!important;padding:9px 5px!important}.nephew-picker-grid .sstyle .sst{font-size:12px!important}}
 .prep-preview-head b,.prep-preview-head span,.prep-preview-row small,.prep-preview-row strong{color:var(--text-primary)!important}
+html.copa-mobile-game #hub[data-mobile-route="career"] .mobile-career-route{overflow:visible!important}
+html.copa-mobile-game #hub[data-mobile-route="career"] .mobile-career-inline{height:auto!important;max-height:none!important;overflow:visible!important}
+html.copa-mobile-game #hub[data-mobile-route="career"] .mobile-career-inline .meta-tab-panel{max-height:none!important;overflow:visible!important}
+html[data-copa-platform="android"] #hub[data-mobile-route="match"] #hubPitch .roundel.full .rname{font-size:7.4px!important;max-width:46px!important}
