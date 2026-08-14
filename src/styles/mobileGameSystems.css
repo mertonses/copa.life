@@ -1746,3 +1746,4 @@ html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#2
 .nephew-picker-grid .sstyle{box-sizing:border-box;display:grid!important;min-width:0!important;min-height:106px!important;align-content:center;justify-items:center;gap:6px!important;margin:0!important;padding:12px 8px!important;text-align:center!important;border-radius:12px!important}
 .nephew-picker-grid .sstyle .sst{font-size:15px!important}.nephew-picker-grid .sstyle .ssd{font-size:8px!important}
 @media(max-width:420px){.nephew-picker{padding:16px 11px}.nephew-picker-grid{gap:6px!important}.nephew-picker-grid .sstyle{min-height:94px!important;padding:9px 5px!important}.nephew-picker-grid .sstyle .sst{font-size:12px!important}}
+.prep-preview-head b,.prep-preview-head span,.prep-preview-row small,.prep-preview-row strong{color:var(--text-primary)!important}
