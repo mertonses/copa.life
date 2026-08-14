@@ -589,6 +589,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
       kasaState="kasa-rich";
       statusLabel=LT("RAHAT","HEALTHY","CÓMODA","KOMFORTABEL","COMODA");subText="";
     }
+    if(kasaState==="kasa-deep-debt")statusLabel=LT("KRİTİK","CRITICAL","CRÍTICO","KRITISCH","CRITICA");
     kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");
     kt.classList.add(kasaState);
     const kasaAccent=kasaState==="kasa-deep-debt"?"var(--status-critical)":kasaState==="kasa-debt"?"var(--status-risk)":kasaState==="kasa-zero"?"var(--status-warning)":kasaState==="kasa-positive"?"var(--status-info)":"var(--status-success)";
