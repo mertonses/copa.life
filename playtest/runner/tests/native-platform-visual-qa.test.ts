@@ -221,9 +221,16 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     hidden:[...document.querySelectorAll<HTMLElement>(".meta-tabs button")]
       .filter(tab=>{const rect=tab.getBoundingClientRect();return rect.left<0||rect.right>innerWidth;})
       .map(tab=>tab.textContent),
+    routeHeight:document.getElementById("mobileCareerRoute")!.getBoundingClientRect().height,
+    snapshotBottom:document.querySelector<HTMLElement>(".meta-overview-snapshot")?.getBoundingClientRect().bottom||0,
+    routeBottom:document.getElementById("mobileCareerRoute")!.getBoundingClientRect().bottom,
+    inlineOverflow:getComputedStyle(document.querySelector<HTMLElement>(".mobile-career-inline")!).overflow,
   }));
   expect(career.overflow).toBeLessThanOrEqual(1);
   expect(career.hidden).toEqual([]);
+  expect(career.routeHeight).toBeGreaterThan(0);
+  expect(career.snapshotBottom).toBeLessThanOrEqual(career.routeBottom+1);
+  expect(career.inlineOverflow).toBe("visible");
   await capture(page,platform,"hub-career");
 
   for(const viewport of [
