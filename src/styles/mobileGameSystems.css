@@ -1813,6 +1813,10 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-foot{align-items
 /* Premium Android cash vault: one quiet Copa Life surface, with status carried
    by the outer edge and the mechanical counter kept as the visual anchor. */
 html.copa-mobile-game #hub #kasaTile.kasa-compact{
+  height:88px!important;
+  min-height:88px!important;
+  padding:5px 8px!important;
+  gap:2px!important;
   background:
     radial-gradient(circle at 88% 8%,rgba(244,216,121,.08),transparent 30%),
     linear-gradient(155deg,rgba(218,61,46,.14),rgba(10,17,24,.92) 62%),
