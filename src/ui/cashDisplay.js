@@ -7,7 +7,7 @@
   const format=value=>{const rounded=roundHalf(value);return Number.isInteger(rounded)?String(Math.abs(rounded)):Math.abs(rounded).toFixed(1);};
   const reduced=()=>!!(document.body.classList.contains("reduced-motion")||(root.matchMedia&&root.matchMedia("(prefers-reduced-motion: reduce)").matches));
   const labels={
-    tr:{cash:"Kasa",spent:"Transfer",president:"Başkan kararı",earned:"Kulüp geliri",yan_saha:"Yan Saha",yanSahaPayout:"Yan Saha dönüşü",undo:"Transfer geri alındı",care:"Sağlık ekibi",default:"Kasa işlemi",legacy:"Miras kasa",legacyShort:"MİRAS"},
+    tr:{cash:"Kasa",spent:"Transfer",president:"Başkan kararı",earned:"Kulüp geliri",yan_saha:"Risk Kulvarı",yanSahaPayout:"Risk Kulvarı dönüşü",undo:"Transfer geri alındı",care:"Sağlık ekibi",default:"Kasa işlemi",legacy:"Miras kasa",legacyShort:"MİRAS"},
     en:{cash:"Cash",spent:"Transfer",president:"Chairman decision",earned:"Club income",yan_saha:"Side Field",yanSahaPayout:"Side Field return",undo:"Transfer undone",care:"Medical team",default:"Cash transaction",legacy:"Legacy vault",legacyShort:"LEGACY"},
     es:{cash:"Caja",spent:"Fichaje",president:"Decisión presidencial",earned:"Ingreso del club",yan_saha:"Campo Lateral",yanSahaPayout:"Retorno de Campo Lateral",undo:"Fichaje deshecho",care:"Equipo médico",default:"Movimiento de caja",legacy:"Caja legado",legacyShort:"LEGADO"},
     de:{cash:"Kasse",spent:"Transfer",president:"Präsidentenentscheid",earned:"Clubeinnahme",yan_saha:"Nebenplatz",yanSahaPayout:"Nebenplatz-Rückkehr",undo:"Transfer rückgängig",care:"Medizinteam",default:"Kassenvorgang",legacy:"Vermächtniskasse",legacyShort:"ERBE"},

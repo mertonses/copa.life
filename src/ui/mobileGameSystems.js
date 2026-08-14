@@ -7,13 +7,13 @@
   const gameMode=()=>native()||new URLSearchParams(root.location.search).has("native-game");
   const tr=()=>root.LANG==="tr";
   const NAV_COPY={
-    tr:{labels:{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"YAN SAHA",career:"KARİYER"},offers:"yeni alınabilir teklifler"},
+    tr:{labels:{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"RİSK KULVARI",career:"KARİYER"},offers:"yeni alınabilir teklifler"},
     en:{labels:{match:"MATCH",market:"MARKET",training:"TRAINING",sidefield:"SIDE FIELD",career:"CAREER"},offers:"new affordable offers"},
     es:{labels:{match:"PARTIDO",market:"MERCADO",training:"ENTRENO",sidefield:"CAMPO LATERAL",career:"CARRERA"},offers:"nuevas ofertas asequibles"},
     de:{labels:{match:"SPIEL",market:"MARKT",training:"TRAINING",sidefield:"NEBENPLATZ",career:"KARRIERE"},offers:"neue bezahlbare Angebote"},
     it:{labels:{match:"PARTITA",market:"MERCATO",training:"ALLENAMENTO",sidefield:"CAMPO LATERALE",career:"CARRIERA"},offers:"nuove offerte accessibili"}
   };
-  NAV_COPY.tr.labels.sidefield="YAN SAHA";NAV_COPY.en.labels.sidefield="SIDE FIELD";NAV_COPY.es.labels.sidefield="CAMPO DE APUESTAS";NAV_COPY.de.labels.sidefield="NEBENWETTE";NAV_COPY.it.labels.sidefield="CAMPO SCOMMESSE";
+  NAV_COPY.tr.labels.sidefield="RİSK KULVARI";NAV_COPY.en.labels.sidefield="SIDE FIELD";NAV_COPY.es.labels.sidefield="CAMPO DE APUESTAS";NAV_COPY.de.labels.sidefield="NEBENWETTE";NAV_COPY.it.labels.sidefield="CAMPO SCOMMESSE";
   const navCopy=()=>NAV_COPY[root.LANG]||NAV_COPY.en;
   function matchAttendance(matchRound,homePower,awayPower){
     const bases=[8000,14000,22000,34000,52000,75000,90000],index=Math.max(0,Math.min(6,(Number(matchRound)||1)-1));
@@ -374,7 +374,7 @@
     const points=values.map((value,index)=>`${(index/Math.max(1,values.length-1)*320).toFixed(1)},${(76-(value-min)/range*64).toFixed(1)}`).join(" ");
     const zeroY=(76-(0-min)/range*64).toFixed(1),limitY=(76-(limit-min)/range*64).toFixed(1),buffer=cash-limit,gauge=Math.max(0,Math.min(100,(cash-limit)/Math.max(1,start-limit)*100));
     const earned=Number(stats.earned)||0,spent=Number(stats.spent)||0,president=Number(stats.president)||0,net=earned-spent-president,worst=Math.min(cash,Number(stats.worstDebt)||0);
-    const labels=tr()?{spent:"Harcama",earned:"Gelir",matchday:"Maç günü geliri",president:"Başkan işlemi",yan_saha:"Yan Saha",yanSahaPayout:"Yan Saha dönüşü",undo:"Transfer geri alındı",expense:"Gider",income:"Gelir"}:{spent:"Expense",earned:"Income",matchday:"Matchday income",president:"Board action",yan_saha:"Side Field",yanSahaPayout:"Side Field return",undo:"Transfer undone",expense:"Expense",income:"Income"};
+    const labels=tr()?{spent:"Harcama",earned:"Gelir",matchday:"Maç günü geliri",president:"Başkan işlemi",yan_saha:"Risk Kulvarı",yanSahaPayout:"Risk Kulvarı dönüşü",undo:"Transfer geri alındı",expense:"Gider",income:"Gelir"}:{spent:"Expense",earned:"Income",matchday:"Matchday income",president:"Board action",yan_saha:"Side Field",yanSahaPayout:"Side Field return",undo:"Transfer undone",expense:"Expense",income:"Income"};
     let history=transactions.slice().reverse();
     if(!history.length){
       if(spent)history.push({round:info.round,kind:"expense",tag:"spent",amount:spent,after:cash});

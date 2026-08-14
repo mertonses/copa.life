@@ -190,7 +190,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     };
   });
   expect(sidefield.overflow).toBeLessThanOrEqual(1);
-  expect(sidefield.heading).toBe("YAN SAHA");
+  expect(sidefield.heading).toBe("RİSK KULVARI");
   expect(sidefield.heroVisible).toBe(true);
   expect(sidefield.offscreen).toEqual([]);
   expect(sidefield.clipped).toEqual([]);
