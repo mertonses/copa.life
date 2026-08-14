@@ -847,6 +847,7 @@ test("club files stay opt-in and never interrupt another hub route",async({page}
   await expect(page.locator("#modal")).toHaveClass(/hidden/);
   expect(await page.evaluate(()=>(globalThis as any).CopaClubFiles.snapshot().selected)).toBe("debt");
   await expect(page.locator("#mobileCareerRoute .mobile-career-inline")).toBeVisible();
+  await page.locator('#mobileCareerRoute .meta-tabs button[onclick*="growth"]').click();
   const directive=page.locator("#mobileCareerRoute .meta-directive:not([disabled])").first();
   await directive.click();
   await expect(page.locator("#modal")).toHaveClass(/hidden/);

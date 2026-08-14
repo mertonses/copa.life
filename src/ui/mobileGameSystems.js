@@ -318,7 +318,7 @@
     if(!panel){panel=document.createElement("section");panel.id="mobileCareerRoute";panel.className="mobile-career-route";hub.appendChild(panel);}
     if(activeCareerSection==="world"&&panel.dataset.section==="world"&&panel.querySelector("#metaWorldPanel"))return;
     const summary=root.CopaMeta&&typeof root.CopaMeta.careerSummary==="function"?root.CopaMeta.careerSummary():null;
-    const labels={career:tr()?"ÖZET":"OVERVIEW",directives:tr()?"YÖNERGELER":"DIRECTIVES",management:tr()?"YÖNETİM":"MANAGEMENT",history:tr()?"GEÇMİŞ":"HISTORY",trophies:tr()?"KUPALAR":"TROPHIES",finance:tr()?"FİNANS":"FINANCE",world:tr()?"DÜNYA":"WORLD"};
+    const labels={career:tr()?"GENEL BAKIŞ":"OVERVIEW",growth:tr()?"GELİŞİM":"PROGRESS",world:tr()?"DÜNYA":"WORLD"};
     const basePanel=root.CopaMeta&&typeof root.CopaMeta.renderPanelHTML==="function"?root.CopaMeta.renderPanelHTML(activeCareerSection):`<div class="mobile-career-metrics"><article><small>${tr()?"KULÜP SEVİYESİ":"CLUB LEVEL"}</small><b>${summary&&summary.level||1}</b></article><article><small>${tr()?"İTİBAR":"REPUTATION"}</small><b>${summary&&summary.reputation||0}</b></article><article><small>${tr()?"LİSANS":"LICENCES"}</small><b>${summary&&summary.licenses||0}</b></article></div>`;
     const fullPanel=basePanel;
     panel.innerHTML=`<div class="meta-progress-modal meta-tab-${activeCareerSection} mobile-career-inline"><header class="meta-progress-head"><div><div class="kithdr">${tr()?"Kulüp Kariyeri":"Club Career"}</div><div class="kitsub">${tr()?"Kariyerinin kalıcı arşivi":"Your permanent career archive"}</div></div><div class="meta-head-actions"><button class="meta-save-menu" type="button" onclick="CopaMeta.openExport()" aria-label="${tr()?"Kayıt seçenekleri":"Save options"}"><span aria-hidden="true">⇅</span><span>${tr()?"KAYIT":"SAVE"}</span></button></div></header><nav class="meta-tabs" aria-label="${tr()?"Kariyer bölümleri":"Career sections"}">${Object.keys(labels).map(id=>`<button type="button" class="${id===activeCareerSection?"active":""}" aria-current="${id===activeCareerSection?"page":"false"}" onclick="CopaMobileShell.openCareerSection('${id}')">${labels[id]}</button>`).join("")}</nav><div class="meta-tab-panel">${fullPanel}</div></div>`;
@@ -327,8 +327,9 @@
       const world=panel.querySelector("#metaWorldPanel");if(world)root.GhostClubs.renderLeaderboard(world);
     }
   }
-  function openCareerSection(section){activeCareerSection=["career","directives","management","history","trophies","finance","world"].includes(section)?section:"career";renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
-  function refreshCareerSection(section=activeCareerSection){activeCareerSection=["career","directives","management","history","trophies","finance","world"].includes(section)?section:activeCareerSection;const panel=document.getElementById("mobileCareerRoute");if(panel)panel.dataset.section="";renderCareerRoute();}
+  function normalizeCareerSection(section){if(["directives","management","mastery"].includes(section))return"growth";if(["history","trophies","museum","finance"].includes(section))return"career";return ["career","growth","world"].includes(section)?section:"career";}
+  function openCareerSection(section){activeCareerSection=normalizeCareerSection(section);renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
+  function refreshCareerSection(section=activeCareerSection){activeCareerSection=normalizeCareerSection(section);const panel=document.getElementById("mobileCareerRoute");if(panel)panel.dataset.section="";renderCareerRoute();}
   function isCareerRouteActive(){const hub=document.getElementById("hub"),panel=document.getElementById("mobileCareerRoute");return !!(hub&&panel&&!hub.classList.contains("hidden")&&hub.dataset.mobileRoute==="career");}
   function enhanceHub(){
     const hub=document.getElementById("hub");

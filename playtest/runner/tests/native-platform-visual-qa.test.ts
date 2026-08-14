@@ -218,7 +218,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   await expect(page.locator("#mobileCareerRoute")).toBeVisible();
   const career=await page.evaluate(()=>({
     overflow:document.documentElement.scrollWidth-innerWidth,
-    hidden:[...document.querySelectorAll<HTMLElement>(".mobile-career-tabs button")]
+    hidden:[...document.querySelectorAll<HTMLElement>(".meta-tabs button")]
       .filter(tab=>{const rect=tab.getBoundingClientRect();return rect.left<0||rect.right>innerWidth;})
       .map(tab=>tab.textContent),
   }));

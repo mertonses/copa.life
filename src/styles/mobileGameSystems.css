@@ -1307,7 +1307,7 @@ html[data-copa-platform="android"] #mobileActionDock #talkBtn.used{background:#2
     margin-inline:auto!important;
   }
   html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-inline .meta-tabs{
-    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     overflow:visible!important;
   }
   html:not(.copa-mobile-game) #hub[data-mobile-route="career"] .mobile-career-inline .meta-tabs button{

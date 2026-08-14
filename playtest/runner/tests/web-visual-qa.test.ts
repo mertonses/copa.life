@@ -371,7 +371,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   await page.locator('#nativeHubNav [data-native-target="career"]').click();
   await expect(page.locator("#mobileCareerRoute")).toBeVisible();
   const careerTabs=page.locator("#mobileCareerRoute .meta-tabs button");
-  await expect(careerTabs).toHaveCount(7);
+  await expect(careerTabs).toHaveCount(3);
   await careerTabs.last().click();
   await expect(careerTabs.last()).toHaveClass(/active/);
   const careerLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>{
@@ -398,22 +398,17 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   expect(surfaceContract.candidates).toBeGreaterThan(20);
   expect(surfaceContract.transparent).toEqual([]);
   await capture(page,"07-career.png");
-  await page.evaluate(()=>(globalThis as any).CopaMobileShell.openCareerSection("trophies"));
-  await expect(page.locator(".meta-collection-grid")).toBeVisible();
-  const museumLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>({
-    collections:panel.querySelectorAll(".meta-collection-grid article").length,
-    visibleMemories:panel.querySelectorAll(".meta-memory-section>.meta-memory-list>.meta-memory-card").length,
-    archiveOpen:panel.querySelector("details.meta-memory-archive")?.hasAttribute("open")||false,
-    whiteCutouts:[...panel.querySelectorAll<HTMLElement>(".meta-collection-grid article")]
-      .filter(card=>getComputedStyle(card,"::before").content.includes("◆")).length,
+  await page.locator('.meta-tabs button[onclick*="career"]').click();
+  await expect(page.locator(".meta-overview-snapshot")).toBeVisible();
+  const overviewLayout=await page.locator("#mobileCareerRoute .mobile-career-inline").evaluate((panel:HTMLElement)=>({
+    overview:!!panel.querySelector(".meta-overview-snapshot"),
+    path:!!panel.querySelector(".meta-career-path"),
     overflow:panel.scrollWidth-panel.clientWidth,
   }));
-  expect(museumLayout.collections).toBe(8);
-  expect(museumLayout.visibleMemories).toBeLessThanOrEqual(6);
-  expect(museumLayout.archiveOpen).toBe(false);
-  expect(museumLayout.whiteCutouts).toBe(0);
-  expect(museumLayout.overflow).toBeLessThanOrEqual(1);
-  await capture(page,"07b-museum.png");
+  expect(overviewLayout.overview).toBe(true);
+  expect(overviewLayout.path).toBe(true);
+  expect(overviewLayout.overflow).toBeLessThanOrEqual(1);
+  await capture(page,"07b-career-overview.png");
 });
 
 test("browser settings keep phone controls structured and remove them after widening",async({page},testInfo)=>{
