@@ -1782,3 +1782,4 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-foot{grid-area:k
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-debt-group{grid-template-rows:auto auto!important;gap:2px!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-debt-label,html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-debt-value{width:max-content!important;max-width:100%!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-debt-group{justify-items:center!important;text-align:center!important}
+html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-detail-link{display:none!important}
