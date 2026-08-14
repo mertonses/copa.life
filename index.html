@@ -945,7 +945,7 @@ function _renderKasaTile(rootId,prefix){
   if(compactDebt)compactDebt.textContent=LT("LİMİT","LIMIT","LÍMITE","LIMIT","LIMITE");
   if(compactDetail)compactDetail.textContent="";
   if(v){const lc=typeof legacySpendable==="function"?legacySpendable():Math.max(0,Math.round(legacyCash||0));if(window.CopaCashDisplay)CopaCashDisplay.render(v,bv,{target:rootId,legacy:lc});else v.innerHTML=`<span>${_fmtMoney(bv)}</span>${lc>0?`<span class="legacy-cash-chip cash-legacy-inline"><small>${tr?"MİRAS":"LEGACY"}</small><b>+€${lc}M</b></span>`:""}`;}
-  if(st)st.textContent=label;
+  if(st)st.textContent=tr?`KASA ${label}`:`CASH ${label}`;
   if(debt)debt.textContent=_fmtMoney(lim);
   if(sp)sp.textContent=_fmtMoney(spent);
   const total=Math.abs(lim)+Math.max(BUDGET,30);
