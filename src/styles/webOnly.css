@@ -61,7 +61,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 @media(min-width:901px){
   html[data-copa-platform="web"] .tournament-draw .td-groups{
     display:grid!important;
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
     grid-auto-flow:row!important;
     grid-auto-columns:auto!important;
     gap:10px!important;
@@ -73,6 +73,11 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   html[data-copa-platform="web"] .tournament-draw .td-group{
     width:auto!important;
     min-width:0!important;
+  }
+
+  html[data-copa-platform="web"] .tournament-draw .td-group li b{
+    min-width:0!important;
+    overflow-wrap:anywhere!important;
   }
 
   html[data-copa-platform="web"] .tournament-draw .td-group-nav,
@@ -419,8 +424,9 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   }
 
   html[data-copa-platform="web"] #hub[data-mobile-route="market"] #freeAgentRow .free-agent-card{
-    height:190px!important;
-    min-height:190px!important;
+    height:auto!important;
+    min-height:228px!important;
+    overflow:visible!important;
   }
 }
 

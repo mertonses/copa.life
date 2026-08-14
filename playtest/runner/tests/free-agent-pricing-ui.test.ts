@@ -24,6 +24,13 @@ test("free-agent cards show the enforced round and power-band prices",async({pag
   await expect(cards.nth(1).locator(".ct-price")).toHaveText("€7M");
   await expect(cards.nth(0).locator(".free-agent-impact span").filter({hasText:"GÜÇ"}).locator("b")).toHaveText("64");
   await expect(cards.nth(1).locator(".free-agent-impact span").filter({hasText:"GÜÇ"}).locator("b")).toHaveText("73");
+  const actionFit=await page.locator("#freeAgentRow .free-agent-card").evaluateAll(cards=>cards.every(card=>{
+    const button=card.querySelector<HTMLElement>(".free-agent-review");
+    if(!button)return false;
+    const cardRect=card.getBoundingClientRect(),buttonRect=button.getBoundingClientRect();
+    return buttonRect.top>=cardRect.top-1&&buttonRect.bottom<=cardRect.bottom+1;
+  }));
+  expect(actionFit).toBe(true);
 });
 
 test("free-agent price headers remain visible on mobile",async({page},testInfo)=>{
