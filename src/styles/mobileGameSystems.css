@@ -1783,11 +1783,11 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-debt-group{grid-template
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-debt-label,html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-debt-value{width:max-content!important;max-width:100%!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-debt-group{justify-items:center!important;text-align:center!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-detail-link{display:none!important}
-html.copa-mobile-game #hub #kasaTile.kasa-compact{height:96px!important;min-height:96px!important;padding:6px 8px!important;grid-template-rows:18px 24px minmax(0,1fr)!important;grid-template-areas:"kasa-head" "kasa-foot" "kasa-value"!important;gap:4px!important}
+html.copa-mobile-game #hub #kasaTile.kasa-compact{height:96px!important;min-height:96px!important;padding:6px 8px!important;grid-template-rows:repeat(3,minmax(0,1fr))!important;grid-template-areas:"kasa-head" "kasa-foot" "kasa-value"!important;gap:3px!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-top-row{display:none!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-main-val{min-height:0!important;align-self:center!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-main-val{transform:translateY(2px)!important}
-html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-top-row{position:static!important;grid-area:kasa-head!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:18px!important;min-height:18px!important;margin:0!important;padding:0!important}
+html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-top-row{position:static!important;grid-area:kasa-head!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-main-val{transform:none!important;box-sizing:border-box!important;width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;padding:1px 4px!important;border:1px solid #46535C!important;border-radius:6px!important;background:rgba(10,17,24,.42)!important;display:flex!important;align-items:center!important;justify-content:center!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-title{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:max-content!important;max-width:100%!important;padding:3px 7px!important;border:1px solid color-mix(in srgb,#F4D879 42%,#46535C)!important;border-radius:6px!important;background:rgba(10,17,24,.42)!important;color:#F3F5F4!important;font:800 7px/1 var(--mono)!important;letter-spacing:.15px!important}
 html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-title{box-sizing:border-box!important;width:100%!important;max-width:100%!important}
@@ -1808,3 +1808,4 @@ html.copa-mobile-game #hub .hub-stat-row #chemTile .ms,html.copa-mobile-game #hu
 html.copa-mobile-game #hub .hub-stat-row #powTile #powHint span{font:inherit!important;letter-spacing:inherit!important;color:inherit!important;text-decoration:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile::before,html.copa-mobile-game #hub .hub-stat-row #powTile::after{display:none!important;content:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile>div[style*="height:3px"]{display:none!important}
+html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-foot{align-items:center!important;height:100%!important;min-height:0!important}
