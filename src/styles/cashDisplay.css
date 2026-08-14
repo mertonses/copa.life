@@ -61,13 +61,13 @@ body.reduced-motion .cash-digit-ghost{display:none!important}body.reduced-motion
 /* Android compact vault: keep the debt line readable and pin the detail affordance to the card corner. */
 @media(max-width:760px){
   html[data-copa-platform="android"] #hub .hub-stat-row>.kasa-compact{position:relative!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-foot{min-height:20px!important;align-items:flex-start!important;justify-content:flex-start!important;padding-right:20px!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group{display:grid!important;gap:1px!important;width:calc(100% - 34px)!important;max-width:calc(100% - 34px)!important;overflow:hidden!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group .kasa-compact-debt-label{display:block!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group .kasa-compact-debt-value{display:block!important;white-space:nowrap!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-debt-label{font-size:7px!important;letter-spacing:.2px!important;opacity:1!important;color:#F3F5F4!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-debt-value{font-size:9px!important;color:#F4D879!important}
-  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-detail{position:absolute!important;right:2px!important;bottom:5px!important;display:grid!important;width:13px!important;height:15px!important;margin:0!important;place-items:center!important;color:#F3F5F4!important;font-size:12px!important;line-height:1!important;opacity:1!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-top-row{align-items:flex-start!important;padding-right:0!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-status-badge{width:48px!important;max-width:48px!important;min-height:15px!important;padding:2px 2px!important;overflow:visible!important;white-space:normal!important;text-align:right!important;line-height:1.05!important;word-break:normal!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-foot{min-height:20px!important;align-items:flex-start!important;justify-content:flex-start!important;padding-right:18px!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group{display:grid!important;gap:1px!important;width:calc(100% - 18px)!important;max-width:calc(100% - 18px)!important;overflow:visible!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group .kasa-compact-debt-label{display:block!important;min-width:0!important;overflow:visible!important;white-space:nowrap!important;color:#FFFFFF!important;font-size:6.3px!important;letter-spacing:0!important;opacity:1!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-debt-group .kasa-compact-debt-value{display:block!important;white-space:nowrap!important;font-size:9px!important;color:#F4D879!important}
+  html[data-copa-platform="android"] #hub .kasa-compact .kasa-compact-detail{position:absolute!important;inset:auto 2px 2px auto!important;display:grid!important;width:13px!important;height:15px!important;margin:0!important;place-items:center!important;color:#F3F5F4!important;font-size:12px!important;line-height:1!important;opacity:1!important}
 }
 
 /* Match-preparation cash: the premium vault language in the same footprint as
