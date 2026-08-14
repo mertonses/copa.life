@@ -3,7 +3,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 
 const source=fs.readFileSync(new URL("../src/state/metaProgression.js",import.meta.url),"utf8");
-assert.match(source,/draws\*2/,"group draws must contribute to career reputation");
+assert.match(source,/draws\*3/,"group draws must contribute to career reputation");
 const storage=new Map();
 let exhibitionOpened=false,lastModal="";
 const sandbox={
@@ -42,8 +42,8 @@ assert.match(lastModal,/EARNED DESIGNS/,"directive and prestige cosmetics must h
 assert.match(lastModal,/crest_clean_cup/,"the earned directive crest must be present in the museum surface");
 assert.equal(meta.selectStylePlan("gegen"),true,"specialist style plans must unlock at five completed runs");
 assert.equal(meta.activeStylePlan("gegen").pressResistance,.035,"selected specialist plan must expose its bounded tactical trade-off");
-assert.equal(state.career.reputation,687,"reputation must use the fixed run-result formula");
-assert.equal(meta.careerSummary().level,6,"career level must be derived from reputation thresholds");
+assert.equal(state.career.reputation,506,"reputation must use the success-weighted run-result formula");
+assert.equal(meta.careerSummary().level,5,"career level must be derived from reputation thresholds");
 assert.equal(state.career.licenses,3,"level 3, level 5 and championship must each award one licence while formations remain locked");
 assert.equal(state.museum.memories.length,23,"completed runs with player snapshots must create museum memories");
 assert.equal(meta.setFeaturedPlayer(state.museum.memories[0].id,1),true);
