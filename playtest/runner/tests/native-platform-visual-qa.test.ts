@@ -154,7 +154,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   expect(match.talkStyle.centerDelta).toBeLessThanOrEqual(2);
   expect(match.talkStyle.verticalCenterDelta).toBeLessThanOrEqual(1);
   expect(match.kasa.hasDetailText).toBe(false);
-  expect(match.kasa.label).toBe("BORÇ LİMİTİ");
+  expect(match.kasa.label).toBe("LİMİT");
   expect(match.kasa.value).toMatch(/€/);
   expect(match.kasa.labelFont).toBeGreaterThanOrEqual(7);
   expect(match.kasa.valueFont).toBeGreaterThanOrEqual(9);
