@@ -1792,5 +1792,6 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact .kasa-compact-debt-value{font-
 html.copa-mobile-game #hub #powTile .ms{display:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile #powHint{display:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile #powHint{visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;text-decoration:none!important}
+html.copa-mobile-game #hub .hub-stat-row #powTile #powHint{display:block!important;visibility:visible!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;text-decoration:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile::before,html.copa-mobile-game #hub .hub-stat-row #powTile::after{display:none!important;content:none!important}
 html.copa-mobile-game #hub .hub-stat-row #powTile>div[style*="height:3px"]{display:none!important}
