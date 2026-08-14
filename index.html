@@ -345,7 +345,7 @@ if("serviceWorker"in navigator){
         <div class="mtile clickable" id="chemTile" onclick="showChemBreak()"><button class="mtile-info" onclick="event.stopPropagation();showChemInfo()" title="Kimya nasıl çalışır?">?</button><div class="mh" id="chemHdr">KİMYA</div><div class="mv" id="chemV">+0</div><div class="ms" id="chemList">detay →</div></div>
         <div class="mtile clickable" id="powTile" onclick="showPowerBreak()"><button class="mtile-info" onclick="event.stopPropagation();showPowerInfo()" title="Kadro gücü nasıl hesaplanır?">?</button><div class="mh" id="powHdr">KADRO GÜCÜ</div><div class="mv" id="powV">0</div><div class="ms" id="powHint"><span onclick="event.stopPropagation();showPowerGraph()" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px"> grafik →</span></div></div>
         <div class="mtile" id="trustTile"><button type="button" class="mtile-info" id="trustInfoBtn" onclick="event.stopPropagation();showTrustInfo()" title="Başkan güveni nasıl çalışır?" aria-label="Başkan güveni nasıl çalışır?">?</button><div class="mh" id="trustHdr">BAŞKAN GÜVENİ</div><div class="mv" id="trustV">—</div><div class="ms" id="trustHint"></div></div>
-        <div class="kasa-card kasa-compact clickable" id="kasaTile" role="button" tabindex="0" onclick="showCashDetails()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showCashDetails()}"><div class="kasa-top-row"><div class="mh kasa-compact-title" id="kasaHdr">KASA</div><div class="kasa-status-badge" id="kasaStatus">RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="ms kasa-compact-foot"><span class="kasa-debt-group"><span class="kasa-compact-debt-label">LİMİT</span><b class="kasa-compact-debt-value" id="kasaDebt">—</b></span><button type="button" class="kasa-compact-detail kasa-detail-link" onclick="event.stopPropagation();showCashDetails()" aria-label="Kasa ayrıntılarını aç" title="Kasa ayrıntılarını aç"></button></div></div>
+        <div class="kasa-card kasa-compact clickable" id="kasaTile" role="button" tabindex="0" aria-haspopup="dialog" onclick="showCashDetails()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showCashDetails()}"><div class="kasa-top-row"><div class="mh kasa-compact-title" id="kasaHdr">KASA</div><div class="kasa-status-badge" id="kasaStatus">RAHAT</div></div><div class="kasa-main-val" id="kasaV">—</div><div class="ms kasa-compact-foot"><span class="kasa-debt-group"><span class="kasa-compact-debt-label">LİMİT</span><b class="kasa-compact-debt-value" id="kasaDebt">—</b><i class="kasa-limit-meter" aria-hidden="true"><b id="kasaLimitMeterFill"></b></i></span><button type="button" class="kasa-compact-detail kasa-detail-link" onclick="event.stopPropagation();showCashDetails()" aria-label="Kasa ayrıntılarını aç" title="Kasa ayrıntılarını aç"></button></div></div>
       </div>
       <div class="styletag" id="styletag">—</div>
       <div class="final-pills" id="finalPills"></div>
@@ -939,7 +939,7 @@ function _renderKasaTile(rootId,prefix){
   else if(bv<20){cls="kasa-positive";label=tr?"DENGEDE":"BALANCED";}
   else{cls="kasa-rich";label=tr?"RAHAT":"HEALTHY";}
   kt.classList.remove("kasa-deep-debt","kasa-debt","kasa-zero","kasa-positive","kasa-rich");kt.classList.add(cls);
-  const v=$(prefix+"V"),st=$(prefix+"Status"),debt=$(prefix+"Debt"),sp=$(prefix+"Spent"),mk=$(prefix+"BarMarker"),safe=$(prefix+"Safe");
+  const v=$(prefix+"V"),st=$(prefix+"Status"),debt=$(prefix+"Debt"),sp=$(prefix+"Spent"),mk=$(prefix+"BarMarker"),safe=$(prefix+"Safe"),limitMeter=$(prefix+"LimitMeterFill");
   const compactTitle=kt.querySelector(".kasa-compact-title"),compactDebt=kt.querySelector(".kasa-compact-debt-label"),compactDetail=kt.querySelector(".kasa-compact-detail");
   if(compactTitle)compactTitle.textContent=LT("KASA","CASH","CAJA","KASSE","CASSA");
   if(compactDebt)compactDebt.textContent=LT("LİMİT","LIMIT","LÍMITE","LIMIT","LIMITE");
@@ -954,6 +954,7 @@ function _renderKasaTile(rootId,prefix){
   if(mk)mk.style.left=(pos*100).toFixed(1)+"%";
   if(safe)safe.style.width=(Math.max(0,pos-zero)*100).toFixed(1)+"%";
   if(safe)safe.style.left=(zero*100).toFixed(1)+"%";
+  if(limitMeter)limitMeter.style.width=(Math.max(0,Math.min(1,(bv-lim)/Math.max(1,0-lim)))*100).toFixed(1)+"%";
 }
 function _setCountryDraftLoading(loading){window._countryDraftLoading=!!loading;const button=$("startBtn");if(!button)return;button.disabled=!!loading;button.setAttribute("aria-busy",loading?"true":"false");button.textContent=loading?LT("Oyuncular yükleniyor…","Loading players…","Cargando jugadores…","Spieler werden geladen…","Caricamento giocatori…"):(L().startBtn||LT("BAŞLA","START","EMPEZAR","START","INIZIA"));}
 function retryCountryDraft(){try{closeModal();}catch(_){}return beginDraft();}
