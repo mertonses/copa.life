@@ -10,7 +10,7 @@ import {botDecisionDelay,botWaitMs,createBotIdentity} from "./botIdentity.js";
 import {TOURNAMENT_LIFETIME_MS,TOURNAMENT_LOBBY_MS,addTournamentParticipant,createTournamentState,roundPairs,tournamentPublicState,validTournamentSize} from "./tournament.js";
 
 const MAX_BODY_BYTES=16*1024;
-const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","capacitor://localhost"];
+const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","http://localhost","capacitor://localhost"];
 const METHODS="GET, POST, PUT, DELETE, OPTIONS";
 const MODES=new Set(["ranked","practice"]);
 const REGIONS=new Set(["weur","eeur","me","apac","global"]);
@@ -39,10 +39,11 @@ const RECONNECT_GRACE_CAP_MS=40_000;
 const clean=(value,max=80)=>String(value==null?"":value).replace(/[<>\u0000-\u001f\u007f]/g,"").replace(/\s+/g," ").trim().slice(0,max);
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 const allowedOrigins=env=>new Set(String(env.ALLOWED_ORIGINS||ORIGINS.join(",")).split(",").map(item=>item.trim()).filter(Boolean));
-const originAllowed=(request,env)=>{const origin=request.headers.get("origin");return !origin||allowedOrigins(env).has(origin);};
+const localOrigin=origin=>/^(?:https?|capacitor):\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin);
+const originAllowed=(request,env)=>{const origin=request.headers.get("origin");return !origin||allowedOrigins(env).has(origin)||localOrigin(origin);};
 const responseHeaders=(request,env)=>{
   const headers={"access-control-allow-methods":METHODS,"access-control-allow-headers":"content-type, x-copa-client, x-copa-arena-token","cache-control":"no-store","content-type":"application/json; charset=utf-8","vary":"origin","x-content-type-options":"nosniff"};
-  const origin=request.headers.get("origin");if(origin&&allowedOrigins(env).has(origin))headers["access-control-allow-origin"]=origin;
+  const origin=request.headers.get("origin");if(origin&&(allowedOrigins(env).has(origin)||localOrigin(origin)))headers["access-control-allow-origin"]=origin;
   return headers;
 };
 const json=(request,env,body,status=200)=>new Response(JSON.stringify(body),{status,headers:responseHeaders(request,env)});

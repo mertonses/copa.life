@@ -5,7 +5,7 @@
   "compatibility_date": "2026-07-29",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life,https://localhost,capacitor://localhost",
+    "ALLOWED_ORIGINS": "https://copa.life,https://www.copa.life,https://localhost,http://localhost,capacitor://localhost",
     "GOOGLE_CLIENT_IDS": "910942499457-79rqm001821h0tealgup26jba3jrnkmc.apps.googleusercontent.com,910942499457-he22hdttfr6pnkf4jsentluc7l3flr6a.apps.googleusercontent.com,910942499457-puuqtrlff1itdu0cejbg990cf1lt4e4a.apps.googleusercontent.com"
   },
   "observability": {

@@ -36,6 +36,12 @@ const ownerFor=async suffix=>{
 beforeEach(async()=>{await applyD1Migrations(env.DB,env.TEST_MIGRATIONS);});
 
 describe("Arena HTTP API",()=>{
+  it("allows loopback origins used by Android WebViews and local Capacitor shells",async()=>{
+    const response=await SELF.fetch("https://arena.test/v1/arena/health",{headers:{origin:"http://localhost:8100"}});
+    expect(response.status).toBe(200);
+    expect(response.headers.get("access-control-allow-origin")).toBe("http://localhost:8100");
+  });
+
   it("exchanges a verified Google credential for a stable Arena account session",async()=>{
     const signIn=()=>SELF.fetch("https://arena.test/v1/arena/auth/google",{
       method:"POST",headers:headers("googleauth"),body:JSON.stringify({credential:"test-google-credential"})
