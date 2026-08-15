@@ -130,7 +130,9 @@ test("packaged Android UI keeps structural and contextual surfaces opaque",async
   expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
   await page.screenshot({path:path.join(visualDir,"android-market-opaque-surfaces.png"),fullPage:true});
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
-  await page.locator(".kasa-detail-btn").click();
+  await page.locator("#kasaTile").click();
+  await expect(page.locator(".cash-detail-sheet")).toBeVisible();
+  await page.locator(".cash-detail-info").click();
   await expect(page.locator(".cash-mechanic-sheet")).toBeVisible();
   const modalSurfaces=await page.locator(".cash-mechanic-sheet").evaluate((sheet:HTMLElement)=>{
     const nodes=[sheet,...sheet.querySelectorAll<HTMLElement>(".cash-mechanic-rules article")];
