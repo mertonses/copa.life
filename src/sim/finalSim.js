@@ -878,6 +878,7 @@ function _mkPool(n){
 /* ── Audio (Web Audio synth) ── */
 function _mkAudio(){
   let AC=null,mg=null,cg=null,fg=null,ambNodes=null;
+  let restoreTimer=null;
   function boot(){
     if(typeof muted!=="undefined"&&muted)return false; // respect global SFX setting
     if(AC)return true;
@@ -899,22 +900,28 @@ function _mkAudio(){
       ambNodes={src,g};
     }catch(e){}
   }
+  function director(stage,intensity){
+    if(window.CopaMatchAudioDirector)window.CopaMatchAudioDirector.state(stage,intensity);
+    if(["danger","reveal","goal","penalty"].includes(stage)&&window.CopaMusicDuck)window.CopaMusicDuck(true,stage==="goal"?1350:850);
+    clearTimeout(restoreTimer);
+    if(["danger","reveal","goal","penalty"].includes(stage))restoreTimer=setTimeout(()=>window.CopaMusicDuck&&window.CopaMusicDuck(false),stage==="goal"?1450:950);
+  }
   return{
     /* continuous pass/ball ticks removed — event-based SFX only */
     shortPass(){},
     drivenPass(){},
     ambience,
-    tension(){beep(300,0.12,'sine',0.07);setTimeout(()=>beep(380,0.12,'sine',0.08),90);},
-    shot(){beep(170,0.2,'sawtooth',0.22);noise(0.18,0.14,180);},
-    save(){beep(380,0.14,'square',0.17);noise(0.12,0.1,220);},
-    goal(){beep(900,0.14,'sine',0.28);setTimeout(()=>beep(1120,0.18,'sine',0.28),110);setTimeout(()=>beep(1340,0.28,'sine',0.32),260);noise(0.9,0.38,120);},
-    whistle(){beep(2100,0.45,'sine',0.18);setTimeout(()=>beep(2500,0.3,'sine',0.14),280);},
-    tackle(){beep(190,0.09,'sawtooth',0.13);noise(0.07,0.09,300);},
-    post(){beep(340,0.28,'sine',0.18);},
-    card(){noise(0.05,0.12,1400);beep(920,0.05,'square',0.06);},
+    tension(){director('danger',.65);beep(300,0.12,'sine',0.07);setTimeout(()=>beep(380,0.12,'sine',0.08),90);},
+    shot(){director('danger',.82);beep(170,0.2,'sawtooth',0.22);noise(0.18,0.14,180);},
+    save(){director('reveal',.72);beep(380,0.14,'square',0.17);noise(0.12,0.1,220);},
+    goal(){director('goal',1);beep(900,0.14,'sine',0.28);setTimeout(()=>beep(1120,0.18,'sine',0.28),110);setTimeout(()=>beep(1340,0.28,'sine',0.32),260);noise(0.9,0.38,120);},
+    whistle(){director('reveal',.3);beep(2100,0.45,'sine',0.18);setTimeout(()=>beep(2500,0.3,'sine',0.14),280);},
+    tackle(){director('build',.3);beep(190,0.09,'sawtooth',0.13);noise(0.07,0.09,300);},
+    post(){director('reveal',.82);beep(340,0.28,'sine',0.18);},
+    card(){director('danger',.45);noise(0.05,0.12,1400);beep(920,0.05,'square',0.06);},
     shoutCue(){beep(640,0.06,'square',0.08);beep(520,0.05,'square',0.06);},
-    crowd(danger){if(cg&&AC)cg.gain.setTargetAtTime(0.07+danger*0.22,AC.currentTime,0.6);},
-    stop(){try{if(ambNodes){ambNodes.src.stop();ambNodes=null;}}catch(e){}try{if(AC){AC.close();AC=null;}}catch(e){}}
+    crowd(danger){if(cg&&AC)cg.gain.setTargetAtTime(0.07+danger*0.22,AC.currentTime,0.6);if(danger>.55)director('danger',danger);else director('build',danger);},
+    stop(){clearTimeout(restoreTimer);if(window.CopaMatchAudioDirector)window.CopaMatchAudioDirector.stop();if(window.CopaMusicDuck)window.CopaMusicDuck(false);try{if(ambNodes){ambNodes.src.stop();ambNodes=null;}}catch(e){}try{if(AC){AC.close();AC=null;}}catch(e){}}
   };
 }
 
@@ -1614,13 +1621,16 @@ function buildSim(myPow, oppPow) {
   /* DOM helpers */
   function _dom(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
   function _html(id,v){const e=document.getElementById(id);if(e)e.innerHTML=v;}
-  let _broadcastCueTimer=null;
+  let _broadcastCueTimer=null,_lastMicroReplayType="moment";
   function _broadcastCue(type,html){
     let cue=document.getElementById('simBroadcastCue');
     if(!cue){const comm=document.getElementById('simComm');if(!comm||!comm.parentNode)return;cue=document.createElement('div');cue.id='simBroadcastCue';cue.className='sim-broadcast-cue';cue.setAttribute('aria-live','polite');cue.setAttribute('aria-atomic','true');comm.insertAdjacentElement('afterend',cue);}
     const text=String(html||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
     if(!text)return;
-    cue.textContent=text;cue.dataset.eventType=String(type||'moment').replace(/_/g,'-');
+    _lastMicroReplayType=String(type||'moment').replace(/_/g,'-');
+    cue.textContent=text;cue.dataset.eventType=_lastMicroReplayType;
+    const replay=document.getElementById('simMicroReplay');
+    if(replay){const major=['goal','save','post','red-card','yellow-card','chance'].includes(_lastMicroReplayType);replay.hidden=!major;replay.textContent=isTR?'MOMENT TEKRARI':'REPLAY MOMENT';}
     cue.classList.remove('is-active');void cue.offsetWidth;cue.classList.add('is-active');
     if(_broadcastCueTimer)clearTimeout(_broadcastCueTimer);
     _broadcastCueTimer=setTimeout(()=>cue.classList.remove('is-active'),2400);
@@ -1663,6 +1673,12 @@ function buildSim(myPow, oppPow) {
     if(userReviewing)el.scrollTop=previousTop+d.offsetHeight;
     else el.scrollTop=0;
   }
+  window._copaSimMicroReplay=function(){
+    const map=document.getElementById('simEventMap'),last=document.querySelector('#simGoals .event-row');
+    if(map){map.classList.remove('is-micro-replay');void map.offsetWidth;map.classList.add('is-micro-replay');setTimeout(()=>map.classList.remove('is-micro-replay'),1300);}
+    if(last){last.classList.remove('is-replay-focus');void last.offsetWidth;last.classList.add('is-replay-focus');setTimeout(()=>last.classList.remove('is-replay-focus'),1300);}
+    const cue=document.getElementById('simBroadcastCue');if(cue){cue.dataset.replayType=_lastMicroReplayType;cue.classList.add('is-replay');setTimeout(()=>cue.classList.remove('is-replay'),900);}
+  };
   function _sendOffPlayer(p,reason){
     if(!p||p.sentOff)return;
     p.sentOff=true;p.hasBall=false;p.vx=0;p.vy=0;p.targetX=p.x;p.targetY=p.y;
@@ -1696,6 +1712,17 @@ function buildSim(myPow, oppPow) {
     if(ma)ma.textContent=a+"%";if(mb)mb.textContent=(100-a)+"%";
     if(bar)bar.style.background=`linear-gradient(90deg,var(--green,#4E9B65) ${a}%,var(--red,#DA3D2E) ${a}%)`;
     if(momentum){momentum.setAttribute("aria-valuenow",String(a));momentum.setAttribute("aria-valuetext",`${myName} ${a}%, ${oppName} ${100-a}%`);}
+    const broadcast=document.getElementById("simBroadcastState"),broadcastText=document.getElementById("simBroadcastStateText");
+    if(broadcast&&broadcastText){const minute=Math.floor(matchTime/60),danger=matchTime-lastDangerTime<95,leader=a>=58?myName:a<=42?oppName:null;let line;
+      if(danger)line=isTR?"Tehlikeli bölge yeniden ısınıyor.":"The danger zone is heating up again.";
+      else if(Math.abs(score[0]-score[1])>=2)line=isTR?(score[0]>score[1]?myName:oppName)+" skor avantajını yönetiyor.":(score[0]>score[1]?myName:oppName)+" are managing the score advantage.";
+      else if(leader)line=isTR?leader+" oyunun yönünü belirliyor.":leader+" are setting the direction of play.";
+      else if(minute<15)line=isTR?"İki takım da oyunun ritmini ölçüyor.":"Both teams are reading the tempo.";
+      else if(minute<45)line=isTR?"Orta saha mücadelesi sertleşiyor.":"The midfield contest is tightening.";
+      else if(minute<75)line=isTR?"İkinci yarıda boşluklar açılıyor.":"Spaces are opening in the second half.";
+      else line=isTR?"Son bölümde her aksiyon sonucu etkileyebilir.":"Every action can shape the finish.";
+      broadcast.dataset.phase=minute<15?"opening":minute<45?"build":minute<75?"pressure":"finish";broadcastText.textContent=line;
+    }
   }
 
   function _registerDanger(teamId,label,icon){
@@ -2784,6 +2811,8 @@ function buildSim(myPow, oppPow) {
   window.openCopaFinalPenalties=null;
   _dom("simScore","0–0");_dom("simClk","0'");_dom("simState",isTR?"Dengeli final":"Even game");
   _dom("simComm","—");_dom("simRadio","📻 —");
+  _dom("simBroadcastStateText",isTR?"Maçın ritmi kuruluyor.":"The match tempo is settling.");
+  const microReplay=document.getElementById("simMicroReplay");if(microReplay)microReplay.hidden=true;
   const sg=document.getElementById("simGoals");if(sg)sg.innerHTML="";
   const initStateEl=document.getElementById("simState");if(initStateEl)initStateEl.classList.remove("is-golden");
   _updateStats();
@@ -2792,6 +2821,7 @@ function buildSim(myPow, oppPow) {
   /* kickoff */
   reposition();kickoff(0);
   audio.ambience&&audio.ambience(); // low stadium bed; silent if SFX muted
+  if(window.CopaMatchAudioDirector)window.CopaMatchAudioDirector.start();
 
   const _PLAYER_CHECKPOINT_FIELDS=[
     "x","y","hx","hy","targetX","targetY","vx","vy","hasBall","roleCommitUntil",

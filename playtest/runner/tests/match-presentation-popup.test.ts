@@ -92,6 +92,8 @@ test("MAÇA ÇIK always asks for presentation and WATCH reuses final UI inside t
   await expect(page.locator("#modal #simEventMap svg")).toBeVisible();
   await expect(page.locator("#modal #simTimeline svg")).toBeVisible();
   await expect(page.locator("#modal #sim .board")).toBeVisible();
+  await expect(page.locator("#modal #simBroadcastState")).toBeVisible();
+  await expect(page.locator("#modal #simBroadcastStateText")).not.toHaveText("—");
 
   const layout=await page.evaluate(()=>{
     const modal=document.querySelector<HTMLElement>(".normal-match-live-sheet")!;
