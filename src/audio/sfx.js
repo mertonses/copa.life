@@ -40,6 +40,31 @@ function sfxKick(power){if(muted)return;const c=ac();if(!c)return;const t=c.curr
 function crowdStart(){if(muted||!ac())return;const c=AC;const src=c.createBufferSource();src.buffer=noiseBuf(c,2);src.loop=true;const f=c.createBiquadFilter();f.type="lowpass";f.frequency.value=520;const g=c.createGain();g.gain.value=0.014;src.connect(f);f.connect(g);g.connect(c.destination);src.start();crowdNodes={src,g};}
 function crowdStop(){if(crowdNodes){try{crowdNodes.src.stop();}catch(e){}crowdNodes=null;}}
 function crowdSwell(){if(!crowdNodes)return;const c=AC,t=c.currentTime,g=crowdNodes.g.gain;g.cancelScheduledValues(t);g.setValueAtTime(0.014,t);g.linearRampToValueAtTime(0.06,t+0.1);g.exponentialRampToValueAtTime(0.014,t+1.2);}
+/* Live-match director: one small adaptive layer shared by Life and Arena.
+   It keeps the music preference independent from SFX while giving the stadium
+   bed a readable shape: settle, build, danger, reveal and release. */
+const CopaMatchAudioDirector=(()=>{
+  let active=false,restoreTimer=null,lastStage="idle";
+  const levels={idle:0.014,live:0.022,build:0.032,decision:0.04,danger:0.055,reveal:0.07,goal:0.09,penalty:0.075};
+  function setCrowd(level){
+    if(!crowdNodes||!AC)return;
+    const now=AC.currentTime,g=crowdNodes.g.gain;g.cancelScheduledValues(now);g.setTargetAtTime(Math.max(.008,Math.min(.11,level)),now,.22);
+  }
+  function start(){if(muted)return false;active=true;crowdStart();setCrowd(levels.live);return !!crowdNodes;}
+  function state(stage,intensity){
+    if(muted)return false;
+    if(!active)start();
+    const key=levels[stage]!=null?stage:"live",boost=Math.max(0,Math.min(1,Number(intensity)||0));
+    lastStage=key;setCrowd(levels[key]+boost*.025);
+    if(window.CopaMusicDuck&&(["danger","reveal","goal","penalty"].includes(key)))window.CopaMusicDuck(true,key==="goal"?1350:850);
+    clearTimeout(restoreTimer);
+    if(["danger","reveal","goal","penalty"].includes(key))restoreTimer=setTimeout(()=>window.CopaMusicDuck&&window.CopaMusicDuck(false),key==="goal"?1450:950);
+    return true;
+  }
+  function stop(){active=false;lastStage="idle";clearTimeout(restoreTimer);crowdStop();if(window.CopaMusicDuck)window.CopaMusicDuck(false);}
+  return{start,state,stop,duck:(on,hold)=>window.CopaMusicDuck&&window.CopaMusicDuck(!!on,hold||700),get stage(){return lastStage;}};
+})();
+window.CopaMatchAudioDirector=CopaMatchAudioDirector;
 function paintMuteButton(){const _on='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><path d="M13.5 7.5Q15.5 10 13.5 12.5"/><path d="M16 5.5Q19 10 16 14.5"/></svg>';const _off='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="2,7 6,7 11,3 11,17 6,13 2,13" fill="currentColor" stroke-linejoin="round"/><line x1="14" y1="7" x2="19" y2="13"/><line x1="19" y1="7" x2="14" y2="13"/></svg>';const btn=document.getElementById("muteBtn"),label=typeof LT==="function"?LT("SES","SFX","SONIDO","SOUND","AUDIO"):(typeof LANG!=="undefined"&&LANG==="tr"?"SES":"SFX");if(btn)btn.innerHTML=(muted?_off:_on)+'<span id="muteBtnLbl">'+label+'</span>';}
 function toggleMute(){muted=!muted;paintMuteButton();if(muted)crowdStop();else{ac();playUiSample("release",.15);}}
 

@@ -174,6 +174,13 @@
   }
   function syncArenaAudio(game){
     if(arenaClockWanted(game)){if(!state.audioClockActive)scheduleArenaClock(game);}else stopArenaClock();
+    if(root.CopaMatchAudioDirector){
+      if(game&&game.phase==="live"){
+        const locked=!!(game.self&&game.self.tactics&&game.self.tactics.length>Number(game.window||0));
+        root.CopaMatchAudioDirector.state(game.liveStage==="reveal"?"reveal":locked?"decision":"build",game.liveStage==="reveal"?0.7:locked?0.35:0.15);
+      }else if(game&&game.phase==="penalty")root.CopaMatchAudioDirector.state(game.penalty&&game.penalty.stage==="reveal"?"reveal":"penalty",0.6);
+      else if(!game||game.phase==="result")root.CopaMatchAudioDirector.stop();
+    }
     const penalty=game&&game.phase==="penalty"&&game.penalty,last=penalty&&penalty.stage==="reveal"&&(penalty.history||[]).at(-1);
     if(last){
       const key=`${game.matchId||""}:${last.kick==null?(penalty.history||[]).length:last.kick}:${last.shooter}:${last.outcome}`;
@@ -618,6 +625,22 @@
       {label:local("ÜRETİLEN TEHLİKE","CHANCE CREATION"),value:`xG ${xg[0].toFixed(2)}–${xg[1].toFixed(2)}`,tone:tone(xgDelta),copy:xgDelta>.18?local("Daha kaliteli pozisyonlar ürettin.","You created the better chances."):xgDelta<-.18?local("Rakip daha kaliteli pozisyonlar buldu.","The opponent created the better chances."):local("Pozisyon kalitesi dengede kaldı.","Chance quality stayed balanced.")}
     ];
   }
+  function liveBroadcastBrief(game,report,segment,revealing){
+    const locked=!!(game.self&&game.self.tactics&&game.self.tactics.length>Number(game.window||0));
+    if(revealing&&report){
+      const mine=game.selfIndex===0?Number(report.homeXg):Number(report.awayXg),theirs=game.selfIndex===0?Number(report.awayXg):Number(report.homeXg);
+      const edge=report.advantage==="neutral"?local("Eşleşme dengede kaldı.","The matchup stayed balanced."):((report.advantage==="home")===(game.selfIndex===0)?local("Taktik eşleşme sende.","You won the tactical matchup."):local("Taktik eşleşme rakipte.","The opponent won the tactical matchup."));
+      return {phase:"reveal",label:local("PENCERE AÇIKLANDI","WINDOW REVEALED"),detail:`${edge} · xG ${mine.toFixed(2)}–${theirs.toFixed(2)}`};
+    }
+    if(locked)return {phase:"locked",label:local("KARAR KİLİTLENDİ","DECISION LOCKED"),detail:local("Seçimin kaydedildi; saha akışı devam ediyor.","Your call is sealed while play continues.")};
+    return {phase:"decision",label:local("KARAR PENCERESİ","DECISION WINDOW"),detail:local(`${segment.startMinute}'–${segment.endMinute}' arasında oyunun yönünü seç.`,`Choose the direction for ${segment.startMinute}'–${segment.endMinute}'.`)};
+  }
+  function liveMicroReplay(game,report,segment){
+    const events=(report&&report.events||game.events||[]).filter(item=>Number(item.minute)>=Number(segment.startMinute)&&Number(item.minute)<=Number(segment.endMinute)).slice(-6);
+    if(!events.length)return "";
+    const labels={goal:local("GOL","GOAL"),card:local("KART","CARD"),attack:local("ATAK","ATTACK"),shot:local("ŞUT","SHOT"),save:local("KURTARIŞ","SAVE")};
+    return `<section class="arena-window-replay"><header><b>${esc(local("MİKRO TEKRAR","MICRO REPLAY"))}</b><span>${esc(local("Karar penceresi", "Decision window"))}</span></header><div>${events.map((item,index)=>`<i style="--replay-index:${index}"><b>${Number(item.minute)}'</b><span>${esc(labels[item.type]||item.type)}</span></i>`).join("")}</div><button type="button" data-arena-replay-window>${esc(local("MOMENTİ TEKRARLA","REPLAY MOMENT"))}</button></section>`;
+  }
   function live(game){
     const allEvents=game.events||[],events=allEvents.slice(-8).reverse(),score=game.score||[0,0],revealing=game.liveStage==="reveal";
     const report=game.windowResult||null,selfHome=game.selfIndex===0;
@@ -640,6 +663,20 @@
       ${revealing&&report?`<div class="arena-window-report"><b>${esc(local(`${report.startMinute}'–${report.endMinute}' BÖLÜM RAPORU`,`${report.startMinute}'–${report.endMinute}' WINDOW REPORT`))}</b><div><span>${esc(choiceLabel("tactics",myTactic))}</span><i>VS</i><span>${esc(choiceLabel("tactics",theirTactic))}</span></div><p>${esc(advantage)} · xG ${myXg}–${theirXg}</p></div>`:""}
       <div class="arena-tactic-window"><span>${game.window+1} / ${segments.length}</span><h2>${esc(revealing?local("SAHADA CANLI","LIVE ON THE PITCH"):text("tacticDecision"))}</h2>${revealing?"":opponentTendency(game)}${revealing?"":options("tactics",["press","balanced","counter","control"],game.self&&game.self.tactics&&game.self.tactics[game.window]||"",!!(game.self&&game.self.tactics&&game.self.tactics.length>game.window))}${!revealing&&game.self&&game.self.tactics&&game.self.tactics.length>game.window?`<p>${esc(choiceLabel("tactics",game.self.tactics[game.window]))} · ${esc(text("selected"))} · ${esc(local("Maç akışı sürüyor","Match flow continues"))}</p>`:""}</div>
     </div>`);
+  }
+  function enhanceLiveDom(game){
+    const live=rootEl().querySelector(".arena-live");if(!live||!game)return;
+    const revealing=game.liveStage==="reveal",report=game.windowResult||null;
+    const segments=game.liveSegments&&game.liveSegments.length?game.liveSegments:[{startMinute:0,endMinute:30},{startMinute:30,endMinute:60},{startMinute:60,endMinute:90}];
+    const segment=segments[game.window]||segments[0],brief=liveBroadcastBrief(game,report,segment,revealing);
+    live.dataset.liveStage=brief.phase;live.dataset.liveWindow=String(Number(game.window)||0);live.classList.toggle("is-reveal",revealing);live.classList.toggle("is-decision",!revealing);
+    const score=live.querySelector(".arena-live-score");
+    if(score&&!live.querySelector(".arena-live-brief"))score.insertAdjacentHTML("afterend",`<section class="arena-live-brief" data-brief-phase="${brief.phase}"><small>${esc(brief.label)}</small><b>${esc(brief.detail)}</b></section>`);
+    const pitch=live.querySelector(".arena-pitch-live");
+    if(revealing&&pitch&&!live.querySelector(".arena-window-replay")){
+      const replay=liveMicroReplay(game,report,segment);if(replay)pitch.insertAdjacentHTML("afterend",replay);
+    }
+    live.querySelectorAll(".arena-pitch-live > span").forEach((marker,index)=>marker.style.setProperty("--replay-index",String(index)));
   }
   const penaltyZoneLabels={
     leftHigh:["SOL ÜST","LEFT HIGH"],leftLow:["SOL ALT","LEFT LOW"],center:["ORTA","CENTER"],rightLow:["SAĞ ALT","RIGHT LOW"],rightHigh:["SAĞ ÜST","RIGHT HIGH"]
@@ -724,6 +761,7 @@
     else if(state.screen==="leaderboard"||state.screen==="history")html=listView(state.screen);
     else if(state.screen==="error")html=errorView(state.lastError);
     element.innerHTML=html;
+    if(state.screen==="room"&&state.room&&state.room.phase==="live")enhanceLiveDom(state.room);
     if(state.screen==="terms")mountGoogleButton();
     if(state.screen==="room"&&state.room&&state.room.phase==="setup"){
       const phase=element.querySelector(".arena-phase"),draft=setupDraft(state.room);
@@ -1096,6 +1134,8 @@
       if(kind==="scenario")draft.scenario=value;
       render();return;
     }
+    const replay=event.target.closest("[data-arena-replay-window]");
+    if(replay){const pitch=rootEl().querySelector(".arena-pitch-live"),markers=pitch&&pitch.querySelectorAll("span");if(pitch){pitch.classList.remove("is-window-replay");void pitch.offsetWidth;pitch.classList.add("is-window-replay");markers&&markers.forEach((marker,index)=>{marker.style.setProperty("--replay-index",String(index));marker.classList.remove("is-replay-focus");setTimeout(()=>marker.classList.add("is-replay-focus"),index*150);setTimeout(()=>marker.classList.remove("is-replay-focus"),index*150+600);});setTimeout(()=>pitch.classList.remove("is-window-replay"),1500);}return;}
     const choice=event.target.closest("[data-arena-choice]");if(choice){selectChoice(choice);return;}
     const button=event.target.closest("[data-arena-action]");if(!button)return;
     const action=button.dataset.arenaAction;

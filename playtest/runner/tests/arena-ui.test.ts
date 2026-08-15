@@ -280,6 +280,8 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator('[data-arena-choice="tactics:press"] .arena-risk-preview')).toContainText("RISK");
   await expect(page.locator(".arena-momentum article")).toHaveCount(4);
   await expect(page.locator(".arena-tendency")).toContainText("Building signal");
+  await expect(page.locator(".arena-live-brief")).toContainText("DECISION WINDOW");
+  await expect(page.locator(".arena-live")).toHaveAttribute("data-live-stage","decision");
   await expect(page.locator('[data-arena-choice="tactics:balanced"]')).toContainText("Balanced Block");
   await expect(page.locator('[data-arena-choice="tactics:counter"]')).toContainText("Fast Transition");
   await expect(page.locator('[data-arena-choice="tactics:control"]')).toContainText("Possession Play");
@@ -291,6 +293,10 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await expect(page.locator(".arena-pitch-live")).toHaveClass(/is-playing/);
   await expect(page.locator(".arena-momentum article.is-mine")).toHaveCount(1);
   await expect(page.locator(".arena-momentum article.is-theirs")).toHaveCount(1);
+  await expect(page.locator(".arena-live-brief")).toContainText("WINDOW REVEALED");
+  await expect(page.locator(".arena-window-replay")).toHaveCount(1);
+  await page.locator("[data-arena-replay-window]").click();
+  await expect(page.locator(".arena-pitch-live")).toHaveClass(/is-window-replay/);
   await expect(page.locator("[data-arena-live-score]")).toContainText("1–0");
   expect(await page.evaluate(()=>(globalThis as any).CopaArena.state.liveEventCues.size)).toBe(0);
   await expect(page.locator("[data-arena-live-score]")).toContainText("1–1",{timeout:2500});
