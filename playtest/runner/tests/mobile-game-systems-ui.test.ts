@@ -497,7 +497,9 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
   const coachmark=page.locator(".copa-coachmark");
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
-  await page.locator(".kasa-detail-btn").click();
+  await page.locator("#kasaTile").click();
+  await expect(page.locator(".cash-detail-sheet")).toBeVisible();
+  await page.locator(".cash-detail-info").click();
   await expect(page.locator(".cash-mechanic-sheet")).toBeVisible();
   await expect(page.locator(".cash-mechanic-rules article")).toHaveCount(4);
   await page.setViewportSize({width:760,height:390});
@@ -535,7 +537,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await capture(page,"03c-cash-guide.png");
   await page.evaluate(()=>(globalThis as any).closeModal());
   await page.setViewportSize({width:447,height:799});
-  await page.locator(".kasa-detail-link").click();
+  await page.locator("#kasaTile").click();
   await expect(page.locator(".cash-detail-sheet")).toBeVisible();
   await expect(page.locator(".cash-detail-metrics article")).toHaveCount(4);
   const cashDetailLayout=await page.locator(".cash-detail-sheet").evaluate((sheet:HTMLElement)=>{

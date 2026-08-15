@@ -230,7 +230,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
     const presWrap=panel.querySelector<HTMLElement>(".presbtngp")!;
     const cashValue=document.querySelector<HTMLElement>("#kasaTile .kasa-main-val")!;
     const debtValue=document.querySelector<HTMLElement>("#kasaTile .kasa-compact-debt-value")!;
-    const cashInfo=document.querySelector<HTMLElement>("#kasaTile .kasa-detail-btn")!.getBoundingClientRect();
+    const cashInfo=document.querySelector<HTMLElement>("#kasaTile .kasa-detail-link")!.getBoundingClientRect();
     const trustInfo=document.querySelector<HTMLElement>("#trustInfoBtn")!.getBoundingClientRect();
     const debtLabel=document.querySelector<HTMLElement>("#kasaTile .kasa-compact-debt-label")!.getBoundingClientRect();
     return{
