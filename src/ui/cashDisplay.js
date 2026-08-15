@@ -40,7 +40,7 @@
     if(canAnimate){const transactionId=tx.transactionId;root.setTimeout(()=>{if(target.isConnected&&target.dataset.cashTransaction===transactionId){target.dataset.cashTransaction="";render(target,next,settings);}},520);}
     if(tx&&!consumed.has(consumeKey)){
       consumed.add(consumeKey);const card=target.closest(".kasa-card")||target.closest(".budget");
-      if(card){const gain=roundHalf(tx.delta)>0||roundHalf(tx.delta)===0&&tx.kind==="income";card.querySelector(".cash-delta-toast")?.remove();card.insertAdjacentHTML("beforeend",deltaMarkup(tx));card.classList.remove("cash-gain","cash-loss","cash-debt-cross");void card.offsetWidth;card.classList.add(gain?"cash-gain":"cash-loss");if(Number(tx.before)>=0&&Number(tx.after)<0)card.classList.add("cash-debt-cross");root.setTimeout(()=>{card.classList.remove("cash-gain","cash-loss","cash-debt-cross");card.querySelector(".cash-delta-toast")?.remove();},1250);}
+      if(card){const gain=roundHalf(tx.delta)>0||roundHalf(tx.delta)===0&&tx.kind==="income",isKasa=card.classList.contains("kasa-card");card.querySelector(".cash-delta-toast")?.remove();if(!isKasa)card.insertAdjacentHTML("beforeend",deltaMarkup(tx));card.classList.remove("cash-gain","cash-loss","cash-debt-cross");void card.offsetWidth;card.classList.add(gain?"cash-gain":"cash-loss");if(Number(tx.before)>=0&&Number(tx.after)<0)card.classList.add("cash-debt-cross");root.setTimeout(()=>{card.classList.remove("cash-gain","cash-loss","cash-debt-cross");card.querySelector(".cash-delta-toast")?.remove();},1250);}
     }
   }
   function onTransaction(event){
