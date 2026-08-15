@@ -17,7 +17,8 @@ test("premium vault animates and sounds once per committed cash transaction",asy
   await page.evaluate(()=>{const game=globalThis as any;game.earn(1.5,"earned");});
   await expect(page.locator("#draftKasaV .cash-display")).toHaveAttribute("aria-label",new RegExp(`31\\.5M$`));
   await expect(page.locator("#draftKasaV .cash-digit.is-rolling").first()).toBeAttached();
-  await expect(page.locator("#draftKasaTile .cash-delta-toast")).toContainText("+€1.5M");
+  await expect(page.locator("#draftKasaTile .cash-delta-toast")).toHaveCount(0);
+  await expect(page.locator("#draftKasaTile")).toHaveClass(/cash-gain/);
   const committed=await page.evaluate(()=>{const game=globalThis as any;return{cash:game.budget,history:game.CopaCashDisplay.recentTransactions().length,sfx:game._copaCashSfxCount||0,last:game.CopaCashDisplay.lastTransaction()};});
   expect(committed.cash).toBe(baseline.cash+1.5);expect(committed.history).toBe(baseline.history+1);expect(committed.sfx).toBe(baseline.sfx+1);expect(committed.last.delta).toBe(1.5);
   await page.waitForTimeout(600);
