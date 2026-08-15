@@ -594,6 +594,7 @@ export function publicState(state,owner){
       firstShooter:state.penalty.firstShooter,
       score:[...state.penalty.score],
       kicks:[...state.penalty.kicks],
+      suddenDeath:!!state.penalty.suddenDeath||(state.penalty.kicks[0]>=5&&state.penalty.kicks[1]>=5&&state.penalty.score[0]===state.penalty.score[1]),
       history:state.penalty.history.map(item=>({...item})),
       selfRole:selfIndex===state.penalty.turn?"shooter":"keeper",
       selfLocked:!!state.penalty.choices[selfIndex],

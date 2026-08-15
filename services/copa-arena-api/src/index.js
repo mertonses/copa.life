@@ -720,7 +720,7 @@ export class ArenaRoom extends DurableObject{
   startPenalties(){
     const firstShooter=hashSeed(`${this.state.seed}|penalty-first`)%2;
     this.state.phase="penalty";
-    this.state.penalty={stage:"choice",kick:0,round:1,turn:firstShooter,firstShooter,score:[0,0],kicks:[0,0],choices:[null,null],history:[]};
+    this.state.penalty={stage:"choice",kick:0,round:1,turn:firstShooter,firstShooter,score:[0,0],kicks:[0,0],choices:[null,null],history:[],suddenDeath:false};
     this.setDeadline();this.scheduleBotDecision();this.persist();
     return this.armAlarm().then(()=>this.broadcast());
   }
@@ -1042,8 +1042,10 @@ export class ArenaRoom extends DurableObject{
       if(this.penaltyComplete()||penalty.kick>=29){
         if(penalty.score[0]===penalty.score[1]){
           const winner=hashSeed(`${this.state.seed}|penalty-cap`)%2;
+          penalty.kicks[winner]++;
           penalty.score[winner]++;
-          penalty.history.push({kick:penalty.kick+1,round:penalty.round+1,shooter:winner,goal:true,outcome:"goal",decider:"safety_cap"});
+          penalty.suddenDeath=true;
+          penalty.history.push({kick:penalty.kick+1,round:Math.max(...penalty.kicks),shooter:winner,goal:true,outcome:"goal",decider:"safety_cap"});
         }
         const teams=this.state.players.map(player=>teamSnapshot(player,this.state.rulesVersion));
         await this.finish(teams[0],teams[1],[...penalty.score]);
@@ -1051,6 +1053,7 @@ export class ArenaRoom extends DurableObject{
         penalty.kick++;
         penalty.turn=penalty.turn===0?1:0;
         penalty.round=Math.max(penalty.kicks[0],penalty.kicks[1])+1;
+        penalty.suddenDeath=penalty.kicks[0]>=5&&penalty.kicks[1]>=5&&penalty.score[0]===penalty.score[1];
         penalty.stage="choice";penalty.choices=[null,null];
         this.setDeadline();this.scheduleBotDecision();this.persist();await this.armAlarm();this.broadcast();
       }
