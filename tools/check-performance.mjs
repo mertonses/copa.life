@@ -83,13 +83,14 @@ const budgets = [
   // journals and the persisted chairman-trust ledger form the validated
   // first-party runtime baseline. Heavy reports, guides, ad SDKs and match
   // simulation still stay lazy.
-  // The mobile interaction hardening keeps the full navigation surface in the
-  // first-party runtime. Keep a small, explicit headroom for that shared CSS
-  // instead of letting device-specific fixes silently push the budget.
+  // The mobile interaction hardening and compact Kasa reel keep the full
+  // navigation surface in the first-party runtime. Keep a small, explicit
+  // headroom for those shared native surfaces instead of letting device-
+  // specific fixes silently push the budget.
   // The centralized five-language copy layer adds a small, intentional
   // first-party runtime cost while removing hundreds of duplicated fallbacks
   // from the main game surface.
-  ["critical html/js/css gzip", criticalGzip, 624 * 1024],
+  ["critical html/js/css gzip", criticalGzip, 632 * 1024],
   ["referenced media asset bytes", referencedAssetBytes, 6 * 1024 * 1024],
   ["largest referenced asset", largestReferencedAsset?.size || 0, 2 * 1024 * 1024],
 ];
