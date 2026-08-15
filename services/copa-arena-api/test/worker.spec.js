@@ -526,6 +526,67 @@ describe("Arena Durable Objects",()=>{
     expect(history.results).toHaveLength(2);
   });
 
+  it("resolves a tied shootout through sudden death and exposes that state",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-SUDDENDEATH00001");
+    const players=[
+      {owner:"owner-sudden-home",clubName:"Ani Ölüm Ev",rating:1000},
+      {owner:"owner-sudden-away",clubName:"Ani Ölüm Dep",rating:1000}
+    ];
+    await room.init("AR-SUDDENDEATH00001",players,"sudden-death-seed",{mode:"practice",botIndex:1});
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
+        player.draft=DRAFT_LINES.map((line,index)=>({line,id:`${line}-${index}`,name:`Sudden ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"}));
+        player.market={id:"none"};player.training="recovery";player.manualDecisions=6;player.manualTactics=1;
+      }
+      instance.state.score=[1,1];
+      instance.state.phase="penalty";
+      instance.state.penalty={stage:"reveal",kick:9,round:5,turn:0,firstShooter:0,score:[5,5],kicks:[5,5],choices:["center","center"],history:[],suddenDeath:false};
+      instance.state.deadline=Date.now()-1;
+      await instance.alarm();
+      expect(instance.state.phase).toBe("penalty");
+      expect(instance.state.penalty.stage).toBe("choice");
+      expect(instance.state.penalty.suddenDeath).toBe(true);
+      expect(publicState(instance.state,players[0].owner).penalty.suddenDeath).toBe(true);
+
+      instance.state.penalty.stage="reveal";
+      instance.state.penalty.score=[6,5];
+      instance.state.penalty.kicks=[6,5];
+      instance.state.penalty.choices=["leftHigh","rightLow"];
+      instance.state.deadline=Date.now()-1;
+      await instance.alarm();
+      expect(instance.state.phase).toBe("result");
+      expect(instance.state.result).toMatchObject({score:[1,1],penalty:[6,5],outcomes:["win","loss"]});
+    });
+  });
+
+  it("keeps the safety-cap shootout decision consistent with its kick history",async()=>{
+    const room=env.ARENA_ROOM.getByName("AR-PENALTYCAP00001");
+    const players=[
+      {owner:"owner-cap-home",clubName:"Sınır Ev",rating:1000},
+      {owner:"owner-cap-away",clubName:"Sınır Dep",rating:1000}
+    ];
+    await room.init("AR-PENALTYCAP00001",players,"penalty-cap-seed",{mode:"practice",botIndex:1});
+    await runInDurableObject(room,async instance=>{
+      for(const player of instance.state.players){
+        player.setup={formation:"4-4-2",style:"balanced",chairman:"babacan"};
+        player.draft=DRAFT_LINES.map((line,index)=>({line,id:`${line}-${index}`,name:`Cap ${line}`,power:72,cost:1,chemistry:0,trait:"reliable"}));
+        player.market={id:"none"};player.training="recovery";player.manualDecisions=6;player.manualTactics=1;
+      }
+      instance.state.score=[2,2];
+      instance.state.phase="penalty";
+      instance.state.penalty={stage:"reveal",kick:29,round:15,turn:0,firstShooter:0,score:[15,15],kicks:[15,15],choices:["center","center"],history:[],suddenDeath:true};
+      instance.state.deadline=Date.now()-1;
+      await instance.alarm();
+      const {penalty}=instance.state.result;
+      expect(instance.state.phase).toBe("result");
+      expect(penalty[0]+penalty[1]).toBe(31);
+      expect(Math.abs(penalty[0]-penalty[1])).toBe(1);
+      expect(instance.state.penalty.kicks).toEqual(penalty);
+      expect(instance.state.penalty.history.at(-1)).toMatchObject({decider:"safety_cap",goal:true});
+    });
+  });
+
   it("settles concurrent duplicate result writes exactly once",async()=>{
     const matchId="AR-CONCURRENT0000001",created=new Date().toISOString();
     const players=[
