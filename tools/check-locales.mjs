@@ -173,7 +173,7 @@ for(const sourceName of ["src/ui/modeGate.js","src/online/arena.js"]){
 }
 
 const newSurfaceMarkers={
-  tr:{side:"KARAR KAYITLARI",power:"GÜÇ",nav:"YAN SAHA",analytics:"ANONİM KULLANIM ÖLÇÜMÜ",arena:"HAZIR KULÜP"},
+  tr:{side:"KARAR KAYITLARI",power:"GÜÇ",nav:"RİSK KULVARI",analytics:"ANONİM KULLANIM ÖLÇÜMÜ",arena:"HAZIR KULÜP"},
   en:{side:"PROPHECY RECORD",power:"POWER",nav:"SIDE FIELD",analytics:"ANONYMOUS USAGE METRICS",arena:"READY-MADE CLUB"},
   es:{side:"REGISTRO",power:"FUERZA",nav:"CAMPO LATERAL",analytics:"MÉTRICAS DE USO ANÓNIMAS",arena:"CLUB PREPARADO"},
   de:{side:"BILANZ",power:"STÄRKE",nav:"NEBENPLATZ",analytics:"ANONYME NUTZUNGSMESSUNG",arena:"BEREITER CLUB"},
