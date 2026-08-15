@@ -18,11 +18,11 @@ const allowed = new Set([
   "#35434C", "#365D46", "#382728", "#3A2022", "#3A4A53", "#3B4B54",
   "#3C4D56", "#3D4951", "#3F4D56", "#40515A", "#41515B", "#45A7A2",
   "#46535C", "#4D92D6", "#4FAE70", "#52616A", "#557A8C", "#55A978",
-  "#56656E", "#56BD7A", "#596871", "#5AAE76", "#5E8294", "#67423E",
+  "#53616A", "#56656E", "#56BD7A", "#596871", "#5AAE76", "#5E8294", "#67423E",
   "#69591E", "#6CD391", "#70433F", "#72D292", "#73CB91", "#79D596",
   "#7DD3FC", "#806FD2", "#86D99B", "#87949A", "#8DC8E5", "#9A3E3B",
   "#AEB8BA", "#AEB9BD", "#B6C0C4", "#BCC5C7", "#C0C9CD", "#C4CCCD",
-  "#C4CDD0", "#D39B31", "#D63D2E", "#D7EDF5", "#DBE2E4", "#DDE3E2",
+  "#C4CDD0", "#C9D0CF", "#D39B31", "#D63D2E", "#D7EDF5", "#DBE2E4", "#DDE3E2",
   "#DDF3E3", "#DF4B48", "#E35B69", "#E3F3F8", "#F0C44D", "#F25D42",
   "#F4F7F7", "#FF4B2B", "#FF5938", "#FF5A38", "#FF7168", "#FF765D",
   "#FF806B", "#FF9A86",
@@ -32,7 +32,7 @@ const allowed = new Set([
   "#111D24", "#171A1D", "#1A2A36", "#4285F4", "#53C07A", "#71818C",
   "#74838C", "#81909A", "#84939C", "#8997A0", "#8D9BA5", "#98A5AD",
   "#AAB4BA", "#CF9D26", "#D9C88F", "#E2B238", "#E3B83F", "#EE806B",
-  "#F4D879", "#F4F6F7", "#F5F6F7", "#F6F1E5", "#FFE697",
+  "#34434B", "#24323A", "#F4D879", "#F4F6F7", "#F5F6F7", "#F6F1E5", "#FFE697",
 ].map((value) => value.toUpperCase()));
 const roots = ["src/styles", "src/ui", "src/cards"];
 const files = ["index.html", "privacy.html", "terms.html", "src/sim/finalSim.js",
