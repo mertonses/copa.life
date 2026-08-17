@@ -57,6 +57,10 @@ const ROOT_FILES = [
   "terms.html",
 ];
 
+const PUBLIC_EXTRA_FILES = [
+  ["outputs/ui-visuals/copa-card-motion-prototype.html", "ui-visuals/copa-card-motion-prototype.html"],
+];
+
 const ROOT_DIRS = ["assets", "src"];
 const SKIP_DIRS = new Set([
   ".agents",
@@ -123,6 +127,11 @@ ensureDir(OUT);
 for (const file of ROOT_FILES) {
   const source = path.join(ROOT, file);
   if (fs.existsSync(source)) copyFile(source, path.join(OUT, file));
+}
+
+for (const [sourceRelative, targetRelative] of PUBLIC_EXTRA_FILES) {
+  const source = path.join(ROOT, sourceRelative);
+  if (fs.existsSync(source)) copyFile(source, path.join(OUT, targetRelative));
 }
 
 for (const dir of ROOT_DIRS) {
