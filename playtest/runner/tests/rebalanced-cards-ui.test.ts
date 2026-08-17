@@ -92,6 +92,27 @@ test("market cards explain the one-card turn limit before opening a purchase pre
   await expect(page.locator("#modal .premium-shop-buy-modal")).toHaveCount(1);
 });
 
+test("market stays capped at three offers and keeps stamp art transparent",async({page})=>{
+  await openHub(page);
+  const result=await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.shopBlocked=0;
+    game.shopOffers=[];
+    game.newShopOffers();
+    game.renderHub();
+    return{
+      generated:game.shopOffers.length,
+      rendered:document.querySelectorAll("#shopcards>.cardtile").length,
+      opaqueStampSurfaces:[...document.querySelectorAll<HTMLElement>("#shopcards>.cardtile .card-stamp")]
+        .filter(stamp=>getComputedStyle(stamp).backgroundColor!=="rgba(0, 0, 0, 0)"||stamp.hasAttribute("style"))
+        .length,
+    };
+  });
+  expect(result.generated).toBeLessThanOrEqual(3);
+  expect(result.rendered).toBeLessThanOrEqual(3);
+  expect(result.opaqueStampSurfaces).toBe(0);
+});
+
 test("Kurban Belli injury cost reads as one natural text flow in a narrow card",async({page})=>{
   await openHub(page);
   await page.evaluate(()=>{

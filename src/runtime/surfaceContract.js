@@ -20,7 +20,7 @@
     '[class$="-notice"]','[class*="-notice "]',
     '[class$="-summary"]','[class*="-summary "]'
   ].join(",");
-  const EXCLUDE=".modal,.copa-transparent-surface,svg,defs,clipPath,mask";
+  const EXCLUDE=".modal,.copa-transparent-surface,.card-stamp,.card-stamp-image,svg,defs,clipPath,mask";
   let scheduled=false,audits=0,repairs=0,observer=null;
 
   function rgba(value){

@@ -2023,7 +2023,7 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
 #hub .market-card-stamp-zone .market-card-stamp>.card-stamp .card-stamp-ink::before,
 #hub .market-card-stamp-zone .market-card-stamp>.card-stamp .card-stamp-ink::after{display:none!important;content:none!important}
 #hub .market-card-stamp-zone .card-stamp-ink{position:absolute!important;inset:0!important;display:block!important;background:none!important}
-#hub .market-card-stamp-zone .card-stamp-image{width:100%!important;height:100%!important;object-fit:contain!important;filter:sepia(.12) saturate(.82) contrast(1.08);mix-blend-mode:screen;opacity:.94}
+#hub .market-card-stamp-zone .card-stamp-image{width:100%!important;height:100%!important;object-fit:contain!important;filter:sepia(.12) saturate(.82) contrast(1.08);mix-blend-mode:normal;opacity:1}
 
 #hub .market-card-impact{
   position:absolute!important;
@@ -2074,7 +2074,7 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
 #hub #shopcards>.market-card.market-card-light .market-card-top .ct-head-price{color:#071521!important;text-shadow:none}
 #hub #shopcards>.market-card.market-card-light .market-card-top::after{background:linear-gradient(90deg,transparent,#071521)}
 #hub #shopcards>.market-card.market-card-light .market-card-stamp-zone::after{border-color:rgba(8,22,36,.28)}
-#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone .card-stamp-image{mix-blend-mode:multiply;opacity:.9}
+#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone .card-stamp-image{mix-blend-mode:normal;opacity:1}
 
 @media(max-width:560px){
   #hub #shopcards>.market-card{border-radius:16px!important}

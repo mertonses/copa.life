@@ -171,7 +171,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   await capture(page,platform,"hub-match");
 
   await page.locator('#nativeHubNav [data-native-target="market"]').click();
-  await expect(page.locator("#shopcards>.cardtile")).toHaveCount(4);
+  await expect(page.locator("#shopcards>.cardtile")).toHaveCount(3);
   const marketGrid=await page.locator("#shopcards").evaluate((root:HTMLElement)=>({
     columns:getComputedStyle(root).gridTemplateColumns.split(" ").length,
     rows:[...root.children].map(child=>(child as HTMLElement).getBoundingClientRect().top),
