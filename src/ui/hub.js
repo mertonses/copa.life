@@ -325,7 +325,7 @@ const MARKET_MOTION_PROFILES={
   derbi:["bolt","sparks"],final_provasi:["trophy"],son_dans:["waltz"],taksit_transfer:["receipt"],son_kredi:["coin"],
   kara_borsa:["orbit"],sahte_evrak:["stamp"],deplasman_kafilesi:["caravan"],kumarbaz:["dice"],gecici_prim:["burst"],
   kisa_kamp:["heartbeat"],doping:["warning"],kriz:["fracture"],kurban_belli:["crosshair"],primler_yatinca:["cash"],
-  vur_igneyi:["syringe"],bu_adam:["target"],gec_gec:["train"],nasip_kismet:["fate"],yildiz_krizi:["startrail"],kasiga_para:["coinrain"]
+  vur_igneyi:["syringe"],bu_adam:["target"],gec_gec:["train"],nasip_kismet:["wheel"],yildiz_krizi:["startrail"],kasiga_para:["coinrain"]
 };
 function marketMotionMarkup(k){
   const profiles=MARKET_MOTION_PROFILES[String(k||"")]||["pulse"];

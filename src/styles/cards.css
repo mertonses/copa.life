@@ -2218,3 +2218,11 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
   #hub[data-mobile-route="market"] #shopcards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
 }
 html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards>.market-card{height:auto!important;min-height:0!important;align-self:start!important}
+
+/* Final art cleanup: remove the faint rotating backplate that sat behind every
+   fullbox illustration. Context motion stays local to the original drawing. */
+#hub .market-card-stamp-zone::after,
+#hub .market-card-stamp-zone .card-motion-fate{display:none!important;content:none!important}
+#hub .market-card-stamp-zone .card-motion-wheel{left:47%!important;top:27%!important;width:6%!important;height:27%!important;border-left:1px solid currentColor!important;border-radius:50% 0 0 50%!important;opacity:.22;transform-origin:50% 100%;animation:marketWheelTick 3.8s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-wheel::after{left:-2px;top:-2px;width:4px;height:4px;border-radius:50%;background:currentColor;box-shadow:0 0 0 2px color-mix(in srgb,currentColor 16%,transparent)}
+@keyframes marketWheelTick{0%,100%{opacity:.12;transform:rotate(-18deg)}50%{opacity:.42;transform:rotate(18deg)}}
