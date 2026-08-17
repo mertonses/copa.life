@@ -47,6 +47,7 @@ function walk(directory, files = []) {
 
 function webSkipped(relative) {
   const value = relative.replace(/\\/g, "/");
+  if (value.startsWith("assets/cards/stamps/") && value.endsWith(".png")) return true;
   return ["assets/chairs", "assets/story-icons", "src/legacy"].some(
     (prefix) => value === prefix || value.startsWith(`${prefix}/`),
   );
