@@ -39,3 +39,25 @@ test("free-agent price headers remain visible on mobile",async({page},testInfo)=
   const overflow=await page.locator("#freeAgentRow").evaluate(node=>(node as HTMLElement).scrollWidth-(node as HTMLElement).clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+test("free-agent cards use the physical Copa shell and role motion",async({page})=>{
+  const cards=page.locator("#freeAgentRow .free-agent-card");
+  await expect(cards).toHaveCount(2);
+  for(const card of await cards.all()){
+    await expect(card.locator(".free-agent-edge")).toHaveCount(1);
+    await expect(card.locator(".free-agent-face")).toHaveCount(1);
+    await expect(card.locator(".free-agent-motion")).toHaveCount(1);
+    await expect(card.locator(".free-agent-stamp")).toHaveText("SERBEST");
+    await expect(card.locator(".ct-price")).toHaveCount(1);
+    const shell=await card.evaluate(node=>{
+      const cardRect=node.getBoundingClientRect();
+      const button=node.querySelector<HTMLElement>(".free-agent-review")?.getBoundingClientRect();
+      const motion=node.querySelector<HTMLElement>(".free-agent-motion");
+      return {role:(node as HTMLElement).dataset.freeAgentRole||"",commonDark:/COMMON|DARK/i.test(node.textContent||""),buttonFit:!!button&&button.top>=cardRect.top-1&&button.bottom<=cardRect.bottom+1,animation:motion?getComputedStyle(motion).animationName:"none"};
+    });
+    expect(shell.role).toBeTruthy();
+    expect(shell.commonDark).toBe(false);
+    expect(shell.buttonFit).toBe(true);
+    expect(shell.animation).not.toBe("none");
+  }
+});

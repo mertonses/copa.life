@@ -99,7 +99,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260805-five-tab-nav2">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-transfer-cards1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -474,7 +474,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   const style=document.createElement("link"),script=document.createElement("script");
   let pending=2;const done=()=>{pending--;if(pending===0)resolve();};
   style.rel="stylesheet";
-  style.href=platform==="web"?"src/styles/webOnly.css?v=20260817-cardface2":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
+  style.href=platform==="web"?"src/styles/webOnly.css?v=20260817-transfer-cards1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
   script.src="src/ui/mobileGameSystems.js?v=20260812-settings-fix1";
   script.onload=done;script.onerror=done;
@@ -533,6 +533,18 @@ function _freeAgentDisplayName(name){
   }
   return clean.slice(0,20).trim();
 }
+function _freeAgentRole(pos){
+  const code=String(pos||"").toUpperCase();
+  if(code==="GK")return "keeper";
+  if(["CB","LB","RB","WB","DF","DEF"].includes(code))return "defender";
+  if(["LW","RW","LM","RM","WNG"].includes(code))return "wing";
+  if(["DM","CDM","CM","AM","CAM","MID"].includes(code))return "midfield";
+  if(["ST","CF","FW","FWD"].includes(code))return "striker";
+  return "utility";
+}
+function _freeAgentMotionMarkup(pos){
+  return `<span class="free-agent-motion free-agent-motion-${_freeAgentRole(pos)}" aria-hidden="true"></span>`;
+}
 function _freeAgentComparisonFor(player){
   const squad=(typeof picksBySlot!=="undefined"?picksBySlot:[]).filter(Boolean);
   if(!player||!squad.length)return null;
@@ -573,7 +585,8 @@ function _renderFreeAgents(){
     const playerName=_freeAgentDisplayName(fullName);
     const powerWord=tr?"Güç":"Power";
     const lock=`<div class="free-agent-lock${cant?"":" hidden"}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${lockReason}</span></div>`;
-    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true"><span class="free-agent-monogram-label">${monogram}</span></div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div>`;
+    const role=_freeAgentRole(pos);
+    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-free-agent-role="${role}" data-free-agent-position="${pos}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="free-agent-edge" aria-hidden="true"></div><div class="free-agent-face"><span class="free-agent-surface-glint" aria-hidden="true"></span><div class="ct-head free-agent-top"><span class="ct-rar var-badge var-2 free-agent-stamp">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-art"><div class="free-agent-icon free-agent-monogram" aria-hidden="true"><span class="free-agent-monogram-label">${monogram}</span></div>${_freeAgentMotionMarkup(pos)}</div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--border-subtle);margin-top:10px;opacity:.5"></div>`;
 }
