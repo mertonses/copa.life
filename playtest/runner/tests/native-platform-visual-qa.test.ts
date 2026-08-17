@@ -171,6 +171,13 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   await capture(page,platform,"hub-match");
 
   await page.locator('#nativeHubNav [data-native-target="market"]').click();
+  await expect(page.locator("#shopcards>.cardtile")).toHaveCount(4);
+  const marketGrid=await page.locator("#shopcards").evaluate((root:HTMLElement)=>({
+    columns:getComputedStyle(root).gridTemplateColumns.split(" ").length,
+    rows:[...root.children].map(child=>(child as HTMLElement).getBoundingClientRect().top),
+  }));
+  expect(marketGrid.columns).toBe(2);
+  expect(new Set(marketGrid.rows).size).toBe(2);
   await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
   await capture(page,platform,"hub-market");

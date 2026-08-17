@@ -514,7 +514,7 @@
   }
 
   function ensureScrollAffordances(){
-    ["#hub .hub-stat-row","#chairpick","#fixbar",".shopcards",".final-pills"].forEach(selector=>{
+    ["#hub .hub-stat-row","#chairpick","#fixbar",".shopcards",".final-pills",".tournament-draw .td-groups"].forEach(selector=>{
       document.querySelectorAll(selector).forEach(element=>{
         if(!element.dataset.mobileScrollBound){
           element.dataset.mobileScrollBound="1";

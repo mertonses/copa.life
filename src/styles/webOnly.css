@@ -409,7 +409,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
   }
 
   html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
     gap:10px!important;
   }
 
@@ -423,6 +423,14 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     min-height:236px!important;
   }
 
+  /* Keep the compact desktop card's description on a real line instead of
+     letting the flex row squeeze it into a clipped sliver. */
+  html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards>.cardtile .ct-desc{
+    min-height:17px!important;
+    flex-shrink:0!important;
+    overflow:visible!important;
+  }
+
   html[data-copa-platform="web"] #hub[data-mobile-route="market"] #freeAgentRow .free-agent-card{
     height:auto!important;
     min-height:228px!important;
@@ -432,16 +440,23 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 
 @media(max-width:900px){
   html[data-copa-platform="web"] #toastContainer{
-    top:70px;
+    top:calc(60px + env(safe-area-inset-top,0px));
     right:12px;
     left:12px;
     align-items:stretch;
+    gap:6px;
   }
 
   html[data-copa-platform="web"] .toast{
     width:auto;
     max-width:none;
-    font-size:11px;
+    min-height:24px;
+    max-height:24px;
+    padding:0 12px;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    font-size:10px;
   }
 
   html[data-copa-platform="web"] .global-footer-bar{
@@ -697,3 +712,8 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     padding-inline:5px!important;
   }
 }
+
+@media(min-width:1000px){
+  html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:20px!important}
+}
+html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards>.market-card{height:auto!important;min-height:0!important;align-self:start!important}

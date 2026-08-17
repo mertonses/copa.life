@@ -17,6 +17,7 @@ export const NATIVE_TEXT_EXTENSIONS = new Set([
 
 export function isNativeSkipped(relativePath) {
   const value = relativePath.replace(/\\/g, "/");
+  if (value.startsWith("assets/cards/stamps/") && value.endsWith(".png")) return true;
   return NATIVE_SKIP_PREFIXES.some(
     (prefix) => value === prefix || value.startsWith(`${prefix}/`),
   );

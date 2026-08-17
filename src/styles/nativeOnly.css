@@ -13,6 +13,92 @@ html:is(
   html:is(
     [data-copa-platform="android"],
     [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:none!important;
+    grid-auto-rows:max-content!important;
+    align-content:start!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.cant{
+    opacity:.88!important;
+    filter:none!important;
+  }
+
+  /* Keep the risk offer visibly separate from the page surface on native
+     screens. Without an opaque card surface it reads as an empty second row. */
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.is-dark{
+    background:#27343C!important;
+    border:1px solid #53636D!important;
+    box-shadow:0 6px 18px rgba(10,17,24,.32)!important;
+    color:#F3F5F4!important;
+    opacity:1!important;
+    filter:none!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.is-dark .ct-head{
+    background:#101D28!important;
+    color:#F3F5F4!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.is-dark .ct-body{
+    background:#27343C!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.is-dark :is(.ct-name,.ct-desc,.ct-contract,.ct-art){
+    color:#F3F5F4!important;
+    opacity:1!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile.is-dark .ct-foot{
+    background:#1F2B34!important;
+    border-top-color:#53636D!important;
+  }
+
+  /* Avoid transient collapsed/low-opacity cards when the market route opens.
+     The grid must be stable before the player can scan four offers. */
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.cardtile{
+    animation:none!important;
+    transform:none!important;
+    opacity:1!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #introSetup .is-mobile-step-active{
+    animation:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
   ).copa-mobile-game body.mobile-game-setup-open:not(.mobile-game-setup-final) #mobileActionDock,
   html:is(
     [data-copa-platform="android"],
@@ -43,8 +129,38 @@ html:is(
     [data-copa-platform="android"],
     [data-copa-platform="ios"]
   ).copa-mobile-game #chairpick .mobile-chair-card.locked{
-    opacity:.66!important;
-    filter:grayscale(.52)!important;
+    opacity:.88!important;
+    filter:none!important;
+    border-color:#53636D!important;
+    background:#27343C!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked .chairthumb{
+    opacity:.8!important;
+    filter:grayscale(.12)!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked .chairbtn-lockover{
+    z-index:1!important;
+    background:rgba(10,17,24,.18)!important;
+  }
+
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked .chair-name-row,
+  html:is(
+    [data-copa-platform="android"],
+    [data-copa-platform="ios"]
+  ).copa-mobile-game #chairpick .mobile-chair-card.locked .chair-detail-link{
+    position:relative!important;
+    z-index:2!important;
   }
 
   html:is(
@@ -56,7 +172,7 @@ html:is(
     .chair-mobile-meta b,
     .chair-mobile-meta em
   ){
-    color:var(--native-readable-muted)!important;
+    color:#F3F5F4!important;
   }
 
   html:is(

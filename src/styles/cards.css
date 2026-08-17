@@ -1062,3 +1062,1033 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
   display:flex!important;
   justify-content:flex-end;
 }
+
+/* ===== KUPA DAMGASI CARD ART SYSTEM =====
+   One physical-print language across card art, active chips and player initials.
+   The mark stays flat and legible at mobile size; texture is suggested by the
+   offset ink plate rather than a noisy raster effect. */
+.card-stamp{
+  --stamp-ink:var(--color-ink);
+  --stamp-fill:color-mix(in srgb,var(--color-primary) 13%,var(--surface-muted));
+  --stamp-accent:var(--color-primary);
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  flex:0 0 auto;
+  isolation:isolate;
+  color:var(--stamp-ink);
+}
+.card-stamp::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  background:var(--stamp-fill);
+  clip-path:polygon(10% 5%,86% 3%,96% 18%,93% 84%,78% 97%,14% 93%,4% 74%,6% 18%);
+}
+.card-stamp::after{
+  content:"";
+  position:absolute;
+  right:2px;
+  top:3px;
+  z-index:0;
+  width:5px;
+  height:5px;
+  background:var(--stamp-accent);
+  clip-path:polygon(14% 0,100% 12%,86% 100%,0 82%);
+  opacity:.9;
+}
+.card-stamp-ink{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+}
+.card-stamp svg{
+  display:block;
+  width:78%;
+  height:78%;
+  max-width:none;
+  max-height:none;
+  overflow:visible;
+  color:currentColor;
+  stroke-width:2.25!important;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.card-stamp svg [stroke-dasharray]{stroke-dasharray:none!important}
+.card-stamp.stamp-soft::before{clip-path:polygon(7% 12%,22% 3%,82% 7%,97% 23%,91% 82%,72% 96%,17% 92%,2% 70%)}
+.card-stamp.stamp-slash::before{clip-path:polygon(6% 22%,18% 7%,91% 9%,98% 30%,84% 94%,24% 98%,3% 76%)}
+.card-stamp.stamp-seal::before{clip-path:polygon(15% 2%,84% 5%,98% 21%,94% 83%,78% 97%,18% 95%,3% 77%,6% 19%)}
+.card-stamp.stamp-dark{
+  --stamp-ink:#fff;
+  --stamp-fill:color-mix(in srgb,var(--color-primary) 22%,var(--surface-dark));
+  --stamp-accent:var(--color-primary);
+}
+.card-stamp.stamp-mini{width:16px;height:16px}
+.card-stamp.stamp-mini::after{right:0;top:1px;width:3px;height:3px}
+.card-stamp.stamp-mini svg{width:100%;height:100%;stroke-width:2.35!important}
+#hub .ct-titlegroup .ct-art{
+  overflow:visible;
+  border-color:transparent;
+  background:transparent;
+}
+#hub .ct-titlegroup .ct-art>.card-stamp{width:28px;height:28px}
+#hub .ct-titlegroup .ct-art>.card-stamp svg{width:78%;height:78%;stroke-width:2.35!important}
+.cc-art>.card-stamp{width:44px;height:44px}
+.cc-art>.card-stamp svg{width:80%;height:80%}
+.card-popup-ico>.card-stamp{width:72px;height:72px;margin:0 auto 6px}
+.card-popup-ico>.card-stamp svg{width:72%;height:72%;stroke-width:2.1!important}
+.fpico>.card-stamp{vertical-align:middle}
+
+/* Screen-print finish: restrained grain, a second ink pass and small
+   registration drift. The texture is deliberately CSS-native so it stays
+   crisp on Android and can be reduced at the tiny chip sizes. */
+.card-stamp::before{
+  background-color:var(--stamp-fill);
+  background-image:
+    radial-gradient(circle at 18% 22%,color-mix(in srgb,var(--stamp-ink) 20%,transparent) 0 .7px,transparent 1.15px),
+    radial-gradient(circle at 74% 68%,color-mix(in srgb,var(--stamp-ink) 15%,transparent) 0 .55px,transparent 1px),
+    repeating-linear-gradient(112deg,transparent 0 5px,color-mix(in srgb,var(--stamp-ink) 7%,transparent) 5.5px 6.2px);
+  background-size:13px 11px,17px 15px,9px 9px;
+  transform:translate(-.3px,.45px) rotate(-.45deg);
+  filter:drop-shadow(1px .65px 0 color-mix(in srgb,var(--stamp-accent) 24%,transparent));
+}
+.card-stamp::after{
+  box-shadow:-1px 1px 0 color-mix(in srgb,var(--stamp-accent) 32%,transparent);
+}
+.card-stamp-ink::before{
+  content:"";
+  position:absolute;
+  inset:3px;
+  z-index:0;
+  background:color-mix(in srgb,var(--stamp-accent) 11%,transparent);
+  clip-path:polygon(10% 5%,86% 3%,96% 18%,93% 84%,78% 97%,14% 93%,4% 74%,6% 18%);
+  transform:translate(1px,-.65px) rotate(.7deg);
+  opacity:.5;
+  pointer-events:none;
+}
+.card-stamp-ink::after{
+  content:"";
+  position:absolute;
+  inset:4px;
+  z-index:2;
+  background-image:
+    repeating-linear-gradient(165deg,transparent 0 6px,color-mix(in srgb,var(--stamp-ink) 10%,transparent) 6.5px 7.1px),
+    radial-gradient(circle at 30% 42%,color-mix(in srgb,var(--stamp-ink) 18%,transparent) 0 .55px,transparent 1px);
+  background-size:10px 10px,15px 13px;
+  clip-path:polygon(10% 5%,86% 3%,96% 18%,93% 84%,78% 97%,14% 93%,4% 74%,6% 18%);
+  transform:translate(.45px,-.35px);
+  opacity:.2;
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+.card-stamp svg{position:relative;z-index:1}
+.card-stamp.stamp-special::before{
+  background-size:9px 8px,13px 11px,7px 7px;
+  transform:translate(-.6px,.7px) rotate(-.8deg);
+  filter:drop-shadow(1.35px .85px 0 color-mix(in srgb,var(--stamp-accent) 34%,transparent));
+}
+.card-stamp.stamp-special .card-stamp-ink::before{transform:translate(1.35px,-.85px) rotate(1deg);opacity:.72}
+.card-stamp.stamp-special .card-stamp-ink::after{opacity:.34}
+.card-stamp.stamp-dark .card-stamp-ink::after{opacity:.29}
+.card-stamp.stamp-mini::before{background-size:8px 7px,11px 9px,6px 6px;filter:none;opacity:.92}
+.card-stamp.stamp-mini .card-stamp-ink::before{inset:2px;opacity:.28;transform:translate(.5px,-.35px)}
+.card-stamp.stamp-mini .card-stamp-ink::after{inset:2px;opacity:.1;mix-blend-mode:screen}
+.card-stamp.stamp-popup::before{background-size:11px 10px,15px 13px,8px 8px}
+
+/* ===== KUPA DAMGASI · KREM SERİGRAFİ BASKI =====
+   Reference language: warm paper, navy ink and a restrained coral registration
+   mark. The plate is intentionally physical-looking; it is not a dark UI tile. */
+.card-stamp{
+  --stamp-ink:#102A42;
+  --stamp-fill:#F1E4C6;
+  --stamp-accent:#D95C46;
+  color:var(--stamp-ink);
+  background:transparent!important;
+}
+.card-stamp::before{
+  z-index:0;
+  inset:0;
+  background-color:var(--stamp-fill);
+  background-image:
+    radial-gradient(circle at 12% 18%,rgba(16,42,66,.26) 0 .55px,transparent 1.05px),
+    radial-gradient(circle at 78% 31%,rgba(16,42,66,.2) 0 .65px,transparent 1.15px),
+    radial-gradient(circle at 38% 79%,rgba(16,42,66,.17) 0 .5px,transparent 1px),
+    repeating-linear-gradient(103deg,transparent 0 7px,rgba(16,42,66,.06) 7.5px 8.2px);
+  background-size:17px 15px,13px 17px,19px 13px,11px 11px;
+  clip-path:polygon(10% 5%,86% 3%,96% 18%,93% 84%,78% 97%,14% 93%,4% 74%,6% 18%);
+  transform:translate(-.35px,.5px) rotate(-.55deg);
+  filter:drop-shadow(1px .75px 0 rgba(16,42,66,.28));
+}
+.card-stamp::after{
+  z-index:4;
+  right:3px;
+  top:3px;
+  width:6px;
+  height:6px;
+  background:var(--stamp-accent);
+  box-shadow:-1px 1px 0 rgba(217,92,70,.38);
+}
+.card-stamp-ink{z-index:2}
+.card-stamp-ink::before{
+  z-index:0;
+  background:color-mix(in srgb,var(--stamp-ink) 10%,transparent);
+  transform:translate(1px,-.65px) rotate(.85deg);
+  opacity:.45;
+  mix-blend-mode:multiply;
+}
+.card-stamp-ink::after{
+  z-index:3;
+  background-image:
+    radial-gradient(circle at 20% 28%,rgba(16,42,66,.24) 0 .55px,transparent 1.05px),
+    radial-gradient(circle at 72% 64%,rgba(16,42,66,.2) 0 .6px,transparent 1.1px),
+    repeating-linear-gradient(164deg,transparent 0 6px,rgba(16,42,66,.09) 6.5px 7.2px);
+  background-size:13px 11px,17px 15px,10px 10px;
+  mix-blend-mode:multiply;
+  opacity:.28;
+}
+.card-stamp svg{
+  z-index:2;
+  color:var(--stamp-ink);
+  stroke:var(--stamp-ink)!important;
+  stroke-width:2.65!important;
+}
+.card-stamp.stamp-dark{
+  --stamp-ink:#102A42;
+  --stamp-fill:#E6D4AE;
+  --stamp-accent:#C94D3C;
+}
+.card-stamp.stamp-special::before{
+  background-image:
+    radial-gradient(circle at 12% 18%,rgba(16,42,66,.34) 0 .6px,transparent 1.15px),
+    radial-gradient(circle at 78% 31%,rgba(16,42,66,.25) 0 .7px,transparent 1.25px),
+    radial-gradient(circle at 38% 79%,rgba(16,42,66,.21) 0 .55px,transparent 1.05px),
+    repeating-linear-gradient(103deg,transparent 0 6px,rgba(16,42,66,.09) 6.5px 7.3px);
+  transform:translate(-.7px,.85px) rotate(-.9deg);
+  filter:drop-shadow(1.5px 1px 0 rgba(217,92,70,.34));
+}
+.card-stamp.stamp-special .card-stamp-ink::before{opacity:.68;transform:translate(1.4px,-.9px) rotate(1.1deg)}
+.card-stamp.stamp-special .card-stamp-ink::after{opacity:.42}
+.card-stamp.stamp-mini{
+  --stamp-fill:#EEE1C4;
+  --stamp-ink:#102A42;
+}
+.card-stamp.stamp-mini::before{background-size:9px 8px,11px 9px,13px 9px,7px 7px;filter:drop-shadow(.7px .5px 0 rgba(16,42,66,.24))}
+.card-stamp.stamp-mini::after{right:1px;top:1px;width:3px;height:3px;box-shadow:none}
+.card-stamp.stamp-mini .card-stamp-ink::before{inset:2px;opacity:.22;transform:translate(.5px,-.35px)}
+.card-stamp.stamp-mini .card-stamp-ink::after{inset:2px;opacity:.12}
+.card-stamp.stamp-mini svg{stroke-width:2.45!important}
+.card-stamp.stamp-popup::before{background-size:13px 11px,15px 13px,17px 12px,9px 9px}
+
+/* ===== KUPA DAMGASI · GENERATED CARD ART =====
+   The paper/ink artwork is now a real per-card asset. Keep the DOM wrapper
+   for sizing and semantics, but do not paint a second paper plate underneath. */
+.card-stamp.card-stamp-asset{
+  background:transparent!important;
+  overflow:visible;
+}
+.card-stamp.card-stamp-asset::before,
+.card-stamp.card-stamp-asset::after,
+.card-stamp.card-stamp-asset .card-stamp-ink::before,
+.card-stamp.card-stamp-asset .card-stamp-ink::after{
+  display:none!important;
+}
+.card-stamp.card-stamp-asset .card-stamp-ink{
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+.card-stamp.card-stamp-asset .card-stamp-image{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  user-select:none;
+  -webkit-user-drag:none;
+  transform:translate(-.2px,.25px) rotate(-.35deg);
+  filter:drop-shadow(.55px .55px 0 rgba(16,42,66,.24));
+}
+.card-stamp.card-stamp-asset.stamp-dark .card-stamp-image{
+  filter:saturate(.84) contrast(1.06) drop-shadow(.55px .55px 0 rgba(16,42,66,.3));
+}
+.card-stamp.card-stamp-asset.stamp-mini .card-stamp-image{
+  transform:translate(-.1px,.15px) rotate(-.25deg);
+  filter:none;
+}
+.card-stamp.card-stamp-asset.stamp-popup .card-stamp-image{
+  transform:translate(-.35px,.35px) rotate(-.45deg);
+}
+.card-stamp.card-stamp-fullbox{
+  overflow:hidden;
+  border-radius:inherit;
+  clip-path:none!important;
+}
+.card-stamp.card-stamp-fullbox .card-stamp-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  transform:none;
+  filter:none;
+}
+.card-stamp.card-stamp-fullbox.stamp-dark .card-stamp-image{
+  filter:saturate(.9) contrast(1.04);
+}
+.card-stamp.card-stamp-fullbox.stamp-mini .card-stamp-image{
+  transform:none;
+  filter:none;
+}
+
+/* ===== COPA CARD SYSTEM: shell, art window, hierarchy and state cues =====
+   The stamp artwork stays untouched. These rules only give every card a
+   calmer outer frame, a consistent art window and a readable three-band flow. */
+#hub .cardtile{
+  position:relative;
+  isolation:isolate;
+  min-height:178px;
+  overflow:hidden;
+  border:1px solid rgba(170,178,179,.28);
+  border-radius:12px;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.045),transparent 35%),
+    linear-gradient(180deg,#1C2D38 0%,#172730 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.035),
+    0 5px 14px rgba(10,17,24,.18);
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+#hub .cardtile::before{
+  content:"";
+  position:absolute;
+  inset:2px;
+  z-index:0;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.075);
+  border-radius:10px;
+}
+#hub .cardtile > *{position:relative;z-index:1}
+/* The hidden insufficient-funds toast must not reserve card height. */
+#hub .cardtile > .insufficient-pop{position:absolute;z-index:8}
+#hub .cardtile:hover:not(.cant),
+#hub .cardtile:focus-within:not(.cant){
+  transform:translateY(-2px);
+  border-color:rgba(242,74,40,.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.045),
+    0 9px 22px rgba(10,17,24,.25);
+}
+#hub .cardtile .ct-head{
+  position:relative;
+  height:33px;
+  min-height:29px;
+  padding:6px 9px 5px;
+  border:0;
+  border-bottom:1px solid rgba(170,178,179,.18);
+  background:transparent;
+}
+#hub .cardtile .ct-head::after{
+  content:"";
+  position:absolute;
+  left:9px;
+  bottom:-1px;
+  width:28px;
+  height:2px;
+  background:var(--color-slate);
+  border-radius:2px;
+}
+#hub .cardtile .ct-head-price{
+  padding:3px 7px;
+  border-radius:6px;
+  background:rgba(10,17,24,.28);
+  border:1px solid rgba(170,178,179,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+#hub .cardtile .ct-body{
+  min-width:0;
+  padding:9px 10px 8px;
+  gap:5px;
+}
+#hub .cardtile .ct-titlegroup{
+  min-height:35px;
+  grid-template-columns:35px minmax(0,1fr);
+  gap:8px;
+}
+#hub .cardtile .ct-titlegroup .ct-art{
+  position:relative;
+  width:35px;
+  height:35px;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(241,228,198,.40);
+  border-radius:8px;
+  background:#0D2236;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.10),
+    0 1px 0 rgba(10,17,24,.45);
+}
+#hub .cardtile .ct-titlegroup .ct-art::after{
+  content:"";
+  position:absolute;
+  right:3px;
+  bottom:3px;
+  width:7px;
+  height:2px;
+  z-index:3;
+  pointer-events:none;
+  background:rgba(241,228,198,.82);
+  border-radius:2px;
+}
+#hub .cardtile .ct-titlegroup .ct-art > .card-stamp{
+  width:100%;
+  height:100%;
+  border-radius:7px;
+}
+#hub .cardtile .ct-titlegroup .ct-art > .card-stamp.card-stamp-fullbox .card-stamp-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+#hub .cardtile .ct-name{
+  color:var(--text-primary);
+  font-size:13px;
+  line-height:1.14;
+  letter-spacing:-.05px;
+}
+#hub .cardtile .market-card-impact{
+  display:flex;
+  align-items:center;
+  min-height:23px;
+  padding:4px 7px;
+  border-top:1px solid rgba(170,178,179,.12);
+  border-bottom:1px solid rgba(170,178,179,.12);
+  background:rgba(10,17,24,.13);
+  color:var(--color-slate);
+  font:800 7px/1.2 var(--mono);
+  letter-spacing:.5px;
+}
+#hub .cardtile .market-card-impact b{font-size:10px;letter-spacing:0}
+#hub .cardtile .ct-desc{
+  min-height:28px;
+  color:var(--text-secondary);
+  font-size:9px;
+  line-height:1.38;
+}
+#hub .cardtile .ct-foot{
+  min-height:39px;
+  padding:7px 9px 8px;
+  border-top:1px solid rgba(170,178,179,.18);
+  gap:7px;
+}
+#hub .cardtile .ct-contract{
+  min-width:0;
+  color:var(--text-secondary);
+  font-size:7px;
+  line-height:1.25;
+}
+#hub .cardtile .ct-detail{
+  flex:0 0 auto;
+  min-height:25px;
+  padding:0 8px;
+  border:1px solid rgba(241,228,198,.48);
+  border-radius:6px;
+  background:transparent;
+  color:var(--text-primary);
+  font:900 7px/1 var(--mono);
+  letter-spacing:.45px;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+#hub .cardtile .ct-detail:hover,
+#hub .cardtile .ct-detail:focus-visible{
+  border-color:var(--color-primary);
+  background:rgba(242,74,40,.14);
+  color:var(--color-ink);
+}
+
+/* COMMON uses a cream keyline; DARK uses a more assertive coral rail. */
+#hub .cardtile.is-common{
+  border-color:rgba(241,228,198,.46);
+  background:
+    linear-gradient(145deg,rgba(241,228,198,.055),transparent 38%),
+    linear-gradient(180deg,#1D303A 0%,#172730 100%);
+}
+#hub .cardtile.is-common .ct-head{
+  background:transparent;
+  color:var(--text-secondary);
+  border-left:0;
+}
+#hub .cardtile.is-common::before{border-color:rgba(241,228,198,.14)}
+#hub .cardtile.is-common .ct-head::after{background:#F1E4C6}
+#hub .cardtile.is-common .ct-rar{color:#F1E4C6!important;border-color:rgba(241,228,198,.48)!important;background:transparent!important}
+#hub .cardtile.is-common .ct-titlegroup .ct-art{border-color:rgba(241,228,198,.52)}
+#hub .cardtile.is-dark{
+  border-color:rgba(242,74,40,.68);
+  background:
+    linear-gradient(145deg,rgba(242,74,40,.10),transparent 38%),
+    linear-gradient(180deg,#202B34 0%,#17242D 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(242,74,40,.08),
+    0 5px 16px rgba(10,17,24,.28);
+}
+#hub .cardtile.is-dark::before{border-color:rgba(242,74,40,.24)}
+#hub .cardtile.is-dark .ct-head{
+  background:transparent;
+  color:var(--text-primary);
+  border-left:0;
+}
+#hub .cardtile.is-dark .ct-head::after{background:var(--color-primary);width:36px}
+#hub .cardtile.is-dark .ct-head{border-bottom-color:rgba(242,74,40,.26)}
+#hub .cardtile.is-dark .ct-titlegroup .ct-art{border-color:rgba(242,74,40,.70)}
+#hub .cardtile.is-dark .ct-titlegroup .ct-art::after{background:var(--color-primary)}
+#hub .cardtile.is-dark .ct-head-price{background:rgba(10,17,24,.42);border-color:rgba(242,74,40,.52);color:#FFFFFF}
+
+/* State cues: geometry and small marks carry meaning in addition to color. */
+#hub .cardtile.upgrade,
+#hub .cardtile.is-active,
+#hub .cardtile.active,
+#hub .cardtile.selected{
+  border-color:var(--color-primary);
+  box-shadow:inset 0 0 0 1px rgba(242,74,40,.36),0 0 0 2px rgba(242,74,40,.18),0 8px 20px rgba(10,17,24,.24);
+}
+#hub .cardtile.upgrade::after,
+#hub .cardtile.is-active::after,
+#hub .cardtile.active::after,
+#hub .cardtile.selected::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:0;
+  width:12px;
+  height:12px;
+  z-index:2;
+  pointer-events:none;
+  border-top:2px solid var(--color-primary);
+  border-right:2px solid var(--color-primary);
+  border-radius:0 9px 0 0;
+}
+#hub .cardtile.cant,
+#hub .cardtile.locked,
+#hub .cardtile.is-locked,
+#hub .cardtile[aria-disabled="true"]{
+  opacity:.72;
+  filter:saturate(.72);
+}
+#hub .cardtile.cant{border-style:dashed;border-color:rgba(242,74,40,.58)}
+#hub .cardtile.cant .ct-foot{border-top-color:rgba(242,74,40,.42)}
+#hub .cardtile.cant .ct-detail{border-style:dashed;color:var(--color-slate)}
+#hub .cardtile.locked,
+#hub .cardtile.is-locked,
+#hub .cardtile[aria-disabled="true"]{cursor:not-allowed;border-style:dashed}
+
+/* Collection cards inherit the same shell and art-window grammar. */
+.collectiongrid .collcard{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid rgba(170,178,179,.28);
+  border-radius:11px;
+  background:linear-gradient(145deg,rgba(255,255,255,.04),transparent 38%),linear-gradient(180deg,#1C2D38,#172730);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.035),0 4px 12px rgba(10,17,24,.16);
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+.collectiongrid .collcard::before{
+  content:"";
+  position:absolute;
+  inset:2px;
+  z-index:0;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:9px;
+}
+.collectiongrid .collcard > *{position:relative;z-index:1}
+.collectiongrid .collcard:hover:not(.locked),
+.collectiongrid .collcard:focus-within:not(.locked){
+  transform:translateY(-2px);
+  border-color:rgba(242,74,40,.68);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045),0 8px 18px rgba(10,17,24,.23);
+}
+.collectiongrid .collcard .cc-head{
+  position:relative;
+  min-height:25px;
+  padding:5px 8px 4px;
+  border:0;
+  border-bottom:1px solid rgba(170,178,179,.17);
+  background:transparent;
+  color:var(--text-secondary);
+}
+.collectiongrid .collcard .cc-head::after{
+  content:"";
+  position:absolute;
+  left:8px;
+  bottom:-1px;
+  width:23px;
+  height:2px;
+  background:var(--color-slate);
+  border-radius:2px;
+}
+.collectiongrid .collcard .cc-art{
+  height:72px;
+  margin:7px 8px 0;
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(241,228,198,.38);
+  border-radius:8px;
+  background:#0D2236;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.collectiongrid .collcard .cc-art > .card-stamp{width:100%;height:100%;border-radius:7px}
+.collectiongrid .collcard .cc-art > .card-stamp.card-stamp-fullbox .card-stamp-image{width:100%;height:100%;object-fit:cover}
+.collectiongrid .collcard .cc-body{padding:7px 9px 6px;gap:3px}
+.collectiongrid .collcard .cc-name{font-size:11px;line-height:1.16;color:var(--text-primary)}
+.collectiongrid .collcard .cc-desc{font-size:7.5px;line-height:1.32;color:var(--text-secondary)}
+.collectiongrid .collcard .cc-foot{min-height:33px;padding:5px 9px 6px;border-top-color:rgba(170,178,179,.17)}
+.collectiongrid .collcard .cc-state{font-size:6.5px;color:var(--text-secondary)}
+.collectiongrid .collcard.v1{border-color:rgba(242,74,40,.68);background:linear-gradient(145deg,rgba(242,74,40,.10),transparent 38%),linear-gradient(180deg,#202B34,#17242D)}
+.collectiongrid .collcard.v1::before{border-color:rgba(242,74,40,.22)}
+.collectiongrid .collcard.v1 .cc-head::after{background:var(--color-primary)}
+.collectiongrid .collcard.v1 .cc-art{border-color:rgba(242,74,40,.68)}
+.collectiongrid .collcard.locked{border-style:dashed;opacity:.56;filter:saturate(.35)}
+.collectiongrid .collcard.active{box-shadow:inset 0 0 0 1px rgba(242,74,40,.38),0 0 0 2px rgba(242,74,40,.18),0 7px 16px rgba(10,17,24,.22)}
+
+/* Compact active-card chips use the same framed art window at a smaller scale. */
+.pitch-overlay #cardrow .card-ico{
+  width:18px;
+  height:18px;
+  padding:1px;
+  margin-right:1px;
+  overflow:hidden;
+  border:1px solid rgba(241,228,198,.38);
+  border-radius:5px;
+  background:#0D2236;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.pitch-overlay #cardrow .card-ico > .card-stamp{width:100%;height:100%;border-radius:4px}
+.pitch-overlay #cardrow .card-ico > .card-stamp.card-stamp-fullbox .card-stamp-image{width:100%;height:100%;object-fit:cover}
+
+@media(max-width:520px){
+  #hub .cardtile{min-height:174px;border-radius:11px}
+  #hub .cardtile .ct-head{height:33px;min-height:33px;padding:5px 7px 4px}
+  #hub .cardtile .ct-body{padding:8px 8px 7px;gap:4px}
+  #hub .cardtile .ct-titlegroup{grid-template-columns:32px minmax(0,1fr);gap:7px;min-height:32px}
+  #hub .cardtile .ct-titlegroup .ct-art{width:32px;height:32px;border-radius:7px}
+  #hub .cardtile .ct-name{font-size:12px}
+  #hub .cardtile .ct-desc{font-size:8px;min-height:27px}
+  #hub .cardtile .market-card-impact{min-height:22px;padding:4px 6px;font-size:6.5px}
+  #hub .cardtile .ct-foot{min-height:37px;padding:6px 7px 7px;gap:5px}
+  #hub .cardtile .ct-contract{font-size:6.5px}
+  #hub .cardtile .ct-detail{min-height:24px;padding:0 6px;font-size:6.5px}
+  #hub[data-mobile-route="market"] #shopcards>.cardtile .ct-body{padding:6px 8px 3px!important}
+  #hub[data-mobile-route="market"] #shopcards>.cardtile .market-card-impact{margin:2px 0!important}
+  .collectiongrid .collcard .cc-art{height:64px;margin-inline:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  #hub .cardtile,#hub .cardtile:hover:not(.cant),
+  .collectiongrid .collcard,.collectiongrid .collcard:hover:not(.locked){transition:none;transform:none}
+}
+
+/* Copa Life market finish: one physical card surface, no detached tier patch. */
+#hub .cardtile{
+  --market-accent:var(--color-primary);
+  border-color:rgba(170,178,179,.34);
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.055),transparent 32%),
+    linear-gradient(180deg,#1B303D 0%,#12232F 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 8px 20px rgba(10,17,24,.24);
+}
+#hub .cardtile::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  z-index:0;
+  pointer-events:none;
+  border:1px solid color-mix(in srgb,var(--market-accent) 38%,transparent);
+  border-radius:8px;
+  clip-path:polygon(0 0,28px 0,28px 1px,calc(100% - 28px) 1px,calc(100% - 28px) 0,100% 0,100% 28px,calc(100% - 1px) 28px,calc(100% - 1px) calc(100% - 28px),100% calc(100% - 28px),100% 100%,calc(100% - 28px) 100%,calc(100% - 28px) calc(100% - 1px),28px calc(100% - 1px),28px 100%,0 100%,0 calc(100% - 28px),1px calc(100% - 28px),1px 28px,0 28px);
+  opacity:.62;
+}
+#hub .cardtile .ct-head{
+  height:31px;
+  min-height:31px;
+  padding:5px 9px 4px;
+  background:transparent!important;
+  border:0!important;
+}
+#hub .cardtile .ct-head::before{
+  content:"";
+  position:absolute;
+  left:9px;
+  right:9px;
+  bottom:3px;
+  height:1px;
+  background:linear-gradient(90deg,transparent 0 44%,rgba(242,232,207,.2) 44% 78%,transparent 78% 86%,var(--market-accent) 86% 100%);
+  opacity:.58;
+}
+#hub .cardtile .ct-head::after{
+  left:auto;
+  right:9px;
+  bottom:3px;
+  width:34px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--market-accent));
+  opacity:.76;
+}
+#hub .cardtile .ct-head-price{
+  position:relative;
+  z-index:1;
+  padding:2px 0 4px 9px;
+  border:0!important;
+  border-left:1px solid color-mix(in srgb,var(--market-accent) 72%,transparent)!important;
+  border-radius:0;
+  background:none!important;
+  box-shadow:none!important;
+  color:var(--text-primary);
+  font-size:13px;
+  letter-spacing:-.02em;
+  text-shadow:0 1px 0 rgba(0,0,0,.28);
+  clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px);
+}
+#hub .cardtile .ct-head-price::after{
+  content:"";
+  position:absolute;
+  left:4px;
+  right:0;
+  bottom:1px;
+  height:1px;
+  background:linear-gradient(90deg,var(--market-accent),transparent);
+  opacity:.8;
+}
+#hub .cardtile .ct-titlegroup .ct-art{
+  border-color:color-mix(in srgb,var(--market-accent) 48%,rgba(241,228,198,.34));
+  border-radius:9px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 2px 0 rgba(10,17,24,.38);
+}
+#hub .cardtile .market-card-impact{
+  position:relative;
+  min-height:27px;
+  padding:4px 8px;
+  border:1px solid color-mix(in srgb,var(--market-accent) 62%,rgba(255,244,225,.18));
+  border-radius:7px 3px 7px 3px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--market-accent) 88%,#F3F5F4) 0%,var(--market-accent) 76%,color-mix(in srgb,var(--market-accent) 70%,#102A42) 76% 100%);
+  color:#fff4e5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 rgba(10,17,24,.2);
+}
+#hub .cardtile .market-card-impact::after{
+  content:"";
+  position:absolute;
+  inset:4px 6px;
+  border-top:1px solid rgba(255,244,225,.22);
+  border-bottom:1px solid rgba(10,17,24,.16);
+  pointer-events:none;
+}
+#hub .cardtile .market-card-impact span{color:#fff4e5;position:relative;z-index:1}
+#hub .cardtile .market-card-impact b{color:#fff4e5}
+#hub .cardtile.is-dark{--market-accent:#F1513D;border-color:#243B49;box-shadow:0 0 0 1px rgba(241,81,61,.28),0 8px 22px rgba(10,17,24,.3);background:linear-gradient(145deg,#223743,#0E1E2A)}
+#hub .cardtile.is-dark .ct-head-price{color:#FFF0D8;border-left-color:rgba(241,81,61,.82)!important}
+#hub .cardtile.is-dark .ct-titlegroup .ct-art{border-color:rgba(241,81,61,.58)}
+#hub .cardtile.is-common{--market-accent:#F1513D}
+
+/* Contextual motion stays inside the printed art window. */
+#hub .cardtile .card-motion{position:absolute;inset:0;z-index:4;pointer-events:none}
+#hub .cardtile .card-motion-hair{left:35%;top:3%;width:25%;height:22%;inset:auto;transform-origin:72% 78%;animation:marketHairSway 2.4s ease-in-out infinite}
+#hub .cardtile .card-motion-hair::before{content:"";position:absolute;left:25%;top:18%;width:52%;height:64%;border-top:1px solid #F1E4C6;border-right:1px solid #F1E4C6;border-radius:55% 70% 0 0;transform:rotate(-24deg)}
+#hub .cardtile .card-motion-hair::after{content:"";position:absolute;right:8%;top:5%;width:24%;height:48%;border-top:1px solid #F1513D;border-radius:50%;transform:rotate(26deg)}
+#hub .cardtile .card-motion-orbit{inset:22% 7% auto;height:56%;border:1px solid rgba(241,81,61,.72);border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;transform:rotate(-18deg);animation:marketOrbitSpin 4.8s linear infinite;opacity:.76}
+#hub .cardtile .card-motion-orbit::after{content:"";position:absolute;right:13%;top:-2px;width:3px;height:3px;border-radius:50%;background:#F1513D;box-shadow:0 0 5px rgba(241,81,61,.6)}
+#hub .cardtile .card-motion-bolt{inset:1% auto auto 45%;width:12%;height:98%;background:linear-gradient(90deg,transparent 0 24%,rgba(241,81,61,.25) 35%,#F1513D 50%,rgba(255,229,198,.72) 60%,transparent 76%);clip-path:polygon(43% 0,76% 0,55% 29%,89% 29%,41% 63%,67% 63%,17% 100%,31% 66%,4% 66%,45% 33%,16% 33%);opacity:.12;filter:drop-shadow(0 0 4px rgba(241,81,61,.35));animation:marketBoltFlash 3.2s cubic-bezier(.18,.7,.24,1) infinite}
+#hub .cardtile .card-motion-sparks{inset:7% 18%;background:radial-gradient(circle at 50% 42%,rgba(255,242,217,.8) 0 1px,transparent 1.6px),radial-gradient(circle at 35% 54%,rgba(241,81,61,.9) 0 1px,transparent 1.6px),radial-gradient(circle at 66% 58%,rgba(241,81,61,.85) 0 1px,transparent 1.6px);opacity:.14;animation:marketSparksPop 3.2s ease-in-out infinite}
+@keyframes marketHairSway{0%,100%{transform:rotate(-2deg) translateX(0)}50%{transform:rotate(4deg) translateX(1px)}}
+@keyframes marketOrbitSpin{to{transform:rotate(342deg)}}
+@keyframes marketBoltFlash{0%,52%,57%,100%{opacity:.08;transform:scaleY(.92)}54%{opacity:.86;transform:scaleY(1.04)}56%{opacity:.2;transform:scaleY(.98)}}
+@keyframes marketSparksPop{0%,50%,58%,100%{opacity:.08;transform:scale(.88)}54%{opacity:.8;transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){#hub .cardtile .card-motion{animation:none!important}}
+
+/* Every market card gets a restrained, contextual motion layer. The stamped art stays
+   static and tactile; these overlays provide the card's readable micro-interaction. */
+#hub .market-card-stamp-zone .card-motion{position:absolute!important;pointer-events:none;z-index:3;color:var(--market-accent,#F1513D);mix-blend-mode:screen;opacity:.48}
+#hub .market-card-stamp-zone .card-motion-pulse{inset:20% 16%!important;border:1px solid currentColor;border-radius:50%;animation:marketPulse 2.9s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-fans{inset:23% 13%!important;background:radial-gradient(circle at 24% 62%,currentColor 0 1px,transparent 2px),radial-gradient(circle at 50% 45%,currentColor 0 1px,transparent 2px),radial-gradient(circle at 76% 62%,currentColor 0 1px,transparent 2px);animation:marketFans 2.3s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-sweep{inset:-12% -35%!important;background:linear-gradient(110deg,transparent 42%,rgba(255,244,225,.6) 49%,transparent 56%);animation:marketSweep 3.2s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-dash{inset:44% 10% auto!important;height:1px;background:repeating-linear-gradient(90deg,currentColor 0 8px,transparent 8px 15px);transform:rotate(-19deg);animation:marketDash 1.8s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-impact{inset:22% 18%!important;border:1px solid currentColor;border-radius:50%;box-shadow:0 0 0 5px rgba(241,81,61,.1),0 0 14px rgba(241,81,61,.22);animation:marketImpact 2.6s cubic-bezier(.2,.7,.3,1) infinite}
+#hub .market-card-stamp-zone .card-motion-star{inset:23% 25%!important;background:radial-gradient(circle,currentColor 0 1px,transparent 2px) center/100% 100% no-repeat;clip-path:polygon(50% 0,58% 39%,100% 50%,58% 61%,50% 100%,42% 61%,0 50%,42% 39%);animation:marketStar 2.4s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-scan{inset:34% 12% auto!important;height:1px;background:linear-gradient(90deg,transparent,currentColor 20% 80%,transparent);animation:marketScan 2.1s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-shield{inset:18% 25%!important;border:1px solid currentColor;clip-path:polygon(50% 0,90% 16%,82% 70%,50% 100%,18% 70%,10% 16%);animation:marketShield 2.8s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-speech{inset:30% 13%!important;border:1px solid currentColor;border-radius:48% 48% 48% 10%;animation:marketSpeech 2.6s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-route{inset:23% 9% 28%!important;border:1px dashed currentColor;border-left-color:transparent;border-bottom-color:transparent;border-radius:55%;transform:rotate(-16deg);animation:marketRoute 3.2s linear infinite}
+#hub .market-card-stamp-zone .card-motion-rise{inset:31% 19% 20%!important;background:linear-gradient(90deg,transparent 0 12%,currentColor 12% 19%,transparent 19% 31%,currentColor 31% 39%,transparent 39% 53%,currentColor 53% 62%,transparent 62% 76%,currentColor 76% 85%,transparent 85%);transform-origin:bottom;animation:marketRise 2.4s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-spine{inset:15% 49% 15%!important;width:2px;background:linear-gradient(180deg,transparent,currentColor 18% 82%,transparent);box-shadow:0 0 0 5px rgba(241,81,61,.08);animation:marketSpine 3.1s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-block{inset:24% 14%!important;background:linear-gradient(currentColor,currentColor) 0 33%/100% 1px no-repeat,linear-gradient(currentColor,currentColor) 0 66%/100% 1px no-repeat,linear-gradient(90deg,currentColor,currentColor) 33% 0/1px 100% no-repeat,linear-gradient(90deg,currentColor,currentColor) 66% 0/1px 100% no-repeat;opacity:.28;animation:marketBlock 2.7s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-compass{inset:20% 25%!important;border:1px solid currentColor;border-radius:50%;animation:marketCompass 3.6s linear infinite}
+#hub .market-card-stamp-zone .card-motion-compass::after{content:"";position:absolute;left:49%;top:8%;width:1px;height:84%;background:currentColor;transform:rotate(34deg)}
+#hub .market-card-stamp-zone .card-motion-wing{inset:30% 12%!important;background:linear-gradient(145deg,transparent 46%,currentColor 47% 49%,transparent 50%),linear-gradient(35deg,transparent 46%,currentColor 47% 49%,transparent 50%);animation:marketWing 2.3s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-dual{inset:30% 22%!important;background:radial-gradient(circle at 25% 50%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 75% 50%,currentColor 0 2px,transparent 3px);animation:marketDual 2.2s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-trophy{inset:20% 24%!important;border:1px solid currentColor;border-radius:48% 48% 40% 40%;box-shadow:0 8px 0 -5px currentColor;animation:marketTrophy 2.8s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-waltz{inset:22% 11%!important;border:1px solid currentColor;border-left-color:transparent;border-radius:50%;transform:rotate(18deg);animation:marketWaltz 3.6s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-receipt{inset:25% 18%!important;border:1px dashed currentColor;transform:rotate(-4deg);animation:marketReceipt 2.5s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-coin{inset:25% 37%!important;border:1px solid currentColor;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(241,81,61,.1);animation:marketCoin 2.1s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-coin::after{content:"+";position:absolute;inset:0;display:grid;place-items:center;font:700 14px/1 system-ui;color:currentColor}
+#hub .market-card-stamp-zone .card-motion-stamp{inset:25% 14%!important;border:1px solid currentColor;border-radius:4px;transform:rotate(-7deg);animation:marketStamp 2.1s steps(2,end) infinite}
+#hub .market-card-stamp-zone .card-motion-caravan{inset:38% 8% auto!important;height:1px;border-top:1px dashed currentColor;animation:marketCaravan 2.6s linear infinite}
+#hub .market-card-stamp-zone .card-motion-dice{inset:29% 33%!important;border:1px solid currentColor;border-radius:5px;transform:rotate(-12deg);animation:marketDice 2.4s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-burst{inset:23% 20%!important;background:radial-gradient(circle,currentColor 0 1px,transparent 2px);clip-path:polygon(50% 0,57% 38%,100% 50%,57% 62%,50% 100%,43% 62%,0 50%,43% 38%);animation:marketBurst 1.8s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-heartbeat{inset:46% 8% auto!important;height:18%;background:linear-gradient(155deg,transparent 0 28%,currentColor 29% 31%,transparent 32% 48%,currentColor 49% 52%,transparent 53%);animation:marketHeartbeat 1.5s linear infinite}
+#hub .market-card-stamp-zone .card-motion-warning{inset:22% 29%!important;border:1px solid currentColor;clip-path:polygon(50% 0,100% 100%,0 100%);animation:marketWarning 1.9s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-fracture{inset:10% 35%!important;background:linear-gradient(118deg,transparent 47%,currentColor 48% 50%,transparent 51%),linear-gradient(62deg,transparent 47%,currentColor 48% 50%,transparent 51%);animation:marketFracture 2.3s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-crosshair{inset:24% 25%!important;border:1px solid currentColor;border-radius:50%;animation:marketCrosshair 2.5s linear infinite}
+#hub .market-card-stamp-zone .card-motion-crosshair::after{content:"";position:absolute;left:50%;top:0;width:1px;height:100%;background:currentColor;box-shadow:0 0 0 0 currentColor;transform:rotate(90deg)}
+#hub .market-card-stamp-zone .card-motion-cash{inset:24% 12%!important;background:radial-gradient(circle at 32% 72%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 62% 46%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 82% 22%,currentColor 0 1px,transparent 2px);animation:marketCash 2.4s ease-out infinite}
+#hub .market-card-stamp-zone .card-motion-syringe{inset:35% 18%!important;height:2px;background:currentColor;transform:rotate(-28deg);animation:marketSyringe 1.9s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-target{inset:23% 22%!important;border:1px solid currentColor;border-radius:50%;box-shadow:0 0 0 5px transparent,0 0 0 6px currentColor;animation:marketTarget 2.6s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-train{inset:38% 8% auto!important;height:2px;background:linear-gradient(90deg,transparent,currentColor 18% 30%,transparent 31% 56%,currentColor 57% 70%,transparent 71%);animation:marketTrain 1.6s linear infinite}
+#hub .market-card-stamp-zone .card-motion-fate{inset:20% 12%!important;border:1px dashed currentColor;border-radius:50%;animation:marketFate 4.2s linear infinite}
+#hub .market-card-stamp-zone .card-motion-startrail{inset:18% 8%!important;background:radial-gradient(circle at 15% 70%,currentColor 0 1px,transparent 2px),radial-gradient(circle at 48% 45%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 82% 22%,currentColor 0 1px,transparent 2px);animation:marketStartrail 2.6s ease-in-out infinite}
+#hub .market-card-stamp-zone .card-motion-coinrain{inset:18% 10%!important;background:radial-gradient(circle at 22% 18%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 58% 38%,currentColor 0 2px,transparent 3px),radial-gradient(circle at 76% 72%,currentColor 0 2px,transparent 3px);animation:marketCoinrain 2.8s ease-in-out infinite}
+@keyframes marketPulse{0%,100%{opacity:.2;transform:scale(.86)}50%{opacity:.72;transform:scale(1.05)}}
+@keyframes marketFans{0%,100%{opacity:.18;transform:translateY(2px)}50%{opacity:.72;transform:translateY(-2px) scale(1.04)}}
+@keyframes marketSweep{0%,100%{opacity:0;transform:translateX(-28%)}45%,60%{opacity:.7}75%{opacity:0;transform:translateX(28%)}}
+@keyframes marketDash{0%,100%{opacity:.18;transform:translateX(-8px) rotate(-19deg)}50%{opacity:.8;transform:translateX(8px) rotate(-19deg)}}
+@keyframes marketImpact{0%,100%{opacity:.16;transform:scale(.75)}55%{opacity:.78;transform:scale(1.08)}}
+@keyframes marketStar{0%,100%{opacity:.18;transform:scale(.7) rotate(0)}50%{opacity:.8;transform:scale(1.15) rotate(20deg)}}
+@keyframes marketScan{0%,100%{opacity:.08;transform:translateY(-12px)}50%{opacity:.65;transform:translateY(36px)}}
+@keyframes marketShield{0%,100%{opacity:.18;transform:scale(.94)}50%{opacity:.64;transform:scale(1.04)}}
+@keyframes marketSpeech{0%,100%{opacity:.12;transform:scale(.92)}50%{opacity:.58;transform:scale(1.03)}}
+@keyframes marketRoute{to{transform:rotate(344deg)}}
+@keyframes marketRise{0%,100%{opacity:.18;transform:scaleY(.78)}50%{opacity:.68;transform:scaleY(1)}}
+@keyframes marketSpine{0%,100%{opacity:.16;transform:scaleY(.74)}50%{opacity:.72;transform:scaleY(1)}}
+@keyframes marketBlock{0%,100%{opacity:.16;transform:translate(0)}50%{opacity:.48;transform:translate(2px,-2px)}}
+@keyframes marketCompass{to{transform:rotate(360deg)}}
+@keyframes marketWing{0%,100%{opacity:.14;transform:translateX(-3px)}50%{opacity:.7;transform:translateX(3px)}}
+@keyframes marketDual{0%,100%{opacity:.16;transform:scale(.88)}50%{opacity:.72;transform:scale(1.13)}}
+@keyframes marketTrophy{0%,100%{opacity:.18;transform:translateY(2px)}50%{opacity:.72;transform:translateY(-2px)}}
+@keyframes marketWaltz{to{transform:rotate(378deg)}}
+@keyframes marketReceipt{0%,100%{opacity:.14;transform:rotate(-7deg) translateY(2px)}50%{opacity:.62;transform:rotate(1deg) translateY(-2px)}}
+@keyframes marketCoin{0%,100%{opacity:.16;transform:rotateY(0) scale(.86)}50%{opacity:.78;transform:rotateY(180deg) scale(1.08)}}
+@keyframes marketStamp{0%,100%{opacity:.18;transform:rotate(-7deg) scale(.94)}50%{opacity:.72;transform:rotate(-4deg) scale(1.02)}}
+@keyframes marketCaravan{0%,100%{opacity:.12;transform:translateX(-12px)}50%{opacity:.72;transform:translateX(12px)}}
+@keyframes marketDice{0%,100%{opacity:.16;transform:rotate(-12deg) translateY(2px)}50%{opacity:.72;transform:rotate(12deg) translateY(-2px)}}
+@keyframes marketBurst{0%,100%{opacity:.12;transform:scale(.7)}50%{opacity:.82;transform:scale(1.14)}}
+@keyframes marketHeartbeat{0%,100%{opacity:.14;transform:scaleX(.84)}32%{opacity:.72;transform:scaleX(1)}48%{opacity:.22;transform:scaleX(.9)}64%{opacity:.62;transform:scaleX(1)}}
+@keyframes marketWarning{0%,100%{opacity:.12;transform:translateY(1px)}50%{opacity:.72;transform:translateY(-1px)}}
+@keyframes marketFracture{0%,100%{opacity:.14;transform:translateX(-1px)}50%{opacity:.72;transform:translateX(2px)}}
+@keyframes marketCrosshair{to{transform:rotate(360deg)}}
+@keyframes marketCash{0%{opacity:.1;transform:translateY(8px)}70%{opacity:.72;transform:translateY(-8px)}100%{opacity:0;transform:translateY(-12px)}}
+@keyframes marketSyringe{0%,100%{opacity:.14;transform:translateX(-5px) rotate(-28deg)}50%{opacity:.72;transform:translateX(5px) rotate(-28deg)}}
+@keyframes marketTarget{0%,100%{opacity:.14;transform:scale(.84)}50%{opacity:.72;transform:scale(1.1)}}
+@keyframes marketTrain{0%{opacity:.08;transform:translateX(-20px)}50%{opacity:.7}100%{opacity:.08;transform:translateX(20px)}}
+@keyframes marketFate{to{transform:rotate(360deg)}}
+@keyframes marketStartrail{0%,100%{opacity:.12;transform:translate(-4px,4px)}50%{opacity:.72;transform:translate(4px,-4px)}}
+@keyframes marketCoinrain{0%{opacity:.12;transform:translateY(-5px)}55%{opacity:.72;transform:translateY(5px)}100%{opacity:.12;transform:translateY(12px)}}
+
+/* ===== Copa card face: production market implementation =====
+   The old market tile remains a compatibility shell for selectors and
+   analytics; the visible surface is now the physical 3D card below. */
+#hub #shopcards>.market-card{
+  --market-accent:#F1513D;
+  --card-rx:0deg;
+  --card-ry:0deg;
+  --card-lift:0px;
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:.63;
+  padding:0!important;
+  border:0!important;
+  border-radius:18px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+  color:#F2E8CF;
+  transform-style:preserve-3d;
+  transform:perspective(1500px) rotateX(var(--card-ry)) rotateY(var(--card-rx)) translateY(var(--card-lift));
+  transition:transform .22s cubic-bezier(.2,.72,.28,1),filter .22s ease,opacity .22s ease;
+  cursor:pointer;
+  isolation:isolate;
+}
+#hub #shopcards>.market-card::before,
+#hub #shopcards>.market-card::after{display:none!important;content:none!important}
+#hub #shopcards>.market-card:hover:not(.cant),
+#hub #shopcards>.market-card:focus-within:not(.cant){transform:perspective(1500px) rotateX(var(--card-ry)) rotateY(var(--card-rx)) translateY(-3px);filter:drop-shadow(0 24px 19px rgba(0,0,0,.34))}
+#hub #shopcards>.market-card.cant{opacity:.66;filter:saturate(.72);cursor:not-allowed}
+#hub #shopcards>.market-card.cant:hover{transform:perspective(1500px) rotateX(0) rotateY(0) translateY(0)}
+#hub #shopcards>.market-card.trade-missing{opacity:.58}
+
+#hub .market-card-edge{
+  position:absolute;
+  inset:3px -4px -4px 5px;
+  z-index:-1;
+  border-radius:18px;
+  background:linear-gradient(145deg,#F9EFDA 0 4%,#9E8C69 5% 7%,#1A2D3B 9% 100%);
+  transform:translateZ(-11px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.28),0 20px 20px rgba(0,0,0,.28);
+}
+#hub .market-card-edge::after{content:"";position:absolute;left:9%;right:14%;top:2px;height:1px;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);opacity:.72}
+#hub .market-card-face{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  border:1px solid rgba(242,232,207,.72);
+  border-radius:18px;
+  background:#081624;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(0,0,0,.42);
+  transform:translateZ(0);
+}
+#hub .market-card-face::before{content:"";position:absolute;inset:9px;border-radius:11px;pointer-events:none;z-index:4;opacity:.72;background:linear-gradient(var(--market-accent),var(--market-accent)) left top/34px 1px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) left top/1px 34px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) right top/34px 1px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) right top/1px 34px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) left bottom/34px 1px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) left bottom/1px 34px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) right bottom/34px 1px no-repeat,linear-gradient(var(--market-accent),var(--market-accent)) right bottom/1px 34px no-repeat}
+#hub .market-card-face::after{content:"";position:absolute;inset:-25%;z-index:7;pointer-events:none;opacity:0;background:linear-gradient(112deg,transparent 38%,rgba(255,255,255,.13) 47%,rgba(255,255,255,.03) 50%,transparent 58%);mix-blend-mode:screen;transform:translate3d(0,0,20px);transition:opacity .2s ease}
+#hub #shopcards>.market-card:hover .market-card-face::after,
+#hub #shopcards>.market-card:focus-within .market-card-face::after{opacity:1}
+#hub .market-card-ink{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.06),transparent 25%),linear-gradient(145deg,#102A3B 0,#081624 62%,#06121D 100%)}
+
+#hub .market-card-top{
+  position:absolute!important;
+  left:16px!important;
+  right:16px!important;
+  top:14px!important;
+  width:auto!important;
+  height:31px!important;
+  min-height:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  padding:0 2px!important;
+  z-index:6;
+  transform:translateZ(24px);
+  border:0!important;
+  border-bottom:0!important;
+  background:none!important;
+  box-shadow:none!important;
+}
+#hub .market-card-top::before{display:none!important}
+#hub .market-card-top::after{content:"";position:absolute;right:0;top:3px;width:42px;height:1px;background:linear-gradient(90deg,transparent,var(--market-accent));opacity:.72}
+#hub .market-card-top .ct-head-price{
+  position:relative;
+  z-index:1;
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:flex-end;
+  min-width:58px;
+  height:28px;
+  margin:0!important;
+  padding:0 6px 1px 12px!important;
+  border:0!important;
+  border-left:1px solid color-mix(in srgb,var(--market-accent) 82%,transparent)!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  color:#F2E8CF!important;
+  font-size:15px!important;
+  font-weight:950!important;
+  line-height:1!important;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 0 rgba(0,0,0,.38);
+  clip-path:polygon(9px 0,100% 0,100% 100%,0 100%,0 9px);
+}
+#hub .market-card-top .ct-head-price::after{content:"";position:absolute;left:4px;right:0;bottom:0;height:1px;background:linear-gradient(90deg,var(--market-accent),transparent);opacity:.78}
+#hub .market-card-currency{margin:0 1px 7px 0;font-size:9px;font-weight:800;letter-spacing:0;opacity:.72}
+
+#hub .market-card-stamp-zone{
+  position:absolute!important;
+  left:15%!important;
+  right:15%!important;
+  top:19%!important;
+  width:auto!important;
+  height:42%!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  place-items:center;
+  z-index:1;
+  transform:translateZ(14px);
+  border:0!important;
+  background:none!important;
+  box-shadow:none!important;
+}
+#hub .market-card-stamp-zone .market-card-stamp{grid-column:1!important;justify-self:stretch!important;min-width:0!important}
+#hub .market-card-stamp-zone::after{content:"";position:absolute;inset:8% -8%;border-radius:50%;border:1px solid rgba(242,232,207,.28);transform:rotate(-11deg);pointer-events:none}
+#hub .market-card-stamp-zone .market-card-stamp{position:relative!important;display:block!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+#hub .market-card-stamp-zone .market-card-stamp>.card-stamp{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transform:none!important}
+#hub .market-card-stamp-zone .market-card-stamp>.card-stamp::before,
+#hub .market-card-stamp-zone .market-card-stamp>.card-stamp::after,
+#hub .market-card-stamp-zone .market-card-stamp>.card-stamp .card-stamp-ink::before,
+#hub .market-card-stamp-zone .market-card-stamp>.card-stamp .card-stamp-ink::after{display:none!important;content:none!important}
+#hub .market-card-stamp-zone .card-stamp-ink{position:absolute!important;inset:0!important;display:block!important;background:none!important}
+#hub .market-card-stamp-zone .card-stamp-image{width:100%!important;height:100%!important;object-fit:contain!important;filter:sepia(.12) saturate(.82) contrast(1.08);mix-blend-mode:screen;opacity:.94}
+
+#hub .market-card-impact{
+  position:absolute!important;
+  left:15%!important;
+  right:15%!important;
+  top:59.5%!important;
+  height:31px!important;
+  min-height:31px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px;
+  padding:0 8px!important;
+  z-index:6;
+  border:1px solid rgba(255,244,225,.42)!important;
+  border-radius:8px 3px 8px 3px!important;
+  background:linear-gradient(135deg,#F35A44 0%,#F1513D 72%,#C84132 72% 100%)!important;
+  color:#FFF4E5!important;
+  box-shadow:0 3px 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.24),inset 0 -1px 0 rgba(112,28,21,.32)!important;
+  transform:translateZ(30px);
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.08em;
+}
+#hub .market-card-impact::before{content:"";position:absolute;inset:4px 7px;border-top:1px solid rgba(255,244,225,.24);border-bottom:1px solid rgba(111,27,20,.18);pointer-events:none}
+#hub .market-card-impact span{position:relative;z-index:1;color:#FFF4E5!important}
+#hub .market-card-impact b{position:relative;z-index:1;color:#FFF4E5!important;font-size:17px!important;letter-spacing:-.04em}
+#hub .market-card-title{position:absolute!important;left:18px!important;right:18px!important;top:68.5%!important;margin:0!important;z-index:6;color:#F2E8CF!important;font-size:clamp(15px,2.1vw,23px)!important;font-weight:950!important;line-height:1.02!important;letter-spacing:-.055em;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.24);transform:translateZ(28px);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+#hub .market-card-desc{position:absolute!important;left:20px!important;right:20px!important;top:75.5%!important;min-height:0!important;margin:0!important;z-index:6;color:#D4C7A9!important;font-size:clamp(8px,1.05vw,10px)!important;line-height:1.2!important;text-align:center;transform:translateZ(28px);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#hub .market-card-bottom{position:absolute!important;left:20px!important;right:20px!important;bottom:17px!important;width:auto!important;min-height:0!important;height:18px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px;z-index:6;border:0!important;background:none!important;transform:translateZ(26px)}
+#hub .market-card-mode{display:inline-flex!important;align-items:center;gap:6px;color:#F2E8CF!important;font-size:9px!important;font-weight:900!important;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+#hub .market-card-mode::before{content:"";width:7px;height:7px;border-radius:50%;background:#9BCAB0;box-shadow:0 0 0 2px rgba(155,202,176,.16)}
+#hub .market-card-bottom .ct-detail{min-height:0!important;height:auto!important;padding:2px 0!important;border:0!important;border-bottom:1px solid rgba(242,232,207,.38)!important;border-radius:0!important;background:none!important;color:rgba(242,232,207,.68)!important;font-size:8px!important;font-weight:900!important;letter-spacing:.14em;line-height:1!important;box-shadow:none!important}
+#hub .market-card-bottom .ct-detail:hover,#hub .market-card-bottom .ct-detail:focus-visible{border-bottom-color:var(--market-accent)!important;color:#F2E8CF!important;background:none!important;box-shadow:none!important}
+#hub .market-card .ct-detail-data{display:none!important}
+#hub .market-card .insufficient-pop{position:absolute!important;inset:auto 12px 48px!important;z-index:12;padding:7px 8px;border:1px solid rgba(241,81,61,.5);border-radius:7px;background:rgba(8,22,36,.94);color:#FFD3C7;font:800 9px/1.2 var(--mono,ui-monospace,monospace);text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+
+#hub #shopcards>.market-card.is-dark{--market-accent:#F1513D}
+#hub #shopcards>.market-card.is-dark .market-card-edge{background:linear-gradient(145deg,#35434A 0 7%,#182B39 8% 100%)}
+#hub #shopcards>.market-card.is-dark .market-card-face{border-color:rgba(242,232,207,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.44),inset 0 -1px 0 rgba(0,0,0,.46),inset 0 0 26px rgba(241,81,61,.12)}
+#hub #shopcards>.market-card.is-dark .market-card-face::before{opacity:1;box-shadow:0 0 0 2px rgba(241,81,61,.1)}
+#hub #shopcards>.market-card.market-card-light .market-card-edge{background:linear-gradient(145deg,#F9EFDA 0 5%,#B19C76 6% 8%,#1A2D3B 10% 100%)}
+#hub #shopcards>.market-card.market-card-light .market-card-face{background:#F2E8CF;border-color:rgba(8,22,36,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.66),inset 0 -1px 0 rgba(8,22,36,.24)}
+#hub #shopcards>.market-card.market-card-light .market-card-ink{background:linear-gradient(145deg,#F6ECD7,#DFCFAB)}
+#hub #shopcards>.market-card.market-card-light .market-card-title{color:#071521!important;text-shadow:none}
+#hub #shopcards>.market-card.market-card-light .market-card-desc,#hub #shopcards>.market-card.market-card-light .market-card-mode{color:#334452!important}
+#hub #shopcards>.market-card.market-card-light .market-card-mode::before{background:#2C6C55}
+#hub #shopcards>.market-card.market-card-light .market-card-top .ct-head-price{color:#071521!important;text-shadow:none}
+#hub #shopcards>.market-card.market-card-light .market-card-top::after{background:linear-gradient(90deg,transparent,#071521)}
+#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone::after{border-color:rgba(8,22,36,.28)}
+#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone .card-stamp-image{mix-blend-mode:multiply;opacity:.9}
+
+@media(max-width:560px){
+  #hub #shopcards>.market-card{border-radius:16px!important}
+  #hub .market-card-top{left:16px!important;right:16px!important;top:16px!important}
+  #hub .market-card-title{font-size:clamp(14px,4.4vw,18px)!important}
+  #hub .market-card-desc{left:17px!important;right:17px!important;font-size:8.5px!important}
+  #hub .market-card-bottom{left:17px!important;right:17px!important;bottom:15px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #hub #shopcards>.market-card{transform:none!important;transition:none!important}
+  #hub .market-card-face::after{display:none!important}
+}
+#hub[data-mobile-route="market"] #shopcards{width:100%!important;max-width:100%!important;margin-right:0!important}
+@media(min-width:700px){
+  #hub[data-mobile-route="market"] #shopcards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+}
+html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards>.market-card{height:auto!important;min-height:0!important;align-self:start!important}

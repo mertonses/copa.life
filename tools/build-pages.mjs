@@ -70,6 +70,7 @@ const SKIP_DIRS = new Set([
   ".vscode",
   "assets/chairs",
   "assets/story-icons",
+  "assets/cards/stamps/source",
   "dist",
   "node_modules",
   "outputs",
@@ -107,6 +108,8 @@ function copyDir(sourceDir, targetDir) {
     const source = path.join(sourceDir, name);
     const relative = path.relative(ROOT, source);
     if (isSkipped(relative)) continue;
+    const normalized = toPosix(relative);
+    if (normalized.startsWith("assets/cards/stamps/") && normalized.endsWith(".png")) continue;
     const target = path.join(targetDir, name);
     const stat = fs.statSync(source);
     if (stat.isDirectory()) copyDir(source, target);

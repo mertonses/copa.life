@@ -12,8 +12,15 @@ import {
   teamSnapshot
 } from "../services/copa-arena-api/src/rules.js";
 
-const RUNS=Number(process.argv.find(argument=>argument.startsWith("--runs="))?.split("=")[1]||400);
-const DECISION_RUNS=Math.min(120,Math.max(30,RUNS));
+const readCount=(prefix,fallback)=>{
+  const raw=process.argv.find(argument=>argument.startsWith(prefix))?.split("=")[1];
+  const value=Number(raw);
+  return Number.isFinite(value)&&value>=0?Math.floor(value):fallback;
+};
+// Keep the default contract check fast enough for local/CI feedback. Use
+// --runs=400 --decision-runs=120 for the extended nightly balance sweep.
+const RUNS=readCount("--runs=",120);
+const DECISION_RUNS=readCount("--decision-runs=",Math.min(24,Math.max(12,Math.ceil(RUNS/10))));
 const failures=[];
 const draftPlans=new Map();
 const strategies={
