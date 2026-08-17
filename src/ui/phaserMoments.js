@@ -65,7 +65,7 @@
   }
   async function mountPenalty(state,reveal){
     const parent=document.getElementById("phaserPenaltyStage");if(!parent)return;
-    const Phaser=await load();if(!parent.isConnected)return;destroy(penaltyGame);const colors=palette(),phase=state.phase;if(parent.parentElement)parent.parentElement.classList.add("has-phaser");
+    const Phaser=await load();if(!parent.isConnected)return;destroy(penaltyGame);const colors=palette();if(parent.parentElement)parent.parentElement.classList.add("has-phaser");
     penaltyGame=new Phaser.Game(commonConfig(Phaser,parent,720,390,{create(){
       const scene=this,g=scene.add.graphics();
       const bg=Phaser.Display.Color.HexStringToColor(colors.background).color,accent=Phaser.Display.Color.HexStringToColor(colors.primary).color;
@@ -94,27 +94,62 @@
       });
       const keeperDir=reveal&&reveal.keeper||"C",shotDir=reveal&&reveal.shot||"C";
       const keeper=scene.add.container(xs[keeperDir],214);
-      const shadow=scene.add.ellipse(0,54,82,13,0x0a1118,.34);
+      const shadow=scene.add.ellipse(0,55,88,14,0x0a1118,.38);
+      const legs=scene.add.graphics();
+      legs.lineStyle(11,0x101d28,1);
+      legs.lineBetween(-10,28,-14,51);
+      legs.lineBetween(10,28,14,51);
+      const boots=scene.add.graphics();
+      boots.fillStyle(0x101d28,1);
+      boots.fillRoundedRect(-22,48,17,7,3);
+      boots.fillRoundedRect(5,48,17,7,3);
+      const shorts=scene.add.graphics();
+      shorts.fillStyle(0x101d28,1);
+      shorts.fillRoundedRect(-23,16,46,16,5);
+      shorts.lineStyle(2,0xf3f5f4,.22);
+      shorts.lineBetween(0,18,0,30);
       const arms=scene.add.graphics();
-      arms.fillStyle(accent,1);
-      /* Keep both arms on one mirrored geometry. Rotated rectangles could round
-         their shoulder/wrist ends differently after the canvas was scaled. */
-      arms.fillPoints([{x:-17,y:-18},{x:-62,y:-7},{x:-62,y:4},{x:-17,y:-5}],true);
-      arms.fillPoints([{x:17,y:-18},{x:62,y:-7},{x:62,y:4},{x:17,y:-5}],true);
-      const torso=scene.add.polygon(0,4,[-18,-28,18,-28,25,28,-25,28],accent);
-      const shirtMark=scene.add.rectangle(0,-2,12,16,0xf3f5f4,.92);
-      const head=scene.add.circle(0,-45,13,0xd6a21f).setStrokeStyle(2,0x101d28,.65);
-      const gloveL=scene.add.circle(-62,-2,7,0xf3f5f4),gloveR=scene.add.circle(62,-2,7,0xf3f5f4);
-      const legL=scene.add.rectangle(-13,39,13,42,0x101d28).setAngle(13),legR=scene.add.rectangle(13,39,13,42,0x101d28).setAngle(-13);
-      keeper.add([shadow,legL,legR,arms,torso,shirtMark,gloveL,gloveR,head]);
+      arms.lineStyle(12,accent,1);
+      arms.lineBetween(-16,-18,-51,-3);
+      arms.lineBetween(16,-18,51,-3);
+      arms.lineStyle(3,0xf3f5f4,.55);
+      arms.lineBetween(-20,-16,-25,-14);
+      arms.lineBetween(20,-16,25,-14);
+      const gloves=scene.add.graphics();
+      gloves.fillStyle(0xf3f5f4,1);
+      gloves.fillCircle(-54,-2,8);
+      gloves.fillCircle(54,-2,8);
+      gloves.lineStyle(2,0x101d28,.28);
+      gloves.strokeCircle(-54,-2,8);
+      gloves.strokeCircle(54,-2,8);
+      const torso=scene.add.graphics();
+      torso.fillStyle(accent,1);
+      torso.fillRoundedRect(-21,-31,42,50,9);
+      torso.fillStyle(0xf3f5f4,.92);
+      torso.fillRoundedRect(-6,-25,12,22,3);
+      torso.lineStyle(3,0xf3f5f4,.78);
+      torso.lineBetween(-7,-28,0,-22);
+      torso.lineBetween(0,-22,7,-28);
+      const neck=scene.add.rectangle(0,-34,10,8,0xd6a21f);
+      const hair=scene.add.circle(0,-49,13,0x101d28,.95);
+      const head=scene.add.circle(0,-46,11,0xd6a21f).setStrokeStyle(2,0x101d28,.72);
+      const lowerBody=scene.add.container(0,0);
+      lowerBody.add([legs,boots,shorts]);
+      const upperBody=scene.add.container(0,0);
+      upperBody.add([arms,gloves,torso,neck,hair,head]);
+      keeper.add([shadow,lowerBody,upperBody]);
       const ball=scene.add.circle(reveal?xs[shotDir]:360,reveal?150:342,13,0xf3f5f4).setStrokeStyle(2,bg,1);
       scene.add.circle(reveal?xs[shotDir]-3:357,reveal?147:339,3,0x101d28,.78);
-      if(reveal&&!reduced()){ball.setPosition(360,342);keeper.setPosition(360,214);scene.tweens.add({targets:ball,x:xs[shotDir],y:reveal.type==="post"?48:142,duration:360,ease:"Cubic.easeOut"});scene.tweens.add({targets:keeper,x:xs[keeperDir],y:keeperDir==="C"?208:193,angle:keeperDir==="L"?-17:keeperDir==="R"?17:0,duration:350,ease:"Sine.easeOut"});}
+      if(reveal&&!reduced()){
+        const diveSide=keeperDir==="L"?-1:keeperDir==="R"?1:0;
+        ball.setPosition(360,342);
+        keeper.setPosition(360,214);
+        scene.tweens.add({targets:ball,x:xs[shotDir],y:reveal.type==="post"?48:142,duration:360,ease:"Cubic.easeOut"});
+        scene.tweens.add({targets:keeper,x:xs[keeperDir],y:keeperDir==="C"?208:193,angle:diveSide*8,duration:350,ease:"Sine.easeOut"});
+        scene.tweens.add({targets:upperBody,x:diveSide*6,y:-5,angle:diveSide*10,duration:320,ease:"Sine.easeOut"});
+      }
       if(reveal&&reveal.type==="goal")scene.time.delayedCall(reduced()?0:350,()=>scene.cameras.main.flash(120,78,155,101));
       if(reveal&&reveal.type==="save")scene.time.delayedCall(reduced()?0:350,()=>scene.cameras.main.shake(reduced()?0:90,.006));
-      const instruction=phase==="shoot"?(root.LANG==="tr"?"KÖŞEYİ SEÇ · ŞUT SENDE":"PICK A CORNER · YOUR KICK"):(root.LANG==="tr"?"KÖŞEYİ SEÇ · KALECİ SENSİN":"PICK A CORNER · YOU ARE THE KEEPER");
-      g.fillStyle(bg,.84);g.fillRoundedRect(210,352,300,29,14);
-      scene.add.text(360,367,instruction,{fontFamily:"monospace",fontSize:"12px",fontStyle:"bold",color:"#f3f5f4",letterSpacing:1}).setOrigin(.5);
     }}));
   }
   root.CopaPhaserMoments={load,mountDraw,animateDraw,mountPenalty,destroyAll(){destroy(drawGame);destroy(penaltyGame);drawGame=null;penaltyGame=null;}};

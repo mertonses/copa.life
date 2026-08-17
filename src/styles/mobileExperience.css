@@ -96,6 +96,14 @@
     padding-bottom:calc(var(--mobile-dock-height) + 10px);
   }
 
+  /* The dock is portaled to body, while the hub owns its own scroll surface on
+     mobile WebViews. Give that surface a real safe tail so the last Cup Road
+     cards cannot sit underneath the fixed actions. */
+  html.mobile-dock-active #hub:not(.hidden){
+    padding-bottom:calc(var(--mobile-dock-height) + 28px)!important;
+    scroll-padding-bottom:calc(var(--mobile-dock-height) + 28px);
+  }
+
   .mobile-action-dock{
     position:fixed;
     z-index:8500;

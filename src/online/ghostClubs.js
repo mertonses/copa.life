@@ -332,11 +332,13 @@
     return `<div class="meta-world-state is-${kind}"><span aria-hidden="true">${icons[kind]||"◎"}</span><h3>${title}</h3><p>${copy}</p>${action?`<button type="button" class="meta-world-action" onclick="GhostClubs.renderLeaderboard(document.getElementById('metaWorldPanel'))">${label}</button>`:""}</div>`;
   }
   function worldLoadingHTML(){
-    return `<div class="meta-world-skeleton" aria-label="${tr("Dünya sıralaması yükleniyor","Loading world rankings")}"><i></i><i></i><i></i><i></i></div>`;
+    return `<div class="meta-world-loading" role="status" aria-live="polite"><div class="meta-world-loading-copy"><span aria-hidden="true">◎</span><p><b>${tr("Dünya sıralaması yükleniyor","Loading World ranking")}</b><small>${tr("Kulüplerin güncel derecesi hazırlanıyor.","Preparing the latest club positions.")}</small></p></div><div class="meta-world-skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>`;
   }
   async function renderLeaderboard(root){
     if(!root)return;
     root.classList.add("meta-world-panel");
+    const requestId=`world-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    root.dataset.worldRequest=requestId;
     const base=apiBase();
     if(!base){
       root.innerHTML=worldStateHTML("unavailable",tr("Dünya sıralaması kullanılamıyor","World rankings are unavailable"),tr("Bu sürümde sıralama servisi yapılandırılmamış.","The ranking service is not configured in this build."),false);
@@ -347,12 +349,16 @@
       return;
     }
     root.innerHTML=worldLoadingHTML();
+    const fallbackTimer=setTimeout(()=>{
+      if(root.dataset.worldRequest===requestId&&root.querySelector(".meta-world-skeleton"))root.innerHTML=worldStateHTML("error",tr("Sıralama yanıt vermiyor","Ranking is taking too long"),tr("Sunucu yanıtı gecikti. Bağlantını kontrol edip yeniden deneyebilirsin.","The server response is delayed. Check your connection and try again."));
+    },4800);
     try{
-      const topPromise=fetchWithTimeout(base+"/v1/leaderboard?limit=100",{headers:{accept:"application/json"},cache:"no-store"});
-      const mePromise=leaderboardEnabled()?fetchWithTimeout(base+"/v1/leaderboard/me",{headers:{accept:"application/json","x-copa-client":clientId(),"x-copa-delete-token":deleteToken()},cache:"no-store"}):Promise.resolve(null);
+      const topPromise=fetchWithTimeout(base+"/v1/leaderboard?limit=100",{headers:{accept:"application/json"},cache:"no-store"},4500);
+      const mePromise=leaderboardEnabled()?fetchWithTimeout(base+"/v1/leaderboard/me",{headers:{accept:"application/json","x-copa-client":clientId(),"x-copa-delete-token":deleteToken()},cache:"no-store"},4500):Promise.resolve(null);
       const [topResponse,meResponse]=await Promise.all([topPromise,mePromise]);
       if(!topResponse.ok)throw new Error("leaderboard_unavailable");
       const top=topResponse.ok?await topResponse.json():{clubs:[]},mine=meResponse&&meResponse.ok?await meResponse.json():{profile:null,nearby:[]},profile=mine.profile;
+      if(root.dataset.worldRequest!==requestId)return;
       const joined=leaderboardEnabled();
       root.innerHTML=`<div class="world-season-head"><span><small>${tr("AKTİF SEZON","ACTIVE SEASON")}</small><b>${escapeHTML(top.season||new Date().toISOString().slice(0,7))}</b></span><span><small>${tr("DÜNYA SIRAN","WORLD RANK")}</small><b>${profile&&profile.rank?`#${profile.rank} · ${profile.season_score}`:joined?tr("İlk turunu tamamla","Complete your first run"):tr("Henüz katılmadın","Not joined yet")}</b></span></div>
         ${!joined?`<div class="world-join-card"><span><b>${tr("Topluluk sıralamasına katıl · Beta","Join the community ranking · Beta")}</b><small>${tr("Katıldıktan sonraki geçerli turların aylık Katsayını oluşturur. Geçmiş turlar gönderilmez.","Eligible runs after joining build your monthly Coefficient. Past runs are never uploaded.")}</small></span><button type="button" onclick="GhostClubs.joinLeaderboard()">${tr("SIRALAMAYA KATIL","JOIN RANKING")}</button></div>`:""}
@@ -364,8 +370,9 @@
       const adSlot=root.querySelector("#worldRankingAdSlot");
       if(adSlot&&window.CopaAds)CopaAds.mountListSlot(adSlot,"world_ranking");
     }catch(_){
+      if(root.dataset.worldRequest!==requestId)return;
       root.innerHTML=worldStateHTML("error",tr("Sıralama yüklenemedi","Ranking could not be loaded"),tr("Sunucuya şu anda ulaşılamıyor. Biraz sonra yeniden deneyebilirsin.","The server cannot be reached right now. You can try again shortly."));
-    }
+    }finally{clearTimeout(fallbackTimer);}
   }
   async function joinLeaderboard(){
     const accepted=await requestLeaderboardConsent();

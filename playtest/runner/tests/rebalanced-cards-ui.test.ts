@@ -49,7 +49,7 @@ test("Yıldız Krizi market preview shows its match-only power",async({page})=>{
   await page.evaluate(()=>{
     const game=globalThis as any;
     game.budget=100;
-    game.shopOffers=["yildiz_krizi","taraftar","genc"];
+    game.shopOffers=["yildiz_krizi","taraftar","genc","son_kredi"];
     game.shopVariants.yildiz_krizi=0;
     game.renderHub();
   });
@@ -67,19 +67,44 @@ test("Yıldız Krizi market preview shows its match-only power",async({page})=>{
   await expect(dark.locator("b")).toHaveText("+4");
 });
 
+test("market cards explain the one-card turn limit before opening a purchase preview",async({page})=>{
+  await openHub(page);
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.budget=100;
+    game.cardsBoughtThisTurn=1;
+    game.shopOffers=["genc","derbi","kara_borsa","son_kredi"];
+    game.shopVariants.genc=0;
+    game.renderHub();
+  });
+
+  await page.locator('[data-card-key="genc"]').evaluate((element:any)=>element.click());
+  await expect(page.locator("#modal")).toContainText("Bu turda 1 kart alındı");
+  await expect(page.locator("#modal .premium-shop-buy-modal")).toHaveCount(0);
+
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.closeModal();
+    game.cardsBoughtThisTurn=0;
+    game.renderHub();
+  });
+  await page.locator('[data-card-key="genc"]').evaluate((element:any)=>element.click());
+  await expect(page.locator("#modal .premium-shop-buy-modal")).toHaveCount(1);
+});
+
 test("Kurban Belli injury cost reads as one natural text flow in a narrow card",async({page})=>{
   await openHub(page);
   await page.evaluate(()=>{
     const game=globalThis as any;
     game.budget=100;
-    game.shopOffers=["kurban_belli","taraftar","genc"];
+    game.shopOffers=["kurban_belli","taraftar","genc","son_kredi"];
     game.shopVariants.kurban_belli=1;
     game.renderHub();
   });
 
   const card=page.locator(".cardtile").filter({hasText:"Kurban Belli"});
   await expect(card).toHaveCount(1);
-  const injuryLine=card.locator(".ct-cost-list li").filter({hasText:"Tur sonunda 2 oyuncu sakatlanır"});
+  const injuryLine=card.locator(".ct-detail-data .ct-cost-list li").filter({hasText:"Tur sonunda 2 oyuncu sakatlanır"});
   await expect(injuryLine).toHaveCount(1);
   const layout=await injuryLine.evaluate(element=>{
     const value=element.querySelector(".card-num") as HTMLElement;

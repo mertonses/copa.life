@@ -323,7 +323,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
       pageOverflow:document.documentElement.scrollWidth-innerWidth,
     };
   });
-  expect(marketLayout.cardWidths).toHaveLength(3);
+  expect(marketLayout.cardWidths).toHaveLength(4);
   expect(marketLayout.agentWidths).toHaveLength(4);
   expect(Math.min(...marketLayout.cardWidths),JSON.stringify(marketLayout)).toBeGreaterThanOrEqual(280);
   expect(Math.max(...marketLayout.cardWidths),JSON.stringify(marketLayout)).toBeLessThanOrEqual(480);
@@ -604,7 +604,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     await page.locator("#nativeHubNav").scrollIntoViewIfNeeded();
 
     await page.locator('#nativeHubNav [data-native-target="market"]').click();
-    await expect(page.locator("#shopcards>.cardtile")).toHaveCount(3);
+    await expect(page.locator("#shopcards>.cardtile")).toHaveCount(4);
     await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
     await capture(page,`responsive-${viewport.name}-market.png`);
     const market=await page.evaluate(()=>({
@@ -619,6 +619,16 @@ test("source-web hub routes stay bounded and keep every primary action visible",
       market.cards.every(card=>card.left>=-1&&card.right<=viewport.width+1&&card.width>=140),
       `${viewport.name}: ${JSON.stringify(market.cards)}`,
     ).toBe(true);
+    const toastLayout=await page.evaluate(()=>{
+      const notices=[...document.querySelectorAll<HTMLElement>("#toastContainer .toast")].filter(node=>node.offsetParent);
+      const label=document.querySelector<HTMLElement>("#shopLbl .shop-label-title")||document.querySelector<HTMLElement>("#shopLbl");
+      const toast=notices[0]?.getBoundingClientRect(),header=label?.getBoundingClientRect();
+      return{count:notices.length,overlapsHeader:!!(toast&&header&&toast.bottom>header.top)};
+    });
+    if(viewport.width<=900){
+      expect(toastLayout.count,`${viewport.name}: stacked toast notices`).toBeLessThanOrEqual(1);
+      expect(toastLayout.overlapsHeader,`${viewport.name}: toast overlaps market heading`).toBe(false);
+    }
 
     await page.locator('#nativeHubNav [data-native-target="training"]').click();
     await expect(page.locator("#mobileTrainingRoute")).toBeVisible();

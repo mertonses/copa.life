@@ -910,6 +910,15 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   await page.evaluate(async()=>{const game=globalThis as any;game.CopaMobileShell.newRun();await game.quickStart();game._cheatPenaltyLaunch();});
   await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
   await expect(page.locator("#phaserPenaltyStage canvas")).toBeVisible({timeout:15_000});
+  await expect(page.locator(".pen-field-instruction")).toBeVisible();
+  await expect(page.locator(".pen-field-instruction")).toContainText(/PICK A CORNER|KÖŞEYİ SEÇ/);
+  const fieldInstruction=await page.locator(".pen-field-instruction").evaluate((node:HTMLElement)=>{
+    const goal=node.closest(".pen-goal")!.getBoundingClientRect(),rect=node.getBoundingClientRect();
+    return{fontSize:Number.parseFloat(getComputedStyle(node.querySelector("span")!).fontSize),inside:rect.left>=goal.left&&rect.right<=goal.right&&rect.top>=goal.top&&rect.bottom<=goal.bottom,stageRole:document.querySelector("#phaserPenaltyStage")?.getAttribute("role")};
+  });
+  expect(fieldInstruction.fontSize).toBeGreaterThanOrEqual(9);
+  expect(fieldInstruction.inside).toBe(true);
+  expect(fieldInstruction.stageRole).toBe("img");
   await expectSurfaceFit(page,".pen-modal");
   fs.mkdirSync(visualDir,{recursive:true});
   await page.locator("#phaserPenaltyStage canvas").screenshot({path:path.join(visualDir,"09a-phaser-penalty-keeper-idle.png")});
@@ -943,7 +952,26 @@ test("Phaser penalty canvas keeps ball and keeper directions tied to the core re
   expect(result.outcomeClass).toContain(result.favorable?"is-positive":"is-negative");
   if(result.favorable)expect(result.outcomeBackground).toBe("rgb(78, 155, 101)");
   else expect(result.outcomeBackground).toBe("rgb(218, 61, 46)");
+  await expect(page.locator(".pen-outcome b")).toContainText(/YOUR SHOT|OPPONENT SHOT|SENİN ŞUTUN|RAKİP ŞUTU/);
   await capture(page,"09-phaser-penalty.png");
+});
+
+test("narrow phone penalty controls keep readable one-column actions",async({page},testInfo)=>{
+  test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
+  await reset(page);
+  await page.setViewportSize({width:360,height:800});
+  await page.goto("/?native-game=1&visual=penalties-narrow",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{const game=globalThis as any;game.CopaMobileShell.newRun();await game.quickStart();game._cheatPenaltyLaunch();});
+  await expect(page.locator(".pen-modal")).toBeVisible({timeout:15_000});
+  await expectSurfaceFit(page,".pen-modal");
+  const layout=await page.locator(".pen-dir-grid").evaluate((grid:HTMLElement)=>{
+    const buttons=[...grid.querySelectorAll<HTMLElement>(".pen-dir-btn")],rects=buttons.map(button=>button.getBoundingClientRect());
+    return{columns:getComputedStyle(grid).gridTemplateColumns.split(" ").length,rows:new Set(rects.map(rect=>Math.round(rect.top))).size,overflow:grid.scrollWidth-grid.clientWidth,minFont:Math.min(...buttons.map(button=>Number.parseFloat(getComputedStyle(button).fontSize)))};
+  });
+  expect(layout.columns).toBe(1);
+  expect(layout.rows).toBe(3);
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.minFont).toBeGreaterThanOrEqual(10);
 });
 
 test("native run restart returns to the Life and Arena mode choice",async({page},testInfo)=>{

@@ -97,6 +97,47 @@ function sfxArenaFound(){if(muted)return false;const c=ac();if(!c)return false;c
 function sfxGoal(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;/* crowd roar */const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();src.buffer=noiseBuf(c,1.4);src.loop=true;f.type="bandpass";f.frequency.value=480;f.Q.value=0.6;g.gain.setValueAtTime(0.001,t);g.gain.linearRampToValueAtTime(0.065,t+0.18);g.gain.setValueAtTime(0.055,t+0.9);g.gain.exponentialRampToValueAtTime(0.001,t+1.4);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);src.stop(t+1.5);/* fanfare */[0,0.14,0.28,0.42].forEach((dt,i)=>{const freq=[659,784,988,1319][i];const o2=c.createOscillator(),g2=c.createGain();o2.type="triangle";o2.frequency.value=freq;g2.gain.setValueAtTime(0.001,t+dt);g2.gain.linearRampToValueAtTime(0.04,t+dt+0.06);g2.gain.exponentialRampToValueAtTime(0.001,t+dt+0.28);o2.connect(g2);g2.connect(c.destination);o2.start(t+dt);o2.stop(t+dt+0.3);});}
 function sfxInjury(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;/* thud */const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();src.buffer=noiseBuf(c,0.12);f.type="lowpass";f.frequency.value=160;g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);/* low groan */const o=c.createOscillator(),g2=c.createGain();o.type="sine";o.frequency.setValueAtTime(140,t+0.06);o.frequency.exponentialRampToValueAtTime(80,t+0.4);g2.gain.setValueAtTime(0.001,t+0.06);g2.gain.linearRampToValueAtTime(0.022,t+0.12);g2.gain.exponentialRampToValueAtTime(0.001,t+0.4);o.connect(g2);g2.connect(c.destination);o.start(t+0.06);o.stop(t+0.42);}
 function sfxCard(){if(muted)return;const c=ac();if(!c)return;const t=c.currentTime;/* quick sharp swipe */const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();src.buffer=noiseBuf(c,0.05);f.type="highpass";f.frequency.value=3200;g.gain.setValueAtTime(0.035,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);click(c,t+0.04,880,0.022,0.06);}
+const MARKET_SFX_PROFILES={
+ taraftar:{tones:[330,440,554],type:"triangle",step:.06},genc:{tones:[392,523,659],type:"triangle",step:.075},ch_momentum:{tones:[294,370,494],type:"sine",step:.06},
+ kontra:{tones:[740,440,880],type:"square",step:.045},buyuk_mac:{tones:[220,330,660],type:"sawtooth",step:.06,noise:"impact"},yildiz:{tones:[523,659,784,1047],type:"triangle",step:.07},
+ otobus:{tones:[110,146,196],type:"sine",step:.08},kaleci_kalesi:{tones:[174,220,261],type:"sine",step:.09,noise:"impact"},mac_sozu:{tones:[262,330,392],type:"triangle",step:.08},
+ anadolu:{tones:[196,294,392],type:"triangle",step:.07},altyapi_plani:{tones:[262,330,523],type:"sine",step:.07},tecrubeli_omurga:{tones:[147,196,247],type:"sine",step:.08},
+ yerli_blok:{tones:[196,247,294],type:"sine",step:.07,noise:"impact"},kaptanin_karari:{tones:[330,392,494],type:"triangle",step:.08},kanat_akini:{tones:[440,554,698],type:"square",step:.045},
+ cift_forvet:{tones:[220,330,440],type:"sawtooth",step:.055},derbi:{tones:[98,196,740],type:"sawtooth",step:.055,noise:"crack"},final_provasi:{tones:[294,440,587],type:"triangle",step:.07},
+ son_dans:{tones:[440,523,659],type:"sine",step:.09},taksit_transfer:{tones:[196,247,330],type:"sine",step:.08},son_kredi:{tones:[262,330,392],type:"triangle",step:.07},
+ kara_borsa:{tones:[660,523,330],type:"sine",step:.075,noise:"rustle",drop:true},sahte_evrak:{tones:[330,247,196],type:"square",step:.06,drop:true},
+ deplasman_kafilesi:{tones:[294,370,494],type:"sine",step:.07},kumarbaz:{tones:[494,659,494,784],type:"triangle",step:.055},gecici_prim:{tones:[523,659,784],type:"square",step:.045},
+ kisa_kamp:{tones:[196,262,330],type:"sine",step:.08},doping:{tones:[110,220,440],type:"sawtooth",step:.06,noise:"rustle"},kriz:{tones:[247,196,147],type:"sawtooth",step:.07,drop:true},
+ kurban_belli:{tones:[330,262,196],type:"sine",step:.075,drop:true},primler_yatinca:{tones:[392,523,659],type:"triangle",step:.07},vur_igneyi:{tones:[880,220],type:"square",step:.05,noise:"impact",drop:true},
+ bu_adam:{tones:[330,440,554],type:"sawtooth",step:.055},gec_gec:{tones:[110,146,220],type:"triangle",step:.08},nasip_kismet:{tones:[392,330,494,262],type:"sine",step:.06},
+ yildiz_krizi:{tones:[784,659,523],type:"triangle",step:.06,drop:true},kasiga_para:{tones:[660,784,988],type:"sine",step:.05}
+};
+function sfxMarketCard(key){
+ if(muted)return;
+ const c=ac();if(!c)return;
+ const profile=MARKET_SFX_PROFILES[String(key||"")]||MARKET_SFX_PROFILES.son_kredi;
+ const t=c.currentTime,step=profile.step||.07,duration=profile.duration||.22,peak=profile.peak||.025;
+ profile.tones.forEach((frequency,index)=>{
+   const o=c.createOscillator(),g=c.createGain(),at=t+index*step;
+   o.type=profile.type||"sine";
+   o.frequency.setValueAtTime(frequency,at);
+   if(profile.drop)o.frequency.exponentialRampToValueAtTime(Math.max(36,frequency*.78),at+duration*.78);
+   g.gain.setValueAtTime(.0001,at);
+   g.gain.exponentialRampToValueAtTime(peak,at+.01);
+   g.gain.exponentialRampToValueAtTime(.0001,at+duration);
+   o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+duration+.015);
+ });
+ if(profile.noise){
+   const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+   src.buffer=noiseBuf(c,profile.noise==="impact"?.09:profile.noise==="crack"?.1:.06);
+   f.type=profile.noise==="impact"?"lowpass":"highpass";
+   f.frequency.value=profile.noise==="rustle"?2200:profile.noise==="crack"?1200:profile.noise==="impact"?480:900;
+   const at=t+(profile.noise==="crack"?.05:0),vol=profile.noise==="impact"?.028:profile.noise==="crack"?.035:.018;
+   g.gain.setValueAtTime(vol,at);g.gain.exponentialRampToValueAtTime(.0001,at+(profile.noise==="impact"?.12:profile.noise==="crack"?.11:.06));
+   src.connect(f);f.connect(g);g.connect(c.destination);src.start(at);
+ }
+ window._copaMarketSfxLast=String(key||"");
+}
 function sfxDrawPick(){if(typeof muted!=="undefined"&&muted)return;const c=ac();if(!c)return;const t=c.currentTime;[260,330,410].forEach((f,i)=>click(c,t+i*.045,f,.022,.045));}
 function sfxDrawPlace(isPlayer){if(typeof muted!=="undefined"&&muted)return;const c=ac();if(!c)return;const t=c.currentTime;click(c,t,isPlayer?760:610,.035,.07);click(c,t+.055,isPlayer?1080:820,.022,.09);}
 function sfxDrawComplete(){if(typeof muted!=="undefined"&&muted)return;const c=ac();if(!c)return;const t=c.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain(),at=t+i*.085;o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(.028,at+.012);g.gain.exponentialRampToValueAtTime(.0001,at+.22);o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+.24);});}

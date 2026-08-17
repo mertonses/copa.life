@@ -216,7 +216,7 @@
     }
   };
 
-  let mode="quick",product="life",activeByProduct={life:0,arena:0},searchQuery="",tipObserver=null,tipNode=null,tipTarget=null,tipKey="",tipCooldownUntil=0;
+  let mode="quick",product="life",activeByProduct={life:0,arena:0},searchQuery="",tipObserver=null,tipNode=null,tipTarget=null,tipKey="",tipCooldownUntil=0,tipResizeBound=false;
   const currentLang=()=>typeof LANG!=="undefined"?LANG:"en";
   const lang=()=>COPY[currentLang()]||COPY.en;
   const ui=()=>UI[currentLang()]||UI.en;
@@ -229,6 +229,16 @@
   };
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const visible=node=>!!(node&&node.isConnected&&!node.classList.contains("hidden")&&node.getClientRects().length);
+  const viewportMetrics=()=>({width:Number((root.visualViewport&&root.visualViewport.width)||root.innerWidth),height:Number((root.visualViewport&&root.visualViewport.height)||root.innerHeight)});
+  const inViewport=node=>{
+    if(!visible(node))return false;
+    const rect=node.getBoundingClientRect(),viewport=viewportMetrics();
+    if(rect.width<1||rect.height<1)return false;
+    const visibleWidth=Math.min(rect.right,viewport.width)-Math.max(rect.left,0);
+    const visibleHeight=Math.min(rect.bottom,viewport.height)-Math.max(rect.top,0);
+    return visibleWidth>=Math.min(24,rect.width*.25)&&visibleHeight>=Math.min(24,rect.height*.25);
+  };
+  const activeTipTarget=(target,screen)=>inViewport(target)&&inViewport(screen);
   const currentProduct=()=>document.body.classList.contains("arena-active")||document.body.dataset.copaMode==="arena"?"arena":"life";
   const contextualTipsAllowed=()=>!document.body.classList.contains("arena-active");
   const analytics=(event,extra={})=>{try{if(global.CopaAnalytics)global.CopaAnalytics.track(event,Object.assign({guide_product:product,guide_view:mode},extra));}catch(_){}};
@@ -459,6 +469,22 @@
     dismissTip(false);
     analytics("guide_tips_reset");
   }
+  function positionCoachmark(){
+    if(!tipNode)return;
+    if(!inViewport(tipTarget)){dismissTip();return;}
+    const targetRect=tipTarget&&tipTarget.getBoundingClientRect();
+    const margin=12,topSafe=Math.max(8,Number((root.visualViewport&&root.visualViewport.offsetTop)||0)+8);
+    const tipRect=tipNode.getBoundingClientRect();
+    if(!targetRect||targetRect.width<1||targetRect.height<1){dismissTip();return;}
+    const {height:viewportHeight,width:viewportWidth}=viewportMetrics();
+    let top=targetRect.bottom+margin;
+    if(top+tipRect.height>viewportHeight-margin)top=targetRect.top-tipRect.height-margin;
+    top=Math.max(topSafe,Math.min(top,viewportHeight-tipRect.height-margin));
+    let left=targetRect.left;
+    left=Math.max(margin,Math.min(left,viewportWidth-tipRect.width-margin));
+    tipNode.style.top=`${Math.round(top)}px`;tipNode.style.left=`${Math.round(left)}px`;tipNode.style.right="auto";tipNode.style.bottom="auto";
+    tipNode.dataset.anchored="true";
+  }
   function showTip(key,target){
     const c=lang(),tip=c.tips[key];
     if(!contextualTipsAllowed()||!tip||tipNode||!target)return;
@@ -470,6 +496,8 @@
     tipNode.setAttribute("role","status");
     tipNode.innerHTML=`<button type="button" class="copa-coachmark-x" aria-label="${esc(c.close)}">×</button><span>${esc(tip[0])}</span><p>${esc(tip[1])}</p><button type="button" class="copa-coachmark-ok">${esc(c.gotIt)}</button>`;
     document.body.appendChild(tipNode);
+    if(!tipResizeBound){root.addEventListener("resize",positionCoachmark,{passive:true});root.addEventListener("scroll",positionCoachmark,{passive:true,capture:true});root.visualViewport?.addEventListener("resize",positionCoachmark,{passive:true});tipResizeBound=true;}
+    root.requestAnimationFrame(positionCoachmark);
     tipNode.querySelector(".copa-coachmark-x")?.addEventListener("click",()=>dismissTip(false));
     tipNode.querySelector(".copa-coachmark-ok")?.addEventListener("click",()=>dismissTip(true));
   }
@@ -480,7 +508,7 @@
       if(tipNode)dismissTip();
       return;
     }
-    if(tipNode)return;
+    if(tipNode){if(!inViewport(tipTarget))dismissTip();return;}
     const state=readContext();
     const candidates=[
       ["setup",document.getElementById("formpick"),document.getElementById("intro")],
@@ -490,7 +518,7 @@
       ["injury",document.getElementById("injbar"),document.getElementById("hub")],
       ["table",document.querySelector("#tournamentHubPanel .tg-table"),document.getElementById("hub")]
     ];
-    const match=candidates.find(([key,target,screen])=>!state[key]&&visible(target)&&visible(screen));
+    const match=candidates.find(([key,target,screen])=>!state[key]&&activeTipTarget(target,screen));
     if(match)showTip(match[0],match[1]);
   }
   function initContextualTips(){
@@ -498,7 +526,7 @@
     if(!contextualTipsAllowed()){dismissTip();return;}
     if(tipObserver)return;
     tipObserver=new MutationObserver(()=>setTimeout(scanContext,120));
-    tipObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+    tipObserver.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class","data-mobile-route","aria-hidden"]});
     setTimeout(scanContext,600);
   }
 

@@ -53,7 +53,7 @@
 </script>
 <script>
 if("serviceWorker"in navigator){
-  navigator.serviceWorker.register("/sw.js?v=20260720-landing-tactics3").then(reg=>reg.update()).catch(()=>{});
+  navigator.serviceWorker.register("/sw.js?v=20260817-cardface2").then(reg=>reg.update()).catch(()=>{});
 }
 </script>
 
@@ -91,7 +91,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260727-balance-cleanup1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260805-effect-summary1">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260817-cardface2">
 <link rel="stylesheet" href="src/styles/match.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
@@ -463,9 +463,9 @@ try{
 <script src="src/balance/economy.js?v=20260712f"></script>
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
-<script src="src/audio/sfx.js?v=20260730-country-unified1"></script>
+<script src="src/audio/sfx.js?v=20260817-cardface2"></script>
 <script src="src/online/ghostClubs.js?v=20260727-balance-v5"></script>
-<script src="src/ui/hub.js?v=20260727-card-readability1"></script>
+<script src="src/ui/hub.js?v=20260817-cardface2"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260729-browser-settings1"></script>
 <script>
@@ -474,7 +474,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   const style=document.createElement("link"),script=document.createElement("script");
   let pending=2;const done=()=>{pending--;if(pending===0)resolve();};
   style.rel="stylesheet";
-  style.href=platform==="web"?"src/styles/webOnly.css?v=20260805-five-tab-nav1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
+  style.href=platform==="web"?"src/styles/webOnly.css?v=20260817-cardface2":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
   script.src="src/ui/mobileGameSystems.js?v=20260812-settings-fix1";
   script.onload=done;script.onerror=done;
@@ -573,7 +573,7 @@ function _renderFreeAgents(){
     const playerName=_freeAgentDisplayName(fullName);
     const powerWord=tr?"Güç":"Power";
     const lock=`<div class="free-agent-lock${cant?"":" hidden"}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${lockReason}</span></div>`;
-    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true">${monogram}</div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div>`;
+    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="ct-head"><span class="ct-rar var-badge var-2">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-icon free-agent-monogram" aria-hidden="true"><span class="free-agent-monogram-label">${monogram}</span></div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--border-subtle);margin-top:10px;opacity:.5"></div>`;
 }
@@ -1482,15 +1482,23 @@ document.addEventListener("contextmenu",function(e){if(e.target.tagName==="IMG"|
 
 /* ===== shop card confirm ===== */
 function confirmBuyCard(k,overridePrice){
+  if(typeof buyCard!=="function")return;
+  if(cardsBoughtThisTurn>=1){showModal(`<div style="padding:18px 16px 14px"><div class="kithdr">${CopaText("Bu turda 1 kart alındı","Card already bought this turn")}</div><div class="kitsub" style="margin:8px 0 16px">${CopaText("Her turda yalnızca 1 kart satın alabilirsin.","You can only buy 1 card per turn.")}</div><div><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${CopaText("Tamam","OK")}</button></div></div>`);return;}
   if(k==="vur_igneyi"&&(typeof injuredIdx==="undefined"||injuredIdx<0)){showModal(`<div style="padding:18px 16px 14px"><div class="kithdr">⚠️ ${CopaText("Sakat Oyuncu Yok","No Injured Player")}</div><div class="kitsub" style="margin:8px 0 16px">${CopaText("Vur İğneyi için sahada sakat oyuncu olmalı.","An injured player must be in your squad to use this card.")}</div><div><button class="btn btn-ghost" onclick="closeModal()" style="width:100%">${CopaText("Tamam","OK")}</button></div></div>`);return;}
   const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;cardVariant[k]=sv;const _basePr=cardPrice(k);cardVariant[k]=oldV;
   const _memDisc=typeof _cardMemDiscount==="function"&&_cardMemDiscount(k);
   const floor=typeof CARD_PRICE_FLOOR==="number"?CARD_PRICE_FLOOR:2;
   const pr=overridePrice!==undefined?overridePrice:(_memDisc?(_basePr<=0?0:Math.max(floor,Math.ceil(_basePr*0.8))):_basePr);
-  if(!(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(pr,"card",{card:k,variant:sv}):canAffordCost(pr))){showToast(CopaText("Bu alım güven kaybından sonra borç limitini aşar.","This purchase would cross the debt limit after the trust loss."),{type:"warning"});return;}const nm=L().cards[k].n;
+  if(!(typeof canAffordChairmanSpend==="function"?canAffordChairmanSpend(pr,"card",{card:k,variant:sv}):canAffordCost(pr))){showToast(CopaText("Bu alım güven kaybından sonra borç limitini aşar.","This purchase would cross the debt limit after the trust loss."),{type:"warning"});return;}const nm=L().cards[k].n;if(typeof sfxMarketCard==="function")sfxMarketCard(k);
   const _memNote=_memDisc?`<div style="font-family:var(--mono);font-size:9px;color:var(--color-primary);margin-top:4px">↩ ${CopaText("Önceki tur indirimi -20%","Previous run discount -20%")}</div>`:"";
-  const _chairLoss=typeof chairmanSpendTrustLoss==="function"?chairmanSpendTrustLoss(pr,"card",{card:k,variant:sv}):0,_projectedTrust=Math.max(0,chairTrust-_chairLoss),_chairNote=_chairLoss?`<div class="chair-consult-note warn">${CopaText(`Pinti kuralı: güven ${chairTrust}/3 → ${_projectedTrust}/3 · yeni limit ${runMoney(chairmanSackLimitForTrust(_projectedTrust))}`,`Miser rule: trust ${chairTrust}/3 → ${_projectedTrust}/3 · new limit ${runMoney(chairmanSackLimitForTrust(_projectedTrust))}`)}</div>`:"";
-  showModal(`<div class="shop-buy-modal"><div class="kithdr">${CopaText("Kart Satın Al","Buy Card")}</div><div class="kitsub">${nm} · ${pr<=0?(CopaText("Ücretsiz","Free")):"€"+pr+"M"}</div>${_memNote}${_chairNote}<div class="shop-buy-actions"><button class="btn btn-primary" onclick="closeModal();buyCard('${k}',${pr})"><span class="btn-label">${CopaText("Satın Al","Buy")}</span><span class="btn-icon" aria-hidden="true">✓</span></button><button class="btn btn-ghost" onclick="closeModal()"><span class="btn-label">${CopaText("Vazgeç","Cancel")}</span></button></div></div>`);}
+   const _chairLoss=typeof chairmanSpendTrustLoss==="function"?chairmanSpendTrustLoss(pr,"card",{card:k,variant:sv}):0,_projectedTrust=Math.max(0,chairTrust-_chairLoss),_chairNoteLimit=chairmanSackLimitForTrust(_projectedTrust),_chairNote=_chairLoss?`<div class="chair-consult-note warn">${CopaText("Pinti kuralı: güven "+chairTrust+"/3 → "+_projectedTrust+"/3 · yeni limit "+runMoney(_chairNoteLimit),"Miser rule: trust "+chairTrust+"/3 → "+_projectedTrust+"/3 · new limit "+runMoney(_chairNoteLimit))}</div>`:"";
+  const _cardDesc=formatCardDesc(shopCardDesc(k,variantDesc(L().cards[k].d,sv)||shortCardText(k,picksBySlot.filter(Boolean)),sv));
+  const _powerDelta=Number((simulateShopPower(k)||{}).delta)||0;
+  const _impactScope=instantShopPowerDelta(k,sv)!==null?(LANG==="tr"?"BU MAÇ":"THIS MATCH"):(LANG==="tr"?"İLK 11":"STARTING XI");
+  const _riskText=/(%|risk|ceza|masraf|ödem|borç)/i.test(_cardDesc)?_cardDesc:"";
+   const _stampClass=sv===1?"stamp-popup stamp-tile stamp-dark":"stamp-popup stamp-tile stamp-base";
+   const _riskBadge=_riskText?`<div class="shop-buy-risk">${CopaText("Risk açıkça yazıyor","Risk disclosed")}</div>`:"";
+   showModal(`<div class="shop-buy-modal premium-shop-buy-modal"><button class="modal-x" onclick="closeModal()" aria-label="${CopaText("Kapat","Close")}">&times;</button><div class="shop-buy-kicker">${CopaText("PAZAR · KART ÖNİZLEMESİ","MARKET · CARD PREVIEW")}</div><div class="shop-buy-head"><div class="shop-buy-art">${cardStampMarkup(k,L().cards[k].i,_stampClass)}</div><div><h2>${nm}</h2><p>${_impactScope} <b class="${_powerDelta>=0?"is-positive":"is-negative"}">${_powerDelta>=0?"+":""}${_powerDelta}</b></p></div></div><div class="shop-buy-price"><small>${CopaText("FİYAT","PRICE")}</small><strong>${pr<=0?CopaText("Ücretsiz","Free"):"€"+pr+"M"}</strong></div><div class="shop-buy-copy">${_cardDesc}</div>${_riskBadge}${_memNote}${_chairNote}<div class="shop-buy-actions"><button class="btn btn-primary" onclick="closeModal();buyCard('${k}',${pr})"><span class="btn-label">${CopaText("Satın Al","Buy")}</span><span class="btn-icon" aria-hidden="true">✓</span></button><button class="btn btn-ghost" onclick="closeModal()"><span class="btn-label">${CopaText("Vazgeç","Cancel")}</span></button></div></div>`);}
 
 function panicContinue(){closeModal();if(remaining>0)loadRollStage();else{$("ddbanner").classList.add("hidden");showPostcard(tournamentFormat==="groups32_v2"?startTournamentDraw:enterHub);}}
 function panicBuy(){panicCount++;const uf=unfilled();if(!uf.length){loadRollStage();return;}const idx=rnd(uf),pos=slots[idx][0];const o=fabPlayer(pos,60,64);o.price=Math.min(o.price,budget);fillSlot(idx,o);const x=L();pushFeed(" "+x.panicFeed,"lose");sfxGrumble();showModal(`<div class="bulletin"><div class="bhead"><span>${x.panicHead}</span><span>${x.rounds[round-1]}</span></div><div class="bmascot"></div><div class="bhl down">${x.panicHead}</div><div class="bbody">${x.panicMsg(surOf(o),o.ov,(x.pos[pos]||pos))}</div><div class="bact"><button class="btn btn-primary" onclick="panicContinue()">${x.presClose}</button></div></div>`);}
@@ -1734,6 +1742,9 @@ function showFx(cb){
 function showToast(msg,{type="default",duration=2600}={}){
   let c=document.getElementById("toastContainer");
   if(!c){c=document.createElement("div");c.id="toastContainer";document.body.appendChild(c);}
+  c.setAttribute("role","status");c.setAttribute("aria-live","polite");c.setAttribute("aria-atomic","false");
+  const compact=!!(window.matchMedia&&window.matchMedia("(max-width:900px)").matches)||window.innerWidth<=900;
+  if(compact)[...c.querySelectorAll(".toast")].forEach(item=>item.remove());
   const t=document.createElement("div");
   t.className="toast"+(type==="info"?" toast-info":"");
   t.textContent=msg;
@@ -3778,10 +3789,11 @@ function _penLogWord(type){
 function _penStatusText(type,byUser){return _penLogWord(type)+"!";}
 function _penHeadline(type,userShot){
   const tr=LANG==="tr";
-  if(type==="goal")return userShot?(tr?"GOL!":"GOAL!"):(tr?"RAKİP GOL ATTI":"OPPONENT SCORES");
-  if(type==="save")return userShot?(tr?"ŞUTUN KURTARILDI!":"YOUR SHOT WAS SAVED!"):(tr?"KURTARDIN!":"YOU SAVED IT!");
-  if(type==="post")return tr?"DİREKTEN DÖNDÜ!":"OFF THE POST!";
-  return userShot?(tr?"DIŞARI!":"WIDE!"):(tr?"RAKİP KAÇIRDI!":"THEY MISSED!");
+  const actor=userShot?(tr?"SENİN ŞUTUN":"YOUR SHOT"):(tr?"RAKİP ŞUTU":"OPPONENT SHOT");
+  if(type==="goal")return actor+(tr?" · GOL":" · GOAL");
+  if(type==="save")return actor+(tr?" · KURTARILDI":" · SAVED");
+  if(type==="post")return actor+(tr?" · DİREK":" · POST");
+  return actor+(tr?" · DIŞARI":" · WIDE");
 }
 function _penRevealDesc(r){
   const tr=LANG==="tr";
@@ -3845,6 +3857,9 @@ function _renderPenaltyModal(){
   const clsKeeper=reveal?(" is-keeper-"+reveal.keeper):(s.phase==="save"?" is-ready":"");
   /* zone highlight: where the ball went + where the keeper dove */
   const goalZoneCls=reveal?(" show-ball "+reveal.type+" ball-"+reveal.shot+" gk-"+reveal.keeper):"";
+  const fieldInstruction=shootPhase
+    ?(tr?"KÖŞEYİ SEÇ · ŞUT SENDE":"PICK A CORNER · YOUR KICK")
+    :(tr?"KÖŞEYİ SEÇ · KALECİ SENSİN":"PICK A CORNER · YOU ARE THE KEEPER");
   /* the goal scene — keeper always faces us; frame with posts, crossbar and net */
   const goalHtml="<div class=\"pen-goal"+goalZoneCls+"\"><div id=\"phaserPenaltyStage\" role=\"application\"></div>"
     +"<div class=\"pen-goalframe\"><span class=\"pen-crossbar\"></span><span class=\"pen-post pen-post-l\"></span><span class=\"pen-post pen-post-r\"></span><div class=\"pen-net\"></div></div>"
@@ -3885,6 +3900,13 @@ function _renderPenaltyModal(){
   const crowdHtml=reveal?"<div class=\"pen-crowd "+reveal.type+"\" aria-hidden=\"true\"></div>":"";
   const rootCls="pen-modal "+(done?"is-done":shootPhase?"is-shoot":"is-save")+((sudden||s.sudden)?" is-sudden":"");
   showModal("<div class=\""+rootCls+"\">"+crowdHtml+"<div class=\"pen-head\"><div class=\"pen-kicker\"><span>"+ctxLbl+"</span><span class=\"pen-kickno\">"+roundLbl+"</span></div>"+atmosphere+"<div class=\"pen-score\"><span>"+clip(s.home,22)+"</span><b>"+s.homeGoals+" - "+s.awayGoals+"</b><span>"+clip(s.away,22)+"</span></div>"+(sudden||s.sudden?"<div class=\"pen-sudden\">"+(tr?"ANİ ÖLÜM":"SUDDEN DEATH")+"</div>":"")+"<div class=\"pen-phase\"><b>"+phaseText+"</b></div></div>"+actorLine+goalHtml+outcomeHtml+"<div class=\"pen-slots\"><div class=\""+(activeHome?"is-active":"")+"\"><span>"+clip(s.home,20)+homeStreakBadge+"</span>"+_penDots(s.homeShots,s.home,activeHome)+"</div><div class=\""+(activeAway?"is-active":"")+"\"><span>"+clip(s.away,20)+awayStreakBadge+"</span>"+_penDots(s.awayShots,s.away,activeAway)+"</div></div>"+tensionHtml+actionDock+"</div>",{dismissOnEscape:false});
+  const fieldNode=document.querySelector(".pen-modal .pen-goal");
+  if(fieldNode)fieldNode.insertAdjacentHTML("beforeend","<div class=\"pen-field-instruction\"><span>"+fieldInstruction+"</span></div>");
+  const fieldStage=document.getElementById("phaserPenaltyStage");
+  if(fieldStage){
+    fieldStage.setAttribute("role","img");
+    fieldStage.setAttribute("aria-label",tr?"Penaltı sahası. Yön seçimi aşağıdaki butonlardan yapılır.":"Penalty scene. Choose a direction with the buttons below.");
+  }
   if(window.CopaPhaserMoments)CopaPhaserMoments.mountPenalty(s,reveal).catch(()=>{});
 }
 /* Hover a direction button → highlight the matching goal zone (preview) */
