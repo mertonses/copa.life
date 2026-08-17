@@ -113,6 +113,51 @@ test("market stays capped at three offers and keeps stamp art transparent",async
   expect(result.opaqueStampSurfaces).toBe(0);
 });
 
+test("all market cards keep their original fullbox art and receive a contextual motion layer",async({page})=>{
+  await openHub(page);
+  const keys=[
+    "taraftar","genc","ch_momentum","kontra","buyuk_mac","yildiz","otobus","kaleci_kalesi","mac_sozu","anadolu","altyapi_plani",
+    "tecrubeli_omurga","yerli_blok","kaptanin_karari","kanat_akini","cift_forvet","derbi","final_provasi","son_dans","taksit_transfer","son_kredi",
+    "kara_borsa","sahte_evrak","deplasman_kafilesi","kumarbaz","gecici_prim","kisa_kamp","doping","kriz","kurban_belli","primler_yatinca",
+    "vur_igneyi","bu_adam","gec_gec","nasip_kismet","yildiz_krizi","kasiga_para",
+  ];
+  const result=await page.evaluate(async(cardKeys)=>{
+    const game=globalThis as any;
+    game.cardsBoughtThisTurn=1;
+    const batches=[];
+    for(let i=0;i<cardKeys.length;i+=3){
+      const batch=cardKeys.slice(i,i+3);
+      game.shopBlocked=0;
+      game.shopOffers=batch;
+      game.shopVariants=Object.fromEntries(batch.map((key:string)=>[key,0]));
+      game.renderHub();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      batches.push([...document.querySelectorAll<HTMLElement>("#shopcards>.market-card")].map(card=>({
+        key:card.querySelector<HTMLElement>("[data-card-stamp]")?.dataset.cardStamp||"",
+        asset:!!card.querySelector<HTMLImageElement>(".card-stamp-image"),
+        motion:card.querySelectorAll(".card-motion").length,
+        animated:[...card.querySelectorAll<HTMLElement>(".card-motion")].every(el=>getComputedStyle(el).animationName!=="none"),
+        transparent:[...card.querySelectorAll<HTMLElement>(".card-stamp,.card-stamp-ink")].every(el=>getComputedStyle(el).backgroundColor==="rgba(0, 0, 0, 0)"),
+        overflow:card.scrollWidth-card.clientWidth,
+        modeSingleLine:(()=>{
+          const mode=card.querySelector<HTMLElement>(".market-card-mode")!,style=getComputedStyle(mode),rect=mode.getBoundingClientRect();
+          return style.whiteSpace==="nowrap"&&rect.height<=parseFloat(style.lineHeight)*1.2;
+        })(),
+        vertical:(()=>{
+          const rect=(selector:string)=>card.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+          const impact=rect(".market-card-impact"),title=rect(".market-card-title"),desc=rect(".market-card-desc"),bottom=rect(".market-card-bottom");
+          return impact.bottom<=title.top+1&&title.bottom<=desc.top+1&&desc.bottom<=bottom.top+1;
+        })(),
+      })));
+    }
+    return batches.flat();
+  },keys);
+  await page.waitForFunction(()=>[...document.querySelectorAll<HTMLImageElement>("#shopcards .card-stamp-image")].every(image=>image.complete&&image.naturalWidth>0));
+  expect(result).toHaveLength(keys.length);
+  expect(result.map((card:any)=>card.key)).toEqual(keys);
+  expect(result.every((card:any)=>card.asset&&card.motion>0&&card.animated&&card.transparent&&card.overflow<=1&&card.modeSingleLine&&card.vertical)).toBe(true);
+});
+
 test("Kurban Belli injury cost reads as one natural text flow in a narrow card",async({page})=>{
   await openHub(page);
   await page.evaluate(()=>{

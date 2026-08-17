@@ -2175,6 +2175,17 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact.kasa-rich .kasa-limit-meter>b{
   white-space:normal!important;
   line-height:1.1!important;
 }
+#hub[data-mobile-route="market"] #shopcards>.market-card .market-card-mode{
+  display:inline-flex!important;
+  flex-wrap:nowrap!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:8px!important;
+  letter-spacing:.08em!important;
+  line-height:1!important;
+}
 
 /* ===== Summary sheet: one hero effect, two quiet detail groups ===== */
 .market-card-detail{
