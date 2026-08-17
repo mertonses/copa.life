@@ -329,7 +329,9 @@ const MARKET_MOTION_PROFILES={
 };
 function marketMotionMarkup(k){
   const profiles=MARKET_MOTION_PROFILES[String(k||"")]||["pulse"];
-  return profiles.map(name=>`<span class="card-motion card-motion-${name}" aria-hidden="true"></span>`).join("");
+  const seed=String(k||"").split("").reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+  const delay=(-0.35-(seed%11)/10).toFixed(2);
+  return profiles.map(name=>`<span class="card-motion card-motion-${name}" style="--motion-delay:${delay}s" aria-hidden="true"></span>`).join("");
 }
 function cardStampMarkup(k,fallback,extraClass=""){
   const raw=String(CARD_SVGS[k]||fallback||"");
