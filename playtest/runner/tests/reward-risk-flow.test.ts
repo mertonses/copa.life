@@ -105,6 +105,7 @@ test("Medical Team lists every injury, heals the selected player and protects th
   await expect(patients.nth(0)).toContainText(names[0]);
   await expect(patients.nth(1)).toContainText(names[1]);
   await patients.nth(1).click();
+  await expect.poll(async()=>page.evaluate(()=>!(globalThis as any).picksBySlot[1].injured)).toBe(true);
 
   const result=await page.evaluate(()=>{
     const game=globalThis as any;
