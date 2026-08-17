@@ -7,13 +7,13 @@
   const gameMode=()=>native()||new URLSearchParams(root.location.search).has("native-game");
   const tr=()=>root.LANG==="tr";
   const NAV_COPY={
-    tr:{labels:{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"RİSK KULVARI",career:"KARİYER"},offers:"yeni alınabilir teklifler"},
-    en:{labels:{match:"MATCH",market:"MARKET",training:"TRAINING",sidefield:"SIDE FIELD",career:"CAREER"},offers:"new affordable offers"},
+    tr:{labels:{match:"MAÇ",market:"PAZAR",training:"ANTRENMAN",sidefield:"RİSK",career:"KARİYER"},offers:"yeni alınabilir teklifler"},
+    en:{labels:{match:"MATCH",market:"MARKET",training:"TRAINING",sidefield:"RISK",career:"CAREER"},offers:"new affordable offers"},
     es:{labels:{match:"PARTIDO",market:"MERCADO",training:"ENTRENO",sidefield:"CAMPO LATERAL",career:"CARRERA"},offers:"nuevas ofertas asequibles"},
     de:{labels:{match:"SPIEL",market:"MARKT",training:"TRAINING",sidefield:"NEBENPLATZ",career:"KARRIERE"},offers:"neue bezahlbare Angebote"},
     it:{labels:{match:"PARTITA",market:"MERCATO",training:"ALLENAMENTO",sidefield:"CAMPO LATERALE",career:"CARRIERA"},offers:"nuove offerte accessibili"}
   };
-  NAV_COPY.tr.labels.sidefield="RİSK KULVARI";NAV_COPY.en.labels.sidefield="SIDE FIELD";NAV_COPY.es.labels.sidefield="CAMPO DE APUESTAS";NAV_COPY.de.labels.sidefield="NEBENWETTE";NAV_COPY.it.labels.sidefield="CAMPO SCOMMESSE";
+  NAV_COPY.tr.labels.sidefield="RİSK";NAV_COPY.en.labels.sidefield="RISK";NAV_COPY.es.labels.sidefield="RIESGO";NAV_COPY.de.labels.sidefield="RISIKO";NAV_COPY.it.labels.sidefield="RISCHIO";
   const navCopy=()=>NAV_COPY[root.LANG]||NAV_COPY.en;
   function matchAttendance(matchRound,homePower,awayPower){
     const bases=[8000,14000,22000,34000,52000,75000,90000],index=Math.max(0,Math.min(6,(Number(matchRound)||1)-1));
@@ -45,8 +45,15 @@
     return Object.keys(labels).map(route=>`<button type="button" data-native-target="${route}" aria-label="${labels[route]}" data-tab-label="${labels[route]}">${NAV_ICONS[route]}<span class="native-hub-tab-label">${labels[route]}</span>${route==="market"?'<i class="native-hub-market-dot hidden" aria-hidden="true"></i>':""}${route==="sidefield"?'<i class="native-hub-sidefield-dot hidden" aria-hidden="true"></i>':""}${route==="training"?`<em class="native-hub-tab-count">${remaining}/2</em>`:""}</button>`).join("");
   }
   function updateTrainingBadge(){
+    const remaining=root.CopaPreparation&&typeof root.CopaPreparation.spent==="function"?Math.max(0,2-root.CopaPreparation.spent()):2;
     const badge=document.querySelector('[data-native-target="training"] .native-hub-tab-count');
-    if(badge&&root.CopaPreparation&&typeof root.CopaPreparation.spent==="function")badge.textContent=`${Math.max(0,2-root.CopaPreparation.spent())}/2`;
+    if(badge)badge.textContent=`${remaining}/2`;
+    document.querySelectorAll("[data-prep-resource]").forEach(resource=>{
+      const count=resource.querySelector("[data-prep-points]");
+      if(count)count.textContent=String(remaining);
+      resource.dataset.pointsLeft=String(remaining);
+      resource.querySelectorAll("[data-prep-point]").forEach((point,index)=>point.classList.toggle("is-available",index<remaining));
+    });
   }
   function marketOfferState(){
     const cards=[...document.querySelectorAll("#shopcards .cardtile[data-card-key]")];
@@ -290,7 +297,7 @@
     if(title)title.textContent=tr()?"Antrenman Merkezi":"Training Centre";
     const opponentName=(document.getElementById("oppNm")||{}).textContent||snapshot.opponent&&snapshot.opponent.name||"—";
     const opponentPower=(document.getElementById("oppPw")||{}).textContent||"—";
-    const scoutTitle=tr()?"Rakip Analizi":"Opponent Analysis";
+    const scoutTitle=tr()?"Rakibi incele":"Inspect opponent";
     const analysis=document.createElement("section");
     analysis.className="mobile-opponent-analysis";
     analysis.innerHTML=`<div class="mobile-opponent-copy"><small>${tr()?"SIRADAKİ RAKİP":"NEXT OPPONENT"}</small><b>${escapeHtml(opponentName)}</b><span>${tr()?"GÜÇ":"POWER"} ${escapeHtml(opponentPower)}</span></div><button type="button" class="mobile-training-scout" aria-label="${scoutTitle}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m14.5 14.5 5 5"/><path class="scout-scan" d="M6.5 10h7"/></svg><span>${scoutTitle}</span><i aria-hidden="true">→</i></button>`;

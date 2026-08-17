@@ -2434,3 +2434,122 @@ html.copa-mobile-game #hub #kasaTile.kasa-compact.kasa-rich .kasa-limit-meter>b{
   #hub #freeAgentRow .free-agent-card,#hub #freeAgentRow .free-agent-motion,#hub #freeAgentRow .free-agent-surface-glint{animation:none!important;transition:none!important;transform:none!important}
   #hub #freeAgentRow .free-agent-motion{opacity:.14!important}
 }
+
+/* Copa navigation and preparation surfaces: one restrained, premium language
+   across web and native game shells. The existing route and button contracts
+   stay intact; this layer only improves hierarchy, focus and state clarity. */
+#hub>.native-hub-nav{
+  --nav-frame:#172832;
+  --nav-line:#3B4B53;
+  box-sizing:border-box!important;
+  width:min(1025px,100%)!important;
+  gap:6px!important;
+  padding:6px!important;
+  border:1px solid color-mix(in srgb,var(--nav-line) 82%,transparent)!important;
+  border-radius:15px!important;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--nav-frame) 97%,white 3%),color-mix(in srgb,var(--surface-bg) 96%,#0A1118 4%))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.045),0 9px 26px rgba(10,17,24,.12)!important;
+}
+#hub>.native-hub-nav button{
+  --tab-tone:#AAB2B3;
+  box-sizing:border-box!important;
+  min-width:0!important;
+  min-height:52px!important;
+  padding:7px 10px!important;
+  gap:8px!important;
+  border:1px solid transparent!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:#AAB2B3!important;
+  font:900 8px/1 var(--mono)!important;
+  letter-spacing:.08em!important;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease,transform .16s ease!important;
+}
+#hub>.native-hub-nav button[data-native-target="match"]{--tab-tone:#FF806B}
+#hub>.native-hub-nav button[data-native-target="market"]{--tab-tone:#D6A21F}
+#hub>.native-hub-nav button[data-native-target="training"]{--tab-tone:#7DD3FC}
+#hub>.native-hub-nav button[data-native-target="sidefield"]{--tab-tone:#FF806B}
+#hub>.native-hub-nav button[data-native-target="career"]{--tab-tone:#75C993}
+#hub>.native-hub-nav button:hover{color:#F3F5F4!important;background:rgba(255,255,255,.035)!important}
+#hub>.native-hub-nav button.active{
+  color:var(--tab-tone)!important;
+  border-color:color-mix(in srgb,var(--tab-tone) 54%,var(--nav-line))!important;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--tab-tone) 13%,var(--nav-frame)),color-mix(in srgb,var(--tab-tone) 4%,var(--nav-frame)))!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tab-tone) 12%,transparent),0 5px 16px color-mix(in srgb,var(--tab-tone) 12%,transparent)!important;
+}
+#hub>.native-hub-nav button.active::after{left:14px!important;right:14px!important;bottom:3px!important;height:2px!important;background:var(--tab-tone)!important}
+#hub>.native-hub-nav .hub-tab-svg{flex:0 0 23px!important;width:23px!important;height:23px!important}
+#hub>.native-hub-nav .hub-tab-icon-frame{fill:rgba(255,255,255,.025)!important;stroke:currentColor!important}
+#hub>.native-hub-nav .hub-tab-motion{stroke:currentColor!important}
+#hub>.native-hub-nav .hub-tab-token{fill:currentColor!important;stroke:var(--nav-frame)!important}
+#hub>.native-hub-nav .native-hub-tab-count{
+  right:8px!important;
+  top:5px!important;
+  min-width:0!important;
+  height:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:color-mix(in srgb,var(--tab-tone) 78%,#F3F5F4)!important;
+  font-size:7px!important;
+  letter-spacing:.04em!important;
+}
+html.copa-mobile-game #hub>.native-hub-nav{width:min(620px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;margin:0 auto 12px!important}
+html.copa-mobile-game #hub>.native-hub-nav button{min-height:56px!important}
+html.copa-mobile-game #hub>.native-hub-nav button:focus-visible{outline:2px solid var(--tab-tone)!important;outline-offset:-2px!important}
+
+/* Preparation points are a first-class resource, not a small count hidden in
+   the preview header. */
+.prep-resource-strip{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:12px;
+  margin-top:14px;
+  padding:10px 12px;
+  border:1px solid color-mix(in srgb,var(--status-info) 42%,var(--border-subtle));
+  border-radius:11px;
+  background:linear-gradient(105deg,color-mix(in srgb,var(--status-info) 11%,var(--surface-elevated)),var(--surface-elevated));
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+.prep-resource-main{display:grid;gap:4px;min-width:0}
+.prep-resource-main small{color:var(--status-info-text);font:900 7px/1 var(--mono);letter-spacing:.1em}
+.prep-resource-main strong{display:flex;align-items:baseline;gap:2px;color:var(--text-primary);font:900 20px/1 var(--disp);font-variant-numeric:tabular-nums}
+.prep-resource-main strong span{color:var(--color-slate);font:900 10px/1 var(--mono)}
+.prep-resource-dots{display:flex;gap:5px}
+.prep-resource-dots i{width:9px;height:9px;border:1px solid var(--border-strong);border-radius:50%;background:transparent;box-shadow:inset 0 0 0 2px var(--surface-elevated)}
+.prep-resource-dots i.is-available{border-color:var(--status-info);background:var(--status-info);box-shadow:0 0 0 2px color-mix(in srgb,var(--status-info) 15%,transparent)}
+.prep-resource-strip>em{color:var(--color-slate);font:800 7px/1.2 var(--mono);font-style:normal;text-align:right;white-space:nowrap}
+.prep-recommended-action{position:relative;overflow:hidden;margin-top:9px!important;padding:12px 13px!important;border-color:color-mix(in srgb,var(--status-success) 58%,var(--border-subtle))!important;border-radius:11px!important;background:linear-gradient(105deg,color-mix(in srgb,var(--status-success) 15%,var(--surface-elevated)),color-mix(in srgb,var(--status-info) 6%,var(--surface-elevated)))!important;box-shadow:inset 0 1px rgba(255,255,255,.045),0 6px 18px rgba(10,17,24,.1)}
+.prep-recommended-action::before{content:"";position:absolute;inset:0;background:linear-gradient(112deg,transparent 0 58%,rgba(255,255,255,.055) 70%,transparent 82%);pointer-events:none}
+.prep-recommend-copy{display:grid!important;gap:4px!important;min-width:0}
+.prep-recommend-copy small{color:var(--status-positive-text)!important;font:900 7px/1 var(--mono)!important;letter-spacing:.12em!important}
+.prep-recommend-copy b{color:var(--text-primary);font-size:14px!important;line-height:1.05}
+.prep-recommend-copy em{overflow:hidden;color:var(--color-slate);font:800 7px/1 var(--mono);font-style:normal;letter-spacing:.03em;text-overflow:ellipsis;white-space:nowrap}
+.prep-recommended-action>i{position:relative;z-index:1;display:grid;place-items:center;width:28px;height:28px;border:1px solid color-mix(in srgb,var(--status-success) 45%,var(--border-subtle));border-radius:50%;background:color-mix(in srgb,var(--status-success) 12%,var(--surface-bg));font-size:16px!important}
+.prep-status{margin-top:10px!important;border-color:color-mix(in srgb,var(--border-subtle) 78%,var(--status-info))!important}
+.prep-preview-head{padding:9px 11px!important;background:color-mix(in srgb,var(--status-info) 8%,var(--surface-bg))!important}
+.prep-preview-head b{color:var(--status-info-text)!important}
+.prep-drill{border-radius:11px!important;background:linear-gradient(145deg,var(--surface-bg),color-mix(in srgb,var(--surface-elevated) 50%,var(--surface-bg)))!important}
+.prep-drill-icon{border:1px solid color-mix(in srgb,var(--drill-tone) 38%,var(--border-subtle));box-shadow:inset 0 1px rgba(255,255,255,.05)}
+.mobile-opponent-analysis{margin:0 0 12px!important;border-left-width:3px!important;border-radius:11px!important;background:linear-gradient(115deg,color-mix(in srgb,var(--status-info) 11%,var(--surface-elevated)),var(--surface-elevated))!important}
+.mobile-opponent-analysis>div.mobile-opponent-copy{display:grid!important;align-items:start!important;gap:4px!important}
+.mobile-opponent-copy{gap:4px!important}
+.mobile-opponent-copy span{display:inline-flex;width:max-content;padding:4px 7px;border:1px solid color-mix(in srgb,var(--status-info) 30%,var(--border-subtle));border-radius:999px;background:color-mix(in srgb,var(--status-info) 10%,var(--surface-bg));color:var(--status-info)!important}
+.mobile-training-scout{border-radius:9px!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 4px 12px rgba(10,17,24,.12)}
+.mobile-training-scout span{text-transform:uppercase}
+.mobile-training-route>.prep-modal{border-color:color-mix(in srgb,var(--status-info) 34%,var(--border-subtle))!important}
+
+@media(max-width:520px){
+  .prep-resource-strip{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .prep-resource-strip>em{grid-column:1/-1;text-align:left;padding-top:2px;border-top:1px solid color-mix(in srgb,var(--border-subtle) 70%,transparent)}
+  .prep-recommend-copy em{max-width:24ch}
+}
+@media(max-width:389px){
+  html.copa-mobile-game #hub>.native-hub-nav{gap:3px!important;padding:5px!important}
+  html.copa-mobile-game #hub>.native-hub-nav button{gap:3px!important;padding-inline:3px!important}
+  html.copa-mobile-game #hub>.native-hub-nav .hub-tab-svg{flex-basis:19px!important;width:19px!important;height:19px!important}
+  html.copa-mobile-game #hub>.native-hub-nav .native-hub-tab-label{font-size:7px!important;letter-spacing:.02em!important}
+}
