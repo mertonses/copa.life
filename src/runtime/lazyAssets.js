@@ -71,8 +71,8 @@
   }
   function ensureSideField(){
     return Promise.all([
-      loadStyleOnce("side-field-style","src/styles/sideField.css?v=20260806-yan-saha4",'link[href*="src/styles/sideField.css"]'),
-      loadScriptOnce("side-field-ui","src/sidefield/sideFieldUI.js?v=20260806-yan-saha4",()=>!!global.CopaSideField)
+      loadStyleOnce("side-field-style","src/styles/sideField.css?v=20260817-risk-label2",'link[href*="src/styles/sideField.css"]'),
+      loadScriptOnce("side-field-ui","src/sidefield/sideFieldUI.js?v=20260817-risk-label1",()=>!!global.CopaSideField)
     ]).then(()=>global.CopaSideField);
   }
   function ensureCashDisplay(){

@@ -99,7 +99,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-transfer-cards1">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-trainingtabs1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -439,7 +439,7 @@ try{
 <script src="src/state/penaltyPersistence.js?v=20260717-penalty-checkpoint1"></script>
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
-<script src="src/runtime/lazyAssets.js?v=20260806-premium-cash1"></script>
+<script src="src/runtime/lazyAssets.js?v=20260817-risk-label1"></script>
 <script src="src/ui/modeGate.js?v=20260804-mode-gate8"></script>
 <script src="src/runtime/finalReplay.js?v=20260730-import-ui2"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
@@ -455,7 +455,7 @@ try{
 <script src="src/cards/cardEffectSummary.js?v=20260805-effect-summary1"></script>
 <script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
 <script src="src/game/chemistry.js?v=20260726-systems1"></script>
-<script src="src/game/preMatchPreparation.js?v=20260729-strategic1"></script>
+<script src="src/game/preMatchPreparation.js?v=20260817-trainingpoints1"></script>
 <script src="src/game/marketIdentity.js?v=20260728-market-identity1"></script>
 <script src="src/game/relationshipSystems.js?v=20260728-relationships1"></script>
 <script src="src/game/clubFiles.js?v=20260729-browser-picker1"></script>
@@ -476,7 +476,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   style.rel="stylesheet";
   style.href=platform==="web"?"src/styles/webOnly.css?v=20260817-transfer-cards1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260812-settings-fix1";
+  script.src="src/ui/mobileGameSystems.js?v=20260817-trainingtabs1";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });
