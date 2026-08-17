@@ -2553,3 +2553,22 @@ html.copa-mobile-game #hub>.native-hub-nav button:focus-visible{outline:2px soli
   html.copa-mobile-game #hub>.native-hub-nav .hub-tab-svg{flex-basis:19px!important;width:19px!important;height:19px!important}
   html.copa-mobile-game #hub>.native-hub-nav .native-hub-tab-label{font-size:7px!important;letter-spacing:.02em!important}
 }
+
+/* Training clarity pass: resource state and selection state use one visual
+   language. Drill colours remain on the icon; the chosen intensity is always
+   the Copa coral action state. */
+.prep-resource-strip[data-points-left="0"]{border-color:color-mix(in srgb,var(--status-warning) 46%,var(--border-subtle));background:linear-gradient(105deg,color-mix(in srgb,var(--status-warning) 8%,var(--surface-elevated)),var(--surface-elevated))}
+.prep-resource-strip[data-points-left="0"] .prep-resource-main small,.prep-resource-strip[data-points-left="0"]>em{color:var(--status-warning-text)}
+.prep-resource-strip>em{max-width:20ch;overflow:hidden;text-overflow:ellipsis}
+.prep-resource-strip[data-points-left="0"] .prep-resource-dots i.is-available{border-color:var(--status-warning);background:var(--status-warning);box-shadow:0 0 0 2px color-mix(in srgb,var(--status-warning) 15%,transparent)}
+.prep-drill.active{border-color:var(--color-primary)!important;box-shadow:inset 3px 0 var(--color-primary)!important;background:color-mix(in srgb,var(--color-primary) 6%,var(--surface-bg))!important}
+.prep-drill .prep-level.active{border-color:var(--color-primary)!important;background:var(--color-primary)!important;color:#fff!important;box-shadow:0 2px 7px color-mix(in srgb,var(--color-primary) 22%,transparent)}
+.prep-drill.is-recommended.active{border-color:var(--color-primary)!important}
+#hub[data-mobile-route="training"] .mobile-opponent-analysis{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}
+#hub[data-mobile-route="training"] .mobile-opponent-analysis>div.mobile-opponent-copy{min-width:0}
+#hub[data-mobile-route="training"] .mobile-opponent-copy span{color:#D7EDF5!important;background:#223D4B!important;border-color:color-mix(in srgb,var(--status-info) 42%,var(--border-subtle))!important}
+@media(max-width:520px){
+  .prep-resource-strip{grid-template-columns:minmax(0,1fr) auto!important}
+  .prep-resource-strip>em{grid-column:auto!important;padding-top:0!important;border-top:0!important;text-align:right!important}
+  #hub[data-mobile-route="training"] .mobile-opponent-analysis{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+}

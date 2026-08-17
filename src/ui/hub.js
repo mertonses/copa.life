@@ -715,7 +715,6 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     const desc=formatCardDesc(shopCardDesc(k,variantDesc(cd.d,sv)||shortCardText(k,s),sv));
     const priceLabel=pr<=0?(LANG==="tr"?"ÜCRETSİZ":"FREE"):`€${pr}M`;
      if(sv===1)d.classList.add("is-dark");else if(sv===0)d.classList.add("is-common");
-     if(k==="kara_borsa"&&sv===0)d.classList.add("market-card-light");
     const _costLines=typeof cardCostLines==="function"?cardCostLines(k,sv):[];
     const _costList=_costLines.length?`<ul class="ct-cost-list">${_costLines.map(line=>`<li>${formatCardDesc(line)}</li>`).join("")}</ul>`:"";
     const _syn=window.CopaCardSynergy?CopaCardSynergy.preview(cards,k):null;

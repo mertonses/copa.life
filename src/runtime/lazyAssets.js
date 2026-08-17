@@ -36,7 +36,7 @@
   }
   function ensureMetaProgression(){
     if(!document.querySelector("link[data-copa-meta]")){
-      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260804-interface-future2";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
+      const style=document.createElement("link");style.rel="stylesheet";style.href="src/styles/metaProgression.css?v=20260817-training-ranking1";style.dataset.copaMeta="1";insertStyleBeforePalette(style);
     }
     return loadScriptOnce("meta-progression","src/state/metaProgression.js?v=20260804-interface-future1",()=>!!global.CopaMeta).then(()=>{
       if(typeof global.applyMeta==="function")global.applyMeta();
