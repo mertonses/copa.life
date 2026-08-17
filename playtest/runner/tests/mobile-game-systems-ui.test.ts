@@ -368,6 +368,9 @@ test("compact draw ceremony reveals a ball and preserves accessible controls",as
       const club=Array.isArray(player)?player[3]:player?.club||player?.team;
       if(club)domestic.add(String(club).trim().toLocaleLowerCase());
     }
+    if(game.selectedCountry==="JP"){
+      for(const city of game.CopaTournamentRuntime.domesticReserveTeams())domestic.add(String(city).trim().toLocaleLowerCase());
+    }
     const label=game.countryDisplayName(game.selectedCountry,game.LANG).toLocaleLowerCase();
     return Object.values(game.tournament.teams).filter((team:any)=>team.id!=="player").map((team:any)=>team.name).filter((name:string)=>!domestic.has(name.trim().toLocaleLowerCase())&&!name.toLocaleLowerCase().startsWith(label+" "));
   });
@@ -488,7 +491,7 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#nativeHubNav button")).toHaveCount(5);
   await page.locator('#nativeHubNav [data-native-target="sidefield"]').click();
   await expect(page.locator("#sideFieldRoute")).toBeVisible();
-  await expect(page.locator(".ys-hero h1")).toHaveText("RİSK KULVARI");
+  await expect(page.locator(".ys-hero h1")).toHaveText("RİSK");
   await expect(page.locator(".ys-match-card")).toHaveCount(15);
   await page.locator(".ys-match-card .ys-odds button:not([disabled])").first().click();
   await expect(page.locator(".ys-slip")).toBeVisible();
