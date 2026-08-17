@@ -97,6 +97,8 @@
     inMemoryLastDraw=identity;
     try{root.localStorage.setItem(LAST_DRAW_KEY,JSON.stringify(identity));}catch(_){}
   }
+  const japanReserveCities=Object.freeze(["Kofu","Uji","Matsue","Hida","Mito","Nara","Iwaki","Aomori","Hirosaki","Sakai","Tottori","Kamakura","Fukui","Toyama","Oita","Morioka","Akita","Nagano","Tsu","Yamagata","Numazu","Kochi","Tokushima","Hachinohe","Otaru","Fukushima","Kure","Sasebo","Matsumoto","Kumamoto","Kagoshima","Naha","Nikko"]);
+  function domesticReserveTeams(country=root.selectedCountry){return country==="JP"?japanReserveCities.slice():[];}
   function createState(){
     const data=root.countryGameData(root.selectedCountry),power=root.squadPower(1).power;
     if(root.CopaSideField)root.CopaSideField.reset();
@@ -110,7 +112,6 @@
     }).filter(Boolean);
     playerClubs.forEach(club=>tournamentPool.push(club));
     const domesticLabel=typeof root.countryDisplayName==="function"?root.countryDisplayName(root.selectedCountry,root.LANG):root.selectedCountry;
-    const japanReserveCities=["Kofu","Uji","Matsue","Hida","Mito","Nara","Iwaki","Aomori","Hirosaki","Sakai","Tottori","Kamakura","Fukui","Toyama","Oita","Morioka","Akita","Nagano","Tsu","Yamagata","Numazu","Kochi","Tokushima","Hachinohe","Otaru","Fukushima","Kure","Sasebo","Matsumoto","Kumamoto","Kagoshima","Naha","Nikko"];
     const existing=new Set(tournamentPool.map(name=>String(name||"").trim().toLocaleLowerCase()).filter(Boolean));
     const sameClub=typeof root.CopaTournamentEngine?.sameClubIdentity==="function"?root.CopaTournamentEngine.sameClubIdentity:(left,right)=>String(left).toLocaleLowerCase()===String(right).toLocaleLowerCase();
     const uniqueTournamentCount=()=>{const names=[];for(const entry of tournamentPool){const name=String(entry||"").trim();if(!name||name===root.teamName||names.some(existingName=>sameClub(existingName,name)))continue;names.push(name);}return names.length;};
@@ -183,6 +184,6 @@
   function renderHub(){const repaired=syncSchedule(),panel=document.getElementById("tournamentHubPanel");if(root.CopaTournamentUI)root.CopaTournamentUI.renderHub(panel,root.tournament,copy());if(root.CopaFixtureRoad)root.CopaFixtureRoad.render();else if(typeof root.renderFixtures==="function")root.renderFixtures();if(repaired&&typeof root._saveState==="function")root._saveState("hub");}
   function showOverview(){if(!active()||!root.CopaTournamentUI)return;root.showModal(root.CopaTournamentUI.overviewMarkup(root.tournament,copy()),{dismissOnOverlay:true,label:copy().tournamentOverview,sheetClass:"sheet-tournament-overview"});}
   function stage(){if(!active())return"legacy";if(root.tournament.phase==="group")return"group";if(root.tournament.phase==="knockout")return root.tournament.knockout.round;return"complete";}
-  root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,repairDuplicateClubNames,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator});
+  root.CopaTournamentRuntime=Object.freeze({copy,active,currentMatch,repairDuplicateClubNames,syncSchedule,startDraw,reveal,finishDraw,completePlayer,replaceCurrentOpponent,renderHub,showOverview,stage,aiSimulator,domesticReserveTeams});
   root.startTournamentDraw=startDraw;root.revealTournamentBall=()=>reveal(1);root.fastTournamentDraw=()=>{if(root.CopaAnalytics)root.CopaAnalytics.track("group_draw_skipped",{country:root.selectedCountry,mode:"fast"});reveal(99);};root.finishTournamentDraw=finishDraw;root.showTournamentOverview=showOverview;
 })(window);

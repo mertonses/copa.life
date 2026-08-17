@@ -229,7 +229,7 @@
   };
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const visible=node=>!!(node&&node.isConnected&&!node.classList.contains("hidden")&&node.getClientRects().length);
-  const viewportMetrics=()=>({width:Number((root.visualViewport&&root.visualViewport.width)||root.innerWidth),height:Number((root.visualViewport&&root.visualViewport.height)||root.innerHeight)});
+  const viewportMetrics=()=>({width:Number((global.visualViewport&&global.visualViewport.width)||global.innerWidth),height:Number((global.visualViewport&&global.visualViewport.height)||global.innerHeight)});
   const inViewport=node=>{
     if(!visible(node))return false;
     const rect=node.getBoundingClientRect(),viewport=viewportMetrics();
@@ -473,7 +473,7 @@
     if(!tipNode)return;
     if(!inViewport(tipTarget)){dismissTip();return;}
     const targetRect=tipTarget&&tipTarget.getBoundingClientRect();
-    const margin=12,topSafe=Math.max(8,Number((root.visualViewport&&root.visualViewport.offsetTop)||0)+8);
+    const margin=12,topSafe=Math.max(8,Number((global.visualViewport&&global.visualViewport.offsetTop)||0)+8);
     const tipRect=tipNode.getBoundingClientRect();
     if(!targetRect||targetRect.width<1||targetRect.height<1){dismissTip();return;}
     const {height:viewportHeight,width:viewportWidth}=viewportMetrics();
@@ -496,8 +496,8 @@
     tipNode.setAttribute("role","status");
     tipNode.innerHTML=`<button type="button" class="copa-coachmark-x" aria-label="${esc(c.close)}">×</button><span>${esc(tip[0])}</span><p>${esc(tip[1])}</p><button type="button" class="copa-coachmark-ok">${esc(c.gotIt)}</button>`;
     document.body.appendChild(tipNode);
-    if(!tipResizeBound){root.addEventListener("resize",positionCoachmark,{passive:true});root.addEventListener("scroll",positionCoachmark,{passive:true,capture:true});root.visualViewport?.addEventListener("resize",positionCoachmark,{passive:true});tipResizeBound=true;}
-    root.requestAnimationFrame(positionCoachmark);
+    if(!tipResizeBound){global.addEventListener("resize",positionCoachmark,{passive:true});global.addEventListener("scroll",positionCoachmark,{passive:true,capture:true});global.visualViewport?.addEventListener("resize",positionCoachmark,{passive:true});tipResizeBound=true;}
+    global.requestAnimationFrame(positionCoachmark);
     tipNode.querySelector(".copa-coachmark-x")?.addEventListener("click",()=>dismissTip(false));
     tipNode.querySelector(".copa-coachmark-ok")?.addEventListener("click",()=>dismissTip(true));
   }
