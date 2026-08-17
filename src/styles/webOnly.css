@@ -418,6 +418,13 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     gap:10px!important;
   }
 
+  /* The free-agent shelf is a full-width market surface.  Do not let the
+     legacy right-column cap collapse four physical cards into icon width. */
+  html[data-copa-platform="web"] #hub[data-mobile-route="market"] #freeAgentRow{
+    width:min(960px,calc(100vw - 56px))!important;
+    max-width:none!important;
+  }
+
   html[data-copa-platform="web"] #hub[data-mobile-route="market"] #shopcards>.cardtile{
     height:236px!important;
     min-height:236px!important;
