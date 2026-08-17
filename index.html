@@ -91,7 +91,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260727-balance-cleanup1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
-<link rel="stylesheet" href="src/styles/cards.css?v=20260817-cardface3">
+<link rel="stylesheet" href="src/styles/cards.css?v=20260817-karaborsa1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260728-ui-fixes1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
@@ -99,7 +99,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-trainingtabs1">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-training-ranking1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -455,7 +455,7 @@ try{
 <script src="src/cards/cardEffectSummary.js?v=20260805-effect-summary1"></script>
 <script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
 <script src="src/game/chemistry.js?v=20260726-systems1"></script>
-<script src="src/game/preMatchPreparation.js?v=20260817-trainingpoints1"></script>
+<script src="src/game/preMatchPreparation.js?v=20260817-training-ranking1"></script>
 <script src="src/game/marketIdentity.js?v=20260728-market-identity1"></script>
 <script src="src/game/relationshipSystems.js?v=20260728-relationships1"></script>
 <script src="src/game/clubFiles.js?v=20260729-browser-picker1"></script>
@@ -464,8 +464,8 @@ try{
 <script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260817-cardface2"></script>
-<script src="src/online/ghostClubs.js?v=20260727-balance-v5"></script>
-<script src="src/ui/hub.js?v=20260817-cardface2"></script>
+<script src="src/online/ghostClubs.js?v=20260817-training-ranking1"></script>
+<script src="src/ui/hub.js?v=20260817-training-ranking1"></script>
 <script src="src/ui/playerProfiles.js?v=20260721-rating-scale1"></script>
 <script src="src/ui/mobileExperience.js?v=20260729-browser-settings1"></script>
 <script>
@@ -476,7 +476,7 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   style.rel="stylesheet";
   style.href=platform==="web"?"src/styles/webOnly.css?v=20260817-transfer-cards1":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260817-trainingtabs1";
+  script.src="src/ui/mobileGameSystems.js?v=20260817-training-ranking1";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });

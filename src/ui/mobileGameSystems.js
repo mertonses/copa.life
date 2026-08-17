@@ -53,6 +53,8 @@
       if(count)count.textContent=String(remaining);
       resource.dataset.pointsLeft=String(remaining);
       resource.querySelectorAll("[data-prep-point]").forEach((point,index)=>point.classList.toggle("is-available",index<remaining));
+      const status=resource.querySelector("[data-prep-resource-status]");
+      if(status)status.textContent=tr()?(remaining?`${remaining} puan kullanılabilir`:"Puanlar tükendi"):(remaining?`${remaining} point${remaining===1?"":"s"} available`:"Points spent");
     });
   }
   function marketOfferState(){

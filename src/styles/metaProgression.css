@@ -176,6 +176,34 @@ html[data-theme="light"] .meta-career-disclosure{background:#FFFFFF;border-color
 .world-rank-row em{color:var(--meta-info);font:900 13px/1 var(--mono);font-style:normal}.world-rank-row.is-me{margin:2px -5px;padding-inline:10px;border:1px solid color-mix(in srgb,var(--meta-info) 33%,transparent);border-radius:8px;background:color-mix(in srgb,var(--meta-info) 9%,var(--surface-elevated))}
 .world-rule{margin:0;padding:11px 13px;border-left:3px solid color-mix(in srgb,var(--meta-info) 60%,transparent);border-radius:4px 9px 9px 4px;background:color-mix(in srgb,var(--meta-info) 5%,var(--surface-bg));color:var(--color-slate);font:8px/1.6 var(--mono)}
 @media(prefers-reduced-motion:reduce){.meta-world-skeleton i{animation:none}}
+
+/* World ranking hierarchy: one personal context block, one deduplicated
+   global list, and rules hidden until requested. */
+.meta-world-panel{gap:11px!important}
+.world-season-head{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:8px}
+.world-season-head>span{min-height:64px;padding:12px 13px 12px 46px;border-radius:12px}
+.world-season-head>span.is-ranked{border-color:color-mix(in srgb,var(--color-primary) 55%,var(--border-subtle));background:linear-gradient(120deg,color-mix(in srgb,var(--color-primary) 13%,var(--surface-elevated)),var(--surface-elevated))}
+.world-season-head>span.is-ranked::before{border-color:color-mix(in srgb,var(--color-primary) 62%,transparent);background:color-mix(in srgb,var(--color-primary) 12%,var(--surface-bg));color:var(--color-primary)}
+.world-season-head>span.is-ranked b{color:var(--color-primary)}
+.meta-world-panel>section{padding:12px 13px!important;border:1px solid var(--border-subtle);border-radius:12px;background:linear-gradient(145deg,color-mix(in srgb,var(--surface-elevated) 88%,var(--status-info) 12%),var(--surface-elevated))}
+.meta-world-panel>section .meta-section-heading{margin-bottom:6px;padding:0 2px}
+.meta-world-panel>section .meta-section-heading h4{color:var(--text-primary)}
+.meta-world-panel>section .meta-section-heading small{font-size:8px}
+.world-nearby-section{border-color:color-mix(in srgb,var(--color-primary) 28%,var(--border-subtle))!important;background:linear-gradient(145deg,color-mix(in srgb,var(--color-primary) 7%,var(--surface-elevated)),var(--surface-elevated))!important}
+.world-top-section .world-rank-list{margin-inline:-5px}
+.world-rank-row.is-me{border-left:3px solid var(--color-primary);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--color-primary) 12%,transparent)}
+.world-rule-disclosure{border:1px solid var(--border-subtle);border-radius:10px;background:color-mix(in srgb,var(--surface-elevated) 90%,var(--status-info) 10%);overflow:hidden}
+.world-rule-disclosure>summary{display:flex;align-items:center;justify-content:space-between;min-height:36px;padding:0 11px;color:var(--color-slate);font:900 8px/1 var(--mono);letter-spacing:.08em;cursor:pointer;list-style:none}
+.world-rule-disclosure>summary::-webkit-details-marker{display:none}
+.world-rule-disclosure>summary span{font-size:14px;transition:transform .16s ease}.world-rule-disclosure:not([open])>summary span{transform:rotate(-90deg)}
+.world-rule-disclosure[open]>summary{border-bottom:1px solid var(--border-subtle);color:var(--text-primary)}
+.world-rule-disclosure .world-rule{border-left:0;border-radius:0;background:transparent}
+@media(max-width:620px){
+  .world-season-head{grid-template-columns:1fr 1fr}
+  .world-season-head>span{min-height:60px;padding:11px 10px 11px 40px}
+  .world-season-head>span::before{left:10px;width:22px;height:22px}
+  .meta-world-panel>section{padding:11px 10px!important}
+}
 @media(max-width:620px){
   .modal:has(.meta-progress-modal),.modal:has(.meta-history-modal){align-items:flex-end;padding:8px 8px 0}
   .sheet:has(.meta-progress-modal),.sheet:has(.meta-history-modal){border-radius:18px 18px 0 0}

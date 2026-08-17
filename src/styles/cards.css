@@ -2189,16 +2189,6 @@ html[data-theme="dark"] .cardtile.is-dark .ct-head-price,html[data-theme="dark"]
 #hub #shopcards>.market-card.is-dark .market-card-edge{background:linear-gradient(145deg,#35434A 0 7%,#182B39 8% 100%)}
 #hub #shopcards>.market-card.is-dark .market-card-face{border-color:rgba(242,232,207,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.44),inset 0 -1px 0 rgba(0,0,0,.46),inset 0 0 26px rgba(241,81,61,.12)}
 #hub #shopcards>.market-card.is-dark .market-card-face::before{opacity:1;box-shadow:0 0 0 2px rgba(241,81,61,.1)}
-#hub #shopcards>.market-card.market-card-light .market-card-edge{background:linear-gradient(145deg,#F9EFDA 0 5%,#B19C76 6% 8%,#1A2D3B 10% 100%)}
-#hub #shopcards>.market-card.market-card-light .market-card-face{background:#F2E8CF;border-color:rgba(8,22,36,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.66),inset 0 -1px 0 rgba(8,22,36,.24)}
-#hub #shopcards>.market-card.market-card-light .market-card-ink{background:linear-gradient(145deg,#F6ECD7,#DFCFAB)}
-#hub #shopcards>.market-card.market-card-light .market-card-title{color:#071521!important;text-shadow:none}
-#hub #shopcards>.market-card.market-card-light .market-card-desc,#hub #shopcards>.market-card.market-card-light .market-card-mode{color:#334452!important}
-#hub #shopcards>.market-card.market-card-light .market-card-mode::before{background:#2C6C55}
-#hub #shopcards>.market-card.market-card-light .market-card-top .ct-head-price{color:#071521!important;text-shadow:none}
-#hub #shopcards>.market-card.market-card-light .market-card-top::after{background:linear-gradient(90deg,transparent,#071521)}
-#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone::after{border-color:rgba(8,22,36,.28)}
-#hub #shopcards>.market-card.market-card-light .market-card-stamp-zone .card-stamp-image{mix-blend-mode:normal;opacity:1}
 
 @media(max-width:560px){
   #hub #shopcards>.market-card{border-radius:16px!important}
