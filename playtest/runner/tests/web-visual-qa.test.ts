@@ -323,7 +323,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
       pageOverflow:document.documentElement.scrollWidth-innerWidth,
     };
   });
-  expect(marketLayout.cardWidths).toHaveLength(4);
+  expect(marketLayout.cardWidths).toHaveLength(3);
   expect(marketLayout.agentWidths).toHaveLength(4);
   expect(Math.min(...marketLayout.cardWidths),JSON.stringify(marketLayout)).toBeGreaterThanOrEqual(280);
   expect(Math.max(...marketLayout.cardWidths),JSON.stringify(marketLayout)).toBeLessThanOrEqual(480);
@@ -604,7 +604,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
     await page.locator("#nativeHubNav").scrollIntoViewIfNeeded();
 
     await page.locator('#nativeHubNav [data-native-target="market"]').click();
-    await expect(page.locator("#shopcards>.cardtile")).toHaveCount(4);
+    await expect(page.locator("#shopcards>.cardtile")).toHaveCount(3);
     await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
     await capture(page,`responsive-${viewport.name}-market.png`);
     const market=await page.evaluate(()=>({

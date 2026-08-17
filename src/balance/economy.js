@@ -33,7 +33,7 @@ function newShopOffers(){
    const weight=cardMarketWeight(k,round);
    for(let i=0;i<Math.max(1,Math.round(weight));i++)pool.push(k);
  });
- const limit=4;
+ const limit=3;
  while(shopOffers.length<limit&&pool.length){
    const idx=rand()*pool.length|0;
    const k=pool.splice(idx,1)[0];

@@ -678,7 +678,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     el._insufficientTimer=setTimeout(()=>el.classList.remove("show-insufficient"),1500);
   }
   window._flashInsufficient=_flashInsufficient;
-  if(cardsBoughtThisTurn===0&&shopOffers.length>0&&shopOffers.length<4&&typeof newShopOffers==="function")newShopOffers();
+  if(cardsBoughtThisTurn===0&&shopOffers.length>0&&shopOffers.length<3&&typeof newShopOffers==="function")newShopOffers();
   const sc=$("shopcards");sc.innerHTML="";
   {
     let marketHead=document.getElementById("marketDecisionHeader");
@@ -696,7 +696,7 @@ function renderHub(){if(typeof _currentCaptainPlayer==="function")_currentCaptai
     coupon.innerHTML=`<span class="lottery-coupon-icon">🎟</span><span><b>${LANG==="tr"?"PİYANGO KUPONU":"LOTTERY COUPON"}</b><small>${LANG==="tr"?`İlk kart en fazla −€${lotteryCouponAmount}M · min. €2M · ${couponRounds} tur`:`Next card up to −€${lotteryCouponAmount}M · min. €2M · ${couponRounds} round${couponRounds===1?"":"s"}`}</small></span>`;
     sc.appendChild(coupon);
   }
-  shopOffers.slice(0,4).forEach(k=>{
+  shopOffers.slice(0,3).forEach(k=>{
     const sv=shopVariants[k]||0,oldV=cardVariant[k]||0;
     cardVariant[k]=sv;
     const cd=x.cards[k];
