@@ -26,6 +26,18 @@ const allowed = new Set([
   "#DDF3E3", "#DF4B48", "#E35B69", "#E3F3F8", "#F0C44D", "#F25D42",
   "#F4F7F7", "#FF4B2B", "#FF5938", "#FF5A38", "#FF7168", "#FF765D",
   "#FF806B", "#FF9A86",
+  // Premium market/card-face palette. These tones are intentionally retained
+  // for stamp ink, paper texture, motion overlays and card-edge gradients.
+  "#06121D", "#081624", "#0E1E2A", "#102A3B", "#102A42", "#12232F",
+  "#182B39", "#1A2D3B", "#1B303D", "#1C2D38", "#1D303A", "#202B34",
+  "#223743", "#243B49", "#35434A", "#9BCAB0", "#9E8C69", "#C84132",
+  "#C94D3C", "#D4C7A9", "#D95C46", "#E6D4AE", "#EEE1C4", "#F1513D",
+  "#F1E4C6", "#F2E8CF", "#F35A44", "#F9EFDA", "#FFD3C7", "#FFF0D8",
+  "#FFF4E5", "#FFE5C6",
+  "#02080E", "#030A11", "#06131F", "#071522", "#0A1B2A", "#0A1C2D",
+  "#0B2235", "#0D1E2B", "#0D2236", "#172730", "#172832", "#183244",
+  "#33495A", "#3B4B53", "#52606A", "#53636D", "#6C7A80", "#6F1B14",
+  "#701C15", "#75C993", "#FFF2D9", "#FFF4E1",
   // Mode-gate and Arena identity palette. These remain isolated to the two
   // branded premium surfaces and deliberately share the same dark/gold/status family.
   "#040B10", "#070D12", "#07131D", "#091117", "#0C1923", "#0D1C28",
