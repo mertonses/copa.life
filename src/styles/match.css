@@ -4016,6 +4016,9 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   min-width:148px;
   padding-left:28px;
 }
+#result.result .runCareerProgress{
+  position:relative;
+}
 #result.result .result-score-panel strong{
   letter-spacing:.015em;
 }
