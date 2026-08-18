@@ -99,7 +99,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260728-ui-fixes1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260817-training-ranking1">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260818-free-agent-tap1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
 <link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
 <style>
@@ -561,8 +561,8 @@ function _freeAgentRole(pos){
   if(["ST","CF","FW","FWD"].includes(code))return "striker";
   return "utility";
 }
-function _freeAgentMotionMarkup(pos){
-  return `<span class="free-agent-motion free-agent-motion-${_freeAgentRole(pos)}" aria-hidden="true"></span>`;
+function _freeAgentAttr(value){
+  return String(value==null?"":value).replace(/[&<>"']/gu,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
 }
 function _freeAgentComparisonFor(player){
   const squad=(typeof picksBySlot!=="undefined"?picksBySlot:[]).filter(Boolean);
@@ -605,7 +605,8 @@ function _renderFreeAgents(){
     const powerWord=tr?"Güç":"Power";
     const lock=`<div class="free-agent-lock${cant?"":" hidden"}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>${lockReason}</span></div>`;
     const role=_freeAgentRole(pos);
-    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-free-agent-role="${role}" data-free-agent-position="${pos}" data-cash-after="${budget-a.fee}" data-lock-reason="${lockReason}" title="${fullName}"><div class="free-agent-edge" aria-hidden="true"></div><div class="free-agent-face"><span class="free-agent-surface-glint" aria-hidden="true"></span><div class="ct-head free-agent-top"><span class="ct-rar var-badge var-2 free-agent-stamp">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-art"><div class="free-agent-icon free-agent-monogram" aria-hidden="true"><span class="free-agent-monogram-label">${monogram}</span></div>${_freeAgentMotionMarkup(pos)}</div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}<div class="ct-foot free-agent-actions"><button type="button" class="free-agent-review" onclick="event.stopPropagation();CopaMobileShell.openFreeAgent(this,${ai})">${tr?"İNCELE":"REVIEW"}</button></div></div></div>`;
+    const accessibleLabel=tr?`${fullName} · ${priceLabel} · serbest transfer detayını aç`:`${fullName} · ${priceLabel} · open free-agent details`;
+    return `<div class="cardtile free-agent-card cat-oyuncu${cant?" unaffordable":""}" style="--fa-tone:${powerTone(inEff)}" data-free-agent="${ai}" data-free-agent-role="${role}" data-free-agent-position="${pos}" data-cash-after="${budget-a.fee}" data-lock-reason="${_freeAgentAttr(lockReason)}" title="${_freeAgentAttr(fullName)}" role="button" tabindex="0" aria-label="${_freeAgentAttr(accessibleLabel)}" onclick="CopaMobileShell.openFreeAgent(this,${ai})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();CopaMobileShell.openFreeAgent(this,${ai})}"><div class="free-agent-edge" aria-hidden="true"></div><div class="free-agent-face"><span class="free-agent-surface-glint" aria-hidden="true"></span><div class="ct-head free-agent-top"><span class="ct-rar var-badge var-2 free-agent-stamp">${tr?"SERBEST":"FREE"}</span><span class="ct-price ct-head-price ${a.fee<=0?"ct-price-free":""}">${priceLabel}</span></div><div class="free-agent-main"><div class="free-agent-art"><div class="free-agent-icon free-agent-monogram" aria-hidden="true"><span class="free-agent-monogram-label">${monogram}</span></div></div><div class="ct-body"><div class="ct-name">${playerName}</div></div></div><div class="free-agent-impact"><span>${tr?"MEVKİ":"POSITION"}<b>${posLbl}</b></span><span>${powerWord.toUpperCase()}<b class="free-agent-power-value">${inEff}</b></span></div>${lock}</div></div>`;
   }).join("");
   el.innerHTML=hdr+`<div class="shopcards" style="margin-bottom:0">${tiles}</div><div style="border-bottom:1px dashed var(--border-subtle);margin-top:10px;opacity:.5"></div>`;
 }
