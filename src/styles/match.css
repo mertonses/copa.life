@@ -3698,7 +3698,9 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
  #result.result .runCareerProgress .career-level-row b,#result.result .runCareerProgress .career-level-row small{color:#C4CCCD;font:800 8px/1 "Arial Narrow",Arial,sans-serif;white-space:nowrap}
  #result.result .runCareerProgress .career-level-row>span{height:5px;border-radius:5px;background:#34434B;overflow:hidden}
  #result.result .runCareerProgress .career-level-row>span i{display:block;height:100%;border-radius:inherit;background:#4E9B65}
- #result.result .runCareerProgress>ul,#result.result .runCareerProgress .career-reputation-note,#result.result .runCareerProgress .career-reputation-breakdown,#result.result .runCareerProgress .career-reward-row,#result.result .runCareerProgress .career-memory-row,#result.result .runCareerProgress .career-open-link{display:none!important}
+ #result.result .runCareerProgress>ul,#result.result .runCareerProgress .career-reputation-note,#result.result .runCareerProgress .career-reputation-breakdown,#result.result .runCareerProgress .career-reward-row,#result.result .runCareerProgress .career-memory-row{display:none!important}
+ #result.result .runCareerProgress .career-open-link{position:absolute;right:30px;bottom:8px;display:inline-flex!important;align-items:center;gap:6px;min-height:20px;padding:0;border:0;background:transparent;color:#D6A21F;font:900 9px/1 "Arial Narrow",Arial,sans-serif;letter-spacing:1.1px;text-decoration:none;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+ #result.result .runCareerProgress .career-open-link:hover{color:#F3C45A}
 #result.result .runCareerProgress:empty{display:none!important}
 #result.result .match-analysis-entry{display:none!important}
 #result.result .result-story-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr);gap:12px;padding:18px 30px;background:linear-gradient(90deg,#0E1C25,#12232F)}
@@ -3940,6 +3942,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   #result.result .result-datahub-head> .result-datahub-controls>button{width:100%}
   #result.result .result-datahub-grid{grid-template-columns:1fr}
   #result.result .result-datahub[data-result-tab="performance"] .result-bars{grid-template-columns:1fr;gap:12px}
+  #result.result .runCareerProgress .career-open-link{right:14px}
   #result.result .result-data-card{min-height:0}
   #result.result .result-squad-modal{padding:18px}
   .share-modal .share-actions{grid-template-columns:1fr}
