@@ -445,7 +445,7 @@
       });
       group.appendChild(button);
     });
-    settings.appendChild(group);
+    settings.appendChild(group);if(typeof global.compactSettingsLayout==="function")global.compactSettingsLayout();
     applyPreferences();
   }
 

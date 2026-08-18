@@ -537,7 +537,7 @@
     group.className="sd-group howto-settings-group";
     group.innerHTML=`<button type="button" class="sdbtn sd-full" data-guide-reset-setting>${esc(ui().reset)}</button>`;
     group.querySelector("button").addEventListener("click",event=>{resetContext();event.currentTarget.textContent=ui().resetDone;setTimeout(()=>{if(event.currentTarget.isConnected)event.currentTarget.textContent=ui().reset;},1600);});
-    drop.appendChild(group);
+    drop.appendChild(group);if(typeof global.compactSettingsLayout==="function")global.compactSettingsLayout();
   }
 
   ensureStyle();

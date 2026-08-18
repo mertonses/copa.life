@@ -93,6 +93,7 @@ test("mobile preferences stay opt-in and draft confirmation stays focused",async
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-preferences=1",{waitUntil:"domcontentloaded"});
   await page.locator("#settingsBtn").click();
+  await page.locator("[data-settings-folder='mobile'] > summary").click();
   const preferences=page.locator(".mobile-pref-group .mobile-pref-btn");
   await expect(preferences).toHaveCount(5);
   await expect(page.locator("#mobileHapticBtn")).toHaveAttribute("aria-pressed","false");

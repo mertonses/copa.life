@@ -16,7 +16,7 @@
       const group=document.createElement("div");group.className="sd-group native-ad-privacy-group";
       privacyButton=document.createElement("button");privacyButton.type="button";privacyButton.className="sdbtn sd-full";
       privacyButton.addEventListener("click",()=>Ads.showPrivacyOptions().catch(()=>{}));
-      group.appendChild(privacyButton);settings.appendChild(group);
+      group.appendChild(privacyButton);settings.appendChild(group);if(typeof root.compactSettingsLayout==="function")root.compactSettingsLayout();
     }
     privacyButton.textContent=label();
     privacyButton.hidden=!privacyOptionsRequired;

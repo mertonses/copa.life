@@ -419,6 +419,7 @@ test("browser settings keep phone controls structured and remove them after wide
   await page.setViewportSize({width:430,height:900});
   await page.goto("/?web-settings-responsive=1",{waitUntil:"domcontentloaded"});
   await page.locator("#settingsBtn").click();
+  await page.locator("[data-settings-folder='mobile'] > summary").click();
   await expect(page.locator(".mobile-pref-group")).toBeVisible();
   const narrowLayout=await page.evaluate(()=>{
     const scale=[...document.querySelectorAll<HTMLElement>("[data-mobile-text-scale]")].map(button=>button.getBoundingClientRect());
@@ -427,13 +428,16 @@ test("browser settings keep phone controls structured and remove them after wide
       scaleRows:new Set(scale.map(rect=>Math.round(rect.top))).size,
       scaleWidths:scale.map(rect=>rect.width),
       toggleWidths:toggles.map(rect=>rect.width),
+      toggleRows:new Set(toggles.map(rect=>Math.round(rect.top))).size,
       menuWidth:document.getElementById("settingsDrop")!.getBoundingClientRect().width,
       overflow:document.documentElement.scrollWidth-innerWidth,
     };
   });
   expect(narrowLayout.scaleRows).toBe(1);
   expect(Math.max(...narrowLayout.scaleWidths)-Math.min(...narrowLayout.scaleWidths)).toBeLessThanOrEqual(1);
-  expect(narrowLayout.toggleWidths.every(width=>Math.abs(width-narrowLayout.menuWidth+16)<=2)).toBe(true);
+  expect(narrowLayout.toggleRows).toBe(3);
+  expect(Math.max(...narrowLayout.toggleWidths)-Math.min(...narrowLayout.toggleWidths)).toBeLessThanOrEqual(2);
+  expect(narrowLayout.toggleWidths.every(width=>width>narrowLayout.menuWidth*.4&&width<narrowLayout.menuWidth*.6)).toBe(true);
   expect(narrowLayout.overflow).toBeLessThanOrEqual(1);
   await capture(page,"00b-narrow-browser-settings.png");
 

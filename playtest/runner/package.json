@@ -13,6 +13,7 @@
     "test:release": "playwright test tests/critical-flow.test.ts tests/run-lifecycle.test.ts tests/side-field-ui.test.ts tests/navigation-contract.test.ts tests/mode-gate-ui.test.ts --project=mobile-chromium --project=desktop-chromium",
     "test:cross": "playwright test tests/cross-browser-smoke.test.ts tests/season-stats-ui.test.ts tests/locale-ui.test.ts tests/howto-guide-ui.test.ts tests/fixture-road-ui.test.ts",
     "test:bridge": "playwright test tests/bridge.test.ts",
+    "test:notifications": "playwright test tests/notifications.test.ts --project=mobile-chromium --project=webkit-mobile --project=desktop-chromium",
     "test:session": "playwright test tests/session.test.ts",
     "assets:store": "node capture-store-assets.mjs",
     "assets:feature": "node capture-store-assets.mjs --feature-only",
