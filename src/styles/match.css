@@ -4066,6 +4066,11 @@ html[data-theme="dark"] #result.result .result-action-share{
   border-color:#34434B!important;
   color:#8D9BA5!important;
 }
+html[data-theme="dark"] #result.result #shareCardBtn{
+  background:transparent!important;
+  border-color:#34434B!important;
+  color:#8D9BA5!important;
+}
 #result.result .result-action-new,
 #result.result .result-actions #againBtn{
   order:4!important;
