@@ -2,7 +2,7 @@
 
 The `copa_life_product_events` dataset contains allowlisted, aggregate gameplay events.
 
-`blob1..21`:
+`blob1..20`:
 
 1. event name
 2. platform
@@ -23,22 +23,21 @@ The `copa_life_product_events` dataset contains allowlisted, aggregate gameplay 
 17. reward
 18. card kind
 19. economy band
-20. tournament and Side Field dimensions
-21. daily rotating random visitor token
+20. tournament, group-matchday and Side Field dimensions
 
-`double1..4` are count, round, schema version and group matchday. The daily token is generated locally, rotates at UTC day boundaries, is not used as an Analytics Engine index, and is only used with `COUNT(DISTINCT blob21)` for aggregate DAU/WAU. It is not joined to Ghost, Arena, leaderboard, save, account or device data.
+`double1..4` are count, round, schema version and a coarse numeric fingerprint of the daily rotating random visitor token. The token rotates at UTC day boundaries, is not written as an Analytics Engine index, and is only used with `COUNT(DISTINCT double4)` for aggregate DAU/WAU. It is not joined to Ghost, Arena, leaderboard, save, account or device data.
 
 Useful queries:
 
 ```sql
-SELECT COUNT(DISTINCT blob21) AS daily_active
+SELECT COUNT(DISTINCT double4) AS daily_active
 FROM copa_life_product_events
 WHERE timestamp >= NOW() - INTERVAL '1' DAY
   AND blob1 = 'session_started'
 ```
 
 ```sql
-SELECT COUNT(DISTINCT blob21) AS weekly_active
+SELECT COUNT(DISTINCT double4) AS weekly_active
 FROM copa_life_product_events
 WHERE timestamp >= NOW() - INTERVAL '7' DAY
   AND blob1 = 'session_started'

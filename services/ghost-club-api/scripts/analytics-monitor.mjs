@@ -11,7 +11,7 @@ const [product,worker]=await Promise.all([queryAnalytics(`
   SELECT
     sumIf(_sample_interval * double1, blob1 = 'session_started') AS sessions,
     sumIf(_sample_interval * double1, blob1 = 'profile_open_error') AS profile_errors,
-    COUNT(DISTINCT blob21) AS active_visitors
+    COUNT(DISTINCT double4) AS active_visitors
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '1' HOUR
 `),queryAnalytics(`
