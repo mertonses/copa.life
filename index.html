@@ -92,7 +92,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/layout.css?v=20260818-chair-cards3">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260817-karaborsa1">
-<link rel="stylesheet" href="src/styles/match.css?v=20260818-result-compact1">
+<link rel="stylesheet" href="src/styles/match.css?v=20260818-result-mockup1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260805-five-tab-nav1">
@@ -384,13 +384,14 @@ if("serviceWorker"in navigator){
   </section>
 
   <section id="result" class="result hidden">
-    <div class="scoreboard"><div id="resultFx" class="result-fx" aria-hidden="true"></div><div class="scoreboard-title"><div class="ln" id="rLn">—</div><div class="big" id="rFinish">—</div></div><div class="ln" id="rRound">—</div></div>
+    <div class="scoreboard"><div id="resultFx" class="result-fx" aria-hidden="true"></div><div class="scoreboard-title"><div class="ln" id="rLn">—</div><div class="big" id="rFinish">—</div><p class="result-subline" id="rRound">—</p></div><div class="result-score-panel"><strong id="rScore">—</strong><small id="rScoreLabel">MAÇ SONUCU</small></div></div>
     <div class="motm hidden" id="motm"></div><p class="verdict" id="rVerdict">—</p><div class="runUnlocks hidden" id="rUnlocks"></div>
     <div class="statline"><div class="stat"><div class="l" id="lblTur">Tur</div><div class="v" id="rTur">0</div></div><div class="stat"><div class="l" id="lblGuc">Güç</div><div class="v" id="rGuc">0</div></div><div class="stat"><div class="l" id="lblKart">Kart</div><div class="v" id="rKart">0</div></div><div class="stat"><div class="l" id="lblCash">Kasa</div><div class="v" id="rCash">0</div></div></div>
     <div class="match-analysis-entry hidden" id="matchAnalysisEntry" aria-live="polite"></div>
     <div class="runCareerProgress hidden" id="rCareerProgress"></div>
     <div class="final-row" id="finalRow"><div class="finalreport hidden" id="finalReport"></div><div class="storytile" id="storyTile"><div class="sth" id="rStoryHdr">SEZONUN HİKÂYESİ</div><div class="stb" id="rStory">—</div></div><div class="econtile hidden" id="econTile"></div></div><div class="lineups hidden" id="lineups"></div>
     <div class="result-actions">
+      <p class="result-action-copy" id="resultActionCopy">Bu tur kaybolmadı. Kulüp kariyerine işlendi.</p>
       <button class="btn btn-ghost result-more-btn" id="resultMoreBtn" onclick="toggleResultDetails()"><span id="resultMoreLbl">İLERİ</span><span aria-hidden="true">→</span></button>
       <div class="result-row"><button class="btn btn-ghost" id="shareCardBtn" onclick="showShareCard()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="18" height="11" rx="2"/><circle cx="10" cy="9.5" r="2.8"/><path d="M6.5 4L8 1.5h4L13.5 4"/><circle cx="16" cy="6.5" r=".9" fill="currentColor" stroke="none"/></svg><span class="result-action-label" id="shareBtnLbl">PAYLAŞ</span></button><button class="btn btn-ghost" id="statsBtn" onclick="showSeasonStats()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:5px"><rect x="2" y="9" width="3" height="6" rx=".5"><animate attributeName="height" values="6;9;6" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="9;6;9" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="8.5" y="5" width="3" height="10" rx=".5"><animate attributeName="height" values="10;13;10" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="5;2;5" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="15" y="7" width="3" height="8" rx=".5"><animate attributeName="height" values="8;11;8" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="7;4;7" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect></svg><span class="result-action-label" id="statsBtnLbl">Sezon İstatistikleri</span></button><div class="seedbox result-seed-action"><span id="rSeedLbl"></span><b id="rSeed"></b></div></div>
       <div class="copied" id="copied"></div><span id="copyBtn" hidden></span>
@@ -4147,4 +4148,28 @@ function _finalTacticBench(benchIdx){
 })();
 </script>
 <script>function toggleResultDetails(){const root=document.getElementById("result"),open=root.classList.toggle("is-expanded"),lbl=document.getElementById("resultMoreLbl"),btn=document.getElementById("resultMoreBtn");if(lbl)lbl.textContent=open?(typeof LT==="function"?LT("ÖZETİ KAPAT","COLLAPSE SUMMARY","CERRAR RESUMEN","ZUSAMMENFASSUNG SCHLIESSEN","CHIUDI RIEPILOGO"):"ÖZETİ KAPAT"):(typeof LT==="function"?LT("İLERİ","NEXT","SIGUIENTE","WEITER","AVANTI"):"İLERİ");if(btn)btn.setAttribute("aria-expanded",String(open));if(open)root.scrollIntoView({behavior:"smooth",block:"start"});}</script>
+<script>
+(function(){
+  const baseRenderResult=renderResult;
+  function decorateResult(r){
+    const root=$("result"),kind=r&&r.endType==="sacked"?"sacked":r&&r.won?"champion":r&&r.endType==="group_eliminated"?"group-eliminated":"eliminated";
+    root.dataset.resultKind=kind;
+    const copy=$("resultActionCopy"),score=$("rScore"),scoreLabel=$("rScoreLabel"),kicker=$("rLn"),title=$("rFinish");
+    const tr=LANG==="tr";
+    const copyText={champion:tr?"Kupa kulüp tarihine işlendi.":"The cup is now part of club history.",sacked:tr?"Yönetim değişti; kulüp kariyerin kayda geçti.":"The board changed; your club career is on record.","group-eliminated":tr?"Grup aşaması tamamlandı; sonraki kariyerde daha güçlü dön.":"The group stage is over; return stronger next career.",eliminated:tr?"Bu tur kaybolmadı. Kulüp kariyerine işlendi.":"This run was not lost. It is part of the club career."};
+    const kickerText={champion:tr?"TÜRKİYE ULUSAL KUPASI · FİNAL":"NATIONAL CUP · FINAL",sacked:tr?"YÖNETİM KARARI · SEZON SONU":"BOARD DECISION · SEASON END","group-eliminated":tr?"TÜRKİYE ULUSAL KUPASI · GRUP AŞAMASI":"NATIONAL CUP · GROUP STAGE",eliminated:tr?"TÜRKİYE ULUSAL KUPASI · SEZON SONU":"NATIONAL CUP · SEASON END"};
+    if(kicker)kicker.textContent=kickerText[kind];
+    if(title&&kind==="champion")title.textContent=tr?"ŞAMPİYON":"CHAMPION";
+    if(title&&kind==="sacked")title.textContent=tr?"KOVULDUN":"SACKED";
+    if(title&&kind==="group-eliminated")title.textContent=tr?"GRUPTA ELENDİN":"ELIMINATED IN GROUP";
+    if(title&&kind==="eliminated")title.textContent=r&&r.score?(tr?"FİNALDE KAYBETTİN":"LOST THE FINAL"):(tr?"ELENDİN":"ELIMINATED");
+    if(score)score.textContent=r&&r.score||"—";
+    if(scoreLabel)scoreLabel.textContent=r&&r.score?(tr?"MAÇ SONUCU":"MATCH RESULT"):(tr?"SEZON DURUMU":"SEASON STATUS");
+    if(copy)copy.textContent=(kind==="eliminated"&&r&&r.score)
+      ?(tr?"Finale kadar geldin; kupa son adımda kaçtı.":"You reached the final; the cup slipped away.")
+      :copyText[kind];
+  }
+  renderResult=function(){baseRenderResult.apply(this,arguments);decorateResult(lastResult);};
+})();
+</script>
 </body></html>
