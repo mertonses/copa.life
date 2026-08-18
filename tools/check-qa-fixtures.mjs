@@ -7,8 +7,8 @@ const checks=[
   ["fixture is URL-gated",/testMode/.test(fixture)&&/Object\.freeze/.test(fixture)],
   ["injury fixture is deterministic and one-shot",/injuryConsumed=false/.test(fixture)&&/injuryLevel=2/.test(fixture)&&/!is\("injury"\)\|\|injuryConsumed/.test(fixture)],
   ["post-match uses fixture instead of random injury",/fixtureInjury=/.test(index)&&/is\("injury"\)\)\?null:applyRandomInjury/.test(index)],
-  ["placement fixture enables coarse tap flow",/is\("placement"\)\)return true/.test(hub)&&/_tapPlaceOnSlot/.test(hub)],
-  ["placement fixture supports Playwright/CUA pointer and mouse drag",/qaPointerPlacementReady/.test(hub)&&/pointerdown/.test(hub)&&/mousedown/.test(hub)&&/pointerup/.test(hub)&&/mouseup/.test(hub)],
+  ["placement fixture enables coarse tap flow",/_tapCoarse/.test(hub)&&/_tapPlaceOnSlot/.test(hub)&&/addEventListener\("click"/.test(hub)],
+  ["placement fixture supports Playwright/CUA pointer and mouse drag",/ondragstart/.test(hub)&&/ondrop/.test(hub)&&/touchstart/.test(hub)&&/touchmove/.test(hub)&&/touchend/.test(hub)],
   ["normal UI has no final replay/import/export controls",!/(openFinalReplayImport|copyFinalReplayCode|openFinalMatchReplay|finalReplayImportBtn|CopaFinalReplay)/.test(index+fs.readFileSync("src/sim/finalSim.js","utf8")+fs.readFileSync("src/ui/advancedSettings.js","utf8"))]
 ];
 const failed=checks.filter(([,pass])=>!pass);

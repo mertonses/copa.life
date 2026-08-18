@@ -775,7 +775,7 @@
   function submitImport(){try{const result=importCode((document.getElementById("metaImportCode")||{}).value);global.showToast(global.LANG==="tr"?`${result.runs} arşiv kaydıyla ilerleme birleştirildi.`:`Progress merged with ${result.runs} archive entries.`);openProgression();}catch(_){global.showToast(global.LANG==="tr"?"Kod geçersiz veya bozulmuş.":"The code is invalid or corrupted.",{type:"info"});}}
   function installControl(){
     const body=document.querySelector(".advanced-body");if(!body||document.getElementById("metaProgressBtn"))return;
-    const button=document.createElement("button");button.type="button";button.id="metaProgressBtn";button.className="btn btn-ghost final-replay-import-btn";button.onclick=()=>openProgression();button.textContent=global.LANG==="tr"?"KULÜP KARİYERİ VE KAYIT":"CLUB CAREER & SAVE";body.insertBefore(button,document.getElementById("advancedGhostSettingSlot"));
+    const button=document.createElement("button");button.type="button";button.id="metaProgressBtn";button.className="btn btn-ghost advanced-tool-btn";button.onclick=()=>openProgression();button.textContent=global.LANG==="tr"?"KULÜP KARİYERİ VE KAYIT":"CLUB CAREER & SAVE";body.insertBefore(button,document.getElementById("advancedGhostSettingSlot"));
   }
 
   global.CopaMeta=Object.freeze({

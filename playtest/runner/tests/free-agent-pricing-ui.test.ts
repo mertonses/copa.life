@@ -14,6 +14,7 @@ test.beforeEach(async({page})=>{
       {p:{name:"Üst Bant Oyuncusu",ov:73,pos:"ST",natPos:"ST",age:27,club:""},fee:game.clampFreeAgentFee(73,3,game.playerMarketValue(73,"free_agent",3))}
     ];
     game._renderFreeAgents();
+    game.CopaMobileShell?.activateRoute("market");
   });
 });
 

@@ -2619,23 +2619,8 @@ function buildSim(myPow, oppPow) {
     drawHeatmap(rawCtx,W,H,heatGrid,HGW,HGH);
     try{window._heatmapImg=canvas.toDataURL("image/png");}catch(e){}
   }
-  function finalReplayRecord(result){
-    if(!window.CopaFinalReplay)return null;
-    const activeCards=[];
-    if(typeof hasCard==="function"){
-      if(hasCard("kanat_akini"))activeCards.push("kanat_akini");
-      if(hasCard("kontra"))activeCards.push("kontra");
-      if(hasCard("sogukkanli_penaltici"))activeCards.push("sogukkanli_penaltici");
-    }
-    return window.CopaFinalReplay.record({
-      config:{seed:matchSeed,homePower:myPow,awayPower:oppPow,cards:activeCards,decisions:decisionLog},
-      result,score:[...score],stats,audit,events:replayEvents,
-      teams:[myName,oppName]
-    });
-  }
-  function finalAuditDetailsHTML(includeReplay){
-    const replayButton=includeReplay?`<button type="button" class="btn btn-primary final-replay-action final-replay-open" onclick="openFinalMatchReplay()">${isTR?"MAÇI YENİDEN İZLE":"WATCH MATCH REPLAY"}</button><button type="button" class="btn btn-ghost final-replay-action final-replay-copy" onclick="copyFinalReplayCode()">${isTR?"TEKRAR KODUNU KOPYALA":"COPY REPLAY CODE"}</button>`:"";
-    const replay=`<div class="final-replay-actions">${replayButton}<button type="button" class="btn btn-ghost final-replay-action final-replay-calibration" onclick="openFinalCalibration()">${isTR?"KALİBRASYON":"CALIBRATION"}</button></div>`;
+  function finalAuditDetailsHTML(){
+    const replay=`<div class="final-audit-actions"><button type="button" class="btn btn-ghost final-audit-calibration" onclick="openFinalCalibration()">${isTR?"KALİBRASYON":"CALIBRATION"}</button></div>`;
     const summary=isTR?"SİMÜLASYON DENETİMİ":"SIMULATION AUDIT";
     return replay+`<details class="final-audit-details"><summary>${summary}</summary><div class="final-audit-body">${auditReportHTML()}</div></details>`;
   }
@@ -2669,12 +2654,11 @@ function buildSim(myPow, oppPow) {
     const isTR2=isTR;const kM=window.keyMoment||"-";
     const fw=["Kupa sandığa girdi.","Rüya sezon!","Son düdüğe kadar didindi.","Bu takım birlikte büyüdü."];const lw=["Finale geldi, yetmedi.","Son adımda tökezledi.","Sıfırdan başla.","Bir sonraki run."];
     const ni=rng.int(fw.length);
-    const replay=finalReplayRecord(won?"win":"loss");
     const telemetry=finalTelemetryProperties(goldenGoalMode?"golden_goal":"regulation",won?"win":"loss");
     if(window.CopaAnalytics)window.CopaAnalytics.track("final_sim_completed",telemetry);
     if(window.CopaFinalCalibration)window.CopaFinalCalibration.record(telemetry);
     window._finalTelemetryContext=null;
-    window._finalAuditHTML=finalAuditDetailsHTML(!!replay);
+    window._finalAuditHTML=finalAuditDetailsHTML();
     window.finalReportHTML=`<h4>${isTR2?"Final Karnesi":"Final Report"}</h4><div class="frrow"><span>${isTR2?"Kırılma anı":"Key moment"}</span><b>${kM}</b></div><div class="frrow"><span>${isTR2?"Şutlar":"Shots"}</span><b>${stats.shots[0]}-${stats.shots[1]}</b></div><div class="frrow"><span>xG</span><b>${stats.xg[0].toFixed(1)}-${stats.xg[1].toFixed(1)}</b></div><div class="frrow"><span>${isTR2?"Kurtarışlar":"Saves"}</span><b>${stats.saves[0]}-${stats.saves[1]}</b></div><div class="frrow"><span>${isTR2?"Final yorumu":"Final note"}</span><b>${won?(isTR2?fw[ni]:fw[ni]):(isTR2?lw[ni]:lw[ni])}</b></div>${window._finalAuditHTML}`;
     window.finalSimAudit=audit;
     calcRatings();
@@ -2752,8 +2736,7 @@ function buildSim(myPow, oppPow) {
     window.openCopaFinalPenalties=(manual)=>{openFinalPenaltyShootout(sc,0,!!manual);return true;};
     window._finalPenaltyScore=sc;
     window.finalSimAudit=audit;
-    const replay=finalReplayRecord("penalties");
-    window._finalAuditHTML=finalAuditDetailsHTML(!!replay);
+    window._finalAuditHTML=finalAuditDetailsHTML();
     window._finalTelemetryContext=finalTelemetryProperties("penalties","");
     window.keyMoment=isTR?"Altın golde gol çıkmadı":"No golden goal";
     window.penaltyNote=isTR?"penaltılara gidildi":"went to penalties";

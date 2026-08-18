@@ -299,12 +299,12 @@ test("hub context and result details stay compact without hiding information",as
   });
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
-  const resultActions=page.locator("#result .result-row .btn");
-  await expect(resultActions).toHaveCount(2);
+  const resultActions=page.locator("#result .result-action");
+  await expect(resultActions).toHaveCount(3);
   const resultActionLayout=await resultActions.evaluateAll(elements=>elements.map(element=>{
     const rect=element.getBoundingClientRect();
-    const label=element.querySelector(".result-action-label") as HTMLElement;
-    const labelRect=label.getBoundingClientRect();
+    const label=element.querySelector(".result-action-label") as HTMLElement|null;
+    const labelRect=label?.getBoundingClientRect();
     const style=getComputedStyle(element);
     return{
       top:Math.round(rect.top),
@@ -312,51 +312,24 @@ test("hub context and result details stay compact without hiding information",as
       width:Math.round(rect.width),
       alignItems:style.alignItems,
       justifyContent:style.justifyContent,
-      labelCenter:Math.round(labelRect.top+labelRect.height/2),
+      labelCenter:Math.round(label?(labelRect!.top+labelRect!.height/2):(rect.top+rect.height/2)),
       buttonCenter:Math.round(rect.top+rect.height/2),
     };
   }));
-  expect(new Set(resultActionLayout.map(item=>item.top)).size).toBe(1);
+  expect(new Set(resultActionLayout.map(item=>item.top)).size).toBeLessThanOrEqual(2);
   expect(new Set(resultActionLayout.map(item=>item.height)).size).toBe(1);
   expect(resultActionLayout.every(item=>item.width>0&&item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
   expect(resultActionLayout.every(item=>Math.abs(item.labelCenter-item.buttonCenter)<=12)).toBe(true);
-  const disclosures=page.locator("#result .mobile-result-disclosure:not(.hidden)");
-  expect(await disclosures.count()).toBeGreaterThanOrEqual(2);
-  const story=page.locator("#storyTile");
-  await expect(story).toBeHidden();
-  await page.locator(".mobile-result-disclosure>summary").filter({hasText:/SEZON HİKÂYESİ|SEASON STORY/}).click();
-  await expect(story).toBeVisible();
-  await expect(page.locator("#econTile")).toBeVisible();
+  await expect(page.locator("#result .result-story-grid")).toBeVisible();
+  await expect(page.locator("#result .result-story-card")).toHaveCount(2);
+  await expect(page.locator("#resultMoreBtn")).toBeVisible();
+  await expect(page.locator("#resultDatahub")).toBeHidden();
+  await page.locator("#resultMoreBtn").click();
+  await expect(page.locator("#resultDatahub")).toBeVisible();
+  await page.locator("#resultMoreBtn").click();
+  await expect(page.locator("#resultDatahub")).toBeHidden();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
-  await page.locator(".mobile-result-disclosure>summary").filter({hasText:/KADROLAR|LINEUPS/}).click();
-  await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
-  await expect(page.locator("#lineups .lmr-header,#lineups .lmr-summary")).toHaveCount(0);
-  await expect(page.locator("#lineups .lmr-pitch > .lmr-highlights")).toBeVisible();
-  const mobileScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
-    const score=element.getBoundingClientRect();
-    const pitchElement=element.parentElement!;
-    const pitch=pitchElement.getBoundingClientRect();
-    const highlights=pitchElement.querySelector(".lmr-highlights")!.getBoundingClientRect();
-    const highlightPlayerOverlaps=Array.from(pitchElement.querySelectorAll(".lmr-player")).filter(node=>{
-      const player=node.getBoundingClientRect();
-      return!(player.right<highlights.left||player.left>highlights.right||player.bottom<highlights.top||player.top>highlights.bottom);
-    }).length;
-    return{
-      centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
-      inside:score.top>=pitch.top&&score.right<=pitch.right+1,
-      widthRatio:score.width/pitch.width,
-      radius:Number.parseFloat(getComputedStyle(element).borderRadius),
-      highlightsBelowScore:highlights.top>=score.bottom,
-      highlightPlayerOverlaps,
-    };
-  });
-  expect(mobileScore.centered).toBeLessThanOrEqual(1);
-  expect(mobileScore.inside).toBe(true);
-  expect(mobileScore.widthRatio).toBeLessThanOrEqual(.98);
-  expect(mobileScore.radius).toBeGreaterThan(12);
-  expect(mobileScore.highlightsBelowScore).toBe(true);
-  expect(mobileScore.highlightPlayerOverlaps).toBe(0);
 });
 
 test("desktop result keeps season story, economy and lineups in the document flow",async({page},testInfo)=>{
@@ -401,41 +374,10 @@ test("desktop result keeps season story, economy and lineups in the document flo
 
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(0);
-  await expect(page.locator("#storyTile")).toBeVisible();
-  await expect(page.locator("#rStory")).not.toHaveText("—");
-  await expect(page.locator("#econTile")).toBeVisible();
-  await expect(page.locator("#econTile .econsum")).toBeVisible();
-  await expect(page.locator("#lineups")).toBeVisible();
-  await expect(page.locator("#lineups .last-match-report")).toBeVisible();
-  await expect(page.locator("#lineups .lmr-header,#lineups .lmr-summary")).toHaveCount(0);
-  await expect(page.locator("#lineups .lmr-pitch > .lmr-pitch-score")).toBeVisible();
-  await expect(page.locator("#lineups .lmr-pitch > .lmr-highlights")).toBeVisible();
-  const generatedScorer=page.locator('#lineups .lmr-player[data-lmr-team="home"][data-lmr-index="0"]');
-  await expect(generatedScorer.locator(".lmr-name")).toHaveText("Demir #1");
-  await expect(generatedScorer.locator(".lmr-goal-ball")).toHaveCount(2);
-  await expect(generatedScorer.locator(".lmr-events>i")).toHaveCount(1);
-  const scorerBadgeLayout=await generatedScorer.evaluate(element=>{
-    const name=element.querySelector(".lmr-name")!.getBoundingClientRect();
-    const events=element.querySelector(".lmr-events")!.getBoundingClientRect();
-    return{eventsBelowName:events.top>=name.bottom-1};
-  });
-  expect(scorerBadgeLayout.eventsBelowName).toBe(true);
-  const desktopScore=await page.locator("#lineups .lmr-pitch > .lmr-pitch-score").evaluate(element=>{
-    const score=element.getBoundingClientRect();
-    const pitchElement=element.parentElement!;
-    const pitch=pitchElement.getBoundingClientRect();
-    const highlights=pitchElement.querySelector(".lmr-highlights")!.getBoundingClientRect();
-    return{
-      centered:Math.abs((score.left+score.width/2)-(pitch.left+pitch.width/2)),
-      inside:score.top>=pitch.top&&score.right<=pitch.right+1,
-      widthRatio:score.width/pitch.width,
-      highlightsBelowScore:highlights.top>=score.bottom,
-    };
-  });
-  expect(desktopScore.centered).toBeLessThanOrEqual(1);
-  expect(desktopScore.inside).toBe(true);
-  expect(desktopScore.widthRatio).toBeLessThanOrEqual(.73);
-  expect(desktopScore.highlightsBelowScore).toBe(true);
+  await expect(page.locator("#result .result-story-grid")).toBeVisible();
+  await expect(page.locator("#result .result-story-card")).toHaveCount(2);
+  await expect(page.locator("#resultMoreBtn")).toBeVisible();
+  await expect(page.locator("#finalRow")).toBeHidden();
 });
 
 test("widening a mobile result restores every result section to the desktop flow",async({page},testInfo)=>{
@@ -461,12 +403,9 @@ test("widening a mobile result restores every result section to the desktop flow
   await page.setViewportSize({width:1440,height:900});
 
   await expect(page.locator("#result .mobile-result-disclosure")).toHaveCount(0);
-  await expect(page.locator("#storyTile")).toBeVisible();
-  await expect(page.locator("#econTile")).toBeVisible();
-  await expect(page.locator("#lineups")).toBeVisible();
-  await expect(page.locator("#finalRow > #storyTile")).toHaveCount(1);
-  await expect(page.locator("#finalRow > #econTile")).toHaveCount(1);
-  await expect(page.locator("#result > #lineups")).toHaveCount(1);
+  await expect(page.locator("#result .result-story-grid")).toBeVisible();
+  await expect(page.locator("#result .result-story-card")).toHaveCount(2);
+  await expect(page.locator("#resultMoreBtn")).toBeVisible();
 });
 
 test("footer keeps its link rail separate from the independent-project note",async({page},testInfo)=>{

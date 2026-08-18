@@ -2529,6 +2529,8 @@ html.copa-mobile-game #hub>.native-hub-nav button:focus-visible{outline:2px soli
   .prep-resource-strip>em{grid-column:1/-1;text-align:left;padding-top:2px;border-top:1px solid color-mix(in srgb,var(--border-subtle) 70%,transparent)}
   .prep-recommend-copy em{max-width:24ch}
 }
+
+#freeAgentRow .free-agent-card{cursor:pointer}
 @media(max-width:389px){
   html.copa-mobile-game #hub>.native-hub-nav{gap:3px!important;padding:5px!important}
   html.copa-mobile-game #hub>.native-hub-nav button{gap:3px!important;padding-inline:3px!important}

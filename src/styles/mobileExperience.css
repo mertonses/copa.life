@@ -1255,6 +1255,11 @@
   #result .mobile-result-disclosure>#lineups{background:var(--surface-elevated)!important}
   #result .mobile-result-disclosure>#lineups .last-match-report,
   #result .mobile-result-disclosure>#lineups .last-match-report *{max-width:100%;box-sizing:border-box}
+  /* The compact result shell keeps the legacy data tiles behind disclosures,
+     but the disclosure summaries themselves must remain reachable. */
+  #result.result:not(.is-expanded) #finalRow{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+  #result.result:not(.is-expanded) #lineups{display:block!important}
+  #result .mobile-result-disclosure:not([open])>#lineups{display:none!important}
 }
 
 /* Very narrow phones get a two-column metric grid instead of four squeezed
