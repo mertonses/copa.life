@@ -13,7 +13,7 @@ function load(file, expression) {
 function expect(condition, message) { if (!condition) throw new Error(message); }
 
 const pool = load("src/data/players_japan.js", "POOL_JP");
-expect(Array.isArray(pool) && pool.length === 561, `Japonya oyuncu sayısı: ${pool?.length}`);
+expect(Array.isArray(pool) && pool.length === 566, `Japonya oyuncu sayısı: ${pool?.length}`);
 expect(new Set(pool.map(player => player[3])).size === 20, "Japonya havuzunda 20 kulüp bulunmalı");
 for (const role of ["GK", "DEF", "MID", "FWD"]) expect(pool.some(player => player[2] === role), `Japonya ${role} grubu eksik`);
 for (const player of pool) {
@@ -67,4 +67,4 @@ expect(sw.includes('"/src/data/players_japan.js"') && sw.includes('"/assets/flag
 expect(ghost.includes('country:cleanText(context.selectedCountry||context.country||"TR").slice(0,8)'), "Hayalet Kulüp ülke serialize yolu eksik");
 expect(ghost.includes("ghostMeta:{country:cleanText(snapshot.club&&snapshot.club.country)"), "Hayalet Kulüp ülke deserialize yolu eksik");
 
-console.log("Japan country OK: 561 oyuncu, 20 kulüp, profil/save/seed/ghost ve responsive UI bağlantıları doğrulandı.");
+console.log("Japan country OK: 566 oyuncu, 20 kulüp, profil/save/seed/ghost ve responsive UI bağlantıları doğrulandı.");

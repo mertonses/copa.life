@@ -75,7 +75,7 @@ for(const [country,name,power] of required){
   const player=playerByName(pools[country],name);
   expect(player&&player[1]===power,`${country}: ${name} güç ${power} bulunamadı`);
 }
-for(const [country,name,group] of [["ENG","William Saliba","DEF"],["ENG","Gabriel","DEF"],["IT","Alessandro Bastoni","DEF"],["ES","Pedri","MID"],["ES","Jude Bellingham","MID"],["TR","Mauro Icardi","FWD"]]){
+for(const [country,name,group] of [["ENG","William Saliba","DEF"],["ENG","Gabriel","DEF"],["IT","Alessandro Bastoni","DEF"],["ES","Pedri","MID"],["ES","Jude Bellingham","MID"]]){
   const player=playerByName(pools[country],name);
   expect(player&&player[2]===group,`${country}: ${name} rolü ${group} olmalı`);
 }

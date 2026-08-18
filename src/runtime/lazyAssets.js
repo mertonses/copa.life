@@ -47,8 +47,8 @@
   }
   function ensureChairPicker(){
     return Promise.all([
-      loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260721-chair-contrast1",'link[href*="chairPicker.css"]'),
-      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260727-compact-chair2",()=>!!global.CopaChairPicker)
+      loadStyleOnce("chair-picker-style","src/styles/chairPicker.css?v=20260818-chair-premium1",'link[href*="chairPicker.css"]'),
+      loadScriptOnce("chair-picker","src/ui/chairPicker.js?v=20260818-chair-premium1",()=>!!global.CopaChairPicker)
     ]).then(()=>global.CopaChairPicker);
   }
   function ensureAdvancedSettings(){
@@ -84,11 +84,11 @@
   function ensureCountryPlayers(country){
     const code=String(country||"TR").toUpperCase();
     const sources={
-      ENG:["country-players-eng","src/data/players_england.js?v=20260720-player-balance1","POOL_EN"],
-      ES:["country-players-es","src/data/players_spain.js?v=20260720-player-balance1","POOL_ES"],
-      IT:["country-players-it","src/data/players_italy.js?v=20260720-player-balance1","POOL_IT"],
-      DE:["country-players-de","src/data/players_germany.js?v=20260720-player-balance1","POOL_DE"],
-      JP:["country-players-jp","src/data/players_japan.js?v=20260720-player-balance1","POOL_JP"]
+      ENG:["country-players-eng","src/data/players_england.js?v=20260818-transfer-update1","POOL_EN"],
+      ES:["country-players-es","src/data/players_spain.js?v=20260818-transfer-update1","POOL_ES"],
+      IT:["country-players-it","src/data/players_italy.js?v=20260818-transfer-update1","POOL_IT"],
+      DE:["country-players-de","src/data/players_germany.js?v=20260818-transfer-update1","POOL_DE"],
+      JP:["country-players-jp","src/data/players_japan.js?v=20260818-transfer-update1","POOL_JP"]
     };
     const source=sources[code];if(!source)return Promise.resolve();
     return loadScriptOnce(source[0],source[1],()=>Array.isArray(global[source[2]])&&global[source[2]].length>0);

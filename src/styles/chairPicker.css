@@ -91,3 +91,18 @@ html[data-theme="dark"] .chair-picker-modal .cp-contract-row{background:color-mi
   .chair-picker-modal .cp-role-badge{font-size:8px}
   .chair-picker-modal .cp-contract-row{grid-template-columns:1fr;gap:3px}
 }
+
+/* Premium chairman profile card */
+.chair-picker-modal .cp-persona{background:linear-gradient(160deg,var(--surface-muted),var(--surface-elevated));padding:22px 20px 18px}
+.chair-picker-modal .cp-portrait-frame{width:min(100%,204px);border-radius:8px;box-shadow:0 14px 28px rgba(10,17,24,.18)}
+.chair-picker-modal .chairpopup-name{font-size:24px;letter-spacing:-.035em}
+.chair-picker-modal .cp-persona-role{color:var(--status-critical)}
+.chair-picker-modal .chairpopup-desc{margin-top:12px;color:var(--text-secondary);font-size:11.5px;line-height:1.5}
+.chair-picker-modal .cp-profile-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0 0 12px}
+.chair-picker-modal .cp-profile-metrics>div{padding:11px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-bg)}
+.chair-picker-modal .cp-profile-metrics small{display:block;color:var(--color-slate);font:800 8px/1.2 var(--mono);letter-spacing:1.2px}
+.chair-picker-modal .cp-profile-metrics b{display:block;margin-top:7px;color:var(--text-primary);font:900 19px/1 var(--mono);font-variant-numeric:tabular-nums}
+.chair-picker-modal .cp-profile-metrics>div:last-child b{color:var(--status-warning-text)}
+.chair-picker-modal .cp-contract-row{min-height:52px;padding:11px 12px}
+html[data-theme="dark"] .chair-picker-modal .cp-profile-metrics>div{background:color-mix(in srgb,var(--surface-bg) 88%,var(--surface-muted))}
+@media(max-width:720px){.chair-picker-modal .cp-profile-metrics{margin-top:0}.chair-picker-modal .chairpopup-desc{font-size:10.5px}.chair-picker-modal .cp-profile-metrics b{font-size:16px}}
