@@ -206,14 +206,18 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
   await expect(page.locator("#advancedGhostSettingSlot .ghost-setting-privacy")).toHaveCount(0);
 
   const layout=await page.evaluate(()=>{
-    const tools=[...document.querySelectorAll(".advanced-run-tools button")].map(node=>(node as HTMLElement).getBoundingClientRect());
+    const toolRows=[...document.querySelectorAll(".advanced-run-tools")].map(row=>[...row.querySelectorAll("button")].map(node=>(node as HTMLElement).getBoundingClientRect()));
+    const metaTools=toolRows[0]||[];
+    const transferTools=toolRows[1]||[];
     const advanced=document.querySelector(".advanced-body") as HTMLElement;
     const ghostOptions=[...document.querySelectorAll(".ghost-setting-option")].map(node=>(node as HTMLElement).getBoundingClientRect());
     const ghostToggles=[...document.querySelectorAll(".ghost-setting-toggle")].map(node=>(node as HTMLElement).getBoundingClientRect());
     const ghostSlot=document.getElementById("advancedGhostSettingSlot")!;
     return{
-      sameRow:Math.abs(tools[0].top-tools[1].top)<=1,
-      equalWidth:Math.abs(tools[0].width-tools[1].width)<=1,
+      metaCount:metaTools.length,
+      transferCount:transferTools.length,
+      sameRow:transferTools.length<2||Math.abs(transferTools[0].top-transferTools[1].top)<=1,
+      equalWidth:transferTools.length<2||Math.abs(transferTools[0].width-transferTools[1].width)<=1,
       overflow:advanced.scrollWidth-advanced.clientWidth,
       ghostRowsStacked:ghostOptions[1].top>=ghostOptions[0].bottom-1,
       compactGhostToggles:ghostToggles.every((toggle,index)=>toggle.width<ghostOptions[index].width*.45),
@@ -221,6 +225,8 @@ test("advanced settings are grouped by task without changing seed or Ghost behav
     };
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.metaCount).toBe(1);
+  expect(layout.transferCount).toBe(2);
   expect(layout.equalWidth).toBe(true);
   expect(layout.sameRow).toBe(!testInfo.project.name.includes("mobile"));
   expect(layout.ghostRowsStacked).toBe(true);
