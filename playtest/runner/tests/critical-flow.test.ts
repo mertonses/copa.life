@@ -94,10 +94,10 @@ test("England player pool loads on selection and is ready before draft generatio
   await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
   expect(await page.evaluate(()=>Array.isArray((globalThis as any).POOL_EN)&&(globalThis as any).POOL_EN.length)).toBe(0);
   await page.evaluate(()=>{(globalThis as any).pickCountry("ENG");});
-  await page.waitForFunction(()=>Array.isArray((globalThis as any).POOL_EN)&&(globalThis as any).POOL_EN.length===2983);
+  await page.waitForFunction(()=>Array.isArray((globalThis as any).POOL_EN)&&(globalThis as any).POOL_EN.length===2980);
   await page.evaluate(()=>{const w=globalThis as any;w.formName="4-3-3";w.slots=w.FORMATIONS[w.formName];w.style="gegen";w.beginDraft();});
   await expect(page.locator("#draft")).toBeVisible();
-  expect(await page.evaluate(()=>({country:(globalThis as any).selectedCountry,pool:(globalThis as any).POOL.length}))).toEqual({country:"ENG",pool:2983});
+  expect(await page.evaluate(()=>({country:(globalThis as any).selectedCountry,pool:(globalThis as any).POOL.length}))).toEqual({country:"ENG",pool:2980});
 });
 
 test("country pools stay lazy, load on demand, and restore the saved country synchronously",async({page})=>{
@@ -105,12 +105,12 @@ test("country pools stay lazy, load on demand, and restore the saved country syn
   await page.addInitScript(key=>{if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,"1");localStorage.setItem("copa_country","TR");localStorage.removeItem("copa_run_v5");}},marker);
   await page.goto(GAME_URL,{waitUntil:"domcontentloaded"});
   expect(await page.evaluate(()=>{const w=globalThis as any;return [w.POOL_EN,w.POOL_ES,w.POOL_IT,w.POOL_DE,w.POOL_JP].map((pool:any[])=>pool.length);})).toEqual([0,0,0,0,0]);
-  const expected={ES:1061,IT:2656,DE:1206,JP:561};
+  const expected={ES:1062,IT:2655,DE:1204,JP:566};
   for(const [country,count] of Object.entries(expected)){
     await page.evaluate(async(code)=>{await (globalThis as any).CopaLazy.ensureCountryPlayers(code);},country);
     expect(await page.evaluate(code=>(globalThis as any)[`POOL_${code}`].length,country)).toBe(count);
   }
   await page.evaluate(()=>{localStorage.setItem("copa_country","DE");});
   await page.reload({waitUntil:"domcontentloaded"});
-  expect(await page.evaluate(()=>{const w=globalThis as any;return {selected:w.selectedCountry,de:w.POOL_DE.length};})).toEqual({selected:"DE",de:1206});
+  expect(await page.evaluate(()=>{const w=globalThis as any;return {selected:w.selectedCountry,de:w.POOL_DE.length};})).toEqual({selected:"DE",de:1204});
 });

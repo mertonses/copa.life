@@ -3606,7 +3606,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 .result .statline .stat{min-height:38px;padding:0 14px;border-left:2px solid var(--border-default)}
 .result .statline .stat:first-child{border-left-color:var(--color-primary)}
 .result .statline .l{font-size:8px;letter-spacing:1.1px}.result .statline .v{font-size:18px;margin-top:5px}
-.result:not(.is-expanded) .runUnlocks,.result:not(.is-expanded) .match-analysis-entry,.result:not(.is-expanded) .runCareerProgress,.result:not(.is-expanded) #finalRow,.result:not(.is-expanded) #lineups,.result:not(.is-expanded) .resultpatreon{display:none!important}
+.result.is-loss:not(.is-expanded) .runUnlocks,.result.is-loss:not(.is-expanded) .match-analysis-entry,.result.is-loss:not(.is-expanded) .runCareerProgress,.result.is-loss:not(.is-expanded) #finalRow,.result.is-loss:not(.is-expanded) #lineups,.result.is-loss:not(.is-expanded) .resultpatreon{display:none!important}
 .result-actions{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 0;border-top:1px solid var(--border-subtle)}
 .result-actions .result-more-btn{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:11px 17px;border-color:var(--color-primary);background:var(--color-primary);color:var(--text-on-primary);font-weight:900;letter-spacing:1px}
 .result-actions .result-more-btn span:last-child{font-size:16px;line-height:1}
