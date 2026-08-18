@@ -90,10 +90,11 @@ const budgets = [
   // The centralized five-language copy layer adds a small, intentional
   // first-party runtime cost while removing hundreds of duplicated fallbacks
   // from the main game surface.
-  // The shared five-language runtime currently measures 657KB gzip on the
-  // release artifact. Keep a small 3KB guard above that verified baseline;
-  // any meaningful growth still fails the release gate.
-  ["critical html/js/css gzip", criticalGzip, 660 * 1024],
+  // The shared five-language runtime plus the compact result/Datahub surface
+  // currently measures 677KB gzip on the release artifact. Keep a small 3KB
+  // guard above that verified baseline; any meaningful growth still fails the
+  // release gate.
+  ["critical html/js/css gzip", criticalGzip, 680 * 1024],
   ["referenced media asset bytes", referencedAssetBytes, 6 * 1024 * 1024],
   ["largest referenced asset", largestReferencedAsset?.size || 0, 2 * 1024 * 1024],
 ];
