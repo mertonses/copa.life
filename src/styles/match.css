@@ -3873,6 +3873,8 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 #result.result .result-data-tab[aria-selected="true"],#result.result .result-data-tab:hover{background:#2E3C45;color:#F3F5F4}
 #result.result .result-datahub-head> .result-datahub-controls>button{min-height:32px}
 #result.result .result-datahub-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr) minmax(240px,.8fr);gap:14px}
+#result.result .result-datahub[data-result-tab="performance"] .result-datahub-grid,#result.result .result-datahub[data-result-tab="impact"] .result-datahub-grid{grid-template-columns:minmax(0,1fr)}
+#result.result .result-datahub[data-result-tab="performance"] .result-bars{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 #result.result .result-data-card{min-height:166px;padding:18px;border-radius:8px;background:#12232F}
 #result.result .result-data-card[data-result-panel]{display:none}
 #result.result .result-datahub[data-result-tab="summary"] .result-data-card[data-result-panel="summary"],#result.result .result-datahub[data-result-tab="summary"] .result-data-card[data-result-panel="impact"],#result.result .result-datahub[data-result-tab="performance"] .result-data-card[data-result-panel="performance"],#result.result .result-datahub[data-result-tab="impact"] .result-data-card[data-result-panel="impact"]{display:block}
@@ -3937,6 +3939,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   #result.result .result-data-tab{flex:1;padding-right:5px;padding-left:5px}
   #result.result .result-datahub-head> .result-datahub-controls>button{width:100%}
   #result.result .result-datahub-grid{grid-template-columns:1fr}
+  #result.result .result-datahub[data-result-tab="performance"] .result-bars{grid-template-columns:1fr;gap:12px}
   #result.result .result-data-card{min-height:0}
   #result.result .result-squad-modal{padding:18px}
   .share-modal .share-actions{grid-template-columns:1fr}
