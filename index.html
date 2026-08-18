@@ -4209,7 +4209,7 @@ function _finalTacticBench(benchIdx){
 </script>
 <script>_installHumanCopyGuard();</script>
 <script src="src/ui/metaUnlocks.js?v=20260726-mobile-repair1"></script>
-<script src="src/ui/faq.js?v=20260720-faq1"></script>
+<script>(()=>{let p;const refresh=()=>{const b=document.getElementById("footerFaqBtn");if(b)b.textContent=window.LANG==="tr"?"SSS":"FAQ"};const load=()=>p||(p=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="src/ui/faq.js?v=20260819-faq-lazy";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)}));window.openFaq=()=>load().then(()=>window.CopaFaq&&window.CopaFaq.open());window.addEventListener("copa:language-changed",refresh);refresh()})();</script>
 <div class="global-footer-bar" id="globalFooterBar">
  <div class="footer-links-row">
   <button class="footer-link" id="footerFaqBtn" onclick="openFaq()" type="button" aria-label="Sık Sorulan Sorular">SSS</button>
