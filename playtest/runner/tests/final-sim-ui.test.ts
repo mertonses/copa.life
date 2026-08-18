@@ -280,45 +280,27 @@ test("final resumes from a process-death checkpoint at the same match state",asy
   expect(after.model).toBe("copa-final-core-v6");
 });
 
-test("shareable final code can be imported and deterministically verified",async({page},testInfo)=>{
-  test.skip(!testInfo.project.name.includes("mobile"),"replay import regression runs once");
+test("final replay and final import-export controls stay unavailable to players",async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes("mobile"),"player-facing final controls regression runs once");
   await page.goto("/?autotest=1",{waitUntil:"domcontentloaded"});
-  await page.evaluate(()=>{(globalThis as any).openFinalReplayImport();});
-  await expect(page.locator("#finalReplayImportValue")).toBeVisible();
-  const importLayout=await page.locator(".final-replay-import").evaluate(modal=>{
-    const header=modal.querySelector("h4") as HTMLElement;
-    const actions=modal.querySelector(".bact") as HTMLElement;
-    const buttons=[...actions.querySelectorAll("button")] as HTMLElement[];
-    const headerStyle=getComputedStyle(header);
-    const actionStyle=getComputedStyle(actions);
+  const surface=await page.evaluate(async()=>{
+    const global=globalThis as any;
+    if(global.CopaLazy?.openAdvancedSettings)await global.CopaLazy.openAdvancedSettings();
     return{
-      headerColor:headerStyle.color,
-      headerBackground:headerStyle.backgroundColor,
-      actionDisplay:actionStyle.display,
-      actionColumns:actionStyle.gridTemplateColumns.split(" ").length,
-      buttonWidths:buttons.map(button=>button.getBoundingClientRect().width),
-      buttonTops:buttons.map(button=>button.getBoundingClientRect().top)
+      importApi:typeof global.openFinalReplayImport,
+      copyApi:typeof global.copyFinalReplayCode,
+      viewerApi:typeof global.openFinalMatchReplay,
+      replayNamespace:typeof global.CopaFinalReplay,
+      importButton:!!document.querySelector("#finalReplayImportBtn"),
+      replayControls:document.querySelectorAll(".final-replay-actions,.final-replay-import,.final-replay-viewer").length,
     };
   });
-  expect(importLayout.headerColor).toBe("rgb(255, 255, 255)");
-  expect(importLayout.headerBackground).toBe("rgb(23, 36, 45)");
-  expect(importLayout.actionDisplay).toBe("grid");
-  expect(importLayout.actionColumns).toBe(2);
-  expect(Math.abs(importLayout.buttonWidths[0]-importLayout.buttonWidths[1])).toBeLessThan(1);
-  expect(Math.abs(importLayout.buttonTops[0]-importLayout.buttonTops[1])).toBeLessThan(1);
-  const code=await page.evaluate(()=>{
-    const core=(globalThis as any).CopaFinalSimCore;
-    return core.createReplayCode({seed:20260717,homePower:78,awayPower:74,tactic:"push",cards:["kontra"],decisions:[{minute:60,tactic:"hold"}]});
+  expect(surface).toEqual({
+    importApi:"undefined",
+    copyApi:"undefined",
+    viewerApi:"undefined",
+    replayNamespace:"undefined",
+    importButton:false,
+    replayControls:0,
   });
-  await page.locator("#finalReplayImportValue").fill(code);
-  await page.getByRole("button",{name:/TEKRARI DOĞRULA|VERIFY REPLAY/}).click();
-  await expect(page.locator(".scoutmodal")).toContainText("copa-final-core-v6");
-  await expect(page.locator(".scoutmodal")).toContainText(/Skor|Score/);
-  const replayed=await page.evaluate((value)=>{
-    const replay=(globalThis as any).CopaFinalReplay.inspect(value);
-    return{score:replay.score,winner:replay.winner,code:replay.replayCode};
-  },code);
-  expect(replayed.score.every((value:number)=>Number.isInteger(value))).toBe(true);
-  expect([0,1]).toContain(replayed.winner);
-  expect(replayed.code).toBe(code);
 });

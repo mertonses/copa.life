@@ -146,7 +146,7 @@
   color:var(--color-ink);font:600 9px/1.45 var(--mono);overflow-wrap:anywhere;
 }
 .transfer-save textarea:focus{outline:2px solid var(--focus-ring);border-color:var(--color-primary)}
-.advanced-run-tools .final-replay-import-btn{
+.advanced-run-tools .advanced-tool-btn{
   width:100%;
   min-height:38px;
   margin:0;
@@ -159,7 +159,7 @@
   letter-spacing:.7px;
   box-shadow:none;
 }
-.advanced-run-tools .final-replay-import-btn:hover{
+.advanced-run-tools .advanced-tool-btn:hover{
   border-color:var(--border-default);
   background:color-mix(in srgb,var(--color-slate) 5%,transparent);
   color:var(--color-ink);

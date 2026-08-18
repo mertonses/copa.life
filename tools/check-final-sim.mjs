@@ -2,7 +2,6 @@ import fs from "node:fs";
 
 const sim = fs.readFileSync("src/sim/finalSim.js", "utf8");
 const core = fs.readFileSync("src/sim/finalSimCore.js", "utf8");
-const replay = fs.readFileSync("src/runtime/finalReplay.js", "utf8");
 const persistence = fs.readFileSync("src/state/finalSimPersistence.js", "utf8");
 const penaltyPersistence = fs.readFileSync("src/state/penaltyPersistence.js", "utf8");
 const calibration = fs.readFileSync("src/balance/finalCalibration.js", "utf8");
@@ -146,21 +145,10 @@ const checks = [
       /_tryResumePenaltyCheckpoint/.test(index),
   },
   {
-    name: "shareable replay code is versioned and contains no names",
+    name: "final replay and import-export controls are player-inaccessible",
     pass:
-      /CFS\$\{REPLAY_VERSION\}/.test(core) &&
-      /parseReplayCode/.test(core) &&
-      /copyFinalReplayCode/.test(replay) &&
-      !/playerName|clubName|teamName/.test(replay),
-  },
-  {
-    name: "real replay viewer is read-only, seekable and accessible",
-    pass:
-      /openViewer/.test(replay) &&
-      /finalReplayRange/.test(replay) &&
-      /speechSynthesis/.test(replay) &&
-      /aria-live="polite"/.test(replay) &&
-      /timeline:cleanEvents/.test(replay),
+      !/(openFinalReplayImport|copyFinalReplayCode|openFinalMatchReplay|finalReplayImportBtn|CopaFinalReplay)/.test(index + sim + lazy) &&
+      !/final-replay-(?:actions|import|viewer)/.test(index + sim),
   },
   {
     name: "weekly calibration stores only anonymous aggregate buckets",

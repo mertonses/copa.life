@@ -133,3 +133,22 @@ html[data-theme="dark"] .chair-picker-modal .cp-profile-metrics>div{background:c
   .chair-picker-modal .cpphoto{width:124%;height:124%;margin:0 -12% -12%}
 }
 @media(max-width:360px){.chair-picker-modal .cp-portrait-frame{width:76px}.chair-picker-modal .cpphoto{width:130%;height:130%;margin-left:-15%;margin-bottom:-15%}}
+
+/* Final responsive guard: the portrait is decorative and must never define the
+   sheet width or push contract copy outside the viewport. */
+.chair-picker-modal .cp-layout,
+.chair-picker-modal .cp-persona,
+.chair-picker-modal .cp-mechanics,
+.chair-picker-modal .cp-persona-copy,
+.chair-picker-modal .cp-contract-row{min-width:0;box-sizing:border-box}
+.chair-picker-modal .cp-portrait-frame{width:min(100%,188px);max-width:188px;overflow:hidden}
+.chair-picker-modal .cp-fx,
+.chair-picker-modal .cp-fx-group,
+.chair-picker-modal .cp-fx-item,
+.chair-picker-modal .cp-fx-item span:last-child{min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:720px){
+  .chair-picker-modal .cp-layout{grid-template-columns:minmax(0,1fr)}
+  .chair-picker-modal .cp-persona-copy{width:auto;min-width:0;padding-right:0!important;overflow:hidden}
+  .chair-picker-modal .cp-portrait-frame{width:84px;max-width:84px;overflow:hidden}
+}
+@media(max-width:360px){.chair-picker-modal .cp-portrait-frame{width:76px;max-width:76px}}
