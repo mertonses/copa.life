@@ -5,14 +5,14 @@ import crypto from "node:crypto";
 import {fileURLToPath} from "node:url";
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
-const DATASET_RELEASE="2026-07-20";
+const DATASET_RELEASE="2026-08-18";
 const sources=[
   {leagueCode:"TR",label:{tr:"Türkiye ligi",en:"Türkiye league",es:"Liga de Türkiye",de:"Liga Türkiye",it:"Campionato turco"},file:"src/data/players.js",variable:"POOL",scope:"Türkiye professional pools",snapshotDate:null},
   {leagueCode:"ES",label:{tr:"İspanya ligi",en:"Spain league",es:"Liga española",de:"Spanische Liga",it:"Campionato spagnolo"},file:"src/data/players_spain.js",variable:"POOL_ES",scope:"Spain professional pools",snapshotDate:null},
   {leagueCode:"DE",label:{tr:"Almanya ligi",en:"Germany league",es:"Liga alemana",de:"Deutsche Liga",it:"Campionato tedesco"},file:"src/data/players_germany.js",variable:"POOL_DE",scope:"Germany professional pools",snapshotDate:null},
   {leagueCode:"IT",label:{tr:"İtalya ligi",en:"Italy league",es:"Liga italiana",de:"Italienische Liga",it:"Campionato italiano"},file:"src/data/players_italy.js",variable:"POOL_IT",scope:"Italy professional pools",snapshotDate:null},
   {leagueCode:"ENG",label:{tr:"İngiltere ligi",en:"England league",es:"Liga inglesa",de:"Englische Liga",it:"Campionato inglese"},file:"src/data/players_england.js",variable:"POOL_EN",scope:"England professional pools",snapshotDate:null},
-  {leagueCode:"JP",label:{tr:"Japonya ligi",en:"Japan league",es:"Liga japonesa",de:"Japanische Liga",it:"Campionato giapponese"},file:"src/data/players_japan.js",variable:"POOL_JP",scope:"Japan top-flight clubs",snapshotDate:"2026-07-15"}
+  {leagueCode:"JP",label:{tr:"Japonya ligi",en:"Japan league",es:"Liga japonesa",de:"Japanische Liga",it:"Campionato giapponese"},file:"src/data/players_japan.js",variable:"POOL_JP",scope:"Japan top-flight clubs",snapshotDate:"2026-08-18"}
 ];
 const lines={
   GK:new Set(["GK"]),

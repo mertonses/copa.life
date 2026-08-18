@@ -3595,3 +3595,22 @@ body.reduced-motion .sim-broadcast-cue{transition:none}
 .sim-eventmap.is-micro-replay{animation:simMicroReplay 1.15s ease-out}.event-row.is-replay-focus{animation:simReplayRow 1.1s ease-out}.sim-broadcast-cue.is-replay{animation:simReplayCue .8s ease-out}@keyframes simMicroReplay{0%{filter:brightness(1)}22%{filter:brightness(1.55) saturate(1.25)}48%{filter:brightness(.9)}100%{filter:none}}@keyframes simReplayRow{0%{transform:translateX(0);box-shadow:none}25%{transform:translateX(4px);box-shadow:0 0 0 1px var(--color-primary),0 0 18px color-mix(in srgb,var(--color-primary) 20%,transparent)}100%{transform:none;box-shadow:none}}@keyframes simReplayCue{50%{transform:scale(1.03);filter:brightness(1.25)}}
 @media(max-width:560px){.match-broadcast-state{grid-template-columns:1fr auto;gap:6px}.match-broadcast-state>span{grid-column:1/-1}.match-broadcast-state>b{font-size:8px}}
 body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-replay-focus,.reduced-motion .sim-broadcast-cue.is-replay{animation:none}
+
+/* Compact premium result summary: details remain available behind NEXT. */
+.result{max-width:980px;margin-inline:auto}
+.result .scoreboard{border-radius:12px;padding:26px 28px 22px;margin-bottom:10px;border:1px solid color-mix(in srgb,var(--status-critical) 32%,var(--border-default));background:linear-gradient(145deg,var(--surface-elevated),var(--surface-bg));box-shadow:var(--shadow-md)}
+.result .scoreboard.elendi{border-top:3px solid var(--status-critical)}
+.result .scoreboard .big{font-size:clamp(42px,8vw,76px);letter-spacing:.02em}
+.result .verdict{margin:0 0 10px;padding:0 5px;font-size:12px}
+.result .statline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0 0 10px;padding:15px 4px;border:1px solid var(--border-subtle);border-radius:9px;background:var(--surface-elevated)}
+.result .statline .stat{min-height:38px;padding:0 14px;border-left:2px solid var(--border-default)}
+.result .statline .stat:first-child{border-left-color:var(--color-primary)}
+.result .statline .l{font-size:8px;letter-spacing:1.1px}.result .statline .v{font-size:18px;margin-top:5px}
+.result:not(.is-expanded) .runUnlocks,.result:not(.is-expanded) .match-analysis-entry,.result:not(.is-expanded) .runCareerProgress,.result:not(.is-expanded) #finalRow,.result:not(.is-expanded) #lineups,.result:not(.is-expanded) .resultpatreon{display:none!important}
+.result-actions{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 0;border-top:1px solid var(--border-subtle)}
+.result-actions .result-more-btn{order:3;margin-left:auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:11px 17px;border-color:var(--color-primary);background:var(--color-primary);color:var(--text-on-primary);font-weight:900;letter-spacing:1px}
+.result-actions .result-more-btn span:last-child{font-size:16px;line-height:1}
+.result-actions .result-row{order:1;display:flex;align-items:center;gap:7px;min-width:0}
+.result-actions #againBtn{order:2;min-height:44px;padding:11px 18px}
+.result.is-expanded .result-more-btn{background:transparent;color:var(--color-primary)}
+@media(max-width:620px){.result .scoreboard{padding:21px 18px 18px}.result .statline{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 0;padding:13px 3px}.result .statline .stat:nth-child(3){border-left-color:var(--border-default)}.result-actions{flex-wrap:wrap}.result-actions .result-row{order:1;width:100%;justify-content:space-between}.result-actions #againBtn{order:2;flex:1}.result-actions .result-more-btn{order:3;margin-left:0;flex:1;justify-content:center}}

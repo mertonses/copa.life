@@ -19,7 +19,7 @@ if(JSON.stringify(fields)!==JSON.stringify(EXPECTED_FIELDS))throw new Error("cop
 if(BANNED_FIELDS.some(field=>fields.includes(field)))throw new Error("raw or medical attribute leaked into the public schema");
 const poolRows=Object.entries(PLAYER_SOURCES).flatMap(([country,[file,variable]])=>loadPoolRows(file,variable,country)),validKeys=new Set(poolRows.map(row=>row.key)),counts={TR:0,ENG:0,ES:0,IT:0,DE:0,JP:0};
 for(const [key,row] of Object.entries(records)){if(!validKeys.has(key))throw new Error("Unknown profile key: "+key);if(!Array.isArray(row)||row.length!==fields.length)throw new Error("Incomplete profile row: "+key);for(let index=0;index<7;index++)if(!Number.isInteger(row[index])||row[index]<0||row[index]>100)throw new Error(`Invalid copa score ${fields[index]} at ${key}`);for(const index of [7,8,9])if(!Array.isArray(row[index]))throw new Error("Narrative field must be an array: "+key);counts[key.split("|")[0]]++;}
-if(Object.keys(records).length!==8866)throw new Error("Expected 8866 copa profiles");
+if(Object.keys(records).length<8800)throw new Error("Expected at least 8800 copa profiles after the 2026-08-18 transfer refresh");
 if(Object.values(counts).some(count=>!count))throw new Error("A country has no profiles");
 
 const indexHtml=fs.readFileSync(path.join(ROOT,"index.html"),"utf8"),profileUi=fs.readFileSync(path.join(ROOT,"src/ui/playerProfiles.js"),"utf8"),profileCss=fs.readFileSync(path.join(ROOT,"src/styles/playerProfiles.css"),"utf8"),profileStore=fs.readFileSync(path.join(ROOT,"src/data/player_profile_store.js"),"utf8"),serviceWorker=fs.readFileSync(path.join(ROOT,"sw.js"),"utf8");

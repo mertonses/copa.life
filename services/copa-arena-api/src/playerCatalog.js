@@ -12,7 +12,7 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
     },
     "scope": "Türkiye professional pools",
     "snapshotDate": null,
-    "datasetRelease": "2026-07-20",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players.js"
   },
   "ES": {
@@ -26,7 +26,7 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
     },
     "scope": "Spain professional pools",
     "snapshotDate": null,
-    "datasetRelease": "2026-07-20",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players_spain.js"
   },
   "DE": {
@@ -40,7 +40,7 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
     },
     "scope": "Germany professional pools",
     "snapshotDate": null,
-    "datasetRelease": "2026-07-20",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players_germany.js"
   },
   "IT": {
@@ -54,7 +54,7 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
     },
     "scope": "Italy professional pools",
     "snapshotDate": null,
-    "datasetRelease": "2026-07-20",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players_italy.js"
   },
   "ENG": {
@@ -68,7 +68,7 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
     },
     "scope": "England professional pools",
     "snapshotDate": null,
-    "datasetRelease": "2026-07-20",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players_england.js"
   },
   "JP": {
@@ -81,13 +81,13 @@ export const ARENA_PLAYER_SOURCES=Object.freeze({
       "it": "Campionato giapponese"
     },
     "scope": "Japan top-flight clubs",
-    "snapshotDate": "2026-07-15",
-    "datasetRelease": "2026-07-20",
+    "snapshotDate": "2026-08-18",
+    "datasetRelease": "2026-08-18",
     "sourceFile": "src/data/players_japan.js"
   }
 });
-export const ARENA_PLAYER_QUARANTINE_COUNT=14;
-export const ARENA_PLAYER_CATALOG_VERSION="c29250186e1de520";
+export const ARENA_PLAYER_QUARANTINE_COUNT=13;
+export const ARENA_PLAYER_CATALOG_VERSION="91e9848edd7aa50f";
 export const ARENA_PLAYER_CATALOG=Object.freeze({
   "GK": {
     "connector": {
@@ -2277,6 +2277,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-11C262BB9D4FB358"
         },
         {
+          "name": "Batuhan Şen",
+          "power": 72,
+          "role": "GK",
+          "club": "Karagümrük",
+          "age": 27,
+          "domesticFlag": 1,
+          "marketHint": 0,
+          "position": "GK",
+          "potential": 72,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-AFA2A9112E9F977A"
+        },
+        {
           "name": "Ahmet Doğan Yıldırım",
           "power": 73,
           "role": "GK",
@@ -2345,20 +2359,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "TR",
           "sourceId": "CP-AB9FE73CEFB6939F"
-        },
-        {
-          "name": "Batuhan Şen",
-          "power": 72,
-          "role": "GK",
-          "club": "Galatasaray",
-          "age": 26,
-          "domesticFlag": 1,
-          "marketHint": 0,
-          "position": "GK",
-          "potential": 72,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-E45EC3F8FD180F1F"
         },
         {
           "name": "Mert Günok",
@@ -4321,6 +4321,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-0C9F88D05822F84B"
         },
         {
+          "name": "Alexander Nübel",
+          "power": 82,
+          "role": "GK",
+          "club": "Beşiktaş",
+          "age": 29,
+          "domesticFlag": 1,
+          "marketHint": 4,
+          "position": "GK",
+          "potential": 82,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-06B8BFEF50661A31"
+        },
+        {
           "name": "Bilal Bayazıt",
           "power": 82,
           "role": "GK",
@@ -4422,7 +4436,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "Doğan Alemdar",
           "power": 79,
           "role": "GK",
-          "club": "Başakşehir",
+          "club": "Beşiktaş",
           "age": 23,
           "domesticFlag": 1,
           "marketHint": 0,
@@ -4436,7 +4450,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "İrfan Can Eğribayat",
           "power": 79,
           "role": "GK",
-          "club": "Samsunspor",
+          "club": "Gençlerbirliği",
           "age": 27,
           "domesticFlag": 1,
           "marketHint": 0,
@@ -4473,20 +4487,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "TR",
           "sourceId": "CP-4327D9AC7CAAB7B6"
-        },
-        {
-          "name": "Onurcan Piri",
-          "power": 79,
-          "role": "GK",
-          "club": "Kayserispor",
-          "age": 31,
-          "domesticFlag": 0,
-          "marketHint": 0,
-          "position": "GK",
-          "potential": 79,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-CA2CA28741FCE742"
         }
       ],
       "ES": [
@@ -4857,20 +4857,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-ABED4E8279488F31"
         },
         {
-          "name": "Alexander Nübel",
-          "power": 82,
-          "role": "GK",
-          "club": "VfB Stuttgart",
-          "age": 28,
-          "domesticFlag": 1,
-          "marketHint": 4,
-          "position": "GK",
-          "potential": 82,
-          "leagueLevel": 1,
-          "sourceLeague": "DE",
-          "sourceId": "CP-FDA51C10C313F1ED"
-        },
-        {
           "name": "Nikola Vasilj",
           "power": 79,
           "role": "GK",
@@ -5163,6 +5149,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "DE",
           "sourceId": "CP-DB8B2773C0BC4B3A"
+        },
+        {
+          "name": "Gregor Kobel",
+          "power": 86,
+          "role": "GK",
+          "club": "Borussia Dortmund",
+          "age": 27,
+          "domesticFlag": 0,
+          "marketHint": 33,
+          "position": "GK",
+          "potential": 86,
+          "leagueLevel": 1,
+          "sourceLeague": "DE",
+          "sourceId": "CP-6C6CF928343D0450"
         }
       ],
       "IT": [
@@ -10343,34 +10343,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-51EC35D1322BBF42"
         },
         {
-          "name": "Sacha Boey",
-          "power": 82,
-          "role": "DEF",
-          "club": "Galatasaray",
-          "age": 25,
-          "domesticFlag": 0,
-          "marketHint": 0,
-          "position": "CB",
-          "potential": 83,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-A7845184B2DFE510"
-        },
-        {
-          "name": "Edson Álvarez",
-          "power": 84,
-          "role": "DEF",
-          "club": "Fenerbahçe",
-          "age": 28,
-          "domesticFlag": 0,
-          "marketHint": 0,
-          "position": "CB",
-          "potential": 84,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-653B21FFB6C895BF"
-        },
-        {
           "name": "Tiago Djaló",
           "power": 81,
           "role": "DEF",
@@ -10579,6 +10551,34 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 2,
           "sourceLeague": "TR",
           "sourceId": "CP-9BC870F82A221A49"
+        },
+        {
+          "name": "Luis Pérez",
+          "power": 80,
+          "role": "DEF",
+          "club": "Gaziantep FK",
+          "age": 30,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "RB",
+          "potential": 80,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-A75D93C188BF18FA"
+        },
+        {
+          "name": "Yakup Kırtay",
+          "power": 79,
+          "role": "DEF",
+          "club": "Erzurumspor",
+          "age": 22,
+          "domesticFlag": 1,
+          "marketHint": 0,
+          "position": "CB",
+          "potential": 82,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-816D46C13FEB35CD"
         }
       ],
       "ES": [
@@ -11008,7 +11008,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "Nathaniel Brown",
           "power": 83,
           "role": "DEF",
-          "club": "Eintracht Frankfurt",
+          "club": "FC Bayern München",
           "age": 22,
           "domesticFlag": 1,
           "marketHint": 28,
@@ -11045,6 +11045,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "DE",
           "sourceId": "CP-B4294CF1C17349B2"
+        },
+        {
+          "name": "Sacha Boey",
+          "power": 82,
+          "role": "DEF",
+          "club": "FC Bayern München",
+          "age": 25,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "CB",
+          "potential": 83,
+          "leagueLevel": 1,
+          "sourceLeague": "DE",
+          "sourceId": "CP-A7845184B2DFE510"
         },
         {
           "name": "Marco Friedl",
@@ -11241,20 +11255,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "DE",
           "sourceId": "CP-56171C58B6EB2972"
-        },
-        {
-          "name": "Waldemar Anton",
-          "power": 84,
-          "role": "DEF",
-          "club": "Borussia Dortmund",
-          "age": 28,
-          "domesticFlag": 1,
-          "marketHint": 18,
-          "position": "CB",
-          "potential": 84,
-          "leagueLevel": 1,
-          "sourceLeague": "DE",
-          "sourceId": "CP-737A0413D9FDE34D"
         }
       ],
       "IT": [
@@ -14352,7 +14352,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "Salih Uçan",
           "power": 77,
           "role": "MID",
-          "club": "Beşiktaş",
+          "club": "Gençlerbirliği",
           "age": 31,
           "domesticFlag": 1,
           "marketHint": 0,
@@ -15067,20 +15067,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-29455765F2F8F0D0"
         },
         {
-          "name": "Jackson Irvine",
-          "power": 76,
-          "role": "MID",
-          "club": "FC St. Pauli",
-          "age": 32,
-          "domesticFlag": 0,
-          "marketHint": 1,
-          "position": "DM",
-          "potential": 76,
-          "leagueLevel": 1,
-          "sourceLeague": "DE",
-          "sourceId": "CP-1C1E3B71BCB0ADC3"
-        },
-        {
           "name": "Robert Wagner",
           "power": 72,
           "role": "MID",
@@ -15317,6 +15303,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "DE",
           "sourceId": "CP-DF772F6E381AB64C"
+        },
+        {
+          "name": "Salih Özcan",
+          "power": 77,
+          "role": "MID",
+          "club": "Borussia Dortmund",
+          "age": 27,
+          "domesticFlag": 0,
+          "marketHint": 1,
+          "position": "DM",
+          "potential": 77,
+          "leagueLevel": 1,
+          "sourceLeague": "DE",
+          "sourceId": "CP-7B2DABB13B4FC3C9"
         }
       ],
       "IT": [
@@ -16095,6 +16095,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-EC6F17AE4017984F"
         },
         {
+          "name": "Jackson Irvine",
+          "power": 76,
+          "role": "MID",
+          "club": "C-Osaka",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 1,
+          "position": "DM",
+          "potential": 76,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-1C1E3B71BCB0ADC3"
+        },
+        {
           "name": "Matheus Bueno",
           "power": 73,
           "role": "MID",
@@ -16317,20 +16331,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-7B2323F10DD6CDF0"
-        },
-        {
-          "name": "Takuya Kida",
-          "power": 71,
-          "role": "MID",
-          "club": "Yokohama F･M",
-          "age": 30,
-          "domesticFlag": 0,
-          "marketHint": 9,
-          "position": "DM",
-          "potential": 71,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-4A32AABE6CB6A789"
         }
       ]
     },
@@ -16391,20 +16391,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "TR",
           "sourceId": "CP-5A9493427FB3DDEC"
-        },
-        {
-          "name": "Fred",
-          "power": 82,
-          "role": "MID",
-          "club": "Fenerbahçe",
-          "age": 32,
-          "domesticFlag": 0,
-          "marketHint": 0,
-          "position": "DM",
-          "potential": 82,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-286EE546C658619F"
         },
         {
           "name": "Youssef Aït Bennasser",
@@ -16617,6 +16603,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-CD8E202C58F8823D"
         },
         {
+          "name": "Nathan Aké",
+          "power": 80,
+          "role": "MID",
+          "club": "Fenerbahçe",
+          "age": 31,
+          "domesticFlag": 0,
+          "marketHint": 16,
+          "position": "CM",
+          "potential": 80,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-BDC6D8AE1CA52D77"
+        },
+        {
           "name": "Miguel Crespo",
           "power": 80,
           "role": "MID",
@@ -16799,20 +16799,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "ES",
           "sourceId": "CP-75D98B927FCA2E20"
-        },
-        {
-          "name": "Sofyan Amrabat",
-          "power": 79,
-          "role": "MID",
-          "club": "Real Betis Balompié",
-          "age": 28,
-          "domesticFlag": 0,
-          "marketHint": 8,
-          "position": "DM",
-          "potential": 79,
-          "leagueLevel": 1,
-          "sourceLeague": "ES",
-          "sourceId": "CP-BBE8F823CD16AEB2"
         },
         {
           "name": "Mauro Arambarri",
@@ -17009,6 +16995,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "ES",
           "sourceId": "CP-FE8E0C0B2A65428F"
+        },
+        {
+          "name": "Luis Milla",
+          "power": 81,
+          "role": "MID",
+          "club": "Getafe C.F.",
+          "age": 30,
+          "domesticFlag": 1,
+          "marketHint": 14,
+          "position": "DM",
+          "potential": 81,
+          "leagueLevel": 1,
+          "sourceLeague": "ES",
+          "sourceId": "CP-C9283625208145E0"
         }
       ],
       "DE": [
@@ -18111,6 +18111,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-AD1E3B289A9A1484"
         },
         {
+          "name": "Jackson Irvine",
+          "power": 76,
+          "role": "MID",
+          "club": "C-Osaka",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 1,
+          "position": "DM",
+          "potential": 76,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-1C1E3B71BCB0ADC3"
+        },
+        {
           "name": "Mutsuki Kato",
           "power": 74,
           "role": "MID",
@@ -18347,20 +18361,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-D8175F6EEEC6708B"
-        },
-        {
-          "name": "Takuma Nishimura",
-          "power": 72,
-          "role": "MID",
-          "club": "FC Machida",
-          "age": 28,
-          "domesticFlag": 0,
-          "marketHint": 12,
-          "position": "AM",
-          "potential": 72,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-A2E0642C4851E5C2"
         }
       ]
     }
@@ -20947,20 +20947,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-F4A8D1873DC4C1E8"
         },
         {
-          "name": "Takuma Asano",
-          "power": 73,
-          "role": "FWD",
-          "club": "R.C.D. Mallorca",
-          "age": 30,
-          "domesticFlag": 0,
-          "marketHint": 3,
-          "position": "RW",
-          "potential": 73,
-          "leagueLevel": 1,
-          "sourceLeague": "ES",
-          "sourceId": "CP-50DB895B35BBB9B3"
-        },
-        {
           "name": "Veljko Birmančević",
           "power": 74,
           "role": "FWD",
@@ -21071,6 +21057,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "ES",
           "sourceId": "CP-7C0582F8C2ED7EFA"
+        },
+        {
+          "name": "Iñaki Williams",
+          "power": 73,
+          "role": "FWD",
+          "club": "Athletic Club",
+          "age": 31,
+          "domesticFlag": 0,
+          "marketHint": 1,
+          "position": "RW",
+          "potential": 73,
+          "leagueLevel": 1,
+          "sourceLeague": "ES",
+          "sourceId": "CP-26361A51751EE9C0"
         }
       ],
       "DE": [
@@ -22229,6 +22229,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-DCA5501DA43B6BC4"
         },
         {
+          "name": "Nicolai Vallys",
+          "power": 74,
+          "role": "FWD",
+          "club": "FC Tokyo",
+          "age": 29,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "LW",
+          "potential": 76,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-D559B9D22BC85015"
+        },
+        {
           "name": "Ryo Germain",
           "power": 74,
           "role": "FWD",
@@ -22297,6 +22311,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-B5A6A8D331896831"
+        },
+        {
+          "name": "Takuma Asano",
+          "power": 73,
+          "role": "FWD",
+          "club": "Hiroshima",
+          "age": 30,
+          "domesticFlag": 0,
+          "marketHint": 3,
+          "position": "RW",
+          "potential": 73,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-50DB895B35BBB9B3"
         },
         {
           "name": "Yuki Soma",
@@ -22395,34 +22423,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-B6648629B260A610"
-        },
-        {
-          "name": "Aleksandar Cavric",
-          "power": 71,
-          "role": "FWD",
-          "club": "Kashima",
-          "age": 31,
-          "domesticFlag": 1,
-          "marketHint": 12,
-          "position": "RW",
-          "potential": 71,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-6FD4F02ABB454354"
-        },
-        {
-          "name": "Oh Se Hun",
-          "power": 71,
-          "role": "FWD",
-          "club": "FC Machida",
-          "age": 26,
-          "domesticFlag": 1,
-          "marketHint": 9,
-          "position": "LW",
-          "potential": 71,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-B0B602BAB7F03C78"
         }
       ]
     },
@@ -23105,6 +23105,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
       ],
       "DE": [
         {
+          "name": "Eljif Elmas",
+          "power": 82,
+          "role": "FWD",
+          "club": "RasenBallsport Leipzig",
+          "age": 25,
+          "domesticFlag": 0,
+          "marketHint": 8,
+          "position": "RW",
+          "potential": 83,
+          "leagueLevel": 1,
+          "sourceLeague": "DE",
+          "sourceId": "CP-0523EFE583B4FCBC"
+        },
+        {
           "name": "Mohamed Amoura",
           "power": 81,
           "role": "FWD",
@@ -23385,20 +23399,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-7474D071BC9EEEFB"
         },
         {
-          "name": "Karim Adeyemi",
-          "power": 80,
-          "role": "FWD",
-          "club": "Borussia Dortmund",
-          "age": 23,
-          "domesticFlag": 1,
-          "marketHint": 21,
-          "position": "RW",
-          "potential": 83,
-          "leagueLevel": 1,
-          "sourceLeague": "DE",
-          "sourceId": "CP-B490F605BFD5174E"
-        },
-        {
           "name": "Maximilian Beier",
           "power": 83,
           "role": "FWD",
@@ -23653,20 +23653,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-A97EF9E91812C94C"
         },
         {
-          "name": "Eljif Elmas",
-          "power": 82,
-          "role": "FWD",
-          "club": "S.S.C. Napoli",
-          "age": 25,
-          "domesticFlag": 0,
-          "marketHint": 8,
-          "position": "RW",
-          "potential": 83,
-          "leagueLevel": 1,
-          "sourceLeague": "IT",
-          "sourceId": "CP-0523EFE583B4FCBC"
-        },
-        {
           "name": "Rafael Leão",
           "power": 83,
           "role": "FWD",
@@ -23777,6 +23763,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "IT",
           "sourceId": "CP-06AC1BA842AEC5B9"
+        },
+        {
+          "name": "Donyell Malen",
+          "power": 84,
+          "role": "FWD",
+          "club": "A.S. Roma",
+          "age": 26,
+          "domesticFlag": 0,
+          "marketHint": 19,
+          "position": "RW",
+          "potential": 84,
+          "leagueLevel": 1,
+          "sourceLeague": "IT",
+          "sourceId": "CP-27B30C3F3F8ED898"
         }
       ],
       "ENG": [
@@ -24203,6 +24203,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-675FDCE5B0185124"
         },
         {
+          "name": "Nicolai Vallys",
+          "power": 74,
+          "role": "FWD",
+          "club": "FC Tokyo",
+          "age": 29,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "LW",
+          "potential": 76,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-D559B9D22BC85015"
+        },
+        {
           "name": "Ryo Germain",
           "power": 74,
           "role": "FWD",
@@ -24257,6 +24271,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-B5A6A8D331896831"
+        },
+        {
+          "name": "Takuma Asano",
+          "power": 73,
+          "role": "FWD",
+          "club": "Hiroshima",
+          "age": 30,
+          "domesticFlag": 0,
+          "marketHint": 3,
+          "position": "RW",
+          "potential": 73,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-50DB895B35BBB9B3"
         },
         {
           "name": "Kyohei Noborizato",
@@ -24425,34 +24453,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-3613062854E2BD7F"
-        },
-        {
-          "name": "Koya Kitagawa",
-          "power": 71,
-          "role": "FWD",
-          "club": "Shimizu",
-          "age": 28,
-          "domesticFlag": 1,
-          "marketHint": 12,
-          "position": "RW",
-          "potential": 71,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-F1C7A60D12E1FFD5"
-        },
-        {
-          "name": "Tatsuya Ito",
-          "power": 71,
-          "role": "FWD",
-          "club": "Kawasaki-F",
-          "age": 28,
-          "domesticFlag": 0,
-          "marketHint": 13,
-          "position": "RW",
-          "potential": 71,
-          "leagueLevel": 1,
-          "sourceLeague": "JP",
-          "sourceId": "CP-3DAA25D3AEDAFA10"
         }
       ]
     }
@@ -26403,6 +26403,34 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-15FC9241568C0090"
         },
         {
+          "name": "Anderson Lopes",
+          "power": 74,
+          "role": "FWD",
+          "club": "Kobe",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-953BEF694A397A4B"
+        },
+        {
+          "name": "Sébastien Haller",
+          "power": 74,
+          "role": "FWD",
+          "club": "Hiroshima",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-E1599BC9B39F8178"
+        },
+        {
           "name": "Rafael Elias",
           "power": 74,
           "role": "FWD",
@@ -26704,7 +26732,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "Halil Dervişoğlu",
           "power": 73,
           "role": "FWD",
-          "club": "Galatasaray",
+          "club": "Gaziantep FK",
           "age": 26,
           "domesticFlag": 1,
           "marketHint": 0,
@@ -28153,6 +28181,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
       ],
       "JP": [
         {
+          "name": "Anderson Lopes",
+          "power": 74,
+          "role": "FWD",
+          "club": "Kobe",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-953BEF694A397A4B"
+        },
+        {
           "name": "Rafael Elias",
           "power": 74,
           "role": "FWD",
@@ -28165,6 +28207,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-5B966365AFBAA8A1"
+        },
+        {
+          "name": "Sébastien Haller",
+          "power": 74,
+          "role": "FWD",
+          "club": "Hiroshima",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-E1599BC9B39F8178"
         },
         {
           "name": "Leo Ceara",
@@ -28633,20 +28689,6 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-0BAB5E88518A6EAA"
         },
         {
-          "name": "Wilfried Zaha",
-          "power": 82,
-          "role": "FWD",
-          "club": "Galatasaray",
-          "age": 33,
-          "domesticFlag": 0,
-          "marketHint": 0,
-          "position": "ST",
-          "potential": 82,
-          "leagueLevel": 1,
-          "sourceLeague": "TR",
-          "sourceId": "CP-51C38BD04ABC193B"
-        },
-        {
           "name": "Blaž Kramer",
           "power": 79,
           "role": "FWD",
@@ -28731,6 +28773,20 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "sourceId": "CP-B91E0F00C4311087"
         },
         {
+          "name": "Romelu Lukaku",
+          "power": 78,
+          "role": "FWD",
+          "club": "Fenerbahçe",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 1,
+          "position": "ST",
+          "potential": 78,
+          "leagueLevel": 1,
+          "sourceLeague": "TR",
+          "sourceId": "CP-57698BBCA9B71E38"
+        },
+        {
           "name": "Rey Manaj",
           "power": 78,
           "role": "FWD",
@@ -28762,7 +28818,7 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "name": "Ahmed Kutucu",
           "power": 78,
           "role": "FWD",
-          "club": "Galatasaray",
+          "club": "Rizespor",
           "age": 25,
           "domesticFlag": 0,
           "marketHint": 0,
@@ -30195,6 +30251,34 @@ export const ARENA_PLAYER_CATALOG=Object.freeze({
           "leagueLevel": 1,
           "sourceLeague": "JP",
           "sourceId": "CP-5B966365AFBAA8A1"
+        },
+        {
+          "name": "Sébastien Haller",
+          "power": 74,
+          "role": "FWD",
+          "club": "Hiroshima",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-E1599BC9B39F8178"
+        },
+        {
+          "name": "Anderson Lopes",
+          "power": 74,
+          "role": "FWD",
+          "club": "Kobe",
+          "age": 32,
+          "domesticFlag": 0,
+          "marketHint": 0,
+          "position": "ST",
+          "potential": 75,
+          "leagueLevel": 1,
+          "sourceLeague": "JP",
+          "sourceId": "CP-953BEF694A397A4B"
         },
         {
           "name": "Leo Ceara",

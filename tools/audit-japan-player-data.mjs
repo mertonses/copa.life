@@ -28,7 +28,7 @@ const distribution = Object.fromEntries([
 
 const failures = [];
 const assert = (condition, message) => { if (!condition) failures.push(message); };
-assert(pool.length === 561, `Oyuncu sayısı 561 değil: ${pool.length}`);
+assert(pool.length === 566, `Oyuncu sayısı 566 değil: ${pool.length}`);
 assert(byClub.length === 20, `Kulüp sayısı 20 değil: ${byClub.length}`);
 assert(Object.values(byRole).every(Boolean), `Eksik mevki grubu: ${JSON.stringify(byRole)}`);
 assert(Math.min(...ages) >= 15 && Math.max(...ages) <= 45, `Yaş aralığı geçersiz: ${Math.min(...ages)}-${Math.max(...ages)}`);
@@ -43,7 +43,7 @@ assert(pool.every(player => player[9] === 1), "Japonya lig seviyesi 1 olmayan oy
 const localFlagCount = pool.filter(player => player[5]).length;
 console.log(JSON.stringify({
   status: failures.length ? "FAIL" : "PASS",
-  snapshot: "copa.life independent player pool 2026-07-15",
+  snapshot: "copa.life independent player pool 2026-08-18",
   scope: "J1, 20 kulüp",
   players: pool.length,
   clubs: byClub.length,
