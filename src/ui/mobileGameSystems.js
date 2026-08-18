@@ -179,9 +179,11 @@
       button.querySelectorAll(".formation-card-kicker").forEach(node=>node.remove());
     });
     document.querySelectorAll("#chairpick .chairbtn").forEach(button=>{
-      button.classList.add("mobile-chair-card");
+      // Keep one canonical mockup card on every surface; legacy mobile markup
+      // added a second footer and changed the visual order.
+      button.classList.remove("mobile-chair-card");
       button.querySelector(".chair-mobile-meta")?.remove();
-      if(!button.querySelector(".chair-detail-link"))button.insertAdjacentHTML("beforeend",`<span class="chair-detail-link">${tr()?"DETAY →":"DETAIL →"}</span>`);
+      button.querySelector(".chair-detail-link")?.remove();
     });
   }
   function setSetupStep(value){
