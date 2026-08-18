@@ -92,7 +92,7 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/layout.css?v=20260818-chair-cards3">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260817-karaborsa1">
-<link rel="stylesheet" href="src/styles/match.css?v=20260818-result-mockup1">
+<link rel="stylesheet" href="src/styles/match.css?v=20260818-result-production1">
 <link rel="stylesheet" href="src/styles/finalReplay.css?v=20260730-import-ui2">
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260805-five-tab-nav1">
@@ -384,20 +384,36 @@ if("serviceWorker"in navigator){
   </section>
 
   <section id="result" class="result hidden">
-    <div class="scoreboard"><div id="resultFx" class="result-fx" aria-hidden="true"></div><div class="scoreboard-title"><div class="ln" id="rLn">—</div><div class="big" id="rFinish">—</div><p class="result-subline" id="rRound">—</p></div><div class="result-score-panel"><strong id="rScore">—</strong><small id="rScoreLabel">MAÇ SONUCU</small></div></div>
-    <div class="motm hidden" id="motm"></div><p class="verdict" id="rVerdict">—</p><div class="runUnlocks hidden" id="rUnlocks"></div>
-    <div class="statline"><div class="stat"><div class="l" id="lblTur">Tur</div><div class="v" id="rTur">0</div></div><div class="stat"><div class="l" id="lblGuc">Güç</div><div class="v" id="rGuc">0</div></div><div class="stat"><div class="l" id="lblKart">Kart</div><div class="v" id="rKart">0</div></div><div class="stat"><div class="l" id="lblCash">Kasa</div><div class="v" id="rCash">0</div></div></div>
-    <div class="match-analysis-entry hidden" id="matchAnalysisEntry" aria-live="polite"></div>
-    <div class="runCareerProgress hidden" id="rCareerProgress"></div>
-    <div class="final-row" id="finalRow"><div class="finalreport hidden" id="finalReport"></div><div class="storytile" id="storyTile"><div class="sth" id="rStoryHdr">SEZONUN HİKÂYESİ</div><div class="stb" id="rStory">—</div></div><div class="econtile hidden" id="econTile"></div></div><div class="lineups hidden" id="lineups"></div>
-    <div class="result-actions">
-      <p class="result-action-copy" id="resultActionCopy">Bu tur kaybolmadı. Kulüp kariyerine işlendi.</p>
-      <button class="btn btn-ghost result-more-btn" id="resultMoreBtn" onclick="toggleResultDetails()"><span id="resultMoreLbl">İLERİ</span><span aria-hidden="true">→</span></button>
-      <div class="result-row"><button class="btn btn-ghost" id="shareCardBtn" onclick="showShareCard()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="18" height="11" rx="2"/><circle cx="10" cy="9.5" r="2.8"/><path d="M6.5 4L8 1.5h4L13.5 4"/><circle cx="16" cy="6.5" r=".9" fill="currentColor" stroke="none"/></svg><span class="result-action-label" id="shareBtnLbl">PAYLAŞ</span></button><button class="btn btn-ghost" id="statsBtn" onclick="showSeasonStats()" style="width:auto"><svg viewBox="0 0 20 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.15em;margin-right:5px"><rect x="2" y="9" width="3" height="6" rx=".5"><animate attributeName="height" values="6;9;6" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="9;6;9" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="8.5" y="5" width="3" height="10" rx=".5"><animate attributeName="height" values="10;13;10" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="5;2;5" dur="1.6s" begin="0.25s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect><rect x="15" y="7" width="3" height="8" rx=".5"><animate attributeName="height" values="8;11;8" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/><animate attributeName="y" values="7;4;7" dur="1.6s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines=".4 0 .6 1;.4 0 .6 1"/></rect></svg><span class="result-action-label" id="statsBtnLbl">Sezon İstatistikleri</span></button><div class="seedbox result-seed-action"><span id="rSeedLbl"></span><b id="rSeed"></b></div></div>
-      <div class="copied" id="copied"></div><span id="copyBtn" hidden></span>
-      <button class="btn" id="againBtn" onclick="restartAfterRunAd()">BAŞLA</button>
+    <div class="result-shell">
+      <div class="result-hero scoreboard">
+        <div id="resultFx" class="result-fx" aria-hidden="true"></div>
+        <div class="result-hero-copy"><div class="result-kicker" id="rLn">—</div><div class="result-title" id="rFinish">—</div><p class="result-subline" id="rRound">—</p></div>
+        <div class="result-status-mark" id="resultStatusMark" aria-hidden="true"></div>
+        <div class="result-score-panel"><strong id="rScore">—</strong><small id="rScoreLabel">MAÇ SONUCU</small></div>
+      </div>
+       <div class="statline result-summary"><div class="stat"><div class="l" id="lblTur">Ulaşılan tur</div><div class="v" id="rTur">0</div></div><div class="stat"><div class="l" id="lblGuc">Kadro gücü</div><div class="v" id="rGuc">0</div></div><div class="stat"><div class="l" id="lblCash">Kulüp kasası</div><div class="v money" id="rCash">0</div></div><div class="stat"><div class="l" id="lblRep">Kulüp itibarı</div><div class="v" id="rRep">—</div></div></div>
+      <div class="match-analysis-entry hidden" id="matchAnalysisEntry" aria-live="polite"></div>
+      <div class="runCareerProgress" id="rCareerProgress"></div>
+      <div class="result-story-grid">
+        <article class="result-story-card"><div class="result-story-head"><div class="result-section-label" id="resultStoryLabel">SEZONUN HİKÂYESİ</div><span class="result-story-state" id="resultStoryState"><i></i>SEZON NOTU</span></div><h2 id="resultStoryTitle">—</h2><p id="resultStoryCopy">—</p><div class="result-trace" id="resultTrace"></div></article>
+        <article class="result-story-card result-decision-card"><div><div class="result-section-label" id="resultDecisionLabel">SEZONUN ÇIKIŞI</div><h2 id="resultDecisionTitle">YENİ TUR</h2><p id="resultDecisionCopy">—</p></div><div class="result-decision-foot"><span id="resultDecisionHint">Bir sonraki hamle</span><span aria-hidden="true">→</span></div></article>
+      </div>
+      <div class="result-actions">
+        <p class="result-action-copy" id="resultActionCopy">Bu tur kaybolmadı. Kulüp kariyerine işlendi.</p>
+        <button class="result-action result-action-share" id="shareCardBtn" onclick="showShareCard()"><span class="result-action-icon" aria-hidden="true">↗</span><span class="result-action-label" id="shareBtnLbl">PAYLAŞ</span></button>
+        <button class="result-action result-action-data" id="resultMoreBtn" onclick="toggleResultDetails()" aria-expanded="false"><span class="result-action-icon" aria-hidden="true">▥</span><span id="resultMoreLbl">DATAHUB</span><span class="result-action-arrow" aria-hidden="true">↓</span></button>
+        <button class="result-action result-action-squad" id="squadResultBtn" onclick="showResultSquad()"><span class="result-action-icon" aria-hidden="true">♙</span><span id="squadResultLbl">KADROYU İNCELE</span><span class="result-action-arrow" aria-hidden="true">→</span></button>
+        <button class="result-action result-action-new" id="againBtn" onclick="restartAfterRunAd()"><span class="result-action-icon" aria-hidden="true">→</span><span id="againBtnLabel">YENİ TUR</span></button>
+        <div class="result-row" aria-hidden="true"><button class="hidden" id="statsBtn" onclick="showSeasonStats()"><span id="statsBtnLbl">DATAHUB</span></button><div class="seedbox result-seed-action"><span id="rSeedLbl"></span><b id="rSeed"></b></div></div>
+        <div class="copied" id="copied"></div><span id="copyBtn" hidden></span>
+      </div>
+      <section class="result-datahub" id="resultDatahub" aria-label="Season datahub">
+        <div class="result-datahub-head"><h2 id="resultHubTitle">SEZON DATAHUB <span>· PERFORMANS · ETKİ</span></h2><button type="button" id="resultHubClose" onclick="toggleResultDetails()">KAPAT</button></div>
+        <div class="result-datahub-grid"><article class="result-data-card result-data-story"><h3 id="resultHubStoryLabel">HİKÂYE NOTU</h3><p id="resultHubStory">—</p><span class="result-chip" id="resultStoryChip"><i></i>—</span></article><article class="result-data-card"><h3 id="resultHubPerformanceLabel">PERFORMANS KARNESİ</h3><div class="result-bars"><div class="result-bar"><span id="resultAttackLabel">Hücum</span><i><b id="resultAttackBar"></b></i><strong id="resultAttackValue">0</strong></div><div class="result-bar"><span id="resultChemLabel">Uyum</span><i><b id="resultChemBar"></b></i><strong id="resultChemValue">0</strong></div><div class="result-bar"><span id="resultFinanceLabel">Finans</span><i><b id="resultFinanceBar"></b></i><strong id="resultFinanceValue">0</strong></div></div></article><article class="result-data-card"><h3 id="resultHubImpactLabel">SEZON ETKİSİ</h3><div class="result-data-stat"><span id="resultRepLabel">İtibar</span><b id="resultRepValue">—</b></div><div class="result-data-stat"><span id="resultFinanceHealthLabel">Finans sağlığı</span><b id="resultFinanceHealthValue">—</b></div><div class="result-data-stat"><span id="resultStandoutLabel">Öne çıkan</span><b id="resultStandoutValue">—</b></div></article></div>
+      </section>
+       <div class="result-legacy-content"><div class="motm hidden" id="motm"></div><p class="verdict" id="rVerdict">—</p><div class="runUnlocks hidden" id="rUnlocks"></div><div class="final-row" id="finalRow"><div class="finalreport hidden" id="finalReport"></div><div class="storytile" id="storyTile"><div class="sth" id="rStoryHdr">SEZONUN HİKÂYESİ</div><div class="stb" id="rStory">—</div></div><div class="econtile hidden" id="econTile"></div></div><div class="lineups hidden" id="lineups"></div><span id="rSeedLbl"></span><span id="rSeed"></span><span id="rKart"></span><span id="lblKart"></span></div>
+      <a class="patreonbox resultpatreon" href="https://www.patreon.com/c/immgo" target="_blank" rel="noopener"><span class="patreonicon" aria-hidden="true"></span><span id="patreonResultText"></span><b>Patreon</b></a>
     </div>
-    <a class="patreonbox resultpatreon" href="https://www.patreon.com/c/immgo" target="_blank" rel="noopener"><span class="patreonicon" aria-hidden="true"></span><span id="patreonResultText"></span><b>Patreon</b></a>
   </section>
 </div>
 <div id="modal" class="modal hidden"></div>
@@ -425,6 +441,7 @@ try{
 <script src="src/core/squad.js?v=20260818-transfer-update1"></script>
 <script src="src/game/generate.js?v=20260729-role-gameplay1"></script>
 <script src="src/balance/config.js?v=20260806-premium-cash1"></script>
+<script src="src/runtime/testFixtures.js?v=20260818-qa-fixtures1"></script>
 <script src="src/state/metaState.js?v=20260711-stability1g"></script>
 <script src="src/state/gameState.js?v=20260714-save4"></script>
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
@@ -1213,7 +1230,7 @@ function renderFixtures(){
 }
 
 /* ===== opponent scouting ===== */
-function genOppLineup(){const base=opponent.power,shape=FORMATIONS[opponent&&opponent.formation]||FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=shape.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const source=oppPick(g),nm=source[0],item={name:nm,ov,pos:s[0],natPos:s[0],grp:g,side,club:source[3]||"",age:source[4]||0};if(typeof playerProfileKey==="function")item.profileKey=playerProfileKey(selectedCountry,nm,item.club,item.age);if(typeof playerGameplayProfileSync==="function")item.gameplayProfile=playerGameplayProfileSync(item,selectedCountry);return item;});oppXI=oppLineup.map(o=>o.name);
+function genOppLineup(){const base=opponent.power,shape=FORMATIONS[opponent&&opponent.formation]||FORMATIONS["4-3-3"];weakFlank=rnd(["L","C","R"]);oppLineup=shape.map((s,i)=>{const g=groupOf(s[0]);let ov=base+ri(-4,4);const x=s[1];const side=x<42?"L":x>58?"R":"C";if(side===weakFlank&&g!=="GK")ov-=ri(4,8);ov=Math.max(50,Math.min(92,ov));const source=oppPick(g),nm=source[0],fallback="opp-"+String(nm||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")+"-"+(source[4]||0)+"-"+s[0],item={name:nm,playerId:source[10]||fallback,ov,pos:s[0],natPos:s[0],grp:g,side,club:source[3]||"",age:source[4]||0};if(typeof playerProfileKey==="function")item.profileKey=playerProfileKey(selectedCountry,nm,item.club,item.age);if(typeof playerGameplayProfileSync==="function")item.gameplayProfile=playerGameplayProfileSync(item,selectedCountry);return item;});oppXI=oppLineup.map(o=>o.name);
   let has=false;slots.forEach((s,i)=>{const p=picksBySlot[i];if(!p)return;const x=s[1],onSide=weakFlank==="L"?x<42:weakFlank==="R"?x>58:(x>=42&&x<=58);if(onSide&&(FWDP.includes(s[0])||groupOf(s[0])==="FWD"))has=true;});matchupBonus=(has?1:0)-opponentEdge(squadPower(round).power,opponent.power);}
 function openScout(){
   if(!window.ScoutReport&&window.CopaLazy){CopaLazy.ensureScoutReport().then(openScout).catch(()=>{});return;}
@@ -1736,6 +1753,7 @@ function applyModernTeamTalk(tone,target){
 function pickTalk(k){const legacy={gaz:"challenge",mantik:"calm",sert:"discipline"};applyModernTeamTalk(legacy[k]||k,"all");}
 function openPreparation(){if(window.CopaPreparation)CopaPreparation.open(round,opponent);}
 function maybeInjure(){
+ if(window.CopaTestFixtures&&CopaTestFixtures.is("injury"))return;
  if(round<=1)return;
  const prepRisk=window.CopaPreparation?CopaPreparation.injuryMultiplier():1,talkRisk=1+Math.max(0,Number(window._talkMatchProfile&&window._talkMatchProfile.injuryRisk)||0);
  const p=applyRandomInjury((hasCard("temiz_sayfa")?0.049:0.07)*prepRisk*talkRisk);window._talkMatchProfile=null;
@@ -2224,8 +2242,9 @@ function resolvePostMatchStateBeforeReward(){
     }else pushFeed("\u{1fa79} "+(CopaText("Riskli zorlama sakatlık bırakmadı","The gamble left no injury")),"pres");
   }
   const perf=lastMatchPerf||{power:squadPower(round).power};
-  const normalInjury=applyRandomInjury(injuryRiskFor(perf.power));
-  if(normalInjury){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(normalInjury)+"</b> "+(CopaText("maçtan sonra sakatlandı","was injured after the match")),"lose");}
+  const fixtureInjury=window.CopaTestFixtures&&typeof CopaTestFixtures.consumeInjury==="function"?CopaTestFixtures.consumeInjury(picksBySlot):null;
+  const normalInjury=fixtureInjury||((window.CopaTestFixtures&&CopaTestFixtures.is("injury"))?null:applyRandomInjury(injuryRiskFor(perf.power)));
+  if(normalInjury){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(normalInjury)+"</b> "+(fixtureInjury?CopaText("test fixture: deterministik sakatlık","test fixture: deterministic injury"):CopaText("maçtan sonra sakatlandı","was injured after the match")),"lose");}
   if(spotlightPlayer&&spotlightPlayer.injured){
     sansMediaPressure=Math.max(sansMediaPressure,2);
     pushFeed(" "+(CopaText("Spotlight oyuncusu sakatlandı — sonraki tur pazar pahalı","Spotlight player injured — market inflated next round")),"lose");
@@ -2541,7 +2560,7 @@ function endRun(won,score,endType){const _parsedScore=_parseRunScore(score);if(w
   const activeSackLine=typeof chairmanSackLimit==="function"?chairmanSackLimit():baseSackLine;
   econStats.finalDebt=finalPenalty;lastResult={won,round,power:sp.power,cards:cards.length,score:score||null,final:!!score,newForm,newChair,chairChoices:[...chairChoices],econ:Object.assign({},econStats),endType:endType||"",budgetAtEnd:finalCashTotal,debtLimit:baseSackLine,sackLimit:activeSackLine,activeSackLimit:activeSackLine,chairmanId:chairman&&chairman.id,metaProgression:null,tournament:tournamentFormat==="groups32_v2"?_runCheckpointClone(tournament):null,tournamentFormat};
   const playedMatches=fixtures.filter(f=>f&&["W","L","D"].includes(f.res)).length,wins=fixtures.filter(f=>f&&f.res==="W").length,draws=fixtures.filter(f=>f&&f.res==="D").length;
-  const museumPlayers=picksBySlot.filter(Boolean).concat((bench||[]).filter(Boolean)).slice(0,18).map((p,index)=>({id:p.id||"",name:p.name||("Player "+(index+1)),pos:p.pos||"",power:typeof effOf==="function"?effOf(p):(p.eff||p.ov||0),club:p.club||"",age:p.age||0}));
+  const museumPlayers=picksBySlot.filter(Boolean).concat((bench||[]).filter(Boolean)).slice(0,18).map((p,index)=>({id:p.playerId||p.id||"",name:p.name||("Player "+(index+1)),pos:p.pos||"",power:typeof effOf==="function"?effOf(p):(p.eff||p.ov||0),club:p.club||"",age:p.age||0}));
   const featuredIndex=museumPlayers.reduce((best,p,index)=>p.power>(museumPlayers[best]&&museumPlayers[best].power||-1)?index:best,0);
   const identity=typeof runIdentity==="function"?runIdentity():{l:""},metaRecord={seed:seedNum,metaRun:metaRuns,team:teamName,country:selectedCountry,formation:formName,style,chairman:chairman&&chairman.id,identity:identity&&identity.l,won,round,endType:endType||"",power:sp.power,cards:cards.length,cash:finalCashTotal,score:score||"",ghost:!!window._ghostOpponentUsed,playedMatches,wins,draws,personalBest,players:museumPlayers,featuredIndex};
   const applyMetaRecord=api=>{const summary=api&&typeof api.recordRun==="function"?api.recordRun(metaRecord):null;if(summary){lastResult.metaProgression=summary;applyMeta();if(!$("result").classList.contains("hidden"))renderResult();}return summary;};
@@ -3545,6 +3564,16 @@ function _saveState(phaseOverride){
   });}catch(e){}
 }
 function _clearState(){if(window.CopaRunPersistence)window.CopaRunPersistence.clear();if(window.CopaFinalSimPersistence)window.CopaFinalSimPersistence.clear();if(window.CopaPenaltyPersistence)window.CopaPenaltyPersistence.clear();}
+function ensurePlayerIdentity(player){
+  if(!player||typeof player!=="object")return player;
+  if(!player.playerId){
+    const source=Array.isArray(POOL)?POOL.find(row=>String(row[0])===String(player.name)&&String(row[3]||"")===String(player.club||"")&&Number(row[4]||0)===Number(player.age||0)):null;
+    const raw=source&&source[10]||[player.name,player.club,player.age,player.natPos||player.pos].join("-");
+    player.playerId=String(raw).startsWith("pl-")?String(raw):"legacy-"+String(raw).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  }
+  player.id=player.playerId;
+  return player;
+}
 function _tryResumeFinalCheckpoint(){
   if(!window.CopaFinalSimPersistence||round<7)return false;
   const saved=window.CopaFinalSimPersistence.read().state;if(!saved)return false;
@@ -3567,7 +3596,7 @@ function _tryRestoreState(){
     document.querySelectorAll("#countryPick button").forEach(button=>button.classList.toggle("on",button.dataset.country===selectedCountry));
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
-    picksBySlot=st.picks;budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
+    picksBySlot=st.picks.map(ensurePlayerIdentity);budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
     window.CopaCashDisplay?.sync(budget);
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
@@ -3575,15 +3604,15 @@ function _tryRestoreState(){
     seedNum=Number(st.seedNum)||0;seedStr=st.seedStr||("TR-2026-"+String(seedNum).padStart(4,"0"));window._runUsesCheatSeed=!!st.cheatRun;window._ghostOpponentUsed=!!st.ghostOpponentUsed;window._ghostOpponentId=String(st.ghostOpponentId||"");window._ghostCheckedRounds=Array.isArray(st.ghostCheckedRounds)?st.ghostCheckedRounds.filter(value=>Number.isInteger(value)&&value>=1&&value<=7):[];window._ghostSeenIds=Array.isArray(st.ghostSeenIds)?st.ghostSeenIds.filter(value=>/^G-[A-Z0-9]{8,32}$/.test(String(value))).slice(-16):[];
     runRng=mulberry32((Math.imul(seedNum,2654435761)>>>0)||1);runRngCalls=Math.max(0,Number(st.rngCalls)||0);for(let i=0;i<runRngCalls;i++)runRng();
     slots=restoreSlots;filled=slots.map((_,i)=>!!picksBySlot[i]);remaining=filled.filter(value=>!value).length;
-    bench=st.bench||[];benchUsed=st.benchUsed||0;captainIdx=Number.isInteger(st.captainIdx)&&!!picksBySlot[st.captainIdx]?st.captainIdx:-1;presCharges=st.presCharges??1;
+    bench=(Array.isArray(st.bench)?st.bench:[]).map(ensurePlayerIdentity);benchUsed=st.benchUsed||0;captainIdx=Number.isInteger(st.captainIdx)&&!!picksBySlot[st.captainIdx]?st.captainIdx:-1;presCharges=st.presCharges??1;
     kit=st.kit||{bg:"#AE3D28",fg:"#FFFFFF",sec:"#F24A28"};_kp=st.kp||0;_ks=st.ks||6;
     feed=st.feed||[];finalPenalty=st.finalPenalty||0;riskPowerMod=st.riskPowerMod||0;
     econStats=st.econStats||{earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:"",transactions:[]};if(!Array.isArray(econStats.transactions))econStats.transactions=[];
     {const data=countryGameData(selectedCountry),bases=data[2],names=data[1];bracket=Array.isArray(st.bracket)&&st.bracket.length?st.bracket.map(item=>item?Object.assign({},item):null):bases.map((base,i)=>({name:(st.fixtures&&st.fixtures[i]&&st.fixtures[i].opp)||names[i%names.length]||"Opponent",power:base}));}
     fixtures=Array.isArray(st.fixtures)&&st.fixtures.length?st.fixtures:bracket.map(b=>({opp:b.name,res:null,gf:null,ga:null}));
     opponent=st.opponent?Object.assign({},st.opponent):(bracket[round-1]||bracket[0]||{name:"Opponent",power:60});
-    currentWeather=st.currentWeather?Object.assign({},st.currentWeather):null;oppChar=st.oppChar?Object.assign({},st.oppChar):null;oppLineup=Array.isArray(st.oppLineup)?st.oppLineup.map(p=>Object.assign({},p)):[];oppXI=oppLineup.map(p=>p.name);weakFlank=st.weakFlank||"C";matchupBonus=Number(st.matchupBonus)||0;
-    shopOffers=Array.isArray(st.shopOffers)?[...st.shopOffers]:[];shopVariants=st.shopVariants||{};shopPriceChaos=st.shopPriceChaos||{};window._freeAgents=Array.isArray(st.freeAgents)?st.freeAgents.map(p=>Object.assign({},p)):[];window._freeAgentsRound=Number(st.freeAgentsRound)||0;
+    currentWeather=st.currentWeather?Object.assign({},st.currentWeather):null;oppChar=st.oppChar?Object.assign({},st.oppChar):null;oppLineup=Array.isArray(st.oppLineup)?st.oppLineup.map(p=>ensurePlayerIdentity(Object.assign({},p))):[];oppXI=oppLineup.map(p=>p.name);weakFlank=st.weakFlank||"C";matchupBonus=Number(st.matchupBonus)||0;
+    shopOffers=Array.isArray(st.shopOffers)?[...st.shopOffers]:[];shopVariants=st.shopVariants||{};shopPriceChaos=st.shopPriceChaos||{};window._freeAgents=Array.isArray(st.freeAgents)?st.freeAgents.map(p=>ensurePlayerIdentity(Object.assign({},p))):[];window._freeAgentsRound=Number(st.freeAgentsRound)||0;
     cardsBoughtThisTurn=Number(st.cardsBoughtThisTurn)||0;freeAgentBoughtThisTurn=Number(st.freeAgentBoughtThisTurn)||0;shopRerolledThisTurn=Number(st.shopRerolledThisTurn)||0;freeAgentRerolledThisTurn=Number(st.freeAgentRerolledThisTurn)||0;rewardedInjuryHealsEarned=Math.max(0,Math.min(MAX_REWARDED_INJURY_HEALS,Number(st.rewardedInjuryHealsEarned)||0));rewardedMarketRerollsEarned=Math.max(0,Math.min(MAX_REWARDED_MARKET_REROLLS,Number(st.rewardedMarketRerollsEarned)||0));rewardedFreeAgentRerollsEarned=Math.max(0,Math.min(MAX_REWARDED_FREE_AGENT_REROLLS,Number(st.rewardedFreeAgentRerollsEarned)||0));injuryRewardInFlight=false;shopRewardInFlight=false;freeAgentRewardInFlight=false;lastTalkResult=st.lastTalkResult||null;
     talkUsed=st.talkUsed||false;talkMod=st.talkMod||{all:0,def:0,atk:0};injuredIdx=Number.isInteger(st.injuredIdx)?st.injuredIdx:-1;medicalProtectionTurns=Math.max(0,Number(st.medicalProtectionTurns)||0);if(typeof syncInjuredIdx==="function")syncInjuredIdx();powerHist=Array.isArray(st.powerHist)?[...st.powerHist]:[];
     tempPrimePenalty=st.tempPrimePenalty||0;shortCampPenalty=st.shortCampPenalty||0;
@@ -4147,29 +4176,83 @@ function _finalTacticBench(benchIdx){
   const _endRun=window.endRun; if(typeof _endRun==="function")window.endRun=function(won,score,endType){_endRun.apply(this,arguments);const r=$("result");if(r)r.classList.toggle("is-loss",!won||endType==="sacked")};
 })();
 </script>
-<script>function toggleResultDetails(){const root=document.getElementById("result"),open=root.classList.toggle("is-expanded"),lbl=document.getElementById("resultMoreLbl"),btn=document.getElementById("resultMoreBtn");if(lbl)lbl.textContent=open?(typeof LT==="function"?LT("ÖZETİ KAPAT","COLLAPSE SUMMARY","CERRAR RESUMEN","ZUSAMMENFASSUNG SCHLIESSEN","CHIUDI RIEPILOGO"):"ÖZETİ KAPAT"):(typeof LT==="function"?LT("İLERİ","NEXT","SIGUIENTE","WEITER","AVANTI"):"İLERİ");if(btn)btn.setAttribute("aria-expanded",String(open));if(open)root.scrollIntoView({behavior:"smooth",block:"start"});}</script>
-<script>
-(function(){
-  const baseRenderResult=renderResult;
-  function decorateResult(r){
-    const root=$("result"),kind=r&&r.endType==="sacked"?"sacked":r&&r.won?"champion":r&&r.endType==="group_eliminated"?"group-eliminated":"eliminated";
-    root.dataset.resultKind=kind;
-    const copy=$("resultActionCopy"),score=$("rScore"),scoreLabel=$("rScoreLabel"),kicker=$("rLn"),title=$("rFinish");
-    const tr=LANG==="tr";
-    const copyText={champion:tr?"Kupa kulüp tarihine işlendi.":"The cup is now part of club history.",sacked:tr?"Yönetim değişti; kulüp kariyerin kayda geçti.":"The board changed; your club career is on record.","group-eliminated":tr?"Grup aşaması tamamlandı; sonraki kariyerde daha güçlü dön.":"The group stage is over; return stronger next career.",eliminated:tr?"Bu tur kaybolmadı. Kulüp kariyerine işlendi.":"This run was not lost. It is part of the club career."};
-    const kickerText={champion:tr?"TÜRKİYE ULUSAL KUPASI · FİNAL":"NATIONAL CUP · FINAL",sacked:tr?"YÖNETİM KARARI · SEZON SONU":"BOARD DECISION · SEASON END","group-eliminated":tr?"TÜRKİYE ULUSAL KUPASI · GRUP AŞAMASI":"NATIONAL CUP · GROUP STAGE",eliminated:tr?"TÜRKİYE ULUSAL KUPASI · SEZON SONU":"NATIONAL CUP · SEASON END"};
-    if(kicker)kicker.textContent=kickerText[kind];
-    if(title&&kind==="champion")title.textContent=tr?"ŞAMPİYON":"CHAMPION";
-    if(title&&kind==="sacked")title.textContent=tr?"KOVULDUN":"SACKED";
-    if(title&&kind==="group-eliminated")title.textContent=tr?"GRUPTA ELENDİN":"ELIMINATED IN GROUP";
-    if(title&&kind==="eliminated")title.textContent=r&&r.score?(tr?"FİNALDE KAYBETTİN":"LOST THE FINAL"):(tr?"ELENDİN":"ELIMINATED");
-    if(score)score.textContent=r&&r.score||"—";
-    if(scoreLabel)scoreLabel.textContent=r&&r.score?(tr?"MAÇ SONUCU":"MATCH RESULT"):(tr?"SEZON DURUMU":"SEASON STATUS");
-    if(copy)copy.textContent=(kind==="eliminated"&&r&&r.score)
-      ?(tr?"Finale kadar geldin; kupa son adımda kaçtı.":"You reached the final; the cup slipped away.")
-      :copyText[kind];
-  }
-  renderResult=function(){baseRenderResult.apply(this,arguments);decorateResult(lastResult);};
-})();
-</script>
+ <script>function toggleResultDetails(){const root=document.getElementById("result"),open=root.classList.toggle("is-expanded"),lbl=document.getElementById("resultMoreLbl"),btn=document.getElementById("resultMoreBtn"),copy=typeof LT==="function"?LT(open?"DATAHUB'I KAPAT":"DATAHUB",open?"CLOSE DATAHUB":"DATAHUB",open?"CERRAR DATAHUB":"DATAHUB",open?"DATAHUB SCHLIESSEN":"DATAHUB",open?"CHIUDI DATAHUB":"DATAHUB"):open?"DATAHUB'I KAPAT":"DATAHUB";if(lbl)lbl.textContent=copy;if(btn)btn.setAttribute("aria-expanded",String(open));if(open)root.scrollIntoView({behavior:"smooth",block:"start"});}</script>
+ <script>
+ (function(){
+   const baseRenderResult=renderResult;
+   const escapeHtml=value=>String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+   const clamp=(value,min=0,max=100)=>Math.max(min,Math.min(max,Math.round(Number(value)||0)));
+   const iconFor=kind=>kind==="champion"
+     ?`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 8h18v9c0 8-4 13-9 15-5-2-9-7-9-15V8Z"/><path d="M15 12H8v4c0 6 4 10 10 10M33 12h7v4c0 6-4 10-10 10M24 32v7M17 40h14"/></svg>`
+     :kind==="sacked"
+       ?`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 17h24v22H12zM18 17v-4h12v4M18 23h12M24 23v10M19 28h10"/><path d="M8 9l32 30"/></svg>`
+       :`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 10v28h28M18 29l6-7 5 4 9-13"/><path d="M31 13h7v7"/></svg>`;
+   function decorateResult(r){
+     const root=$("result"),kind=r&&r.endType==="sacked"?"sacked":r&&r.won?"champion":r&&r.endType==="group_eliminated"?"group-eliminated":"eliminated";
+     root.dataset.resultKind=kind;
+     const tr=LANG==="tr",tx=(a,b,c,d,e)=>typeof LT==="function"?LT(a,b,c,d,e):(tr?a:b),roundLabel=()=>{const x=L();return x.rounds&&x.rounds[Math.max(0,(r&&r.won?7:r&&r.round||1)-1)]||String(r&&r.round||"—")};
+     const score=$("rScore"),scoreLabel=$("rScoreLabel"),kicker=$("rLn"),title=$("rFinish"),copy=$("resultActionCopy"),mark=$("resultStatusMark"),x=L(),group=typeof resultGroupSummary==="function"?resultGroupSummary(r):null;
+     const endCash=Number(r&&r.budgetAtEnd)||0,summary=r&&r.metaProgression||null,e=r&&r.econ||{};
+     const titleText={champion:tx("ŞAMPİYON","CHAMPION","CAMPEÓN","SIEGER","CAMPIONE"),sacked:tx("KOVULDUN","SACKED","DESTITUIDO","ENTLASSEN","ESONERATO"),"group-eliminated":tx("GRUPTA ELENDİN","ELIMINATED IN THE GROUP","ELIMINADO EN EL GRUPO","IN DER GRUPPE AUSGESCHIEDEN","ELIMINATO NEL GIRONE"),eliminated:r&&r.score?tx("FİNALDE KAYBETTİN","LOST THE FINAL","PERDISTE LA FINAL","FINALE VERLOREN","FINALE PERSA"):tx("ELENDİN","ELIMINATED","ELIMINADO","AUSGESCHIEDEN","ELIMINATO")};
+     const kickerText={champion:tx("TÜRKİYE ULUSAL KUPASI · FİNAL","NATIONAL CUP · FINAL","COPA NACIONAL · FINAL","NATIONALPOKAL · FINALE","COPPA NAZIONALE · FINALE"),sacked:tx("YÖNETİM KARARI · SEZON SONU","BOARD DECISION · SEASON END","DECISIÓN DIRECTIVA · FIN DE TEMPORADA","VORSTANDSBESCHLUSS · SAISONENDE","DECISIONE DEL CDA · FINE STAGIONE"),"group-eliminated":tx("TÜRKİYE ULUSAL KUPASI · GRUP AŞAMASI","NATIONAL CUP · GROUP STAGE","COPA NACIONAL · FASE DE GRUPOS","NATIONALPOKAL · GRUPPENPHASE","COPPA NAZIONALE · FASE A GIRONI"),eliminated:tx("TÜRKİYE ULUSAL KUPASI · SEZON SONU","NATIONAL CUP · SEASON END","COPA NACIONAL · FIN DE TEMPORADA","NATIONALPOKAL · SAISONENDE","COPPA NAZIONALE · FINE STAGIONE")};
+     const actionText=kind==="champion"?tx("Kupa kulüp tarihine işlendi.","The cup is now part of club history.","La copa ya es parte de la historia del club.","Der Pokal ist jetzt Teil der Clubgeschichte.","La coppa entra nella storia del club."):kind==="sacked"?tx("Kasa baskısı yönetim kararını tetikledi.","Financial pressure triggered the board decision.","La presión financiera provocó la decisión de la directiva.","Finanzieller Druck löste die Vorstandsentscheidung aus.","La pressione finanziaria ha portato alla decisione del CDA."):kind==="group-eliminated"?tx("Grup aşaması kapandı; sonraki tur için yeni bir plan kur.","The group stage is over; build a new plan for the next run.","La fase de grupos terminó; prepara un nuevo plan para el próximo recorrido.","Die Gruppenphase ist vorbei; plane den nächsten Run neu.","La fase a gironi è chiusa; prepara il prossimo percorso."):r&&r.score?tx("Finale kadar geldin; kupa son adımda kaçtı.","You reached the final; the cup slipped away at the last step.","Llegaste a la final; la copa se escapó en el último paso.","Du hast das Finale erreicht; der Pokal entglitt im letzten Schritt.","Hai raggiunto la finale; la coppa è sfumata all'ultimo passo."):tx("Bu tur kaybolmadı; kulüp kariyerine işlendi.","This run was not lost; it is part of the club career.","Este recorrido no se perdió; ya forma parte de la carrera del club.","Dieser Run ist nicht verloren; er gehört jetzt zur Clubkarriere.","Questo percorso non è perso; ora fa parte della carriera del club.");
+     if(kicker)kicker.textContent=kickerText[kind];
+     if(title){title.textContent=titleText[kind];title.className="result-title "+(kind==="champion"?"gold":kind==="sacked"?"sacked-hdl":"acc");}
+     if(mark)mark.innerHTML=iconFor(kind);
+     if(score)score.textContent=r&&r.score||"—";
+     if(scoreLabel)scoreLabel.textContent=r&&r.score?tx("MAÇ SONUCU","MATCH RESULT","RESULTADO DEL PARTIDO","SPIELERGEBNIS","RISULTATO DELLA PARTITA"):tx("SEZON DURUMU","SEASON STATUS","ESTADO DE TEMPORADA","SAISONSTATUS","STATO DELLA STAGIONE");
+     if(copy)copy.textContent=actionText;
+     const storyLabel=$("resultStoryLabel"),storyState=$("resultStoryState"),storyTitle=$("resultStoryTitle"),storyCopy=$("resultStoryCopy"),storyChip=$("resultStoryChip"),decisionLabel=$("resultDecisionLabel"),decisionTitle=$("resultDecisionTitle"),decisionCopy=$("resultDecisionCopy"),decisionHint=$("resultDecisionHint"),trace=$("resultTrace");
+     const groupLine=group?tx(`Grup ${group.id}'de ${group.points} puan ve ${group.gd>0?"+":""}${group.gd} averajla ${group.rank}. sırada kaldın.`,`You finished ${group.rank}${group.rank===1?"st":group.rank===2?"nd":group.rank===3?"rd":"th"} in Group ${group.id} with ${group.points} points and ${group.gd>0?"+":""}${group.gd} goal difference.`,`Terminaste ${group.rank}.º en el Grupo ${group.id} con ${group.points} puntos y ${group.gd>0?"+":""}${group.gd} de diferencia.`,`Du wurdest ${group.rank}. in Gruppe ${group.id} mit ${group.points} Punkten und ${group.gd>0?"+":""}${group.gd} Tordifferenz.`,`Hai chiuso ${group.rank}º nel Gruppo ${group.id} con ${group.points} punti e ${group.gd>0?"+":""}${group.gd} di differenza reti.`):"";
+     const story={champion:{state:tx("ŞAMPİYONLUK","CHAMPIONSHIP","CAMPEONATO","MEISTERSCHAFT","CAMPIONATO"),title:tx("Kupa gecesi","Cup night","Noche de copa","Pokalsieger-Nacht","Notte di coppa"),copy:r&&r.score?tx(`Finali ${r.score} kazanıp kupayı kaldırdın.`,`You won the final ${r.score} and lifted the cup.`,`Ganaste la final ${r.score} y levantaste la copa.`,`Du hast das Finale ${r.score} gewonnen und den Pokal geholt.`,`Hai vinto la finale ${r.score} e alzato la coppa.`):tx("Finali kazanıp kupayı kaldırdın.","You won the final and lifted the cup.","Ganaste la final y levantaste la copa.","Du hast das Finale gewonnen und den Pokal geholt.","Hai vinto la finale e alzato la coppa."),chip:tx("KUPA","CUP","COPA","POKAL","COPPA")},sacked:{state:tx("YÖNETİM NOTU","BOARD NOTE","NOTA DE LA DIRECTIVA","VORSTANDSNOTIZ","NOTA DEL CDA"),title:tx("Kasa baskısı","Financial pressure","Presión financiera","Finanzdruck","Pressione finanziaria"),copy:tx(`Kasa ${runMoney(endCash)} seviyesine düşünce yönetim müdahale etti.`,`The board stepped in when funds fell to ${runMoney(endCash)}.`,`La directiva intervino cuando la caja cayó a ${runMoney(endCash)}.`,`Der Vorstand griff ein, als die Kasse auf ${runMoney(endCash)} fiel.`,`Il CDA è intervenuto quando la cassa è scesa a ${runMoney(endCash)}.`),chip:tx("YÖNETİM","BOARD","DIRECTIVA","VORSTAND","CDA")},"group-eliminated":{state:tx("GRUP NOTU","GROUP NOTE","NOTA DE GRUPO","GRUPPENNOTIZ","NOTA DEL GIRONE"),title:tx("İlk iki sıra kaçtı","Top two slipped away","Fuera de los dos primeros","Top zwei verpasst","Fuori dalle prime due"),copy:groupLine||tx("İlk iki sıranın dışında kalarak grup aşamasında elendin.","You finished outside the top two in the group stage.","Quedaste fuera de los dos primeros en la fase de grupos.","Du bliebst in der Gruppenphase außerhalb der Top zwei.","Sei rimasto fuori dalle prime due nella fase a gironi."),chip:tx("GRUP","GROUP","GRUPO","GRUPPE","GIRONE")},eliminated:{state:tx("SEZON NOTU","SEASON NOTE","NOTA DE TEMPORADA","SAISONEINTRAG","NOTA STAGIONALE"),title:r&&r.score?tx("Son adım","Last step","Último paso","Letzter Schritt","Ultimo passo"):tx("Yol burada bitti","The road ends here","El camino termina aquí","Der Weg endet hier","Il cammino finisce qui"),copy:r&&r.score?tx(`Finalde ${r.score} kaybettin; kupa son anda kaçtı.`,`You lost the final ${r.score}; the cup slipped away at the last moment.`,`Perdiste la final ${r.score}; la copa se escapó al final.`,`Du hast das Finale ${r.score} verloren; der Pokal entglitt im letzten Moment.`,`Hai perso la finale ${r.score}; la coppa è sfumata all'ultimo momento.`):tx(`${roundLabel()} aşamasında turnuva yolculuğun sona erdi.`,`Your cup run ended in ${roundLabel()}.`,`Tu recorrido terminó en ${roundLabel()}.`,`Dein Pokallauf endete in ${roundLabel()}.`,`Il tuo percorso si è chiuso in ${roundLabel()}.`),chip:r&&r.score?tx("FİNAL","FINAL","FINAL","FINALE","FINALE"):tx("ELENME","EXIT","ELIMINACIÓN","AUS","USCITA")}}[kind];
+     if(storyLabel)storyLabel.textContent=tx("SEZONUN HİKÂYESİ","SEASON STORY","HISTORIA DE LA TEMPORADA","SAISONGESCHICHTE","STORIA DELLA STAGIONE");
+     if(storyState)storyState.innerHTML=`<i></i>${story.state}`;
+     if(storyTitle)storyTitle.textContent=story.title;
+     if(storyCopy)storyCopy.textContent=story.copy;
+     if(storyChip)storyChip.innerHTML=`<i></i>${story.chip}`;
+     if(decisionLabel)decisionLabel.textContent=tx("SEZONUN ÇIKIŞI","NEXT MOVE","PRÓXIMO PASO","NÄCHSTER SCHRITT","PROSSIMA MOSSA");
+     if(decisionTitle)decisionTitle.textContent=tx("YENİ TUR","NEW ROUND","NUEVA PARTIDA","NEUER RUN","NUOVO PERCORSO");
+     if(decisionCopy)decisionCopy.textContent=kind==="sacked"?tx("Yeni yönetimle daha kontrollü bir başlangıç kur.","Build a more controlled start under new management.","Construye un inicio más controlado con la nueva directiva.","Starte unter neuer Führung kontrollierter.","Riparti con un inizio più controllato sotto il nuovo CDA."):kind==="champion"?tx("Yeni başkan, yeni kadro, yeni hikâye.","New chairman, new squad, new story.","Nuevo presidente, nueva plantilla, nueva historia.","Neuer Präsident, neuer Kader, neue Geschichte.","Nuovo presidente, nuova rosa, nuova storia."):tx("Bir sonraki turda kaderi yeniden yaz.","Rewrite the story in the next run.","Reescribe la historia en el próximo recorrido.","Schreib die Geschichte im nächsten Run neu.","Riscrivi la storia nel prossimo percorso.");
+     if(decisionHint)decisionHint.textContent=tx("BAŞKAN VE KADRO SEÇ","PICK CHAIRMAN & SQUAD","ELIGE PRESIDENTE Y PLANTILLA","PRÄSIDENT & KADER WÄHLEN","SCEGLI PRESIDENTE E ROSA");
+     if(trace){const stage=kind==="champion"?3:kind==="group-eliminated"?1:(r&&r.round>=5?2:1),labels=[tx("GRUP","GROUP","GRUPOS","GRUPPE","GIRONE"),tx("ELEME","KNOCKOUT","ELIMINATORIA","K.-O.","ELIMINAZIONE"),tx("FİNAL","FINAL","FINAL","FINALE","FINALE")];trace.innerHTML=labels.map((label,index)=>`<span class="result-trace-step ${index<stage-1?"done":index===stage-1?"current":"locked"}">${label}</span>`).join("");}
+     const hubTitle=$("resultHubTitle"),hubStoryLabel=$("resultHubStoryLabel"),hubStory=$("resultHubStory"),hubChip=$("resultStoryChip"),perf=$("resultHubPerformanceLabel"),impact=$("resultHubImpactLabel");
+     if(hubTitle)hubTitle.innerHTML=`${tx("SEZON DATAHUB","SEASON DATAHUB","DATAHUB DE TEMPORADA","SAISON-DATAHUB","DATAHUB STAGIONALE")} <span>· ${tx("PERFORMANS · ETKİ","PERFORMANCE · IMPACT","RENDIMIENTO · IMPACTO","LEISTUNG · EINFLUSS","PRESTAZIONE · IMPATTO")}</span>`;
+     if(hubStoryLabel)hubStoryLabel.textContent=tx("HİKÂYE NOTU","STORY NOTE","NOTA DE HISTORIA","GESCHICHTSNOTIZ","NOTA STORIA");
+     if(hubStory)hubStory.textContent=story.copy;
+     if(hubChip)hubChip.innerHTML=`<i></i>${story.chip}`;
+     if(perf)perf.textContent=tx("PERFORMANS KARNESİ","PERFORMANCE CARD","TARJETA DE RENDIMIENTO","LEISTUNGSKARTE","SCHEDA PRESTAZIONI");
+     if(impact)impact.textContent=tx("SEZON ETKİSİ","SEASON IMPACT","IMPACTO DE TEMPORADA","SAISONEINFLUSS","IMPATTO STAGIONALE");
+     const chemistry=typeof chemBonus==="function"?Number(chemBonus((typeof picksBySlot!=="undefined"?picksBySlot:[]).filter(Boolean)).total)||0:0;
+     const attack=clamp(r&&r.power),chem=clamp(50+chemistry*2),finance=clamp(endCash>=0?Math.min(100,58+endCash):Math.max(14,42+endCash));
+     const setBar=(bar,value)=>{if(bar){bar.style.width=value+"%";bar.setAttribute("aria-valuenow",String(value));}};
+     [["resultAttackBar",attack],["resultChemBar",chem],["resultFinanceBar",finance]].forEach(([id,value])=>setBar($(id),value));
+     [["resultAttackValue",attack],["resultChemValue",chem],["resultFinanceValue",finance]].forEach(([id,value])=>{const el=$(id);if(el)el.textContent=value+"%";});
+     const rep=summary&&Number(summary.reputation),repValue=$("resultRepValue"),financeHealth=$("resultFinanceHealthValue"),standout=$("resultStandoutValue");
+     const repStat=$("rRep");if(repStat)repStat.textContent=Number.isFinite(rep)?`+${rep}`:"—";
+     if(repValue){repValue.textContent=Number.isFinite(rep)?`+${rep}`:"—";repValue.className=Number.isFinite(rep)&&rep>0?"good":"";}
+     if(financeHealth){financeHealth.textContent=endCash>=0?tx("DENGELİ","STABLE","ESTABLE","STABIL","STABILE"):tx("BASKI","PRESSURE","PRESIÓN","DRUCK","PRESSIONE");financeHealth.className=endCash>=0?"good":"bad";}
+     if(standout){const player=typeof motm!=="undefined"&&motm?motm:"—";standout.textContent=player;standout.title=player;}
+     const labels={attack:$("resultAttackLabel"),chem:$("resultChemLabel"),finance:$("resultFinanceLabel"),rep:$("resultRepLabel"),health:$("resultFinanceHealthLabel"),standout:$("resultStandoutLabel")};
+     if(labels.attack)labels.attack.textContent=tx("Hücum","Attack","Ataque","Angriff","Attacco");
+     if(labels.chem)labels.chem.textContent=tx("Uyum","Chemistry","Química","Chemie","Intesa");
+     if(labels.finance)labels.finance.textContent=tx("Finans","Finance","Finanzas","Finanzen","Finanze");
+     if(labels.rep)labels.rep.textContent=tx("İtibar","Reputation","Reputación","Reputation","Reputazione");
+     if(labels.health)labels.health.textContent=tx("Finans sağlığı","Financial health","Salud financiera","Finanzlage","Salute finanziaria");
+     if(labels.standout)labels.standout.textContent=tx("Öne çıkan","Standout","Destacado","Herausragend","In evidenza");
+     const more=$("resultMoreLbl"),hubClose=$("resultHubClose"),isExpanded=root.classList.contains("is-expanded");
+     if(more)more.textContent=tx(isExpanded?"DATAHUB'I KAPAT":"DATAHUB",isExpanded?"CLOSE DATAHUB":"DATAHUB",isExpanded?"CERRAR DATAHUB":"DATAHUB",isExpanded?"DATAHUB SCHLIESSEN":"DATAHUB",isExpanded?"CHIUDI DATAHUB":"DATAHUB");
+     if(hubClose)hubClose.textContent=tx("KAPAT","CLOSE","CERRAR","SCHLIESSEN","CHIUDI");
+     const share=$("shareBtnLbl"),squad=$("squadResultLbl");if(share)share.textContent=tx("PAYLAŞ","SHARE","COMPARTIR","TEILEN","CONDIVIDI");if(squad)squad.textContent=tx("KADROYU İNCELE","REVIEW SQUAD","VER PLANTILLA","KADER ANSEHEN","VEDI ROSA");
+     const visibleRepLabel=$("lblRep");if(visibleRepLabel)visibleRepLabel.textContent=tx("Kulüp itibarı","Club reputation","Reputación del club","Club-Reputation","Reputazione del club");
+     const again=$("againBtn");if(again){again.innerHTML=`<span class="result-action-icon" aria-hidden="true">→</span><span id="againBtnLabel">${tx("YENİ TUR","NEW ROUND","NUEVA PARTIDA","NEUER RUN","NUOVO PERCORSO")}</span>`;again.setAttribute("aria-label",tx("Yeni tur başlat","Start a new run","Iniciar una nueva partida","Neuen Run starten","Avvia un nuovo percorso"));}
+   }
+   window.showResultSquad=function(){
+     const tr=LANG==="tr",tx=(a,b,c,d,e)=>typeof LT==="function"?LT(a,b,c,d,e):(tr?a:b),players=(typeof picksBySlot!=="undefined"?picksBySlot:[]).filter(Boolean).slice(0,11);
+     if(typeof showModal!=="function")return;
+     const rows=players.map((p,index)=>`<li><span class="result-squad-num">${String(index+1).padStart(2,"0")}</span><span><b>${escapeHtml(typeof shortName==="function"?shortName(p):p.name||"—")}</b><small>${escapeHtml(p.pos||"")}</small></span><strong>${typeof effOf==="function"?effOf(p):p.ov||"—"}</strong></li>`).join("");
+     showModal(`<div class="result-squad-modal"><div class="kithdr">${tx("KADROYU İNCELE","REVIEW SQUAD","VER PLANTILLA","KADER ANSEHEN","VEDI ROSA")}</div><div class="kitsub">${escapeHtml(tx("Bu turun sahaya çıkan çekirdeği.","The core XI behind this run.","El once que sostuvo este recorrido.","Die Kernelf dieses Runs.","L'undici che ha sostenuto il percorso."))}</div><ol class="result-squad-list">${rows||`<li><span>${tx("Kadro verisi hazır değil.","Squad data is not ready.","La plantilla no está lista.","Kaderdaten sind noch nicht bereit.","I dati della rosa non sono pronti.")}</span></li>`}</ol><div class="bact"><button class="btn btn-ghost" type="button" onclick="closeModal()">${tx("KAPAT","CLOSE","CERRAR","SCHLIESSEN","CHIUDI")}</button></div></div>`,{dismissOnOverlay:true,label:tx("Kadroyu incele","Review squad","Ver plantilla","Kader ansehen","Vedi rosa")});
+   };
+   renderResult=function(){baseRenderResult.apply(this,arguments);decorateResult(lastResult);};
+ })();
+ </script>
 </body></html>
