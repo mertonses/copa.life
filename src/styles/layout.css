@@ -7208,5 +7208,8 @@ body.reduced-motion .tactical-board-clock b,body.reduced-motion .tactical-attack
 #chairpick .chair-card .card-foot span{float:right;color:var(--color-primary);font-size:14px;line-height:8px}
 #chairpick .chair-card .chairbtn-check{top:7px;right:7px;width:20px;height:20px;font-size:11px;box-shadow:0 2px 5px rgba(10,17,24,.3)}
 #chairpick .chair-card.locked{opacity:.5;filter:grayscale(.55)}
+#chairpick .chair-card .card-copy::before,#chairpick .chair-card .card-copy::after{display:none!important;content:none!important}
+#chairpick .chair-card .card-copy>.card-foot{display:none!important}
+#chairpick .chair-card .chairbtn-name{display:inline-block!important;visibility:visible!important;opacity:1!important}
 @media(max-width:720px){#chairpick.chairpickrow{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;overflow:visible}.v7-setup-twocol #chairpick .chair-card .portrait{height:150px}.v7-setup-twocol #chairpick .chair-card .chairbtn-name{font-size:15px}.v7-setup-twocol #chairpick .chair-card .card-copy{padding:10px}.v7-setup-twocol #chairpick .chair-card .card-foot{padding:9px 10px}}
 @media(max-width:380px){#chairpick.chairpickrow{gap:7px}.v7-setup-twocol #chairpick .chair-card .portrait{height:132px}.v7-setup-twocol #chairpick .chair-card .chairbtn-name{font-size:13px}.v7-setup-twocol #chairpick .chair-card .chairbtn-role{font-size:7px}}
