@@ -25,6 +25,8 @@ async function assertSummary(page:Page,kind:string,title:string,score:string,fil
   await expect(page.locator("#result")).toHaveAttribute("data-result-kind",kind);
   await expect(page.locator("#rFinish")).toHaveText(title);
   await expect(page.locator("#rScore")).toHaveText(score);
+  await expect(page.locator("#resultFx")).toHaveCount(0);
+  await expect(page.locator("#resultStatusMark")).toHaveCount(0);
   await expect(page.locator("#resultActionCopy")).toBeVisible();
   await expect(page.locator("#resultDetails")).toHaveCount(0);
   const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth,board:document.querySelector("#result .scoreboard")!.getBoundingClientRect().height,stats:[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect().width)}));

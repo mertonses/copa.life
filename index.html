@@ -87,7 +87,7 @@ if("serviceWorker"in navigator){
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260818-settings-compact1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
@@ -385,9 +385,7 @@ if("serviceWorker"in navigator){
   <section id="result" class="result hidden">
     <div class="result-shell">
       <div class="result-hero scoreboard">
-        <div id="resultFx" class="result-fx" aria-hidden="true"></div>
         <div class="result-hero-copy"><div class="result-kicker" id="rLn">—</div><div class="result-title" id="rFinish">—</div><p class="result-subline" id="rRound">—</p><div class="result-context-line"><span class="result-outcome-badge" id="resultOutcomeBadge">ELENME</span><span id="resultClubContext">—</span></div></div>
-        <div class="result-status-mark" id="resultStatusMark" aria-hidden="true"></div>
         <div class="result-score-panel"><strong id="rScore">—</strong><small id="rScoreLabel">MAÇ SONUCU</small></div>
       </div>
        <div class="statline result-summary"><div class="stat"><div class="l" id="lblTur">Ulaşılan tur</div><div class="v" id="rTur">0</div><small class="stat-meta" id="rTurMeta">Sezon ilerlemesi</small></div><div class="stat"><div class="l" id="lblGuc">Kadro gücü</div><div class="v" id="rGuc">0</div><small class="stat-meta" id="rGucMeta">İlk 11 ortalaması</small></div><div class="stat"><div class="l" id="lblCash">Kulüp kasası</div><div class="v money" id="rCash">0</div><small class="stat-meta" id="rCashMeta">Sezon sonu</small></div><div class="stat"><div class="l" id="lblRep">Kulüp itibarı</div><div class="v" id="rRep">—</div><small class="stat-meta" id="rRepMeta">Bu sezonun etkisi</small></div></div>
@@ -4212,23 +4210,17 @@ function _finalTacticBench(benchIdx){
    const baseRenderResult=renderResult;
    const escapeHtml=value=>String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
    const clamp=(value,min=0,max=100)=>Math.max(min,Math.min(max,Math.round(Number(value)||0)));
-   const iconFor=kind=>kind==="champion"
-     ?`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 8h18v9c0 8-4 13-9 15-5-2-9-7-9-15V8Z"/><path d="M15 12H8v4c0 6 4 10 10 10M33 12h7v4c0 6-4 10-10 10M24 32v7M17 40h14"/></svg>`
-     :kind==="sacked"
-       ?`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 17h24v22H12zM18 17v-4h12v4M18 23h12M24 23v10M19 28h10"/><path d="M8 9l32 30"/></svg>`
-       :`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 10v28h28M18 29l6-7 5 4 9-13"/><path d="M31 13h7v7"/></svg>`;
    function decorateResult(r){
      const root=$("result"),kind=r&&r.endType==="sacked"?"sacked":r&&r.won?"champion":r&&r.endType==="group_eliminated"?"group-eliminated":"eliminated";
      root.dataset.resultKind=kind;
      const tr=LANG==="tr",tx=(a,b,c,d,e)=>typeof LT==="function"?LT(a,b,c,d,e):(tr?a:b),roundLabel=()=>{const x=L();return x.rounds&&x.rounds[Math.max(0,(r&&r.won?7:r&&r.round||1)-1)]||String(r&&r.round||"—")};
-     const score=$("rScore"),scoreLabel=$("rScoreLabel"),kicker=$("rLn"),title=$("rFinish"),copy=$("resultActionCopy"),mark=$("resultStatusMark"),x=L(),group=typeof resultGroupSummary==="function"?resultGroupSummary(r):null;
+     const score=$("rScore"),scoreLabel=$("rScoreLabel"),kicker=$("rLn"),title=$("rFinish"),copy=$("resultActionCopy"),x=L(),group=typeof resultGroupSummary==="function"?resultGroupSummary(r):null;
      const endCash=Number(r&&r.budgetAtEnd)||0,summary=r&&r.metaProgression||null,e=r&&r.econ||{};
      const titleText={champion:tx("ŞAMPİYON","CHAMPION","CAMPEÓN","SIEGER","CAMPIONE"),sacked:tx("KOVULDUN","SACKED","DESTITUIDO","ENTLASSEN","ESONERATO"),"group-eliminated":tx("GRUPTA ELENDİN","ELIMINATED IN THE GROUP","ELIMINADO EN EL GRUPO","IN DER GRUPPE AUSGESCHIEDEN","ELIMINATO NEL GIRONE"),eliminated:r&&r.score?tx("FİNALDE KAYBETTİN","LOST THE FINAL","PERDISTE LA FINAL","FINALE VERLOREN","FINALE PERSA"):tx("ELENDİN","ELIMINATED","ELIMINADO","AUSGESCHIEDEN","ELIMINATO")};
      const kickerText={champion:tx("TÜRKİYE ULUSAL KUPASI · FİNAL","NATIONAL CUP · FINAL","COPA NACIONAL · FINAL","NATIONALPOKAL · FINALE","COPPA NAZIONALE · FINALE"),sacked:tx("YÖNETİM KARARI · SEZON SONU","BOARD DECISION · SEASON END","DECISIÓN DIRECTIVA · FIN DE TEMPORADA","VORSTANDSBESCHLUSS · SAISONENDE","DECISIONE DEL CDA · FINE STAGIONE"),"group-eliminated":tx("TÜRKİYE ULUSAL KUPASI · GRUP AŞAMASI","NATIONAL CUP · GROUP STAGE","COPA NACIONAL · FASE DE GRUPOS","NATIONALPOKAL · GRUPPENPHASE","COPPA NAZIONALE · FASE A GIRONI"),eliminated:tx("TÜRKİYE ULUSAL KUPASI · SEZON SONU","NATIONAL CUP · SEASON END","COPA NACIONAL · FIN DE TEMPORADA","NATIONALPOKAL · SAISONENDE","COPPA NAZIONALE · FINE STAGIONE")};
      const actionText=kind==="champion"?tx("Kupa kulüp tarihine işlendi.","The cup is now part of club history.","La copa ya es parte de la historia del club.","Der Pokal ist jetzt Teil der Clubgeschichte.","La coppa entra nella storia del club."):kind==="sacked"?tx("Kasa baskısı yönetim kararını tetikledi.","Financial pressure triggered the board decision.","La presión financiera provocó la decisión de la directiva.","Finanzieller Druck löste die Vorstandsentscheidung aus.","La pressione finanziaria ha portato alla decisione del CDA."):kind==="group-eliminated"?tx("Grup aşaması kapandı; sonraki tur için yeni bir plan kur.","The group stage is over; build a new plan for the next run.","La fase de grupos terminó; prepara un nuevo plan para el próximo recorrido.","Die Gruppenphase ist vorbei; plane den nächsten Run neu.","La fase a gironi è chiusa; prepara il prossimo percorso."):r&&r.score?tx("Finale kadar geldin; kupa son adımda kaçtı.","You reached the final; the cup slipped away at the last step.","Llegaste a la final; la copa se escapó en el último paso.","Du hast das Finale erreicht; der Pokal entglitt im letzten Schritt.","Hai raggiunto la finale; la coppa è sfumata all'ultimo passo."):tx("Bu tur kaybolmadı; kulüp kariyerine işlendi.","This run was not lost; it is part of the club career.","Este recorrido no se perdió; ya forma parte de la carrera del club.","Dieser Run ist nicht verloren; er gehört jetzt zur Clubkarriere.","Questo percorso non è perso; ora fa parte della carriera del club.");
      if(kicker)kicker.textContent=kickerText[kind];
      if(title){title.textContent=titleText[kind];title.className="result-title "+(kind==="champion"?"gold":kind==="sacked"?"sacked-hdl":"acc");}
-     if(mark)mark.innerHTML=iconFor(kind);
      if(score)score.textContent=r&&r.score||"—";
      if(scoreLabel)scoreLabel.textContent=r&&r.score?tx("MAÇ SONUCU","MATCH RESULT","RESULTADO DEL PARTIDO","SPIELERGEBNIS","RISULTATO DELLA PARTITA"):tx("SEZON DURUMU","SEASON STATUS","ESTADO DE TEMPORADA","SAISONSTATUS","STATO DELLA STAGIONE");
      if(copy)copy.textContent=actionText;
