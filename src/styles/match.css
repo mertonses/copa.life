@@ -3627,7 +3627,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 #result.result .result-score-panel small{display:block;margin-top:8px;color:#8D9BA5;font:400 10px/1 "Arial Narrow",Arial,sans-serif;letter-spacing:1.2px;white-space:nowrap}
 #result.result .result-fx{opacity:.6}
 #result.result .verdict{display:none;margin:0;padding:0}
-#result.result:not(.is-expanded) .motm,#result.result:not(.is-expanded) .runUnlocks,#result.result:not(.is-expanded) .match-analysis-entry,#result.result:not(.is-expanded) .runCareerProgress,#result.result:not(.is-expanded) #finalRow,#result.result:not(.is-expanded) #lineups,#result.result:not(.is-expanded) .resultpatreon{display:none!important}
+#result.result:not(.is-expanded) .motm,#result.result:not(.is-expanded) .runUnlocks,#result.result:not(.is-expanded) .match-analysis-entry,#result.result:not(.is-expanded) #finalRow,#result.result:not(.is-expanded) #lineups,#result.result:not(.is-expanded) .resultpatreon{display:none!important}
 #result.result .statline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0;padding:20px 30px;border:0;border-left:1px solid #3A4750;border-right:1px solid #3A4750;border-radius:0;background:#172731}
 #result.result .statline .stat{min-height:0;padding:0 13px;border-left:2px solid #40515A}
 #result.result .statline .stat:first-child{border-left-color:#F24A28}
