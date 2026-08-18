@@ -4067,6 +4067,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   border-color:#F24A28;
   background:#F24A28;
   color:#0A1118;
+  margin:0!important;
 }
 #result.result .result-action-icon{
   display:inline-flex;
