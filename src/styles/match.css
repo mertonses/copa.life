@@ -2535,6 +2535,7 @@ html[data-theme="dark"] #result #statsBtn:hover{
   background:var(--surface-elevated)!important;
   border-color:var(--color-primary)!important;
 }
+html[data-theme="dark"] #result #shareCardBtn{background:transparent!important;color:#8D9BA5!important;border-color:#34434B!important}
 /* The shared ink token becomes light in dark mode. Pitch player cards must use
    a real dark surface instead, otherwise names and positions lose contrast. */
 html[data-theme="dark"] .scout-player-card{
@@ -4061,11 +4062,6 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   border-color:#34434B;
   background:transparent!important;
   color:#8D9BA5;
-}
-html[data-theme="dark"] #result.result .result-action-share{
-  background:transparent!important;
-  border-color:#34434B!important;
-  color:#8D9BA5!important;
 }
 #result.result .result-action-new,
 #result.result .result-actions #againBtn{
