@@ -58,5 +58,10 @@
     return result.ok?result.value:fallback;
   }
 
-  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,inspect,inspectUser,normalize,sanitize});
+  function sanitizeUser(value,fallback=""){
+    const result=inspectUser(value);
+    return result.ok?result.value:fallback;
+  }
+
+  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,inspect,inspectUser,normalize,sanitize,sanitizeUser});
 })(typeof window!=="undefined"?window:globalThis);

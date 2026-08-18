@@ -38,13 +38,62 @@ async function assertSummary(page:Page,kind:string,title:string,score:string,fil
 test("result states use the compact mockup summary hierarchy",async({page})=>{
   await boot(page);
   await page.evaluate(()=>{(globalThis as any).endRun(false,null,"knockout_eliminated");});
-  await assertSummary(page,"eliminated","ELENDİN","—",`${test.info().project.name}-eliminated.png`);
+  await assertSummary(page,"eliminated","ELENDİN","GRUP · 1. MAÇ",`${test.info().project.name}-eliminated.png`);
+  await page.locator("#resultMoreBtn").click();
+  await expect(page.locator("#resultDatahub")).toBeVisible();
+  await expect(page.locator("#resultDatahub .result-data-card[data-result-panel='summary']")).toBeVisible();
+  await expect(page.locator("#resultDatahub .result-data-card[data-result-panel='impact']")).toBeVisible();
+  if(test.info().project.name==="desktop-chromium")await page.screenshot({path:path.join(output,"desktop-chromium-datahub-summary.png"),fullPage:false});
+  await page.locator("#resultDatahub .result-data-tab[data-result-tab='performance']").click();
+  await expect(page.locator("#resultDatahub .result-data-card[data-result-panel='performance']")).toBeVisible();
+  await expect(page.locator("#resultDatahub .result-data-card[data-result-panel='summary']")).toBeHidden();
+  if(test.info().project.name==="desktop-chromium")await page.screenshot({path:path.join(output,"desktop-chromium-datahub-performance.png"),fullPage:false});
+  await page.locator("#resultMoreBtn").click();
+  await page.locator("#squadResultBtn").click();
+  await expect(page.locator(".result-squad-modal")).toBeVisible();
+  await expect(page.locator(".result-squad-player")).toHaveCount(11);
+  if(test.info().project.name==="desktop-chromium")await page.screenshot({path:path.join(output,"desktop-chromium-squad-modal.png"),fullPage:false});
+  await page.locator(".result-squad-modal .result-modal-close").click();
+  await page.locator("#shareCardBtn").click();
+  await expect(page.locator(".share-modal")).toBeVisible();
+  await expect(page.locator(".share-modal .share-status")).toHaveAttribute("role","status");
+  if(test.info().project.name==="desktop-chromium")await page.screenshot({path:path.join(output,"desktop-chromium-share-modal.png"),fullPage:false});
+  await page.locator(".share-modal .share-head button").click();
+  await page.locator("#againBtn").click();
+  await expect(page.locator(".result-new-run-confirm")).toBeVisible();
+  if(test.info().project.name==="desktop-chromium")await page.screenshot({path:path.join(output,"desktop-chromium-new-run-confirm.png"),fullPage:false});
+  await page.locator(".result-new-run-confirm .btn-ghost").click();
 
   await boot(page);
   await page.evaluate(()=>{(globalThis as any)._runSeedResultCheat("sacked");});
-  await assertSummary(page,"sacked","KOVULDUN","—",`${test.info().project.name}-sacked.png`);
+  await assertSummary(page,"sacked","KOVULDUN","KOVULMA",`${test.info().project.name}-sacked.png`);
 
   await boot(page);
   await page.evaluate(()=>{(globalThis as any).endRun(true,"2–1","champion");});
   await assertSummary(page,"champion","ŞAMPİYON","2–1",`${test.info().project.name}-champion.png`);
+});
+
+test("result surface stays readable across compact phone widths",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","mobile result width matrix");
+  for(const viewport of [{width:360,height:800},{width:390,height:844},{width:414,height:896},{width:430,height:932}]){
+    await page.setViewportSize(viewport);
+    await boot(page);
+    await page.evaluate(()=>{(globalThis as any).endRun(false,null,"knockout_eliminated");});
+    const layout=await page.evaluate(()=>{
+      const rect=(selector:string)=>document.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+      const title=rect("#rFinish"),score=rect("#rScore"),shell=rect("#result .result-shell");
+      return{
+        overflow:document.documentElement.scrollWidth-innerWidth,
+        shellInside:shell.left>=-1&&shell.right<=innerWidth+1,
+        heroHeight:document.querySelector<HTMLElement>("#result .result-hero")!.getBoundingClientRect().height,
+        titleScoreOverlap:!(title.right<=score.left||score.right<=title.left||title.bottom<=score.top||score.bottom<=title.top),
+        storyWidth:document.querySelector<HTMLElement>("#resultStoryTitle")!.getBoundingClientRect().width,
+      };
+    });
+    expect(layout.overflow,`${viewport.width}px overflow`).toBeLessThanOrEqual(1);
+    expect(layout.shellInside,`${viewport.width}px shell`).toBe(true);
+    expect(layout.heroHeight,`${viewport.width}px hero`).toBeGreaterThan(190);
+    expect(layout.titleScoreOverlap,`${viewport.width}px hero overlap`).toBe(false);
+    expect(layout.storyWidth,`${viewport.width}px story`).toBeGreaterThan(0);
+  }
 });
