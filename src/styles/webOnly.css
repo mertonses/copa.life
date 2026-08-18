@@ -13,13 +13,18 @@ html[data-copa-platform="web"] :is(button,[role="button"],a):focus-visible{
 }
 
 html[data-copa-platform="web"] #toastContainer{
-  top:84px;
+  top:80px;
   right:24px;
   bottom:auto;
 }
 
 html[data-copa-platform="web"] .toast{
   max-width:320px;
+  min-height:28px;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  font-size:11px;
   border:1px solid color-mix(in srgb,var(--color-primary) 38%,var(--border-default));
   border-left-width:4px;
   background:#101D28;

@@ -29,10 +29,13 @@ async function assertSummary(page:Page,kind:string,title:string,score:string,fil
   await expect(page.locator("#resultStatusMark")).toHaveCount(0);
   await expect(page.locator("#resultActionCopy")).toBeVisible();
   await expect(page.locator("#resultDetails")).toHaveCount(0);
-  const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth,board:document.querySelector("#result .scoreboard")!.getBoundingClientRect().height,stats:[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect().width)}));
+  const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth,board:document.querySelector("#result .scoreboard")!.getBoundingClientRect().height,stats:[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect().width),actions:[...document.querySelectorAll<HTMLElement>("#result .result-actions .result-action")].map(node=>{const box=node.getBoundingClientRect();return{width:Math.round(box.width),height:Math.round(box.height)}})}));
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.board).toBeGreaterThan(100);
   expect(layout.stats).toHaveLength(4);
+  expect(new Set(layout.actions.map(item=>item.width)).size).toBe(1);
+  expect(new Set(layout.actions.map(item=>item.height)).size).toBe(1);
+  expect(layout.actions[0].height).toBe(50);
   fs.mkdirSync(output,{recursive:true});
   await page.screenshot({path:path.join(output,file),fullPage:false});
 }
