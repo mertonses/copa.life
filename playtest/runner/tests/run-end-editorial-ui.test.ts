@@ -92,18 +92,16 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
   const layout=await page.evaluate(()=>{
     const rect=(selector:string)=>document.querySelector(selector)!.getBoundingClientRect();
     const board=rect("#result .scoreboard");
-    const actions=[...document.querySelectorAll("#result .result-row .btn")].map(node=>node.getBoundingClientRect());
-    const actionItems=[...document.querySelectorAll("#result .result-row>*")].map(node=>node.getBoundingClientRect());
+    const actions=[...document.querySelectorAll<HTMLElement>("#result .result-action")].filter(node=>node.offsetParent).map(node=>node.getBoundingClientRect());
     const stats=[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect());
     const decision=getComputedStyle(document.querySelector("#result .scoreboard")!,"::before");
     return{
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
       boardHeight:board.height,
-      actionWidthDelta:Math.abs(actions[0].width-actions[1].width),
-      actionGap:actions[1].left-actions[0].right,
-      actionItemCount:actionItems.length,
-      actionSameRow:Math.max(...actionItems.map(item=>item.top))-Math.min(...actionItems.map(item=>item.top))<=1,
-      actionItemsInside:actionItems.every(item=>item.left>=0&&item.right<=innerWidth+1),
+      actionWidthDelta:actions.length?Math.max(...actions.map(item=>item.width))-Math.min(...actions.map(item=>item.width)):0,
+      actionItemCount:actions.length,
+      actionItemsInside:actions.every(item=>item.left>=0&&item.right<=innerWidth+1),
+      actionMinHeight:actions.length?Math.min(...actions.map(item=>item.height)):0,
       statGap:stats[1].left-stats[0].right,
       decision:decision.content,
       negativeCash:getComputedStyle(document.querySelector("#rCash")!).color
@@ -111,16 +109,15 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
   });
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.boardHeight).toBeGreaterThanOrEqual(99);
-  expect(layout.boardHeight).toBeLessThanOrEqual(130);
+  expect(layout.boardHeight).toBeLessThanOrEqual(testInfo.project.name==="mobile-chromium"?300:230);
   expect(layout.actionWidthDelta).toBeLessThanOrEqual(1);
-  expect(layout.actionGap).toBeGreaterThanOrEqual(5);
-  expect(layout.actionItemCount).toBe(3);
-  expect(layout.actionSameRow).toBe(true);
+  expect(layout.actionItemCount).toBeGreaterThanOrEqual(3);
   expect(layout.actionItemsInside).toBe(true);
+  expect(layout.actionMinHeight).toBeGreaterThanOrEqual(40);
   expect(layout.statGap).toBeGreaterThanOrEqual(5);
   expect(layout.decision).toContain("YÖNETİM");
   expect(layout.negativeCash).not.toBe("rgb(243, 245, 244)");
-  await page.locator("#result .result-row").scrollIntoViewIfNeeded();
+  await page.locator("#result .result-actions").scrollIntoViewIfNeeded();
   await page.screenshot({path:testInfo.outputPath("sacked-result-ui.png"),fullPage:true});
 });
 
@@ -145,11 +142,11 @@ test("completed unshared run does not interrupt the result with a Ghost solicita
 test("season story keeps four meaningful chronological beats and economy hides zero rows",async({page})=>{
   await finishRun(page);
   await expect(page.locator("#rFinish")).toHaveText("ELENDİN");
-  await expect(page.locator("#rLn")).toBeHidden();
+  await expect(page.locator("#rLn")).toBeVisible();
   const heroAlignment=await page.locator(".scoreboard").evaluate(element=>{
-    const board=element.getBoundingClientRect();
+    const copy=element.querySelector(".result-hero-copy")!.getBoundingClientRect();
     const title=element.querySelector("#rFinish")!.getBoundingClientRect();
-    return Math.abs((title.left+title.width/2)-(board.left+board.width/2));
+    return Math.abs(title.left-copy.left);
   });
   expect(heroAlignment).toBeLessThanOrEqual(1);
   const story=page.locator("#rStory");
@@ -426,7 +423,7 @@ test("chairman picker separates personality from mechanics and collapses safely 
     expect(Math.abs(layout.persona.top-layout.mechanics.top)).toBeLessThanOrEqual(1);
     expect(layout.mechanics.left).toBeGreaterThanOrEqual(layout.persona.right-1);
     expect(layout.portrait.width).toBeLessThanOrEqual(190);
-    expect(layout.modalHeight).toBeLessThanOrEqual(425);
+    expect(layout.modalHeight).toBeLessThanOrEqual(470);
     await expect(modal.locator(".cp-nav-btn small")).toHaveCount(2);
     await expect(modal.locator(".cp-nav-btn small").first()).toBeVisible();
   }

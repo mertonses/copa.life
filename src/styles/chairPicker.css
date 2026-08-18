@@ -94,7 +94,7 @@ html[data-theme="dark"] .chair-picker-modal .cp-contract-row{background:color-mi
 
 /* Premium chairman profile card */
 .chair-picker-modal .cp-persona{background:linear-gradient(160deg,var(--surface-muted),var(--surface-elevated));padding:22px 20px 18px}
-.chair-picker-modal .cp-portrait-frame{width:min(100%,204px);border-radius:8px;box-shadow:0 14px 28px rgba(10,17,24,.18)}
+.chair-picker-modal .cp-portrait-frame{width:min(100%,188px);border-radius:8px;box-shadow:0 14px 28px rgba(10,17,24,.18)}
 .chair-picker-modal .chairpopup-name{font-size:24px;letter-spacing:-.035em}
 .chair-picker-modal .cp-persona-role{color:var(--status-critical)}
 .chair-picker-modal .chairpopup-desc{margin-top:12px;color:var(--text-secondary);font-size:11.5px;line-height:1.5}

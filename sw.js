@@ -13,7 +13,6 @@ const PRECACHE = [
   "/src/styles/cards.css",
   "/src/styles/match.css",
   "/src/styles/matchAnalysis.css",
-  "/src/styles/finalReplay.css",
   "/src/styles/mobileExperience.css",
   "/src/styles/faq.css",
   "/src/styles/tournament.css",
@@ -68,7 +67,6 @@ const PRECACHE = [
   "/src/tournament/tournamentRuntime.js",
   "/src/tournament/matchResolver.js",
   "/src/runtime/lazyAssets.js",
-  "/src/runtime/finalReplay.js",
   "/src/state/metaProgression.js",
   "/src/ui/hub.js",
   "/src/ui/playerProfiles.js",
@@ -122,6 +120,44 @@ self.addEventListener("activate", e => {
     await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
     await self.clients.claim();
   })());
+});
+
+function notificationPayload(data) {
+  const value = data && typeof data === "object" ? data : {};
+  return {
+    title: String(value.title || "Copa Life"),
+    body: String(value.body || ""),
+    tag: String(value.tag || value.id || "copa-life-notification"),
+    data: value.data && typeof value.data === "object" ? value.data : {},
+    icon: "/web-app-icon-192.png",
+    badge: "/web-app-icon-192.png",
+    renotify: false,
+  };
+}
+
+self.addEventListener("push", event => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : "" }; }
+  event.waitUntil(self.registration.showNotification(notificationPayload(data).title, notificationPayload(data)));
+});
+
+self.addEventListener("message", event => {
+  const value = event.data || {};
+  if (value.type !== "copa:show-local-notification") return;
+  const notification = notificationPayload(value.notification);
+  event.waitUntil(self.registration.showNotification(notification.title, notification));
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const deepLink = event.notification && event.notification.data && event.notification.data.deepLink;
+  const target = new URL("/index.html", self.location.origin);
+  if (deepLink) target.searchParams.set("copa-deep-link", deepLink);
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(clients => {
+    const existing = clients.find(client => "focus" in client);
+    if (existing) { if ("navigate" in existing && existing.url !== target.href) existing.navigate(target.href); return existing.focus(); }
+    return self.clients.openWindow(target.href);
+  }));
 });
 
 self.addEventListener("fetch", e => {
