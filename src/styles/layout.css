@@ -7216,11 +7216,18 @@ body.reduced-motion .tactical-board-clock b,body.reduced-motion .tactical-attack
 @media(max-width:380px){#chairpick.chairpickrow{gap:7px}.v7-setup-twocol #chairpick .chair-card .portrait{height:132px}.v7-setup-twocol #chairpick .chair-card .chairbtn-name{font-size:13px}.v7-setup-twocol #chairpick .chair-card .chairbtn-role{font-size:7px}}
 
 /* Final chairman-card guard: the mockup has one compact footer per card. */
-#chairpick .chair-card{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+#chairpick .chair-card{display:flex!important;flex-direction:column!important;align-items:stretch!important;height:auto!important;min-height:238px!important}
+html:not(.copa-mobile-game) #chairpick .chair-card.mobile-chair-card{display:flex!important;grid-template-rows:none!important;height:auto!important;min-height:238px!important;overflow:hidden!important}
+html.copa-mobile-game #chairpick .chair-card.mobile-chair-card{display:flex!important;grid-template-rows:none!important;height:auto!important;min-height:220px!important;overflow:hidden!important}
+html.copa-mobile-game #chairpick .chair-card.mobile-chair-card .portrait{height:116px!important;flex:0 0 116px!important}
+html.copa-mobile-game #chairpick .chair-card.mobile-chair-card .chairthumb{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;background:transparent!important}
 #chairpick .chair-card>.portrait{flex:0 0 auto!important}
-#chairpick .chair-card>.card-copy{flex:0 0 auto!important;min-height:0!important}
-#chairpick .chair-card>.card-foot{display:flex!important;align-items:center!important;justify-content:space-between!important;flex:0 0 auto!important;margin-top:auto!important}
+#chairpick .chair-card>.card-copy{flex:0 0 auto!important;height:auto!important;min-height:58px!important;overflow:visible!important;box-sizing:border-box!important}
+#chairpick .chair-card>.card-copy .chairbtn-role{display:block!important;visibility:visible!important;opacity:1!important;min-height:10px!important;color:#AEB8BA!important}
+#chairpick .chair-card>.card-foot{display:flex!important;align-items:center!important;justify-content:space-between!important;flex:0 0 auto!important;margin-top:0!important;min-height:32px!important}
 #chairpick .chair-card>.card-copy .card-foot,
 #chairpick .chair-card>.card-foot~.card-foot,
+#chairpick .chair-card .chair-detail-link,
+html:not(.copa-mobile-game) #chairpick .chair-card .chair-detail-link,
 #chairpick .chair-card .chairbtnlbl,
 #chairpick .chair-card .chairbtn-name+ .card-foot{display:none!important}
