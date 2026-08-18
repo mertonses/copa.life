@@ -89,7 +89,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260727-balance-cleanup1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260818-chair-cards1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260817-karaborsa1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260818-result-compact1">
@@ -4138,5 +4138,12 @@ function _finalTacticBench(benchIdx){
  </div>
   <span class="rights-note">Copa Life, bağımsız bir futbol yönetim oyunudur.</span>
 </div>
+<script>
+(function(){
+  window.buildChairButtons=function(){const cp=$("chairpick");if(!cp)return;const x=L();cp.innerHTML="";const lock=`<svg class="chairbtn-lockico" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3V7a5 5 0 0 1 5-5m0 12a2 2 0 1 0 0 4 2 2 0 0 0-0-4m0-10a3 3 0 0 0-3 3v3h6V7a3 3 0 0 0-3-3"/></svg>`;CHAIRMEN.forEach(c=>{const lk=!unlockedChairs.includes(c.id),sel=selectedChairId===c.id,m=_masteryDisplay("chairmen",c.id),cd=x.chair&&x.chair[c.id]||{},name=cd.n||c.id,b=document.createElement("button");b.className="fbtn chairbtn chair-card"+(lk?" locked":"")+(sel?" sel":"");b.dataset.chairId=c.id;b.setAttribute("aria-selected",sel?"true":"false");b.setAttribute("aria-label",m?`${name}, ${m.tooltip}`:name);if(m)b.title=m.tooltip;const badge=m?`<span class="setup-mastery tier-${m.tier}" title="${m.tooltip}" aria-hidden="true"><span class="mastery-star">★</span>${m.count}</span>`:"";b.innerHTML=`<div class="portrait"><img src="${chairSrc(c.id)}" class="chairthumb" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'"></div>${sel?'<span class="chairbtn-check" aria-hidden="true">✓</span>':''}<span class="card-copy"><span class="chair-name-row"><span class="chairbtn-name-wrap"><span class="chairbtn-name" title="${name}">${chairShortLabel(c.id)}</span>${badge}</span></span><span class="chairbtn-role">${cd.role||""}</span></span><span class="card-foot">${LT("DETAY","DETAILS","DETALLES","DETAILS","DETTAGLI")} <span aria-hidden="true">→</span></span>${lk?`<div class="chairbtn-lockover">${lock}</div>`:""}`;b.onclick=lk?()=>_chairLockedFlash(b):()=>pickChair(c.id);cp.appendChild(b)});const ch=$("chairhdr");if(ch)ch.textContent=LT("Başkanını seç","Pick your chairman","Elige presidente","Präsident wählen","Scegli il presidente");_updateIntroSummary()};
+  buildChairButtons();
+  const _endRun=window.endRun; if(typeof _endRun==="function")window.endRun=function(won,score,endType){_endRun.apply(this,arguments);const r=$("result");if(r)r.classList.toggle("is-loss",!won||endType==="sacked")};
+})();
+</script>
 <script>function toggleResultDetails(){const root=document.getElementById("result"),open=root.classList.toggle("is-expanded"),lbl=document.getElementById("resultMoreLbl"),btn=document.getElementById("resultMoreBtn");if(lbl)lbl.textContent=open?(typeof LT==="function"?LT("ÖZETİ KAPAT","COLLAPSE SUMMARY","CERRAR RESUMEN","ZUSAMMENFASSUNG SCHLIESSEN","CHIUDI RIEPILOGO"):"ÖZETİ KAPAT"):(typeof LT==="function"?LT("İLERİ","NEXT","SIGUIENTE","WEITER","AVANTI"):"İLERİ");if(btn)btn.setAttribute("aria-expanded",String(open));if(open)root.scrollIntoView({behavior:"smooth",block:"start"});}</script>
 </body></html>

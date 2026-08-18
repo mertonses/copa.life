@@ -7190,3 +7190,23 @@ body.reduced-motion .tactical-board-clock b,body.reduced-motion .tactical-attack
   #hub .pitch-area #hubBenchSection .bench-panel-grip{display:none}
 }
 .settingsdrop.global-settings-open{position:fixed!important;z-index:2147483646!important;left:var(--settings-left)!important;right:auto!important;top:var(--settings-top)!important;max-height:min(620px,calc(100dvh - var(--settings-top) - 10px));overflow:auto;overscroll-behavior:contain}
+
+/* Chairman selection cards share the mockup's premium card anatomy. */
+#chairpick.chairpickrow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;overflow:visible;padding-bottom:4px}
+#chairpick .chair-card{display:flex;flex-direction:column;align-items:stretch;min-width:0;max-width:none;min-height:0;padding:0;border:1px solid var(--border-default);border-radius:8px;overflow:hidden;background:linear-gradient(150deg,var(--surface-elevated),var(--surface-bg));text-align:left;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+#chairpick .chair-card:hover:not(.locked):not(.sel){transform:translateY(-4px);border-color:var(--color-primary);box-shadow:0 12px 24px rgba(10,17,24,.18)}
+#chairpick .chair-card.sel{border:2px solid var(--color-primary);transform:translateY(-3px);box-shadow:0 12px 26px rgba(242,74,40,.18)}
+#chairpick .chair-card .portrait{position:relative;height:clamp(120px,10vw,190px);overflow:hidden;background:var(--surface-muted)}
+#chairpick .chair-card .chairthumb{width:100%;height:100%;aspect-ratio:auto;object-fit:cover;object-position:center top;margin:0;border-radius:0;background:transparent}
+#chairpick .chair-card .card-copy{display:block;min-width:0;padding:12px 12px 10px;background:var(--surface-elevated)}
+#chairpick .chair-card .chair-name-row{display:flex;align-items:center;justify-content:flex-start;gap:7px;min-height:0;padding:0;background:transparent;border:0}
+#chairpick .chair-card .chairbtn-name-wrap{display:flex;align-items:center;gap:7px;min-width:0}
+#chairpick .chair-card .chairbtn-name{width:auto;min-width:0;padding:0;background:transparent;border:0;color:var(--color-ink);font:850 17px/1.1 var(--disp);letter-spacing:-.02em;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chairpick .chair-card .chairbtn-role{display:block;margin-top:7px;color:var(--color-slate);font:800 8px/1.2 var(--mono);letter-spacing:1.25px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chairpick .chair-card .setup-mastery{position:static;display:inline-flex;flex:0 0 auto;transform:none;margin:0;padding:3px 6px;border:1px solid currentColor;border-radius:999px;background:transparent;font-size:9px}
+#chairpick .chair-card .card-foot{display:block;margin-top:auto;padding:10px 12px;border-top:1px solid var(--border-subtle);background:var(--surface-bg);color:var(--color-ink);font:850 9px/1 var(--mono);letter-spacing:1.2px}
+#chairpick .chair-card .card-foot span{float:right;color:var(--color-primary);font-size:14px;line-height:8px}
+#chairpick .chair-card .chairbtn-check{top:7px;right:7px;width:20px;height:20px;font-size:11px;box-shadow:0 2px 5px rgba(10,17,24,.3)}
+#chairpick .chair-card.locked{opacity:.5;filter:grayscale(.55)}
+@media(max-width:720px){#chairpick.chairpickrow{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;overflow:visible}.v7-setup-twocol #chairpick .chair-card .portrait{height:150px}.v7-setup-twocol #chairpick .chair-card .chairbtn-name{font-size:15px}.v7-setup-twocol #chairpick .chair-card .card-copy{padding:10px}.v7-setup-twocol #chairpick .chair-card .card-foot{padding:9px 10px}}
+@media(max-width:380px){#chairpick.chairpickrow{gap:7px}.v7-setup-twocol #chairpick .chair-card .portrait{height:132px}.v7-setup-twocol #chairpick .chair-card .chairbtn-name{font-size:13px}.v7-setup-twocol #chairpick .chair-card .chairbtn-role{font-size:7px}}
