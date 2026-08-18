@@ -47,6 +47,8 @@ test("chairman cards match the compact premium reference",async({page},testInfo)
     };
   }));
   expect(layout.every(card=>card.imageHeight>100&&card.copyHeight>30&&card.footerCount===1&&card.legacyDetails===0&&card.name&&card.role&&card.roleRect.height>0&&card.roleRect.display!=="none"&&/^(DETAY|DETAILS) →$/.test(card.detail||"")&&card.overflow<=1),JSON.stringify(layout)).toBe(true);
+  const expectedImageHeight=testInfo.project.name.includes("mobile")?150:205;
+  expect(layout.every(card=>Math.abs(card.imageHeight-expectedImageHeight)<=1),JSON.stringify(layout)).toBe(true);
   expect(Math.max(...layout.map(card=>card.bottom-card.top))-Math.min(...layout.map(card=>card.bottom-card.top))).toBeLessThanOrEqual(2);
   const rows=[...new Set(layout.map(card=>Math.round(card.top)))].map(top=>layout.filter(card=>Math.abs(card.top-top)<=2).sort((a,b)=>a.left-b.left));
   expect(rows.every(row=>row.slice(1).every((card,index)=>card.left>=row[index].right-1))).toBe(true);
@@ -54,4 +56,11 @@ test("chairman cards match the compact premium reference",async({page},testInfo)
 
   fs.mkdirSync(output,{recursive:true});
   await page.screenshot({path:path.join(output,`${testInfo.project.name}.png`),fullPage:false});
+
+  // Mockup behavior parity: opening a card must produce the profile-card flow,
+  // while retaining the selection state in the game.
+  await cards.first().click();
+  await expect(page.locator(".chair-picker-modal")).toBeVisible();
+  await expect(page.locator(".chair-picker-modal .chairpopup-name")).toContainText("Patron");
+  await page.screenshot({path:path.join(output,`profile-${testInfo.project.name}.png`),fullPage:false});
 });
