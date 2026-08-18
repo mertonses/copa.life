@@ -102,24 +102,28 @@ function normalizeAnalyticsEvent(value){
   const visitorKey=String(value.visitor_key||"");if(!/^[a-z0-9]{16,64}$/.test(visitorKey))return null;
   return {event,platform,locale,gameCountry,outcome,detail,round,pagePath,appVersion,schemaVersion,modelVersion,powerGap,endType,tactic,chairman,formation,style,reward,cardKind,economyBand,tournamentStage,drawMode,qualification,groupMatchday,sidefieldPick,confidence,stakeBand,visitorKey};
 }
+function analyticsVisitorFingerprint(value){
+  const token=String(value||"").slice(0,13);
+  return /^[a-z0-9]{13}$/.test(token)?Number.parseInt(token,16):0;
+}
 
 async function handleAnalytics(request,env){
   if(env.PRODUCT_ANALYTICS_LIMITER){const outcome=await env.PRODUCT_ANALYTICS_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
   let body;try{body=await readJsonLimited(request,4096);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
   const event=normalizeAnalyticsEvent(body);if(!event)return json(request,env,{error:"invalid_analytics_event"},422);
   if(!env.PRODUCT_ANALYTICS)return json(request,env,{error:"analytics_unavailable"},503);
-  /* copa_life_product_events: blob1..21 below; blob21 is a daily rotating,
-     random client token for aggregate DAU/WAU only. It is not an account or
-     install identity and is never written as an Analytics Engine index. */
+  /* Analytics Engine accepts twenty blobs. Keep the daily rotating random
+     visitor token as a coarse numeric fingerprint in double4 so the event
+     dimensions stay intact. It is not written as an Analytics Engine index,
+     and DAU/WAU queries remain schema-compatible. */
   env.PRODUCT_ANALYTICS.writeDataPoint({
     blobs:[
       event.event,event.platform,event.locale,event.gameCountry,event.outcome,event.detail,event.pagePath,event.appVersion,
       event.modelVersion||"",event.powerGap||"",event.endType||"",event.tactic||"",String(event.schemaVersion||1),
       event.chairman||"",event.formation||"",event.style||"",event.reward||"",event.cardKind||"",event.economyBand||"",
-      [event.tournamentStage||"",event.drawMode||"",event.qualification||"",event.sidefieldPick||"",event.confidence||"",event.stakeBand||""].join("|"),
-      event.visitorKey||""
+      [event.tournamentStage||"",event.drawMode||"",event.qualification||"",event.sidefieldPick||"",event.confidence||"",event.stakeBand||"",String(event.groupMatchday||0)].join("|")
     ],
-    doubles:[1,event.round,event.schemaVersion||1,event.groupMatchday||0]
+    doubles:[1,event.round,event.schemaVersion||1,analyticsVisitorFingerprint(event.visitorKey)]
   });
   const responseHeaders=headers(request,env);delete responseHeaders["content-type"];
   return new Response(null,{status:204,headers:responseHeaders});
@@ -483,4 +487,4 @@ export default {
   async scheduled(controller,env){await purgeExpired(env,new Date(controller.scheduledTime));}
 };
 
-export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket};
+export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,analyticsVisitorFingerprint,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket};

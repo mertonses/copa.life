@@ -51,7 +51,7 @@ for(const dimension of ["sidefield_pick","confidence","stake_band"]){
 }
 expect(runtime.includes("Math.min(7"),"analytics round contract must include the final");
 expect(!runtime.includes("seed")&&!runtime.includes("replay"),"final analytics must not transmit a seed or replay code");
-expect(worker.includes("daily rotating")&&worker.includes("never written as an Analytics Engine index"),"Analytics Engine privacy schema is not documented in code");
+expect(worker.includes("daily rotating")&&worker.includes("not written as an Analytics Engine index"),"Analytics Engine privacy schema is not documented in code");
 expect(workerConfig.includes('"binding": "PRODUCT_ANALYTICS"')&&workerConfig.includes('"dataset": "copa_life_product_events"'),"production Analytics Engine binding is missing");
 expect(stagingConfig.includes('"dataset": "copa_life_product_events_staging"'),"staging analytics dataset is not isolated");
 expect(workerConfig.includes('"binding": "WORKER_ANALYTICS"')&&workerConfig.includes('"dataset": "copa_life_worker_health"'),"production Worker health analytics binding is missing");
@@ -59,7 +59,7 @@ expect(stagingConfig.includes('"dataset": "copa_life_worker_health_staging"'),"s
 expect(worker.includes("routeBucket(url.pathname)")&&worker.includes('return "not_found"'),"Worker metrics do not use a fixed privacy-safe route bucket");
 expect(!worker.includes("writeDataPoint({indexes"),"Analytics Engine metrics must not write an identifier index");
 expect(reportWorkflow.includes("CLOUDFLARE_ANALYTICS_TOKEN")&&reportScript.includes("_sample_interval"),"weekly sampled KPI report is missing");
-expect(reportScript.includes("COUNT(DISTINCT blob21)")&&reportScript.includes("daily_active"),"daily active visitor report is missing");
+expect(reportScript.includes("COUNT(DISTINCT double4)")&&reportScript.includes("daily_active"),"daily active visitor report is missing");
 expect(reportScript.includes("blob14 AS chairman")&&reportScript.includes("blob17 AS reward"),"weekly balance decision report is missing");
 expect(reportScript.includes("blob20 AS dimensions")&&reportScript.includes("side_field:"),"weekly Yan Saha report is missing");
 expect(reportScript.includes("chairman_outcomes")&&reportScript.includes("blob5 AS outcome"),"weekly chairman outcome report is missing");

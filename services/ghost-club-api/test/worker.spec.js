@@ -1,6 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, detectSchemaVersion, purgeExpired, routeBucket, validHistory } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, analyticsVisitorFingerprint, detectSchemaVersion, purgeExpired, routeBucket, validHistory } from "../src/index.js";
 
 const origin="https://copa.life";
 const formation442=["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"];
@@ -195,6 +195,8 @@ describe("Ghost Club Worker",()=>{
     expect(normalizeAnalyticsEvent({...sideFieldEvent,stake_band:"m99"})).toBeNull();
     const activeEvent={...sideFieldEvent,schema_version:6,visitor_key:"0123456789abcdef0123456789abcdef"};
     expect(normalizeAnalyticsEvent(activeEvent)).toMatchObject({schemaVersion:6,visitorKey:activeEvent.visitor_key});
+    expect(analyticsVisitorFingerprint(activeEvent.visitor_key)).toBe(Number.parseInt("0123456789abc",16));
+    expect(analyticsVisitorFingerprint("not-a-daily-token")).toBe(0);
     expect(normalizeAnalyticsEvent({...activeEvent,visitor_key:"not-a-daily-token"})).toBeNull();
     expect(normalizeAnalyticsEvent({...finalEvent,seed:"never-store",power_gap:"exact_7"})).toBeNull();
   });

@@ -11,12 +11,12 @@ const [funnel,activeDay,activeWeek,countries,profileErrors,worker,workerRoutes,f
     AND blob1 IN ('${eventOrder.join("','")}')
   GROUP BY event
 `),queryAnalytics(`
-  SELECT COUNT(DISTINCT blob21) AS daily_active
+  SELECT COUNT(DISTINCT double4) AS daily_active
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '1' DAY
     AND blob1 = 'session_started'
 `),queryAnalytics(`
-  SELECT COUNT(DISTINCT blob21) AS weekly_active
+  SELECT COUNT(DISTINCT double4) AS weekly_active
   FROM copa_life_product_events
   WHERE timestamp >= NOW() - INTERVAL '7' DAY
     AND blob1 = 'session_started'
