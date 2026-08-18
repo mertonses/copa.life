@@ -117,8 +117,6 @@ test("packaged Android UI keeps structural and contextual surfaces opaque",async
       "#freeAgentRow .free-agent-card",
       "#freeAgentRow .free-agent-card .ct-head",
       "#freeAgentRow .free-agent-impact span",
-      "#freeAgentRow .free-agent-actions",
-      "#freeAgentRow .free-agent-actions button",
     ];
     return selectors.map(selector=>{
       const style=getComputedStyle(document.querySelector<HTMLElement>(selector)!);
@@ -127,7 +125,7 @@ test("packaged Android UI keeps structural and contextual surfaces opaque",async
   });
   expect(marketSurfaces.every(surface=>alpha(surface.color)===1)).toBe(true);
   expect(marketSurfaces.every(surface=>surface.border!=="rgba(0, 0, 0, 0)")).toBe(true);
-  expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
+  await expect(page.locator("#freeAgentRow .free-agent-review")).toHaveCount(0);
   await page.screenshot({path:path.join(visualDir,"android-market-opaque-surfaces.png"),fullPage:true});
   await page.locator('#nativeHubNav [data-native-target="match"]').click();
   await page.locator("#kasaTile").click();

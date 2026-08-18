@@ -663,8 +663,8 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   await expect(page.locator("#freeAgentRow")).not.toContainText(/KASA SONRASI|CASH AFTER/i);
   await capture(page,"03h-compact-market.png");
   await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
-  expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
-  await page.locator("#freeAgentRow .free-agent-review").first().click();
+  await expect(page.locator("#freeAgentRow .free-agent-review")).toHaveCount(0);
+  await page.locator("#freeAgentRow .free-agent-card").first().click();
   await expect(page.locator(".free-agent-detail")).toBeVisible();
   await expect(page.locator(".free-agent-versus")).toBeVisible();
   await expect(page.locator(".free-agent-versus article")).toHaveCount(2);
@@ -779,20 +779,18 @@ test("market identity, free-agent comparison and relationship sheet stay compact
   await expect(page.locator("#marketDecisionHeader .market-condition small")).toBeVisible();
   await expect(page.locator("#marketDecisionHeader .market-money span")).toHaveCount(2);
   await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
-  expect(await page.locator("#freeAgentRow .free-agent-actions").evaluateAll(rows=>rows.every(row=>row.querySelectorAll("button").length===1))).toBe(true);
+  await expect(page.locator("#freeAgentRow .free-agent-review")).toHaveCount(0);
   const marketSurfaces=await page.evaluate(()=>{
     const style=(selector:string)=>getComputedStyle(document.querySelector<HTMLElement>(selector)!);
     const card=style("#freeAgentRow .free-agent-card");
     const head=style("#freeAgentRow .free-agent-card .ct-head");
     const impact=style("#freeAgentRow .free-agent-impact span");
-    const actions=style("#freeAgentRow .free-agent-actions");
     const cash=style("#marketDecisionHeader .market-cash-panel");
     return{
       cardBackground:card.backgroundColor,
       cardBorder:card.borderLeftStyle,
       headBackground:head.backgroundColor,
       impactBackground:impact.backgroundColor,
-      actionsBackground:actions.backgroundColor,
       cashBackground:cash.backgroundColor,
     };
   });
@@ -801,7 +799,7 @@ test("market identity, free-agent comparison and relationship sheet stay compact
     else expect(value,`${surface} must be opaque`).not.toBe("rgba(0, 0, 0, 0)");
   }
   await capture(page,"06-market-opaque-surfaces.png");
-  await page.locator("#freeAgentRow .free-agent-review").first().click();
+  await page.locator("#freeAgentRow .free-agent-card").first().click();
   await expect(page.locator(".free-agent-detail")).toBeVisible();
   await expect(page.locator(".free-agent-versus article")).toHaveCount(2);
   await expectSurfaceFit(page,".free-agent-detail");
