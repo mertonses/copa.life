@@ -4029,3 +4029,66 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   #result.result .result-hero{grid-template-columns:1fr;gap:0}
   #result.result .result-score-panel{min-width:0;width:100%;padding-left:0}
 }
+
+/* Final CTA hierarchy: one primary action, equal geometry, quiet utilities. */
+#result.result .result-actions{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+#result.result .result-actions .result-action{
+  width:100%!important;
+  height:50px;
+  min-height:50px;
+  box-sizing:border-box;
+  padding:0 12px;
+  border-radius:5px;
+}
+#result.result .result-action-squad{
+  order:1!important;
+  border-color:#52616A;
+  background:#12232F;
+  color:#F3F5F4;
+}
+#result.result .result-action-data{
+  order:2!important;
+  border-color:#34434B;
+  background:#12232F;
+  color:#C4CCCD;
+}
+#result.result .result-action-share{
+  order:3!important;
+  border-color:#34434B;
+  background:transparent!important;
+  color:#8D9BA5;
+}
+#result.result .result-action-new,
+#result.result .result-actions #againBtn{
+  order:4!important;
+  border-color:#F24A28;
+  background:#F24A28;
+  color:#0A1118;
+}
+#result.result .result-action-icon{
+  display:inline-flex;
+  flex:0 0 16px;
+  width:16px;
+  align-items:center;
+  justify-content:center;
+}
+#result.result .result-action-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#result.result .result-datahub[data-result-tab="performance"] .result-data-card{
+  min-height:124px;
+}
+@media(max-width:720px){
+  #result.result .result-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #result.result .result-action-new{
+    grid-column:auto!important;
+  }
+}
