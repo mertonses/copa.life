@@ -106,11 +106,22 @@ if("serviceWorker"in navigator){
 #loader.done{opacity:0;pointer-events:none}
 #loader svg{animation:ldspin 1s linear infinite}
 @keyframes ldspin{to{transform:rotate(360deg)}}
+html.copa-native-boot body>.wrap{content-visibility:hidden!important;contain:strict!important;height:0!important;min-height:0!important;overflow:hidden!important}
+html.copa-native-boot body>#modeGate{display:none!important}
 :focus-visible{outline:2px solid var(--acc,#F24A28);outline-offset:2px;border-radius:3px}
 @keyframes howtoFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .slot-filled{border:2px solid #4E9B65!important;background:rgba(104,117,124,0.15)!important;animation:slotFillPulse 0.8s ease-out}
 @keyframes slotFillPulse{0%{box-shadow:0 0 0 4px rgba(242,74,40,0.4)}100%{box-shadow:0 0 0 0px rgba(242,74,40,0)}}
 </style>
+<script>
+(function(){
+  const meta=document.querySelector('meta[name="copa-platform"]'),platform=String(meta&&meta.content||"").toLowerCase();
+  if(platform==="android"||platform==="ios"){
+    document.documentElement.dataset.copaPlatform=platform;
+    document.documentElement.classList.add("copa-native-boot");
+  }
+})();
+</script>
 <noscript><div style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;line-height:1.6">
 <h1>Copa Life — Roguelite futbol. Şans + strateji.</h1>
 <p>Ücretsiz tarayıcı futbol yönetim oyunu. Kadro kur, transfer yönet, kupayı kaldır. 6 ülke: Türkiye, İngiltere, İspanya, İtalya, Almanya ve Japonya. 9000'den fazla gerçek oyuncu ismiyle roguelite futbol deneyimi.</p>
@@ -302,7 +313,7 @@ if("serviceWorker"in navigator){
                   <div class="copa-chair-stage-kicker js-chair-stage-type">EKONOMİ</div>
                   <h2 class="copa-chair-stage-title js-chair-stage-title">PATRON<br>BAŞKAN</h2>
                   <p class="copa-chair-stage-role js-chair-stage-role">BÜYÜK PATRON</p>
-                  <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="eager" fetchpriority="high" decoding="async"></div>
+                  <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="lazy" fetchpriority="low" decoding="async"></div>
                   <div class="copa-chair-stage-actions" aria-label="Başkan navigasyonu"><button class="copa-chair-nav js-chair-prev" type="button" aria-label="Önceki başkan" title="Önceki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><button class="copa-chair-nav js-chair-next" type="button" aria-label="Sonraki başkan" title="Sonraki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
                 </div>
               </section>
@@ -4141,11 +4152,12 @@ function _bootCopaApplication(){
   const savedRun=_readRunState(),manualResume=window.CopaMobileShell&&CopaMobileShell.shouldGateResume(savedRun);
   if(manualResume)CopaMobileShell.showLanding(savedRun);else if(!_tryRestoreState()&&window.CopaMobileShell&&CopaMobileShell.mobile())CopaMobileShell.showLanding(null);
   try{applyTheme("dark",false);const _savedMusic=localStorage.getItem("copa_music");_musicEnabled=_savedMusic==="1";if(_savedMusic===null)localStorage.setItem("copa_music","0");_updateMusicButton();_startDefaultMusic();if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}
+  document.documentElement.classList.remove("copa-native-boot");
 }
 window.CopaBootReady=Promise.all([Promise.resolve(window.CopaPlatform&&window.CopaPlatform.ready).catch(()=>null),window.CopaMobileShellReady||Promise.resolve()]).then(_bootCopaApplication);
 (function(){try{if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}})();
 (function(){const ms=$("mechStats");if(!ms)return;const pc=typeof POOL_TR!=="undefined"?POOL_TR.length:(typeof POOL!=="undefined"?POOL.length:0);const tc=typeof OPP_POOL!=="undefined"?OPP_POOL.length:0;const cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:(typeof allCardKeys==="function"?allCardKeys().length:33);ms.innerHTML=`<span><b>${pc}</b> oyuncu</span><span>·</span><span><b>${tc}</b> takım</span><span>·</span><span><b>${cc}</b> kart</span><span>·</span><span><b>6</b> tur</span><span>·</span><span><b>6</b> başkan</span>`;})();
-(function(){Promise.resolve(window.CopaBootReady).finally(()=>{const l=$("loader");if(l){l.classList.add("done");setTimeout(()=>l.remove(),350);}
+(function(){Promise.resolve(window.CopaBootReady).finally(()=>{document.documentElement.classList.remove("copa-native-boot");const l=$("loader");if(l){l.classList.add("done");setTimeout(()=>l.remove(),350);}
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){const m=$("modal");if(m&&!m.classList.contains("hidden")){if(m.dataset.dismissOnEscape==="false"){e.preventDefault();return;}closeModal();}}});
 // Klavye kısayolları
 document.addEventListener('keydown',e=>{
