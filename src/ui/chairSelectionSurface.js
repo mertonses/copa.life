@@ -12,12 +12,12 @@
     en: { profile: "CHAIRMAN PROFILE", start: "STARTING CASH", debt: "DEBT LIMIT", advantage: "MAIN ADVANTAGE", trigger: "TRIGGER", redline: "RED LINE", select: "SELECT CHAIRMAN", prev: "← PREVIOUS", next: "NEXT →", cards: "CHAIRMEN", hint: "Inspect the active card · drag to explore" }
   };
   const chairSpotlights = {
-    babacan: { spot: "rgba(78,155,101,.28)", rim: "rgba(112,220,145,.18)" },
-    leydi: { spot: "rgba(116,143,157,.28)", rim: "rgba(174,205,220,.18)" },
-    pinti: { spot: "rgba(215,160,90,.28)", rim: "rgba(255,205,125,.18)" },
-    sansasyoncu: { spot: "rgba(242,74,40,.25)", rim: "rgba(255,126,102,.18)" },
-    torpilci: { spot: "rgba(217,192,155,.25)", rim: "rgba(255,229,191,.18)" },
-    cilgin: { spot: "rgba(138,155,126,.26)", rim: "rgba(194,216,164,.18)" }
+    babacan: { spot: "rgba(78,155,101,.28)", rim: "rgba(115,203,145,.18)" },
+    leydi: { spot: "rgba(116,131,140,.28)", rim: "rgba(174,184,186,.18)" },
+    pinti: { spot: "rgba(211,155,49,.28)", rim: "rgba(255,229,198,.18)" },
+    sansasyoncu: { spot: "rgba(242,74,40,.25)", rim: "rgba(255,128,107,.18)" },
+    torpilci: { spot: "rgba(217,200,143,.25)", rim: "rgba(255,240,216,.18)" },
+    cilgin: { spot: "rgba(155,202,176,.26)", rim: "rgba(221,243,227,.18)" }
   };
   const textFor = (value, lang) => value && typeof value === "object" ? (value[lang] || value.en || value.tr || "") : String(value || "");
   const chairIds = () => CHAIRMEN.filter(ch => unlockedChairs.includes(ch.id)).map(ch => ch.id);
