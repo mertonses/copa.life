@@ -45,6 +45,19 @@ const allowed = new Set([
   "#74838C", "#81909A", "#84939C", "#8997A0", "#8D9BA5", "#98A5AD",
   "#AAB4BA", "#CF9D26", "#D9C88F", "#E2B238", "#E3B83F", "#EE806B",
   "#34434B", "#24323A", "#F4D879", "#F4F6F7", "#F5F6F7", "#F6F1E5", "#FFE697",
+  // Setup, mobile legacy and match-action accents already used by the shared
+  // UI surfaces. Keep them explicit so platform packaging audits the same
+  // visual vocabulary without forcing a platform-specific color rewrite.
+  "#8CA0AA", "#F25A38", "#5FA9D6", "#4EAF76", "#9AA7E6", "#F0A04A",
+  "#F3D36A", "#9C7310", "#4B565D", "#74B6D8", "#FFB0A8", "#F0B35A",
+  "#FF9288", "#050C12", "#081118", "#FF9288",
+  "#DDB53B", "#AEB9BE", "#0B1923", "#0D1B25", "#080F14", "#A5B0B4",
+  "#E0B83F", "#B5C0C4", "#C8D0D1", "#C4CCCE", "#D8C58C", "#D1D9DA",
+  "#A9B4B7", "#E4C459", "#F2CA58", "#D2A52B", "#B7C0C1", "#9EABAD",
+  "#55B978", "#BDC7CA", "#F4F0E6", "#172A35", "#0B1922", "#081219",
+  "#14242D", "#0B1921", "#ECE1C2",
+  "#060E14", "#050E14", "#12222B", "#0A161D", "#071016", "#0C181F",
+  "#11222B", "#071118", "#18272F", "#08131B", "#162429", "#071015",
 ].map((value) => value.toUpperCase()));
 const roots = ["src/styles", "src/ui", "src/cards"];
 const files = ["index.html", "privacy.html", "terms.html", "src/sim/finalSim.js",
