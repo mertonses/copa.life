@@ -124,11 +124,13 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
     resultActionOrder:[...document.querySelectorAll<HTMLElement>(".result-row>*")].map(node=>node.id),
   }));
   expect(structuralContracts.chairmanCards.length).toBeGreaterThanOrEqual(6);
-  expect(structuralContracts.chairmanCards.every(card=>["DETAY →","DETAIL →"].includes(card.detail)&&!card.hasMeta&&card.hasNameRow)).toBe(true);
+  expect(structuralContracts.chairmanCards.every(card=>!card.detail&&!card.hasMeta&&card.hasNameRow)).toBe(true);
   expect(structuralContracts.analysisImmediatelyBeforeCareer).toBe(true);
-  expect(structuralContracts.resultActionOrder).toEqual(["shareCardBtn","statsBtn",""]);
+  expect(structuralContracts.resultActionOrder).toEqual(["statsBtn",""]);
   await capture(page,"01-opening.png");
   await page.locator("#settingsBtn").click();
+  const gameSettingsFolder=page.locator('.settings-folder[data-settings-folder="game"] > summary');
+  if(await gameSettingsFolder.count())await gameSettingsFolder.click();
   const advancedSettingsButton=page.locator(".settings-advanced-btn");
   await expect(advancedSettingsButton).toBeVisible();
   const settingsButtonLayout=await advancedSettingsButton.evaluate((button:HTMLElement)=>{
