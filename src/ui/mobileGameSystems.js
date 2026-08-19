@@ -153,14 +153,14 @@
   }
   function prepareStepper(){
     if(!gameMode())return;
-    const setup=document.getElementById("introSetup"),country=document.getElementById("countryPick"),form=document.getElementById("formpick"),chair=document.getElementById("chairpick");
+    const setup=document.getElementById("introSetup"),country=document.getElementById("countryPick"),form=document.getElementById("formpick"),chair=document.querySelector(".copa-chair-subcol");
     if(!setup||!country||!form||!chair)return;
-    const countryGroup=country.closest(".v7-setup-group"),two=form.closest(".v7-setup-twocol"),formCol=form.closest(".v7-setup-subcol"),chairCol=chair.closest(".v7-setup-subcol");
-    if(countryGroup)countryGroup.dataset.mobileStep="1";if(formCol)formCol.dataset.mobileStep="2";if(chairCol)chairCol.dataset.mobileStep="3";if(two)two.classList.add("mobile-step-host");
+    const countryGroup=country.closest(".copa-country-group")||country.closest(".v7-setup-group"),two=form.closest(".v7-setup-twocol"),formCol=form.closest(".v7-setup-subcol"),chairCol=chair.closest(".v7-setup-subcol");
+    if(formCol)formCol.dataset.mobileStep="1";if(chairCol)chairCol.dataset.mobileStep="2";if(countryGroup)countryGroup.dataset.mobileStep="3";if(two)two.classList.add("mobile-step-host");
     let nav=document.getElementById("mobileSetupNav");
     if(!nav){
       nav=document.createElement("div");nav.id="mobileSetupNav";nav.className="mobile-setup-nav";
-      nav.innerHTML=`<div class="mobile-step-progress"><i></i><b>1/3</b></div><div class="mobile-step-buttons"><button type="button" class="btn btn-ghost" data-step-back onclick="CopaMobileShell.step(-1)">← ${tr()?"GERİ":"BACK"}</button><button type="button" class="btn btn-primary" data-step-next onclick="CopaMobileShell.step(1)">${tr()?"DEVAM":"NEXT"} →</button></div>`;
+      nav.innerHTML=`<div class="mobile-step-progress"><i></i><b>1/4</b></div><div class="mobile-step-buttons"><button type="button" class="btn btn-ghost" data-step-back onclick="CopaMobileShell.step(-1)">← ${tr()?"GERİ":"BACK"}</button><button type="button" class="btn btn-primary" data-step-next onclick="CopaMobileShell.step(1)">${tr()?"DEVAM":"NEXT"} →</button></div>`;
       setup.prepend(nav);
     }
     enhanceSetupChoices();
@@ -187,13 +187,13 @@
     });
   }
   function setSetupStep(value){
-    setupStep=Math.max(1,Math.min(3,Number(value)||1));prepareStepper();
-    document.body.classList.toggle("mobile-game-setup-final",setupStep===3);
+    setupStep=Math.max(1,Math.min(4,Number(value)||1));prepareStepper();
+    document.body.classList.toggle("mobile-game-setup-final",setupStep===4);
     const setup=document.getElementById("introSetup");if(setup)setup.dataset.mobileCurrentStep=String(setupStep);
     document.querySelectorAll("#introSetup [data-mobile-step]").forEach(node=>node.classList.toggle("is-mobile-step-active",Number(node.dataset.mobileStep)===setupStep));
     const nav=document.getElementById("mobileSetupNav"),cta=document.querySelector("#introSetup .v7-cta-stack");
-    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/3*100}%`;if(label)label.textContent=`${setupStep}/3`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===3);}
-    if(cta)cta.classList.toggle("is-mobile-step-active",setupStep===3);
+    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/4*100}%`;if(label)label.textContent=`${setupStep}/4`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===4);}
+    if(cta)cta.classList.toggle("is-mobile-step-active",setupStep===4);
   }
   function step(delta){setSetupStep(setupStep+(Number(delta)||0));}
   function handleBack(){

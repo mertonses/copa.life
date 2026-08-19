@@ -497,6 +497,7 @@ test("web responsive setup shells keep navigation readable and centered",async({
     await reset(page);
     await page.goto(`/?web-${viewport.name}-visual-qa=1`,{waitUntil:"domcontentloaded"});
     await expect(page.locator("#startBtn")).toBeVisible();
+    await expect(page.locator("#chairpick,#chairSelectionSurface .copa-chair-rail-head")).toHaveCount(0);
     const landing=await page.locator("#introLand").evaluate((element:HTMLElement)=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
       left:element.getBoundingClientRect().left,
@@ -504,7 +505,7 @@ test("web responsive setup shells keep navigation readable and centered",async({
     }));
     const setupFlow=await page.evaluate(()=>{
       const rect=(selector:string)=>document.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
-      const chair=rect("#chairpick"),country=rect("#countryPick"),start=rect(".v7-cta-stack");
+      const chair=rect("#chairSelectionSurface"),country=rect("#countryPick"),start=rect(".v7-cta-stack");
       return{
         startPosition:getComputedStyle(document.querySelector<HTMLElement>(".v7-cta-stack")!).position,
         followsChair:start.top>=chair.bottom-1,
@@ -518,6 +519,164 @@ test("web responsive setup shells keep navigation readable and centered",async({
     expect(setupFlow.followsCountry).toBe(true);
     await capture(page,`responsive-${viewport.name}-opening.png`);
   }
+});
+
+test("landing hero and progress rail use the compact single surface",async({page},testInfo)=>{
+  const isMobile=testInfo.project.name==="mobile-chromium";
+  await reset(page);
+  await page.addInitScript(()=>localStorage.setItem("copa.guide.context.v2",JSON.stringify({setup:Date.now()})));
+  await page.goto("/?web-compact-landing-visual-qa=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>(globalThis as any).setLang("tr"));
+  await expect(page.locator("#introLand")).toBeVisible();
+  if(isMobile){
+    await expect(page.locator(".v7-landing-panel")).toBeHidden();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+    await capture(page,"compact-landing-mobile.png");
+    return;
+  }
+  await expect(page.locator(".v7-landing-panel")).toBeVisible();
+  await expect(page.locator("#mechSection .mstep")).toHaveCount(4);
+  const layout=await page.evaluate(()=>{
+    const rect=(selector:string)=>document.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+    const panel=rect(".v7-landing-panel"),hero=rect(".v7-hero-head"),progress=rect("#mechSection"),board=rect(".tactical-board");
+    const steps=[...document.querySelectorAll<HTMLElement>("#mechSection .mstep")];
+    const progressElement=document.querySelector<HTMLElement>("#mechSection")!;
+    const progressStyle=getComputedStyle(progressElement);
+    const stat=document.querySelector(".tactical-board-bottom");
+    return{
+      panelHeight:panel.height,
+      heroHeight:hero.height,
+      progressHeight:progress.height,
+      boardHeight:board.height,
+      boardRatio:board.width/board.height,
+      statRemoved:!stat,
+      stepTops:new Set(steps.map(step=>Math.round(step.getBoundingClientRect().top))).size,
+      progressDisplay:progressStyle.display,
+      progressOverflowX:progressStyle.overflowX,
+      progressScrollable:progressElement.scrollWidth>progressElement.clientWidth,
+      progressWidths:{scrollWidth:progressElement.scrollWidth,clientWidth:progressElement.clientWidth,stepWidths:steps.map(step=>step.getBoundingClientRect().width),stepFlex:steps.map(step=>getComputedStyle(step).flex)},
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(layout.panelHeight).toBeLessThanOrEqual(isMobile?1:240);
+  expect(layout.heroHeight).toBeLessThanOrEqual(isMobile?1:190);
+  expect(layout.progressHeight).toBeLessThanOrEqual(isMobile?1:50);
+  expect(layout.boardHeight).toBeGreaterThan(80);
+  expect(layout.boardRatio).toBeGreaterThan(1.7);
+  expect(layout.statRemoved).toBe(true);
+  expect(layout.stepTops).toBe(1);
+  expect(layout.progressDisplay).toBe(isMobile?"flex":"grid");
+  if(isMobile)expect(layout.progressOverflowX).toBe("auto");
+  expect(layout.progressScrollable,JSON.stringify(layout)).toBe(isMobile);
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  await page.locator("#mechSection .mstep").first().hover();
+  await expect(page.locator("#mechSection .mstep").first().locator("small")).toBeVisible();
+  await page.mouse.move(4,4);
+  await capture(page,`compact-landing-${isMobile?"mobile":"desktop"}.png`);
+});
+
+test("desktop setup keeps the country rail and primary action row compact",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop compact setup surface");
+  await reset(page);
+  await page.addInitScript(()=>localStorage.setItem("copa.guide.context.v2",JSON.stringify({setup:Date.now()})));
+  await page.goto("/?web-compact-setup-visual-qa=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).goSetup();});
+  await page.waitForTimeout(100);
+  await page.evaluate(()=>{document.querySelector(".copa-coachmark")?.remove();});
+  await expect(page.locator("#introSetup")).toBeVisible();
+  await expect(page.locator("#countryPick .country-name")).toHaveCount(6);
+  await expect(page.locator(".copa-formation-panel,.copa-country-panel")).toHaveCount(2);
+  await page.evaluate(async()=>{await (globalThis as any).CopaLazy.ensureMetaProgression();});
+  const layout=await page.evaluate(()=>{
+    const country=document.querySelector<HTMLElement>("#countryPick")!;
+    const formation=document.querySelector<HTMLElement>("#formpick .fbtn:not(.locked)")!;
+    const selectedFormation=document.querySelector<HTMLElement>("#formpick .fbtn.sel")!;
+    const selectedCountry=document.querySelector<HTMLElement>("#countryPick button.on")!;
+    const cards=[...country.querySelectorAll<HTMLElement>("button")];
+    const start=document.querySelector<HTMLElement>("#startBtn")!;
+    const primaryActions=document.querySelector<HTMLElement>(".v7-primary-actions")!;
+    const metaline=document.querySelector<HTMLElement>("#metaline")!;
+    const career=metaline.querySelector<HTMLElement>(".career-entry");
+    return{
+      cardHeights:cards.map(card=>card.getBoundingClientRect().height),
+      cardDirections:cards.map(card=>getComputedStyle(card).flexDirection),
+      formationRadius:getComputedStyle(formation).borderRadius,
+      countryRadius:getComputedStyle(cards[0]).borderRadius,
+      formationBorderWidth:getComputedStyle(formation).borderTopWidth,
+      countryBorderWidth:getComputedStyle(cards[0]).borderTopWidth,
+      formationPanelRadius:getComputedStyle(document.querySelector<HTMLElement>(".copa-formation-panel")!).borderRadius,
+      countryPanelRadius:getComputedStyle(document.querySelector<HTMLElement>(".copa-country-panel")!).borderRadius,
+      startWidth:start.getBoundingClientRect().width,
+      primaryActionsWidth:primaryActions.getBoundingClientRect().width,
+      formationCheck:{
+        content:getComputedStyle(selectedFormation,"::after").content,
+        top:getComputedStyle(selectedFormation,"::after").top,
+        right:getComputedStyle(selectedFormation,"::after").right,
+        fontSize:getComputedStyle(selectedFormation,"::after").fontSize,
+      },
+      countryCheck:{
+        content:getComputedStyle(selectedCountry,"::after").content,
+        top:getComputedStyle(selectedCountry,"::after").top,
+        right:getComputedStyle(selectedCountry,"::after").right,
+        fontSize:getComputedStyle(selectedCountry,"::after").fontSize,
+      },
+      summaryRemoved:!document.getElementById("introSummary"),
+      ctaDisplay:getComputedStyle(document.querySelector<HTMLElement>(".v7-cta-stack")!).display,
+      metaDisplay:getComputedStyle(metaline).display,
+      metaBase:metaline.querySelectorAll(".meta-base").length,
+      careerVisible:!!career&&getComputedStyle(career).display!=="none",
+      overflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(layout.cardHeights.every(height=>height<=50)).toBe(true);
+  expect(layout.cardDirections.every(direction=>direction==="row")).toBe(true);
+  expect(layout.formationRadius).toBe(layout.countryRadius);
+  expect(layout.formationBorderWidth).toBe(layout.countryBorderWidth);
+  expect(layout.formationPanelRadius).toBe("0px");
+  expect(layout.countryPanelRadius).toBe("0px");
+  expect(Math.abs(layout.startWidth-layout.primaryActionsWidth)).toBeLessThanOrEqual(2);
+  expect(layout.formationCheck).toEqual(layout.countryCheck);
+  await page.locator("#formpick .fbtn:not(.locked):not(.sel)").first().hover();
+  const formationHover=await page.locator("#formpick .fbtn:not(.locked):not(.sel)").first().evaluate((node:HTMLElement)=>({border:getComputedStyle(node).borderTopColor,background:getComputedStyle(node).backgroundColor}));
+  await expect(page.locator("#formpick .form-dot-preview")).toHaveCount(0);
+  await page.locator("#countryPick button:not(.on)").first().hover();
+  const countryHover=await page.locator("#countryPick button:not(.on)").first().evaluate((node:HTMLElement)=>({border:getComputedStyle(node).borderTopColor,background:getComputedStyle(node).backgroundColor,filter:getComputedStyle(node.querySelector("img")!).filter}));
+  expect(formationHover.border).not.toBe("rgb(39, 52, 60)");
+  expect(countryHover.border).not.toBe("rgb(39, 52, 60)");
+  expect(countryHover.filter).toBe("none");
+  expect(layout.summaryRemoved).toBe(true);
+  expect(layout.ctaDisplay).toBe("grid");
+  expect(layout.metaDisplay).toBe("flex");
+  expect(layout.metaBase).toBe(1);
+  expect(layout.careerVisible).toBe(true);
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  await capture(page,"compact-setup-desktop.png");
+});
+
+test("chairman profile navigates through locked previews without exposing the old rail",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop chairman carousel contract");
+  await reset(page);
+  await page.addInitScript(()=>localStorage.removeItem("kupayolu"));
+  await page.goto("/?chairman-carousel-visual-qa=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{(globalThis as any).setLang("tr");(globalThis as any).goSetup();});
+  await page.waitForTimeout(120);
+  await expect(page.locator("#chairpick,#chairSelectionSurface .copa-chair-rail-head")).toHaveCount(0);
+  await expect(page.locator(".js-chair-primary")).toHaveCount(0);
+  await expect(page.locator("#chairhdr")).toHaveCount(0);
+  await expect(page.locator(".copa-chair-stage-head span")).toHaveCount(0);
+  await expect(page.locator(".copa-chair-stage-actions .js-chair-prev,.copa-chair-stage-actions .js-chair-next")).toHaveCount(2);
+  await expect(page.locator(".copa-chair-detail-actions")).toHaveCount(0);
+  await expect(page.locator(".js-chair-selected-mark")).toBeVisible();
+  await expect(page.locator(".copa-coachmark")).toHaveCount(0);
+  await page.locator(".js-chair-next").click();
+  await expect(page.locator(".js-chair-detail-index")).toHaveText("02 / 06");
+  await expect(page.locator(".js-chair-selected-mark")).toBeHidden();
+  await expect(page.locator(".js-chair-stage-image")).toHaveAttribute("alt",/Diplomat/i);
+  const preview=await page.locator("#chairSelectionSurface").evaluate((surface:HTMLElement)=>({
+    chairId:surface.dataset.chairId||"",
+  }));
+  expect(preview.chairId).toBe("leydi");
+  await capture(page,"chairman-locked-preview.png");
 });
 
 test("source-web hub routes stay bounded and keep every primary action visible",async({page},testInfo)=>{

@@ -88,3 +88,324 @@
 }
 @keyframes chairSelectionSpotlight{0%{opacity:.22;filter:blur(26px)}24%{opacity:1;filter:blur(10px)}100%{opacity:.82;filter:blur(20px)}}
 @media(prefers-reduced-motion:reduce){.copa-chair-stage-portrait,.copa-chair-selection #chairpick .chair-card{transition:none!important}.copa-chair-selection.is-chair-transitioning .copa-chair-stage-spotlight{animation:none!important}}
+
+/* Final setup composition: formation and country share one compact surface.
+   The chairman profile stays in the same decision flow without the old rail. */
+#introSetup .copa-setup-container{
+  width:100%;
+  box-sizing:border-box;
+  padding:14px;
+  border:1px solid #34434b;
+  border-radius:9px;
+  background:linear-gradient(145deg,#14232c,#101d28);
+}
+#introSetup .copa-setup-heading{
+  margin:0 0 10px;
+  color:#aeb8ba;
+  font:900 9px/1 var(--mono);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+#introSetup .copa-setup-fields{
+  display:grid!important;
+  grid-template-columns:minmax(520px,1.18fr) minmax(0,.82fr);
+  grid-template-areas:"chairman options";
+  gap:12px 16px!important;
+  align-items:start;
+}
+#introSetup .copa-roster-options{grid-area:options;display:grid;gap:10px;align-content:start;min-width:0}
+#introSetup .copa-formation-panel,
+#introSetup .copa-country-panel{
+  min-width:0;
+  box-sizing:border-box;
+  padding:12px;
+  border:1px solid #34434b;
+  border-radius:0;
+  background:linear-gradient(145deg,#14232c,#101d28);
+}
+#introSetup .copa-formation-panel .v7-sec-lbl,
+#introSetup .copa-country-panel .v7-sec-lbl{margin:0 0 7px}
+#introSetup .copa-formation-subcol{min-width:0}
+#introSetup .copa-chair-subcol{grid-area:chairman;min-width:0}
+#introSetup .copa-country-group{min-width:0;margin:0;padding:0}
+#introSetup .copa-setup-fields>.v7-setup-subcol,
+#introSetup .copa-setup-fields>.v7-setup-group{width:auto!important}
+#introSetup .copa-chair-subcol>.v7-sec-lbl{margin:0 0 7px}
+#introSetup .copa-chair-selection{margin:0}
+#introSetup .copa-chair-workspace{box-shadow:none}
+#introSetup .copa-chair-stage-frame{height:clamp(250px,18vw,300px);margin-top:0;margin-bottom:8px}
+#introSetup .copa-chair-detail-panel{padding:16px 18px 14px}
+#introSetup .copa-chair-detail-desc{min-height:36px;margin:14px 0 11px;font-size:10px;line-height:1.4}
+#introSetup .copa-chair-metrics{gap:7px;margin-bottom:9px}
+#introSetup .copa-chair-metrics>div{padding:9px}
+#introSetup .copa-chair-metrics b{margin-top:6px;font-size:17px}
+#introSetup .copa-chair-contracts>div{grid-template-columns:112px minmax(0,1fr);gap:10px;padding:9px 0}
+#introSetup .copa-chair-contracts p{font-size:9px;line-height:1.35}
+#introSetup .copa-chair-stage-actions{display:flex;gap:10px;margin:0 0 12px}
+#introSetup .copa-chair-primary.is-locked,
+#introSetup .js-chair-primary:disabled{
+  background:#27343c!important;
+  border-color:#53636d!important;
+  color:#7a858b!important;
+  box-shadow:none!important;
+  cursor:not-allowed!important;
+  opacity:.76;
+}
+#introSetup .js-chair-primary.is-locked::before{content:"🔒 ";font-size:.8em}
+#introSetup .copa-chair-selection.is-chair-locked .copa-chair-stage-portrait img{opacity:.46;filter:grayscale(1) saturate(.3) brightness(.7)!important}
+#introSetup .copa-chair-selection.is-chair-locked .copa-chair-stage-portrait::after{content:"KİLİTLİ";position:absolute;z-index:5;right:12px;bottom:18px;padding:6px 8px;border:1px solid #53636d;border-radius:4px;background:rgba(10,17,24,.78);color:#aeb8ba;font:900 8px/1 var(--mono);letter-spacing:1px}
+#introSetup .copa-chair-selection.is-chair-locked .copa-chair-stage-kicker,
+#introSetup .copa-chair-selection.is-chair-locked .copa-chair-detail-kicker{color:#7a858b}
+#introSetup .copa-chair-metrics b.chair-value-positive{color:#73cb91}
+#introSetup .copa-chair-metrics b.chair-value-risk{color:#ff806b}
+#introSetup .copa-chair-contracts .chair-value-positive{color:#73cb91;font-weight:850}
+#introSetup .copa-chair-contracts .chair-value-risk{color:#ff806b;font-weight:850}
+#introSetup .copa-chair-contracts .chair-value-neutral{color:#f3f5f4;font-weight:850}
+#introSetup .copa-formation-panel .formpick{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+#introSetup .copa-formation-panel .formpick .fbtn{
+  min-width:0!important;
+  width:100%!important;
+  min-height:44px!important;
+  padding:8px 4px!important;
+  white-space:nowrap!important;
+  border:1px solid var(--border-default)!important;
+  border-radius:0!important;
+  background:var(--surface-elevated)!important;
+  color:var(--color-ink)!important;
+}
+#introSetup .copa-formation-panel .formpick .fbtn:hover:not(.locked):not(.sel),
+#introSetup .copa-country-panel .countrypick button:hover:not(.on):not(.locked){
+  background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-elevated))!important;
+  border-color:var(--color-primary)!important;
+  color:var(--color-ink)!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--color-primary) 16%,transparent)!important;
+}
+#introSetup .copa-formation-panel .formpick .fbtn.sel,
+#introSetup .copa-country-panel .countrypick button.on{
+  transform:none!important;
+  border-width:2px!important;
+  border-color:var(--color-primary)!important;
+  background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-elevated))!important;
+  color:var(--color-ink)!important;
+  box-shadow:0 0 0 2px rgba(104,117,124,.14)!important;
+}
+#introSetup .copa-formation-panel .formpick .fbtn.sel::after{
+  content:"✓";
+  display:block;
+  position:absolute;
+  top:4px;
+  right:5px;
+  font-size:8px;
+  font-weight:800;
+  color:var(--color-primary);
+  line-height:1;
+}
+#introSetup .copa-formation-panel .formation-card-name{white-space:nowrap!important;font-size:11px!important}
+#introSetup .copa-chair-rail-head,#introSetup #chairpick{display:none!important}
+
+@media(max-width:1099px) and (min-width:721px){
+  #introSetup .copa-setup-fields{display:flex!important;flex-direction:column!important;gap:12px!important}
+  #introSetup .copa-roster-options{display:contents}
+  #introSetup .copa-formation-panel{order:1}
+  #introSetup .copa-chair-subcol{order:2}
+  #introSetup .copa-country-panel{order:3}
+  #introSetup .copa-roster-options .v7-cta-stack{order:4}
+  #introSetup .copa-chair-stage-frame{height:clamp(290px,38vw,360px)}
+}
+@media(max-width:720px){
+  #introSetup .copa-setup-container{padding:0;border:0;border-radius:0;background:transparent}
+  #introSetup .copa-setup-heading{display:none}
+  #introSetup .copa-setup-fields{display:flex!important;flex-direction:column!important;gap:14px!important}
+  #introSetup .copa-roster-options{display:contents}
+  #introSetup .copa-formation-panel .formpick{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #introSetup .copa-formation-panel{order:1}
+  #introSetup .copa-chair-subcol{order:2}
+  #introSetup .copa-country-panel{order:3}
+  #introSetup .copa-chair-stage-frame{height:clamp(280px,78vw,360px)}
+  #introSetup .copa-chair-detail-panel{padding:14px}
+  #introSetup .copa-chair-detail-desc{min-height:0}
+  #introSetup .copa-chair-contracts>div{grid-template-columns:106px minmax(0,1fr)}
+  #introSetup .copa-roster-options .v7-cta-stack{order:4}
+}
+
+@media(min-width:1100px){
+  #introSetup .copa-roster-options{
+    align-self:stretch;
+    grid-template-rows:auto auto minmax(0,1fr);
+  }
+  #introSetup .copa-country-group .countrypick{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  #introSetup .copa-roster-options .v7-cta-stack{
+    align-self:end;
+    display:grid!important;
+    grid-template-columns:1fr;
+    align-items:start;
+    gap:8px;
+    margin:0;
+    padding:12px 0 0;
+    border-top:0;
+  }
+  #introSetup .copa-roster-options .v7-summary{
+    min-height:48px;
+    margin:0;
+    justify-content:flex-start;
+    text-align:left;
+  }
+  #introSetup .copa-roster-options .v7-primary-actions{width:100%;grid-column:1;grid-row:1}
+  #introSetup .copa-roster-options .v7-cta-stack .btn-go{
+    width:100%;
+    min-height:48px;
+    padding:12px 16px;
+  }
+}
+
+@media(min-width:721px) and (max-width:1099px){
+  #introSetup .copa-roster-options .v7-cta-stack{
+    grid-template-columns:1fr!important;
+    border-top:0!important;
+  }
+  #introSetup .copa-roster-options .v7-primary-actions{grid-column:1/-1!important}
+  #introSetup .copa-roster-options .v7-cta-stack #startBtn{width:100%!important}
+}
+
+#introSetup .copa-chair-detail-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+#introSetup .copa-chair-selected-mark{
+  display:inline-grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border:1px solid #4e9b65;
+  border-radius:50%;
+  background:#183f3a;
+  color:#73cb91;
+  font:900 11px/1 var(--mono);
+}
+#introSetup .copa-chair-selected-mark[hidden]{display:none}
+#introSetup .copa-chair-stage-actions{
+  position:absolute;
+  z-index:6;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:0;
+  padding:0 2px;
+}
+#introSetup .copa-chair-nav{
+  display:grid;
+  place-items:center;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  min-height:42px;
+  padding:0;
+  border:1px solid color-mix(in srgb,var(--color-slate) 35%,transparent);
+  border-radius:50%;
+  background:color-mix(in srgb,var(--surface-elevated) 72%,transparent);
+  color:#aeb8ba;
+  cursor:pointer;
+  box-shadow:0 3px 10px rgba(10,17,24,.18);
+  transition:background var(--tr-fast),border-color var(--tr-fast),color var(--tr-fast),transform var(--tr-fast),box-shadow var(--tr-fast);
+}
+#introSetup .copa-chair-nav svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#introSetup .copa-chair-nav:hover,
+#introSetup .copa-chair-nav:focus-visible{
+  border-color:color-mix(in srgb,var(--color-primary) 70%,var(--color-slate));
+  background:color-mix(in srgb,var(--color-primary) 13%,var(--surface-elevated));
+  box-shadow:0 5px 14px color-mix(in srgb,var(--color-primary) 18%,transparent);
+  color:#f3f5f4;
+  transform:translateY(-1px);
+}
+#introSetup .copa-chair-nav:active{transform:translateY(1px)}
+#introSetup .copa-chair-selection[data-chair-id="torpilci"] .copa-chair-stage-portrait{bottom:0}
+#introSetup .copa-chair-selection[data-chair-id="pinti"] .copa-chair-stage-portrait{right:-1%;bottom:-5px}
+
+#introSetup .copa-formation-panel .formpick .fbtn,
+#introSetup .copa-country-panel .countrypick button{
+  transition:background var(--tr-fast),border-color var(--tr-fast),color var(--tr-fast),box-shadow var(--tr-fast),transform var(--tr-fast);
+}
+#introSetup .copa-formation-panel .formpick .fbtn:hover:not(.locked):not(.sel),
+#introSetup .copa-country-panel .countrypick button:hover:not(.on){
+  background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-elevated))!important;
+  border-color:var(--color-primary)!important;
+  color:var(--color-ink)!important;
+}
+#introSetup .copa-formation-panel .formpick .fbtn.sel:hover,
+#introSetup .copa-country-panel .countrypick button.on:hover{
+  background:color-mix(in srgb,var(--color-primary) 8%,var(--surface-elevated))!important;
+  border-color:var(--color-primary)!important;
+  color:var(--color-ink)!important;
+}
+#introSetup .copa-country-panel .countrypick img{filter:none!important;opacity:1!important}
+
+#introSetup .copa-roster-options .v7-cta-stack #startBtn{
+  position:relative;
+  min-height:50px;
+  padding:12px 42px 12px 18px;
+  border:1.5px solid #ff806b;
+  border-radius:6px;
+  background:linear-gradient(135deg,#f24a28,#ff806b);
+  color:#101d28;
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:2.5px;
+  box-shadow:0 3px 0 var(--action-primary-hover),0 10px 24px color-mix(in srgb,var(--color-primary) 22%,transparent);
+  transition:background var(--tr-fast),transform var(--tr-fast),box-shadow var(--tr-fast),filter var(--tr-fast);
+}
+#introSetup .copa-roster-options .v7-cta-stack #startBtn::before{
+  content:"→";
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  font:900 18px/1 var(--mono);
+  transition:transform var(--tr-fast);
+}
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:hover,
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:focus-visible{
+  background:linear-gradient(135deg,#ff806b,#f24a28);
+  filter:saturate(1.08) brightness(1.04);
+  transform:translateY(-2px);
+  box-shadow:0 5px 0 var(--action-primary-hover),0 14px 30px color-mix(in srgb,var(--color-primary) 30%,transparent);
+}
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:hover::before,
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:focus-visible::before{transform:translate(3px,-50%)}
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:active{transform:translateY(1px);box-shadow:0 1px 0 var(--action-primary-hover),0 5px 12px color-mix(in srgb,var(--color-primary) 18%,transparent)}
+#introSetup .copa-roster-options .v7-cta-stack #startBtn:disabled{filter:none;background:var(--disabled-bg);color:var(--disabled-text);border-color:var(--border-default);box-shadow:none}
+
+@media(max-width:720px){
+  #introSetup .copa-chair-stage-actions{margin-bottom:12px;padding-inline:0}
+  #introSetup .copa-chair-nav{flex-basis:44px;width:44px;height:44px;min-height:44px}
+  #introSetup .copa-roster-options .v7-cta-stack,
+  #introSetup .copa-roster-options .v7-primary-actions,
+  #introSetup .copa-roster-options .v7-cta-stack #startBtn{width:100%}
+  #introSetup #startBtn{min-height:56px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #introSetup .copa-chair-nav,
+  #introSetup .copa-roster-options .v7-cta-stack #startBtn,
+  #introSetup .copa-roster-options .v7-cta-stack #startBtn::before{transition:none}
+}

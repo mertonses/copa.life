@@ -301,7 +301,7 @@ canvas{width:100%;height:auto;display:block;border:3px solid #FFFFFF;border-radi
 .lineups{display:flex;gap:8px;margin-bottom:14px;text-align:left}.xi{flex:1;border:1px solid var(--border-subtle);border-radius:var(--radius-md);overflow:hidden}.xi h4{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;background:var(--surface-muted);color:var(--color-ink);border-bottom:1px solid var(--border-subtle);padding:6px;text-align:center}.xi .pr{display:flex;gap:5px;padding:3px 6px;font-size:11px;border-bottom:1px solid var(--border-subtle)}.xi .pr:last-child{border:none}.xi .pr .pp{font-family:var(--mono);font-size:8px;color:var(--color-slate);width:26px;flex-shrink:0}.xi .pr .pnm{flex:1;font-family:var(--disp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xi .pr.star{background:rgba(104,117,124,.08)}.xi .pr.star .pnm{font-weight:700;color:var(--color-primary)}
 .statline{display:flex;border:1px solid var(--border-subtle);border-radius:var(--radius-md);overflow:hidden;margin-bottom:14px;background:var(--surface-elevated);box-shadow:var(--shadow-sm)}.stat{flex:1;padding:12px 6px;border-right:1px solid var(--border-subtle)}.stat:last-child{border:none}.stat .l{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--color-slate)}.stat .v{font-family:var(--mono);font-weight:700;font-size:19px}
 .copied{color:var(--color-primary);text-align:center;font-size:13px;font-family:var(--mono);height:16px;margin-top:8px}
-#result #againBtn,#result #shareCardBtn,#result #statsBtn{display:block;visibility:visible}
+#result #againBtn,#result #statsBtn{display:block;visibility:visible}
 .final-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;align-items:start}
 @media(min-width:700px){.final-row{grid-template-columns:1fr 1fr 1fr}}
 .econtile{min-width:0}
@@ -1770,7 +1770,6 @@ html[data-theme="dark"] .result .narrative-number.neutral{color:var(--status-inf
 #againBtn .again-dot{color:var(--color-slate);opacity:.72;margin:0 1px}
 #againBtn .again-life{color:var(--color-primary)}
 html[data-theme="dark"] #againBtn .again-copa{color:#101D28}
-#shareCardBtn,
 #statsBtn{
   background:rgba(255,255,255,.58);
 }
@@ -2524,18 +2523,15 @@ html[data-theme="dark"] .result .xi h4 small{
 
 /* Result actions need a clear hierarchy on the dark surface: inspect first,
    restart second. These also override legacy light button fills. */
-html[data-theme="dark"] #result #shareCardBtn,
 html[data-theme="dark"] #result #statsBtn{
   background:var(--surface-raised)!important;
   color:var(--text-primary)!important;
   border-color:var(--border-default)!important;
 }
-html[data-theme="dark"] #result #shareCardBtn:hover,
 html[data-theme="dark"] #result #statsBtn:hover{
   background:var(--surface-elevated)!important;
   border-color:var(--color-primary)!important;
 }
-html[data-theme="dark"] #result #shareCardBtn{background:transparent!important;color:#8D9BA5!important;border-color:#34434B!important}
 /* The shared ink token becomes light in dark mode. Pitch player cards must use
    a real dark surface instead, otherwise names and positions lose contrast. */
 html[data-theme="dark"] .scout-player-card{
@@ -3727,7 +3723,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 #result.result .result-decision-card h2{margin:10px 0 5px;color:#D6A21F;font:700 23px/1 "Arial Narrow",Arial,sans-serif}
 #result.result .result-decision-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;color:#8D9BA5;font:400 10px/1 "Arial Narrow",Arial,sans-serif}
 #result.result .result-decision-foot span:last-child{color:#D6A21F;font-size:18px}
-#result.result .result-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch;margin:0;padding:15px 30px;border:0;border-top:1px solid #34434B;border-radius:0;background:#0C1921}
+#result.result .result-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch;margin:0;padding:15px 30px;border:0;border-top:1px solid #34434B;border-radius:0;background:#0C1921}
  #result.result .result-action-copy{grid-column:1/-1;order:0;margin:0;color:#8D9BA5;font:400 12px/1.35 "Arial Narrow",Arial,sans-serif}
  #result.result .result-action{display:inline-flex;order:1;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:46px;margin:0;padding:11px 12px;border:1px solid #34434B;border-radius:3px;background:#172832;color:#F3F5F4;font:900 10px/1.15 "Arial Narrow",Arial,sans-serif;letter-spacing:1px;text-align:center}
 #result.result .result-action-icon{font-size:16px;line-height:1}
@@ -3856,16 +3852,14 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 #result.result .result-story-card p{font-size:12px;line-height:1.5}
 #result.result .result-trace{margin-top:19px}
 #result.result .result-decision-card h2{font-size:24px}
-#result.result .result-actions{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:10px;padding:16px 34px 19px}
+#result.result .result-actions{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:10px;padding:16px 34px 19px}
 #result.result .result-action-copy{margin-bottom:2px;color:#AEB8BA;font-size:12px}
 #result.result .result-action{min-height:50px;border-radius:5px;transition:transform .18s ease,filter .18s ease,border-color .18s ease}
 #result.result .result-action:hover{transform:translateY(-1px)}
 #result.result .result-action-new{order:1}
 #result.result .result-action-squad{order:2}
 #result.result .result-action-data{order:3}
-#result.result .result-action-share{order:4}
 #result.result .result-action-data{background:#12232F}
-#result.result .result-action-share{background:transparent;color:#C4CCCD}
 #result.result .result-datahub{padding:21px 34px 25px;background:#0C1921}
 #result.result .result-datahub[aria-hidden="true"]{display:none}
 #result.result .result-datahub-head{align-items:flex-start;margin-bottom:16px}
@@ -4034,7 +4028,7 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
 
 /* Final CTA hierarchy: one primary action, equal geometry, quiet utilities. */
 #result.result .result-actions{
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:10px;
 }
 #result.result .result-actions .result-action{
@@ -4057,25 +4051,9 @@ body.reduced-motion .sim-eventmap.is-micro-replay,.reduced-motion .event-row.is-
   background:#12232F;
   color:#C4CCCD;
 }
-#result.result .result-action-share{
-  order:3!important;
-  border-color:#34434B;
-  background:transparent!important;
-  color:#8D9BA5;
-}
-html[data-theme="dark"] #result.result .result-action-share{
-  background:transparent!important;
-  border-color:#34434B!important;
-  color:#8D9BA5!important;
-}
-html[data-theme="dark"] #result.result #shareCardBtn{
-  background:transparent!important;
-  border-color:#34434B!important;
-  color:#8D9BA5!important;
-}
 #result.result .result-action-new,
 #result.result .result-actions #againBtn{
-  order:4!important;
+  order:3!important;
   border-color:#F24A28;
   background:#F24A28;
   color:#0A1118;
@@ -4104,4 +4082,336 @@ html[data-theme="dark"] #result.result #shareCardBtn{
   #result.result .result-action-new{
     grid-column:auto!important;
   }
+}
+
+/* Result and squad modal typography: use the loaded Copa type system rather
+   than platform-dependent Arial Narrow/Impact fallbacks. */
+#result.result,
+#result.result *{
+  font-family:var(--disp)!important;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+#result.result .result-title,
+#result.result .result-score-panel strong{
+  font-family:"Barlow Condensed",var(--disp)!important;
+  font-weight:800;
+  text-rendering:geometricPrecision;
+}
+#result.result .result-kicker,
+#result.result .result-section-label,
+#result.result .result-story-state,
+#result.result .result-score-panel small,
+#result.result .result-summary .l,
+#result.result .result-action,
+#result.result .result-data-tab,
+#result.result .result-datahub-head> .result-datahub-controls>button{
+  font-family:var(--mono)!important;
+}
+.result-squad-modal,
+.result-squad-modal *{
+  font-family:var(--disp)!important;
+  font-synthesis:none;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.result-squad-modal .kithdr{
+  color:#F3F5F4;
+  font-family:"Barlow Condensed",var(--disp)!important;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:1.6px;
+}
+.result-squad-modal .kitsub{
+  color:#AEB8BA;
+  font-size:12px;
+  line-height:1.4;
+}
+.result-squad-modal .result-modal-close{
+  font-family:var(--disp)!important;
+  font-size:20px;
+  font-weight:800;
+}
+.result-squad-summary{
+  align-items:center;
+  min-height:48px;
+  font-family:var(--mono)!important;
+  letter-spacing:.08em;
+}
+.result-squad-formation{display:grid;gap:4px;min-width:0}
+.result-squad-formation small,
+.result-squad-list-head,
+.result-squad-scroll-hint{
+  color:#8D9BA5;
+  font-family:var(--mono)!important;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.12em;
+  line-height:1.2;
+  text-transform:uppercase;
+}
+.result-squad-formation strong{
+  color:#F3F5F4;
+  font-family:"Barlow Condensed",var(--disp)!important;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:.04em;
+}
+.result-squad-count{white-space:nowrap}
+.result-squad-count b{
+  color:#D6A21F;
+  font-family:var(--mono)!important;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+}
+.result-squad-list-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin:14px 4px 6px 0;
+  padding:0 11px;
+}
+.result-squad-list{
+  flex:1 1 auto;
+  min-height:0;
+  scrollbar-width:thin;
+  scrollbar-color:#52606A transparent;
+}
+.result-squad-list li.result-squad-player b{
+  color:#F3F5F4;
+  font-family:var(--disp)!important;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+.result-squad-list li.result-squad-player small,
+.result-squad-list li.result-squad-player strong,
+.result-squad-num{
+  font-family:var(--mono)!important;
+  font-variant-numeric:tabular-nums;
+}
+.result-squad-list li.result-squad-player strong{
+  font-size:16px;
+  font-weight:800;
+}
+.result-squad-scroll-hint{
+  flex:0 0 auto;
+  margin:8px 4px 0 0;
+  padding-top:2px;
+  color:#AEB8BA;
+  font-size:8px;
+  letter-spacing:.04em;
+  text-align:right;
+  text-transform:none;
+}
+.result-squad-modal .bact .btn{
+  font-family:var(--mono)!important;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+@media(max-width:720px){
+  .result-squad-list-head{margin-top:11px}
+  .result-squad-scroll-hint{font-size:7px}
+  #result.result .result-action-new{grid-column:1/-1!important}
+}
+
+/* The result CTA inherits the same confident treatment as the setup BAŞLA
+   action, so starting another run feels like a deliberate next step. */
+#result.result .result-action-new,
+#result.result .result-actions #againBtn{
+  position:relative;
+  overflow:hidden;
+  padding:0 48px 0 18px!important;
+  border:1.5px solid #FF806B!important;
+  border-radius:6px!important;
+  background:linear-gradient(135deg,#F24A28,#FF806B)!important;
+  color:#101D28!important;
+  font-family:var(--mono)!important;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:2px;
+  box-shadow:0 3px 0 var(--action-primary-hover),0 10px 24px color-mix(in srgb,var(--color-primary) 22%,transparent);
+  transition:background var(--tr-fast),transform var(--tr-fast),box-shadow var(--tr-fast),filter var(--tr-fast);
+}
+#result.result .result-action-new .result-action-icon,
+#result.result .result-actions #againBtn .result-action-icon{
+  display:none;
+}
+#result.result .result-action-new::after,
+#result.result .result-actions #againBtn::after{
+  content:"→";
+  position:absolute;
+  top:50%;
+  right:16px;
+  transform:translateY(-50%);
+  color:#101D28;
+  font:900 18px/1 var(--mono);
+  transition:transform var(--tr-fast);
+}
+#result.result .result-action-new:hover,
+#result.result .result-action-new:focus-visible,
+#result.result .result-actions #againBtn:hover,
+#result.result .result-actions #againBtn:focus-visible{
+  background:linear-gradient(135deg,#FF806B,#F24A28)!important;
+  filter:saturate(1.08) brightness(1.04);
+  transform:translateY(-2px);
+  box-shadow:0 5px 0 var(--action-primary-hover),0 14px 30px color-mix(in srgb,var(--color-primary) 30%,transparent);
+}
+#result.result .result-action-new:hover::after,
+#result.result .result-action-new:focus-visible::after,
+#result.result .result-actions #againBtn:hover::after,
+#result.result .result-actions #againBtn:focus-visible::after{
+  transform:translate(3px,-50%);
+}
+#result.result .result-action-new:active,
+#result.result .result-actions #againBtn:active{
+  transform:translateY(1px);
+  box-shadow:0 1px 0 var(--action-primary-hover),0 5px 12px color-mix(in srgb,var(--color-primary) 18%,transparent);
+}
+#result.result .result-action-new:disabled,
+#result.result .result-actions #againBtn:disabled{
+  filter:none;
+  background:var(--disabled-bg)!important;
+  color:var(--disabled-text)!important;
+  border-color:var(--border-default)!important;
+  box-shadow:none;
+}
+@media(prefers-reduced-motion:reduce){
+  #result.result .result-action-new,
+  #result.result .result-actions #againBtn,
+  #result.result .result-action-new::after,
+  #result.result .result-actions #againBtn::after{transition:none}
+}
+
+/* On compact screens the mobile experience portals #againBtn into a fixed
+   dock, so it needs the same CTA contract outside #result as well. */
+.mobile-action-dock[data-dock-kind="result"] #againBtn{
+  position:relative!important;
+  overflow:hidden!important;
+  padding:0 48px 0 18px!important;
+  border:1.5px solid #FF806B!important;
+  border-radius:6px!important;
+  background:linear-gradient(135deg,#F24A28,#FF806B)!important;
+  color:#101D28!important;
+  font-family:var(--mono)!important;
+  font-size:11px!important;
+  font-weight:950!important;
+  letter-spacing:2px!important;
+  box-shadow:0 3px 0 var(--action-primary-hover),0 10px 24px color-mix(in srgb,var(--color-primary) 22%,transparent)!important;
+  transition:background var(--tr-fast),transform var(--tr-fast),box-shadow var(--tr-fast),filter var(--tr-fast)!important;
+}
+.mobile-action-dock[data-dock-kind="result"] #againBtn .result-action-icon{display:none!important}
+.mobile-action-dock[data-dock-kind="result"] #againBtn::after{
+  content:"→";
+  position:absolute;
+  top:50%;
+  right:16px;
+  transform:translateY(-50%);
+  color:#101D28;
+  font:900 18px/1 var(--mono);
+  transition:transform var(--tr-fast);
+}
+.mobile-action-dock[data-dock-kind="result"] #againBtn:hover,
+.mobile-action-dock[data-dock-kind="result"] #againBtn:focus-visible{
+  background:linear-gradient(135deg,#FF806B,#F24A28)!important;
+  filter:saturate(1.08) brightness(1.04);
+  transform:translateY(-2px);
+  box-shadow:0 5px 0 var(--action-primary-hover),0 14px 30px color-mix(in srgb,var(--color-primary) 30%,transparent)!important;
+}
+.mobile-action-dock[data-dock-kind="result"] #againBtn:hover::after,
+.mobile-action-dock[data-dock-kind="result"] #againBtn:focus-visible::after{transform:translate(3px,-50%)}
+.mobile-action-dock[data-dock-kind="result"] #againBtn:active{
+  transform:translateY(1px);
+  box-shadow:0 1px 0 var(--action-primary-hover),0 5px 12px color-mix(in srgb,var(--color-primary) 18%,transparent)!important;
+}
+.mobile-action-dock[data-dock-kind="result"] #againBtn:disabled{
+  filter:none;
+  background:var(--disabled-bg)!important;
+  color:var(--disabled-text)!important;
+  border-color:var(--border-default)!important;
+  box-shadow:none!important;
+}
+
+/* Final visual refinement: make the next-run action clearly primary while
+   keeping the result surface calm and the mobile dock visually attached. */
+#result.result .result-actions{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);
+}
+#result.result .result-action-copy{
+  margin-bottom:5px!important;
+  color:#C4CCCD!important;
+  font-size:13px!important;
+  line-height:1.45!important;
+}
+#result.result .result-action-new,
+#result.result .result-actions #againBtn{
+  font-family:"Barlow Condensed",var(--disp)!important;
+  font-size:13px;
+  letter-spacing:1.8px;
+}
+#result.result .result-action-new::before,
+#result.result .result-actions #againBtn::before,
+.mobile-action-dock[data-dock-kind="result"] #againBtn::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:-90%;
+  left:-28%;
+  width:24%;
+  height:280%;
+  background:rgba(255,255,255,.18);
+  filter:blur(2px);
+  transform:rotate(18deg) translateX(-180%);
+  transition:transform .42s ease;
+  pointer-events:none;
+}
+#result.result .result-action-new>*,
+#result.result .result-actions #againBtn>*,
+.mobile-action-dock[data-dock-kind="result"] #againBtn>*{
+  position:relative;
+  z-index:1;
+}
+#result.result .result-action-new::after,
+#result.result .result-actions #againBtn::after,
+.mobile-action-dock[data-dock-kind="result"] #againBtn::after{
+  display:grid;
+  width:24px;
+  height:24px;
+  place-items:center;
+  border:1px solid rgba(16,29,40,.28);
+  border-radius:50%;
+  background:rgba(16,29,40,.1);
+  z-index:2;
+}
+#result.result .result-action-new:hover::before,
+#result.result .result-action-new:focus-visible::before,
+#result.result .result-actions #againBtn:hover::before,
+#result.result .result-actions #againBtn:focus-visible::before,
+.mobile-action-dock[data-dock-kind="result"] #againBtn:hover::before,
+.mobile-action-dock[data-dock-kind="result"] #againBtn:focus-visible::before{
+  transform:rotate(18deg) translateX(720%);
+}
+#result.result[data-result-kind="champion"] .result-action-new,
+#result.result[data-result-kind="champion"] .result-actions #againBtn{
+  border-color:#F3D36A!important;
+  background:linear-gradient(135deg,#D6A21F,#F3D36A)!important;
+  box-shadow:0 3px 0 #9C7310,0 10px 24px rgba(214,162,31,.24);
+}
+#result.result[data-result-kind="sacked"] .result-action-new,
+#result.result[data-result-kind="sacked"] .result-actions #againBtn{
+  border-color:#AEB8BA!important;
+  background:linear-gradient(135deg,#68757C,#AEB8BA)!important;
+  box-shadow:0 3px 0 #4B565D,0 10px 24px rgba(104,117,124,.24);
+}
+.mobile-action-dock[data-dock-kind="result"]{
+  border-top-color:rgba(174,184,186,.3)!important;
+  background:rgba(10,17,24,.82)!important;
+  box-shadow:0 -10px 28px rgba(10,17,24,.28)!important;
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+}
+.result-squad-list{
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
 }

@@ -137,34 +137,36 @@ if("serviceWorker"in navigator){
       <button class="mode-card mode-card-classic is-selected" type="button" data-mode-choice="classic" aria-describedby="lifeModeDescription">
         <span class="mode-card-backdrop" aria-hidden="true"></span>
         <span class="mode-card-shade" aria-hidden="true"></span>
-        <span class="mode-card-topline"><span class="mode-card-index">01</span><span class="mode-card-type" data-mode-copy="storyMode">HİKÂYE MODU</span></span>
-        <span class="mode-card-emblem" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 34V15l15-6 15 6v19M5 39h38M16 34V22h16v12M19 16h10"/></svg></span>
+        <span class="mode-card-topline"><span class="mode-card-type" data-mode-copy="storyMode">HİKÂYE MODU</span></span>
+        <span class="mode-card-emblem mode-card-life-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M12 14h40v36H12z"/><path d="M32 14v36M12 32h40"/><circle cx="32" cy="32" r="7"/><path class="mode-mark-route" d="M18 45c6-8 10-5 15-11 4-5 7-11 15-15"/><circle class="mode-mark-node" cx="18" cy="45" r="2.2"/></svg></span>
         <span class="mode-card-copy" id="lifeModeDescription">
           <small data-mode-copy="solo">TEK OYUNCULU</small>
           <strong class="mode-title mode-title-life"><span>COPA</span> <em>LIFE</em></strong>
           <span data-mode-copy="lifeDesc">Kadronu kur, seçimlerini yap ve kendi futbol hikâyeni yaz.</span>
         </span>
+        <span class="mode-card-stamp" data-mode-copy="lifeMeta">KARİYER ODAKLI</span>
         <span class="mode-card-features" aria-label="Copa Life özellikleri" data-mode-aria="lifeFeatures"><span data-mode-copy="lifeFeatureStory">HİKÂYE</span><span data-mode-copy="lifeFeatureLength">7 MAÇ</span><span data-mode-copy="lifeFeatureSave">OTOMATİK KAYIT</span></span>
-        <span class="mode-card-status"><span><small data-mode-copy="lifeStatusLabel">KARİYER DURUMU</small><b data-mode-state="life">YENİ KARİYER · 7 MAÇ</b></span><span class="mode-card-cta"><span data-mode-copy="lifeCta">COPA LIFE'I BAŞLAT</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span></span>
+        <span class="mode-card-status"><span><small data-mode-copy="lifeStatusLabel">MEVCUT KARİYERİN</small><b data-mode-state="life">YENİ KARİYER · 7 MAÇ</b></span><span class="mode-card-cta"><span data-mode-copy="lifeCta">HİKÂYEYE BAŞLA</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span></span>
       </button>
       <button class="mode-card mode-card-arena" id="arenaModeBtn" type="button" data-mode-choice="arena" aria-describedby="arenaModeDescription">
         <span class="mode-card-backdrop" aria-hidden="true"></span>
         <span class="mode-card-shade" aria-hidden="true"></span>
-        <span class="mode-card-topline"><span class="mode-card-index">02</span><span class="mode-card-live"><i></i> LIVE</span></span>
-        <span class="mode-card-emblem mode-card-crown" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 15l10 9 7-15 7 15 10-9-4 23H11z"/><path d="M12 42h24"/></svg></span>
+        <span class="mode-card-topline"><span class="mode-card-live"><i></i> LIVE</span></span>
+        <span class="mode-card-emblem mode-card-arena-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path class="mode-mark-score" d="M14 13h36M14 51h36"/><path d="M22 21h20l-2 22H24z"/><path d="M22 24h-5a7 7 0 0 0 7 9M42 24h5a7 7 0 0 1-7 9M29 43v6M35 43v6M25 51h14"/><circle class="mode-mark-node" cx="18" cy="13" r="2"/><circle class="mode-mark-node" cx="46" cy="13" r="2"/></svg></span>
         <span class="mode-card-copy" id="arenaModeDescription">
           <small data-mode-copy="multiplayer">ÇOK OYUNCULU</small>
-          <strong class="mode-title mode-title-arena"><span>COPA</span> <em>ARENA</em><span class="mode-title-crown" aria-hidden="true"><svg viewBox="0 0 18 14"><path d="M1 3.5 5.3 7 9 1l3.7 6L17 3.5 15.5 12h-13z"/></svg></span></strong>
+          <strong class="mode-title mode-title-arena"><span>COPA</span> <em>ARENA</em></strong>
           <span data-mode-copy="arenaDesc">Canlı eşleşmeler, dereceli yolculuk ve rövanş heyecanı.</span>
         </span>
+        <span class="mode-card-stamp" data-mode-copy="arenaMeta">DERECELİ · CANLI</span>
         <span class="mode-card-features" aria-label="Copa Arena özellikleri" data-mode-aria="arenaFeatures"><span data-mode-copy="arenaFeatureRanked">DERECELİ</span><span data-mode-copy="arenaFeatureLive">CANLI EŞLEŞME</span><span data-mode-copy="arenaFeatureSeason">SEZON YOLU</span></span>
-        <span class="mode-card-status"><span><small data-mode-copy="arenaStatusLabel">ARENA DURUMU</small><b data-mode-state="arena">SERVİS HAZIR · DERECELİ</b></span><span class="mode-card-cta"><span data-mode-copy="arenaCta">ARENA'YA GİR</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span></span>
+        <span class="mode-card-status"><span><small data-mode-copy="arenaStatusLabel">ARENA PROFİLİN</small><b data-mode-state="arena">SERVİS HAZIR · DERECELİ</b></span><span class="mode-card-cta"><span data-mode-copy="arenaCta">ARENA'YA GİR</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span></span>
       </button>
     </div>
     <a class="mode-gate-app-promo" href="https://play.google.com/store/apps/details?id=life.copa.app" target="_blank" rel="noopener noreferrer" aria-label="Google Play'den Copa Life uygulamasını indir" data-mode-aria="appLabel">
       <span class="mode-gate-app-new" data-mode-copy="appNew">YENİ</span>
       <span class="mode-gate-app-icon" aria-hidden="true"><img src="favicon.svg" alt=""></span>
-      <span class="mode-gate-app-copy"><small data-mode-copy="appKicker">MOBİLDE DE OYNA</small><strong data-mode-copy="appTitle">Copa Life Android'de</strong><em data-mode-copy="appDescription">Kariyerine telefondan devam et.</em></span>
+      <span class="mode-gate-app-copy"><small data-mode-copy="appKicker">MOBİLDE DE OYNA</small><strong data-mode-copy="appTitle">Kariyerine telefondan devam et</strong><em data-mode-copy="appDescription">Kadron ve ilerlemen yanında.</em></span>
       <span class="mode-gate-app-visual" aria-hidden="true"><span class="mode-gate-phone"><img src="assets/screenshots/android/draft-current.png" alt=""></span><span class="mode-gate-app-qr"><img src="assets/google-play-qr.png" alt=""></span></span>
       <span class="mode-gate-app-cta" aria-hidden="true"><img data-mode-badge="tr" src="assets/google-play-hemen-indir.webp" alt="Google Play'den hemen indirin"><img data-mode-badge="en" src="assets/get-it-on-google-play-badge.png" alt="Get it on Google Play"></span>
     </a>
@@ -182,6 +184,7 @@ if("serviceWorker"in navigator){
 
   <section id="intro" class="hero">
    <div id="introLand">
+    <div class="v7-landing-panel">
     <div class="v7-hero-head">
       <div class="v7-hero-copy">
         <h2 class="v7-tagline">Zar at. Kadronu kur.<br><span class="v7-tagline-accent">Kadere meydan oku.</span></h2>
@@ -189,10 +192,6 @@ if("serviceWorker"in navigator){
       </div>
       <aside class="v7-hero-side">
         <div class="tactical-board" aria-hidden="true">
-          <div class="tactical-board-top">
-            <span class="tactical-board-id"><i></i> PLAN / 04</span>
-            <span class="tactical-board-clock"><b></b> <span id="tacticalClock">12:14</span></span>
-          </div>
           <div class="tactical-stage">
             <svg class="tactical-diagram" viewBox="0 0 360 144" preserveAspectRatio="xMidYMid meet" focusable="false">
               <defs>
@@ -249,76 +248,75 @@ if("serviceWorker"in navigator){
               </g>
             </svg>
           </div>
-          <div class="tactical-board-bottom">
-            <span class="tactical-formation" id="tacticalFormation">4–3–3</span>
-            <span class="tactical-metric"><span id="tacticalPossessionWord">TOPLA</span> <strong id="tacticalPossession">57%</strong></span>
-            <span class="tactical-metric">xG <strong id="tacticalXg">0.62</strong></span>
-            <span class="tactical-signal"><i></i><i></i><i></i><i></i></span>
-          </div>
         </div>
       </aside>
     </div>
-    <div class="mechanics" id="mechSection" data-nosnippet>
-      <div class="mstep"><span class="mn">1</span><p class="mt">Diziliş ve Başkan<small>Dizilişini ve başkanını seç.</small></p></div>
-      <div class="mstep"><span class="mn">2</span><p class="mt">Zar At<small>Mevki adaylarını gör ve seç.</small></p></div>
-      <div class="mstep"><span class="mn">3</span><p class="mt">Kadronu Kur<small>Kadronu kartlarla güçlendir.</small></p></div>
-      <div class="mstep"><span class="mn">4</span><p class="mt">Finale Ulaş<small>Strateji kur; şansa güvenme.</small></p></div>
+    <div class="mechanics" id="mechSection" role="list" data-nosnippet aria-label="Oyun adımları">
+      <div class="mstep is-active" role="listitem" tabindex="0" aria-describedby="mech-tip-1"><span class="mn" aria-hidden="true">1</span><p class="mt">Diziliş ve Başkan<small id="mech-tip-1">Dizilişini ve başkanını seç.</small></p></div>
+      <div class="mstep" role="listitem" tabindex="0" aria-describedby="mech-tip-2"><span class="mn" aria-hidden="true">2</span><p class="mt">Zar At<small id="mech-tip-2">Mevki adaylarını gör ve seç.</small></p></div>
+      <div class="mstep" role="listitem" tabindex="0" aria-describedby="mech-tip-3"><span class="mn" aria-hidden="true">3</span><p class="mt">Kadronu Kur<small id="mech-tip-3">Kadronu kartlarla güçlendir.</small></p></div>
+      <div class="mstep" role="listitem" tabindex="0" aria-describedby="mech-tip-4"><span class="mn" aria-hidden="true">4</span><p class="mt">Finale Ulaş<small id="mech-tip-4">Strateji kur; şansa güvenme.</small></p></div>
+    </div>
     </div>
    </div>
    <div id="introSetup">
-    <div class="v7-setup-group v7-setup-twocol copa-setup-stack">
-      <div class="v7-setup-subcol">
-        <div class="v7-sec-lbl" id="pickhdr">Dizilişini seç</div>
-        <div class="formpick" id="formpick"></div>
-      </div>
-      <div class="v7-setup-subcol copa-chair-subcol">
-        <div class="v7-sec-lbl" id="chairhdr">Başkanını seç</div>
-        <section class="copa-chair-selection" id="chairSelectionSurface" aria-labelledby="chairhdr">
-          <div class="copa-chair-workspace">
-            <section class="copa-chair-stage-panel" aria-label="Başkan profili">
-              <div class="copa-chair-stage-head"><span>BAŞKAN PROFİLİ</span><strong class="js-chair-stage-index">01 / 06</strong></div>
-              <div class="copa-chair-stage-frame">
-                <span class="copa-chair-stage-grid" aria-hidden="true"></span>
-                <span class="copa-chair-stage-spotlight" aria-hidden="true"></span>
-                <div class="copa-chair-stage-kicker js-chair-stage-type">EKONOMİ</div>
-                <h2 class="copa-chair-stage-title js-chair-stage-title">PATRON<br>BAŞKAN</h2>
-                <p class="copa-chair-stage-role js-chair-stage-role">BÜYÜK PATRON</p>
-                <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="eager" fetchpriority="high" decoding="async"></div>
-              </div>
-            </section>
-            <section class="copa-chair-detail-panel" aria-label="Başkan ayrıntıları">
-              <div class="copa-chair-detail-head"><div><span class="copa-chair-detail-kicker js-chair-detail-type">EKONOMİ</span><h2 class="js-chair-detail-title">PATRON BAŞKAN</h2><p class="js-chair-detail-role">BÜYÜK PATRON</p></div><strong class="js-chair-detail-index">01 / 06</strong></div>
-              <p class="copa-chair-detail-desc js-chair-detail-desc"></p>
-              <div class="copa-chair-metrics"><div><small>BAŞLANGIÇ KASASI</small><b class="js-chair-cash">€30M</b></div><div><small>BORÇ LİMİTİ</small><b class="js-chair-debt">−€28M</b></div></div>
-              <div class="copa-chair-contracts"><div><small>ANA AVANTAJ</small><p class="js-chair-advantage"></p></div><div><small>TETİKLEYİCİ</small><p class="js-chair-trigger"></p></div><div><small>KIRMIZI ÇİZGİ</small><p class="js-chair-redline"></p></div></div>
-              <div class="copa-chair-detail-actions"><button class="btn btn-go js-chair-primary" type="button">BAŞKANI SEÇ</button><div><button class="copa-chair-nav js-chair-prev" type="button">← ÖNCEKİ</button><button class="copa-chair-nav js-chair-next" type="button">SONRAKİ →</button></div></div>
-            </section>
+    <section class="copa-setup-container" id="copaSetupContainer" aria-labelledby="setupContainerTitle">
+      <div class="copa-setup-heading" id="setupContainerTitle">KADRO KURULUMU</div>
+      <div class="v7-setup-group v7-setup-twocol copa-setup-fields">
+        <div class="copa-roster-options">
+          <div class="copa-formation-panel">
+            <div class="v7-setup-subcol copa-formation-subcol">
+              <div class="v7-sec-lbl" id="pickhdr">Dizilişini seç</div>
+              <div class="formpick" id="formpick"></div>
+            </div>
           </div>
-          <div class="copa-chair-rail-head"><span>BAŞKANLAR</span><small>Aktif kartı incele · sürükleyerek keşfet</small></div>
-          <div class="chairpickrow" id="chairpick"></div>
-        </section>
+          <div class="copa-country-panel">
+            <div class="v7-setup-group copa-country-group">
+              <div class="v7-sec-lbl" id="countryhdr">Ülkeni Seç</div>
+              <div class="countrypick" id="countryPick">
+                <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye"><img src="assets/flags/TR.svg" alt="">Türkiye</button>
+                <button data-country="IT" onclick="pickCountry('IT')" title="İtalya"><img src="assets/flags/IT.svg" alt="">İtalya</button>
+                <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.svg" alt="">İngiltere</button>
+                <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.svg" alt="">İspanya</button>
+                <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.svg" alt="">Almanya</button>
+                <button data-country="JP" onclick="pickCountry('JP')" title="Japonya"><img src="assets/flags/JP.svg" alt="">Japonya</button>
+              </div>
+            </div>
+          </div>
+          <div class="v7-cta-stack">
+            <div class="v7-primary-actions">
+              <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
+            </div>
+            <div class="advanced-wrap hidden" aria-hidden="true">
+              <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div class="v7-setup-subcol copa-chair-subcol">
+          <section class="copa-chair-selection" id="chairSelectionSurface" aria-label="Başkan profili">
+            <div class="copa-chair-workspace">
+              <section class="copa-chair-stage-panel" aria-label="Başkan profili">
+                <div class="copa-chair-stage-frame">
+                  <span class="copa-chair-stage-grid" aria-hidden="true"></span>
+                  <span class="copa-chair-stage-spotlight" aria-hidden="true"></span>
+                  <div class="copa-chair-stage-kicker js-chair-stage-type">EKONOMİ</div>
+                  <h2 class="copa-chair-stage-title js-chair-stage-title">PATRON<br>BAŞKAN</h2>
+                  <p class="copa-chair-stage-role js-chair-stage-role">BÜYÜK PATRON</p>
+                  <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="eager" fetchpriority="high" decoding="async"></div>
+                  <div class="copa-chair-stage-actions" aria-label="Başkan navigasyonu"><button class="copa-chair-nav js-chair-prev" type="button" aria-label="Önceki başkan" title="Önceki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><button class="copa-chair-nav js-chair-next" type="button" aria-label="Sonraki başkan" title="Sonraki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
+                </div>
+              </section>
+              <section class="copa-chair-detail-panel" aria-label="Başkan ayrıntıları">
+                <div class="copa-chair-detail-head"><div><span class="copa-chair-detail-kicker js-chair-detail-type">EKONOMİ</span><h2 class="js-chair-detail-title">PATRON BAŞKAN</h2><p class="js-chair-detail-role">BÜYÜK PATRON</p></div><div class="copa-chair-detail-meta"><span class="copa-chair-selected-mark js-chair-selected-mark" role="status" aria-label="Bu başkan seçildi">✓</span><strong class="js-chair-detail-index">01 / 06</strong></div></div>
+                <p class="copa-chair-detail-desc js-chair-detail-desc"></p>
+                <div class="copa-chair-metrics"><div><small>BAŞLANGIÇ KASASI</small><b class="js-chair-cash">€30M</b></div><div><small>BORÇ LİMİTİ</small><b class="js-chair-debt">−€28M</b></div></div>
+                <div class="copa-chair-contracts"><div><small>GÜÇLÜ YANI</small><p class="js-chair-advantage"></p></div><div><small>TAKIM ETKİSİ</small><p class="js-chair-trigger"></p></div><div><small>DİKKAT</small><p class="js-chair-redline"></p></div></div>
+              </section>
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
-    <div class="v7-setup-group">
-      <div class="v7-sec-lbl" id="countryhdr">Ülkeni Seç</div>
-      <div class="countrypick" id="countryPick">
-        <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye"><img src="assets/flags/TR.svg" alt="">Türkiye</button>
-        <button data-country="IT" onclick="pickCountry('IT')" title="İtalya"><img src="assets/flags/IT.svg" alt="">İtalya</button>
-        <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.svg" alt="">İngiltere</button>
-        <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.svg" alt="">İspanya</button>
-        <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.svg" alt="">Almanya</button>
-        <button data-country="JP" onclick="pickCountry('JP')" title="Japonya"><img src="assets/flags/JP.svg" alt="">Japonya</button>
-      </div>
-    </div>
-    <div class="v7-cta-stack">
-      <div class="v7-summary" id="introSummary"></div>
-      <div class="v7-primary-actions">
-        <button class="btn btn-go" id="startBtn" onclick="normalStart()">BAŞLA</button>
-      </div>
-      <div class="advanced-wrap hidden" aria-hidden="true">
-        <div class="advanced-body hidden" data-advanced-settings><input id="seedInput" maxlength="14" hidden></div>
-      </div>
-    </div>
+    </section>
     <div class="cover" style="display:none"><picture><source srcset="assets/mascot.webp" type="image/webp"><img class="mascot" alt="Copa Life mascot" src="assets/mascot.webp" loading="lazy" decoding="async"></picture><div class="est">EST · 1974</div><div class="crest"></div><h1 id="coverTitle">Copa Life</h1><div class="sub2" id="coverSub">Türkiye Ulusal Kupası</div><div class="rule"></div><div class="blurb" id="coverBlurb">—</div></div>
     <div class="artnote" id="lowryNote" style="display:none"></div>
     <div class="metaline" id="metaline"></div>
@@ -371,6 +369,7 @@ if("serviceWorker"in navigator){
       </div>
       <div class="styletag" id="styletag">—</div>
       <div class="final-pills" id="finalPills"></div>
+      <aside class="relationship-notice hidden" id="relationshipNotice" aria-live="polite"></aside>
       <div class="pitch-area">
         <div class="pitch-tactical-strip"><div class="pitch-overlay" id="pitchOverlay"><div class="cardrow" id="cardrow"></div></div></div>
         <div class="pitch" id="hubPitch" style="aspect-ratio:68/60"><div class="pl half"></div><div class="pl circ"></div><div class="pl boxb"></div><div class="pl boxt"></div></div>
@@ -420,7 +419,6 @@ if("serviceWorker"in navigator){
       </div>
       <div class="result-actions">
         <p class="result-action-copy" id="resultActionCopy">Bu tur kaybolmadı. Kulüp kariyerine işlendi.</p>
-        <button class="result-action result-action-share" id="shareCardBtn" onclick="showShareCard()"><span class="result-action-icon" aria-hidden="true">↗</span><span class="result-action-label" id="shareBtnLbl">PAYLAŞ</span></button>
         <button class="result-action result-action-data" id="resultMoreBtn" onclick="toggleResultDetails()" aria-expanded="false" aria-controls="resultDatahub"><span class="result-action-icon" aria-hidden="true">▥</span><span id="resultMoreLbl">SEZON ÖZETİ</span><span class="result-action-arrow" aria-hidden="true">↓</span></button>
         <button class="result-action result-action-squad" id="squadResultBtn" onclick="showResultSquad()"><span class="result-action-icon" aria-hidden="true">♙</span><span id="squadResultLbl">KADROYU İNCELE</span><span class="result-action-arrow" aria-hidden="true">→</span></button>
         <button class="result-action result-action-new" id="againBtn" onclick="restartAfterRunAd()"><span class="result-action-icon" aria-hidden="true">→</span><span id="againBtnLabel">YENİ TUR</span></button>
@@ -658,7 +656,6 @@ function fgFor(bg){const c=bg.replace("#","");const r=parseInt(c.substr(0,2),16)
 const $=id=>document.getElementById(id);
 function motionReduced(){return !!(document.body.classList.contains("reduced-motion")||(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches));}
 /* ===== Landing tactical canvas ===== */
-let _tacticalTimer=null,_tacticalSeconds=12*60+14,_tacticalPossession=57,_tacticalXg=.62;
 const _tacticalShirtNumbers=[1,3,4,5,2,6,8,10,7,9,11];
 function _tacticalPoint(slot){return{x:28+(100-Number(slot[2]))*2.75,y:18+Number(slot[1])*1.08};}
 function _updateTacticalFormation(name){
@@ -679,17 +676,7 @@ function _updateTacticalFormation(name){
   if(run)run.setAttribute("d",`M${t.x} ${t.y}C${t.x+28} ${t.y} 307 78 331 72`);
   const label=$("tacticalFormation");if(label)label.textContent=String(name||"4-3-3").replaceAll("-","–");
 }
-function _renderTacticalLiveData(){
-  const clock=$("tacticalClock"),pos=$("tacticalPossession"),xg=$("tacticalXg"),word=$("tacticalPossessionWord");
-  const min=Math.floor(_tacticalSeconds/60),sec=_tacticalSeconds%60;if(clock)clock.textContent=String(min).padStart(2,"0")+":"+String(sec).padStart(2,"0");
-  if(pos)pos.textContent=_tacticalPossession+"%";if(xg)xg.textContent=_tacticalXg.toFixed(2);if(word)word.textContent=LT("TOPLA","POS","POSESIÓN","BALL","POS");
-}
-function _tickTacticalBoard(){
-  const intro=$("intro"),land=$("introLand");if(!intro||intro.classList.contains("hidden")||!land||land.classList.contains("hidden"))return;
-  const next=_tacticalSeconds+9+Math.floor(Math.random()*13);if(next>=90*60){_tacticalSeconds=0;_tacticalXg=.05;}else{_tacticalSeconds=next;_tacticalXg=Math.min(3.4,_tacticalXg+.01+Math.random()*.045);}
-  _tacticalPossession=Math.max(44,Math.min(66,_tacticalPossession+Math.floor(Math.random()*3)-1));_renderTacticalLiveData();
-}
-function startTacticalBoard(){_updateTacticalFormation(typeof formName!=="undefined"?formName:"4-3-3");_renderTacticalLiveData();if(_tacticalTimer)clearInterval(_tacticalTimer);_tacticalTimer=setInterval(_tickTacticalBoard,1250);}
+function startTacticalBoard(){_updateTacticalFormation(typeof formName!=="undefined"?formName:"4-3-3");}
 /* ===== SVG constants ===== */
 const _SIL=`<svg class="slot-sil" viewBox="0 0 20 26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="6" r="3.5"/><path d="M3 25C3 18 6 15 10 15C14 15 17 18 17 25"/></svg>`;
 const _SLOT_SIL={GK:_SIL,DEF:_SIL,MID:_SIL,FWD:_SIL};
@@ -816,7 +803,7 @@ function applyStatic(){const x=L();const tr=LANG==="tr";document.title=tr?"copa.
     ['Wähle Formation und <mark>deinen Präsidenten.</mark>','Würfle und <mark>baue deinen Kader</mark> Position für Position.','Stelle den Kader auf, <mark>verstärke ihn mit Karten</mark> und manage Verletzungen.','Baue deine Strategie. <mark>Glück allein reicht nicht.</mark>'],
     ['Scegli il modulo e <mark>il presidente.</mark>','Lancia il dado: <mark>costruisci la rosa</mark> ruolo per ruolo.','Crea la rosa, <mark>potenziala con le carte</mark> e gestisci gli infortuni.','Costruisci la strategia. <mark>La fortuna non basta.</mark>']
   );_updateIntroSummary();
-  document.querySelectorAll(".mstep .mt").forEach((el,i)=>{if(mechTexts[i])el.innerHTML=mechTexts[i];});
+  document.querySelectorAll(".mstep .mt").forEach((el,i)=>{if(mechTexts[i])el.innerHTML=mechTexts[i];const tip=el.querySelector("small");if(tip)tip.id=`mech-tip-${i+1}`;});
   if($("logoSlogan"))$("logoSlogan").textContent=LT("kadere meydan okuduğun kadro yönetim oyunu","the squad management game where you defy fate","el juego de gestión de plantilla donde desafías al destino","das Kadermanagementspiel, in dem du das Schicksal herausforderst","il gioco di gestione rosa in cui sfidi il destino");
   document.title=CopaText("Copa Life — Roguelite futbol. Şans + strateji.","Copa Life — Roguelite football. Luck + strategy.");
   if($("coverTitle"))$("coverTitle").textContent="Copa Life";
@@ -829,7 +816,7 @@ function _formationMasteryBadge(mastery){return mastery?`<span class="setup-mast
 function requestFormationUnlock(f){
   const run=api=>{const summary=api.careerSummary();if(!summary.licenses){showToast(CopaText("Bu diziliş için Taktik Lisansı gerekiyor.","A Tactical Licence is required for this formation."));return;}const tr=LANG==="tr";showModal(`<div class="formation-unlock-modal"><div class="kithdr">${tr?"TAKTİK LİSANSI":"TACTICAL LICENCE"}</div><div class="kitsub">${tr?`${f} dizilişini kalıcı olarak açmak ister misin? İki tur arasında yalnız bir lisans kullanılabilir.`:`Permanently unlock ${f}? Only one licence can be used between runs.`}</div><div class="bact"><button class="btn btn-primary" onclick="confirmFormationUnlock('${f}')">${tr?"DİZİLİŞİ AÇ":"UNLOCK FORMATION"}</button><button class="btn btn-ghost" onclick="closeModal()">${tr?"VAZGEÇ":"CANCEL"}</button></div></div>`);};if(window.CopaMeta)run(CopaMeta);else CopaLazy.ensureMetaProgression().then(run);}
 function confirmFormationUnlock(f){if(!window.CopaMeta)return false;const result=CopaMeta.requestFormationUnlock(f);if(!result.ok){showToast(result.reason==="window_closed"?(CopaText("Bu iki tur arasında bir lisans zaten kullandın.","You already used a licence between these runs.")):(CopaText("Kullanılabilir Taktik Lisansı yok.","No Tactical Licence is available.")));return false;}closeModal();pickForm(f);showToast((CopaText("Yeni diziliş açıldı: ","Formation unlocked: "))+f);return true;}
-function buildFormButtons(){const fp=$("formpick");fp.innerHTML="";if(formName&&!unlockedForms.includes(formName)){formName=unlockedForms[0]||"4-4-2";slots=FORMATIONS[formName];}const _checkIco=`<svg class="fbtn-check-ico" viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,7.5 5.5,11 12,3.5"/></svg>`;FORMORDER.forEach(f=>{const lk=!unlockedForms.includes(f),mastery=_masteryDisplay("formations",f);const b=document.createElement("button");b.className="fbtn"+(lk?" locked":"")+(formName===f?" sel":"");b.setAttribute("aria-pressed",String(!lk&&formName===f));b.setAttribute("aria-label",mastery?`${f}, ${mastery.tooltip}`:f);if(mastery)b.title=mastery.tooltip;b.style.position="relative";const fmSlots=FORMATIONS[f]||[];const dots=fmSlots.map(s=>`<circle cx="${(s[1]/100*24+2).toFixed(1)}" cy="${(s[2]/100*24+2).toFixed(1)}" r="1.6" fill="currentColor" opacity=".9"/>`).join("");const preview=`<div class="form-dot-preview"><svg viewBox="0 0 28 28" width="56" height="56"><rect width="28" height="28" rx="2" fill="rgba(255,255,255,.06)"/><line x1="2" y1="14" x2="26" y2="14" stroke="currentColor" stroke-width=".4" opacity=".25"/><rect x="9" y="1" width="10" height="3.5" rx=".8" fill="none" stroke="currentColor" stroke-width=".4" opacity=".25"/><rect x="9" y="23.5" width="10" height="3.5" rx=".8" fill="none" stroke="currentColor" stroke-width=".4" opacity=".25"/>${dots}</svg></div>`;const lock=lk?`<svg viewBox='0 0 14 18' width='11' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='lockicon'><rect x='2' y='8' width='10' height='9' rx='1.5'/><path d='M4 8V6a3 3 0 0 1 6 0v2'/><circle cx='7' cy='12.5' r='1.2' fill='currentColor'/></svg>`:"";b.innerHTML=preview+`<span class="formation-name-row"><span class="formation-card-name">${f}</span>${lock}</span>`+(!lk&&formName===f?_checkIco:"")+_formationMasteryBadge(mastery);if(!lk)b.onclick=()=>pickForm(f);else b.onclick=()=>requestFormationUnlock(f);fp.appendChild(b);});
+function buildFormButtons(){const fp=$("formpick");fp.innerHTML="";if(formName&&!unlockedForms.includes(formName)){formName=unlockedForms[0]||"4-4-2";slots=FORMATIONS[formName];}FORMORDER.forEach(f=>{const lk=!unlockedForms.includes(f),mastery=_masteryDisplay("formations",f);const b=document.createElement("button");b.className="fbtn"+(lk?" locked":"")+(formName===f?" sel":"");b.setAttribute("aria-pressed",String(!lk&&formName===f));b.setAttribute("aria-label",mastery?`${f}, ${mastery.tooltip}`:f);if(mastery)b.title=mastery.tooltip;b.style.position="relative";const lock=lk?`<svg viewBox='0 0 14 18' width='11' height='14' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='lockicon'><rect x='2' y='8' width='10' height='9' rx='1.5'/><path d='M4 8V6a3 3 0 0 1 6 0v2'/><circle cx='7' cy='12.5' r='1.2' fill='currentColor'/></svg>`:"";b.innerHTML=`<span class="formation-name-row"><span class="formation-card-name">${f}</span>${lock}</span>`+_formationMasteryBadge(mastery);if(!lk)b.onclick=()=>pickForm(f);else b.onclick=()=>requestFormationUnlock(f);fp.appendChild(b);});
 fp.onkeydown=e=>{const btns=[...fp.querySelectorAll(".fbtn:not(.locked)")];const idx=btns.indexOf(document.activeElement);if(idx<0)return;if(e.key==="ArrowRight"||e.key==="ArrowDown"){e.preventDefault();btns[(idx+1)%btns.length].focus();}else if(e.key==="ArrowLeft"||e.key==="ArrowUp"){e.preventDefault();btns[(idx-1+btns.length)%btns.length].focus();}else if(e.key===" "||e.key==="Enter"){e.preventDefault();btns[idx].click();}};
 buildChairButtons();}
 function randomClubName(){
@@ -900,15 +887,16 @@ function chairProfileSrc(id){return`assets/chairs_profile_hd/${id}.webp`;}
 function chairProfileThumbSrc(id){return`assets/chairs_profile_hd/thumbs/${id}.webp`;}
 function chairShortLabel(id){const cd=L().chair&&L().chair[id],name=(cd&&cd.n)||id;const labels={en:{babacan:"Patron",leydi:"Diplomat",pinti:"Miser",sansasyoncu:"Showman",torpilci:"Fixer",cilgin:"Professor"},es:{babacan:"Patrón",leydi:"Diplomático",pinti:"Tacaño",sansasyoncu:"Showman",torpilci:"Arreglador",cilgin:"Profesor"},de:{babacan:"Patron",leydi:"Diplomat",pinti:"Geizhals",sansasyoncu:"Showman",torpilci:"Strippenzieher",cilgin:"Professor"},it:{babacan:"Patron",leydi:"Diplomatico",pinti:"Tirchio",sansasyoncu:"Showman",torpilci:"Faccendiere",cilgin:"Professore"}};return labels[LANG]&&labels[LANG][id]||name.replace(/^The\s+/i,"").split(" ")[0];}
 function buildChairButtons(){const cp=$("chairpick");if(!cp)return;const x=L();cp.innerHTML="";const _lockSVG=`<svg class="chairbtn-lockico" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3V7a5 5 0 0 1 5-5m0 12a2 2 0 1 0 0 4 2 2 0 0 0-4m0-10a3 3 0 0 0-3-3v3h6V7a3 3 0 0 0-3-3"/></svg>`;CHAIRMEN.forEach(c=>{const lk=!unlockedChairs.includes(c.id),isSel=selectedChairId===c.id,mastery=_masteryDisplay("chairmen",c.id);const b=document.createElement("button");b.className="fbtn chairbtn"+(lk?" locked":"")+(isSel?" sel":"");b.dataset.chairId=c.id;b.setAttribute("aria-selected",isSel?"true":"false");const norm=chairProfileSrc(c.id),thumbNorm=chairProfileThumbSrc(c.id);const cname=(x.chair&&x.chair[c.id]&&x.chair[c.id].n)||c.id;const shortLbl=chairShortLabel(c.id);b.setAttribute("aria-label",mastery?`${cname}, ${mastery.tooltip}`:cname);if(mastery)b.title=mastery.tooltip;const thumb=`<img src="${thumbNorm}" class="chairthumb" alt="${cname}" loading="lazy" decoding="async" onerror="this.style.display='none'">`;const checkBadge=isSel?`<span class="chairbtn-check" aria-hidden="true">✓</span>`:"";const nameLbl=`<span class="chairbtn-name" title="${cname}">${shortLbl}</span>`;const masteryBadge=mastery?`<span class="setup-mastery tier-${mastery.tier}" title="${mastery.tooltip}" aria-hidden="true"><span class="mastery-star">★</span>${mastery.count}</span>`:"";b.innerHTML=thumb+checkBadge+`<span class="chair-name-row">${nameLbl}${masteryBadge}</span>`+(lk?`<div class="chairbtn-lockover">${_lockSVG}</div>`:"");if(!lk){b.onclick=()=>pickChair(c.id);}else{b.onclick=()=>_chairLockedFlash(b);}cp.appendChild(b);});const ch=$("chairhdr");if(ch)ch.textContent=LT("Başkanını seç","Pick your chairman","Elige presidente","Präsident wählen","Scegli il presidente");_updateIntroSummary();}
-function pickChair(id){selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));try{sfxSeat();}catch(e){}buildChairButtons();if(typeof syncChairSelectionSurface==="function")syncChairSelectionSurface(id);}
-function confirmChair(id){selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));buildChairButtons();closeModal();const chairName=(L().chair&&L().chair[id]&&L().chair[id].n)||id;showToast(LT(`${chairName} seçildi.`,`${chairName} selected.`,`${chairName} seleccionado.`,`${chairName} ausgewählt.`,`${chairName} selezionato.`),{type:"info",duration:1800,id:"chairman-selected"});}
+function chairIsUnlocked(id){return Array.isArray(unlockedChairs)&&unlockedChairs.includes(id);}
+function pickChair(id){if(!chairIsUnlocked(id))return;selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));try{sfxSeat();}catch(e){}buildChairButtons();if(typeof syncChairSelectionSurface==="function")syncChairSelectionSurface(id);}
+function confirmChair(id){if(!chairIsUnlocked(id)){showToast(LT("Bu başkan henüz kullanıma açık değil.","This chairman is not available yet.","Este presidente aún no está disponible.","Dieser Präsident ist noch nicht verfügbar.","Questo presidente non è ancora disponibile."),{type:"info",duration:1800,id:"chairman-locked"});return;}selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));buildChairButtons();closeModal();const chairName=(L().chair&&L().chair[id]&&L().chair[id].n)||id;showToast(LT(`${chairName} seçildi.`,`${chairName} selected.`,`${chairName} seleccionado.`,`${chairName} ausgewählt.`,`${chairName} selezionato.`),{type:"info",duration:1800,id:"chairman-selected"});}
 const _CHAIR_FX={
-  babacan:{pros:{tr:["Borç limiti €28M — en geniş marj","Danışma sonuçları çoğunlukla destekleyicidir","Pozitif destek final gücü borcu bırakmaz"],en:["€28M debt limit — widest margin","Consultation outcomes are usually supportive","Positive support leaves no final-power debt"]},cons:{tr:["Kartlar €1M daha pahalı"],en:["Cards cost €1M more"]}},
-  leydi:{pros:{tr:["Draftta yerli adayları tercih eder","Toplam kimya +3 ve üstüyse maçlık +1 güç ve güven"],en:["Prefers local candidates in the draft","+1 match power and trust when total chemistry is +3 or higher"]},cons:{tr:["Negatif kimyada maçlık −1 güç ve güven","Borç limiti €21M"],en:["−1 match power and trust with negative chemistry","€21M debt limit"]}},
-  pinti:{pros:{tr:["Transfer fiyatları %10 indirimli","Pozitif kasayla biten her tur €2M birikim","Birikim finalde güce veya kasaya çevrilir"],en:["Transfer prices 10% cheaper","€2M saved after each round finished in the black","Savings convert to final power or cash"]},cons:{tr:["Premium kartlar ek fiyatlıdır","€14M+ veya riskli kart harcaması işlem başına güven −1","Borç limiti €14M — en sıkı kısıt"],en:["Premium cards carry a surcharge","€14M+ or risky-card spending costs at most 1 trust per transaction","€14M debt limit — tightest constraint"]}},
-  sansasyoncu:{pros:{tr:["Güç 85+ transferlerde tur başına tek medya bonusu","1. ve 4. maçta iki Spotlight fırsatı"],en:["One media bonus per round for 85+ signings","Two Spotlight opportunities in matches 1 and 4"]},cons:{tr:["Kart pazarı pahalı","Spotlight sakatlanırsa sonraki pazar daha pahalı","Borç limiti €22M"],en:["Expensive card market","Spotlight injury inflates the next market","€22M debt limit"]}},
-  torpilci:{pros:{tr:["Kartlar €1M daha ucuz","Kabul edilen yeğen her tur +3 gelişir","Yeğen kabulünde €3M destek"],en:["Cards cost €1M less","Accepted nephew develops +3 each round","€3M subsidy when accepting the nephew"]},cons:{tr:["Turda bir kez zorunlu yeğen kararı","Reddedersen borç limiti €3M daralır","Kabul edersen finalde −1 güç","Borç limiti €16M"],en:["One guaranteed nephew decision per run","Rejection tightens the debt limit by €3M","Accepting costs −1 final power","€16M debt limit"]}},
-  cilgin:{pros:{tr:["Borç limiti €29M","Run başına en fazla iki kaos zarı","Güven sıfır değilse zar pas geçilebilir","DARK kartları çağırır"],en:["€29M debt limit","At most two chaos rolls per run","Chaos can be skipped unless trust is zero","Draws DARK cards into the market"]},cons:{tr:["Kararlar ve kartlar öngörülemez","Run başına en fazla bir bütçe krizi"],en:["Decisions and cards are unpredictable","At most one budget crisis per run"]}},
+  babacan:{pros:{tr:["Borç limitin −€28M olur.","Başkan danışmalarında takımını destekleyen sonuçlar daha sık çıkar.","Takımını destekleyen danışma kararı final gücünü azaltmaz."],en:["Your debt limit is −€28M.","Supportive consultation results appear more often.","A supportive consultation result does not reduce final power."]},cons:{tr:["Kart fiyatlarına +€1M eklenir."],en:["Card prices increase by +€1M."]}},
+  leydi:{pros:{tr:["Draftta yerli oyuncuların seçilme ihtimali artar.","Takım kimyan +3 veya üzerindeyse ilgili maçta gücün ve başkan güvenin +1 artar."],en:["Local players are more likely to appear in the draft.","At +3 chemistry or higher, that match gives +1 power and +1 chairman trust."]},cons:{tr:["Kimyan 0'ın altındaysa ilgili maçta gücün ve başkan güvenin −1 azalır.","Borç limitin −€21M olur."],en:["Below 0 chemistry, that match gives −1 power and −1 chairman trust.","Your debt limit is −€21M."]}},
+  pinti:{pros:{tr:["Transfer fiyatlarına %10 indirim uygulanır.","Tur sonunda kasan 0 veya üzerindeyse birikimine €2M eklenir.","Finalden önce birikimini final gücüne veya kasana çevirebilirsin."],en:["Transfers receive a 10% discount.","If your cash is 0 or higher at the end of a round, €2M is added to savings.","Before the final, you can convert savings into final power or cash."]},cons:{tr:["Premium kart satın alırken ek ücret ödersin.","€14M ve üzeri transferlerde veya riskli kart alımında başkan güvenin işlem başına −1 azalır.","Borç limitin −€14M olur."],en:["Premium cards cost an extra fee.","Transfers costing €14M or more and risky card purchases reduce chairman trust by −1 per transaction.","Your debt limit is −€14M."]}},
+  sansasyoncu:{pros:{tr:["Gücü 85–89 olan transfer ilgili maçta +2 güç, 90 ve üzeri transfer +3 güç kazandırır. Bu bonus ilgili turda yalnızca bir kez verilir.","1. ve 4. maçtan önce bir oyuncu seçersin. Seçtiğin oyuncu o maç +2 ila +4 güç kazanır."],en:["A signing rated 85–89 gives +2 power in that match. A signing rated 90 or higher gives +3 power. This bonus is awarded only once per round.","Before matches 1 and 4, choose one player to gain +2 to +4 power in that match."]},cons:{tr:["Kart fiyatlarına +€2M eklenir.","Seçtiğin Spotlight oyuncusu sakatlanırsa bir sonraki pazar kart fiyatlarına +€3M eklenir.","Borç limitin −€22M olur."],en:["Card prices increase by +€2M.","If your selected Spotlight player is injured, card prices increase by +€3M in the next market.","Your debt limit is −€22M."]}},
+  torpilci:{pros:{tr:["Kart fiyatlarına −€1M indirim uygulanır.","Kabul ettiğin yeğeninin gücü her tur en fazla +3 artar.","Yeğeni kabul ettiğinde kasana €3M eklenir."],en:["Card prices receive a −€1M discount.","Your accepted nephew gains up to +3 power each round.","Accepting the nephew adds €3M to your cash."]},cons:{tr:["Her tur bir kez zorunlu yeğen kararı gelir.","Yeğeni reddedersen borç limitin €3M daralır.","Yeğeni kabul edersen final gücünden 1 puan eksilir.","Borç limitin −€16M olur."],en:["One mandatory nephew decision appears each round.","Rejecting the nephew tightens your debt limit by €3M.","Accepting the nephew removes 1 point from final power.","Your debt limit is −€16M."]}},
+  cilgin:{pros:{tr:["Borç limitin −€29M olur.","Oyun boyunca en fazla iki kez kaos zarı atabilirsin.","Başkan güvenin 0'dan büyükse kaos zarını pas geçebilirsin.","DARK kartlar pazarda görünebilir."],en:["Your debt limit is −€29M.","You can roll the chaos die at most twice per run.","You can skip the chaos die while chairman trust is above 0.","DARK cards can appear in the market."]},cons:{tr:["Başkan kararları ve kart sonuçları rastgele değişebilir.","Oyun boyunca en fazla bir bütçe krizi yaşanır."],en:["Chairman decisions and card results can vary randomly.","At most one budget crisis occurs per run."]}},
 };
 window.COPA_CHAIR_FX=_CHAIR_FX;
 function showChairPopup(id){
@@ -930,11 +918,11 @@ function applyMeta(){const m=$("metaline");
   const _ico_trophy="<svg viewBox='0 0 24 24' width='13' height='13' fill='currentColor' style='vertical-align:-.15em;color:var(--gold)'><path d='M17 3a1 1 0 0 1 .993 .883l.007 .117v2.17a3 3 0 1 1 0 5.659v.171a6.002 6.002 0 0 1 -5 5.917v2.083h3a1 1 0 0 1 .117 1.993l-.117 .007h-8a1 1 0 0 1 -.117 -1.993l.117 -.007h3v-2.083a6.002 6.002 0 0 1 -4.996 -5.692l-.004 -.225v-.171a3 3 0 0 1 -3.996 -2.653l-.003 -.176l.005 -.176a3 3 0 0 1 3.995 -2.654l-.001 -2.17a1 1 0 0 1 1 -1h10zm-12 5a1 1 0 1 0 0 2a1 1 0 0 0 0 -2zm14 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2z'/></svg>";
   const _ico_lock="<svg viewBox='0 0 24 24' width='11' height='13' fill='currentColor' style='vertical-align:-.15em;color:var(--color-slate)'><path d='M12 2a5 5 0 0 1 5 5v3a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3 -3v-6a3 3 0 0 1 3 -3v-3a5 5 0 0 1 5 -5m0 12a2 2 0 0 0 -1.995 1.85l-.005 .15a2 2 0 1 0 2 -2m0 -10a3 3 0 0 0 -3 3v3h6v-3a3 3 0 0 0 -3 -3'/></svg>";
   const _ico_hat="<svg viewBox='0 0 14 12' width='13' height='11' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' style='vertical-align:-.1em'><rect x='1' y='9' width='12' height='2.5' rx='.8'/><rect x='4' y='2.5' width='6' height='7' rx='.5'/><line x1='3.5' y1='2.5' x2='10.5' y2='2.5'/></svg>";
-  if(metaRuns>0||unlockedForms.length>1){const b=metaBest>=7?_ico_trophy:L().rabbr[Math.max(0,metaBest-1)];const hdr=metaRuns>0?`<div class="metaline-hdr">${CopaText("KİŞİSEL REKOR","PERSONAL BEST")}</div>`:"";m.innerHTML=hdr+L().metaLine(b,metaRuns)+` · ${_ico_lock} ${unlockedForms.length}/${FORMORDER.length} · ${_ico_hat} ${unlockedChairs.length}/${CHAIR_ORDER.length}`;}else m.innerHTML=`<div class="metaline-hdr">${CopaText("KOPİ","GAME INFO")}</div>${_ico_lock} ${unlockedForms.length}/${FORMORDER.length} · ${L().lockedHint}`;
+  if(metaRuns>0||unlockedForms.length>1){const b=metaBest>=7?_ico_trophy:L().rabbr[Math.max(0,metaBest-1)];const hdr=metaRuns>0?`<span class="metaline-hdr">${CopaText("KİŞİSEL REKOR","PERSONAL BEST")}</span>`:"";m.innerHTML=`<span class="meta-base">${hdr}${L().metaLine(b,metaRuns)} · ${_ico_lock} ${unlockedForms.length}/${FORMORDER.length} · ${_ico_hat} ${unlockedChairs.length}/${CHAIR_ORDER.length}</span>`;}else m.innerHTML=`<span class="meta-base"><span class="metaline-hdr">${CopaText("KOPİ","GAME INFO")}</span>${_ico_lock} ${unlockedForms.length}/${FORMORDER.length} · ${L().lockedHint}</span>`;
   if(window.CopaMeta){const career=CopaMeta.careerSummary();m.insertAdjacentHTML("beforeend",`<button type="button" class="career-entry" onclick="CopaMeta.openProgression('career')"><span>${CopaText("KULÜP SEVİYESİ","CLUB LEVEL")} <b>${career.level}</b></span><span>${career.reputation.toLocaleString(CopaText("tr-TR","en-GB"))} ${CopaText("İtibar","Reputation")}${career.licenses?` · ${career.licenses} ${CopaText("Lisans","Licence")}`:""}</span></button>`);}}
 
 /* ===== setup ===== */
-function _updateIntroSummary(){const el=$("introSummary");if(!el)return;const chairShort=selectedChairId?chairShortLabel(selectedChairId):"—";const parts=[formName||"—",chairShort,countryDisplayName(selectedCountry,LANG)];const prefix=LT("Seçimin: ","Setup: ","Selección: ","Auswahl: ","Scelta: ");el.innerHTML=`<span style="color:var(--color-slate);font-size:.85em">${prefix}</span>`+parts.map(v=>`<strong>${v}</strong>`).join('<span style="color:var(--color-slate);font-weight:400"> · </span>');}
+function _updateIntroSummary(){}
 function pickForm(f){if(formName!==f){try{typeof sfxFormation==="function"?sfxFormation():sfxFlag("IT");}catch(e){}}formName=f;slots=FORMATIONS[f];if(window.CopaAnalytics)window.CopaAnalytics.track("formation_selected",analyticsBalanceProps({formation:f}));buildFormButtons();_updateIntroSummary();_updateTacticalFormation(f);}
 function _styleImpact(k){const tr=LANG==="tr",data={
  gegen:[tr?"Önde baskı":"High press","+2",tr?"Her kadroda sabit güç":"Reliable power",tr?"Yüksek tempoda risk":"High-tempo risk"],
@@ -946,16 +934,12 @@ function _styleImpact(k){const tr=LANG==="tr",data={
 function normalStart(){if(window.GhostClubs&&GhostClubs.shouldGateMobileOnboarding&&GhostClubs.shouldGateMobileOnboarding()){GhostClubs.requestMobileOnboarding().then(()=>normalStart());return;}if(!formName||!unlockedForms.includes(formName))pickForm(unlockedForms[0]||"4-4-2");const x=L();let sb="";Object.keys(STYLES).forEach(k=>{const sd=x.styles[k],impact=_styleImpact(k),mastery=_masteryDisplay("styles",k),badge=mastery?`<span class="style-mastery tier-${mastery.tier}" title="${mastery.tooltip}" aria-hidden="true"><span class="mastery-star">★</span>${mastery.count}</span>`:"",a11y=mastery?`${sd.n}, ${mastery.tooltip}`:sd.n;sb+=`<div class="stylebtn style-choice-modern" data-style="${k}" role="button" tabindex="0" aria-label="${a11y}"${mastery?` title="${mastery.tooltip}"`:""} onclick="pickStyle('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickStyle('${k}');}"><div class="ssi">${sd.i}</div><div class="ssm"><div class="style-choice-summary"><div class="sst"><span>${sd.n}</span>${badge}<strong class="style-impact-value">${impact[1]}</strong></div><div class="ssd">${impact[0]}</div></div><div class="style-impact-grid"><span class="is-positive">${impact[2]}</span><span class="is-negative">${impact[3]}</span></div></div></div>`;});showModal(`<div class="style-select-modal"><div class="kithdr">${x.styleHdr}</div><div class="kitsub">${x.styleSub}</div><div class="stylelist">${sb}</div><div class="bact" style="margin-top:4px"><button class="btn btn-ghost" onclick="closeModal()">← ${CopaText("GERİ","BACK")}</button></div></div>`);}
 function pickStyle(k){style=k;talkHistory=[];if(window.CopaPreparation)CopaPreparation.reset();if(window.CopaChemistry)CopaChemistry.reset();window._talkMatchProfile=null;if(window.CopaAnalytics)window.CopaAnalytics.track("style_selected",analyticsBalanceProps({style:k}));sfxSeat();closeModal();if(legacyFund>0){showLegacyBetModal();}else{beginDraft();}}
 function showLegacyBetModal(){const tr=LANG==="tr";const half=Math.floor(legacyFund/2),betReturn=Math.round(legacyFund*1.5);
-const _lgVault=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17L20 7L36 17"/><rect x="6" y="17" width="28" height="19" rx="2"/><circle cx="20" cy="27" r="6"/><circle cx="20" cy="27" r="2.2" fill="currentColor" stroke="none"/><line x1="20" y1="21" x2="20" y2="19"/><ellipse cx="20" cy="4" rx="3" ry="1.5" fill="currentColor" stroke="none"><animate attributeName="cy" values="3;16;3" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.9;0;0.9" dur="1.6s" repeatCount="indefinite"/></ellipse></svg>`;
-const _lgDice=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g><animateTransform attributeName="transform" type="rotate" values="0 20 20;-14 20 20;10 20 20;-5 20 20;0 20 20" dur="2s" repeatCount="indefinite" keyTimes="0;0.25;0.55;0.8;1"/><rect x="7" y="7" width="26" height="26" rx="4"/><circle cx="14" cy="14" r="2.5" fill="currentColor" stroke="none"/><circle cx="26" cy="14" r="2.5" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="2.5" fill="currentColor" stroke="none"/><circle cx="14" cy="26" r="2.5" fill="currentColor" stroke="none"/><circle cx="26" cy="26" r="2.5" fill="currentColor" stroke="none"/></g></svg>`;
-const _lgScale=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="20" y1="9" x2="20" y2="36"/><line x1="8" y1="36" x2="32" y2="36"/><circle cx="20" cy="9" r="2.2"/><g><animateTransform attributeName="transform" type="rotate" values="0 20 9;-16 20 9;0 20 9" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/><line x1="6" y1="9" x2="34" y2="9"/><path d="M3 13 Q6.5 20 10 13"/><path d="M30 13 Q33.5 20 37 13"/></g></svg>`;
-const _lgLock=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="19" width="20" height="15" rx="2"/><path d="M14 19v-5a6 6 0 0 1 12 0v5"/><circle cx="20" cy="26" r="2.5"/><line x1="20" y1="26" x2="20" y2="30"/><line x1="30" y1="8" x2="30" y2="14"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.8s" repeatCount="indefinite"/></line><line x1="27" y1="11" x2="33" y2="11"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.8s" repeatCount="indefinite" begin="0.1s"/></line></svg>`;
-showModal(`<div><div class="kithdr legacy-kasa-title"><span class="legacy-title-icon">${_lgVault}</span>${tr?"Miras Kasa":"Legacy Vault"}</div><div class="kitsub legacy-kasa-sub">${tr?`Geçen turdan €${legacyFund}M kaldı. Bu parayla ne yapacaksın?`:`€${legacyFund}M carried over from last run. What will you do with it?`}</div><div class="stylelist legacy-kasa-list">
-<div class="stylebtn legacy-choice" onclick="applyLegacyBet('add')"><span class="legacy-choice-badge">${tr?"GÜVENLİ":"SAFE"}</span><div class="ssi" style="color:var(--color-primary)">${_lgVault}</div><div class="ssm"><div class="sst">${tr?"Kasaya Ekle":"Add to Funds"}</div><div class="ssd">€${legacyFund}M ${tr?"kasana eklenir.":"is added to your budget."}</div></div></div>
-<div class="stylebtn legacy-choice" onclick="applyLegacyBet('double')"><span class="legacy-choice-badge legacy-risk">${tr?"RİSKLİ":"RISKY"}</span><div class="ssi" style="color:var(--color-primary)">${_lgDice}</div><div class="ssm"><div class="sst">${tr?"Şampiyonluk Bahsi":"Championship Bet"}</div><div class="ssd">${tr?`€${legacyFund}M yatır. Şampiyon olursan Miras Kasa'ya €${betReturn}M döner; olamazsan kaybedersin.`:`Stake €${legacyFund}M. Win the cup to return €${betReturn}M to the Legacy Vault; otherwise lose it.`}</div></div></div>
-<div class="stylebtn legacy-choice" onclick="applyLegacyBet('half')"><span class="legacy-choice-badge legacy-balanced">${tr?"DENGELİ":"BALANCED"}</span><div class="ssi" style="color:var(--color-slate)">${_lgScale}</div><div class="ssm"><div class="sst">${tr?"Garantiye Al":"Secure Half"}</div><div class="ssd">€${half}M ${tr?"kasana eklenir, kalanı sonraki tura devreder.":"is added now, the rest carries to next run."}</div></div></div>
-<div class="stylebtn legacy-choice" onclick="applyLegacyBet('skip')"><span class="legacy-choice-badge legacy-store">${tr?"SAKLA":"SAVE"}</span><div class="ssi" style="color:var(--color-slate)">${_lgLock}</div><div class="ssm"><div class="sst">${tr?"Devret":"Carry Over"}</div><div class="ssd">${tr?"Bu turda kullanma, tamamını birikimde tut.":"Do not use it this run; keep all of it saved."}</div></div></div>
-</div></div>`);}
+const _lgVault=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17L20 7l14 10"/><path d="M10 17v16h20V17"/><path d="M14 33h12"/><circle cx="20" cy="24" r="4.5"/><path d="M20 19.5v-2.5M20 24h2.5"/></svg>`;
+const _lgDice=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13h16v4c0 5.2-3.2 8.5-8 8.5S12 22.2 12 17z"/><path d="M12 15H8c0 5 2.6 7.5 6.1 7.5M28 15h4c0 5-2.6 7.5-6.1 7.5"/><path d="M20 25.5v7M14 33h12"/><path d="M20 7v3M16.5 8.5h7"/></svg>`;
+const _lgScale=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8v24M8 32h24M9 13h22"/><path d="M9 13l-4 8h8zM31 13l-4 8h8z"/><circle cx="20" cy="8" r="2"/></svg>`;
+const _lgLock=`<svg viewBox="0 0 40 40" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14h24M25 9l6 5-6 5"/><path d="M7 27h24M25 22l6 5-6 5"/></svg>`;
+const _legacyCard=(choice,theme,badge,icon,context,title,copy,outcome,note)=>{const result=choice==="double"?`+€${betReturn}M`:outcome,detail=choice==="double"?(tr?"ŞAMPİYON OLURSAN":"IF YOU WIN THE TITLE"):note;return `<button type="button" class="stylebtn legacy-choice legacy-choice-${theme}" data-legacy-choice="${choice}" onclick="applyLegacyBet('${choice}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();applyLegacyBet('${choice}');}"><span class="legacy-choice-badge ${theme==='risk'?'legacy-risk':theme==='balanced'?'legacy-balanced':theme==='store'?'legacy-store':''}">${badge}</span><span class="ssi legacy-choice-icon">${icon}</span><span class="ssm"><span class="legacy-choice-context">${context}</span><span class="sst">${title}</span><span class="ssd">${copy}</span><span class="legacy-choice-outcome"><span><small>${tr?"SONUÇ":"OUTCOME"}</small><b>${result}</b></span><i>${detail}</i></span></span><span class="legacy-choice-arrow" aria-hidden="true">→</span></button>`;};
+showModal(`<div class="legacy-kasa-modal"><div class="kithdr legacy-kasa-title"><span class="legacy-title-icon">${_lgVault}</span><span class="legacy-title-copy"><small>${tr?"SEZON MİRASI":"SEASON LEGACY"}</small><strong>${tr?"Miras Kasa":"Legacy Vault"}</strong></span><span class="legacy-balance"><small>${tr?"DEVREDEN BAKİYE":"CARRIED BALANCE"}</small><b>€${legacyFund}M</b></span></div><div class="kitsub legacy-kasa-sub">${tr?"Önceki turun mirasını bu tur için yönlendir.":"Direct the previous round's legacy into this run."}</div><div class="legacy-kasa-rail"><span><i></i>${tr?"KASA AKTİF":"VAULT ACTIVE"}</span><b>${tr?"4 KARAR YOLU":"4 DECISION ROUTES"}</b></div><div class="stylelist legacy-kasa-list">${_legacyCard("add","safe",tr?"GÜVENLİ":"SAFE",_lgVault,tr?"GÜVENLİ BÜYÜME":"SAFE GROWTH",tr?"Kasaya Ekle":"Add to Funds",`€${legacyFund}M ${tr?"kasana eklenir.":"is added to your budget."}`,`+€${legacyFund}M`,tr?"ANINDA":"NOW")}${_legacyCard("double","risk",tr?"RİSKLİ":"RISKY",_lgDice,tr?"BÜYÜK SIÇRAMA":"HIGH UPSIDE",tr?"Şampiyonluk Bahsi":"Championship Bet",tr?`€${legacyFund}M yatır. Şampiyon olursan Miras Kasa'ya €${betReturn}M döner; olamazsan kaybedersin.`:`Stake €${legacyFund}M. Win the cup to return €${betReturn}M to the Legacy Vault; otherwise lose it.`,tr?"ŞAMPİYONLUKTA GERİ DÖNÜŞ":"RETURN ON TITLE",tr?"SONUÇ BEKLENİR":"RESOLVES LATER")}${_legacyCard("half","balanced",tr?"DENGELİ":"BALANCED",_lgScale,tr?"DENGEYİ KORU":"BALANCED MOVE",tr?"Garantiye Al":"Secure Half",`€${half}M ${tr?"kasana eklenir, kalanı sonraki tura devreder.":"is added now, the rest carries to next run."}`,`+€${half}M`,tr?"KALANI DEVREDER":"REST CARRIES")}${_legacyCard("skip","store",tr?"SAKLA":"SAVE",_lgLock,tr?"MİRASI KORU":"PRESERVE LEGACY",tr?"Devret":"Carry Over",tr?"Bu turda kullanma, tamamını birikimde tut.":"Do not use it this run; keep all of it saved.",`€${legacyFund}M`,tr?"SONRAKİ TUR":"NEXT RUN")}</div><div class="legacy-kasa-footnote"><span class="legacy-footnote-mark">i</span><span>${tr?"Kararın, bu turdaki bütçe akışını ve sonraki turun başlangıç kasasını belirler.":"Your choice sets this run's budget flow and the next run's starting vault."}</span></div></div>`);}
 function applyLegacyBet(choice){if(window._pendingLegacyStart)return false;closeModal();const half=Math.floor(legacyFund/2);let _earnAmt=0,_earnMsg="";if(choice==="add"){_earnAmt=legacyFund;legacyFund=0;_earnMsg=` ${CopaText("Miras kasa ayrıldı","Legacy vault reserved")}: +€${_earnAmt}M`;}else if(choice==="double"){const stake=legacyFund;legacyFund=0;window._legacyBet={stake,payout:Math.round(stake*1.5)};}else if(choice==="half"){legacyFund=legacyFund-half;_earnAmt=half;_earnMsg=` ${CopaText("Miras kasanın yarısı ayrıldı","Half legacy vault reserved")}: +€${half}M`;}else if(choice!=="skip")return false;window._pendingLegacyStart={amount:_earnAmt,message:_earnMsg};return beginDraft();}
 function _consumePendingLegacyStart(){const pending=window._pendingLegacyStart;if(!pending)return;window._pendingLegacyStart=null;const amount=Math.max(0,Math.round(pending.amount||0));if(amount>0){if(typeof addLegacyCash==="function")addLegacyCash(amount);else earn(amount,"earned");pushFeed(String(pending.message||""),"buy");}saveMeta();}
 function _ensureDraftKasa(){
@@ -1852,7 +1836,8 @@ function showModal(html,{dismissOnOverlay=false,dismissOnEscape=true,label="",ba
     };
   }
   const ariaLabel=label?` aria-label="${label}"`:" aria-labelledby=\"_mdlttl\"";
-  const sheetCls=["sheet",bare?"sheet-bare":"",sheetClass].filter(Boolean).join(" ");
+  const autoSheetClass=html.includes("style-select-modal")?"style-select-sheet":"";
+  const sheetCls=["sheet",bare?"sheet-bare":"",sheetClass,autoSheetClass].filter(Boolean).join(" ");
   m.innerHTML=`<div class="${sheetCls}" role="dialog" aria-modal="true"${ariaLabel}>${html}</div>`;
   m.dataset.dismissOnEscape=dismissOnEscape?"true":"false";
   m.classList.remove("hidden");
@@ -4400,10 +4385,11 @@ function _finalTacticBench(benchIdx){
      if(typeof showModal!=="function")return oldShowResultSquad&&oldShowResultSquad();
      const names=players.map(p=>String(p.fullName||p.name||((typeof shortName==="function"&&shortName(p))||"—")));
      const initials=name=>name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0)).join("").toUpperCase()||"XI";
-     const rows=players.map((p,index)=>{const name=names[index],power=Number(typeof effOf==="function"?effOf(p):p.ov)||0,width=Math.max(0,Math.min(100,power));return `<li class="result-squad-player"><span class="result-squad-num">${String(index+1).padStart(2,"0")}</span><span class="result-squad-avatar" aria-hidden="true">${esc(initials(name))}</span><span class="result-squad-info"><b title="${esc(name)}">${esc(name)}</b><small>${esc(p.pos||tx("MEVKİ","POSITION","POSICIÓN","POSITION","RUOLO"))}</small><i class="result-squad-meter" aria-hidden="true"><i style="width:${width}%"></i></i></span><strong aria-label="${tx("Güç","Power","Fuerza","Stärke","Forza")} ${power}">${power||"—"}</strong></li>`;}).join("");
+     const positionLabel=raw=>{const pos=String(raw||"").toUpperCase();const labels={GK:tx("KALECİ","GOALKEEPER","PORTERO","TORWART","PORTIERE"),LB:tx("SOL BEK","LEFT BACK","LATERAL IZQUIERDO","LINKER VERTEIDIGER","TERZINO SINISTRO"),RB:tx("SAĞ BEK","RIGHT BACK","LATERAL DERECHO","RECHTER VERTEIDIGER","TERZINO DESTRO"),CB:tx("STOPER","CENTRE BACK","CENTRAL","INNENVERTEIDIGER","DIFENSORE CENTRALE"),DM:tx("ÖN LİBERO","DEFENSIVE MIDFIELDER","PIVOTE","DEFENSIVES MITTELFELD","MEDIANO"),CM:tx("MERKEZ ORTA SAHA","CENTRAL MIDFIELDER","MEDIO CENTRO","ZENTRALES MITTELFELD","CENTROCAMPISTA"),LM:tx("SOL ORTA SAHA","LEFT MIDFIELDER","INTERIOR IZQUIERDO","LINKES MITTELFELD","MEZZALA SINISTRA"),RM:tx("SAĞ ORTA SAHA","RIGHT MIDFIELDER","INTERIOR DERECHO","RECHTES MITTELFELD","MEZZALA DESTRA"),AM:tx("10 NUMARA","ATTACKING MIDFIELDER","MEDIAPUNTA","OFFENSIVES MITTELFELD","TREQUARTISTA"),LW:tx("SOL KANAT","LEFT WINGER","EXTREMO IZQUIERDO","LINKER FLÜGEL","ALA SINISTRA"),RW:tx("SAĞ KANAT","RIGHT WINGER","EXTREMO DERECHO","RECHTER FLÜGEL","ALA DESTRA"),CF:tx("FORVET","CENTRE FORWARD","DELANTERO CENTRO","MITTELSTÜRMER","PUNTA CENTRALE"),ST:tx("SANTRFOR","STRIKER","DELANTERO","STÜRMER","ATTACCANTE")};return labels[pos]||String(raw||tx("MEVKİ","POSITION","POSICIÓN","POSITION","RUOLO"));};
+     const rows=players.map((p,index)=>{const name=names[index],power=Number(typeof effOf==="function"?effOf(p):p.ov),validPower=Number.isFinite(power),powerValue=validPower?Math.max(0,Math.min(100,power)):0,displayPower=validPower&&power>0?power:"—",pos=positionLabel(p.pos),powerLabel=tx("Oyuncu gücü","Player power","Fuerza del jugador","Spielerstärke","Forza del giocatore");return `<li class="result-squad-player"><span class="result-squad-num">${String(index+1).padStart(2,"0")}</span><span class="result-squad-avatar" aria-hidden="true">${esc(initials(name))}</span><span class="result-squad-info"><b title="${esc(name)}">${esc(name)}</b><small title="${esc(pos)}" aria-label="${esc(pos)}">${esc(p.pos||"—")}</small><i class="result-squad-meter" role="progressbar" aria-label="${powerLabel} ${displayPower}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${powerValue}"><i aria-hidden="true" style="width:${powerValue}%"></i></i></span><strong aria-label="${tx("Güç","Power","Fuerza","Stärke","Forza")} ${displayPower}">${displayPower}</strong></li>`;}).join("");
      const form=typeof formName!=="undefined"&&formName?formName:"—";
-     const title=tx("KADROYU İNCELE","REVIEW SQUAD","VER PLANTILLA","KADER ANSEHEN","VEDI ROSA");
-     showModal(`<div class="result-squad-modal"><div class="result-squad-modal-head"><div><div class="kithdr">${title}</div><div class="kitsub">${esc(tx("Bu sezonun sahaya çıkan çekirdeği.","The core XI behind this season.","El once de esta temporada.","Die Kernelf dieser Saison.","L'undici di questa stagione."))}</div></div><button class="result-modal-close" type="button" onclick="closeModal()" aria-label="${tx("Kapat","Close","Cerrar","Schließen","Chiudi")}">×</button></div><div class="result-squad-summary"><span>${esc(form)}</span><b>${players.length}/11 ${tx("oyuncu","players","jugadores","Spieler","giocatori")}</b></div><ol class="result-squad-list">${rows||`<li><span>${tx("Kadro verisi hazır değil.","Squad data is not ready.","La plantilla no está lista.","Kaderdaten sind noch nicht bereit.","I dati della rosa non sono pronti.")}</span></li>`}</ol><div class="bact"><button class="btn btn-ghost" type="button" onclick="closeModal()">${tx("KAPAT","CLOSE","CERRAR","SCHLIESSEN","CHIUDI")}</button></div></div>`,{dismissOnOverlay:true,label:title});
+     const title=tx("KADROYU İNCELE","REVIEW SQUAD","VER PLANTILLA","KADER ANSEHEN","VEDI ROSA"),startingXI=tx("İLK 11","STARTING XI","ONCE INICIAL","STARTELF","UNDICI TITOLARE"),formationLabel=tx("DİZİLİŞ","FORMATION","FORMACIÓN","FORMATION","MODULO"),playersLabel=tx("oyuncu","players","jugadores","Spieler","giocatori"),powerHeader=tx("GÜÇ","POWER","FUERZA","STÄRKE","FORZA"),scrollHint=players.length>8?tx("Tüm kadroyu görmek için kaydır.","Scroll to see the full squad.","Desplázate para ver toda la plantilla.","Scrollen, um den ganzen Kader zu sehen.","Scorri per vedere tutta la rosa."):"";
+     showModal(`<div class="result-squad-modal"><div class="result-squad-modal-head"><div><div class="kithdr">${title}</div><div class="kitsub">${esc(tx("Bu sezonun ilk 11’i.","This season’s starting XI.","El once inicial de esta temporada.","Die Startelf dieser Saison.","L’undici titolare di questa stagione."))}</div></div><button class="result-modal-close" type="button" onclick="closeModal()" aria-label="${tx("Kapat","Close","Cerrar","Schließen","Chiudi")}">×</button></div><div class="result-squad-summary"><span class="result-squad-formation"><small>${formationLabel}</small><strong>${esc(form)}</strong></span><span class="result-squad-count"><b>${players.length}/11</b> ${playersLabel}</span></div><div class="result-squad-list-head"><span>${startingXI}</span><span>${powerHeader}</span></div><ol class="result-squad-list" aria-label="${startingXI}">${rows||`<li><span>${tx("Kadro verisi hazır değil.","Squad data is not ready.","La plantilla no está lista.","Kaderdaten sind noch nicht bereit.","I dati della rosa non sono pronti.")}</span></li>`}</ol>${scrollHint?`<p class="result-squad-scroll-hint" role="status">↕ ${scrollHint}</p>`:""}<div class="bact"><button class="btn btn-ghost" type="button" onclick="closeModal()">${tx("KADROYU KAPAT","CLOSE SQUAD","CERRAR PLANTILLA","KADER SCHLIESSEN","CHIUDI ROSA")}</button></div></div>`,{dismissOnOverlay:true,label:title});
    };
    const oldShowShareCard=window.showShareCard;
    function shareStatus(message,tone){const node=document.querySelector(".share-modal .share-status");if(node){node.textContent=message;node.dataset.tone=tone||"neutral";}}

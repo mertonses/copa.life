@@ -248,7 +248,10 @@
     const modal=document.getElementById("modal");
     if(isVisible(modal))return null;
     const intro=document.getElementById("intro");
-    if(isVisible(intro))return{node:document.querySelector(".v7-primary-actions")||document.getElementById("startBtn"),kind:"intro"};
+    /* The setup page owns its own scroll surface. Portaling BAŞLA into the
+       viewport-fixed action dock makes it cover chairman/country content on
+       short mobile viewports; keep the action stack in the page flow instead. */
+    if(isVisible(intro))return null;
     const hub=document.getElementById("hub");
     if(isVisible(hub)){
       const actionPanel=hub.querySelector(".hub-action-panel")||

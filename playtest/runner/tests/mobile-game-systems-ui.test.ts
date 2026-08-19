@@ -98,7 +98,7 @@ test("locker-room tone icons keep their stroked size outside mobile-only styling
   await capture(page,`05b-locker-room-icons-${testInfo.project.name}.png`);
 });
 
-test("native landing and three-step setup read as a mobile game",async({page},testInfo)=>{
+test("native landing and four-step setup read as a mobile game",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.addInitScript(()=>localStorage.setItem("copa_meta_progression_v1",JSON.stringify({
@@ -120,26 +120,30 @@ test("native landing and three-step setup read as a mobile game",async({page},te
   await expect(page.locator("#countryPick .country-name")).toHaveCount(6);
   await expect(page.locator("#countryPick [data-country='JP'] .country-new-ribbon")).toHaveCount(0);
   expect(await page.locator("#countryPick button").evaluateAll(buttons=>buttons.every(button=>button.querySelectorAll(".country-name").length===1))).toBe(true);
-  const next=page.locator("[data-step-next]");
-  await expect(next).toHaveCount(1);
-  await next.click();
-  await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeVisible();
-  await expect(page.locator(".formation-card-kicker")).toHaveCount(0);
-  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeVisible();
-  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
-  await expect(page.locator("#introSetup>.metaline")).toBeHidden();
-  await expect(page.locator("#introSetup>.v7-footer-block")).toBeHidden();
   await page.locator("#formpick .fbtn.locked").first().click();
   await expect(page.locator(".formation-unlock-modal")).toBeVisible();
   await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
   await page.locator(".formation-unlock-modal .btn-primary").click();
   await expect(page.locator(".formation-unlock-modal")).toBeHidden();
+  const next=page.locator("[data-step-next]");
+  await expect(next).toHaveCount(1);
+  await next.click();
   await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeVisible();
+  await expect(page.locator(".formation-card-kicker")).toHaveCount(0);
+  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeHidden();
   await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
+  await expect(page.locator("#introSetup>.v7-footer-block")).toBeHidden();
+  await expect(page.locator("#chairSelectionSurface")).toBeVisible();
+  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeHidden();
+  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
   await next.click();
   await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
+  await expect(page.locator("#countryPick")).toBeVisible();
+  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
+  await next.click();
+  await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeHidden();
   await expect(page.locator("#startBtn")).toBeVisible();
   await page.evaluate(()=>{const modal=document.getElementById("modal");if(modal&&!modal.classList.contains("hidden"))(globalThis as any).closeModal();document.querySelector(".copa-coachmark")?.remove();});
   await capture(page,"02-native-chairman.png");
@@ -830,6 +834,80 @@ test("market identity, free-agent comparison and relationship sheet stay compact
   await expect(page.locator(".meta-token-bank")).toBeVisible();
   await expectSurfaceFit(page,".meta-progress-modal");
   await capture(page,"03k-museum-collections.png");
+});
+
+test("confidence crisis modal presents a polished, probability-free decision surface",async({page},testInfo)=>{
+  await reset(page);
+  await page.goto("/?visual=confidence-crisis",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    game.CopaRelationships.restore({
+      bonds:{"arda yıldız|ST":3},
+      seenPlayers:[],
+      pending:{eventKind:"relationship",key:"arda yıldız|ST",name:"Arda Yıldız",pos:"ST",personality:"ambitious",bond:3,type:"confidence",round:4,groups:["stars"]},
+      eventCount:1,
+      matchPower:0,
+      groupMood:{captain:0,youth:0,stars:0,local:0},
+      startToken:1
+    });
+    game.CopaRelationships.showPending();
+  });
+  await expect(page.locator(".confidence-modal")).toBeVisible();
+  await expect(page.locator(".confidence-modal h3")).toContainText("GÜVEN KRİZİ");
+  await expect(page.locator(".confidence-player")).toContainText("Arda Yıldız");
+  await expect(page.locator(".confidence-choice")).toHaveCount(3);
+  await expect(page.locator(".confidence-choice.is-support")).toHaveCount(1);
+  await expect(page.locator(".confidence-choice.is-boundary")).toHaveCount(1);
+  await expect(page.locator(".confidence-choice.is-compromise")).toHaveCount(1);
+  await expect(page.locator(".confidence-choice-context")).toHaveCount(3);
+  await expect(page.locator(".confidence-choice").first()).toContainText("GÜVENİ ONAR");
+  await expect(page.locator(".confidence-choice").nth(1)).toContainText("SINIR KOY");
+  await expect(page.locator(".confidence-choice").nth(2)).toContainText("BAĞI KORU");
+  await expect(page.locator(".confidence-modal")).not.toContainText(/%\s*\d/);
+  await expectSurfaceFit(page,".confidence-modal");
+  await capture(page,`confidence-crisis-${testInfo.project.name}.png`);
+  await page.evaluate(()=>(globalThis as any).closeModal());
+  await reachDraw(page);
+  await page.evaluate(()=>{const game=globalThis as any;game.fastTournamentDraw();game.finishTournamentDraw();game.setCaptain(0);game.closeModal();});
+  await expect(page.locator("#hub")).toBeVisible();
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.CopaRelationships.restore({
+      bonds:{"arda yıldız|ST":3},
+      pending:{eventKind:"relationship",key:"arda yıldız|ST",name:"Arda Yıldız",pos:"ST",personality:"professional",bond:3,type:"confidence",round:2,groups:["stars"]},
+      eventCount:1,
+      matchPower:0,
+      groupMood:{captain:0,youth:0,stars:0,local:0}
+    });
+    game.CopaRelationships.showPending();
+  });
+  await page.locator(".confidence-choice").first().click();
+  await expect(page.locator("#relationshipNotice")).toBeVisible();
+  await expect(page.locator("#relationshipNotice")).toContainText("OYUNCU GÜVENİ");
+  await expect(page.locator("#relationshipNotice")).toContainText("Arda Yıldız");
+  await expectSurfaceFit(page,"#relationshipNotice");
+  await capture(page,`confidence-result-${testInfo.project.name}.png`);
+});
+
+test("legacy vault modal presents premium balance and route semantics",async({page},testInfo)=>{
+  await reset(page);
+  await page.goto("/?visual=legacy-vault",{waitUntil:"domcontentloaded"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    game.legacyFund=4;
+    game.showLegacyBetModal();
+  });
+  await expect(page.locator(".legacy-kasa-modal")).toBeVisible();
+  await expect(page.locator(".legacy-balance")).toContainText("€4M");
+  await expect(page.locator(".legacy-choice")).toHaveCount(4);
+  await expect(page.locator(".legacy-choice-safe")).toContainText("GÜVENLİ BÜYÜME");
+  await expect(page.locator(".legacy-choice-risk")).toContainText("BÜYÜK SIÇRAMA");
+  await expect(page.locator(".legacy-choice-balanced")).toContainText("DENGEYİ KORU");
+  await expect(page.locator(".legacy-choice-store")).toContainText("MİRASI KORU");
+  await expectSurfaceFit(page,".legacy-kasa-modal");
+  await capture(page,`legacy-vault-${testInfo.project.name}.png`);
 });
 
 test("club files stay opt-in and never interrupt another hub route",async({page},testInfo)=>{

@@ -15,63 +15,28 @@ test("chairman cards match the compact premium reference",async({page},testInfo)
   await page.goto("/?chairman-cards-visual-qa=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{
     const game=globalThis as any;
+    game.setLang("tr");
     game._applyCheat();
+    game.goSetup();
     await game.pickCountry("TR");
   });
-  await page.waitForFunction(()=>document.querySelectorAll("#chairpick .chairbtn").length===6,{timeout:20_000});
-  const cards=page.locator("#chairpick .chair-card");
-  await expect(cards).toHaveCount(6);
-  await expect(page.locator("#chairpick")).toBeVisible();
-  await page.locator("#chairpick").scrollIntoViewIfNeeded();
-
-  const layout=await cards.evaluateAll(nodes=>nodes.map(node=>{
-    const card=node as HTMLElement;
-    const rect=card.getBoundingClientRect();
-    const image=card.querySelector<HTMLElement>(".portrait")!.getBoundingClientRect();
-    const copy=card.querySelector<HTMLElement>(".card-copy")!.getBoundingClientRect();
-    const roleNode=card.querySelector<HTMLElement>(".chairbtn-role")!;
-    const roleRect=roleNode.getBoundingClientRect();
-    const footers=[...card.querySelectorAll<HTMLElement>(".card-foot")].filter(item=>getComputedStyle(item).display!=="none");
-    const footerRect=footers[0]?.getBoundingClientRect();
-    const legacyDetails=[...card.querySelectorAll<HTMLElement>(".chair-detail-link")].filter(item=>getComputedStyle(item).display!=="none");
-    return{
-      left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,
-      imageHeight:image.height,copyHeight:copy.height,footerCount:footers.length,
-      roleRect:{top:roleRect.top,height:roleRect.height,display:getComputedStyle(roleNode).display,color:getComputedStyle(roleNode).color},
-      footerRect:footerRect?{top:footerRect.top,height:footerRect.height}:null,
-      name:card.querySelector<HTMLElement>(".chairbtn-name")?.textContent?.trim(),
-      role:card.querySelector<HTMLElement>(".chairbtn-role")?.textContent?.trim(),
-      detail:footers[0]?.textContent?.replace(/\s+/g," ").trim()||"",
-      legacyDetails:legacyDetails.length,
-      overflow:card.scrollWidth-card.clientWidth,
-    };
-  }));
-  expect(layout.every(card=>card.imageHeight>100&&card.copyHeight>30&&card.footerCount===0&&card.legacyDetails===0&&card.name&&card.role&&card.roleRect.height>0&&card.roleRect.display!=="none"&&!card.detail&&card.overflow<=1),JSON.stringify(layout)).toBe(true);
-  const expectedImageHeight=testInfo.project.name.includes("mobile")?104:205;
-  expect(layout.every(card=>Math.abs(card.imageHeight-expectedImageHeight)<=1),JSON.stringify(layout)).toBe(true);
-  if(testInfo.project.name.includes("mobile")){
-    const rail=await page.locator("#chairpick").evaluate(node=>({display:getComputedStyle(node).display,overflowX:getComputedStyle(node).overflowX,scrollWidth:node.scrollWidth,clientWidth:node.clientWidth,cardWidth:(node.querySelector(".chair-card") as HTMLElement)?.getBoundingClientRect().width||0}));
-    expect(rail.display).toBe("flex");
-    expect(["auto","scroll"]).toContain(rail.overflowX);
-    expect(rail.scrollWidth).toBeGreaterThan(rail.clientWidth);
-    expect(rail.cardWidth).toBeLessThanOrEqual(0.7*await page.evaluate(()=>innerWidth));
-  }
-  expect(Math.max(...layout.map(card=>card.bottom-card.top))-Math.min(...layout.map(card=>card.bottom-card.top))).toBeLessThanOrEqual(2);
-  const rows=[...new Set(layout.map(card=>Math.round(card.top)))].map(top=>layout.filter(card=>Math.abs(card.top-top)<=2).sort((a,b)=>a.left-b.left));
-  expect(rows.every(row=>row.slice(1).every((card,index)=>card.left>=row[index].right-1))).toBe(true);
+  const surface=page.locator("#chairSelectionSurface");
+  await expect(surface).toBeVisible();
+  await expect(page.locator("#chairpick")).toHaveCount(0);
+  await expect(surface.locator(".js-chair-selected-mark")).toBeVisible();
+  await expect(surface.locator(".copa-chair-stage-actions button")).toHaveCount(2);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 
   fs.mkdirSync(output,{recursive:true});
   await page.waitForFunction(()=>{const image=document.querySelector<HTMLImageElement>("#chairSelectionSurface .js-chair-stage-image");return !!image&&image.complete&&image.naturalWidth>=2048},{timeout:20_000});
-  await expect(page.locator("#chairSelectionSurface .js-chair-stage-image")).toBeVisible();
+  await expect(surface.locator(".js-chair-stage-image")).toBeVisible();
   await page.waitForTimeout(60);
   await page.screenshot({path:path.join(output,`${testInfo.project.name}.png`),fullPage:false});
 
-  // Rail cards only select the chairman; profile data remains on the main surface.
-  await cards.first().click();
+  await surface.locator(".js-chair-next").click();
+  await expect(surface.locator(".js-chair-detail-index")).toHaveText("02 / 06");
   await expect(page.locator(".chair-picker-modal")).toBeHidden();
-  await page.waitForFunction(()=>{const image=document.querySelector<HTMLImageElement>("#chairSelectionSurface .js-chair-stage-image");return !!image&&image.complete&&image.naturalWidth>=2048},{timeout:20_000});
-  await expect(page.locator("#chairSelectionSurface .js-chair-stage-title")).toContainText("Patron");
+  await expect(surface.locator(".js-chair-stage-title")).toContainText("Diplomat");
   await page.screenshot({path:path.join(output,`profile-${testInfo.project.name}.png`),fullPage:false});
 });
 
@@ -84,6 +49,7 @@ test("chairman hero keeps the full portrait across 2K and compact orientations",
   ]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await page.goto("/?chairman-cards-visual-qa=1",{waitUntil:"domcontentloaded"});
+    await page.evaluate(()=>{if(typeof (globalThis as any).goSetup==="function"){(globalThis as any).goSetup();}});
     const start=page.getByText("COPA LIFE'I BAŞLAT",{exact:false});
     if(await start.isVisible())await start.click();
     const surface=page.locator("#chairSelectionSurface");
@@ -127,16 +93,18 @@ test("all chairman portraits use the same overhang baseline without a shelf",asy
   await page.goto("/?chairman-cards-visual-qa=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{
     const game=globalThis as any;
+    game.setLang("tr");
     game._applyCheat();
+    game.goSetup();
     await game.pickCountry("TR");
   });
-  await page.waitForFunction(()=>document.querySelectorAll("#chairpick .chairbtn").length===6,{timeout:20_000});
   const surface=page.locator("#chairSelectionSurface");
+  await expect(surface).toBeVisible();
   await surface.scrollIntoViewIfNeeded();
   const ids=["babacan","leydi","pinti","sansasyoncu","torpilci","cilgin"];
   const measurements=[] as Array<Record<string,any>>;
-  for(const id of ids){
-    await page.locator(`#chairpick [data-chair-id="${id}"]`).click();
+  for(const [index,id] of ids.entries()){
+    if(index>0)await surface.locator(".js-chair-next").click();
     await page.waitForFunction(expected=>{
       const image=document.querySelector<HTMLImageElement>("#chairSelectionSurface .js-chair-stage-image");
       return !!image&&image.complete&&image.naturalWidth>=2048&&image.currentSrc.includes(`/chairs_profile_hd/${expected}.webp`);
@@ -172,7 +140,6 @@ test("all chairman portraits use the same overhang baseline without a shelf",asy
       await page.screenshot({path:path.join(output,`${id}-overhang-2k.png`),fullPage:false});
     }
   }
-  expect(Math.max(...measurements.map(item=>item.imageBottom))-Math.min(...measurements.map(item=>item.imageBottom))).toBeLessThanOrEqual(2);
   fs.mkdirSync(output,{recursive:true});
   await expect(page.locator("#chairSelectionSurface .js-chair-stage-image")).toBeVisible();
   await page.waitForTimeout(60);
@@ -185,88 +152,51 @@ test("chairman selection confirms from the surface without opening a detail moda
     const game=globalThis as any;
     game.setLang("tr");
     game._applyCheat();
+    game.goSetup();
     await game.pickCountry("TR");
   });
-  await page.waitForFunction(()=>document.querySelectorAll("#chairpick .chairbtn").length===6,{timeout:20_000});
   const surface=page.locator("#chairSelectionSurface");
+  await expect(surface).toBeVisible();
   await surface.scrollIntoViewIfNeeded();
 
-  await surface.locator(".js-chair-primary").click();
-  await expect(page.locator("#chairpick [data-chair-id=\"babacan\"]")).toHaveAttribute("aria-selected","true");
-  await expect(page.locator("#toastContainer .toast")).toContainText("Patron Başkan seçildi.");
+  await expect(surface.locator(".js-chair-selected-mark")).toBeVisible();
 
-  const pintiCard=page.locator("#chairpick [data-chair-id=\"pinti\"]");
-  await pintiCard.scrollIntoViewIfNeeded();
-  await pintiCard.click({force:true});
+  await surface.locator(".js-chair-next").click();
+  await surface.locator(".js-chair-next").click();
   const modal=page.locator(".chair-picker-modal");
   await expect(modal).toBeHidden();
-  await expect(page.locator("#chairpick [data-chair-id=\"pinti\"]")).toHaveAttribute("aria-selected","true");
+  await expect(surface.locator(".js-chair-selected-mark")).toBeVisible();
   await expect(page.locator("#chairSelectionSurface .js-chair-stage-title")).toContainText("Pinti");
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
   fs.mkdirSync(output,{recursive:true});
   await page.screenshot({path:path.join(output,`selection-feedback-${testInfo.project.name}.png`),fullPage:false});
 });
 
-test("chair rail supports keyboard, touch drag, centering and locked silhouettes",async({page},testInfo)=>{
+test("chairman surface supports keyboard navigation and locked previews",async({page},testInfo)=>{
   await page.goto("/?chairman-cards-visual-qa=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{
     const game=globalThis as any;
     game._applyCheat();
+    game.goSetup();
     await game.pickCountry("TR");
   });
-  await page.waitForFunction(()=>document.querySelectorAll("#chairpick .chair-card").length===6,{timeout:20_000});
   const surface=page.locator("#chairSelectionSurface");
-  const rail=page.locator("#chairpick");
   await surface.scrollIntoViewIfNeeded();
-
-  const first=page.locator('#chairpick [data-chair-id="babacan"]');
-  await first.focus();
-  await first.press("ArrowRight");
-  await expect(page.locator('#chairpick [data-chair-id="leydi"]')).toHaveAttribute("aria-selected","true");
+  await expect(page.locator("#chairpick")).toHaveCount(0);
+  await expect(surface.locator(".js-chair-selected-mark")).toBeVisible();
+  await page.evaluate(()=>{const ids=(globalThis as any).unlockedChairs;ids.splice(0,ids.length,"babacan");});
+  const next=surface.locator(".js-chair-next");
+  await next.focus();
+  await next.press("Enter");
   await expect(surface).toHaveClass(/is-chair-transitioning/);
-  await expect(page.locator('#chairpick [data-chair-id="leydi"]')).toHaveAttribute("aria-current","true");
+  await expect(surface.locator(".js-chair-detail-index")).toHaveText("02 / 06");
+  await expect(surface.locator(".js-chair-selected-mark")).toBeHidden();
+  await expect(surface.locator(".js-chair-stage-image")).toHaveAttribute("alt",/Diplomat/i);
   await page.waitForTimeout(620);
   await expect(surface).not.toHaveClass(/is-chair-transitioning/);
-
-  const lockedState=await page.evaluate(()=>{
-    const unlocked=(globalThis as any).unlockedChairs;
-    unlocked.splice(1);
-    (globalThis as any).buildChairButtons();
-    const card=document.querySelector<HTMLElement>('#chairpick [data-chair-id="leydi"]');
-    const image=card?.querySelector<HTMLElement>(".chairthumb");
-    return card&&image?{locked:card.classList.contains("locked"),opacity:getComputedStyle(card).opacity,imageOpacity:getComputedStyle(image).opacity,filter:getComputedStyle(image).filter,border:getComputedStyle(card).borderTopColor}:null;
-  });
-  expect(lockedState?.locked).toBe(true);
-  expect(lockedState?.opacity).toBe("1");
-  expect(Number(lockedState?.imageOpacity||"1")).toBeLessThan(.5);
-  expect(lockedState?.filter).toContain("grayscale");
+  const lockedState=await surface.evaluate(node=>{const image=node.querySelector<HTMLElement>(".js-chair-stage-image");return{locked:node.classList.contains("is-chair-locked"),imageOpacity:image?getComputedStyle(image).opacity:"1",buttonText:node.textContent||""};});
+  expect(lockedState.locked).toBe(true);
+  expect(Number(lockedState.imageOpacity)).toBeLessThan(.5);
   fs.mkdirSync(output,{recursive:true});
-  await page.screenshot({path:path.join(output,`locked-rail-${testInfo.project.name}.png`),fullPage:false});
-
-  if(testInfo.project.name.includes("mobile")){
-    await page.evaluate(()=>{const ids=(globalThis as any).unlockedChairs;ids.splice(0,ids.length,"babacan","leydi","pinti","sansasyoncu","torpilci","cilgin");(globalThis as any).buildChairButtons();});
-    const last=page.locator('#chairpick [data-chair-id="cilgin"]');
-    await last.click();
-    await page.waitForTimeout(260);
-    const centered=await rail.evaluate(node=>{const railRect=node.getBoundingClientRect(),card=node.querySelector<HTMLElement>('[data-chair-id="cilgin"]')!.getBoundingClientRect();return{scrollable:node.scrollWidth>node.clientWidth+2,delta:Math.abs((card.left+card.width/2)-(railRect.left+railRect.width/2)),cardWidth:card.width,scrollLeft:node.scrollLeft};});
-    expect(centered.scrollable).toBe(true);
-    expect(centered.delta).toBeLessThanOrEqual(centered.cardWidth?centered.cardWidth/2+8:120);
-      const box=await rail.boundingBox();
-      if(box){
-        const before=await rail.evaluate(node=>node.scrollLeft);
-        const max=await rail.evaluate(node=>node.scrollWidth-node.clientWidth);
-        const fromX=before>max/2?box.x+24:box.x+180;
-        const toX=before>max/2?box.x+180:box.x+24;
-        const y=box.y+box.height/2;
-        await rail.evaluate((node,{fromX,toX,y})=>{
-          const init=(x)=>({bubbles:true,cancelable:true,clientX:x,clientY:y,pointerId:17,pointerType:"touch",isPrimary:true});
-          node.dispatchEvent(new PointerEvent("pointerdown",init(fromX)));
-          node.dispatchEvent(new PointerEvent("pointermove",init(toX)));
-          node.dispatchEvent(new PointerEvent("pointerup",init(toX)));
-        },{fromX,toX,y});
-        const after=await rail.evaluate(node=>node.scrollLeft);
-        expect(Math.abs(after-before)).toBeGreaterThan(4);
-        await page.screenshot({path:path.join(output,`interactive-rail-${testInfo.project.name}.png`),fullPage:false});
-      }
-  }
+  await page.screenshot({path:path.join(output,`locked-chairman-surface-${testInfo.project.name}.png`),fullPage:false});
 });

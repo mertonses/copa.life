@@ -203,6 +203,11 @@ test("landing hero keeps responsive tactics and persistent header actions",async
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
   const isMobile=testInfo.project.name.includes("mobile");
+  if(isMobile){
+    await expect(page.locator(".v7-landing-panel")).toBeHidden();
+    await expect(page.locator("#settingsBtn")).toBeVisible();
+    return;
+  }
   await expect(page.locator(".v7-hero-desc")).toHaveText("Her seçiminle yeni bir futbol hikâyesi yaz.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
@@ -271,7 +276,7 @@ test("landing hero keeps responsive tactics and persistent header actions",async
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.opacity).toBeGreaterThanOrEqual(.03);
   expect(layout.opacity).toBeLessThanOrEqual(.05);
-  expect(layout.uniqueTops).toBe(isMobile?2:1);
+  expect(layout.uniqueTops).toBe(1);
   expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
   expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
