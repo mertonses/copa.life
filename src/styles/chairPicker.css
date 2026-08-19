@@ -132,7 +132,7 @@ html[data-theme="dark"] .chair-picker-modal .cp-profile-metrics>div{background:c
   .chair-picker-modal .cp-portrait-frame{width:84px;aspect-ratio:1;margin:0}
   .chair-picker-modal .cpphoto{width:auto;height:100%;max-width:100%;margin:0 auto}
 }
-@media(max-width:360px){.chair-picker-modal .cp-portrait-frame{width:76px}.chair-picker-modal .cpphoto{width:auto;height:100%;max-width:100%;margin:0 auto}}
+@media(max-width:360px){.chair-picker-modal .cp-portrait-frame{width:76px}.chair-picker-modal .cpphoto{width:130%;height:130%;margin-left:-15%;margin-bottom:-15%}}
 
 /* Final responsive guard: the portrait is decorative and must never define the
    sheet width or push contract copy outside the viewport. */
