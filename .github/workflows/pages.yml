@@ -53,7 +53,8 @@ jobs:
         run: npm ci --prefix playtest/runner
 
       - name: Install browser engine
-        run: npx --prefix playtest/runner playwright install --with-deps chromium
+        # Use runner-provided system libraries to avoid apt mirror stalls.
+        run: npx --prefix playtest/runner playwright install chromium
 
       - name: Release browser contracts
         run: npm run test:release --prefix playtest/runner

@@ -84,7 +84,8 @@ jobs:
         run: npm ci --prefix playtest/runner
 
       - name: Install Chromium
-        run: npx --prefix playtest/runner playwright install --with-deps chromium
+        # Avoid apt dependency installation on the hosted runner.
+        run: npx --prefix playtest/runner playwright install chromium
 
       - name: Read and confirm release version
         id: version

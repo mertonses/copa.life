@@ -93,7 +93,8 @@ jobs:
         run: npm ci --prefix playtest/runner
 
       - name: Install Chromium
-        run: npx --prefix playtest/runner playwright install --with-deps chromium
+        # The hosted runner has the required system libraries; --with-deps can hang on apt mirrors.
+        run: npx --prefix playtest/runner playwright install chromium
 
       - name: Verify release configuration and dependency security
         run: |
