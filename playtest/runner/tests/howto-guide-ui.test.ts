@@ -94,17 +94,13 @@ test("mobile guide uses a single column, expandable copy and compact previous-ne
   await expect(page.locator(".howto-detail-open-label")).toBeVisible();
 });
 
-test("first-run setup tip records itself and does not reopen after reload",async({browser},testInfo)=>{
+test("setup does not show the removed first-run tip",async({browser},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single browser persistence check");
   const context=await browser.newContext({viewport:{width:1280,height:800}});
   const page=await context.newPage();
   await page.goto("/?howto-tip=first",{waitUntil:"domcontentloaded"});
-  await expect(page.locator(".copa-coachmark")).toBeVisible({timeout:6000});
-  await expect(page.locator("#formpick")).toHaveClass(/guide-focus/);
-  await page.locator(".copa-coachmark-ok").click();
-  await page.reload({waitUntil:"domcontentloaded"});
-  await page.waitForTimeout(2800);
   await expect(page.locator(".copa-coachmark")).toHaveCount(0);
+  await expect(page.locator("#formpick")).not.toHaveClass(/guide-focus/);
   await context.close();
 });
 
@@ -134,15 +130,13 @@ test("mobile draft opens at the page top with one contextual first-run tip",asyn
   expect(contextState.draft).toBeTruthy();
 });
 
-test("closing a contextual tip without acknowledgement keeps it available",async({browser},testInfo)=>{
+test("setup tip dismissal route stays quiet after the tip removal",async({browser},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","single browser persistence check");
   const context=await browser.newContext({viewport:{width:1280,height:800}});
   const page=await context.newPage();
   await page.goto("/?howto-tip=dismiss",{waitUntil:"domcontentloaded"});
-  await expect(page.locator(".copa-coachmark")).toBeVisible({timeout:6000});
-  await page.locator(".copa-coachmark-x").click();
-  const state=await page.evaluate(()=>JSON.parse(localStorage.getItem("copa.guide.context.v2")||"{}"));
-  expect(state.setup).toBeFalsy();
+  await expect(page.locator(".copa-coachmark")).toHaveCount(0);
+  await expect(page.locator("#formpick")).not.toHaveClass(/guide-focus/);
   await context.close();
 });
 

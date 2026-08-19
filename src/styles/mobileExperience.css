@@ -162,6 +162,11 @@
     font-size:14px!important;
     white-space:nowrap;
   }
+  .mobile-action-dock[data-dock-kind="result"] #againBtn{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
   .mobile-action-dock[data-dock-kind="intro"] .v7-primary-actions{
     display:grid;
     grid-template-columns:1fr;

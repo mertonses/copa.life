@@ -155,7 +155,7 @@ if("serviceWorker"in navigator){
         <span class="mode-card-emblem mode-card-arena-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path class="mode-mark-score" d="M14 13h36M14 51h36"/><path d="M22 21h20l-2 22H24z"/><path d="M22 24h-5a7 7 0 0 0 7 9M42 24h5a7 7 0 0 1-7 9M29 43v6M35 43v6M25 51h14"/><circle class="mode-mark-node" cx="18" cy="13" r="2"/><circle class="mode-mark-node" cx="46" cy="13" r="2"/></svg></span>
         <span class="mode-card-copy" id="arenaModeDescription">
           <small data-mode-copy="multiplayer">ÇOK OYUNCULU</small>
-          <strong class="mode-title mode-title-arena"><span>COPA</span> <em>ARENA</em></strong>
+          <strong class="mode-title mode-title-arena"><span>COPA</span> <em>ARENA</em><span class="mode-title-crown" aria-hidden="true"><svg viewBox="0 0 18 14"><path d="M1 3.5 5.3 7 9 1l3.7 6L17 3.5 15.5 12h-13z"/></svg></span></strong>
           <span data-mode-copy="arenaDesc">Canlı eşleşmeler, dereceli yolculuk ve rövanş heyecanı.</span>
         </span>
         <span class="mode-card-stamp" data-mode-copy="arenaMeta">DERECELİ · CANLI</span>
@@ -419,9 +419,9 @@ if("serviceWorker"in navigator){
       </div>
       <div class="result-actions">
         <p class="result-action-copy" id="resultActionCopy">Bu tur kaybolmadı. Kulüp kariyerine işlendi.</p>
-        <button class="result-action result-action-data" id="resultMoreBtn" onclick="toggleResultDetails()" aria-expanded="false" aria-controls="resultDatahub"><span class="result-action-icon" aria-hidden="true">▥</span><span id="resultMoreLbl">SEZON ÖZETİ</span><span class="result-action-arrow" aria-hidden="true">↓</span></button>
-        <button class="result-action result-action-squad" id="squadResultBtn" onclick="showResultSquad()"><span class="result-action-icon" aria-hidden="true">♙</span><span id="squadResultLbl">KADROYU İNCELE</span><span class="result-action-arrow" aria-hidden="true">→</span></button>
-        <button class="result-action result-action-new" id="againBtn" onclick="restartAfterRunAd()"><span class="result-action-icon" aria-hidden="true">→</span><span id="againBtnLabel">YENİ TUR</span></button>
+        <button class="result-action result-action-data" id="resultMoreBtn" onclick="toggleResultDetails()" aria-expanded="false" aria-controls="resultDatahub"><span class="result-action-icon" aria-hidden="true">▥</span><span class="result-action-label" id="resultMoreLbl">SEZON ÖZETİ</span><span class="result-action-arrow" aria-hidden="true">↓</span></button>
+        <button class="result-action result-action-squad" id="squadResultBtn" onclick="showResultSquad()"><span class="result-action-icon" aria-hidden="true">♙</span><span class="result-action-label" id="squadResultLbl">KADROYU İNCELE</span><span class="result-action-arrow" aria-hidden="true">→</span></button>
+        <button class="result-action result-action-new" id="againBtn" onclick="restartAfterRunAd()"><span class="result-action-icon" aria-hidden="true">→</span><span class="result-action-label" id="againBtnLabel">YENİ TUR</span></button>
         <div class="result-row" aria-hidden="true"><button class="hidden" id="statsBtn" onclick="showSeasonStats()"><span id="statsBtnLbl">DATAHUB</span></button><div class="seedbox result-seed-action"><span id="rSeedLbl"></span><b id="rSeed"></b></div></div>
         <div class="copied" id="copied"></div><span id="copyBtn" hidden></span>
       </div>
@@ -4429,5 +4429,6 @@ function _finalTacticBench(benchIdx){
    window.addEventListener("load",()=>syncPremiumResult(window.lastResult||null));
  })();
  </script>
+ <script>(()=>{const normalize=()=>{const button=document.getElementById("againBtn");if(!button)return;const label=button.textContent?.trim()||"";if(!button.querySelector(".result-action-label")){button.innerHTML=`<span class="result-action-icon" aria-hidden="true">→</span><span class="result-action-label" id="againBtnLabel">${label}</span>`;}};const previous=window.renderResult;if(typeof previous==="function")window.renderResult=function(){previous.apply(this,arguments);normalize();};window.addEventListener("copa:language-changed",normalize);})();</script>
  <script>(()=>{const l=()=>{const c=document.createElement("link");c.rel="stylesheet";c.href="src/styles/chairSelection.css";document.head.appendChild(c);const s=document.createElement("script");s.src="src/ui/chairSelectionSurface.js";s.async=false;document.body.appendChild(s)};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",l,{once:true}):l()})();</script>
 </body></html>

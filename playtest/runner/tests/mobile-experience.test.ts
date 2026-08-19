@@ -300,7 +300,7 @@ test("hub context and result details stay compact without hiding information",as
   });
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
-  const resultActions=page.locator("#result .result-action");
+  const resultActions=page.locator("#result .result-action, .mobile-action-dock[data-dock-kind='result'] #againBtn");
   await expect(resultActions).toHaveCount(3);
   const resultActionLayout=await resultActions.evaluateAll(elements=>elements.map(element=>{
     const rect=element.getBoundingClientRect();
