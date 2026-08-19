@@ -18,9 +18,6 @@ html[data-copa-platform="android"]{
   background-color:var(--android-page);
 }
 
-html[data-copa-platform="android"] #modeGate,
-html[data-copa-platform="ios"] #modeGate{display:none!important}
-
 html[data-copa-platform="android"] body,
 html[data-copa-platform="android"] #app,
 html[data-copa-platform="android"] .wrap{
