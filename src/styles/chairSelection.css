@@ -221,7 +221,15 @@
   #introSetup .copa-setup-heading{display:none}
   #introSetup .copa-setup-fields{display:flex!important;flex-direction:column!important;gap:14px!important}
   #introSetup .copa-roster-options{display:contents}
-  #introSetup .copa-formation-panel .formpick{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #introSetup .copa-formation-panel,
+  #introSetup .copa-country-panel,
+  #introSetup .copa-chair-subcol,
+  #introSetup .copa-roster-options .v7-cta-stack{
+    align-self:stretch!important;
+    width:100%!important;
+    max-width:none!important;
+  }
+  #introSetup .copa-formation-panel .formpick{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #introSetup .copa-formation-panel{order:1}
   #introSetup .copa-chair-subcol{order:2}
   #introSetup .copa-country-panel{order:3}

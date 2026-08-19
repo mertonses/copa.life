@@ -119,7 +119,17 @@
   global.CopaLazy=Object.freeze({loadScriptOnce,ensureMatchCore,ensureFinalSim,ensureMetaProgression,ensureChairPicker,ensureAdvancedSettings,ensureScoutReport,ensureHiddenDraft,ensureArena,ensureSideField,ensureCashDisplay,ensureCountryPlayers,ensureLastMatchReport,warmRunReports,toggleAdvancedSettings,openAdvancedSettings,closeAdvancedSettings,openMetaProgression,openArena});
   global.addEventListener("load",()=>{
     const warm=()=>{Promise.all([warmRunReports(),ensureMetaProgression(),ensureSideField(),ensureCashDisplay()]).catch(()=>{});};
-    if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(warm,{timeout:1500});
+    /* Native WebViews must reach their first interactive frame before optional
+       report, finance and side-field chunks are parsed. On a cold Android
+       WebView these requests compete with the initial document and can starve
+       focus long enough for the system ANR watchdog to fire. Each feature still
+       loads on demand through CopaLazy; this only moves the optional warm-up
+       behind the first native interaction window. */
+    if(global.COPA_IS_NATIVE){
+      const nativeWarm=()=>global.setTimeout(warm,10000);
+      if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(nativeWarm,{timeout:12000});
+      else global.setTimeout(warm,10000);
+    }else if(typeof global.requestIdleCallback==="function")global.requestIdleCallback(warm,{timeout:1500});
     else global.setTimeout(warm,250);
   },{once:true});
 })(window);

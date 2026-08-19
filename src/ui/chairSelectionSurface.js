@@ -167,5 +167,14 @@
   window.addEventListener("copa:language-changed", () => syncChairSelectionSurface());
   window.buildChairButtons();
   const runPrefetch = () => { if (navigator.connection && navigator.connection.saveData) return; CHAIRMEN.forEach(ch => { const link = document.createElement("link"); link.rel = "prefetch"; link.as = "image"; link.href = chairProfileSrc(ch.id); link.dataset.copaChairPrefetch = ch.id; document.head.appendChild(link); }); };
-  if ("requestIdleCallback" in window) requestIdleCallback(runPrefetch, { timeout: 1800 }); else setTimeout(runPrefetch, 800);
+  /* The active portrait is eager. The other five are fetched only after the
+     native first-screen budget, because decoding all large transparent PNG
+     derivatives during Android cold start can evict the first frame. */
+  if (!window.COPA_IS_NATIVE) {
+    if ("requestIdleCallback" in window) requestIdleCallback(runPrefetch, { timeout: 1800 }); else setTimeout(runPrefetch, 800);
+  } else if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => setTimeout(runPrefetch, 10000), { timeout: 12000 });
+  } else {
+    setTimeout(runPrefetch, 10000);
+  }
 })();
