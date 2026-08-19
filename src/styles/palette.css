@@ -112,8 +112,6 @@ html[data-theme="light"]{
   --rating-elite-text:#1F6B45;
   --data-series:#101D28;
   --formation-hover-bg:color-mix(in srgb,#F24A28 9%,#FFFFFF);
-  --formation-preview-bg:#101D28;
-  --formation-preview-ink:#F3F5F4;
 
   --color-background:var(--page-bg);
   --color-ink:var(--text-primary);
@@ -231,8 +229,6 @@ html[data-theme="dark"]{
   --rating-elite-text:color-mix(in srgb,#1F6B45 56%,#F3F5F4);
   --data-series:#AAB2B3;
   --formation-hover-bg:color-mix(in srgb,#F24A28 16%,#27343C);
-  --formation-preview-bg:#303C44;
-  --formation-preview-ink:#F3F5F4;
 
   --color-background:var(--page-bg);
   --color-ink:var(--text-primary);
@@ -274,7 +270,7 @@ body::before{background:radial-gradient(color-mix(in srgb,var(--text-secondary) 
 
 .sheet,.settingsdrop,.modalbox,
 .copa-coachmark,.fixture-detail,
-.tooltip,[role="tooltip"],.form-dot-preview{
+.tooltip,[role="tooltip"]{
   border-color:var(--border-default);
   background:var(--surface-elevated);
   color:var(--text-primary);
@@ -313,16 +309,6 @@ input::placeholder,textarea::placeholder{color:var(--text-secondary);opacity:1}
   border-color:var(--action-primary-hover);
   background:var(--action-primary-hover);
   color:var(--text-on-primary);
-}
-html .v7-setup-twocol .form-dot-preview,
-html .formpick .form-dot-preview,
-html[data-theme="dark"] .v7-setup-twocol .form-dot-preview,
-html[data-theme="dark"] .formpick .form-dot-preview{
-  border-color:var(--action-primary)!important;
-  background:var(--formation-preview-bg)!important;
-  color:var(--formation-preview-ink)!important;
-  box-shadow:0 14px 30px color-mix(in srgb,var(--surface-deep) 42%,transparent),
-    inset 0 1px 0 color-mix(in srgb,var(--brand-paper) 10%,transparent)!important;
 }
 html :is(button,a,input,textarea,select,[tabindex]):focus-visible,
 html .btn:focus{

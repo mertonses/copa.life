@@ -173,8 +173,6 @@ html[data-theme="dark"] .patreonicon-sm{filter:brightness(0) invert(1)}
 .pickhdr{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--color-slate);margin-bottom:8px}
 .formpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding-bottom:4px}
 .formpick .fbtn{min-width:0;padding:9px 4px;font-size:12px;position:relative}
-.form-dot-preview{opacity:0;visibility:hidden;transform:translateX(-50%) scale(0.7);transition:opacity .14s ease,transform .14s ease;position:absolute;bottom:calc(100% + 7px);left:50%;background:var(--color-ink);color:var(--color-background);border-radius:var(--radius-sm);padding:8px;z-index:99;pointer-events:none;box-shadow:var(--shadow-md)}
-.fbtn:hover:not(.locked) .form-dot-preview{opacity:1;visibility:visible;transform:translateX(-50%) scale(1.5)}
 .formpick .fbtn.sel{transform:scale(1.05);box-shadow:0 0 0 2px var(--surface-elevated),0 0 0 4px var(--color-primary);z-index:1;position:relative}
 #chairpick{display:flex;flex-direction:row;flex-wrap:wrap;gap:5px}
 #chairpick .fbtn{font-size:12px;padding:6px 5px;text-align:center}
@@ -2051,22 +2049,6 @@ html.copa-mobile-device .tools #howtoToggle svg{width:16px;height:16px;margin:0!
   min-height:38px;
   padding:8px 4px;
   font-size:10.5px;
-}
-.v7-setup-twocol .form-dot-preview{
-  display:block;
-  opacity:0;
-  visibility:hidden;
-  transform:translateX(-50%) translateY(4px) scale(.82);
-  transform-origin:50% 100%;
-  bottom:calc(100% + 9px);
-  border:1px solid rgba(243,245,244,.18);
-  box-shadow:0 10px 24px rgba(16,29,40,.22);
-}
-.v7-setup-twocol .fbtn:hover:not(.locked) .form-dot-preview,
-.v7-setup-twocol .fbtn:focus-visible:not(.locked) .form-dot-preview{
-  opacity:1;
-  visibility:visible;
-  transform:translateX(-50%) translateY(0) scale(1.18);
 }
 .v7-setup-twocol #chairpick{
   display:grid!important;
@@ -4631,50 +4613,6 @@ html.hub-player-dragging *{cursor:grabbing!important}
     height:auto!important;
     max-height:none!important;
     aspect-ratio:68/92!important;
-  }
-}
-
-/* ===== Formation hover preview sizing ===== */
-@media(min-width:761px){
-  .v7-setup-twocol .form-dot-preview,
-  .formpick .form-dot-preview{
-    width:92px!important;
-    height:118px!important;
-    padding:14px!important;
-    bottom:calc(100% + 12px)!important;
-    border-radius:9px!important;
-    display:grid!important;
-    place-items:center!important;
-    background:var(--color-ink)!important;
-    transform:translateX(-50%) translateY(6px) scale(.92)!important;
-    transform-origin:50% 100%!important;
-    box-shadow:0 14px 30px rgba(16,29,40,.28)!important;
-  }
-  .v7-setup-twocol .form-dot-preview svg,
-  .formpick .form-dot-preview svg{
-    width:72px!important;
-    height:72px!important;
-  }
-  .v7-setup-twocol .fbtn:hover:not(.locked) .form-dot-preview,
-  .v7-setup-twocol .fbtn:focus-visible:not(.locked) .form-dot-preview,
-  .formpick .fbtn:hover:not(.locked) .form-dot-preview,
-  .formpick .fbtn:focus-visible:not(.locked) .form-dot-preview{
-    opacity:1!important;
-    visibility:visible!important;
-    transform:translateX(-50%) translateY(0) scale(1)!important;
-  }
-
-  html[data-theme="dark"] .v7-setup-twocol .form-dot-preview,
-  html[data-theme="dark"] .formpick .form-dot-preview{
-    background:#101D28!important;
-    color:#F3F5F4!important;
-    border:1px solid rgba(243,245,244,.16)!important;
-    box-shadow:0 12px 28px rgba(10,17,24,.38),inset 0 1px 0 rgba(243,245,244,.03)!important;
-  }
-}
-@media(max-width:760px){
-  .form-dot-preview{
-    display:none!important;
   }
 }
 
