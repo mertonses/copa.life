@@ -43,7 +43,7 @@
   function copy(){
     return languageIsTurkish()?{
       actions:"Ana aksiyonlar",field:"SAHA",events:"OLAYLAR",stats:"İSTATİSTİK",
-      matchView:"Maç görünümü",offline:"Bağlantı yok · kayıtlı oyun güvende",
+      matchView:"Maç görünümü",offline:"Bağlantı yok · kayıtlı oyun güvende",savedAt:"Son kayıt",
       online:"Bağlantı geri geldi",retry:"Yeniden dene",settings:"MOBİL DENEYİM",
       haptics:"DOKUNUŞ TİTREŞİMİ",battery:"PİL TASARRUFU",
       smartSpeed:"AKILLI MAÇ HIZI",confirmPick:"OYUNCU SEÇİMİNİ ONAYLA",
@@ -68,7 +68,7 @@
       swipe:"Yatay kaydırılabilir",
     }:{
       actions:"Primary actions",field:"PITCH",events:"EVENTS",stats:"STATS",
-      matchView:"Match view",offline:"Offline · your saved run is safe",
+      matchView:"Match view",offline:"Offline · your saved run is safe",savedAt:"Last save",
       online:"Connection restored",retry:"Retry",settings:"MOBILE EXPERIENCE",
       haptics:"TOUCH HAPTICS",battery:"BATTERY SAVER",
       smartSpeed:"SMART MATCH SPEED",confirmPick:"CONFIRM PLAYER PICKS",
@@ -492,7 +492,8 @@
   function syncNetworkState(restored){
     const banner=ensureNetworkBanner(),c=copy(),online=global.navigator.onLine!==false;
     banner.classList.toggle("is-online",online);
-    banner.querySelector("span").textContent=online?c.online:c.offline;
+    let saved="";try{const raw=localStorage.getItem("copa_last_save_at");if(raw){const date=new Date(raw);if(!Number.isNaN(date.getTime()))saved=` · ${c.savedAt}: ${date.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;}}catch(_){ }
+    banner.querySelector("span").textContent=(online?c.online:c.offline)+(!online?saved:"");
     banner.querySelector("button").textContent=c.retry;
     if(!online){
       banner.classList.remove("hidden");
@@ -660,8 +661,12 @@
         unreadFeedCount=0;
         const unread=document.querySelector(".mobile-feed-unread");
         if(unread)unread.classList.add("hidden");
-        const items=[...feed.querySelectorAll(":scope > .feeditem")].map(item=>item.outerHTML).join("");
-        if(typeof global.showModal==="function")global.showModal(`<div class="mobile-feed-sheet"><header><div><span>${copy().newFeed}</span><h3>${copy().feedMore}</h3></div><button type="button" onclick="closeModal()" aria-label="${copy().cancel}">×</button></header><div class="mobile-feed-history">${items}</div></div>`,{dismissOnOverlay:true,label:copy().feedMore});
+        const c=copy(),items=[...feed.querySelectorAll(":scope > .feeditem")].map(item=>item.outerHTML).join(""),filters=[["all",languageIsTurkish()?"TÜMÜ":"ALL"],["match",languageIsTurkish()?"MAÇ":"MATCH"],["injury",languageIsTurkish()?"SAKATLIK":"INJURY"],["transfer",languageIsTurkish()?"TRANSFER":"TRANSFER"],["reward",languageIsTurkish()?"ÖDÜL":"REWARD"],["tournament",languageIsTurkish()?"TURNUVA":"TOURNAMENT"],["system",languageIsTurkish()?"SİSTEM":"SYSTEM"]];
+        if(typeof global.showModal==="function"){
+          global.showModal(`<div class="mobile-feed-sheet"><header><div><span>${c.newFeed}</span><h3>${c.feedMore}</h3></div><button type="button" onclick="closeModal()" aria-label="${c.cancel}">×</button></header><div class="mobile-feed-filters" role="tablist">${filters.map(([key,label],index)=>`<button type="button" role="tab" data-feed-filter="${key}" aria-selected="${index===0}">${label}</button>`).join("")}</div><div class="mobile-feed-history">${items}</div></div>`,{dismissOnOverlay:true,label:c.feedMore});
+          const sheet=document.querySelector("#modal .mobile-feed-sheet"),history=sheet?.querySelector(".mobile-feed-history");
+          sheet?.querySelectorAll("[data-feed-filter]").forEach(button=>button.addEventListener("click",()=>{const key=button.dataset.feedFilter||"all";sheet.querySelectorAll("[data-feed-filter]").forEach(item=>item.setAttribute("aria-selected",String(item===button)));history?.querySelectorAll(".feeditem").forEach(item=>{item.hidden=key!=="all"&&(item.dataset.feedCategory||"system")!==key;});}));
+        }
         toggle.setAttribute("aria-expanded","false");
         toggle.textContent=copy().feedMore;
       });
@@ -942,6 +947,22 @@
     showToast(copy().resumed,{type:"info",duration:2600});
   }
 
+  function ensurePitchZoom(){
+    if(!isPhoneInteraction())return;
+    const pitch=document.querySelector("#hub .pitch-area > .pitch");
+    if(!pitch||pitch.dataset.zoomBound)return;
+    pitch.dataset.zoomBound="1";
+    let startDistance=0,startScale=1,scale=1;
+    const distance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+    const reset=document.createElement("button");reset.type="button";reset.className="mobile-pitch-zoom-reset";reset.textContent=languageIsTurkish()?"SAHAYI SIFIRLA":"RESET PITCH";reset.hidden=true;reset.setAttribute("aria-label",reset.textContent);
+    const apply=()=>{pitch.style.setProperty("--mobile-pitch-scale",String(scale));pitch.classList.toggle("is-zoomed",scale>1.02);reset.hidden=scale<=1.02;};
+    reset.addEventListener("click",()=>{scale=1;apply();});
+    pitch.parentElement?.appendChild(reset);
+    pitch.addEventListener("touchstart",event=>{if(event.touches.length===2){startDistance=distance(event.touches);startScale=scale;}},{passive:true});
+    pitch.addEventListener("touchmove",event=>{if(event.touches.length!==2||!startDistance)return;event.preventDefault();scale=Math.max(1,Math.min(1.7,startScale*distance(event.touches)/startDistance));apply();},{passive:false});
+    pitch.addEventListener("touchend",event=>{if(event.touches.length<2)startDistance=0;},{passive:true});
+  }
+
   function enhance(){
     enhanceFrame=0;
     // Result disclosures are a responsive DOM transformation. Run their
@@ -970,6 +991,7 @@
     ensureSkipButton();
     ensureNativeShare();
     ensureNativeHubNavigation();
+    ensurePitchZoom();
     syncMatchEvents();
     syncOverlayScroll();
   }

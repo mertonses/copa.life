@@ -5,6 +5,7 @@ const fixture=fs.readFileSync("src/runtime/testFixtures.js","utf8");
 const hub=fs.readFileSync("src/ui/hub.js","utf8");
 const checks=[
   ["fixture is URL-gated",/testMode/.test(fixture)&&/Object\.freeze/.test(fixture)],
+  ["platform parity fixture has one shared team, squad and opponent set",/Copa Test United/.test(fixture)&&/fixture-gk-01/.test(fixture)&&/Copa Test Athletic/.test(fixture)&&/function common/.test(fixture)],
   ["injury fixture is deterministic and one-shot",/injuryConsumed=false/.test(fixture)&&/injuryLevel=2/.test(fixture)&&/!is\("injury"\)\|\|injuryConsumed/.test(fixture)],
   ["post-match uses fixture instead of random injury",/fixtureInjury=/.test(index)&&/is\("injury"\)\)\?null:applyRandomInjury/.test(index)],
   ["placement fixture enables coarse tap flow",/_tapCoarse/.test(hub)&&/_tapPlaceOnSlot/.test(hub)&&/addEventListener\("click"/.test(hub)],

@@ -684,11 +684,20 @@ test("mobile match surface stays vertically scrollable when the simulator is ope
   await page.waitForTimeout(50);
   const state=await page.evaluate(()=>{
     const sim=document.getElementById("sim")!,html=getComputedStyle(document.documentElement),body=getComputedStyle(document.body),simStyle=getComputedStyle(sim);
-    return{htmlOverflow:html.overflowY,bodyOverflow:body.overflowY,simOverflow:simStyle.overflowY,simMaxHeight:simStyle.maxHeight,simTouch:simStyle.touchAction};
+    const scroll=document.scrollingElement!;
+    return{htmlOverflow:html.overflowY,bodyOverflow:body.overflowY,simOverflow:simStyle.overflowY,simMaxHeight:simStyle.maxHeight,simTouch:simStyle.touchAction,documentHeight:scroll.scrollHeight,viewportHeight:scroll.clientHeight};
   });
   expect(state.htmlOverflow).toBe("auto");
   expect(state.bodyOverflow).toBe("auto");
   expect(state.simOverflow).toBe("visible");
   expect(state.simMaxHeight).toBe("none");
   expect(state.simTouch).toBe("pan-y");
+  expect(state.documentHeight).toBeGreaterThan(state.viewportHeight);
+  const moved=await page.evaluate(()=>{
+    const scroll=document.scrollingElement!;
+    window.scrollTo({top:Math.min(420,scroll.scrollHeight-scroll.clientHeight),behavior:"auto"});
+    return{y:window.scrollY,max:scroll.scrollHeight-scroll.clientHeight};
+  });
+  expect(moved.max).toBeGreaterThan(0);
+  expect(moved.y).toBeGreaterThan(0);
 });
