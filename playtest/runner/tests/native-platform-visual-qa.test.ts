@@ -62,6 +62,11 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     await page.goto(`${packagePath(platform)}?native-setup-${viewport.name}=1`,{waitUntil:"domcontentloaded"});
     await expect(page.locator("html")).toHaveAttribute("data-copa-platform",platform);
     await expect(page.locator("#mobileGameLanding")).toBeVisible();
+    await expect(page.locator("#loader")).toBeHidden({timeout:10_000});
+    if(platform==="android"){
+      expect(await page.locator(".mode-gate-app-promo,.mode-gate-mobile-app-cta").evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).length)).toBe(0);
+      await expect(page.locator(".global-footer-bar")).toBeHidden();
+    }
     const landing=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
       actions:[...document.querySelectorAll<HTMLElement>(".mgl-actions button")]
@@ -76,6 +81,8 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     await page.evaluate(()=>(globalThis as any).CopaMobileShell.newRun());
     await expect(page.locator("body")).toHaveClass(/mobile-game-setup-open/);
     await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
+    const leakedStep2=await page.locator('#introSetup [data-mobile-step="2"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
+    expect(leakedStep2,`${platform} ${viewport.name} leaked step 2`).toEqual([]);
     await expect(page.locator("#mobileActionDock")).toBeHidden();
     const formation=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
@@ -96,8 +103,11 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
       expect(country.overflow,`${platform} ${viewport.name} country`).toBeLessThanOrEqual(1);
       expect(country.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
     }
+    await capture(page,platform,`${viewport.name}-setup-first`);
     await page.locator("[data-step-next]").click();
     await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
+    const leakedStep1=await page.locator('#introSetup [data-mobile-step="1"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
+    expect(leakedStep1,`${platform} ${viewport.name} leaked step 1`).toEqual([]);
     await expect(page.locator("#mobileActionDock")).toBeHidden();
     const chairman=await page.evaluate(() => ({
       overflow:document.documentElement.scrollWidth-innerWidth,
@@ -259,21 +269,39 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
 
   await page.locator('#nativeHubNav [data-native-target="career"]').click();
   await expect(page.locator("#mobileCareerRoute")).toBeVisible();
-  const career=await page.evaluate(()=>({
-    overflow:document.documentElement.scrollWidth-innerWidth,
-    hidden:[...document.querySelectorAll<HTMLElement>(".meta-tabs button")]
-      .filter(tab=>{const rect=tab.getBoundingClientRect();return rect.left<0||rect.right>innerWidth;})
-      .map(tab=>tab.textContent),
-    routeHeight:document.getElementById("mobileCareerRoute")!.getBoundingClientRect().height,
-    snapshotBottom:document.querySelector<HTMLElement>(".meta-overview-snapshot")?.getBoundingClientRect().bottom||0,
-    routeBottom:document.getElementById("mobileCareerRoute")!.getBoundingClientRect().bottom,
-    inlineOverflow:getComputedStyle(document.querySelector<HTMLElement>(".mobile-career-inline")!).overflow,
-  }));
+  const career=await page.evaluate(()=>{
+    const route=document.getElementById("mobileCareerRoute")!;
+    const header=route.querySelector<HTMLElement>(".meta-progress-head")!;
+    const actions=route.querySelector<HTMLElement>(".meta-head-actions")!;
+    const tabs=route.querySelector<HTMLElement>(".meta-tabs")!;
+    const routeRect=route.getBoundingClientRect(),headerRect=header.getBoundingClientRect(),actionRect=actions.getBoundingClientRect(),tabsRect=tabs.getBoundingClientRect();
+    return{
+      overflow:document.documentElement.scrollWidth-innerWidth,
+      hidden:[...document.querySelectorAll<HTMLElement>(".meta-tabs button")]
+        .filter(tab=>{const rect=tab.getBoundingClientRect();return rect.left<0||rect.right>innerWidth;})
+        .map(tab=>tab.textContent),
+      routeHeight:routeRect.height,
+      snapshotBottom:document.querySelector<HTMLElement>(".meta-overview-snapshot")?.getBoundingClientRect().bottom||0,
+      routeBottom:routeRect.bottom,
+      inlineOverflow:getComputedStyle(document.querySelector<HTMLElement>(".mobile-career-inline")!).overflow,
+      layout:{
+        header:{left:headerRect.left,right:headerRect.right,bottom:headerRect.bottom},
+        actions:{left:actionRect.left,right:actionRect.right,top:actionRect.top},
+        tabs:{left:tabsRect.left,right:tabsRect.right,top:tabsRect.top},
+        tabRects:[...tabs.querySelectorAll<HTMLElement>("button")].map(button=>{const rect=button.getBoundingClientRect();return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};}),
+      },
+    };
+  });
   expect(career.overflow).toBeLessThanOrEqual(1);
   expect(career.hidden).toEqual([]);
   expect(career.routeHeight).toBeGreaterThan(0);
   expect(career.snapshotBottom).toBeLessThanOrEqual(career.routeBottom+1);
   expect(career.inlineOverflow).toBe("visible");
+  expect(career.layout.actions.left,JSON.stringify(career.layout)).toBeGreaterThanOrEqual(career.layout.header.left);
+  expect(career.layout.actions.left,JSON.stringify(career.layout)).toBeGreaterThanOrEqual(career.layout.header.right-64);
+  expect(career.layout.actions.right,JSON.stringify(career.layout)).toBeLessThanOrEqual(career.layout.header.right+1);
+  expect(career.layout.tabs.top,JSON.stringify(career.layout)).toBeGreaterThanOrEqual(career.layout.header.bottom-1);
+  expect(career.layout.tabRects.every((rect,index,all)=>index===0||rect.left>=all[index-1].right-1),JSON.stringify(career.layout)).toBe(true);
   await capture(page,platform,"hub-career");
 
   for(const viewport of [
@@ -330,5 +358,66 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
       expect(layout.action.clipped).toEqual([]);
     }
     await capture(page,platform,`hub-${viewport.name}`);
+  }
+});
+
+test("Android hub routes scroll down and back up without horizontal drift or layout jitter",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","Android scroll regression matrix");
+  await clean(page);
+  await page.setViewportSize({width:360,height:800});
+  await openHub(page,"android");
+
+  for(const target of ["match","market","training","sidefield","career"]){
+    await page.locator(`#nativeHubNav [data-native-target="${target}"]`).click();
+    await page.waitForTimeout(700);
+    const audit=await page.evaluate(async route=>{
+      const settle=()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));
+      const visible=(node:HTMLElement)=>!!node.offsetParent||node===document.body||node===document.documentElement;
+      const scrolling=document.scrollingElement as HTMLElement;
+      const candidates=[scrolling,...document.querySelectorAll<HTMLElement>("body *")]
+        .filter((node,index,list)=>list.indexOf(node)===index&&visible(node))
+        .filter(node=>{
+          if(node===scrolling)return node.scrollHeight>node.clientHeight+4;
+          const overflow=getComputedStyle(node).overflowY;
+          return /(auto|scroll|overlay)/.test(overflow)&&node.scrollHeight>node.clientHeight+4;
+        })
+        .sort((a,b)=>(b.scrollHeight-b.clientHeight)-(a.scrollHeight-a.clientHeight));
+      const host=candidates[0]||scrolling;
+      const max=Math.max(0,host.scrollHeight-host.clientHeight);
+      const previousScrollBehavior=host.style.scrollBehavior;
+      host.style.scrollBehavior="auto";
+      const nav=document.getElementById("nativeHubNav")!;
+      const routeRoot=(route==="training"?document.getElementById("mobileTrainingRoute"):route==="sidefield"?document.getElementById("sideFieldRoute"):route==="career"?document.getElementById("mobileCareerRoute"):document.getElementById("hub"))!;
+      const measure=()=>({
+        left:routeRoot.getBoundingClientRect().left,
+        width:routeRoot.getBoundingClientRect().width,
+        navLeft:nav.getBoundingClientRect().left,
+        navWidth:nav.getBoundingClientRect().width,
+        pageOverflow:document.documentElement.scrollWidth-innerWidth,
+      });
+      host.scrollTop=0;await settle();
+      const start=measure();
+      host.scrollTop=max;const assigned=host.scrollTop;host.dispatchEvent(new Event("scroll"));await settle();
+      const bottom=host.scrollTop,atBottom=measure();
+      host.scrollTop=Math.floor(max/2);host.dispatchEvent(new Event("scroll"));await settle();
+      const middle=measure();
+      host.scrollTop=0;host.dispatchEvent(new Event("scroll"));await settle();
+      const top=host.scrollTop,end=measure();
+      host.style.scrollBehavior=previousScrollBehavior;
+      return{
+        host:host===scrolling?"document":host.id||host.className||host.tagName,
+        max,assigned,bottom,top,
+        hostLayout:{clientHeight:host.clientHeight,scrollHeight:host.scrollHeight,rectHeight:host.getBoundingClientRect().height,overflowY:getComputedStyle(host).overflowY,position:getComputedStyle(host).position},
+        samples:[start,atBottom,middle,end],
+      };
+    },target);
+    expect(audit.samples.every(sample=>sample.pageOverflow<=1),`${target}: ${JSON.stringify(audit)}`).toBe(true);
+    expect(Math.max(...audit.samples.map(sample=>sample.width))-Math.min(...audit.samples.map(sample=>sample.width)),`${target} route width`).toBeLessThanOrEqual(1);
+    expect(Math.max(...audit.samples.map(sample=>sample.navWidth))-Math.min(...audit.samples.map(sample=>sample.navWidth)),`${target} nav width`).toBeLessThanOrEqual(1);
+    expect(Math.max(...audit.samples.map(sample=>sample.navLeft))-Math.min(...audit.samples.map(sample=>sample.navLeft)),`${target} nav left`).toBeLessThanOrEqual(1);
+    if(audit.max>4){
+      expect(audit.bottom,`${target} failed to reach bottom via ${audit.host}: ${JSON.stringify(audit)}`).toBeGreaterThan(0);
+      expect(audit.top,`${target} failed to return to top via ${audit.host}`).toBe(0);
+    }
   }
 });

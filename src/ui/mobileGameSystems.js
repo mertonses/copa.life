@@ -243,6 +243,7 @@
     const hub=document.getElementById("hub");if(!hub)return;
     const previousRoute=hub.dataset.mobileRoute||"";
     activeRoute=["match","market","training","sidefield","career"].includes(route)?route:"match";
+    const routeChanged=previousRoute!==activeRoute;
     hub.dataset.mobileRoute=activeRoute;
     const actionDock=document.getElementById("mobileActionDock");
     if(actionDock)actionDock.classList.toggle("mobile-route-suppressed",activeRoute!=="match");
@@ -252,17 +253,17 @@
       button.classList.toggle("active",selected);
       button.setAttribute("aria-current",selected?"page":"false");
     });
-    if(previousRoute&&previousRoute!==activeRoute)playRouteSound(activeRoute);
+    if(previousRoute&&routeChanged)playRouteSound(activeRoute);
     normalizePlayButton();
-    if(activeRoute==="training")renderTrainingRoute();
-    if(activeRoute==="sidefield")ensureSideFieldRoute().then(()=>{if(activeRoute==="sidefield")document.getElementById("sideFieldRoute")?.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});});
-    if(activeRoute==="career")renderCareerRoute();
+    if(activeRoute==="training"&&(routeChanged||!document.querySelector("#mobileTrainingRoute .prep-modal")))renderTrainingRoute();
+    if(activeRoute==="sidefield"&&(routeChanged||!document.getElementById("sideFieldRoute")))ensureSideFieldRoute().then(()=>{if(routeChanged&&activeRoute==="sidefield")document.getElementById("sideFieldRoute")?.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});});
+    if(activeRoute==="career"&&(routeChanged||!document.querySelector("#mobileCareerRoute .mobile-career-inline")))renderCareerRoute();
     updateTrainingBadge();
     updateMarketBadge(activeRoute==="market");
     updateSideFieldBadge();
-    if(root.CopaMobileExperience&&typeof root.CopaMobileExperience.refresh==="function")root.CopaMobileExperience.refresh();
+    if(routeChanged&&root.CopaMobileExperience&&typeof root.CopaMobileExperience.refresh==="function")root.CopaMobileExperience.refresh();
     const target=nav||(activeRoute==="market"?document.getElementById("shopcards"):activeRoute==="training"?document.getElementById("mobileTrainingRoute"):activeRoute==="sidefield"?document.getElementById("sideFieldRoute"):activeRoute==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar"));
-    if(target)target.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});
+    if(routeChanged&&target)target.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});
   }
   function ensureRoutes(){
     const hub=document.getElementById("hub");if(!hub)return;

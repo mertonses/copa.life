@@ -26,6 +26,7 @@
   Object.assign(COPY.de,{storyMode:"STORY-MODUS",lifeFeatureStory:"STORY",lifeFeatureLength:"7 SPIELE",lifeFeatureSave:"AUTOSAVE",arenaFeatureRanked:"RANGLISTE",arenaFeatureLive:"LIVE-SPIEL",arenaFeatureSeason:"SAISONPFAD",lifeStatusLabel:"KARRIERESTATUS",arenaStatusLabel:"ARENASTATUS",lifeCta:"COPA LIFE STARTEN",arenaCta:"ARENA BETRETEN",selectionLabel:"Spielmodusauswahl",lifeFeatures:"Copa-Life-Funktionen",arenaFeatures:"Copa-Arena-Funktionen",newCareer:"NEUE KARRIERE · 7 SPIELE",continueCareer:"FORTSETZEN · SPIEL {round}/7",arenaReady:"DIENST BEREIT · RANGLISTE",arenaClub:"{club} · RANGLISTE",arenaOffline:"OFFLINE · TRAINING OFFEN",continueCta:"KARRIERE FORTSETZEN"});
   Object.assign(COPY.it,{storyMode:"MODALITÀ STORIA",lifeFeatureStory:"STORIA",lifeFeatureLength:"7 PARTITE",lifeFeatureSave:"SALVATAGGIO AUTO",arenaFeatureRanked:"CLASSIFICATA",arenaFeatureLive:"PARTITA LIVE",arenaFeatureSeason:"PERCORSO STAGIONE",lifeStatusLabel:"STATO CARRIERA",arenaStatusLabel:"STATO ARENA",lifeCta:"AVVIA COPA LIFE",arenaCta:"ENTRA NELL'ARENA",selectionLabel:"Selezione modalità di gioco",lifeFeatures:"Funzioni Copa Life",arenaFeatures:"Funzioni Copa Arena",newCareer:"NUOVA CARRIERA · 7 PARTITE",continueCareer:"CONTINUA · PARTITA {round}/7",arenaReady:"SERVIZIO PRONTO · CLASSIFICATA",arenaClub:"{club} · CLASSIFICATA",arenaOffline:"OFFLINE · ALLENAMENTO APERTO",continueCta:"CONTINUA CARRIERA"});
   const format=(template,values)=>String(template||"").replace(/\{(\w+)\}/g,(_,key)=>values[key]??"");
+  let modeTransitionPending=false;
   function runState(){try{return root.CopaRunPersistence?.read?.().state||null;}catch(_){return null;}}
   function arenaClub(){try{return root.localStorage.getItem("copa_arena_club_v1")||"";}catch(_){return "";}}
   function refreshState(copy){
@@ -65,12 +66,65 @@
     if(!root.CopaMobileShell?.gameMode?.())setup?.classList.remove("hidden");
     root.requestAnimationFrame(()=>root.scrollTo(0,0));
   }
+  function nativeLifeMode(){
+    const platform=(document.querySelector('meta[name="copa-platform"]')||{}).content||document.documentElement.dataset.copaPlatform||"web";
+    return String(platform).toLowerCase()!=="web"||!!root.COPA_IS_NATIVE;
+  }
+  function waitForMobileShell(){
+    if(root.CopaMobileShell?.showLanding)return Promise.resolve(root.CopaMobileShell);
+    return new Promise(resolve=>{
+      const started=Date.now();
+      let readyObserved=false;
+      const check=()=>{
+        if(root.CopaMobileShell?.showLanding){resolve(root.CopaMobileShell);return;}
+        if(!readyObserved&&root.CopaMobileShellReady&&typeof root.CopaMobileShellReady.finally==="function"){
+          readyObserved=true;
+          root.CopaMobileShellReady.finally(check);
+          return;
+        }
+        if(Date.now()-started>=8000){resolve(null);return;}
+        root.setTimeout(check,16);
+      };
+      check();
+    });
+  }
+  function setTransitionState(active,button){
+    const element=gate();if(!element)return;
+    element.classList.toggle("is-transitioning",active);
+    element.toggleAttribute("aria-busy",active);
+    element.querySelectorAll("[data-mode-choice]").forEach(card=>{
+      card.classList.toggle("is-launching",active&&card===button);
+      card.toggleAttribute("aria-disabled",active);
+    });
+  }
+  function openClassicMode(){
+    setVisible(false);
+    document.body.dataset.copaMode="classic";
+    document.getElementById("intro")?.classList.remove("hidden");
+    const shell=root.CopaMobileShell;
+    if(nativeLifeMode()&&shell?.showLanding){
+      shell.showLanding(runState());
+      root.requestAnimationFrame(()=>root.scrollTo(0,0));
+      return;
+    }
+    restoreLifeSetup();
+  }
   function choose(mode){
     if(mode==="classic"){
-      setVisible(false);
-      document.body.dataset.copaMode="classic";
-      document.getElementById("intro")?.classList.remove("hidden");
-      restoreLifeSetup();
+      if(modeTransitionPending)return;
+      if(nativeLifeMode()&&!root.CopaMobileShell?.showLanding){
+        modeTransitionPending=true;
+        const button=gate()?.querySelector('[data-mode-choice="classic"]');
+        setTransitionState(true,button);
+        waitForMobileShell().then(shell=>{
+          if(shell?.showLanding)openClassicMode();
+        }).finally(()=>{
+          modeTransitionPending=false;
+          setTransitionState(false,button);
+        });
+        return;
+      }
+      openClassicMode();
       return;
     }
     if(mode==="arena"){
