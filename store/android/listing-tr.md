@@ -25,7 +25,7 @@ Belirsizliklerle dolu bir başlangıçtan kendi kulübünü kur. Ülkeni, dizili
 
 COPA ARENA
 
-Kulübünü gerçek zamanlı rekabete taşı. Aynı kurallar altında kadronu kur, taktik kararlarını süre içinde ver ve rakibinin hamlelerine cevap ver.
+Kulübünü gerçek zamanlı rekabete taşı. Aynı kurallar altında kadronu kur, taktik kararlarını süre içinde ver ve rakibinin hamlelerini boşa çıkar.
 
 - Canlı dereceli eşleşmeler ve görünür rating yolculuğu
 - Oyun akışında dört taktik penceresi ve kararların anlaşılır sonuçları
