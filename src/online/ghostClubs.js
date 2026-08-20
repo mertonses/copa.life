@@ -74,6 +74,22 @@
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
     try{return await fetch(url,Object.assign({},options,{signal:controller.signal}));}finally{clearTimeout(timer);}
   }
+  const nativeNetwork=()=>!!(window.COPA_IS_NATIVE||window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  async function fetchReadWithRetry(url,options,timeoutMs=5000){
+    const attempts=nativeNetwork()?2:1;let lastError;
+    for(let attempt=0;attempt<attempts;attempt++){
+      try{
+        const response=await fetchWithTimeout(url,options,timeoutMs);
+        if(response.ok||response.status<500||attempt===attempts-1)return response;
+        lastError=new Error(`http_${response.status}`);
+      }catch(error){
+        lastError=error;
+        if(attempt===attempts-1)throw error;
+      }
+      await new Promise(resolve=>setTimeout(resolve,350*(attempt+1)));
+    }
+    throw lastError||new Error("network_unavailable");
+  }
   const isTr=()=>typeof window.LANG==="undefined"||window.LANG==="tr";
   const tr=(a,b)=>isTr()?a:b;
   function visibleChairmanName(chairman){
@@ -344,17 +360,17 @@
       root.innerHTML=worldStateHTML("unavailable",tr("Dünya sıralaması kullanılamıyor","World rankings are unavailable"),tr("Bu sürümde sıralama servisi yapılandırılmamış.","The ranking service is not configured in this build."),false);
       return;
     }
-    if(!navigator.onLine){
+    if(navigator.onLine===false&&!nativeNetwork()){
       root.innerHTML=worldStateHTML("offline",tr("Çevrimdışısın","You are offline"),tr("Dünya sıralamasını görmek için bağlantını kontrol et.","Check your connection to view the World ranking."));
       return;
     }
     root.innerHTML=worldLoadingHTML();
     const fallbackTimer=setTimeout(()=>{
       if(root.dataset.worldRequest===requestId&&root.querySelector(".meta-world-skeleton"))root.innerHTML=worldStateHTML("error",tr("Sıralama yanıt vermiyor","Ranking is taking too long"),tr("Sunucu yanıtı gecikti. Bağlantını kontrol edip yeniden deneyebilirsin.","The server response is delayed. Check your connection and try again."));
-    },4800);
+    },nativeNetwork()?10000:4800);
     try{
-      const topPromise=fetchWithTimeout(base+"/v1/leaderboard?limit=100",{headers:{accept:"application/json"},cache:"no-store"},4500);
-      const mePromise=leaderboardEnabled()?fetchWithTimeout(base+"/v1/leaderboard/me",{headers:{accept:"application/json","x-copa-client":clientId(),"x-copa-delete-token":deleteToken()},cache:"no-store"},4500):Promise.resolve(null);
+      const topPromise=fetchReadWithRetry(base+"/v1/leaderboard?limit=100",{headers:{accept:"application/json"},cache:"no-store"},5000);
+      const mePromise=leaderboardEnabled()?fetchReadWithRetry(base+"/v1/leaderboard/me",{headers:{accept:"application/json","x-copa-client":clientId(),"x-copa-delete-token":deleteToken()},cache:"no-store"},5000):Promise.resolve(null);
       const [topResponse,meResponse]=await Promise.all([topPromise,mePromise]);
       if(!topResponse.ok)throw new Error("leaderboard_unavailable");
       const top=topResponse.ok?await topResponse.json():{clubs:[]},mine=meResponse&&meResponse.ok?await meResponse.json():{profile:null,nearby:[]},profile=mine.profile;

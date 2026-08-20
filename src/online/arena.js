@@ -188,9 +188,22 @@
     }
   }
   async function request(path,options={}){
-    const response=await fetch(api()+path,{cache:"no-store",...options,headers:{...headers(),...(options.headers||{})}});
-    const data=response.status===204?null:await response.json().catch(()=>({error:"invalid_response"}));
-    if(!response.ok)throw new Error(data&&data.error||`http_${response.status}`);return data;
+    const method=String(options.method||"GET").toUpperCase(),retryable=method==="GET",attempts=retryable?2:1;
+    let lastError;
+    for(let attempt=0;attempt<attempts;attempt++){
+      try{
+        const response=await fetch(api()+path,{cache:"no-store",...options,headers:{...headers(),...(options.headers||{})}});
+        const data=response.status===204?null:await response.json().catch(()=>({error:"invalid_response"}));
+        if(response.ok)return data;
+        lastError=new Error(data&&data.error||`http_${response.status}`);lastError.status=response.status;
+        if(response.status<500||attempt===attempts-1)throw lastError;
+      }catch(error){
+        lastError=error;
+        if(!retryable||attempt===attempts-1||Number(error&&error.status)>0&&Number(error.status)<500)throw error;
+      }
+      await new Promise(resolve=>setTimeout(resolve,350*(attempt+1)));
+    }
+    throw lastError||new Error("network_unavailable");
   }
   const googleClientId=()=>String((document.querySelector("meta[name='copa-google-client-id']")||{}).content||"").trim();
   const googleIosClientId=()=>String((document.querySelector("meta[name='copa-google-ios-client-id']")||{}).content||"").trim();
@@ -803,7 +816,8 @@
     }catch(error){state.lastError=error.message;setScreen("error");sfx("error");}
   }
   async function startQueue(mode="ranked"){
-    if(!navigator.onLine){state.lastError="offline";setScreen("error");return;}
+    const isNative=!!(root.COPA_IS_NATIVE||root.Capacitor&&root.Capacitor.isNativePlatform&&root.Capacitor.isNativePlatform());
+    if(navigator.onLine===false&&!isNative){state.lastError="offline";setScreen("error");return;}
     disconnect(false);if(mode==="ranked")startSearchMusic();setScreen("loading");
     try{
       const data=await request("/v1/arena/session",{method:"POST",body:JSON.stringify({clubName:clubName(),mode,region:"weur"})});

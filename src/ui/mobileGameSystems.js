@@ -155,8 +155,26 @@
     if(!gameMode())return;
     const setup=document.getElementById("introSetup"),country=document.getElementById("countryPick"),form=document.getElementById("formpick"),chair=document.querySelector(".copa-chair-subcol");
     if(!setup||!country||!form||!chair)return;
-    const countryGroup=country.closest(".copa-country-group")||country.closest(".v7-setup-group"),two=form.closest(".v7-setup-twocol"),formCol=form.closest(".v7-setup-subcol"),chairCol=chair.closest(".v7-setup-subcol");
-    if(formCol)formCol.dataset.mobileStep="1";if(chairCol)chairCol.dataset.mobileStep="2";if(countryGroup)countryGroup.dataset.mobileStep="3";if(two)two.classList.add("mobile-step-host");
+    const countryGroup=country.closest(".copa-country-group")||country.closest(".v7-setup-group"),countryPanel=country.closest(".copa-country-panel"),two=form.closest(".v7-setup-twocol"),formCol=form.closest(".v7-setup-subcol"),chairCol=chair.closest(".v7-setup-subcol");
+    const androidFlow=String(root.COPA_PLATFORM||document.documentElement.dataset.copaPlatform||"").toLowerCase()==="android";
+    if(androidFlow){
+      // Android keeps the first decision in one viewport. Formation and country
+      // are one step, while the start action lives directly below the chairman.
+      if(formCol)formCol.dataset.mobileStep="1";
+      if(countryPanel)countryPanel.dataset.mobileStep="1";
+      if(countryGroup)countryGroup.dataset.mobileStep="1";
+      if(chairCol)chairCol.dataset.mobileStep="2";
+      setup.dataset.mobileFlow="android-two-step";
+      const cta=setup.querySelector(".v7-cta-stack");
+      if(cta){
+        cta.dataset.mobileStep="2";
+        if(chairCol&&!chairCol.contains(cta))chairCol.appendChild(cta);
+      }
+    }else{
+      if(formCol)formCol.dataset.mobileStep="1";if(chairCol)chairCol.dataset.mobileStep="2";if(countryGroup)countryGroup.dataset.mobileStep="3";
+      setup.removeAttribute("data-mobile-flow");
+    }
+    if(two)two.classList.add("mobile-step-host");
     let nav=document.getElementById("mobileSetupNav");
     if(!nav){
       nav=document.createElement("div");nav.id="mobileSetupNav";nav.className="mobile-setup-nav";
@@ -187,13 +205,14 @@
     });
   }
   function setSetupStep(value){
-    setupStep=Math.max(1,Math.min(4,Number(value)||1));prepareStepper();
-    document.body.classList.toggle("mobile-game-setup-final",setupStep===4);
+    const androidFlow=String(root.COPA_PLATFORM||document.documentElement.dataset.copaPlatform||"").toLowerCase()==="android",stepCount=androidFlow?2:4;
+    setupStep=Math.max(1,Math.min(stepCount,Number(value)||1));prepareStepper();
+    document.body.classList.toggle("mobile-game-setup-final",setupStep===stepCount);
     const setup=document.getElementById("introSetup");if(setup)setup.dataset.mobileCurrentStep=String(setupStep);
     document.querySelectorAll("#introSetup [data-mobile-step]").forEach(node=>node.classList.toggle("is-mobile-step-active",Number(node.dataset.mobileStep)===setupStep));
     const nav=document.getElementById("mobileSetupNav"),cta=document.querySelector("#introSetup .v7-cta-stack");
-    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/4*100}%`;if(label)label.textContent=`${setupStep}/4`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===4);}
-    if(cta)cta.classList.toggle("is-mobile-step-active",setupStep===4);
+    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/stepCount*100}%`;if(label)label.textContent=`${setupStep}/${stepCount}`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===stepCount);}
+    if(cta)cta.classList.toggle("is-mobile-step-active",setupStep===stepCount);
   }
   function step(delta){setSetupStep(setupStep+(Number(delta)||0));}
   function handleBack(){
