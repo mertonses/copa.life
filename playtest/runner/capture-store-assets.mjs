@@ -19,11 +19,11 @@ const DISABLE_MOTION="*,*::before,*::after{animation:none!important;transition:n
 const FEATURE_ONLY=process.argv.includes("--feature-only");
 
 const LOCALES=[
-  {code:"tr-TR",lang:"tr",browserLocale:"tr-TR",headline:"İKİ MOD. TEK FUTBOL HİKÂYESİ.",subline:"Life'ta kulübünü kur. Arena'da dünyaya meydan oku.",league:"Lig yıldızları"},
-  {code:"en-US",lang:"en",browserLocale:"en-US",headline:"TWO MODES. ONE FOOTBALL STORY.",subline:"Build your club in Life. Challenge the world in Arena.",league:"League stars"},
-  {code:"es-ES",lang:"es",browserLocale:"es-ES",headline:"DOS MODOS. UNA HISTORIA DE FÚTBOL.",subline:"Crea tu club en Life. Desafía al mundo en Arena.",league:"Estrellas de liga"},
-  {code:"de-DE",lang:"de",browserLocale:"de-DE",headline:"ZWEI MODI. EINE FUSSBALLGESCHICHTE.",subline:"Baue deinen Club in Life. Fordere die Welt in Arena heraus.",league:"Ligastars"},
-  {code:"it-IT",lang:"it",browserLocale:"it-IT",headline:"DUE MODALITÀ. UNA STORIA DI CALCIO.",subline:"Crea il club in Life. Sfida il mondo in Arena.",league:"Stelle dei campionati"},
+  {code:"tr-TR",lang:"tr",browserLocale:"tr-TR",headline:"YILDIZINI SEÇ. RAKİBİNİ ALT ET.",subline:"Altı büyük ligden yıldızlarla kadronu kur.",league:"Lig yıldızları"},
+  {code:"en-US",lang:"en",browserLocale:"en-US",headline:"PICK YOUR STAR. BEAT YOUR RIVALS.",subline:"Build your squad with stars from six major leagues.",league:"League stars"},
+  {code:"es-ES",lang:"es",browserLocale:"es-ES",headline:"ELIGE TU ESTRELLA. SUPERA A TUS RIVALES.",subline:"Crea tu plantilla con estrellas de seis grandes ligas.",league:"Estrellas de liga"},
+  {code:"de-DE",lang:"de",browserLocale:"de-DE",headline:"WÄHLE DEINEN STAR. SCHLAG DEINE RIVALEN.",subline:"Baue dein Team mit Stars aus sechs Topligen.",league:"Ligastars"},
+  {code:"it-IT",lang:"it",browserLocale:"it-IT",headline:"SCEGLI LA TUA STELLA. BATTI I RIVALI.",subline:"Crea la tua rosa con stelle di sei grandi campionati.",league:"Stelle dei campionati"},
 ];
 
 const SCREENSHOTS=[
@@ -36,6 +36,17 @@ const SCREENSHOTS=[
   "07-arena-live-pvp.jpg",
   "08-arena-private-tournaments.jpg",
 ];
+
+const PROMO_COPY={
+  "01-two-modes.jpg":{tr:["KULÜBÜNÜ KUR.","SAHAYA ÇIK."],en:["BUILD YOUR CLUB.","STEP ONTO THE PITCH."],es:["CREA TU CLUB.","SAL AL CAMPO."],de:["BAU DEINEN CLUB.","AB AUF DEN PLATZ."],it:["CREA IL TUO CLUB.","SCENDI IN CAMPO."]},
+  "02-life-stars-tr-eng.jpg":{tr:["YILDIZINI SEÇ.","KADRONU GÜÇLENDİR."],en:["PICK YOUR STAR.","STACK YOUR SQUAD."],es:["ELIGE TU ESTRELLA.","REFUERZA TU PLANTILLA."],de:["WÄHLE DEINEN STAR.","STÄRKE DEIN TEAM."],it:["SCEGLI LA TUA STELLA.","POTENZIA LA ROSA."]},
+  "03-life-stars-es-de.jpg":{tr:["LİG YILDIZLARINI TOPLA.","GÜCÜNÜ SAHAYA TAŞI."],en:["COLLECT LEAGUE STARS.","TAKE YOUR POWER TO THE PITCH."],es:["FICHA ESTRELLAS.","LLEVA TU FUERZA AL CAMPO."],de:["HOL DIR LIGASTARS.","BRING DEINE POWER AUF DEN PLATZ."],it:["PRENDI LE STELLE.","PORTA LA TUA FORZA IN CAMPO."]},
+  "04-life-stars-it-jp.jpg":{tr:["DÜNYADAN YILDIZLAR.","TEK KADRO. TEK HEDEF."],en:["STARS FROM EVERY LEAGUE.","ONE SQUAD. ONE TARGET."],es:["ESTRELLAS DEL MUNDO.","UN EQUIPO. UN OBJETIVO."],de:["STARS AUS ALLEN LIGEN.","EIN TEAM. EIN ZIEL."],it:["STELLE DA OGNI CAMPIONATO.","UNA ROSA. UN OBIETTIVO."]},
+  "05-life-cup-journey.jpg":{tr:["KUPA YOLUNDA.","RAKİBİNİ ALT ET."],en:["ON THE CUP RUN.","BEAT YOUR RIVALS."],es:["RUMBO A LA COPA.","SUPERA A TUS RIVALES."],de:["AUF DEM WEG ZUM POKAL.","SCHLAG DEINE RIVALEN."],it:["CORSA ALLA COPPA.","BATTI I RIVALI."]},
+  "06-arena-season-road.jpg":{tr:["CANLI KARAR VER.","RAKİBİNİ ALT ET."],en:["MAKE THE LIVE CALL.","BEAT YOUR RIVAL."],es:["DECIDE EN DIRECTO.","SUPERA A TU RIVAL."],de:["TRIFF LIVE ENTSCHEIDUNGEN.","SCHLAG DEINEN RIVALEN."],it:["DECIDI IN DIRETTA.","BATTI IL TUO RIVALE."]},
+  "07-arena-live-pvp.jpg":{tr:["MAÇ DEVAM EDİYOR.","RAKİBİNİ ALT ET."],en:["THE MATCH IS LIVE.","BEAT YOUR RIVAL."],es:["EL PARTIDO SIGUE.","SUPERA A TU RIVAL."],de:["DAS SPIEL LÄUFT.","SCHLAG DEINEN RIVALEN."],it:["LA PARTITA È LIVE.","BATTI IL TUO RIVALE."]},
+  "08-arena-private-tournaments.jpg":{tr:["KUPANI KAZAN.","HERKESİ GERİDE BIRAK."],en:["WIN YOUR CUP.","LEAVE THEM ALL BEHIND."],es:["GANA TU COPA.","DEJA A TODOS ATRÁS."],de:["HOL DIR DEN POKAL.","LASS ALLE HINTER DIR."],it:["VINCI LA COPPA.","LASCIA TUTTI INDIETRO."]},
+};
 
 const LEAGUE_PAIRS=[
   {codes:["TR","ENG"],file:SCREENSHOTS[1]},
@@ -78,6 +89,18 @@ async function addLeagueRibbon(page,locale,codes){
   },{label:locale.league,codes});
 }
 
+async function addPromoOverlay(page,locale,file){
+  const copy=PROMO_COPY[file]?.[locale.lang]||PROMO_COPY[file]?.en;
+  if(!copy)return;
+  await page.evaluate(({copy})=>{
+    document.querySelector("#storePromoOverlay")?.remove();
+    const overlay=document.createElement("div");overlay.id="storePromoOverlay";
+    overlay.style.cssText="position:fixed;z-index:10000;left:16px;right:16px;bottom:16px;padding:12px 15px 13px;border-left:4px solid #f24a28;border-top:1px solid rgba(243,245,244,.28);border-bottom:1px solid rgba(243,245,244,.16);border-radius:12px;background:linear-gradient(100deg,rgba(7,15,23,.96),rgba(7,15,23,.78));box-shadow:0 10px 28px rgba(0,0,0,.45);font:900 12px/1.15 Inter,Segoe UI,sans-serif;letter-spacing:1.4px;color:#f3f5f4;text-transform:uppercase";
+    overlay.innerHTML=`<span style="display:block;color:#f24a28;font-size:10px;letter-spacing:2px;margin-bottom:5px">${copy[0]}</span><b style="display:block;font-size:17px;letter-spacing:.3px">${copy[1]}</b>`;
+    document.body.append(overlay);
+  },{copy});
+}
+
 async function captureDraft(context,locale,pair,output){
   const page=await preparePage(context);
   await page.evaluate(async codes=>{
@@ -101,6 +124,7 @@ async function captureDraft(context,locale,pair,output){
   },pair.codes);
   await page.locator("#optstage").waitFor({state:"visible"});
   await addLeagueRibbon(page,locale,pair.codes);
+  await addPromoOverlay(page,locale,pair.file);
   const starNames=await page.evaluate(codes=>globalThis.eval(`{
     const storeCodes=${JSON.stringify(codes)};
     const pools=storeCodes.map(code=>countryGameData(code)[0]);
@@ -127,6 +151,7 @@ async function captureLifeJourney(context,locale,output){
   await page.evaluate(()=>globalThis.pcGo());
   await page.locator("#tournamentDraw").waitFor({state:"visible"});
   await page.evaluate(()=>globalThis.fastTournamentDraw());
+  await addPromoOverlay(page,locale,SCREENSHOTS[4]);
   await screenshot(page,path.join(output,SCREENSHOTS[4]));
   await page.close();
 }
@@ -138,15 +163,18 @@ async function openArena(context){
   return page;
 }
 
-async function captureArena(context,output){
+async function captureArena(context,locale,output){
   const page=await openArena(context);
+  await addPromoOverlay(page,locale,SCREENSHOTS[5]);
   await screenshot(page,path.join(output,SCREENSHOTS[5]));
   await page.evaluate(room=>{const arena=globalThis.CopaArena;arena.state.screen="room";arena.state.room=room;arena.refresh();},LIVE_ROOM);
   await page.locator(".arena-live").waitFor({state:"visible"});
+  await addPromoOverlay(page,locale,SCREENSHOTS[6]);
   await screenshot(page,path.join(output,SCREENSHOTS[6]));
   const tournament={code:"COPA48",size:8,status:"active",joined:8,host:true,eliminated:false,champion:false,participants:["COPA XI","NORTH STAR FC","BOSPHORUS FK","TOKYO WINGS","MADRID 1902","BERLIN UNITED","MILANO CALCIO","LONDON ATHLETIC"].map((clubName,index)=>({slot:index+1,clubName})),rounds:[{number:1,matches:[{status:"completed",winnerSlot:1,players:[{slot:1,clubName:"COPA XI"},{slot:2,clubName:"NORTH STAR FC"}]},{status:"completed",winnerSlot:3,players:[{slot:3,clubName:"BOSPHORUS FK"},{slot:4,clubName:"TOKYO WINGS"}]},{status:"active",winnerSlot:null,players:[{slot:5,clubName:"MADRID 1902"},{slot:6,clubName:"BERLIN UNITED"}]},{status:"waiting",winnerSlot:null,players:[{slot:7,clubName:"MILANO CALCIO"},{slot:8,clubName:"LONDON ATHLETIC"}]}]},{number:2,matches:[{status:"waiting",winnerSlot:null,players:[{slot:1,clubName:"COPA XI"},{slot:3,clubName:"BOSPHORUS FK"}]}]}]};
   await page.evaluate(item=>{const arena=globalThis.CopaArena;arena.state.screen="tournament";arena.state.tournament=item;arena.refresh();},tournament);
   await page.locator(".arena-tournament-room").waitFor({state:"visible"});
+  await addPromoOverlay(page,locale,SCREENSHOTS[7]);
   await screenshot(page,path.join(output,SCREENSHOTS[7]));
   await page.close();
 }
@@ -159,10 +187,10 @@ async function captureFlow(browser,locale,{tablet=false}={}){
     const original=globalThis.fetch.bind(globalThis);globalThis.fetch=(input,init)=>{const url=String(typeof input==="string"?input:input?.url||"");if(!url.includes("/v1/arena/"))return original(input,init);if(url.includes("/profile"))return Promise.resolve(new Response(JSON.stringify({profile}),{status:200,headers:{"content-type":"application/json"}}));if(url.includes("/history"))return Promise.resolve(new Response(JSON.stringify({matches:[]}),{status:200,headers:{"content-type":"application/json"}}));if(url.includes("/leaderboard"))return Promise.resolve(new Response(JSON.stringify({season:"2026-Q3",entries:[{...profile,rank:7}]}),{status:200,headers:{"content-type":"application/json"}}));if(url.includes("/events"))return Promise.resolve(new Response(null,{status:204}));return Promise.resolve(new Response(JSON.stringify({error:"store_capture"}),{status:503,headers:{"content-type":"application/json"}}));};
   },{lang:locale.lang,profile:PROFILE});
   try{
-    const landing=await preparePage(context,{landing:true});await screenshot(landing,path.join(output,SCREENSHOTS[0]));await landing.close();
+    const landing=await preparePage(context,{landing:true});await addPromoOverlay(landing,locale,SCREENSHOTS[0]);await screenshot(landing,path.join(output,SCREENSHOTS[0]));await landing.close();
     for(const pair of LEAGUE_PAIRS)await captureDraft(context,locale,pair,output);
     await captureLifeJourney(context,locale,output);
-    await captureArena(context,output);
+    await captureArena(context,locale,output);
   }finally{await context.close();}
 }
 
@@ -178,7 +206,7 @@ async function renderFeatureGraphic(browser,locale){
 
 async function renderSocialGraphic(browser){
   const context=await browser.newContext({viewport:{width:1200,height:630},deviceScaleFactor:1,colorScheme:"dark"});
-  try{const page=await context.newPage(),background=`data:image/png;base64,${fs.readFileSync(KEY_ART).toString("base64")}`;await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{width:1200px;height:630px;margin:0;overflow:hidden;background:#0a1118}body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#f3f5f4}main{position:relative;width:100%;height:100%;background:url('${background}') center/cover no-repeat}main:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,17,24,.83),rgba(10,17,24,.12))}section{position:absolute;z-index:2;left:72px;top:82px;width:710px}.brand{font-size:66px;font-weight:950;letter-spacing:-3px}.brand b{color:#f24a28}.brand em{color:#d6a21f;font-style:normal}.brand i{font-style:normal;color:#68757c;margin:0 18px}h1{margin:86px 0 18px;font-size:58px;line-height:1;text-transform:uppercase}p{font-size:23px;color:#c1c9ca;font-weight:650}</style></head><body><main><section><div class="brand">copa<b>.</b>life<i>×</i>copa <em>ARENA</em></div><h1>İKİ MOD. TEK FUTBOL HİKÂYESİ.</h1><p>Life'ta kulübünü kur. Arena'da dünyaya meydan oku.</p></section></main></body></html>`,{waitUntil:"load"});await page.screenshot({path:path.join(ROOT,"assets","social-v2.jpg"),type:"jpeg",quality:96});}finally{await context.close();}
+  try{const page=await context.newPage(),background=`data:image/png;base64,${fs.readFileSync(KEY_ART).toString("base64")}`;await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{width:1200px;height:630px;margin:0;overflow:hidden;background:#0a1118}body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#f3f5f4}main{position:relative;width:100%;height:100%;background:url('${background}') center/cover no-repeat}main:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,17,24,.83),rgba(10,17,24,.12))}section{position:absolute;z-index:2;left:72px;top:82px;width:710px}.brand{font-size:66px;font-weight:950;letter-spacing:-3px}.brand b{color:#f24a28}.brand em{color:#d6a21f;font-style:normal}.brand i{font-style:normal;color:#68757c;margin:0 18px}h1{margin:86px 0 18px;font-size:58px;line-height:1;text-transform:uppercase}p{font-size:23px;color:#c1c9ca;font-weight:650}</style></head><body><main><section><div class="brand">copa<b>.</b>life<i>×</i>copa <em>ARENA</em></div><h1>YILDIZINI SEÇ. RAKİBİNİ ALT ET.</h1><p>Altı büyük ligden yıldızlarla kadronu kur.</p></section></main></body></html>`,{waitUntil:"load"});await page.screenshot({path:path.join(ROOT,"assets","social-v2.jpg"),type:"jpeg",quality:96});}finally{await context.close();}
 }
 
 if(!FEATURE_ONLY){for(const target of [LOCALIZED,DEFAULT_PHONE,DEFAULT_TABLET])fs.rmSync(target,{recursive:true,force:true});for(const target of [LOCALIZED,DEFAULT_PHONE,DEFAULT_TABLET])fs.mkdirSync(target,{recursive:true});}
