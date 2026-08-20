@@ -49,6 +49,7 @@ async function boot(page:any,packaged=false){
   if(packaged)await page.evaluate(()=>{const shell=(globalThis as any).CopaMobileShell;if(shell)shell.showLanding(null);});
   if(packaged)await expect(page.locator("#startBtn")).toHaveCount(1);
   else await expect(page.locator("#startBtn")).toBeVisible();
+  if(packaged)await expect(page.locator(".mode-gate-app-promo")).toBeHidden();
   await expect(page.locator('[data-mode-choice="arena"]:visible').first()).toBeVisible();
 }
 

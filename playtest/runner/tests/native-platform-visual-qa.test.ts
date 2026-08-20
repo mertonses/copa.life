@@ -72,10 +72,10 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(landing.actions.every(action=>action.left>=0&&action.right<=viewport.width+1&&action.height>=44)).toBe(true);
     await capture(page,platform,`${viewport.name}-landing`);
 
-    if(viewport.width>760)continue;
+    if(viewport.width>760&&platform!=="android")continue;
     await page.evaluate(()=>(globalThis as any).CopaMobileShell.newRun());
     await expect(page.locator("body")).toHaveClass(/mobile-game-setup-open/);
-    await expect(page.locator('#introSetup [data-mobile-step="1"]')).toBeVisible();
+    await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
     await expect(page.locator("#mobileActionDock")).toBeHidden();
     const formation=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
@@ -86,14 +86,25 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(formation.overflow,`${platform} ${viewport.name} formation`).toBeLessThanOrEqual(1);
     expect(formation.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
 
+    if(platform==="android"){
+      const country=await page.evaluate(() => ({
+        overflow:document.documentElement.scrollWidth-innerWidth,
+        cards:[...document.querySelectorAll<HTMLElement>("#countryPick button")].map(button=>{
+          const rect=button.getBoundingClientRect();return{left:rect.left,right:rect.right,height:rect.height};
+        }),
+      }));
+      expect(country.overflow,`${platform} ${viewport.name} country`).toBeLessThanOrEqual(1);
+      expect(country.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
+    }
     await page.locator("[data-step-next]").click();
-    await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeVisible();
+    await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
     await expect(page.locator("#mobileActionDock")).toBeHidden();
-    const chairman=await page.evaluate(()=>({
+    const chairman=await page.evaluate(() => ({
       overflow:document.documentElement.scrollWidth-innerWidth,
       surface:document.querySelector<HTMLElement>("#chairSelectionSurface")!.getBoundingClientRect(),
       previous:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-prev")!.getBoundingClientRect(),
       next:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-next")!.getBoundingClientRect(),
+      start:document.querySelector<HTMLElement>("#startBtn")!.getBoundingClientRect(),
     }));
     expect(chairman.overflow,`${platform} ${viewport.name} chairman`).toBeLessThanOrEqual(1);
     expect(chairman.surface.left).toBeGreaterThanOrEqual(0);
@@ -101,9 +112,10 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(chairman.previous.height).toBeGreaterThanOrEqual(44);
     expect(chairman.next.height).toBeGreaterThanOrEqual(44);
 
-    await page.locator("[data-step-next]").click();
-    await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
-    await expect(page.locator("#mobileActionDock")).toBeHidden();
+    if(platform!=="android"){
+      await page.locator("[data-step-next]").click();
+      await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
+      await expect(page.locator("#mobileActionDock")).toBeHidden();
     const country=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
       cards:[...document.querySelectorAll<HTMLElement>("#countryPick button")].map(button=>{
@@ -113,10 +125,17 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(country.overflow,`${platform} ${viewport.name} country`).toBeLessThanOrEqual(1);
     expect(country.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
     await page.locator("[data-step-next]").click();
+    }
+    if(platform==="android"){
+      const start=await page.locator("#startBtn").boundingBox();
+      expect(start).not.toBeNull();
+      expect(start!.width).toBeGreaterThanOrEqual(viewport.width-(viewport.width>760?80:40));
+      expect(start!.height).toBeGreaterThanOrEqual(44);
+    }
     await expect(page.locator("#startBtn")).toBeVisible();
     const start=await page.locator("#startBtn").boundingBox();
     expect(start).not.toBeNull();
-    expect(start!.width).toBeGreaterThanOrEqual(viewport.width-40);
+    expect(start!.width).toBeGreaterThanOrEqual(viewport.width-(viewport.width>760?80:40));
     expect(start!.height).toBeGreaterThanOrEqual(44);
     await capture(page,platform,`${viewport.name}-setup-final`);
   }
@@ -182,6 +201,15 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   }));
   expect(marketGrid.columns).toBe(2);
   expect(new Set(marketGrid.rows).size).toBe(2);
+  const marketCards=await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>("#shopcards>.market-card")].map(card=>{
+    const face=card.querySelector<HTMLElement>(".market-card-face")!;
+    const rect=(selector:string)=>face.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+    const cardRect=card.getBoundingClientRect(),faceRect=face.getBoundingClientRect(),impact=rect(".market-card-impact"),title=rect(".market-card-title"),desc=rect(".market-card-desc"),bottom=rect(".market-card-bottom");
+    return{inside:faceRect.left>=cardRect.left-1&&faceRect.right<=cardRect.right+1&&faceRect.top>=cardRect.top-1&&faceRect.bottom<=cardRect.bottom+1,order:impact.bottom<=title.top+1&&title.bottom<=desc.top+1&&desc.bottom<=bottom.top+1,cardHeight:cardRect.height};
+  }));
+  expect(marketCards.every(card=>card.inside),JSON.stringify(marketCards)).toBe(true);
+  expect(marketCards.every(card=>card.order),JSON.stringify(marketCards)).toBe(true);
+  expect(marketCards.every(card=>card.cardHeight>=270),JSON.stringify(marketCards)).toBe(true);
   await expect(page.locator("#freeAgentRow .free-agent-card")).toHaveCount(4);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
   await capture(page,platform,"hub-market");
@@ -254,6 +282,14 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   ]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await openHub(page,platform);
+    await page.locator('#nativeHubNav [data-native-target="market"]').click();
+    await expect(page.locator("#shopcards>.market-card")).toHaveCount(3);
+    const tabletCards=await page.evaluate(()=>[...document.querySelectorAll<HTMLElement>("#shopcards>.market-card")].map(card=>{
+      const face=card.querySelector<HTMLElement>(".market-card-face")!,impact=face.querySelector<HTMLElement>(".market-card-impact")!,title=face.querySelector<HTMLElement>(".market-card-title")!,desc=face.querySelector<HTMLElement>(".market-card-desc")!,bottom=face.querySelector<HTMLElement>(".market-card-bottom")!;
+      return{height:card.getBoundingClientRect().height,order:impact.getBoundingClientRect().bottom<=title.getBoundingClientRect().top+1&&title.getBoundingClientRect().bottom<=desc.getBoundingClientRect().top+1&&desc.getBoundingClientRect().bottom<=bottom.getBoundingClientRect().top+1};
+    }));
+    expect(tabletCards.every(card=>card.height>=270&&card.order),`${platform} ${viewport.name} market ${JSON.stringify(tabletCards)}`).toBe(true);
+    await page.locator('#nativeHubNav [data-native-target="match"]').click();
     const layout=await page.evaluate(()=>{
       const controls=[...document.querySelectorAll<HTMLElement>("#hub button")]
         .filter(button=>button.offsetParent)

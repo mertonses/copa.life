@@ -331,3 +331,153 @@ html:is(
     display:none!important;
   }
 }
+
+/* Android setup and market hardening. Keep the Android package independent
+   from the desktop promo and from the legacy absolute card geometry. */
+html[data-copa-platform="android"] .mode-gate-app-promo,
+html[data-copa-platform="android"] .mode-gate-mobile-app-cta{
+  display:none!important;
+}
+
+@media(max-width:1024px){
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"]{
+    overflow:visible!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .mobile-step-host{
+    display:block!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-setup-fields{
+    display:block!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-roster-options{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px!important;
+    min-width:0!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-roster-options{
+    display:none!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-formation-panel,
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-country-panel{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:12px!important;
+    border:1px solid rgba(121,143,151,.34)!important;
+    border-radius:12px!important;
+    background:#101D28!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #formpick{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #countryPick{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin-top:12px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #chairSelectionSurface .copa-chair-nav{
+    min-width:44px!important;
+    min-height:44px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol .v7-cta-stack[data-mobile-step="2"]{
+    display:block!important;
+    width:100%!important;
+    margin:12px 0 0!important;
+    padding:0!important;
+    position:static!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #startBtn{
+    display:flex!important;
+    width:100%!important;
+    min-height:56px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:1px solid rgba(255,232,182,.44)!important;
+    border-radius:10px!important;
+    color:#171A1D!important;
+    background:linear-gradient(135deg,#FF7A4A,#F24A28 62%,#D63A22)!important;
+    box-shadow:0 12px 26px rgba(242,74,40,.25),inset 0 1px rgba(255,255,255,.28)!important;
+    font-size:14px!important;
+    letter-spacing:1.2px!important;
+  }
+
+  /* One stable vertical rhythm prevents title, effect band and description
+     from competing for the same pixels at phone and tablet widths. */
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card{
+    height:clamp(270px,34vw,312px)!important;
+    min-height:270px!important;
+    aspect-ratio:auto!important;
+    overflow:visible!important;
+    transform:none!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-rows:max-content!important;
+    gap:16px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card .market-card-face{
+    overflow:hidden!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card .market-card-impact{
+    top:54%!important;
+    height:28px!important;
+    min-height:28px!important;
+    overflow:hidden!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card .market-card-title{
+    top:calc(54% + 38px)!important;
+    left:14px!important;
+    right:14px!important;
+    min-height:18px!important;
+    max-height:20px!important;
+    overflow:hidden!important;
+    font-size:clamp(12px,2.8vw,17px)!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+    text-overflow:ellipsis!important;
+    -webkit-line-clamp:1!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card .market-card-desc{
+    top:calc(54% + 64px)!important;
+    left:14px!important;
+    right:14px!important;
+    max-height:27px!important;
+    overflow:hidden!important;
+    font-size:clamp(8px,1.35vw,10px)!important;
+    line-height:1.25!important;
+    -webkit-line-clamp:2!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #hub[data-mobile-route="market"] #shopcards>.market-card .market-card-bottom{
+    right:14px!important;
+    bottom:12px!important;
+    left:14px!important;
+  }
+}
