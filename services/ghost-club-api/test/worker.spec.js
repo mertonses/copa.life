@@ -1,6 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, analyticsVisitorFingerprint, detectSchemaVersion, purgeExpired, routeBucket, validHistory } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, analyticsVisitorFingerprint, detectSchemaVersion, purgeExpired, routeBucket, validHistory, validNotificationToken, notificationPlatform } from "../src/index.js";
 
 const origin="https://copa.life";
 const formation442=["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"];
@@ -58,6 +58,22 @@ describe("Ghost Club Worker",()=>{
     const response=await exports.default.fetch(new Request("https://ghost.test/v1/health",{headers:{origin}}));
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ok:true,service:"ghost-club-api",schema_version:3,consent_version:"ghost-terms-v1",leaderboard_consent_version:"leaderboard-terms-v1"});
+  });
+
+  it("registers, refreshes and unregisters push tokens through the shared backend contract",async()=>{
+    expect(validNotificationToken("short")).toBe(false);
+    expect(notificationPlatform("ANDROID")).toBe("android");
+    const token="ExponentPushToken[0123456789abcdef]";
+    const headers={origin,"content-type":"application/json","x-copa-client":"GCL-PUSHCLIENT1"};
+    const first=await exports.default.fetch(new Request("https://ghost.test/v1/notifications/tokens",{method:"POST",headers,body:JSON.stringify({token,platform:"android",appVersion:"1.6.10",locale:"tr"})}));
+    expect(first.status).toBe(200);expect(await first.json()).toMatchObject({ok:true,registered:true,platform:"android"});
+    const row=await env.GHOSTS.prepare("SELECT token, platform, active, app_version, locale FROM notification_tokens WHERE token=?").bind(token).first();
+    expect(row).toMatchObject({token,platform:"android",active:1,app_version:"1.6.10",locale:"tr"});
+    const invalid=await exports.default.fetch(new Request("https://ghost.test/v1/notifications/tokens",{method:"POST",headers,body:JSON.stringify({token:"too-short",platform:"android"})}));
+    expect(invalid.status).toBe(422);
+    const removed=await exports.default.fetch(new Request("https://ghost.test/v1/notifications/tokens",{method:"DELETE",headers,body:JSON.stringify({token})}));
+    expect(removed.status).toBe(200);expect(await removed.json()).toMatchObject({ok:true,unregistered:true});
+    expect(await env.GHOSTS.prepare("SELECT active FROM notification_tokens WHERE token=?").bind(token).first()).toMatchObject({active:0});
   });
 
   it("reports the highest fully installed schema instead of hard-coding health",()=>{

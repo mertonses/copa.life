@@ -2,8 +2,8 @@
   "use strict";
 
   const COPY={
-    tr:{current:"Sıradaki maç",scheduled:"Fikstürde",won:"Kazandı",draw:"Berabere",lost:"Kaybetti",locked:"Kilitli",reveal:"Rakip eşleşme sonrası belli olur",opponent:"Rakip",score:"Skor",penalties:"Penaltılar",event:"Önemli olay",noEvent:"Kayıtlı önemli olay yok",close:"Detayı kapat",cup:"Kupa",champion:"Şampiyon",progress:"Kupa ilerlemesi"},
-    en:{current:"Next match",scheduled:"Scheduled",won:"Won",draw:"Draw",lost:"Lost",locked:"Locked",reveal:"Opponent revealed after the tie is set",opponent:"Opponent",score:"Score",penalties:"Penalties",event:"Key event",noEvent:"No key event recorded",close:"Close details",cup:"Cup",champion:"Champion",progress:"Cup progress"},
+    tr:{current:"Sıradaki maç",scheduled:"Fikstürde",won:"Kazandı",draw:"Berabere",lost:"Kaybetti",locked:"Kilitli",reveal:"Rakip eşleşme sonrası belli olur",opponent:"Rakip",score:"Skor",penalties:"Penaltılar",event:"Önemli olay",noEvent:"Kayıtlı önemli olay yok",close:"Detayı kapat",cup:"Kupa",champion:"Şampiyon",progress:"Kupa ilerlemesi",league:"Lig",country:"Ülke",power:"Güç"},
+    en:{current:"Next match",scheduled:"Scheduled",won:"Won",draw:"Draw",lost:"Lost",locked:"Locked",reveal:"Opponent revealed after the tie is set",opponent:"Opponent",score:"Score",penalties:"Penalties",event:"Key event",noEvent:"No key event recorded",close:"Close details",cup:"Cup",champion:"Champion",progress:"Cup progress",league:"League",country:"Country",power:"Power"},
     es:{current:"Próximo partido",scheduled:"Programado",won:"Victoria",draw:"Empate",lost:"Derrota",locked:"Bloqueado",reveal:"El rival se revela al definir el cruce",opponent:"Rival",score:"Marcador",penalties:"Penaltis",event:"Momento clave",noEvent:"Sin momento clave registrado",close:"Cerrar detalle",cup:"Copa",champion:"Campeón",progress:"Progreso de copa"},
     de:{current:"Nächstes Spiel",scheduled:"Angesetzt",won:"Sieg",draw:"Remis",lost:"Niederlage",locked:"Gesperrt",reveal:"Gegner erscheint, sobald das Duell feststeht",opponent:"Gegner",score:"Ergebnis",penalties:"Elfmeterschießen",event:"Schlüsselmoment",noEvent:"Kein Schlüsselmoment gespeichert",close:"Details schließen",cup:"Pokal",champion:"Meister",progress:"Pokalfortschritt"},
     it:{current:"Prossima partita",scheduled:"In calendario",won:"Vittoria",draw:"Pareggio",lost:"Sconfitta",locked:"Bloccato",reveal:"L'avversario appare quando si definisce l'incrocio",opponent:"Avversario",score:"Risultato",penalties:"Rigori",event:"Momento chiave",noEvent:"Nessun momento chiave registrato",close:"Chiudi dettagli",cup:"Coppa",champion:"Campione",progress:"Progresso coppa"}
@@ -107,11 +107,15 @@
     const played=!!fixture.res,active=!played&&index===currentRound()-1,scheduled=!played&&!active&&!!fixture.matchId,locked=!played&&!active&&!scheduled;
     const label=fixtureLabel(index,roundLabels);
     if(locked)return `<div class="fixture-detail-copy"><span>${esc(label)}</span><b>${esc(c.locked)}</b><p>${esc(c.reveal)}</p></div>`;
-    const penalty=penaltyScore(fixture,index),event=eventText(fixture,index);
+    const penalty=penaltyScore(fixture,index),event=eventText(fixture,index),meta=[];
+    if(fixture.league)meta.push(`<div><small>${esc(c.league)}</small><strong>${esc(fixture.league)}</strong></div>`);
+    if(fixture.country)meta.push(`<div><small>${esc(c.country)}</small><strong>${esc(fixture.country)}</strong></div>`);
+    if(Number.isFinite(Number(fixture.power)))meta.push(`<div><small>${esc(c.power)}</small><strong>${esc(fixture.power)}</strong></div>`);
     return `<div class="fixture-detail-copy">
       <span>${esc(label)}${played?` · ${esc(resultCopy(fixture.res))}`:""}</span>
       <b>${esc(fixture.opp||c.opponent)}</b>
       <div class="fixture-detail-stats">
+        ${meta.join("")}
         ${played?`<div><small>${esc(c.score)}</small><strong>${esc(fixture.gf)}–${esc(fixture.ga)}</strong></div>`:""}
         ${penalty?`<div><small>${esc(c.penalties)}</small><strong>${esc(penalty[0])}–${esc(penalty[1])}</strong></div>`:""}
         <div class="fixture-key-event"><small>${esc(c.event)}</small><strong>${esc(event||c.noEvent)}</strong></div>

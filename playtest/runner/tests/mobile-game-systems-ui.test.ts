@@ -344,6 +344,10 @@ test("captain recommendation has contextual ratings and a distinct animated high
   await expect(page.locator(".captain-picker")).toBeVisible();
   await expect(page.locator(".cap-card")).toHaveCount(11);
   await expect(page.locator(".cap-card-suggest")).toHaveCount(1);
+  await page.waitForFunction(() => {
+    const card = document.querySelector<HTMLElement>(".cap-card-suggest");
+    return !!card && getComputedStyle(card).backgroundImage.includes("linear-gradient");
+  });
   const captainVisuals=await page.evaluate(()=>{
     const card=document.querySelector<HTMLElement>(".cap-card-suggest")!,badge=card.querySelector<HTMLElement>(".cap-card-badge")!;
     const powers=[...document.querySelectorAll<HTMLElement>(".cap-card-power")];

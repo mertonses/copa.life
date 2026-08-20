@@ -10,7 +10,7 @@ test.beforeEach(async({page})=>{
     document.getElementById("tournamentHubPanel")?.classList.remove("hidden");
     (0,eval)(`fixtures=[
       {opp:"A Spor",res:"W",gf:2,ga:0,events:[{min:71,type:"goal",name:"Uçan"}]},
-      {opp:"B Spor",res:"D",gf:1,ga:1,events:[{min:88,type:"goal",name:"Demir"}]},
+      {opp:"B Spor",res:"D",gf:1,ga:1,league:"Türkiye",country:"TR",power:79,events:[{min:88,type:"goal",name:"Demir"}]},
       {opp:"C Spor",res:null,gf:null,ga:null},
       {opp:"D Spor",res:null,gf:null,ga:null},
       {opp:"E Spor",res:null,gf:null,ga:null},
@@ -36,6 +36,8 @@ test("fixture road shows text outcomes, active match, locked futures and rich de
   await expect(page.locator("#fixtureDetail")).toContainText("1–1");
   await expect(page.locator("#fixtureDetail")).toContainText("5–4");
   await expect(page.locator("#fixtureDetail")).toContainText("88' Gol");
+  await expect(page.locator("#fixtureDetail")).toContainText("Türkiye");
+  await expect(page.locator("#fixtureDetail")).toContainText("79");
 
   await page.locator(".fixture-node.is-active").click();
   await expect(page.locator("#fixtureDetail")).toContainText("C Spor");

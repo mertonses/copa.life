@@ -5,6 +5,7 @@ const METHODS="GET, POST, DELETE, OPTIONS";
 const CONSENT_VERSION="ghost-terms-v1";
 const LEADERBOARD_CONSENT_VERSION="leaderboard-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
+const NOTIFICATION_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_EVENTS=new Set(["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed"]);
 const ANALYTICS_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
@@ -236,6 +237,33 @@ async function handlePost(request,env){
   return json(request,env,{ok:true,id:stored.public_ghost_id,integrity:stored.integrity,status:moderation.status,eligible_until:eligibleUntil},201);
 }
 
+function validNotificationToken(value){
+  const token=String(value||"").trim();
+  return token.length>=16&&token.length<=4096&&!/[\u0000-\u001f\u007f]/.test(token);
+}
+function notificationPlatform(value){const platform=String(value||"").trim().toLowerCase();return NOTIFICATION_PLATFORMS.has(platform)?platform:"";}
+function notificationMeta(value){
+  const raw=String(value||"").trim(),appVersion=/^[A-Za-z0-9._-]{1,64}$/.test(raw)?raw:"";
+  return {appVersion};
+}
+async function handleNotificationToken(request,env,remove=false){
+  if(env.GHOST_WRITE_LIMITER){const outcome=await env.GHOST_WRITE_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
+  let body;try{body=await readJsonLimited(request,8192);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
+  const token=String(body&&body.token||"").trim();
+  if(!validNotificationToken(token))return json(request,env,{error:"invalid_notification_token"},422);
+  const client=await clientHash(request),now=new Date().toISOString();
+  if(remove){
+    await env.GHOSTS.prepare("UPDATE notification_tokens SET active=0, updated_at=?, last_seen_at=? WHERE token=? AND client_hash=?").bind(now,now,token,client).run();
+    return json(request,env,{ok:true,unregistered:true},200);
+  }
+  const platform=notificationPlatform(body&&body.platform);
+  if(!platform)return json(request,env,{error:"invalid_notification_platform"},422);
+  const meta=notificationMeta(body&&body.appVersion);
+  const locale=String(body&&body.locale||"").trim().toLowerCase();
+  await env.GHOSTS.prepare("INSERT INTO notification_tokens (token, platform, client_hash, app_version, locale, created_at, updated_at, last_seen_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1) ON CONFLICT(token) DO UPDATE SET platform=excluded.platform, client_hash=excluded.client_hash, app_version=excluded.app_version, locale=excluded.locale, updated_at=excluded.updated_at, last_seen_at=excluded.last_seen_at, active=1").bind(token,platform,client,meta.appVersion,/^[a-z]{2}(?:-[a-z]{2})?$/.test(locale)?locale:"",now,now,now).run();
+  return json(request,env,{ok:true,registered:true,platform},200);
+}
+
 async function handleMatch(request,env,url){
   if(env.GHOST_READ_LIMITER){const outcome=await env.GHOST_READ_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
   const power=Math.round(range(url.searchParams.get("power"),35,115)),round=Math.round(range(url.searchParams.get("round"),1,7)),simulationVersion=clean(url.searchParams.get("simulation_version")),cardSchemaVersion=clean(url.searchParams.get("card_schema_version"));
@@ -433,6 +461,7 @@ async function purgeExpired(env,now=new Date()){const cutoff=now.toISOString(),r
 function routeBucket(pathname){
   if(pathname==="/v1/health")return "health";
   if(pathname==="/v1/analytics/events")return "analytics_events";
+  if(pathname==="/v1/notifications/tokens")return "notification_tokens";
   if(pathname==="/v1/ghosts")return "ghost_write";
   if(pathname==="/v1/ghosts/match")return "ghost_match";
   if(pathname==="/v1/leaderboard/runs")return "leaderboard_write";
@@ -470,6 +499,8 @@ async function routeRequest(request,env,url){
     return json(request,env,{ok,service:"ghost-club-api",schema_version:schemaVersion,consent_version:CONSENT_VERSION,leaderboard_consent_version:LEADERBOARD_CONSENT_VERSION},ok?200:503);
   }
   if(request.method==="POST"&&url.pathname==="/v1/analytics/events")return await handleAnalytics(request,env);
+  if(request.method==="POST"&&url.pathname==="/v1/notifications/tokens")return await handleNotificationToken(request,env,false);
+  if(request.method==="DELETE"&&url.pathname==="/v1/notifications/tokens")return await handleNotificationToken(request,env,true);
   if(request.method==="POST"&&url.pathname==="/v1/ghosts")return await handlePost(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/ghosts/match")return await handleMatch(request,env,url);
   if(request.method==="POST"&&url.pathname==="/v1/leaderboard/runs")return await handleLeaderboardPost(request,env);
@@ -487,4 +518,4 @@ export default {
   async scheduled(controller,env){await purgeExpired(env,new Date(controller.scheduledTime));}
 };
 
-export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,analyticsVisitorFingerprint,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket};
+export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,analyticsVisitorFingerprint,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket,validNotificationToken,notificationPlatform,notificationMeta};

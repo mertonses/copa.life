@@ -61,7 +61,18 @@ try {
     & $jarsigner -verify -verbose -certs $OutputAab | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Signed AAB could not be verified." }
 
-    $hash = (Get-FileHash -LiteralPath $OutputAab -Algorithm SHA256).Hash
+    # Keep release signing independent of the host PowerShell module set.
+    # Windows PowerShell installations used by CI may not expose the
+    # Microsoft.PowerShell.Utility module, so use the .NET implementation.
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = ([BitConverter]::ToString(
+            $sha256.ComputeHash([IO.File]::ReadAllBytes($OutputAab))
+        )).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+    }
     [pscustomobject]@{
         SignedAab = (Resolve-Path -LiteralPath $OutputAab).Path
         Sha256 = $hash

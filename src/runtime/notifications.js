@@ -8,6 +8,7 @@
 
   const PREF_KEY = "copa_notification_preferences_v1";
   const TOKEN_KEY = "copa_push_token_v1";
+  const EVENT_HISTORY_KEY = "copa_notification_events_v1";
   const SCHEDULED_KEY = "copa_scheduled_notifications_v1";
   const HISTORY_KEY = "copa_notification_history_v1";
   const CATEGORIES = Object.freeze(["match", "injury", "transfer", "reward", "tournament", "system"]);
@@ -64,6 +65,7 @@
   let preferences = Object.assign(cloneDefaults(), read(PREF_KEY, {}));
   preferences.categories = Object.assign({}, DEFAULTS.categories, preferences.categories || {});
   let recentIds = Array.isArray(read(HISTORY_KEY, [])) ? read(HISTORY_KEY, []) : [];
+  let eventHistory = Array.isArray(read(EVENT_HISTORY_KEY, [])) ? read(EVENT_HISTORY_KEY, []) : [];
   let scheduledIds = Array.isArray(read(SCHEDULED_KEY, [])) ? read(SCHEDULED_KEY, []) : [];
   let pendingAction = null;
   let initDone = false;
@@ -108,7 +110,16 @@
   function remember(id) { if (!id || recentIds.includes(id)) return false; recentIds = [id, ...recentIds].slice(0, 80); write(HISTORY_KEY, recentIds); return true; }
   function toastType(event) { return event.priority === "critical" || event.priority === "high" ? "warning" : event.type === "reward" ? "info" : "default"; }
   function record(source, channel) {
-    const event = normalize(source); global.dispatchEvent(new CustomEvent("copa:notification-recorded", { detail: { event, channel: channel || "in-app" } })); return event;
+    const event = normalize(source);
+    if (event.body && !eventHistory.some(item => item && item.id === event.id)) {
+      eventHistory = [Object.assign({}, event, { at: event.at ? event.at.toISOString() : null }), ...eventHistory].slice(0, 80);
+      write(EVENT_HISTORY_KEY, eventHistory);
+    }
+    global.dispatchEvent(new CustomEvent("copa:notification-recorded", { detail: { event, channel: channel || "in-app" } })); return event;
+  }
+  function getHistory(category) {
+    const key = String(category || "").trim();
+    return eventHistory.filter(item => !key || categoryFor(item) === key).map(item => Object.assign({}, item));
   }
   function captureToast(message, options) { return record({ id: options && options.id, type: options && options.type || "system", priority: options && options.priority || "normal", body: message }, "toast"); }
   function captureFeed(source) {
@@ -210,13 +221,30 @@
   }
   async function unregisterRemote() {
     const plugin = pushPlugin(); if (plugin && typeof plugin.unregister === "function") await Promise.resolve(plugin.unregister()).catch(() => null);
+    const record = read(TOKEN_KEY, null), url = pushTokenEndpoint();
+    if (record && record.token && url && typeof fetch === "function") {
+      await fetch(url, { method: "DELETE", headers: Object.assign({ "content-type": "application/json" }, clientHeaders()), credentials: "include", body: JSON.stringify({ token: record.token }) }).catch(() => null);
+    }
     try { localStorage.removeItem(TOKEN_KEY); } catch (_) {}
     return true;
   }
+  function pushTokenEndpoint() {
+    const explicit = String(global.COPA_PUSH_TOKEN_ENDPOINT || "").trim();
+    if (explicit) return explicit.replace(/\/$/, "");
+    const meta = document.querySelector('meta[name="copa-push-token-api"]');
+    return String(meta && meta.content || "").trim().replace(/\/$/, "");
+  }
+  function clientHeaders() {
+    let value = "";
+    try { value = localStorage.getItem("copa_ghost_client_id_v1") || ""; } catch (_) {}
+    return /^GCL-[A-Z0-9]{8,40}$/.test(value) ? { "x-copa-client": value } : {};
+  }
   async function syncToken(endpoint) {
-    const record = read(TOKEN_KEY, null), url = String(endpoint || global.COPA_PUSH_TOKEN_ENDPOINT || "").trim();
+    const record = read(TOKEN_KEY, null), url = String(endpoint || pushTokenEndpoint()).trim();
     if (!record || !record.token || !url || typeof fetch !== "function") return { ok: false, reason: url ? "token-missing" : "endpoint-not-configured" };
-    const response = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, credentials: "include", body: JSON.stringify({ token: record.token, platform: record.platform, updatedAt: record.updatedAt }) }).catch(error => ({ error: String(error && error.message || error) }));
+    const appVersion = document.querySelector('meta[name="copa-build-version"]')?.content || "";
+    const locale = document.documentElement.lang || global.LANG || "tr";
+    const response = await fetch(url, { method: "POST", headers: Object.assign({ "content-type": "application/json" }, clientHeaders()), credentials: "include", body: JSON.stringify({ token: record.token, platform: record.platform, updatedAt: record.updatedAt, appVersion, locale }) }).catch(error => ({ error: String(error && error.message || error) }));
     if (!response || response.error || !response.ok) return { ok: false, reason: response && response.error || `http-${response && response.status || 0}` };
     return { ok: true };
   }
@@ -293,7 +321,7 @@
     getPreferences, setEnabled(value) { preferences.enabled = !!value; savePrefs(); return preferences.enabled; },
     setCategory(category, value) { if (CATEGORIES.includes(category)) { preferences.categories[category] = !!value; savePrefs(); } return getPreferences(); },
     setQuietHours(value, start, end) { preferences.quietEnabled = !!value; if (start) preferences.quietStart = String(start); if (end) preferences.quietEnd = String(end); savePrefs(); return getPreferences(); },
-    captureToast, captureFeed, publish, schedule, requestPermission, requestLocalPermission, checkLocalPermission, registerRemote, unregisterRemote, syncToken,
+    captureToast, captureFeed, publish, schedule, requestPermission, requestLocalPermission, checkLocalPermission, registerRemote, unregisterRemote, syncToken, getHistory,
     storeToken, routeAction, testNotification, refreshSettings, get nativeAvailable() { return !!localPlugin(); }, get pushAvailable() { return !!pushPlugin(); },
   };
   global.CopaNotificationCenter = Object.freeze(api);
