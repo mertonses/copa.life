@@ -98,6 +98,7 @@ html[data-copa-platform="android"] .mode-card-live i{animation:none!important;tr
 .mode-gate-app-new{animation:modeNewGlow 3.6s 1.25s ease-in-out 1}
 .mode-gate-app-cta img{transition:transform .22s ease,filter .22s ease}
 .mode-gate-app-promo:hover .mode-gate-app-cta img,.mode-gate-app-promo:focus-visible .mode-gate-app-cta img{transform:scale(1.07);filter:brightness(1.08)}
+.mode-gate.is-transitioning .mode-card{pointer-events:none}.mode-gate.is-transitioning .mode-card:not(.is-launching){opacity:.5}.mode-gate .mode-card.is-launching{border-color:var(--color-primary);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary) 32%,transparent),0 18px 42px rgba(0,0,0,.28)}.mode-gate .mode-card.is-launching .mode-card-cta svg{animation:modeChoiceLaunch .72s ease-in-out infinite alternate}@keyframes modeChoiceLaunch{to{transform:translateX(4px)}}
 @media(prefers-reduced-motion:reduce){.mode-gate-phone,.mode-gate-phone img,.mode-gate-app-new{animation:none}.mode-gate-phone{transform:rotate(3deg)}}
 
 /* Desktop promo spans the same visual rail as the mode cards. */

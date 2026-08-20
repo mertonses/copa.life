@@ -489,7 +489,7 @@ try{
 <script src="src/state/runLifecycle.js?v=20260715-state1"></script>
 <script src="src/state/diagnostics.js?v=20260715-diagnostics1"></script>
 <script src="src/runtime/lazyAssets.js?v=20260817-risk-label1"></script>
-<script src="src/ui/modeGate.js?v=20260804-mode-gate8"></script>
+<script src="src/ui/modeGate.js?v=20260820-native-life-transition1"></script>
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260720-explicit-power1"></script>
@@ -523,9 +523,9 @@ window.CopaMobileShellReady=new Promise(resolve=>{
   const style=document.createElement("link"),script=document.createElement("script");
   let pending=2;const done=()=>{pending--;if(pending===0)resolve();};
   style.rel="stylesheet";
-  style.href=platform==="web"?"src/styles/webOnly.css?v=20260818-chair-mockup3":"src/styles/nativeOnly.css?v=20260728-native-visual-qa1";
+  style.href=platform==="web"?"src/styles/webOnly.css?v=20260818-chair-mockup3":"src/styles/nativeOnly.css?v=20260820-setup-step-isolation1";
   style.onload=done;style.onerror=done;
-  script.src="src/ui/mobileGameSystems.js?v=20260818-chair-mockup1";
+  script.src="src/ui/mobileGameSystems.js?v=20260820-android-route-stability1";
   script.onload=done;script.onerror=done;
   document.head.append(style,script);
 });

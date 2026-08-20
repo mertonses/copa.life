@@ -335,7 +335,8 @@ html:is(
 /* Android setup and market hardening. Keep the Android package independent
    from the desktop promo and from the legacy absolute card geometry. */
 html[data-copa-platform="android"] .mode-gate-app-promo,
-html[data-copa-platform="android"] .mode-gate-mobile-app-cta{
+html[data-copa-platform="android"] .mode-gate-mobile-app-cta,
+html[data-copa-platform="android"] .global-footer-bar{
   display:none!important;
 }
 
@@ -388,10 +389,14 @@ html[data-copa-platform="android"] .mode-gate-mobile-app-cta{
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol{
-    display:block!important;
+    display:none!important;
     width:100%!important;
     min-width:0!important;
     margin-top:12px!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-chair-subcol{
+    display:block!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #chairSelectionSurface .copa-chair-nav{
@@ -400,11 +405,15 @@ html[data-copa-platform="android"] .mode-gate-mobile-app-cta{
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol .v7-cta-stack[data-mobile-step="2"]{
-    display:block!important;
+    display:none!important;
     width:100%!important;
     margin:12px 0 0!important;
     padding:0!important;
     position:static!important;
+  }
+
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-chair-subcol .v7-cta-stack[data-mobile-step="2"]{
+    display:block!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #startBtn{

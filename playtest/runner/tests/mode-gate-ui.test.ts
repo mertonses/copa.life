@@ -1,4 +1,8 @@
 import {test,expect} from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const output=path.resolve(__dirname,"../../../outputs/ui-visuals/native-platforms");
 
 async function boot(page:any){
   await page.addInitScript(()=>{localStorage.clear();sessionStorage.clear();});
@@ -73,4 +77,45 @@ test("mode choices preserve sound, return and reset behavior",async({page},testI
   await expect(page.locator("#introLand")).toBeVisible();
   await expect(page.locator("#introSetup")).toBeVisible();
   await expect(page.locator("#startBtn")).toBeVisible();
+});
+
+test("first Android COPA LIFE choice waits for the native landing instead of exposing a blank setup",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","Android cold-start race regression");
+  await page.addInitScript(()=>{localStorage.clear();sessionStorage.clear();});
+  await page.goto(`/dist-android/index.html?mode-gate-qa=${Date.now()}`,{waitUntil:"domcontentloaded"});
+  const gate=page.locator("#modeGate");
+  await expect(gate).toBeVisible();
+  await page.evaluate(()=>{
+    const scope=globalThis as any;
+    scope.__savedMobileShell=scope.CopaMobileShell;
+    delete scope.CopaMobileShell;
+    scope.CopaMobileShellReady=new Promise<void>(resolve=>setTimeout(()=>{
+      scope.CopaMobileShell=scope.__savedMobileShell;
+      resolve();
+    },900));
+  });
+  await page.locator('[data-mode-choice="classic"]').click();
+  await expect(gate).toBeVisible();
+  await expect(gate).toHaveAttribute("aria-busy","");
+  await expect(page.locator("#introSetup")).toBeHidden();
+  await expect(gate).toBeHidden({timeout:10_000});
+  await expect(page.locator("#mobileGameLanding")).toBeVisible();
+  await expect(page.locator("#introLand")).toBeVisible();
+  await expect(page.locator("#introSetup")).toBeHidden();
+  const audit=await page.evaluate(()=>{
+    const landing=document.getElementById("mobileGameLanding")!;
+    const rect=landing.getBoundingClientRect();
+    return{
+      text:(landing.textContent||"").trim(),
+      width:rect.width,
+      height:rect.height,
+      pageOverflow:document.documentElement.scrollWidth-innerWidth,
+    };
+  });
+  expect(audit.text).toContain("COPA LIFE");
+  expect(audit.width).toBeGreaterThan(300);
+  expect(audit.height).toBeGreaterThan(500);
+  expect(audit.pageOverflow).toBeLessThanOrEqual(1);
+  fs.mkdirSync(output,{recursive:true});
+  await page.screenshot({path:path.join(output,"android-first-copa-life.png"),fullPage:true});
 });
