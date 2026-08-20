@@ -8,8 +8,8 @@
     torpilci: { tr: "Risk", en: "Risk" }, cilgin: { tr: "Kaos", en: "Chaos" }
   };
   const chairSurfaceCopy = {
-    tr: { profile: "BAŞKAN PROFİLİ", start: "BAŞLANGIÇ KASASI", debt: "BORÇ LİMİTİ", advantage: "ANA AVANTAJ", trigger: "TETİKLEYİCİ", redline: "KIRMIZI ÇİZGİ", select: "BAŞKANI SEÇ", prev: "← ÖNCEKİ", next: "SONRAKİ →", cards: "BAŞKANLAR", hint: "Aktif kartı incele · sürükleyerek keşfet" },
-    en: { profile: "CHAIRMAN PROFILE", start: "STARTING CASH", debt: "DEBT LIMIT", advantage: "MAIN ADVANTAGE", trigger: "TRIGGER", redline: "RED LINE", select: "SELECT CHAIRMAN", prev: "← PREVIOUS", next: "NEXT →", cards: "CHAIRMEN", hint: "Inspect the active card · drag to explore" }
+    tr: { profile: "BAŞKAN PROFİLİ", start: "BAŞLANGIÇ KASASI", debt: "BORÇ LİMİTİ", advantage: "GÜÇLÜ YANI", trigger: "TAKIM ETKİSİ", redline: "DİKKAT", select: "BAŞKANI SEÇ", locked: "KİLİTLİ", lockedHint: "Bu başkan henüz kullanıma açık değil.", prev: "← ÖNCEKİ", next: "SONRAKİ →", cards: "BAŞKANLAR", hint: "" },
+    en: { profile: "CHAIRMAN PROFILE", start: "STARTING CASH", debt: "DEBT LIMIT", advantage: "KEY STRENGTH", trigger: "TEAM EFFECT", redline: "WATCH OUT", select: "SELECT CHAIRMAN", locked: "LOCKED", lockedHint: "This chairman is not available yet.", prev: "← PREVIOUS", next: "NEXT →", cards: "CHAIRMEN", hint: "" }
   };
   const chairSpotlights = {
     babacan: { spot: "rgba(78,155,101,.28)", rim: "rgba(115,203,145,.18)" },
@@ -20,7 +20,8 @@
     cilgin: { spot: "rgba(155,202,176,.26)", rim: "rgba(221,243,227,.18)" }
   };
   const textFor = (value, lang) => value && typeof value === "object" ? (value[lang] || value.en || value.tr || "") : String(value || "");
-  const chairIds = () => CHAIRMEN.filter(ch => unlockedChairs.includes(ch.id)).map(ch => ch.id);
+  const chairIds = () => CHAIRMEN.map(ch => ch.id);
+  let previewChairId = null;
   const setSurfaceText = (selector, value, html = false) => { const node = document.querySelector(selector); if (node) html ? node.innerHTML = value : node.textContent = value; };
   const chairRail = () => document.getElementById("chairpick");
   const chairRailCards = () => [...(chairRail()?.querySelectorAll(".chair-card") || [])];
@@ -86,7 +87,12 @@
     }, true);
   };
 
-  function syncChairSelectionSurface(id = selectedChairId || chairIds()[0]) {
+  const decorateNumbers = value => String(value || "").replace(/([+−-]?€?\d+(?:[.,]\d+)?%?)/g, token => {
+    const tone = token.startsWith("+") ? "chair-value-positive" : token.startsWith("-") || token.startsWith("−") ? "chair-value-risk" : "chair-value-neutral";
+    return `<span class="${tone}">${token}</span>`;
+  });
+
+  function syncChairSelectionSurface(id = previewChairId || selectedChairId || chairIds()[0]) {
     const surface = document.getElementById("chairSelectionSurface"), cd = L().chair && L().chair[id];
     if (!surface || !cd) return;
     const previousId = surface.dataset.chairId, changed = Boolean(previousId && previousId !== id);
@@ -104,7 +110,8 @@
       clearTimeout(surface._chairTransitionTimer);
       surface._chairTransitionTimer = setTimeout(() => surface.classList.remove("is-chair-transitioning"), 560);
     }
-    const lang = LANG === "tr" ? "tr" : "en", ids = chairIds(), allIds = CHAIRMEN.map(ch => ch.id), index = Math.max(0, allIds.indexOf(id)), total = allIds.length || 1, fx = _CHAIR_FX[id] || { pros: { tr: [], en: [] }, cons: { tr: [], en: [] } }, copy = chairSurfaceCopy[lang], type = chairTypes[id] && chairTypes[id][lang] || "Chairman";
+    const lang = LANG === "tr" ? "tr" : "en", ids = chairIds(), index = Math.max(0, ids.indexOf(id)), total = ids.length || 1, locked = !unlockedChairs.includes(id), fx = _CHAIR_FX[id] || { pros: { tr: [], en: [] }, cons: { tr: [], en: [] } }, copy = chairSurfaceCopy[lang], type = chairTypes[id] && chairTypes[id][lang] || "Chairman";
+    surface.classList.toggle("is-chair-locked", locked);
     const debt = typeof baseChairmanSackLimit === "function" ? Math.abs(baseChairmanSackLimit(id)) : 30;
     const title = String(cd.n || id).replace(/\s+Başkan$/i, "<br>Başkan");
     setSurfaceText(".js-chair-stage-index", `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`);
@@ -112,15 +119,35 @@
     setSurfaceText(".js-chair-stage-type", type); setSurfaceText(".js-chair-detail-type", type);
     setSurfaceText(".js-chair-stage-title", title, true); setSurfaceText(".js-chair-detail-title", cd.n || id);
     setSurfaceText(".js-chair-stage-role", cd.role || ""); setSurfaceText(".js-chair-detail-role", cd.role || "");
-    setSurfaceText(".js-chair-detail-desc", cd.desc || "", true); setSurfaceText(".js-chair-cash", `€${typeof BUDGET === "number" ? BUDGET : 30}M`); setSurfaceText(".js-chair-debt", `−€${debt}M`);
-    setSurfaceText(".js-chair-advantage", textFor(fx.pros && fx.pros[lang] && fx.pros[lang][0], lang)); setSurfaceText(".js-chair-trigger", textFor(fx.pros && fx.pros[lang] && fx.pros[lang][1], lang)); setSurfaceText(".js-chair-redline", textFor(fx.cons && fx.cons[lang] && fx.cons[lang][0], lang));
-    setSurfaceText(".copa-chair-stage-head span", copy.profile); setSurfaceText(".copa-chair-rail-head>span", copy.cards); setSurfaceText(".copa-chair-rail-head small", copy.hint); setSurfaceText(".js-chair-primary", copy.select); setSurfaceText(".js-chair-prev", copy.prev); setSurfaceText(".js-chair-next", copy.next);
+    setSurfaceText(".js-chair-detail-desc", decorateNumbers(cd.desc || ""), true); setSurfaceText(".js-chair-cash", `€${typeof BUDGET === "number" ? BUDGET : 30}M`); setSurfaceText(".js-chair-debt", `−€${debt}M`);
+    setSurfaceText(".js-chair-advantage", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][0], lang)), true); setSurfaceText(".js-chair-trigger", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][1], lang)), true); setSurfaceText(".js-chair-redline", decorateNumbers(textFor(fx.cons && fx.cons[lang] && fx.cons[lang][0], lang)), true);
+    setSurfaceText(".copa-chair-stage-head span", copy.profile); setSurfaceText(".copa-chair-rail-head>span", copy.cards); setSurfaceText(".copa-chair-rail-head small", copy.hint);
+    const prevButton = surface.querySelector(".js-chair-prev"), nextButton = surface.querySelector(".js-chair-next");
+    if (prevButton) { prevButton.setAttribute("aria-label", copy.prev); prevButton.title = copy.prev; }
+    if (nextButton) { nextButton.setAttribute("aria-label", copy.next); nextButton.title = copy.next; }
     const labels = surface.querySelectorAll(".copa-chair-metrics small"); if (labels[0]) labels[0].textContent = copy.start; if (labels[1]) labels[1].textContent = copy.debt;
     const contractLabels = surface.querySelectorAll(".copa-chair-contracts small"); [copy.advantage, copy.trigger, copy.redline].forEach((label, i) => { if (contractLabels[i]) contractLabels[i].textContent = label; });
     const image = surface.querySelector(".js-chair-stage-image"); if (image) { image.src = chairProfileSrc(id); image.alt = cd.n || id; image.decoding = "async"; image.setAttribute("fetchpriority", "high"); }
-    const prev = ids[(index - 1 + total) % total], next = ids[(index + 1) % total], primary = surface.querySelector(".js-chair-primary");
-    const activate = nextId => { if (!nextId) return; selectedChairId = nextId; try { sfxSeat(); } catch (e) {} buildChairButtons(); syncChairSelectionSurface(nextId); };
-    const prevButton = surface.querySelector(".js-chair-prev"), nextButton = surface.querySelector(".js-chair-next"); if (prevButton) prevButton.onclick = () => activate(prev); if (nextButton) nextButton.onclick = () => activate(next); if (primary) primary.onclick = () => confirmChair(id);
+    const prev = ids[(index - 1 + total) % total], next = ids[(index + 1) % total], selectedMark = surface.querySelector(".js-chair-selected-mark");
+    if (selectedMark) {
+      const isSelected = !locked && id === selectedChairId;
+      selectedMark.hidden = !isSelected;
+      selectedMark.setAttribute("aria-hidden", String(!isSelected));
+      selectedMark.setAttribute("aria-label", isSelected ? "Bu başkan seçildi" : "");
+    }
+    const cashNode = surface.querySelector(".js-chair-cash"), debtNode = surface.querySelector(".js-chair-debt"); if (cashNode) cashNode.classList.add("chair-value-positive"); if (debtNode) debtNode.classList.add("chair-value-risk");
+    const activate = nextId => {
+      if (!nextId) return;
+      if (unlockedChairs.includes(nextId) && typeof pickChair === "function") {
+        previewChairId = null;
+        pickChair(nextId);
+        return;
+      }
+      previewChairId = nextId;
+      try { sfxSeat(); } catch (e) {}
+      syncChairSelectionSurface(nextId);
+    };
+    if (prevButton) prevButton.onclick = () => activate(prev); if (nextButton) nextButton.onclick = () => activate(next);
     if (!surface.dataset.parallaxReady) {
       surface.dataset.parallaxReady = "true";
       const portrait = surface.querySelector(".copa-chair-stage-portrait");
@@ -137,7 +164,17 @@
     bindChairRail();
     syncChairSelectionSurface();
   };
+  window.addEventListener("copa:language-changed", () => syncChairSelectionSurface());
   window.buildChairButtons();
   const runPrefetch = () => { if (navigator.connection && navigator.connection.saveData) return; CHAIRMEN.forEach(ch => { const link = document.createElement("link"); link.rel = "prefetch"; link.as = "image"; link.href = chairProfileSrc(ch.id); link.dataset.copaChairPrefetch = ch.id; document.head.appendChild(link); }); };
-  if ("requestIdleCallback" in window) requestIdleCallback(runPrefetch, { timeout: 1800 }); else setTimeout(runPrefetch, 800);
+  /* The active portrait is eager. The other five are fetched only after the
+     native first-screen budget, because decoding all large transparent PNG
+     derivatives during Android cold start can evict the first frame. */
+  if (!window.COPA_IS_NATIVE) {
+    if ("requestIdleCallback" in window) requestIdleCallback(runPrefetch, { timeout: 1800 }); else setTimeout(runPrefetch, 800);
+  } else if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => setTimeout(runPrefetch, 10000), { timeout: 12000 });
+  } else {
+    setTimeout(runPrefetch, 10000);
+  }
 })();

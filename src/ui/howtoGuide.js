@@ -486,6 +486,7 @@
     tipNode.dataset.anchored="true";
   }
   function showTip(key,target){
+    if(key==="setup")return;
     const c=lang(),tip=c.tips[key];
     if(!contextualTipsAllowed()||!tip||tipNode||!target)return;
     const state=readContext();

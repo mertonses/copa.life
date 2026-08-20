@@ -104,13 +104,13 @@ for(const theme of ["dark"] as const){
       const previewStyle=preview?getComputedStyle(preview):null;
       return {
         buttonBorder:button.borderTopColor,
+        previewCount:element.querySelectorAll(".form-dot-preview").length,
         previewBackground:previewStyle?.backgroundColor,
         previewColor:previewStyle?.color,
       };
     });
     expect(formationColors.buttonBorder).toBe("rgb(242, 74, 40)");
-    expect(formationColors.previewColor).toBe("rgb(243, 245, 244)");
-    expect(formationColors.previewBackground).toBe("rgb(48, 60, 68)");
+    expect(formationColors.previewCount).toBe(0);
     await expectReadable(page,`${theme} formation hover`);
 
     await page.locator("#settingsBtn").click();

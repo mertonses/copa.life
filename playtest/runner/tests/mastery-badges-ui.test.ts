@@ -34,13 +34,12 @@ test("formation and play-style mastery stay compact while full tiers remain acce
   await expect(masteredFormation).toHaveAttribute("aria-label",/4-4-2, Ustalık: Uzman · 8/);
   await expect(masteredFormation).toHaveAttribute("title","Ustalık: Uzman · 8");
 
-  const chairmanBadges=page.locator("#chairpick .setup-mastery");
-  await expect(chairmanBadges).toHaveCount(6);
-  await expect(chairmanBadges).toHaveText(["★17","★4","★1","★4","★1","★6"]);
-  await expect(page.locator("#chairpick")).not.toContainText(/Yeni|Deneyimli|Uzman|Usta|Efsane/);
-  const patron=page.locator("#chairpick .chairbtn").first();
-  await expect(patron).toHaveAttribute("aria-label",/Ustalık: Usta · 17/);
-  await expect(patron).toHaveAttribute("title","Ustalık: Usta · 17");
+  // Chairman cards were intentionally removed from setup. Chairman mastery
+  // remains available in Club Career and the profile surface uses only the
+  // previous/next controls requested for the setup flow.
+  await expect(page.locator("#chairpick")).toHaveCount(0);
+  await expect(page.locator("#chairSelectionSurface")).toBeVisible();
+  await expect(page.locator(".js-chair-selected-mark")).toBeVisible();
 
   await page.evaluate(()=>(globalThis as any).normalStart());
   const styleBadges=page.locator("#modal .style-mastery");

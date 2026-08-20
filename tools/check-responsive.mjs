@@ -111,11 +111,12 @@ const checks = [
       && /function ensureResultDisclosures\(\)\{\s*if\(!isPhoneInteraction\(\)\)/.test(mobileScript),
   },
   {
-    name: "mobile landing keeps live formation-linked tactics and a two-by-two summary grid",
+    name: "mobile landing keeps formation-linked field and a two-by-two summary grid",
     pass: !/button\.id="mobileMechanicsToggle"/.test(mobileScript)
       && /\.tactical-board\{display:grid!important\}/.test(mobile)
       && /function _updateTacticalFormation\(name\)/.test(html)
-      && /function _tickTacticalBoard\(\)/.test(html)
+      && !/function _tickTacticalBoard\(\)/.test(html)
+      && !/tactical-board-top|tactical-board-bottom|tacticalClock|tacticalPossession|tacticalXg/.test(html)
       && /function pickForm\(f\)\{[\s\S]*?_updateTacticalFormation\(f\)/.test(html)
       && /#introLand \.mechanics\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important;[\s\S]*grid-auto-rows:minmax\(54px,auto\)/s.test(mobile),
   },

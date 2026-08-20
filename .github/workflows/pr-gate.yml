@@ -49,7 +49,9 @@ jobs:
         run: npm ci --prefix services/ghost-club-api
       - name: Install browser dependencies
         if: matrix.suite == 'navigation'
-        run: npm ci --prefix playtest/runner && npx --prefix playtest/runner playwright install --with-deps chromium
+        # GitHub-hosted Ubuntu runners already include Chromium's system libraries.
+        # Avoid --with-deps: its apt mirror can hang before browser installation starts.
+        run: npm ci --prefix playtest/runner && npx --prefix playtest/runner playwright install chromium
       - name: Run behavior-contract suite
         shell: bash
         run: |

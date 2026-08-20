@@ -162,6 +162,11 @@
     font-size:14px!important;
     white-space:nowrap;
   }
+  .mobile-action-dock[data-dock-kind="result"] #againBtn{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
   .mobile-action-dock[data-dock-kind="intro"] .v7-primary-actions{
     display:grid;
     grid-template-columns:1fr;
@@ -1339,4 +1344,114 @@
   #settingsDrop.settings-compact .settings-folder[data-settings-folder="mobile"]>.mobile-pref-group>.mobile-text-scale-label,
   #settingsDrop.settings-compact .settings-folder[data-settings-folder="mobile"]>.mobile-pref-group>.mobile-text-scale{grid-column:1/-1}
   #settingsDrop.settings-compact .settings-folder[data-settings-folder="mobile"]>.mobile-pref-group>.mobile-pref-btn{min-height:44px!important}
+}
+
+/* Compact landing panel: touch keeps the progress rail horizontally scrollable. */
+@media(max-width:720px){
+  /* Mobile setup starts at the actionable choices. The desktop story panel
+     is intentionally removed from this flow to avoid a second onboarding
+     surface above the formation and chairman decisions. */
+  #introLand>.v7-landing-panel{display:none!important}
+  #introLand .v7-landing-panel{
+    overflow:visible;
+    border:1px solid color-mix(in srgb,var(--color-slate) 22%,var(--border-subtle));
+    border-radius:10px;
+    background:linear-gradient(150deg,color-mix(in srgb,var(--surface-elevated) 42%,transparent),color-mix(in srgb,var(--surface-bg) 76%,transparent));
+  }
+  #introLand .v7-hero-head{
+    min-height:0;
+    gap:10px;
+    padding:14px 12px 12px!important;
+    border-bottom:0;
+  }
+  #introLand .v7-tagline{margin-bottom:5px;line-height:.86}
+  #introLand .v7-hero-desc{font-size:10px;line-height:1.35}
+  #introLand .tactical-board{
+    max-width:none;
+    aspect-ratio:2.35;
+    grid-template-rows:16px minmax(0,1fr) 25px;
+  }
+  #introLand .tactical-diagram{width:100%;height:auto;aspect-ratio:2.5;align-self:center}
+  #introLand .tactical-board-bottom{
+    min-height:22px;
+    padding-inline:8px;
+    border:1px solid color-mix(in srgb,var(--color-slate) 24%,var(--border-subtle));
+    border-radius:4px;
+    background:color-mix(in srgb,var(--surface-elevated) 72%,transparent);
+  }
+  #introLand .mechanics{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:0!important;
+    min-height:56px;
+    margin:0!important;
+    padding:0 12px!important;
+    border-top:1px solid color-mix(in srgb,var(--color-slate) 22%,var(--border-subtle));
+    border-bottom:0!important;
+    overflow-x:auto;
+    overflow-y:visible;
+    overscroll-behavior-x:contain;
+    scrollbar-width:thin;
+    touch-action:pan-x;
+  }
+  #introLand .mstep{
+    position:relative;
+    display:flex!important;
+    flex:0 0 164px!important;
+    align-items:center!important;
+    min-width:164px!important;
+    min-height:56px!important;
+    padding:0 16px 0 0!important;
+    border:0!important;
+    scroll-snap-align:start;
+  }
+  #introLand .mstep + .mstep{padding-left:28px!important}
+  #introLand .mstep + .mstep::before{
+    content:""!important;
+    position:absolute;
+    top:50%;
+    left:0;
+    width:18px;
+    height:1px;
+    display:block!important;
+    background:color-mix(in srgb,var(--color-slate) 38%,transparent);
+  }
+  #introLand .mn{
+    display:grid!important;
+    place-items:center;
+    flex:0 0 24px!important;
+    width:24px!important;
+    height:24px!important;
+    min-width:24px!important;
+    margin-right:8px;
+    padding:0!important;
+    border:1px solid var(--border-default);
+    border-radius:50%;
+  }
+  #introLand .mstep.is-active .mn{border-color:var(--color-primary);color:var(--color-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--color-primary) 12%,transparent)}
+  #introLand .mstep.is-complete .mn{border-color:var(--status-positive-text);background:var(--status-positive-text);color:var(--surface-bg);font-size:0}
+  #introLand .mstep.is-complete .mn::before{content:"✓";font-size:9px}
+  #introLand .mt{min-width:0;margin:0!important;font-size:10px!important;line-height:1.15!important;white-space:nowrap}
+  #introLand .mstep.is-active .mt{color:var(--color-primary)}
+  #introLand .mt small{display:none!important}
+  #introLand .mstep.is-active .mt small,
+  #introLand .mstep:focus-visible .mt small{
+    position:absolute!important;
+    left:28px;
+    bottom:5px;
+    display:block!important;
+    width:120px;
+    max-width:120px;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:none!important;
+    box-shadow:none!important;
+    color:var(--color-slate);
+    font-size:8px!important;
+    line-height:1.2!important;
+    opacity:1!important;
+    transform:none!important;
+    white-space:normal;
+  }
 }

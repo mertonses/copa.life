@@ -2,29 +2,30 @@ import { test, expect } from "@playwright/test";
 
 const mobileOnly=(projectName:string)=>projectName==="mobile-chromium";
 
-test("mobile primary actions use one safe-area aware dock without cloning controls",async({page},testInfo)=>{
+test("mobile setup keeps BAŞLA in flow without covering chairman content",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"phone interaction contract");
   await page.goto("/?mobile-experience=1",{waitUntil:"domcontentloaded"});
 
   const dock=page.locator("#mobileActionDock");
-  await expect(dock).toBeVisible();
-  await expect(dock.locator("#startBtn")).toHaveCount(1);
+  await expect(dock).toBeHidden();
   await expect(page.locator("#startBtn")).toHaveCount(1);
-  await expect(dock).toHaveAttribute("data-dock-kind","intro");
+  await expect(page.locator(".v7-cta-stack #startBtn")).toHaveCount(1);
 
   const metrics=await page.locator("#startBtn").evaluate(element=>{
     const rect=element.getBoundingClientRect();
-    const dockElement=element.closest("#mobileActionDock") as HTMLElement;
-    const style=getComputedStyle(dockElement);
+    const chairman=document.getElementById("chairSelectionSurface")?.getBoundingClientRect();
+    const countries=document.getElementById("countryPick")?.getBoundingClientRect();
     return{
       height:rect.height,
-      bottom:Math.round(innerHeight-rect.bottom),
-      safeAreaPadding:style.paddingBottom,
+      inOriginalStack:!!element.closest(".v7-cta-stack"),
+      overlapsChairman:!!chairman&&rect.top<chairman.bottom&&rect.bottom>chairman.top,
+      overlapsCountries:!!countries&&rect.top<countries.bottom&&rect.bottom>countries.top,
     };
   });
   expect(metrics.height).toBeGreaterThanOrEqual(48);
-  expect(metrics.bottom).toBeGreaterThanOrEqual(6);
-  expect(metrics.safeAreaPadding).not.toBe("");
+  expect(metrics.inOriginalStack).toBe(true);
+  expect(metrics.overlapsChairman).toBe(false);
+  expect(metrics.overlapsCountries).toBe(false);
 
   await page.evaluate(async()=>{await (globalThis as any).quickStart();});
   await expect(page.locator("#draft")).toBeVisible();
@@ -299,7 +300,7 @@ test("hub context and result details stay compact without hiding information",as
   });
   await expect(page.locator("#result")).toBeVisible();
   await expect(page.locator("#result .scoreboard")).toBeVisible();
-  const resultActions=page.locator("#result .result-action");
+  const resultActions=page.locator("#result .result-action, .mobile-action-dock[data-dock-kind='result'] #againBtn");
   await expect(resultActions).toHaveCount(3);
   const resultActionLayout=await resultActions.evaluateAll(elements=>elements.map(element=>{
     const rect=element.getBoundingClientRect();

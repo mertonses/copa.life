@@ -92,6 +92,22 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 }
 
 @media(min-width:761px){
+  html[data-copa-platform="web"] .sheet.style-select-sheet{
+    box-sizing:border-box;
+    width:min(820px,calc(100vw - 48px))!important;
+    max-width:calc(100vw - 48px)!important;
+    min-width:0!important;
+    overflow:hidden!important;
+  }
+
+  html[data-copa-platform="web"] .sheet.style-select-sheet .style-select-modal{
+    box-sizing:border-box;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow:hidden!important;
+  }
+
   html[data-copa-platform="web"] #hub #kasaTile .kasa-detail-btn{
     top:5px!important;
     right:5px!important;
@@ -180,7 +196,7 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
 
   html[data-copa-platform="web"] .style-select-modal .style-choice-modern .ssm{
     display:grid;
-    grid-template-columns:minmax(150px,.72fr) minmax(0,1.35fr);
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
     gap:14px;
     align-items:center;
     width:100%;
@@ -447,6 +463,23 @@ html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-traini
     height:auto!important;
     min-height:228px!important;
     overflow:visible!important;
+  }
+}
+
+@media(min-width:761px) and (max-width:900px){
+  html[data-copa-platform="web"] .style-select-modal .style-choice-modern .ssm{
+    grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);
+    gap:10px;
+  }
+
+  html[data-copa-platform="web"] .style-select-modal .style-impact-grid{
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+  }
+
+  html[data-copa-platform="web"] .style-select-modal .style-impact-grid span{
+    min-height:32px;
+    padding:6px 8px!important;
   }
 }
 
@@ -749,3 +782,18 @@ html[data-copa-platform="web"] #chairpick .chair-card>.card-foot span{color:#F24
 html[data-copa-platform="web"] #chairpick .chair-card .chair-detail-link,html[data-copa-platform="web"] #chairpick .chair-card .chair-mobile-meta{display:none!important}
 @media(max-width:900px){html[data-copa-platform="web"] #chairpick.chairpickrow{grid-template-columns:repeat(3,minmax(0,1fr))!important}html[data-copa-platform="web"] #chairpick .chair-card>.portrait{height:190px!important;flex-basis:190px!important}}
 @media(max-width:560px){html[data-copa-platform="web"] #chairpick.chairpickrow{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}html[data-copa-platform="web"] #chairpick .chair-card>.portrait{height:150px!important;flex-basis:150px!important}html[data-copa-platform="web"] #chairpick .chair-card .chairbtn-name{font-size:15px!important}}
+
+/* Keep achievement and impact pills on the title's text baseline. */
+html[data-copa-platform="web"] .style-select-modal .style-choice-modern .sst{
+  align-items:baseline!important;
+  line-height:1.1!important;
+}
+html[data-copa-platform="web"] .style-select-modal .style-choice-modern .style-mastery{
+  align-self:baseline!important;
+  margin-left:0!important;
+  transform:translateY(-1px);
+}
+html[data-copa-platform="web"] .style-select-modal .style-choice-modern .style-impact-value{
+  align-self:baseline!important;
+  transform:translateY(-1px);
+}

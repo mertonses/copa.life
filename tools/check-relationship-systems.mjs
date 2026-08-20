@@ -39,6 +39,30 @@ assert.equal(api.canEnter(brokenPlayer).allowed,false);
 assert.match(api.canEnter(brokenPlayer).message,/oyuna girmek istemiyor/);
 assert.match(api.profileMarkup(brokenPlayer),/Söz bozuldu/);
 assert.equal(api.chairRank("babacan"),2);
+api.restore({
+  bonds:{"test oyuncu|CM":3},
+  pending:{eventKind:"relationship",key:"test oyuncu|CM",name:"Test Oyuncu",pos:"CM",personality:"professional",bond:3,type:"confidence",round:5,groups:["captain"]},
+  eventCount:1,
+  matchPower:0,
+  groupMood:{captain:0,youth:0,stars:0,local:0}
+});
+api.resolve("support");
+assert.equal(api.summary().matchPower,1,"confidence support must create a bounded one-match boost");
+assert.equal(api.summary().lastDecision.choice,"support");
+assert.equal(api.summary().lastDecision.bondAfter,4);
+assert.match(api.profileMarkup(players[0]),/Özel konuşma yapıldı/);
+assert.ok(api.summary().groups.find(group=>group.id==="captain").mood>0,"confidence support must lift the related group mood");
+api.restore({
+  bonds:{"hırslı oyuncu|ST":3},
+  pending:{eventKind:"relationship",key:"hırslı oyuncu|ST",name:"Hırslı Oyuncu",pos:"ST",personality:"ambitious",bond:3,type:"confidence",round:5,groups:["stars"]},
+  eventCount:1,
+  matchPower:0,
+  groupMood:{captain:0,youth:0,stars:0,local:0}
+});
+api.resolve("bench");
+assert.equal(api.summary().matchPower,-1,"ambitious role clarification must carry a visible one-match relationship cost");
+assert.equal(api.summary().lastDecision.bondAfter,2);
+assert.ok(api.summary().groups.find(group=>group.id==="stars").mood<0,"a broken confidence moment must reach the player group");
 api.setChairAgenda("squad");
 const filtered=api.filterChairOutcomes([{id:"sale"},{id:"academy"},{id:"tax"}]);
 assert.deepEqual(Array.from(filtered,item=>item.id),["academy"]);

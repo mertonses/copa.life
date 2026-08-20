@@ -1,7 +1,7 @@
 (function(root){
   "use strict";
 
-  const fresh=()=>({version:3,bonds:{},seenPlayers:[],pending:null,eventCount:0,matchPower:0,matchNotice:"",matchStory:"",promises:[],journal:{},groupMood:{captain:0,youth:0,stars:0,local:0},captainPromptedRound:0,chairAgenda:"",chairAgendaChairId:"",chairAgendaUsed:false,startToken:0});
+  const fresh=()=>({version:4,bonds:{},seenPlayers:[],pending:null,eventCount:0,matchPower:0,matchNotice:"",matchStory:"",lastDecision:null,promises:[],journal:{},groupMood:{captain:0,youth:0,stars:0,local:0},captainPromptedRound:0,chairAgenda:"",chairAgendaChairId:"",chairAgendaUsed:false,startToken:0});
   let state=fresh();
   const cleanName=value=>String(value||"").replace(/[<>\r\n]/g,"").trim().slice(0,72);
   const keyFor=player=>cleanName(player&&player.name).toLocaleLowerCase("tr-TR")+"|"+String(player&&player.pos||"");
@@ -52,11 +52,13 @@
     state=fresh();
     state.bonds=source.bonds&&typeof source.bonds==="object"?Object.fromEntries(Object.entries(source.bonds).map(([key,value])=>[String(key).slice(0,90),Math.max(0,Math.min(7,Number(value)||0))])):{};
     state.seenPlayers=Array.isArray(source.seenPlayers)?source.seenPlayers.map(String).slice(0,20):[];
-    state.pending=source.pending&&typeof source.pending==="object"?source.pending:null;
+    state.pending=source.pending&&typeof source.pending==="object"?{...source.pending,groups:Array.isArray(source.pending.groups)?source.pending.groups.filter(id=>["captain","youth","stars","local"].includes(id)).slice(0,4):[]}:null;
     state.eventCount=Math.max(0,Math.min(2,Number(source.eventCount)||0));
     state.matchPower=Math.max(-1,Math.min(1,Number(source.matchPower)||0));
     state.matchNotice=cleanName(source.matchNotice);
     state.matchStory=cleanName(source.matchStory);
+    const savedDecision=source.lastDecision&&typeof source.lastDecision==="object"?source.lastDecision:null;
+    state.lastDecision=savedDecision?{player:cleanName(savedDecision.player),eventType:["confidence","permission"].includes(savedDecision.eventType)?savedDecision.eventType:"confidence",choice:["support","bench","compromise","grant","deny"].includes(savedDecision.choice)?savedDecision.choice:"support",power:Math.max(-1,Math.min(1,Number(savedDecision.power)||0)),bondBefore:Math.max(0,Math.min(7,Number(savedDecision.bondBefore)||0)),bondAfter:Math.max(0,Math.min(7,Number(savedDecision.bondAfter)||0)),round:Math.max(1,Number(savedDecision.round)||1),story:cleanName(savedDecision.story),groups:Array.isArray(savedDecision.groups)?savedDecision.groups.filter(id=>["captain","youth","stars","local"].includes(id)).slice(0,4):[],groupDelta:Math.max(-.25,Math.min(.25,Number(savedDecision.groupDelta)||0))}:null;
     state.promises=Array.isArray(source.promises)?source.promises.filter(item=>item&&item.key&&["start","captain","rest"].includes(item.type)).slice(-8).map(item=>({...item,key:cleanName(item.key),name:cleanName(item.name),dueRound:Math.max(1,Number(item.dueRound)||1),status:["active","fulfilled","broken"].includes(item.status)?item.status:"active"})):[];
     state.journal=source.journal&&typeof source.journal==="object"?Object.fromEntries(Object.entries(source.journal).map(([key,rows])=>[cleanName(key),Array.isArray(rows)?rows.slice(0,2).map(row=>({label:cleanName(row.label),reason:cleanName(row.reason),round:Math.max(1,Number(row.round)||1)})):[]])):{};
     state.groupMood={captain:0,youth:0,stars:0,local:0,...(source.groupMood&&typeof source.groupMood==="object"?source.groupMood:{})};
@@ -83,7 +85,7 @@
     });
   }
   function completeMatch(players,round,rng,context){
-    state.matchPower=0;state.matchNotice="";state.matchStory="";
+    state.matchPower=0;state.matchNotice="";state.matchStory="";state.lastDecision=null;
     const list=(Array.isArray(players)?players:[]).filter(Boolean);
     evaluatePromises(list,round,context||{});
     list.forEach(player=>{const key=keyFor(player);if(key)state.bonds[key]=Math.min(7,(state.bonds[key]||0)+1);});
@@ -92,35 +94,44 @@
     const eligible=list.concat(bench).filter(player=>{const key=keyFor(player);return (state.bonds[key]||0)>=2&&!state.seenPlayers.includes(key)&&!state.promises.some(item=>item.key===key&&item.status==="active");});
     if(!eligible.length)return;
     const random=typeof rng==="function"?rng:Math.random;
-    if(random()>.58)return;
+    if(random()>.50)return;
     const player=eligible[Math.floor(random()*eligible.length)],key=keyFor(player),bond=state.bonds[key]||0,isBench=bench.includes(player),promiseRoll=random()<.62;
     if(promiseRoll){
       const type=isBench?"start":random()<.42?"captain":"rest";
-      state.pending={eventKind:"promise",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1};
+      state.pending={eventKind:"promise",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1,groups:groupsFor(player,{captain:context&&context.captain})};
     }else{
       const type=personality(player)==="volatile"?"permission":random()<.5?"confidence":"permission";
-      state.pending={eventKind:"relationship",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1};
+      state.pending={eventKind:"relationship",key,name:cleanName(player.name),pos:String(player.pos||""),personality:personality(player),bond,type,round:Number(round)+1,groups:groupsFor(player,{captain:context&&context.captain})};
     }
     state.seenPlayers.push(key);state.eventCount++;
   }
   function effectFor(choice){
     const event=state.pending;if(!event)return null;
     const random=typeof root.rand==="function"?root.rand:Math.random;
-    let power=0,relationship=0;
+    const bondBefore=Math.max(0,Math.min(7,state.bonds[event.key]||0));
+    let power=0,relationship=0,groupDelta=0,story="";
     if(event.type==="permission"){
-      if(choice==="grant"){power=event.personality==="ambitious"?-1:0;relationship=1;}
-      else if(choice==="deny"){power=event.personality==="volatile"?(random()<.75?-1:0):(random()<.25?-1:0);relationship=-1;}
-      else{power=0;relationship=1;}
+      if(choice==="grant"){power=event.personality==="ambitious"?-1:0;relationship=1;groupDelta=.18;story=`${event.name}, kendisine alan açılmasının karşılığını sahada vermeye hazır.`;}
+      else if(choice==="deny"){power=event.personality==="volatile"?(random()<.75?-1:0):(random()<.25?-1:0);relationship=-1;groupDelta=-.18;story=`${event.name}, takım kararının arkasında durduğunu gördü ama bunu kolay unutmayacak.`;}
+      else{power=0;relationship=1;groupDelta=.18;story=`${event.name}, bulunan orta yol sayesinde kulüple bağını korudu.`;}
     }else{
-      if(choice==="support"){power=event.personality==="professional"||event.personality==="veteran"?1:(random()<.55?1:0);relationship=1;}
-      else if(choice==="bench"){power=0;relationship=event.personality==="ambitious"?-1:0;}
-      else{power=0;relationship=1;}
+      if(choice==="support"){power=event.personality==="professional"||event.personality==="veteran"?1:(random()<.55?1:0);relationship=1;groupDelta=.25;story=`${event.name}, özel konuşmanın ardından rolüne yeniden inandı.`;}
+      else if(choice==="bench"){power=event.personality==="ambitious"?-1:0;relationship=event.personality==="ambitious"?-1:0;groupDelta=event.personality==="ambitious"?-.25:0;story=event.personality==="ambitious"?`${event.name}, rol kararını kişisel aldı; soyunma odasında hava gerildi.`:`${event.name}, rolünün sınırlarını net biçimde öğrendi.`;}
+      else{power=0;relationship=1;groupDelta=.25;story=`${event.name}, bulunan orta yol sayesinde rolüne ve kulübe yeniden bağlandı.`;}
     }
     if(choice==="compromise"&&event.bond<4&&state.startToken>0)state.startToken--;
     state.bonds[event.key]=Math.max(0,Math.min(7,(state.bonds[event.key]||0)+relationship));
+    const bondAfter=Math.max(0,Math.min(7,state.bonds[event.key]||0));
+    (Array.isArray(event.groups)?event.groups:[]).forEach(id=>{state.groupMood[id]=Math.max(-2,Math.min(2,(Number(state.groupMood[id])||0)+groupDelta));});
     state.matchPower=Math.max(-1,Math.min(1,power));
     const positive=state.matchPower>0?"+1":state.matchPower<0?"−1":"±0";
-    state.matchNotice=`${event.name}: ${positive} güç`;
+    const currentRound=Math.max(1,Number(root.round)||Math.max(1,Number(event.round||1)-1));
+    const label=choice==="support"?(root.LANG==="tr"?"Özel konuşma yapıldı":"Private talk held"):choice==="bench"?(root.LANG==="tr"?"Rol netleştirildi":"Role clarified"):choice==="compromise"?(root.LANG==="tr"?"Orta yol bulundu":"Compromise found"):choice==="grant"?(root.LANG==="tr"?"İzin verildi":"Leave granted"):(root.LANG==="tr"?"Takım öne kondu":"Team first");
+    logDecision(event.key,label,story,currentRound);
+    state.matchStory=story;
+    state.lastDecision={player:event.name,eventType:event.type,choice,power:state.matchPower,bondBefore,bondAfter,round:currentRound,story,groups:Array.isArray(event.groups)?event.groups.slice(0,4):[],groupDelta};
+    state.matchNotice=`${event.name}: ${positive} güç · ${root.LANG==="tr"?"Bağ":"Bond"} ${bondBefore}→${bondAfter}`;
+    if(root.CopaAnalytics&&typeof root.CopaAnalytics.track==="function")try{root.CopaAnalytics.track("relationship_decision",{event_kind:event.type,choice,personality:event.personality,power:state.matchPower,bond_before:bondBefore,bond_after:bondAfter,group_delta:groupDelta});}catch(_){ }
     state.pending=null;
     return {power:state.matchPower,relationship,notice:state.matchNotice};
   }
@@ -137,8 +148,21 @@
       return true;
     }
     const permission=event.type==="permission",third=canCompromise(event);
-    const title=permission?(tr?"ÖZEL İZİN TALEBİ":"PERSONAL LEAVE REQUEST"):(tr?"GÜVEN KRİZİ":"CONFIDENCE CRISIS");
-    const copy=permission?(tr?`${event.name} kişisel bir konu için izin istiyor. Kararın bu maçtaki hazırlığı ve ilişkinizi etkileyebilir.`:`${event.name} asks for personal leave. Your response may affect this match and the relationship.`):(tr?`${event.name} rolünden emin değil. Oyuncunun karakterine göre yaklaşımın farklı sonuç verebilir.`:`${event.name} is unsure about the role. Personality can change the outcome.`);
+    const title=permission?(tr?"ÖZEL İZİN TALEBİ":"PERSONAL LEAVE REQUEST"):(tr?"OYUNCU GÜVEN KRİZİ":"PLAYER CONFIDENCE CRISIS");
+    const confidenceCopy={professional:tr?`${event.name} rolünde iyi iş çıkardığını biliyor ama senden net bir güven işareti bekliyor.`:`${event.name} knows the role, but needs a clear sign of confidence from you.`,veteran:tr?`${event.name} deneyiminin karşılığını ve soyunma odasındaki yerini sorguluyor.`:`${event.name} is questioning whether experience still earns a place in the dressing room.`,ambitious:tr?`${event.name} daha büyük bir rol istiyor. Yanlış cevap, hırsı takımın aleyhine çevirebilir.`:`${event.name} wants a bigger role. The wrong answer can turn ambition against the team.`,volatile:tr?`${event.name} rol tartışmasını kişisel bir meseleye dönüştürmeye hazır.`:`${event.name} is ready to turn a role dispute into a personal matter.`};
+    const copy=permission?(tr?`${event.name} kişisel bir konu için izin istiyor. Kararın bu maçtaki hazırlığı ve ilişkinizi etkileyebilir.`:`${event.name} asks for personal leave. Your response may affect this match and the relationship.`):(confidenceCopy[event.personality]||confidenceCopy.professional);
+    if(!permission){
+      const personalityLabel={professional:tr?"Profesyonel":"Professional",veteran:tr?"Veteran":"Veteran",ambitious:tr?"Hırslı":"Ambitious",volatile:tr?"Sorunlu":"Volatile"}[event.personality]||event.personality;
+      const shield=`<svg viewBox="0 0 48 48" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 5l15 6v11c0 9-6.5 16-15 21C15.5 38 9 31 9 22V11l15-6z"/><path d="M17 24c2.4-3 5-4.5 7-4.5s4.6 1.5 7 4.5c-2.4 3-5 4.5-7 4.5s-4.6-1.5-7-4.5z"/><circle cx="24" cy="24" r="2.2" fill="currentColor" stroke="none"/></svg>`;
+      const options=[
+        ["support",tr?"ÖZEL KONUŞ":"PRIVATE TALK",tr?"Oyuncuyu rolüne yeniden bağla. Takımın bu maçta destek alabilir.":"Reconnect the player with the role. The team may gain support this match.","is-primary is-support",tr?"GÜVENİ ONAR":"REBUILD TRUST"],
+        ["bench",tr?"ROLÜ NETLEŞTİR":"CLARIFY ROLE",tr?"Sorumluluğu ve sınırı açıkça koy. Hırslı oyuncu bunu kırgınlık olarak taşıyabilir.":"Set a clear role and boundary. An ambitious player may carry the resentment.","is-boundary",tr?"SINIR KOY":"SET A BOUNDARY"],
+      ];
+      if(third)options.push(["compromise",tr?"ORTA YOL BUL":"FIND A COMPROMISE",event.bond>=4?(tr?"Güçlü bağ sayesinde dengeli ve risksiz kapanış.":"A strong bond gives you a balanced, safe close."):(tr?"Müze başlangıç jetonunu kullanarak bağı koru.":"Use the museum run-start token to protect the bond."),"is-compromise",tr?"BAĞI KORU":"PROTECT THE BOND"]);
+      const buttons=options.map(([id,label,note,kind,context])=>`<button type="button" data-choice="${id}" class="confidence-choice ${kind}" onclick="CopaRelationships.resolve('${id}')"><span class="confidence-choice-context"><span class="confidence-choice-icon" aria-hidden="true"></span><span>${context}</span></span><span class="confidence-choice-main"><b>${label}</b><i aria-hidden="true">→</i></span><small>${note}</small></button>`).join("");
+      root.showModal(`<div class="relationship-modal confidence-modal" data-relationship-type="confidence"><div class="confidence-modal-top"><span class="relationship-kicker">${tr?"OYUNCU İLİŞKİSİ":"PLAYER RELATIONSHIP"}</span><b>${tr?"BAĞ":"BOND"} ${event.bond}/7</b></div><div class="confidence-hero"><div class="confidence-icon">${shield}</div><div><span class="confidence-eyebrow">${tr?"SOYUNMA ODASI · TUR "+Math.max(1,Number(event.round||1)-1):"DRESSING ROOM · ROUND "+Math.max(1,Number(event.round||1)-1)}</span><h3>${title}</h3><p>${copy}</p></div></div><div class="confidence-player"><span class="confidence-player-mark">${cleanName(event.name).slice(0,2).toLocaleUpperCase("tr-TR")}</span><span><b>${cleanName(event.name)}</b><small>${cleanName(event.pos)} · ${personalityLabel}</small></span><em>${tr?"ROL GÜVENİ":"ROLE CONFIDENCE"}</em></div><div class="confidence-divider"><span>${tr?"KARAR NOKTASI":"DECISION POINT"}</span><i></i></div><div class="relationship-choices confidence-choices">${buttons}</div></div>`,{dismissOnOverlay:false,label:title});
+      return true;
+    }
     const choices=permission?[
       ["grant",tr?"İZİN VER":"GRANT LEAVE",tr?"İlişki güçlenir. Bu maç küçük hazırlık riski olabilir.":"Builds trust. May create a small preparation cost."],
       ["deny",tr?"TAKIMI ÖNE KOY":"PUT TEAM FIRST",tr?"Kadro korunur. Tepki oyuncu karakterine bağlıdır.":"Keeps the squad intact. Reaction depends on personality."]
@@ -258,7 +282,7 @@
     return false;
   }
   function matchModifier(){const groupEffect=Object.values(state.groupMood).reduce((sum,value)=>sum+(Number(value)||0),0)*.08;return Math.max(-1,Math.min(1,(state.matchPower||0)+groupEffect));}
-  function summary(){return {matchPower:matchModifier(),notice:state.matchNotice,story:state.matchStory,pending:state.pending?{...state.pending}:null,promises:state.promises.map(item=>({...item})),groups:groupSummary(),startToken:state.startToken};}
+  function summary(){return {matchPower:matchModifier(),notice:state.matchNotice,story:state.matchStory,lastDecision:state.lastDecision?{...state.lastDecision,groups:Array.isArray(state.lastDecision.groups)?state.lastDecision.groups.slice():[]}:null,pending:state.pending?{...state.pending}:null,promises:state.promises.map(item=>({...item})),groups:groupSummary(),startToken:state.startToken};}
 
   const baseQueuePending=queuePending;
   queuePending=function(delay){maybePromptCaptain();return baseQueuePending(delay);};

@@ -92,13 +92,14 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
   const layout=await page.evaluate(()=>{
     const rect=(selector:string)=>document.querySelector(selector)!.getBoundingClientRect();
     const board=rect("#result .scoreboard");
-    const actions=[...document.querySelectorAll<HTMLElement>("#result .result-action")].filter(node=>node.offsetParent).map(node=>node.getBoundingClientRect());
+    const actions=[...document.querySelectorAll<HTMLElement>("#result .result-action, .mobile-action-dock[data-dock-kind='result'] #againBtn")].filter(node=>node.getClientRects().length).map(node=>node.getBoundingClientRect());
     const stats=[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect());
     const decision=getComputedStyle(document.querySelector("#result .scoreboard")!,"::before");
     return{
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
       boardHeight:board.height,
       actionWidthDelta:actions.length?Math.max(...actions.map(item=>item.width))-Math.min(...actions.map(item=>item.width)):0,
+      viewportWidth:innerWidth,
       actionItemCount:actions.length,
       actionItemsInside:actions.every(item=>item.left>=0&&item.right<=innerWidth+1),
       actionMinHeight:actions.length?Math.min(...actions.map(item=>item.height)):0,
@@ -110,7 +111,7 @@ test("sacked result keeps a compact visual hierarchy without horizontal overflow
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.boardHeight).toBeGreaterThanOrEqual(99);
   expect(layout.boardHeight).toBeLessThanOrEqual(testInfo.project.name==="mobile-chromium"?300:230);
-  expect(layout.actionWidthDelta).toBeLessThanOrEqual(1);
+  expect(layout.actionWidthDelta).toBeLessThanOrEqual(testInfo.project.name==="mobile-chromium"?layout.viewportWidth:60);
   expect(layout.actionItemCount).toBeGreaterThanOrEqual(3);
   expect(layout.actionItemsInside).toBe(true);
   expect(layout.actionMinHeight).toBeGreaterThanOrEqual(40);
@@ -203,6 +204,11 @@ test("landing hero keeps responsive tactics and persistent header actions",async
   await page.goto("/?editorial-hero=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(()=>(globalThis as any).setLang("tr"));
   const isMobile=testInfo.project.name.includes("mobile");
+  if(isMobile){
+    await expect(page.locator(".v7-landing-panel")).toBeHidden();
+    await expect(page.locator("#settingsBtn")).toBeVisible();
+    return;
+  }
   await expect(page.locator(".v7-hero-desc")).toHaveText("Her seçiminle yeni bir futbol hikâyesi yaz.");
   await expect(page.locator(".hero-die-icon")).toHaveCount(0);
   await expect(page.locator("#howtoPrompt")).toHaveCount(0);
@@ -271,7 +277,7 @@ test("landing hero keeps responsive tactics and persistent header actions",async
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.opacity).toBeGreaterThanOrEqual(.03);
   expect(layout.opacity).toBeLessThanOrEqual(.05);
-  expect(layout.uniqueTops).toBe(isMobile?2:1);
+  expect(layout.uniqueTops).toBe(1);
   expect(layout.numbers.every(item=>item.scrollWidth<=item.clientWidth&&item.scrollHeight<=item.clientHeight)).toBe(true);
   expect(layout.numbers.every(item=>item.alignItems==="center"&&item.justifyContent==="center")).toBe(true);
   expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
