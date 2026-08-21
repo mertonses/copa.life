@@ -14,7 +14,7 @@ else try{
 const all=files.length===0||files.some(file=>/^(package(?:-lock)?\.json|\.github\/workflows\/|tools\/changed-test-matrix\.mjs)/.test(file));
 const matches=pattern=>all||files.some(file=>pattern.test(file));
 const suites=["contracts"];
-if(matches(/^(services\/copa-arena-api\/|src\/online\/arena\.js|src\/styles\/arena\.css)/))suites.push("arena");
+if(matches(/^(services\/copa-arena-(?:api|gateway)\/|src\/online\/arena\.js|src\/styles\/arena\.css)/))suites.push("arena");
 if(matches(/^(services\/ghost-club-api\/|src\/runtime\/productAnalytics\.js|privacy\.html)/))suites.push("ghost");
 if(matches(/^(index\.html|src\/(ui|styles|sidefield|cards)\/|playtest\/runner\/tests\/)/))suites.push("navigation");
 if(matches(/^(android\/|ios\/|capacitor\.config|src\/runtime\/(native|platform)|tools\/(build-android|build-ios|check-android|check-ios))/))suites.push("native");

@@ -7,6 +7,7 @@ const plan=files=>JSON.parse(execFileSync(process.execPath,[script,"--files",fil
 assert.deepEqual(plan(["README.md"]),["contracts"]);
 assert.deepEqual(plan(["src/sidefield/sideFieldUI.js"]),["contracts","navigation"]);
 assert.deepEqual(plan(["services/copa-arena-api/src/rules.js"]),["contracts","arena"]);
+assert.deepEqual(plan(["services/copa-arena-gateway/functions/[[path]].js"]),["contracts","arena"]);
 assert.deepEqual(plan(["src/runtime/productAnalytics.js"]),["contracts","ghost"]);
 assert.deepEqual(plan(["android/app/build.gradle"]),["contracts","native"]);
 assert.deepEqual(plan(["package.json"]),["contracts","arena","ghost","navigation","native"]);

@@ -8,6 +8,7 @@ import {
 import {ARENA_PLAYER_CATALOG_VERSION,ARENA_PLAYER_SOURCES} from "./playerCatalog.js";
 import {botDecisionDelay,botWaitMs,createBotIdentity} from "./botIdentity.js";
 import {TOURNAMENT_LIFETIME_MS,TOURNAMENT_LOBBY_MS,addTournamentParticipant,createTournamentState,roundPairs,tournamentPublicState,validTournamentSize} from "./tournament.js";
+import {clubName} from "./namePolicy.js";
 
 const MAX_BODY_BYTES=16*1024;
 const ORIGINS=["https://copa.life","https://www.copa.life","https://localhost","http://localhost","capacitor://localhost"];
@@ -89,15 +90,6 @@ async function body(request,limit=MAX_BODY_BYTES){
     text+=decoder.decode();
   }finally{reader.releaseLock();}
   return JSON.parse(text);
-}
-function clubName(value){
-  const raw=String(value==null?"":value);
-  if(/[<>\u0000-\u001f\u007f]/.test(raw))return "";
-  const name=clean(raw,29).normalize("NFKC");
-  if(Array.from(name).length<2||!/^[\p{L}\p{N} .&'-]+$/u.test(name))return "";
-  const normalized=name.toLocaleLowerCase("en-US").replace(/[^a-z0-9çğıöşü]+/g,"");
-  if(/(?:hitler|nazi|porno|seks|terror|official|resmi)/.test(normalized))return "";
-  return name;
 }
 function profile(row){
   if(!row)return null;
@@ -1224,7 +1216,7 @@ async function handleEquipCosmetic(request,env){
 }
 async function handleLeaderboard(request,env,url){
   const season=seasonKey(),requested=Number(url.searchParams.get("limit")),limit=Number.isFinite(requested)&&requested>0?Math.round(clamp(requested,1,50)):25;
-  const rows=await env.DB.prepare("SELECT public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics FROM arena_profiles WHERE season_key=? ORDER BY rating DESC,season_points DESC,wins DESC LIMIT ?").bind(season,limit).all();
+  const rows=await env.DB.prepare("SELECT public_id,club_name,rating,season_key,season_points,wins,draws,losses,streak,token_progress,cosmetics FROM arena_profiles WHERE season_key=? AND (wins+draws+losses)>0 ORDER BY rating DESC,season_points DESC,wins DESC LIMIT ?").bind(season,limit).all();
   return json(request,env,{season,entries:(rows.results||[]).map((row,index)=>({...profile(row),rank:index+1}))});
 }
 async function handleHistory(request,env){

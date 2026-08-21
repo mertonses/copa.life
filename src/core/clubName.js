@@ -2,7 +2,8 @@
 (function(root){
   "use strict";
 
-  const MAX_LENGTH=29;
+  const MAX_LENGTH=19;
+  const DATA_MAX_LENGTH=29;
   const MIN_ALNUM=2;
   const RAW_UNSAFE=/[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Zl}\p{Zp}]/u;
   const INVISIBLE_OR_UNSAFE=/[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Zl}\p{Zp}\p{M}]/u;
@@ -23,13 +24,13 @@
     const normalized=normalize(value);
     const length=Array.from(normalized).length;
     if(!normalized)return {ok:false,value:"",length,code:"required",maxLength:MAX_LENGTH};
-    if(length>MAX_LENGTH)return {ok:false,value:normalized,length,code:"too_long",maxLength:MAX_LENGTH};
+    if(length>DATA_MAX_LENGTH)return {ok:false,value:normalized,length,code:"too_long",maxLength:DATA_MAX_LENGTH};
     if(INVISIBLE_OR_UNSAFE.test(normalized))return {ok:false,value:normalized,length,code:"unsafe_unicode",maxLength:MAX_LENGTH};
     if(!ALLOWED.test(normalized))return {ok:false,value:normalized,length,code:"invalid_character",maxLength:MAX_LENGTH};
     const chars=Array.from(normalized);
     if(!ALNUM.test(chars[0])||!ALNUM.test(chars[chars.length-1]))return {ok:false,value:normalized,length,code:"invalid_edge",maxLength:MAX_LENGTH};
     if(chars.filter(ch=>ALNUM.test(ch)).length<MIN_ALNUM)return {ok:false,value:normalized,length,code:"too_short",maxLength:MAX_LENGTH};
-    return {ok:true,value:normalized,length,code:"",maxLength:MAX_LENGTH};
+    return {ok:true,value:normalized,length,code:"",maxLength:DATA_MAX_LENGTH};
   }
 
   function moderationText(value){
@@ -45,9 +46,12 @@
 
   function inspectUser(value){
     const base=inspect(value);if(!base.ok)return base;
+    if(base.length>MAX_LENGTH)return {...base,ok:false,code:"too_long",maxLength:MAX_LENGTH};
     const text=moderationText(base.value),compact=text.replace(/\s+/g,"");
-    const prohibited=[/\b(?:hitler|nazi|isis|kkk)\b/,/\b(?:porn|porno|sex|seks|xxx|hentai)\b/,/\b(?:kill all|oldurun|nefret)\b/];
+    const prohibited=[/\b(?:hitler|nazi|isis|kkk)\b/,/\b(?:porn|porno|sex|seks|xxx|hentai|onlyfans|lolicon|pedofil|pedo)\b/,/\b(?:kill all|oldurun|nefret)\b/];
     if(prohibited.some(pattern=>pattern.test(text)))return {...base,ok:false,code:"restricted_name"};
+    const compactBlocked=["yarrak","yarrag","orospu","orspu","pezevenk","serefsiz","ibne","gavat","kahpe","zomsik","siken","siker","siktir","sikik","sikim","sikici","sikiyim","fuck","fck","shit","bitch","cunt","dick","cock","pussy","asshole","nigger","faggot","putana","puttana","mierda","polla","cazzo","merda","scheisse","arschloch","fotze","hurensohn"];
+    if(compactBlocked.some(term=>compact.includes(term))||/\b(?:xxx|sex|seks|escort|nude|nudes|amk|aq|pic|puta|puto|cono)\b/.test(text))return {...base,ok:false,code:"restricted_name"};
     if(/\b(?:official|resmi|gercek hesap|real account|president|prime minister|cumhurbaskani|basbakan|party|partisi|senator|minister|bakan)\b/.test(text))return {...base,ok:false,code:"review_required"};
     if(reservedNames().has(compact))return {...base,ok:false,code:"reserved_brand"};
     return base;
@@ -63,5 +67,5 @@
     return result.ok?result.value:fallback;
   }
 
-  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,inspect,inspectUser,normalize,sanitize,sanitizeUser});
+  root.ClubNamePolicy=Object.freeze({MAX_LENGTH,DATA_MAX_LENGTH,inspect,inspectUser,normalize,sanitize,sanitizeUser});
 })(typeof window!=="undefined"?window:globalThis);
