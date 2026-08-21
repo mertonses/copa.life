@@ -70,6 +70,7 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
     }),
   }));
   const benchPlayer=page.locator("#hubBenchSection .bench-row").first();
+  if(await benchPlayer.evaluate(node=>(node as HTMLElement).draggable)){
   await expect.poll(()=>benchPlayer.evaluate(node=>typeof (node as any).ondragstart==="function")).toBe(true);
   await benchPlayer.evaluate(node=>{
     const event=new DragEvent("dragstart",{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()});
@@ -110,6 +111,9 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
   expect(Math.abs(after.y-before.y)).toBeLessThanOrEqual(1);
   const restoredShift=after.slots[0].y-before.slots[0].y;
   expect(after.slots.map((slot,index)=>({x:slot.x,y:slot.y-restoredShift}))).toEqual(before.slots);
+  }
+  expect(await benchPlayer.evaluate(node=>(node as HTMLElement).draggable)).toBe(false);
+  expect(await benchPlayer.evaluate(node=>(node as any).ondragstart)).toBeNull();
 
   const selectedBenchName=await benchPlayer.locator(".bench-name").textContent();
   await benchPlayer.click();
@@ -132,13 +136,15 @@ test("native lineup drag keeps the viewport, targets and tactical HUD stable",as
   });
   await page.waitForTimeout(360);
   expect(await page.locator("html").evaluate(node=>node.classList.contains("hub-player-dragging"))).toBe(true);
+  expect(await page.locator("html").evaluate(node=>node.classList.contains("hub-global-drag-lock"))).toBe(false);
+  expect(await page.evaluate(()=>getComputedStyle(document.body).overflow)).not.toBe("hidden");
   await expect(page.locator(".touch-drag-ghost")).toHaveCount(1);
   await benchPlayer.evaluate(node=>node.dispatchEvent(new Event("touchcancel",{bubbles:true,cancelable:true})));
   expect(await page.locator("html").evaluate(node=>node.classList.contains("hub-player-dragging"))).toBe(false);
   await expect(page.locator(".touch-drag-ghost")).toHaveCount(0);
 
   await page.locator(".native-bench-close").click();
-  await page.evaluate(()=>document.getElementById("hubPitch")!.scrollIntoView({block:"center"}));
+  await page.locator("#powTile .mtile-info").scrollIntoViewIfNeeded();
   const scrollBeforeModal=await page.evaluate(()=>scrollY);
   await page.locator("#powTile .mtile-info").click();
   await expect(page.locator(".mechanic-info-modal")).toBeVisible();

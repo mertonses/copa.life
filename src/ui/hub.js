@@ -781,7 +781,7 @@ function _resetBenchPanelPosition(panel){
   if(!panel)return;panel.style.removeProperty("left");panel.style.removeProperty("top");panel.style.removeProperty("right");panel.style.removeProperty("max-height");panel.classList.remove("bench-panel-dragging");
 }
 
-let _hubDragScrollLock=null,_hubDragPreview=null,_hubIgnoreScrollCleanupUntil=0;
+let _hubDragScrollLock=null,_hubDragPreview=null,_hubIgnoreScrollCleanupUntil=0,_hubDragWatchdog=0;
 function _hubDragStyleSnapshot(style,properties){
   const snapshot={};
   properties.forEach(property=>snapshot[property]={value:style.getPropertyValue(property),priority:style.getPropertyPriority(property)});
@@ -793,23 +793,33 @@ function _hubRestoreDragStyles(style,snapshot){
     else style.removeProperty(property);
   });
 }
-function _hubLockDragScroll(){
+function _hubLockDragScroll(options){
   if(_hubDragScrollLock)return;
+  const globalLock=!(options&&options.global===false);
   const root=document.documentElement,body=document.body,scrolling=document.scrollingElement||root;
   const x=window.scrollX||scrolling.scrollLeft||0,y=window.scrollY||scrolling.scrollTop||0;
   const props=["overflow","touch-action"];
-  _hubDragScrollLock={x,y,body,root,styles:_hubDragStyleSnapshot(body.style,props),rootStyles:_hubDragStyleSnapshot(root.style,props)};
+  _hubDragScrollLock={global:globalLock,x,y,body,root,styles:globalLock?_hubDragStyleSnapshot(body.style,props):null,rootStyles:globalLock?_hubDragStyleSnapshot(root.style,props):null};
   root.classList.add("hub-player-dragging");
-  root.style.setProperty("overflow","hidden","important");
-  root.style.setProperty("touch-action","none","important");
-  body.style.setProperty("overflow","hidden","important");
-  body.style.setProperty("touch-action","none","important");
-  window.scrollTo(x,y);
+  root.classList.toggle("hub-global-drag-lock",globalLock);
+  if(globalLock){
+    root.style.setProperty("overflow","hidden","important");
+    root.style.setProperty("touch-action","none","important");
+    body.style.setProperty("overflow","hidden","important");
+    body.style.setProperty("touch-action","none","important");
+    window.scrollTo(x,y);
+  }
+  clearTimeout(_hubDragWatchdog);
+  _hubDragWatchdog=setTimeout(()=>{
+    if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();
+    _hubUnlockDragScroll();
+  },4500);
 }
 function _hubUnlockDragScroll(){
   const lock=_hubDragScrollLock;
-  document.documentElement.classList.remove("hub-player-dragging");
-  if(lock){
+  clearTimeout(_hubDragWatchdog);_hubDragWatchdog=0;
+  document.documentElement.classList.remove("hub-player-dragging","hub-global-drag-lock");
+  if(lock&&lock.global){
     _hubRestoreDragStyles(lock.body.style,lock.styles);
     _hubRestoreDragStyles(lock.root.style,lock.rootStyles);
     _hubIgnoreScrollCleanupUntil=performance.now()+700;
@@ -832,7 +842,7 @@ function _hubCreateDragPreview(source){
   return preview;
 }
 function _hubBeginNativeDrag(event,source){
-  _hubLockDragScroll();
+  _hubLockDragScroll({global:!_tapCoarse()});
   source.classList.add("hub-drag-source");
   if(event.dataTransfer){
     event.dataTransfer.effectAllowed="move";
@@ -868,16 +878,17 @@ function _initHubDragDrop(){
   /* pitch slots */
   slots.forEach((_,i)=>{
     const el=document.getElementById("h"+i); if(!el)return;
-    el.draggable=true;
-    el.ondragstart=e=>{_src={type:"slot",idx:i};_hubBeginNativeDrag(e,el);};
-    el.ondragend=()=>{_src=null;_clearOver();_hubFinishNativeDrag(el);};
+    const htmlDrag=!_tapCoarse();
+    el.draggable=htmlDrag;
+    el.ondragstart=htmlDrag?(e=>{_src={type:"slot",idx:i};_hubBeginNativeDrag(e,el);}):null;
+    el.ondragend=htmlDrag?(()=>{_src=null;_clearOver();_hubFinishNativeDrag(el);}):null;
     el.ondragover=e=>{e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect="move";_clearOver();el.classList.add("h-drag-over");};
     el.ondragleave=()=>el.classList.remove("h-drag-over");
     el.ondrop=e=>{e.preventDefault();_clearOver();if(!_src||_src.idx===i){_hubFinishNativeDrag();return;}
       if(_src.type==="slot"){
         /* GK restriction: GK slot ↔ non-GK slot blocked unless player is injured */
         const _srcIsGK=slots[_src.idx][0]==="GK",_dstIsGK=slots[i][0]==="GK";
-        if(_srcIsGK!==_dstIsGK){const _a=picksBySlot[_src.idx],_b=picksBySlot[i];if(!(_a&&_a.injured)&&!(_b&&_b.injured))return;}
+        if(_srcIsGK!==_dstIsGK){const _a=picksBySlot[_src.idx],_b=picksBySlot[i];if(!(_a&&_a.injured)&&!(_b&&_b.injured)){_src=null;_hubFinishNativeDrag();return;}}
         /* swap two pitch players */
         const a=picksBySlot[_src.idx],b=picksBySlot[i];
         picksBySlot[_src.idx]=b; picksBySlot[i]=a;
@@ -888,7 +899,7 @@ function _initHubDragDrop(){
         renderHub();
       } else if(_src.type==="bench"){
         /* bench player → pitch slot */
-        const bp=bench&&bench[_src.idx]; if(!bp)return;
+        const bp=bench&&bench[_src.idx]; if(!bp){_src=null;_hubFinishNativeDrag();return;}
         const old=picksBySlot[i];
         bp.used=true;bp.bench=false;
         if(typeof fillSlotReplace==="function")fillSlotReplace(i,bp);
@@ -901,9 +912,10 @@ function _initHubDragDrop(){
   /* bench players: add drag via event delegation on benchEl */
   const _be=document.getElementById("hubBenchSection"); if(!_be)return;
   _be.querySelectorAll("[data-bench-idx]").forEach(card=>{
-    card.draggable=true;
-    card.ondragstart=e=>{const bi=parseInt(card.dataset.benchIdx);_src={type:"bench",idx:bi};_hubBeginNativeDrag(e,card);};
-    card.ondragend=()=>{_src=null;_clearOver();_hubFinishNativeDrag(card);};
+    const htmlDrag=!_tapCoarse();
+    card.draggable=htmlDrag;
+    card.ondragstart=htmlDrag?(e=>{const bi=parseInt(card.dataset.benchIdx);_src={type:"bench",idx:bi};_hubBeginNativeDrag(e,card);}):null;
+    card.ondragend=htmlDrag?(()=>{_src=null;_clearOver();_hubFinishNativeDrag(card);}):null;
   });
   /* touch drag-drop for mobile */
   let _tEl=null,_tGhost=null,_tSrc=null,_tTimer=null,_tStart=null;
@@ -924,6 +936,7 @@ function _initHubDragDrop(){
     ["resize","orientationchange","pagehide","blur"].forEach(ev=>window.addEventListener(ev,()=>{if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true}));
     window.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true});
     window.addEventListener("scroll",()=>{if(performance.now()<_hubIgnoreScrollCleanupUntil)return;if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},{passive:true,capture:true});
+    ["touchcancel","pointercancel","dragend","drop","copa:native-resume"].forEach(ev=>document.addEventListener(ev,()=>setTimeout(()=>{if(typeof window.cleanupTouchDragGhosts==="function")window.cleanupTouchDragGhosts();},0),{passive:true}));
   }
   function _touchDrop(x,y){
     _clearOver();
@@ -961,7 +974,10 @@ function _initHubDragDrop(){
       const initial=e.touches[0];_tStart=initial?{x:initial.clientX,y:initial.clientY}:null;
       _tTimer=setTimeout(()=>{
         _tSrc=src();if(!_tSrc)return;
-        _hubLockDragScroll();
+        // A touch drag only suppresses the gesture on its source element. It
+        // must never lock the document; tap placement remains the primary
+        // Android interaction and a lost touchcancel cannot freeze the page.
+        _hubLockDragScroll({global:false});
         if(window.PlayerProfiles)PlayerProfiles.setDragging(true);
         _tEl=el;
         const t=_tStart||{x:0,y:0};

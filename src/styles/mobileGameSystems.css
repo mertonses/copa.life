@@ -21,7 +21,7 @@ body:has(#modal:not(.hidden)) #toastContainer{z-index:79}
 
 @media(max-width:760px){
   html.copa-mobile-game,html.copa-mobile-game body{min-height:100%;background:#101d28}
-  html.copa-mobile-game body.mobile-game-landing-open,html.copa-mobile-game body.mobile-game-setup-open{height:100dvh;overflow:hidden}
+  html.copa-mobile-game body.mobile-game-landing-open:not(.run-active),html.copa-mobile-game body.mobile-game-setup-open:not(.run-active){height:100dvh;overflow:hidden}
   html.copa-mobile-game body:not(.run-active) .wrap{padding:0;max-width:none}
   html.copa-mobile-game body:not(.run-active) .top{position:fixed;z-index:51;top:max(10px,env(safe-area-inset-top));right:12px;left:auto;width:auto;border:0;background:transparent}
   html.copa-mobile-game body:not(.run-active) .top .life-mode-back:not([hidden]){position:fixed;z-index:2;top:max(10px,env(safe-area-inset-top));right:auto;left:12px}
@@ -559,7 +559,7 @@ html.copa-mobile-game .mobile-legal-links .sdbtn{min-width:0!important;padding-i
   html.copa-mobile-game #hub .hub-stat-row>.kasa-card{background:linear-gradient(145deg,var(--surface-elevated),color-mix(in srgb,var(--surface-bg) 82%,var(--metric-accent,var(--status-success))))!important;border:1px solid var(--border-subtle)!important;box-shadow:var(--shadow-sm)!important}
   html.copa-mobile-game body.run-active,
   html.copa-mobile-game body.run-active .wrap,
-  html.copa-mobile-game body.run-active #hub{overflow-x:hidden!important;overflow-y:visible!important}
+  html.copa-mobile-game body.run-active #hub{overflow-x:clip!important;overflow-y:visible!important}
   html.copa-mobile-game #tournamentHubPanel .tg-hub-card{border:1px solid var(--border-subtle)!important;border-radius:14px!important;background:var(--surface-elevated)!important;overflow:hidden}
 
   .locker-scene[data-target="defence"] i:nth-child(-n+2),.locker-scene[data-target="attack"] i:nth-last-child(-n+2),.locker-scene[data-target="youth"] i:not(.captain),.locker-scene[data-target="star"] .captain{filter:drop-shadow(0 0 8px var(--color-primary));transform:translateY(-4px)}

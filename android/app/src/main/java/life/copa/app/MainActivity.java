@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -20,6 +22,17 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(CopaAdsPlugin.class);
         registerPlugin(CopaPlayGamesPlugin.class);
         super.onCreate(savedInstanceState);
+
+        WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+        if (webView != null) {
+            // Android 12+'s stretch overscroll can make a WebView look as if
+            // it is vibrating near the page edges. The web content remains
+            // normally scrollable; only the native edge effect is disabled.
+            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            webView.setVerticalScrollBarEnabled(false);
+            webView.setHorizontalScrollBarEnabled(false);
+            webView.setNestedScrollingEnabled(true);
+        }
 
         if (currentVersion >= 0L && previousVersion >= 0L && previousVersion != currentVersion && getBridge() != null) {
             getBridge().getWebView().clearCache(true);

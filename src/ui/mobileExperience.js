@@ -178,6 +178,53 @@
     haptic([12,18]);
   }
 
+  function scrollDiagnostics(reason){
+    const root=document.documentElement,body=document.body,scrolling=document.scrollingElement||root;
+    const rootStyle=getComputedStyle(root),bodyStyle=getComputedStyle(body);
+    return{
+      reason:reason||"manual",
+      platform:root.dataset.copaPlatform||"web",
+      screen:["intro","draft","hub","sim","result"].find(id=>isVisible(document.getElementById(id)))||"",
+      rootClasses:[...root.classList].filter(name=>/(open|drag|lock)/.test(name)),
+      bodyClasses:[...body.classList].filter(name=>/(open|active|drag|lock)/.test(name)),
+      rootOverflow:rootStyle.overflow,
+      bodyOverflow:bodyStyle.overflow,
+      rootTouchAction:rootStyle.touchAction,
+      bodyTouchAction:bodyStyle.touchAction,
+      scrollY:Math.round(global.scrollY||scrolling.scrollTop||0),
+      scrollHeight:scrolling.scrollHeight,
+      viewportHeight:global.innerHeight,
+      canScroll:scrolling.scrollHeight>global.innerHeight+2&&rootStyle.overflowY!=="hidden"&&bodyStyle.overflowY!=="hidden",
+    };
+  }
+
+  function releaseStaleScrollLocks(reason){
+    if(!global.COPA_IS_NATIVE&&!isPhoneInteraction())return scrollDiagnostics(reason);
+    const root=document.documentElement,body=document.body;
+    const activeRun=body.classList.contains("run-active")||["draft","hub","sim","result"].some(id=>isVisible(document.getElementById(id)));
+    if(activeRun)body.classList.remove("mobile-game-landing-open","mobile-game-setup-open","mobile-game-setup-final");
+
+    const bench=document.getElementById("hubBenchSection"),hub=document.getElementById("hub");
+    if(root.classList.contains("native-bench-open")&&(!bench||!bench.classList.contains("native-bench-sheet")||!hub||hub.classList.contains("hidden")))closeNativeBench({restoreFocus:false});
+
+    const profile=document.querySelector(".player-profile-layer");
+    if(body.classList.contains("player-profile-open")&&(!profile||profile.classList.contains("hidden")||!profile.classList.contains("is-sheet")))body.classList.remove("player-profile-open");
+    const analysis=document.getElementById("matchAnalysisLayer");
+    if(root.classList.contains("match-analysis-open")&&(!analysis||analysis.classList.contains("hidden")))root.classList.remove("match-analysis-open");
+    if(body.classList.contains("advanced-settings-open")&&!document.getElementById("advancedSettingsLayer"))body.classList.remove("advanced-settings-open");
+    const draw=document.getElementById("tournamentDraw");
+    if((root.classList.contains("tournament-draw-open")||body.classList.contains("tournament-draw-open"))&&(!draw||draw.classList.contains("hidden"))){
+      root.classList.remove("tournament-draw-open");body.classList.remove("tournament-draw-open");
+    }
+    if(root.classList.contains("hub-player-dragging")&&!document.querySelector(".hub-drag-source,.hub-player-drag-preview")){
+      if(typeof global.cleanupTouchDragGhosts==="function")global.cleanupTouchDragGhosts();
+      root.classList.remove("hub-player-dragging","hub-global-drag-lock");
+      root.style.removeProperty("overflow");root.style.removeProperty("touch-action");
+      body.style.removeProperty("overflow");body.style.removeProperty("touch-action");
+    }
+    return scrollDiagnostics(reason);
+  }
+
   function ensureNativeHubNavigation(){
     if(!global.COPA_IS_NATIVE||!isPhoneInteraction())return;
     const hub=document.getElementById("hub");if(!hub)return;
@@ -919,6 +966,7 @@
   }
 
   function syncOverlayScroll(){
+    releaseStaleScrollLocks("overlay-sync");
     const modal=document.getElementById("modal"),open=isVisible(modal);
     document.documentElement.classList.toggle("mobile-modal-open",open);
     const activeScreen=()=>["intro","draft","hub","sim","result"].find(id=>isVisible(document.getElementById(id)))||"";
@@ -965,6 +1013,7 @@
 
   function enhance(){
     enhanceFrame=0;
+    releaseStaleScrollLocks("enhance");
     // Result disclosures are a responsive DOM transformation. Run their
     // cleanup before the phone-only guard so a narrow -> wide resize can
     // restore the desktop result layout.
@@ -1003,6 +1052,7 @@
 
   function sync(){
     syncFrame=0;
+    releaseStaleScrollLocks("sync");
     const nav=ensureSimTabs();
     syncSimLanguage(nav);
     const sim=document.getElementById("sim");
@@ -1130,7 +1180,9 @@
     document.addEventListener("focusout",()=>setTimeout(updateKeyboardState,0));
     document.addEventListener("click",handleDocumentCapture,true);
     document.addEventListener("click",handleDocumentClick);
-    document.addEventListener("visibilitychange",()=>{if(document.hidden)checkpoint();});
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)checkpoint();else releaseStaleScrollLocks("visibility-resume");});
+    global.addEventListener("pageshow",()=>releaseStaleScrollLocks("pageshow"),{passive:true});
+    global.addEventListener("copa:native-resume",()=>releaseStaleScrollLocks("native-resume"),{passive:true});
     global.addEventListener("pagehide",checkpoint,{passive:true});
     applyPreferences();
     syncNetworkState(false);
@@ -1151,6 +1203,8 @@
     enhance,
     openNativeBench,
     closeNativeBench,
+    releaseStaleScrollLocks,
+    scrollDiagnostics,
     setTextScale:writeTextScale,
   };
 
