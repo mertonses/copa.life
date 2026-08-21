@@ -239,6 +239,21 @@
     return root.CopaLazy.ensureSideField().then(api=>{api.ensureCurrent();api.mount();return api;}).catch(()=>null);
   }
 
+  function routeScrollBehavior(){
+    return native()||document.body.classList.contains("reduced-motion")?"auto":"smooth";
+  }
+
+  function scrollRouteIntoView(route){
+    const hub=document.getElementById("hub");if(!hub)return;
+    const target=route==="market"?document.getElementById("shopcards"):route==="training"?document.getElementById("mobileTrainingRoute"):route==="sidefield"?document.getElementById("sideFieldRoute"):route==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar");
+    if(!target)return;
+    const behavior=routeScrollBehavior();
+    if(behavior==="auto"){
+      const top=Math.max(0,Math.round(root.scrollY+target.getBoundingClientRect().top-8));
+      root.scrollTo({top,behavior:"auto"});
+    }else target.scrollIntoView({block:"start",behavior});
+  }
+
   function activateRoute(route){
     const hub=document.getElementById("hub");if(!hub)return;
     const previousRoute=hub.dataset.mobileRoute||"";
@@ -256,14 +271,16 @@
     if(previousRoute&&routeChanged)playRouteSound(activeRoute);
     normalizePlayButton();
     if(activeRoute==="training"&&(routeChanged||!document.querySelector("#mobileTrainingRoute .prep-modal")))renderTrainingRoute();
-    if(activeRoute==="sidefield"&&(routeChanged||!document.getElementById("sideFieldRoute")))ensureSideFieldRoute().then(()=>{if(routeChanged&&activeRoute==="sidefield")document.getElementById("sideFieldRoute")?.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});});
+    if(activeRoute==="sidefield"&&(routeChanged||!document.getElementById("sideFieldRoute")))ensureSideFieldRoute().then(()=>{if(routeChanged&&activeRoute==="sidefield")root.requestAnimationFrame(()=>scrollRouteIntoView("sidefield"));});
     if(activeRoute==="career"&&(routeChanged||!document.querySelector("#mobileCareerRoute .mobile-career-inline")))renderCareerRoute();
     updateTrainingBadge();
     updateMarketBadge(activeRoute==="market");
     updateSideFieldBadge();
-    if(routeChanged&&root.CopaMobileExperience&&typeof root.CopaMobileExperience.refresh==="function")root.CopaMobileExperience.refresh();
-    const target=nav||(activeRoute==="market"?document.getElementById("shopcards"):activeRoute==="training"?document.getElementById("mobileTrainingRoute"):activeRoute==="sidefield"?document.getElementById("sideFieldRoute"):activeRoute==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar"));
-    if(routeChanged&&target)target.scrollIntoView({block:"start",behavior:document.body.classList.contains("reduced-motion")?"auto":"smooth"});
+    if(routeChanged&&root.CopaMobileExperience){
+      if(typeof root.CopaMobileExperience.releaseStaleScrollLocks==="function")root.CopaMobileExperience.releaseStaleScrollLocks("route-change");
+      if(typeof root.CopaMobileExperience.refresh==="function")root.CopaMobileExperience.refresh();
+    }
+    if(routeChanged&&activeRoute!=="sidefield")root.requestAnimationFrame(()=>scrollRouteIntoView(activeRoute));
   }
   function ensureRoutes(){
     const hub=document.getElementById("hub");if(!hub)return;
@@ -359,7 +376,7 @@
     }
   }
   function normalizeCareerSection(section){if(["directives","management","mastery"].includes(section))return"growth";if(["history","trophies","museum","finance"].includes(section))return"career";return ["career","growth","world"].includes(section)?section:"career";}
-  function openCareerSection(section){activeCareerSection=normalizeCareerSection(section);renderCareerRoute();const panel=document.getElementById("mobileCareerRoute");if(panel)panel.scrollIntoView({block:"start",behavior:"smooth"});}
+  function openCareerSection(section){activeCareerSection=normalizeCareerSection(section);renderCareerRoute();scrollRouteIntoView("career");}
   function refreshCareerSection(section=activeCareerSection){activeCareerSection=normalizeCareerSection(section);const panel=document.getElementById("mobileCareerRoute");if(panel)panel.dataset.section="";renderCareerRoute();}
   function isCareerRouteActive(){const hub=document.getElementById("hub"),panel=document.getElementById("mobileCareerRoute");return !!(hub&&panel&&!hub.classList.contains("hidden")&&hub.dataset.mobileRoute==="career");}
   function enhanceHub(){

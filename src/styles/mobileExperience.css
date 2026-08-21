@@ -77,6 +77,16 @@
     overflow:hidden;
     touch-action:none;
   }
+  html[data-copa-platform="android"] #hubPitch .roundel,
+  html[data-copa-platform="ios"] #hubPitch .roundel,
+  html[data-copa-platform="android"] #hubBenchSection .bench-row,
+  html[data-copa-platform="ios"] #hubBenchSection .bench-row{
+    touch-action:pan-y;
+  }
+  html.hub-player-dragging[data-copa-platform="android"] :is(#hubPitch .roundel,#hubBenchSection .bench-row),
+  html.hub-player-dragging[data-copa-platform="ios"] :is(#hubPitch .roundel,#hubBenchSection .bench-row){
+    touch-action:none;
+  }
   html.native-bench-open[data-copa-platform="android"] #hubBenchSection.native-bench-sheet,
   html.native-bench-open[data-copa-platform="ios"] #hubBenchSection.native-bench-sheet{transform:translateY(0);visibility:visible;transition-delay:0s}
   html[data-copa-platform="android"] #hubBenchSection .native-bench-close,
@@ -90,7 +100,8 @@
   }
   html.native-bench-open[data-copa-platform="android"] .native-bench-backdrop,
   html.native-bench-open[data-copa-platform="ios"] .native-bench-backdrop{opacity:1;visibility:visible;transition-delay:0s}
-  html.native-bench-open,html.native-bench-open body{overflow:hidden}
+  /* The fixed backdrop and the sheet own interaction while open. Keeping the
+     document scrollable prevents a stale overlay class from freezing Android. */
 
   html.mobile-dock-active body{
     padding-bottom:calc(var(--mobile-dock-height) + 10px);
@@ -1333,6 +1344,12 @@
   html.copa-mobile-game #hub[data-mobile-route="sidefield"] .side-field-route{
     touch-action:pan-y;
     overscroll-behavior-y:auto;
+  }
+  html.copa-mobile-game #mobileTrainingRoute>.prep-modal{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    touch-action:pan-y;
   }
   #result{
     min-height:100dvh;

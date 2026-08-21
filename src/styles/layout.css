@@ -3639,8 +3639,8 @@ img,svg,canvas{max-width:100%}
   margin:0;
 }
 
-html.hub-player-dragging,
-html.hub-player-dragging body{
+html.hub-global-drag-lock,
+html.hub-global-drag-lock body{
   overflow:hidden!important;
   overscroll-behavior:none!important;
 }
