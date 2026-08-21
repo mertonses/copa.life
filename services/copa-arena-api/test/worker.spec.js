@@ -234,10 +234,18 @@ describe("Arena HTTP API",()=>{
 
   it("returns only public leaderboard fields",async()=>{
     await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("board"),body:JSON.stringify({clubName:"Kuzey FK",mode:"ranked"})});
+    await env.DB.prepare("UPDATE arena_profiles SET wins=1 WHERE club_name='Kuzey FK'").run();
     const response=await SELF.fetch("https://arena.test/v1/arena/leaderboard");
     const data=await response.json();
     expect(data.entries.some(entry=>entry.clubName==="Kuzey FK")).toBe(true);
     expect(JSON.stringify(data)).not.toContain("owner_hash");
+  });
+
+  it("keeps profiles without a completed match off the leaderboard",async()=>{
+    await SELF.fetch("https://arena.test/v1/arena/session",{method:"POST",headers:headers("boardempty"),body:JSON.stringify({clubName:"Bekleyen Kulüp",mode:"ranked"})});
+    const response=await SELF.fetch("https://arena.test/v1/arena/leaderboard");
+    const data=await response.json();
+    expect(data.entries.some(entry=>entry.clubName==="Bekleyen Kulüp")).toBe(false);
   });
 
   it("prevents one Arena identity from entering two queues",async()=>{

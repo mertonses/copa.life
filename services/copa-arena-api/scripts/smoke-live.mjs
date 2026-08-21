@@ -1,4 +1,4 @@
-const api=(process.env.COPA_ARENA_API||"https://copa-life-arena.mertonses-copa.workers.dev").replace(/\/$/,"");
+const api=(process.env.COPA_ARENA_API||"https://arena-api.copa.life").replace(/\/$/,"");
 const wsApi=api.replace(/^http/,"ws");
 const stamp=Date.now().toString(36).toUpperCase();
 const identities=[0,1].map(index=>({
@@ -13,7 +13,10 @@ const request=async(id,path,options={})=>{
   if(!response.ok)throw new Error(`${path}:${response.status}:${JSON.stringify(data)}`);
   return data;
 };
-const timeout=(label,ms=45_000)=>new Promise((_,reject)=>setTimeout(()=>reject(new Error(`timeout:${label}`)),ms));
+const timeout=(label,ms=45_000)=>new Promise((_,reject)=>{
+  const timer=setTimeout(()=>reject(new Error(`timeout:${label}`)),ms);
+  timer.unref?.();
+});
 const waitEvent=(socket,type)=>Promise.race([
   new Promise((resolve,reject)=>{
     const onMessage=event=>{const data=JSON.parse(event.data);if(data.type===type){socket.removeEventListener("message",onMessage);resolve(data);}};
