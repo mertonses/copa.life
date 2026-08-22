@@ -137,10 +137,10 @@
     if(!active()||(root.tournament.phase==="draw"&&root.tournament.countryCode!==root.selectedCountry))createState();
     if(root.CopaRunState&&root.CopaRunState.phase!=="draw"){const moved=root.CopaRunState.transition("draw",{reason:restoring?"restore_draw":"squad_complete"});if(!moved.ok)return false;}
     for(const id of ["intro","draft","hub","sim","result"]){const element=document.getElementById(id);if(element)element.classList.add("hidden");}
-    const section=document.getElementById("tournamentDraw");if(section)section.classList.remove("hidden");
+    const section=document.getElementById("tournamentDraw");if(section)section.classList.add("is-layout-preparing");
     document.documentElement.classList.add("tournament-draw-open");
     document.body.classList.add("tournament-draw-open");
-    renderDraw();if(typeof root._saveState==="function")root._saveState("draw");
+    renderDraw();if(section){void section.offsetWidth;section.classList.remove("hidden","is-layout-preparing");section.classList.add("is-layout-ready");}if(typeof root._saveState==="function")root._saveState("draw");
     if(!restoring&&root.CopaAnalytics)root.CopaAnalytics.track("group_draw_started",{country:root.selectedCountry,mode:"manual"});return true;
   }
   function reveal(count){

@@ -178,7 +178,7 @@ test("an injured loan expires without leaving a stale injury pointer",async({pag
   expect(result.pointer).toBe(result.otherIdx);
 });
 
-test("risky offers use contextual animated icons and preserve the intended packages",async({page})=>{
+test("risky offers use distinct static icons and preserve the intended packages",async({page})=>{
   await openHub(page);
   await page.evaluate(()=>(globalThis as any).showDraftEvent());
   await expect(page.getByRole("button",{name:/Vadeli Kudret/})).toBeVisible();
@@ -205,7 +205,7 @@ test("risky offers use contextual animated icons and preserve the intended packa
     expect.stringContaining("risk-svg-grit"),
     expect.stringContaining("risk-svg-safe"),
   ]);
-  expect(iconAudit.every(icon=>icon.animation!=="none")).toBe(true);
+  expect(iconAudit.every(icon=>icon.animation==="none")).toBe(true);
   await page.emulateMedia({reducedMotion:"reduce"});
   const reducedAnimations=await page.locator(".risk-svg").evaluateAll(icons=>icons.map(icon=>getComputedStyle(icon.querySelector(".risk-bolt,.risk-coin,.risk-signature,.risk-pulse,.risk-check")!).animationName));
   expect(reducedAnimations.every(name=>name==="none")).toBe(true);

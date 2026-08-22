@@ -29,14 +29,22 @@ async function assertSummary(page:Page,kind:string,title:string,score:string,fil
   await expect(page.locator("#resultStatusMark")).toHaveCount(0);
   await expect(page.locator("#resultActionCopy")).toBeVisible();
   await expect(page.locator("#resultDetails")).toHaveCount(0);
-  const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth,board:document.querySelector("#result .scoreboard")!.getBoundingClientRect().height,stats:[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect().width),actions:[...document.querySelectorAll<HTMLElement>("#result .result-actions .result-action")].map(node=>{const box=node.getBoundingClientRect();return{width:Math.round(box.width),height:Math.round(box.height)}})}));
+  const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth-innerWidth,board:document.querySelector("#result .scoreboard")!.getBoundingClientRect().height,stats:[...document.querySelectorAll("#result .statline .stat")].map(node=>node.getBoundingClientRect().width),actions:[...document.querySelectorAll<HTMLElement>("#result .result-actions .result-action")].map(node=>{const box=node.getBoundingClientRect();return{id:node.id,width:Math.round(box.width),height:Math.round(box.height)}}),again:(()=>{const node=document.getElementById("againBtn");if(!node)return null;const rect=node.getBoundingClientRect();return{className:node.className,parent:node.parentElement?.className||"",width:Math.round(rect.width),height:Math.round(rect.height),visible:!!node.offsetParent,bottom:rect.bottom,viewportHeight:innerHeight};})()}));
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.board).toBeGreaterThan(100);
   expect(layout.stats).toHaveLength(4);
   expect(layout.actions[0].width).toBe(layout.actions[1].width);
-  expect(layout.actions[2].width).toBeGreaterThan(layout.actions[0].width);
   expect(new Set(layout.actions.map(item=>item.height)).size).toBe(1);
   expect(layout.actions[0].height).toBe(50);
+  if(layout.again?.parent.includes("mobile-action-dock-inner")){
+    expect(layout.actions,JSON.stringify(layout)).toHaveLength(2);
+    expect(layout.again.visible).toBe(true);
+    expect(layout.again.height).toBeGreaterThanOrEqual(44);
+    expect(layout.again.bottom).toBeLessThanOrEqual(layout.again.viewportHeight+1);
+  }else{
+    expect(layout.actions,JSON.stringify(layout)).toHaveLength(3);
+    expect(layout.actions[2].width).toBeGreaterThan(layout.actions[0].width);
+  }
   fs.mkdirSync(output,{recursive:true});
   await page.screenshot({path:path.join(output,file),fullPage:false});
 }

@@ -156,19 +156,20 @@
     const setup=document.getElementById("introSetup"),country=document.getElementById("countryPick"),form=document.getElementById("formpick"),chair=document.querySelector(".copa-chair-subcol");
     if(!setup||!country||!form||!chair)return;
     const countryGroup=country.closest(".copa-country-group")||country.closest(".v7-setup-group"),countryPanel=country.closest(".copa-country-panel"),two=form.closest(".v7-setup-twocol"),formCol=form.closest(".v7-setup-subcol"),chairCol=chair.closest(".v7-setup-subcol");
-    const androidFlow=String(root.COPA_PLATFORM||document.documentElement.dataset.copaPlatform||"").toLowerCase()==="android";
-    if(androidFlow){
-      // Android keeps the first decision in one viewport. Formation and country
-      // are one step, while the start action lives directly below the chairman.
-      if(formCol)formCol.dataset.mobileStep="1";
-      if(countryPanel)countryPanel.dataset.mobileStep="1";
-      if(countryGroup)countryGroup.dataset.mobileStep="1";
-      if(chairCol)chairCol.dataset.mobileStep="2";
+    const compactFlow=root.matchMedia&&root.matchMedia("(max-width: 920px), (pointer: coarse)").matches;
+    if(compactFlow){
+      // Narrow screens establish the chairman first, then keep formation,
+      // country and the start action together as one final setup decision.
+      if(chairCol)chairCol.dataset.mobileStep="1";
+      if(formCol)formCol.dataset.mobileStep="2";
+      if(countryPanel)countryPanel.dataset.mobileStep="2";
+      if(countryGroup)countryGroup.dataset.mobileStep="2";
       setup.dataset.mobileFlow="android-two-step";
       const cta=setup.querySelector(".v7-cta-stack");
       if(cta){
         cta.dataset.mobileStep="2";
-        if(chairCol&&!chairCol.contains(cta))chairCol.appendChild(cta);
+        const roster=setup.querySelector(".copa-roster-options");
+        if(roster&&!roster.contains(cta))roster.appendChild(cta);
       }
     }else{
       if(formCol)formCol.dataset.mobileStep="1";if(chairCol)chairCol.dataset.mobileStep="2";if(countryGroup)countryGroup.dataset.mobileStep="3";
@@ -205,7 +206,7 @@
     });
   }
   function setSetupStep(value){
-    const androidFlow=String(root.COPA_PLATFORM||document.documentElement.dataset.copaPlatform||"").toLowerCase()==="android",stepCount=androidFlow?2:4;
+    const compactFlow=document.getElementById("introSetup")?.dataset.mobileFlow==="android-two-step",stepCount=compactFlow?2:4;
     setupStep=Math.max(1,Math.min(stepCount,Number(value)||1));prepareStepper();
     document.body.classList.toggle("mobile-game-setup-final",setupStep===stepCount);
     const setup=document.getElementById("introSetup");if(setup)setup.dataset.mobileCurrentStep=String(setupStep);
@@ -259,6 +260,7 @@
     const previousRoute=hub.dataset.mobileRoute||"";
     activeRoute=["match","market","training","sidefield","career"].includes(route)?route:"match";
     const routeChanged=previousRoute!==activeRoute;
+    if(routeChanged)document.querySelectorAll("#toastContainer .toast").forEach(node=>node.remove());
     hub.dataset.mobileRoute=activeRoute;
     const actionDock=document.getElementById("mobileActionDock");
     if(actionDock)actionDock.classList.toggle("mobile-route-suppressed",activeRoute!=="match");

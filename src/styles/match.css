@@ -511,6 +511,10 @@ canvas{width:100%;height:auto;display:block;border:3px solid #FFFFFF;border-radi
 }
 .tele-footer{
   padding:16px 22px 20px!important;
+  position:sticky;
+  z-index:9;
+  bottom:0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface-elevated) 0%,transparent),var(--surface-elevated) 28%);
 }
 .tele-footer .btn{
   width:100%;

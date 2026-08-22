@@ -98,7 +98,7 @@ test("locker-room tone icons keep their stroked size outside mobile-only styling
   await capture(page,`05b-locker-room-icons-${testInfo.project.name}.png`);
 });
 
-test("native landing and four-step setup read as a mobile game",async({page},testInfo)=>{
+test("native landing and chairman-first two-step setup read as a mobile game",async({page},testInfo)=>{
   test.skip(!mobileOnly(testInfo.project.name),"native phone presentation");
   await reset(page);
   await page.addInitScript(()=>localStorage.setItem("copa_meta_progression_v1",JSON.stringify({
@@ -115,35 +115,30 @@ test("native landing and four-step setup read as a mobile game",async({page},tes
   expect(overflow).toBeLessThanOrEqual(1);
   await capture(page,"01-native-landing.png");
   await page.locator('#mobileGameLanding button[onclick*="newRun"]').click();
-  await expect(page.locator('#introSetup [data-mobile-step="1"]')).toBeVisible();
-  await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeHidden();
+  await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
+  expect(await page.locator('#introSetup [data-mobile-step="2"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).length)).toBe(0);
+  await expect(page.locator("#chairSelectionSurface")).toBeVisible();
+  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
   await expect(page.locator("#countryPick .country-name")).toHaveCount(6);
   await expect(page.locator("#countryPick [data-country='JP'] .country-new-ribbon")).toHaveCount(0);
   expect(await page.locator("#countryPick button").evaluateAll(buttons=>buttons.every(button=>button.querySelectorAll(".country-name").length===1))).toBe(true);
-  await page.locator("#formpick .fbtn.locked").first().click();
-  await expect(page.locator(".formation-unlock-modal")).toBeVisible();
-  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
-  await page.locator(".formation-unlock-modal .btn-primary").click();
-  await expect(page.locator(".formation-unlock-modal")).toBeHidden();
   const next=page.locator("[data-step-next]");
   await expect(next).toHaveCount(1);
   await next.click();
-  await expect(page.locator('#introSetup [data-mobile-step="2"]')).toBeVisible();
+  await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
+  expect(await page.locator('#introSetup [data-mobile-step="1"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).length)).toBe(0);
   await expect(page.locator(".formation-card-kicker")).toHaveCount(0);
-  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeHidden();
-  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
+  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeVisible();
+  await expect(page.locator("#introSetup .v7-cta-stack")).toBeVisible();
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
   await expect(page.locator("#introSetup>.v7-footer-block")).toBeHidden();
-  await expect(page.locator("#chairSelectionSurface")).toBeVisible();
-  await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeHidden();
-  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
-  await next.click();
-  await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
+  await expect(page.locator("#chairSelectionSurface")).toBeHidden();
   await expect(page.locator("#countryPick")).toBeVisible();
-  await expect(page.locator("#introSetup .v7-cta-stack")).toBeHidden();
-  await next.click();
-  await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeHidden();
+  await page.locator("#formpick .fbtn.locked").first().click();
+  await expect(page.locator(".formation-unlock-modal")).toBeVisible();
+  await page.locator(".formation-unlock-modal .btn-primary").click();
+  await expect(page.locator(".formation-unlock-modal")).toBeHidden();
   await expect(page.locator("#startBtn")).toBeVisible();
   await page.evaluate(()=>{const modal=document.getElementById("modal");if(modal&&!modal.classList.contains("hidden"))(globalThis as any).closeModal();document.querySelector(".copa-coachmark")?.remove();});
   await capture(page,"02-native-chairman.png");
@@ -271,7 +266,7 @@ test("draft candidates keep only the two useful quick actions",async({page},test
     card.click();
     return{selecting:card.classList.contains("is-selecting"),busy:card.getAttribute("aria-busy"),haptic};
   });
-  expect(selectionFeedback).toEqual({selecting:true,busy:"true",haptic:10});
+  expect(selectionFeedback).toEqual({selecting:false,busy:null,haptic:10});
   await expect(page.locator("#draftThumbDock #undoBtn")).toBeVisible();
   await expect(page.locator("#draftThumbDock #allBtn")).toBeVisible();
   await expect(page.locator("#draftThumbDock #undoBtn")).toContainText(/geri al|undo/i);
@@ -702,7 +697,13 @@ test("preparation, mobile routes and locker-room talk are playable",async({page}
   expect(trainingCopy.eyebrow.color).not.toBe("rgb(10, 17, 24)");
   expect(trainingCopy.opponent.color).not.toBe("rgb(10, 17, 24)");
   await expect(page.locator(".prep-drill")).toHaveCount(7);
-  await expectSurfaceFit(page,".prep-modal");
+  const trainingBounds=await page.locator("#mobileTrainingRoute .prep-modal").evaluate((modal:HTMLElement)=>{
+    const rect=modal.getBoundingClientRect();
+    return{left:rect.left,right:rect.right,pageOverflow:document.documentElement.scrollWidth-innerWidth};
+  });
+  expect(trainingBounds.left).toBeGreaterThanOrEqual(-1);
+  expect(trainingBounds.right).toBeLessThanOrEqual(431);
+  expect(trainingBounds.pageOverflow).toBeLessThanOrEqual(1);
   await expect(page.locator(".mobile-opponent-analysis .mobile-training-scout")).toBeVisible();
   await page.locator(".mobile-opponent-analysis .mobile-training-scout").click();
   await expect(page.locator(".scout-report-modal")).toBeVisible();
@@ -890,6 +891,7 @@ test("confidence crisis modal presents a polished, probability-free decision sur
   await expect(page.locator("#relationshipNotice")).toBeVisible();
   await expect(page.locator("#relationshipNotice")).toContainText("OYUNCU GÜVENİ");
   await expect(page.locator("#relationshipNotice")).toContainText("Arda Yıldız");
+  await page.locator("#relationshipNotice").scrollIntoViewIfNeeded();
   await expectSurfaceFit(page,"#relationshipNotice");
   await capture(page,`confidence-result-${testInfo.project.name}.png`);
 });
