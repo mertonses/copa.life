@@ -98,6 +98,14 @@ test("Copa Arena keeps the singleplayer entry intact and renders every premium w
   await capture(page,"01-web-opening-with-arena.png");
   await page.locator('[data-mode-choice="arena"]').click();
   await expect(page.locator(".arena-portal")).toBeVisible();
+  const portalOrder=await page.locator(".arena-portal").evaluate((portal:HTMLElement)=>[...portal.children].map(node=>(node as HTMLElement).dataset.arenaAction||node.className));
+  expect(portalOrder.indexOf("practice")).toBeGreaterThan(portalOrder.indexOf("arena-portal-links"));
+  const portalColors=await page.evaluate(()=>["custom-room","tournament-room","history","leaderboard","cosmetics"].map(action=>{
+    const button=document.querySelector<HTMLElement>(`[data-arena-action="${action}"]`)!;
+    const icon=button.querySelector<SVGElement>("svg")!;
+    return{action,color:getComputedStyle(icon).color,stroke:getComputedStyle(icon).stroke};
+  }));
+  expect(portalColors.every(item=>item.color!=="rgb(0, 0, 0)"&&item.stroke!=="rgb(0, 0, 0)"&&item.stroke!=="none")).toBe(true);
   await expect(page.locator('[data-arena-action="custom-room"]')).toContainText("PRIVATE ROOM");
   await page.locator('[data-arena-action="custom-room"]').click();
   await expect(page.locator(".arena-custom-room")).toBeVisible();

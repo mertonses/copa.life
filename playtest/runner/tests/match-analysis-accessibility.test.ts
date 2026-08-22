@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("mobile result analysis shows exactly three reasons and closes safely",async({page},testInfo)=>{
+test("compact result hides the analysis entry while the analysis dialog still closes safely",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="mobile-chromium","Android-sized interaction contract");
   await page.goto("/?match-analysis-accessibility=1",{waitUntil:"domcontentloaded"});
   await page.waitForFunction(()=>Boolean((globalThis as any).LastMatchReport&&(globalThis as any).CopaMatchAnalysis));
@@ -39,10 +39,8 @@ test("mobile result analysis shows exactly three reasons and closes safely",asyn
   });
 
   const trigger=page.locator("#matchAnalysisEntry .match-analysis-trigger");
-  await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveAttribute("aria-haspopup","dialog");
-  expect(await trigger.evaluate(node=>node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48);
-  await trigger.click();
+  await expect(trigger).toBeHidden();
+  expect(await page.evaluate(()=>(globalThis as any).CopaMatchAnalysis.open())).toBe(true);
 
   const layer=page.locator("#matchAnalysisLayer");
   await expect(layer).toHaveAttribute("aria-hidden","false");
@@ -55,7 +53,6 @@ test("mobile result analysis shows exactly three reasons and closes safely",asyn
   await page.keyboard.press("Escape");
   await expect(layer).toHaveAttribute("aria-hidden","true");
   await expect(page.locator(".wrap")).not.toHaveAttribute("aria-hidden","true");
-  await expect(trigger).toBeFocused();
 });
 
 test("Android comfort text sizes persist and settings controls are easy to tap",async({page},testInfo)=>{
@@ -65,7 +62,12 @@ test("Android comfort text sizes persist and settings controls are easy to tap",
   await settings.click();
   await expect(settings).toHaveAttribute("aria-expanded","true");
 
+  const mobileFolder=page.locator('[data-settings-folder="mobile"]');
+  await mobileFolder.locator("summary").click();
+  await expect(mobileFolder).toHaveAttribute("open","");
+
   const scaleButtons=page.locator("[data-mobile-text-scale]");
+  await expect(scaleButtons.first()).toBeVisible();
   await expect(scaleButtons).toHaveCount(3);
   const sizes=await scaleButtons.evaluateAll(nodes=>nodes.map(node=>{
     const rect=node.getBoundingClientRect();

@@ -58,7 +58,18 @@ html[data-copa-platform="web"] .advanced-settings-sheet>header small{
   line-height:1.2;
 }
 
+html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-training-route{
+  display:flow-root!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+}
+
 html[data-copa-platform="web"] #hub[data-mobile-route="training"] .mobile-training-route>.prep-modal{
+  position:relative!important;
+  inset:auto!important;
+  height:auto!important;
+  min-height:0!important;
   max-height:none!important;
   overflow:visible!important;
 }

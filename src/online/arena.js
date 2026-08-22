@@ -11,7 +11,7 @@
   const TERMS_VERSION="arena-terms-v1";
   function ensureArenaStyles(){
     const current=document.querySelector('link[href*="src/styles/arena.css"]');if(current){current.dataset.copaArenaStyles="true";return;}
-    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260805-system-club1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
+    const link=document.createElement("link");link.rel="stylesheet";link.href="src/styles/arena.css?v=20260821-premium-navigation1";link.dataset.copaArenaStyles="true";document.head.appendChild(link);
   }
   ensureArenaStyles();
   const REWARDS=[
@@ -306,10 +306,10 @@
         <div class="arena-record"><span><small>${esc(text("record"))}</small><b>${matches}</b></span><span class="is-win"><small>W</small><b>${profile.wins}</b></span><span><small>D</small><b>${profile.draws}</b></span><span class="is-loss"><small>L</small><b>${profile.losses}</b></span></div>
       </section>
       <button class="arena-primary arena-play" data-arena-action="queue">${icon("search")}<span><b>${esc(text("play"))}</b><small>${esc(text("authentic"))} · ${esc(text("fair"))}</small></span><i>→</i></button>
-      <button class="arena-practice" data-arena-action="practice">${icon("shield")}<span><b>${esc(text("practice"))}</b><small>${esc(text("practiceCopy"))}</small></span><i>›</i></button>
-      <button class="arena-custom-entry" data-arena-action="custom-room">${icon("arena")}<span><b>${esc(arenaLocale({tr:"ÖZEL ODA",en:"PRIVATE ROOM",es:"SALA PRIVADA",de:"PRIVATER RAUM",it:"STANZA PRIVATA"}))}</b><small>${esc(arenaLocale({tr:"Kod oluştur, arkadaşınla ödülsüz maç yap",en:"Create a code and play an unranked friend match",es:"Crea un código y juega un amistoso sin rango",de:"Code erstellen und ungewertet gegen Freunde spielen",it:"Crea un codice e gioca un'amichevole non classificata"}))}</small></span><i>›</i></button>
+      <button class="arena-custom-entry arena-room-entry" data-arena-action="custom-room">${icon("arena")}<span><b>${esc(arenaLocale({tr:"ÖZEL ODA",en:"PRIVATE ROOM",es:"SALA PRIVADA",de:"PRIVATER RAUM",it:"STANZA PRIVATA"}))}</b><small>${esc(arenaLocale({tr:"Kod oluştur, arkadaşınla ödülsüz maç yap",en:"Create a code and play an unranked friend match",es:"Crea un código y juega un amistoso sin rango",de:"Code erstellen und ungewertet gegen Freunde spielen",it:"Crea un codice e gioca un'amichevole non classificata"}))}</small></span><i>›</i></button>
       <button class="arena-custom-entry arena-tournament-entry" data-arena-action="tournament-room">${icon("rank")}<span><b>${esc(arenaLocale({tr:"ÖZEL TURNUVA",en:"PRIVATE TOURNAMENT",es:"TORNEO PRIVADO",de:"PRIVATTURNIER",it:"TORNEO PRIVATO"}))}</b><small>${esc(arenaLocale({tr:"4 veya 8 kulüplü tek eleme odası",en:"A 4 or 8-club single-elimination room",es:"Eliminación directa para 4 u 8 clubes",de:"K.-o.-Raum für 4 oder 8 Clubs",it:"Eliminazione diretta per 4 o 8 club"}))}</small></span><i>›</i></button>
       <div class="arena-portal-links"><button data-arena-action="history">${icon("ball")} ${esc(text("history"))}</button><button data-arena-action="leaderboard">${icon("rank")} ${esc(text("leaderboard"))}</button><button data-arena-action="cosmetics">${icon("shield")} ${esc(arenaLocale({tr:"KOLEKSİYON",en:"COLLECTION",es:"COLECCIÓN",de:"SAMMLUNG",it:"COLLEZIONE"}))}</button></div>
+      <button class="arena-practice" data-arena-action="practice">${icon("shield")}<span><b>${esc(text("practice"))}</b><small>${esc(text("practiceCopy"))}</small></span><i>›</i></button>
       <div class="arena-principles"><span><i>01</i><b>${esc(text("authentic"))}</b><small>${esc(text("noBots"))}</small></span><span><i>02</i><b>${esc(text("fair"))}</b><small>${esc(text("fairCopy"))}</small></span><span><i>03</i><b>${esc(text("server"))}</b><small>${esc(text("serverCopy"))}</small></span></div>
       <button class="arena-data-delete" data-arena-action="delete-data">${esc(text("deleteData"))}</button>
     </div>`);

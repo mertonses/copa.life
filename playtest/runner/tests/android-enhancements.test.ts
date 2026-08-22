@@ -23,6 +23,9 @@ test("Android presents filtered notifications and a safe pinch-zoom pitch contro
     game.finishTournamentDraw();
   });
   await expect(page.locator("#hub")).toBeVisible();
+  const captainChoice=page.locator("#modal .cap-card").first();
+  if(await captainChoice.isVisible())await captainChoice.click();
+  await expect(page.locator("#modal")).toBeHidden();
   await page.evaluate(() => {
     const game = globalThis as any;
     game.pushFeed("Oyuncu transferi tamamlandı", "buy");

@@ -157,6 +157,8 @@ body.reduced-motion .td-swipe-hand{animation:none}@media(prefers-reduced-motion:
 body.reduced-motion .td-transfer-band,
 body.reduced-motion .td-hold-draw.is-holding>i{animation:none!important}
 body.reduced-motion .td-group{transition:none!important}
+.tournament-draw.is-layout-preparing{visibility:hidden!important;pointer-events:none!important}
+.tournament-draw.is-layout-ready .td-shell{contain:layout paint}
 @media(prefers-reduced-motion:reduce){
   .td-transfer-band,.td-hold-draw.is-holding>i{animation:none!important}
   .td-group{transition:none!important}

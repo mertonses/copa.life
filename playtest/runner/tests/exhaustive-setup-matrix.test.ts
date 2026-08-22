@@ -26,12 +26,15 @@ test("every formation, chairman and play style is operable in all 300 setup comb
     expect(await page.evaluate(()=>({name:(globalThis as any).formName,slots:(globalThis as any).slots.length}))).toEqual({name:formation,slots:11});
   }
 
-  await expect(page.locator("#chairpick .chairbtn")).toHaveCount(chairmen.length);
-  for(const chairman of chairmen){
-    await page.locator(`#chairpick [data-chair-id="${chairman}"]`).click();
-    await expect(page.locator(".chair-picker-modal")).toHaveAttribute("data-chair-id",chairman);
-    await page.locator(".chair-picker-modal .cp-sel-btn").click();
-    await expect(page.locator(`#chairpick [data-chair-id="${chairman}"]`)).toHaveAttribute("aria-selected","true");
+  await expect(page.locator("#chairpick")).toHaveCount(0);
+  const chairSurface=page.locator("#chairSelectionSurface");
+  await expect(chairSurface).toBeVisible();
+  for(let index=0;index<chairmen.length;index++){
+    const chairman=chairmen[index];
+    await expect(chairSurface).toHaveAttribute("data-chair-id",chairman);
+    await expect(chairSurface.locator(".js-chair-selected-mark")).toBeVisible();
+    expect(await page.evaluate(()=>(globalThis as any).selectedChairId)).toBe(chairman);
+    if(index<chairmen.length-1)await chairSurface.locator(".js-chair-next").click();
   }
 
   await page.evaluate(()=>{(globalThis as any).normalStart();});

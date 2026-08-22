@@ -354,14 +354,14 @@ html[data-copa-platform="android"] .global-footer-bar{
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-roster-options{
-    display:grid!important;
+    display:none!important;
     grid-template-columns:minmax(0,1fr)!important;
     gap:12px!important;
     min-width:0!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-roster-options{
-    display:none!important;
+    display:grid!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-formation-panel,
@@ -389,14 +389,14 @@ html[data-copa-platform="android"] .global-footer-bar{
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol{
-    display:none!important;
+    display:block!important;
     width:100%!important;
     min-width:0!important;
     margin-top:12px!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-chair-subcol{
-    display:block!important;
+    display:none!important;
   }
 
   html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] #chairSelectionSurface .copa-chair-nav{
@@ -404,7 +404,7 @@ html[data-copa-platform="android"] .global-footer-bar{
     min-height:44px!important;
   }
 
-  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-chair-subcol .v7-cta-stack[data-mobile-step="2"]{
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"] .copa-roster-options .v7-cta-stack[data-mobile-step="2"]{
     display:none!important;
     width:100%!important;
     margin:12px 0 0!important;
@@ -412,7 +412,7 @@ html[data-copa-platform="android"] .global-footer-bar{
     position:static!important;
   }
 
-  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-chair-subcol .v7-cta-stack[data-mobile-step="2"]{
+  html[data-copa-platform="android"].copa-mobile-game #introSetup[data-mobile-flow="android-two-step"][data-mobile-current-step="2"] .copa-roster-options .v7-cta-stack[data-mobile-step="2"]{
     display:block!important;
   }
 

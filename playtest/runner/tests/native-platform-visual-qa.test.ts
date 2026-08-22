@@ -77,6 +77,20 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(landing.actions.every(action=>action.left>=0&&action.right<=viewport.width+1&&action.height>=44)).toBe(true);
     await capture(page,platform,`${viewport.name}-landing`);
 
+    await page.locator("#settingsBtn").click();
+    await expect(page.locator("#settingsDrop")).toBeVisible();
+    const settings=await page.locator("#settingsDrop").evaluate((menu:HTMLElement)=>{
+      const rect=menu.getBoundingClientRect();
+      return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:rect.width,viewportWidth:innerWidth,viewportHeight:innerHeight};
+    });
+    expect(settings.left,`${platform} ${viewport.name} settings ${JSON.stringify(settings)}`).toBeGreaterThanOrEqual(0);
+    expect(settings.right,`${platform} ${viewport.name} settings ${JSON.stringify(settings)}`).toBeLessThanOrEqual(viewport.width+1);
+    expect(settings.top,`${platform} ${viewport.name} settings ${JSON.stringify(settings)}`).toBeGreaterThanOrEqual(0);
+    expect(settings.width,`${platform} ${viewport.name} settings ${JSON.stringify(settings)}`).toBeGreaterThanOrEqual(Math.min(300,viewport.width-20));
+    await capture(page,platform,`${viewport.name}-settings`);
+    await page.locator("#settingsBtn").click();
+    await expect(page.locator("#settingsDrop")).toBeHidden();
+
     if(viewport.width>760&&platform!=="android")continue;
     await page.evaluate(()=>(globalThis as any).CopaMobileShell.newRun());
     await expect(page.locator("body")).toHaveClass(/mobile-game-setup-open/);
@@ -84,64 +98,33 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     const leakedStep2=await page.locator('#introSetup [data-mobile-step="2"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
     expect(leakedStep2,`${platform} ${viewport.name} leaked step 2`).toEqual([]);
     await expect(page.locator("#mobileActionDock")).toBeHidden();
-    const formation=await page.evaluate(()=>({
+    const chairmanFirst=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
-      cards:[...document.querySelectorAll<HTMLElement>("#formpick .mobile-formation-card")].map(button=>{
-        const rect=button.getBoundingClientRect();return{left:rect.left,right:rect.right,height:rect.height};
-      }),
+      surface:document.querySelector<HTMLElement>("#chairSelectionSurface")!.getBoundingClientRect(),
+      previous:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-prev")!.getBoundingClientRect(),
+      next:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-next")!.getBoundingClientRect(),
     }));
-    expect(formation.overflow,`${platform} ${viewport.name} formation`).toBeLessThanOrEqual(1);
-    expect(formation.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
-
-    if(platform==="android"){
-      const country=await page.evaluate(() => ({
-        overflow:document.documentElement.scrollWidth-innerWidth,
-        cards:[...document.querySelectorAll<HTMLElement>("#countryPick button")].map(button=>{
-          const rect=button.getBoundingClientRect();return{left:rect.left,right:rect.right,height:rect.height};
-        }),
-      }));
-      expect(country.overflow,`${platform} ${viewport.name} country`).toBeLessThanOrEqual(1);
-      expect(country.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
-    }
+    expect(chairmanFirst.overflow,`${platform} ${viewport.name} chairman`).toBeLessThanOrEqual(1);
+    expect(chairmanFirst.surface.left).toBeGreaterThanOrEqual(0);
+    expect(chairmanFirst.surface.right).toBeLessThanOrEqual(viewport.width+1);
+    expect(chairmanFirst.previous.height).toBeGreaterThanOrEqual(44);
+    expect(chairmanFirst.next.height).toBeGreaterThanOrEqual(44);
     await capture(page,platform,`${viewport.name}-setup-first`);
     await page.locator("[data-step-next]").click();
     await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
     const leakedStep1=await page.locator('#introSetup [data-mobile-step="1"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
     expect(leakedStep1,`${platform} ${viewport.name} leaked step 1`).toEqual([]);
     await expect(page.locator("#mobileActionDock")).toBeHidden();
-    const chairman=await page.evaluate(() => ({
+    const roster=await page.evaluate(() => ({
       overflow:document.documentElement.scrollWidth-innerWidth,
-      surface:document.querySelector<HTMLElement>("#chairSelectionSurface")!.getBoundingClientRect(),
-      previous:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-prev")!.getBoundingClientRect(),
-      next:document.querySelector<HTMLElement>("#chairSelectionSurface .js-chair-next")!.getBoundingClientRect(),
+      formations:[...document.querySelectorAll<HTMLElement>("#formpick .mobile-formation-card")].map(button=>button.getBoundingClientRect()),
+      countries:[...document.querySelectorAll<HTMLElement>("#countryPick button")].map(button=>button.getBoundingClientRect()),
       start:document.querySelector<HTMLElement>("#startBtn")!.getBoundingClientRect(),
     }));
-    expect(chairman.overflow,`${platform} ${viewport.name} chairman`).toBeLessThanOrEqual(1);
-    expect(chairman.surface.left).toBeGreaterThanOrEqual(0);
-    expect(chairman.surface.right).toBeLessThanOrEqual(viewport.width+1);
-    expect(chairman.previous.height).toBeGreaterThanOrEqual(44);
-    expect(chairman.next.height).toBeGreaterThanOrEqual(44);
+    expect(roster.overflow,`${platform} ${viewport.name} roster`).toBeLessThanOrEqual(1);
+    expect(roster.formations.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
+    expect(roster.countries.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
 
-    if(platform!=="android"){
-      await page.locator("[data-step-next]").click();
-      await expect(page.locator('#introSetup [data-mobile-step="3"]')).toBeVisible();
-      await expect(page.locator("#mobileActionDock")).toBeHidden();
-    const country=await page.evaluate(()=>({
-      overflow:document.documentElement.scrollWidth-innerWidth,
-      cards:[...document.querySelectorAll<HTMLElement>("#countryPick button")].map(button=>{
-        const rect=button.getBoundingClientRect();return{left:rect.left,right:rect.right,height:rect.height};
-      }),
-    }));
-    expect(country.overflow,`${platform} ${viewport.name} country`).toBeLessThanOrEqual(1);
-    expect(country.cards.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
-    await page.locator("[data-step-next]").click();
-    }
-    if(platform==="android"){
-      const start=await page.locator("#startBtn").boundingBox();
-      expect(start).not.toBeNull();
-      expect(start!.width).toBeGreaterThanOrEqual(viewport.width-(viewport.width>760?80:40));
-      expect(start!.height).toBeGreaterThanOrEqual(44);
-    }
     await expect(page.locator("#startBtn")).toBeVisible();
     const start=await page.locator("#startBtn").boundingBox();
     expect(start).not.toBeNull();

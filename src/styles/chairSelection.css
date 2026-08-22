@@ -349,6 +349,11 @@
 #introSetup .copa-chair-nav:active{transform:translateY(1px)}
 #introSetup .copa-chair-selection[data-chair-id="torpilci"] .copa-chair-stage-portrait{bottom:0}
 #introSetup .copa-chair-selection[data-chair-id="pinti"] .copa-chair-stage-portrait{right:-1%;bottom:-5px}
+#introSetup .copa-chair-lock-warning{position:absolute;z-index:9;left:50%;bottom:62px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 28px);padding:9px 13px;border:1px solid color-mix(in srgb,var(--status-error) 72%,transparent);background:color-mix(in srgb,var(--status-error) 18%,var(--surface-deep));color:var(--status-error-text);box-shadow:0 10px 28px rgba(10,17,24,.34);font:900 9px/1.25 var(--mono);letter-spacing:.06em;text-align:center}
+#introSetup .copa-chair-lock-warning[hidden]{display:none}
+#introSetup .copa-chair-selection.is-locked-warning .copa-chair-stage-frame{animation:chairLockedNudge .32s ease-out both}
+@keyframes chairLockedNudge{25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}to{transform:none}}
+@media(max-width:920px){html:not([data-copa-platform="android"]) #introSetup .copa-setup-fields{display:flex!important;flex-direction:column!important}html:not([data-copa-platform="android"]) #introSetup .copa-chair-subcol{order:-1}html:not([data-copa-platform="android"]) #introSetup .copa-roster-options{order:2}}
 
 #introSetup .copa-formation-panel .formpick .fbtn,
 #introSetup .copa-country-panel .countrypick button{

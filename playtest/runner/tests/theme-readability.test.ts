@@ -34,7 +34,8 @@ async function contrastFailures(page:Page){
       if(element.closest('[aria-hidden="true"]')||rect.width<1||rect.height<1||rect.bottom<=0||rect.right<=0||rect.top>=innerHeight||rect.left>=innerWidth||style.visibility==="hidden"||style.display==="none"||Number(style.opacity)<.5)continue;
       const text=Array.from(element.childNodes).filter(node=>node.nodeType===3).map(node=>node.textContent?.trim()||"").filter(Boolean).join(" ");
       if(!text)continue;
-      const foreground=parse(style.color);
+      const svgText=element instanceof SVGTextElement;
+      const foreground=parse(svgText?style.fill:style.color);
       if(!foreground)continue;
       let background=[0,0,0,0],parent:HTMLElement|null=element,gradient=false;
       while(parent){
@@ -50,7 +51,7 @@ async function contrastFailures(page:Page){
       const fontSize=Number(style.fontSize.replace("px","")),bold=Number(style.fontWeight)>=700;
       const minimum=fontSize>=24||(fontSize>=18.66&&bold)?3:4.5;
       const ratio=contrast(foreground,background);
-      if(ratio+.05<minimum)failures.push({text:text.slice(0,60),ratio:Number(ratio.toFixed(2)),fontSize,className:element.className,parentClass:element.parentElement?.className||""});
+      if(ratio+.05<minimum)failures.push({text:text.slice(0,60),ratio:Number(ratio.toFixed(2)),fontSize,tagName:element.tagName,className:element.className,parentClass:element.parentElement?.className||""});
     }
     return failures.slice(0,30);
   });

@@ -123,8 +123,7 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
     analysisImmediatelyBeforeCareer:document.querySelector("#matchAnalysisEntry")?.nextElementSibling?.id==="rCareerProgress",
     resultActionOrder:[...document.querySelectorAll<HTMLElement>(".result-row>*")].map(node=>node.id),
   }));
-  expect(structuralContracts.chairmanCards.length).toBeGreaterThanOrEqual(6);
-  expect(structuralContracts.chairmanCards.every(card=>!card.detail&&!card.hasMeta&&card.hasNameRow)).toBe(true);
+  expect(structuralContracts.chairmanCards.length).toBe(0);
   expect(structuralContracts.analysisImmediatelyBeforeCareer).toBe(true);
   expect(structuralContracts.resultActionOrder).toEqual(["statsBtn",""]);
   await capture(page,"01-opening.png");
@@ -188,6 +187,8 @@ test("wide web surfaces remain readable and use the available canvas",async({pag
   await page.locator("#postClubName").fill("Web QA FK");
   await page.evaluate(()=>(globalThis as any).pcGo());
   await expect(page.locator("#tournamentDraw")).toBeVisible();
+  await expect(page.locator("#tournamentDraw")).toHaveClass(/is-layout-ready/);
+  await expect(page.locator("#tournamentDraw")).not.toHaveClass(/is-layout-preparing/);
   await capture(page,"03-group-draw.png");
   const drawLayout=await page.locator(".td-groups").evaluate((groups:HTMLElement)=>({
     visibleWidth:groups.clientWidth,
@@ -426,12 +427,17 @@ test("browser settings keep phone controls structured and remove them after wide
   const narrowLayout=await page.evaluate(()=>{
     const scale=[...document.querySelectorAll<HTMLElement>("[data-mobile-text-scale]")].map(button=>button.getBoundingClientRect());
     const toggles=[...document.querySelectorAll<HTMLElement>(".mobile-pref-btn")].map(button=>button.getBoundingClientRect());
+    const menuRect=document.getElementById("settingsDrop")!.getBoundingClientRect();
+    const menuStyle=getComputedStyle(document.getElementById("settingsDrop")!);
     return{
       scaleRows:new Set(scale.map(rect=>Math.round(rect.top))).size,
       scaleWidths:scale.map(rect=>rect.width),
       toggleWidths:toggles.map(rect=>rect.width),
       toggleRows:new Set(toggles.map(rect=>Math.round(rect.top))).size,
-      menuWidth:document.getElementById("settingsDrop")!.getBoundingClientRect().width,
+      menuWidth:menuRect.width,
+      menuLeft:menuRect.left,
+      menuRight:menuRect.right,
+      menuStyle:{position:menuStyle.position,left:menuStyle.left,right:menuStyle.right,transform:menuStyle.transform},
       overflow:document.documentElement.scrollWidth-innerWidth,
     };
   });
@@ -440,6 +446,8 @@ test("browser settings keep phone controls structured and remove them after wide
   expect(narrowLayout.toggleRows).toBe(3);
   expect(Math.max(...narrowLayout.toggleWidths)-Math.min(...narrowLayout.toggleWidths)).toBeLessThanOrEqual(2);
   expect(narrowLayout.toggleWidths.every(width=>width>narrowLayout.menuWidth*.4&&width<narrowLayout.menuWidth*.6)).toBe(true);
+  expect(narrowLayout.menuLeft,JSON.stringify(narrowLayout)).toBeGreaterThanOrEqual(0);
+  expect(narrowLayout.menuRight,JSON.stringify(narrowLayout)).toBeLessThanOrEqual(430);
   expect(narrowLayout.overflow).toBeLessThanOrEqual(1);
   await capture(page,"00b-narrow-browser-settings.png");
 

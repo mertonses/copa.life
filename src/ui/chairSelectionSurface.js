@@ -22,6 +22,7 @@
   const textFor = (value, lang) => value && typeof value === "object" ? (value[lang] || value.en || value.tr || "") : String(value || "");
   const chairIds = () => CHAIRMEN.map(ch => ch.id);
   let previewChairId = null;
+  let lockedWarningTimer = 0;
   const setSurfaceText = (selector, value, html = false) => { const node = document.querySelector(selector); if (node) html ? node.innerHTML = value : node.textContent = value; };
   const chairRail = () => document.getElementById("chairpick");
   const chairRailCards = () => [...(chairRail()?.querySelectorAll(".chair-card") || [])];
@@ -112,6 +113,8 @@
     }
     const lang = LANG === "tr" ? "tr" : "en", ids = chairIds(), index = Math.max(0, ids.indexOf(id)), total = ids.length || 1, locked = !unlockedChairs.includes(id), fx = _CHAIR_FX[id] || { pros: { tr: [], en: [] }, cons: { tr: [], en: [] } }, copy = chairSurfaceCopy[lang], type = chairTypes[id] && chairTypes[id][lang] || "Chairman";
     surface.classList.toggle("is-chair-locked", locked);
+    const warning = surface.querySelector(".js-chair-lock-warning");
+    if (warning && !locked) warning.hidden = true;
     const debt = typeof baseChairmanSackLimit === "function" ? Math.abs(baseChairmanSackLimit(id)) : 30;
     const title = String(cd.n || id).replace(/\s+Başkan$/i, "<br>Başkan");
     setSurfaceText(".js-chair-stage-index", `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`);
@@ -156,7 +159,33 @@
     }
   }
 
+  function displayedChairIsLocked() {
+    const surface = document.getElementById("chairSelectionSurface");
+    return Boolean(surface && surface.classList.contains("is-chair-locked"));
+  }
+  function warnLockedChair() {
+    const surface = document.getElementById("chairSelectionSurface");
+    if (!surface || !displayedChairIsLocked()) return false;
+    let warning = surface.querySelector(".js-chair-lock-warning");
+    if (!warning) {
+      warning = document.createElement("div");
+      warning.className = "copa-chair-lock-warning js-chair-lock-warning";
+      warning.setAttribute("role", "alert");
+      surface.querySelector(".copa-chair-stage-frame")?.appendChild(warning);
+    }
+    warning.textContent = LANG === "tr" ? "KİLİTLİ · Başlamak için açık bir başkana geç." : "LOCKED · Choose an available chairman to start.";
+    warning.hidden = false;
+    surface.classList.remove("is-locked-warning");
+    void surface.offsetWidth;
+    surface.classList.add("is-locked-warning");
+    clearTimeout(lockedWarningTimer);
+    lockedWarningTimer = setTimeout(() => surface.classList.remove("is-locked-warning"), 1400);
+    surface.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    return true;
+  }
+
   window.syncChairSelectionSurface = syncChairSelectionSurface;
+  window.CopaChairSelectionSurface = Object.freeze({ displayedChairIsLocked, warnLockedChair });
   window.buildChairButtons = function () {
     originalBuildChairButtons.apply(this, arguments);
     document.querySelectorAll("#chairpick .card-foot").forEach(node => node.remove());
