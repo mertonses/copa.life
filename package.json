@@ -94,6 +94,8 @@
     "check:clubnames": "node tools/check-club-name-security.mjs",
     "check:ghosts": "node tools/check-ghost-clubs.mjs",
     "check:analytics": "npm run build:pages && npm run build:android && npm run build:ios && node tools/check-analytics.mjs",
+    "check:play-review": "node tools/check-play-review.mjs",
+    "check:growth-package": "node tools/check-growth-package.mjs",
     "analytics:report": "node services/ghost-club-api/scripts/analytics-report.mjs",
     "analytics:monitor": "node services/ghost-club-api/scripts/analytics-monitor.mjs",
     "check:rights": "node tools/check-publishing-rights.mjs",
@@ -142,7 +144,6 @@
     "@capacitor/preferences": "8.0.1",
     "@capacitor/push-notifications": "8.1.2",
     "@capacitor/splash-screen": "8.0.2",
-    "@capacitor/status-bar": "8.0.3",
     "@capgo/capacitor-social-login": "^8.3.39",
     "phaser": "4.2.1"
   },

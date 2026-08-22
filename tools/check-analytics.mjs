@@ -26,7 +26,8 @@ const iosIndex=read("dist-ios/index.html");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
-for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed"]){
+expect(sourceIndex.includes("src/runtime/playReview.js"),"Play review runtime is not loaded");
+for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed","arena_match_completed"]){
   expect(runtime.includes(`"${event}"`),`product event is missing: ${event}`);
   expect(worker.includes(`"${event}"`),`Worker allowlist is missing: ${event}`);
 }
