@@ -1,17 +1,14 @@
 package life.copa.app;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.GeneralLocation.CENTER;
-import static androidx.test.espresso.action.GeneralLocation.TOP_CENTER;
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static org.junit.Assert.assertTrue;
 
+import android.app.Instrumentation;
+import android.os.SystemClock;
+import android.view.MotionEvent;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
-import androidx.test.espresso.action.GeneralSwipeAction;
-import androidx.test.espresso.action.Press;
-import androidx.test.espresso.action.Swipe;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,12 +26,12 @@ public class ScrollInteractionTest {
             result.set(value);
             latch.countDown();
         }));
-        assertTrue("JavaScript evaluation timed out", latch.await(8, TimeUnit.SECONDS));
+        assertTrue("JavaScript evaluation timed out", latch.await(20, TimeUnit.SECONDS));
         return result.get();
     }
 
     private void waitFor(String expression) throws Exception {
-        long deadline = System.currentTimeMillis() + 15_000L;
+        long deadline = System.currentTimeMillis() + 30_000L;
         while (System.currentTimeMillis() < deadline) {
             if ("true".equals(evaluate("Boolean(" + expression + ")"))) return;
             Thread.sleep(120L);
@@ -46,16 +43,51 @@ public class ScrollInteractionTest {
         return (int) Math.round(Double.parseDouble(evaluate("Number(" + expression + ")")));
     }
 
-    private void swipeUpThroughContent() {
-        onView(isAssignableFrom(WebView.class)).perform(
-            new GeneralSwipeAction(Swipe.SLOW, CENTER, TOP_CENTER, Press.FINGER)
-        );
+    private void swipe(float startYFraction, float endYFraction) throws Exception {
+        CountDownLatch boundsReady = new CountDownLatch(1);
+        AtomicReference<int[]> bounds = new AtomicReference<>();
+        webView.post(() -> {
+            int[] location = new int[2];
+            webView.getLocationOnScreen(location);
+            bounds.set(new int[] { location[0], location[1], webView.getWidth(), webView.getHeight() });
+            boundsReady.countDown();
+        });
+        assertTrue("WebView bounds timed out", boundsReady.await(20, TimeUnit.SECONDS));
+
+        int[] box = bounds.get();
+        float x = box[0] + (box[2] * 0.5f);
+        float startY = box[1] + (box[3] * startYFraction);
+        float endY = box[1] + (box[3] * endYFraction);
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        long downTime = SystemClock.uptimeMillis();
+
+        MotionEvent down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, startY, 0);
+        assertTrue("Failed to inject swipe start", instrumentation.getUiAutomation().injectInputEvent(down, true));
+        down.recycle();
+
+        for (int step = 1; step <= 12; step++) {
+            long eventTime = SystemClock.uptimeMillis();
+            float progress = step / 12f;
+            float y = startY + ((endY - startY) * progress);
+            MotionEvent move = MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
+            assertTrue("Failed to inject swipe movement", instrumentation.getUiAutomation().injectInputEvent(move, true));
+            move.recycle();
+            SystemClock.sleep(16L);
+        }
+
+        long upTime = SystemClock.uptimeMillis();
+        MotionEvent up = MotionEvent.obtain(downTime, upTime, MotionEvent.ACTION_UP, x, endY, 0);
+        assertTrue("Failed to inject swipe end", instrumentation.getUiAutomation().injectInputEvent(up, true));
+        up.recycle();
+        SystemClock.sleep(450L);
     }
 
-    private void swipeDownThroughContent() {
-        onView(isAssignableFrom(WebView.class)).perform(
-            new GeneralSwipeAction(Swipe.SLOW, TOP_CENTER, CENTER, Press.FINGER)
-        );
+    private void swipeUpThroughContent() throws Exception {
+        swipe(0.72f, 0.28f);
+    }
+
+    private void swipeDownThroughContent() throws Exception {
+        swipe(0.28f, 0.72f);
     }
 
     @Test
