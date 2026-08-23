@@ -53,7 +53,7 @@ public class CopaAdsPlugin extends Plugin {
     private static final String PLACEMENT_INJURY = "injury";
     private static final String PLACEMENT_MARKET = "market";
     private static final int MAX_REWARDED_REROLLS_PER_RUN = 2;
-    private static final int MAX_REWARDED_INJURY_HEALS_PER_RUN = 1;
+    private static final int MAX_REWARDED_INJURY_HEALS_PER_RUN = 2;
     private static final int MAX_REWARDED_MARKET_REROLLS_PER_RUN = 1;
     private static final long RUN_END_AD_COOLDOWN_MS = 10 * 60 * 1000L;
 

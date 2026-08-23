@@ -583,6 +583,68 @@ test("landing hero and progress rail use the compact single surface",async({page
   await capture(page,`compact-landing-${isMobile?"mobile":"desktop"}.png`);
 });
 
+test("polished desktop hero stays aligned from narrow web to 2K",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="desktop-chromium","desktop viewport matrix");
+  await reset(page);
+  for(const viewport of [
+    {name:"narrow",width:900,height:900},
+    {name:"desktop",width:1440,height:900},
+    {name:"2k",width:2560,height:1440},
+  ]){
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.goto(`/?web-hero-polish-${viewport.name}=1`,{waitUntil:"domcontentloaded"});
+    await expect(page.locator(".v7-landing-panel")).toBeVisible();
+    await page.waitForTimeout(1400);
+    const layout=await page.evaluate(()=>{
+      const rect=(selector:string)=>document.querySelector<HTMLElement>(selector)!.getBoundingClientRect();
+      const panel=rect(".v7-landing-panel"),board=rect(".tactical-board"),progress=rect("#mechSection");
+      const taglineNode=document.querySelector<HTMLElement>(".v7-tagline")!,taglineRange=document.createRange();
+      taglineRange.selectNodeContents(taglineNode);
+      const tagline=taglineRange.getBoundingClientRect();
+      const stage=document.querySelector<HTMLElement>(".tactical-stage")!;
+      const diagram=document.querySelector<SVGElement>(".tactical-diagram")!;
+      const pitch=document.querySelector<SVGElement>(".tactical-pitch")!;
+      const accent=document.querySelector<HTMLElement>(".v7-tagline-accent")!;
+      const connector=getComputedStyle(document.querySelectorAll<HTMLElement>("#mechSection .mstep")[0],"::after");
+      const secondaryRoute=getComputedStyle(document.querySelector<SVGElement>(".tactical-run")!);
+      const zoom=Number.parseFloat(getComputedStyle(document.querySelector<HTMLElement>(".wrap")!).zoom)||1;
+      return{
+        panelHeight:panel.height/zoom,
+        progressHeight:progress.height/zoom,
+        copyBoardGap:board.left-tagline.right,
+        boardInsideRight:panel.right-board.right,
+        pageOverflow:document.documentElement.scrollWidth-innerWidth,
+        stageOverflow:getComputedStyle(stage).overflow,
+        stageBorder:Number.parseFloat(getComputedStyle(stage).borderTopWidth)*zoom,
+        diagramFits:diagram.getBoundingClientRect().bottom<=stage.getBoundingClientRect().bottom+1&&diagram.getBoundingClientRect().top>=stage.getBoundingClientRect().top-1,
+        pitchFits:pitch.getBoundingClientRect().bottom<=stage.getBoundingClientRect().bottom+1&&pitch.getBoundingClientRect().top>=stage.getBoundingClientRect().top-1,
+        stageBackground:getComputedStyle(stage).backgroundImage,
+        accentAnimation:getComputedStyle(accent,"::after").animationName,
+        routeAnimation:getComputedStyle(document.querySelector<SVGElement>(".tactical-route-primary")!).animationIterationCount,
+        connectorHidden:connector.content==="none"||connector.display==="none",
+        secondaryRouteOpacity:Number.parseFloat(secondaryRoute.opacity),
+        secondaryRouteMarker:secondaryRoute.markerEnd,
+      };
+    });
+    expect(layout.panelHeight,`${viewport.name} ${JSON.stringify(layout)}`).toBeLessThanOrEqual(240);
+    expect(layout.progressHeight,viewport.name).toBeLessThanOrEqual(50);
+    expect(layout.copyBoardGap,viewport.name).toBeGreaterThanOrEqual(viewport.name==="narrow"?16:40);
+    expect(layout.boardInsideRight,viewport.name).toBeGreaterThanOrEqual(0);
+    expect(layout.pageOverflow,viewport.name).toBeLessThanOrEqual(1);
+    expect(layout.stageOverflow,viewport.name).toBe("hidden");
+    expect(layout.stageBorder,viewport.name).toBe(0);
+    expect(layout.diagramFits,viewport.name).toBe(true);
+    expect(layout.pitchFits,viewport.name).toBe(true);
+    expect(layout.stageBackground,viewport.name).toBe("none");
+    expect(layout.accentAnimation,viewport.name).toContain("heroAccentSweep");
+    expect(layout.routeAnimation,viewport.name).toBe("1");
+    expect(layout.connectorHidden,viewport.name).toBe(true);
+    expect(layout.secondaryRouteOpacity,viewport.name).toBeLessThanOrEqual(.35);
+    expect(layout.secondaryRouteMarker,viewport.name).toBe("none");
+    await capture(page,`hero-polish-${viewport.name}.png`);
+  }
+});
+
 test("desktop setup keeps the country rail and primary action row compact",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="desktop-chromium","desktop compact setup surface");
   await reset(page);
@@ -732,8 +794,10 @@ test("source-web hub routes stay bounded and keep every primary action visible",
       const tournament=document.querySelector<HTMLElement>("#tournamentHubPanel")!;
       const pitch=document.querySelector<HTMLElement>(".pitch-area")!;
       const president=document.querySelector<HTMLElement>("#presBtn")!;
+      const metricHeights=["chemTile","powTile","trustTile","kasaTile"].map(id=>document.getElementById(id)!.getBoundingClientRect().height);
       return{
         overflow:document.documentElement.scrollWidth-innerWidth,
+        metricHeights,
         leakedMarket:!!document.querySelector<HTMLElement>("#shopLbl")?.offsetParent,
         actionWidth:actionRoot.getBoundingClientRect().width,
         parentWidth:actionRoot.parentElement!.getBoundingClientRect().width,
@@ -753,6 +817,7 @@ test("source-web hub routes stay bounded and keep every primary action visible",
       };
     });
     expect(match.overflow,viewport.name).toBeLessThanOrEqual(1);
+    if(viewport.width<=760)expect(Math.max(...match.metricHeights)-Math.min(...match.metricHeights),`${viewport.name}: ${JSON.stringify(match.metricHeights)}`).toBeLessThanOrEqual(1);
     expect(match.leakedMarket,viewport.name).toBe(false);
     expect(match.actionWidth,viewport.name).toBeGreaterThan(match.parentWidth*.88);
     expect(match.clipped,viewport.name).toEqual([]);

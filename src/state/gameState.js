@@ -5,7 +5,7 @@ var tournament=null,tournamentFormat="groups32_v2";
 var injuredIdx=-1,medicalProtectionTurns=0,oppLineup=[],weakFlank="C",matchupBonus=0,autoTimer=null,undoData=null,undoUsed=false,lastMatchEvents=[],lastSackReason="";
 var teamName="",feed=[],riskPowerMod=0,finalPenalty=0,eventSeen={},draftRerollUsed=false;
 var DRAFT_REROLLS=1,MAX_REWARDED_DRAFT_REROLLS=2,draftRerollsLeft=DRAFT_REROLLS,draftRewardedRerollsEarned=0,draftRewardInFlight=false;
-var MAX_REWARDED_INJURY_HEALS=1,rewardedInjuryHealsEarned=0,injuryRewardInFlight=false;
+var MAX_REWARDED_INJURY_HEALS=2,rewardedInjuryHealsEarned=0,injuryRewardInFlight=false;
 var MAX_REWARDED_MARKET_REROLLS=1,rewardedMarketRerollsEarned=0,shopRewardInFlight=false;
 var MAX_REWARDED_FREE_AGENT_REROLLS=1,rewardedFreeAgentRerollsEarned=0,freeAgentRewardInFlight=false;
 var cardsBoughtThisTurn=0,freeAgentBoughtThisTurn=0,shopRerolledThisTurn=0,freeAgentRerolledThisTurn=0;

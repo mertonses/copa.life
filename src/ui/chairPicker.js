@@ -9,8 +9,8 @@
     },
     leydi:{
       tag:{tr:"Dengeli",en:"Balanced",es:"Equilibrio",de:"Ausgewogen",it:"Equilibrio"},
-      style:{tr:"Yerli oyuncular daha sık gelir. Yüksek kimya takımı güçlendirir.",en:"Local players appear more often. Strong chemistry boosts the team.",es:"Aparecen más jugadores locales. Una buena química fortalece al equipo.",de:"Einheimische Spieler erscheinen häufiger. Gute Chemie stärkt das Team.",it:"I giocatori locali appaiono più spesso. Una buona chimica rafforza la squadra."},
-      contract:{adv:{tr:"Yerli adaylar daha sık gelir.",en:"Local candidates appear more often."},trigger:{tr:"Kimya +3: bu maç +1 güç ve güven.",en:"Chemistry +3: +1 power and trust this match."},red:{tr:"Negatif kimya: −1 güç ve güven.",en:"Negative chemistry: −1 power and trust."}}
+      style:{tr:"Her draft adayının yerli havuzundan gelme ihtimali %20 artar. Yüksek kimya takımı güçlendirir.",en:"Each draft candidate has a 20% higher chance of coming from the local player pool. Strong chemistry boosts the team.",es:"Aparecen más jugadores locales. Una buena química fortalece al equipo.",de:"Einheimische Spieler erscheinen häufiger. Gute Chemie stärkt das Team.",it:"I giocatori locali appaiono più spesso. Una buona chimica rafforza la squadra."},
+      contract:{adv:{tr:"Her draft adayının yerli havuzundan gelme ihtimali %20 artar.",en:"Each draft candidate has a 20% higher chance of coming from the local player pool."},trigger:{tr:"Kimya +3: bu maç +1 güç ve güven.",en:"Chemistry +3: +1 power and trust this match."},red:{tr:"Negatif kimya: −1 güç ve güven.",en:"Negative chemistry: −1 power and trust."}}
     },
     pinti:{
       tag:{tr:"Ekonomi",en:"Economy",es:"Economía",de:"Finanzen",it:"Economia"},

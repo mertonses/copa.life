@@ -125,11 +125,31 @@ test("native landing and chairman-first two-step setup read as a mobile game",as
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
   const next=page.locator("[data-step-next]");
   await expect(next).toHaveCount(1);
+  await page.locator(".js-chair-next").click();
+  await expect(page.locator("#chairSelectionSurface")).toHaveClass(/is-chair-locked/);
+  await expect(next).toHaveAttribute("aria-disabled","true");
+  await next.click({force:true});
+  await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
+  await expect(page.locator(".js-chair-lock-warning")).toContainText(/KİLİTLİ.*Devam etmek|LOCKED.*continue/);
+  await capture(page,"02a-native-locked-chairman-next.png");
+  await page.locator(".js-chair-prev").click();
+  await expect(page.locator("#chairSelectionSurface")).not.toHaveClass(/is-chair-locked/);
+  await expect(next).toHaveAttribute("aria-disabled","false");
   await next.click();
   await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
   expect(await page.locator('#introSetup [data-mobile-step="1"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).length)).toBe(0);
   await expect(page.locator(".formation-card-kicker")).toHaveCount(0);
   await expect(page.locator("#formpick .fbtn.sel .formation-card-name")).toBeVisible();
+  const formationAlignment=await page.locator("#formpick .fbtn").evaluateAll(buttons=>buttons.map(button=>{
+    const box=button.getBoundingClientRect(),row=button.querySelector(".formation-name-row")!.getBoundingClientRect();
+    const name=button.querySelector(".formation-card-name")!.getBoundingClientRect(),lock=button.querySelector(".lockicon")?.getBoundingClientRect();
+    return{
+      horizontal:Math.abs((row.left+row.width/2)-(box.left+box.width/2)),
+      vertical:Math.abs((row.top+row.height/2)-(box.top+box.height/2)),
+      lockVertical:lock?Math.abs((lock.top+lock.height/2)-(name.top+name.height/2)):0
+    };
+  }));
+  expect(formationAlignment.every(item=>item.horizontal<=2&&item.vertical<=2&&item.lockVertical<=2)).toBe(true);
   await expect(page.locator("#introSetup .v7-cta-stack")).toBeVisible();
   await expect(page.locator("#introSetup>.metaline")).toBeHidden();
   await expect(page.locator("#introSetup>.v7-footer-block")).toBeHidden();
@@ -213,6 +233,12 @@ test("draft candidates keep only the two useful quick actions",async({page},test
   await page.evaluate(()=>(globalThis as any).setBudget());
   await page.locator("#rollBtn").click();
   await expect(page.locator("#opts .opt")).toHaveCount(3);
+  const countryWatermarks=await page.locator("#opts .opt:not(.hidden-player)").evaluateAll(cards=>cards.map(card=>{
+    const pseudo=getComputedStyle(card,"::before");
+    return{display:pseudo.display,content:pseudo.content};
+  }));
+  expect(countryWatermarks.every(mark=>mark.display==="none"&&(mark.content==="none"||mark.content==='""'))).toBe(true);
+  await capture(page,"03a-draft-candidates-no-country-code.png");
   await expect(page.locator("#opts .opt-forecast")).toHaveCount(3);
   await expect(page.locator("#opts .opt .ctx")).toHaveCount(0);
   const candidateHeading=await page.locator("#opts .opt").first().evaluate((card:HTMLElement)=>{

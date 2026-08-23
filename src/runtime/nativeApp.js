@@ -3,8 +3,8 @@
   if(!root.COPA_IS_NATIVE||!root.Capacitor)return;
   const capacitor=root.Capacitor,plugins=capacitor.Plugins||{};
   const resolvePlugin=name=>plugins[name]||(typeof capacitor.registerPlugin==="function"?capacitor.registerPlugin(name):null);
-  const App=resolvePlugin("App"),StatusBar=resolvePlugin("StatusBar"),SplashScreen=resolvePlugin("SplashScreen");
-  if(!App||!StatusBar||!SplashScreen)return;
+  const App=resolvePlugin("App"),SplashScreen=resolvePlugin("SplashScreen");
+  if(!App||!SplashScreen)return;
   function addNativeListener(name,handler){try{const result=App.addListener(name,handler);if(result&&typeof result.catch==="function")result.catch(()=>{});}catch(_){}}
   async function checkpoint(){
     try{if(typeof root._saveState==="function")root._saveState();}catch(_){}
@@ -34,7 +34,5 @@
       App.minimizeApp().catch(()=>App.exitApp().catch(()=>{}));
     });
   root.addEventListener("pagehide",checkpoint,{passive:true});
-  const statusTasks=[StatusBar.setStyle({style:"LIGHT"}),StatusBar.setOverlaysWebView({overlay:false})];
-  if(root.COPA_PLATFORM==="android")statusTasks.push(StatusBar.setBackgroundColor({color:"#101D28"}));
-  Promise.allSettled(statusTasks).finally(()=>SplashScreen.hide().catch(()=>{}));
+  SplashScreen.hide().catch(()=>{});
 })(window);

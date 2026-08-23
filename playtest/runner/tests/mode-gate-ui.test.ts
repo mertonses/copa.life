@@ -45,10 +45,12 @@ test("mode gate remains complete and unclipped on mobile",async({page},testInfo)
     const gate=document.querySelector<HTMLElement>("#modeGate")!;
     const cards=[...gate.querySelectorAll<HTMLElement>(".mode-card")];
     const clipped=[...gate.querySelectorAll<HTMLElement>("span,b,small,p,h1")].filter(node=>node.offsetParent&&node.scrollWidth>node.clientWidth+2&&getComputedStyle(node).whiteSpace!=="normal");
-    return{viewportWidth:innerWidth,pageOverflow:document.documentElement.scrollWidth-innerWidth,gateOverflow:gate.scrollWidth-gate.clientWidth,cardWidths:cards.map(card=>card.getBoundingClientRect().width),cardHeights:cards.map(card=>card.getBoundingClientRect().height),clipped:clipped.map(node=>node.textContent?.trim())};
+    const app=document.querySelector<HTMLElement>("body>.wrap")!;
+    return{viewportWidth:innerWidth,pageOverflow:document.documentElement.scrollWidth-innerWidth,gateOverflow:gate.scrollWidth-gate.clientWidth,appDisplay:getComputedStyle(app).display,cardWidths:cards.map(card=>card.getBoundingClientRect().width),cardHeights:cards.map(card=>card.getBoundingClientRect().height),clipped:clipped.map(node=>node.textContent?.trim())};
   });
   expect(audit.pageOverflow).toBeLessThanOrEqual(1);
   expect(audit.gateOverflow).toBeLessThanOrEqual(1);
+  expect(audit.appDisplay).toBe("none");
   expect(audit.cardWidths.every(width=>width<=audit.viewportWidth)).toBe(true);
   expect(audit.cardHeights.every(height=>height>=228)).toBe(true);
   expect(audit.clipped).toEqual([]);

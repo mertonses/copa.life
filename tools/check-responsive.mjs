@@ -140,7 +140,8 @@ const checks = [
   {
     name: "injury notice stays compact directly above the bench",
     pass: /<div class="hub-bench-stack" id="hubBenchStack">\s*<div class="injbar hidden" id="injbar"[\s\S]*<div id="hubBenchSection"><\/div>/s.test(html)
-      && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:18px minmax\(0,1fr\) auto;[\s\S]*min-height:44px;[\s\S]*box-shadow:none!important/s.test(layout),
+      && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:minmax\(180px,\.72fr\) minmax\(480px,1\.28fr\);[\s\S]*min-height:50px;[\s\S]*box-shadow:none!important/s.test(layout)
+      && /#hub \.hub-bench-stack \.injbar \.inj-btns\{[\s\S]*grid-template-columns:repeat\(4,minmax\(108px,1fr\)\)/s.test(layout),
   },
   {
     name: "wide bench is a bounded draggable pitch overlay with a narrow-screen fallback",

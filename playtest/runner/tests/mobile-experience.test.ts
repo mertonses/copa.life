@@ -446,9 +446,8 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   await page.evaluate(()=>{const w=globalThis as any;w.pcGo();w.fastTournamentDraw();w.finishTournamentDraw();w.setCaptain(0);w.closeModal();});
   await page.evaluate(()=>{
     const global=globalThis as any;
+    global.assignPlayerInjury(global.picksBySlot[0],2);
     global.injuredIdx=0;
-    global.picksBySlot[0].injured=true;
-    global.picksBySlot[0].injuryLevel=2;
     global.renderInjbar();
   });
   await expect(page.locator("#injbar")).toBeVisible();
@@ -466,6 +465,7 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
       nextId:injury.nextElementSibling?.id,
       height:injuryRect.height,
       beforeBench:injuryRect.bottom<=benchRect.top,
+      overlapsBench:injuryRect.left<benchRect.right&&injuryRect.right>benchRect.left&&injuryRect.top<benchRect.bottom&&injuryRect.bottom>benchRect.top,
       beforeShop:injuryRect.top<shopRect.top,
       stackOrder:getComputedStyle(stack).order,
       actions:[...injury.querySelectorAll("button")].map(button=>{
@@ -477,9 +477,10 @@ test("backup picker stays readable and bounded on desktop and mobile",async({pag
   });
   expect(injuryLayout.parentId).toBe("hubBenchStack");
   expect(injuryLayout.nextId).toBe("hubBenchSection");
-  expect(injuryLayout.beforeBench).toBe(true);
-  expect(injuryLayout.height).toBeLessThanOrEqual(phoneProject?170:58);
-  expect(injuryLayout.actions).toHaveLength(2);
+  expect(injuryLayout.overlapsBench).toBe(false);
+  expect(injuryLayout.height).toBeLessThanOrEqual(phoneProject?210:125);
+  expect(injuryLayout.actions.length).toBeGreaterThanOrEqual(3);
+  expect(injuryLayout.actions.length).toBeLessThanOrEqual(4);
   expect(injuryLayout.actions.every(action=>action.width>0&&action.height>=(phoneProject?44:30))).toBe(true);
   expect(injuryLayout.pageOverflow).toBeLessThanOrEqual(1);
   if(mobileOnly(testInfo.project.name)){

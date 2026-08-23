@@ -95,6 +95,8 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     await page.evaluate(()=>(globalThis as any).CopaMobileShell.newRun());
     await expect(page.locator("body")).toHaveClass(/mobile-game-setup-open/);
     await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
+    await expect(page.locator("[data-step-back]")).toBeHidden();
+    await expect.poll(()=>page.locator("#chairSelectionSurface .js-chair-stage-image").evaluate((image:HTMLImageElement)=>image.naturalWidth)).toBeGreaterThan(0);
     const leakedStep2=await page.locator('#introSetup [data-mobile-step="2"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
     expect(leakedStep2,`${platform} ${viewport.name} leaked step 2`).toEqual([]);
     await expect(page.locator("#mobileActionDock")).toBeHidden();
@@ -111,6 +113,7 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(chairmanFirst.next.height).toBeGreaterThanOrEqual(44);
     await capture(page,platform,`${viewport.name}-setup-first`);
     await page.locator("[data-step-next]").click();
+    await expect(page.locator("[data-step-back]")).toBeVisible();
     await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
     const leakedStep1=await page.locator('#introSetup [data-mobile-step="1"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
     expect(leakedStep1,`${platform} ${viewport.name} leaked step 1`).toEqual([]);
@@ -126,6 +129,9 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     expect(roster.countries.every(card=>card.left>=0&&card.right<=viewport.width+1&&card.height>=44)).toBe(true);
 
     await expect(page.locator("#startBtn")).toBeVisible();
+    await page.locator('#countryPick button[data-country="IT"]').click();
+    await expect(page.locator('#countryPick button[data-country="IT"]')).toHaveAttribute("aria-pressed","true");
+    await expect(page.locator('#countryPick button[data-country="TR"]')).toHaveAttribute("aria-pressed","false");
     const start=await page.locator("#startBtn").boundingBox();
     expect(start).not.toBeNull();
     expect(start!.width).toBeGreaterThanOrEqual(viewport.width-(viewport.width>760?80:40));
@@ -154,7 +160,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
       overflow:document.documentElement.scrollWidth-innerWidth,
       navCount:nav.querySelectorAll("button").length,
       talkStyle:(()=>{const talk=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #talkBtn")!;const play=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #playBtn")!;const talkRect=talk.getBoundingClientRect();const playRect=play.getBoundingClientRect();const content=[...play.children].map(node=>(node as HTMLElement).getBoundingClientRect());const contentLeft=Math.min(...content.map(rect=>rect.left));const contentRight=Math.max(...content.map(rect=>rect.right));return{background:getComputedStyle(talk).backgroundColor,color:getComputedStyle(talk).color,centerDelta:Math.abs((contentLeft+contentRight)/2-(playRect.left+playRect.right)/2),verticalCenterDelta:Math.abs((talkRect.top+talkRect.bottom)/2-(playRect.top+playRect.bottom)/2)}})(),
-      kasa:(()=>{const card=document.getElementById("kasaTile")!;const label=card.querySelector<HTMLElement>(".kasa-compact-debt-label")!;const value=card.querySelector<HTMLElement>(".kasa-compact-debt-value")!;const detail=card.querySelector<HTMLElement>(".kasa-detail-link")!;const labelRect=label.getBoundingClientRect();const valueRect=value.getBoundingClientRect();const cardRect=card.getBoundingClientRect();const detailRect=detail.getBoundingClientRect();return{hasDetailText:/detay/i.test(card.textContent||""),label:label.textContent?.trim(),value:value.textContent?.trim(),labelFont:Number.parseFloat(getComputedStyle(label).fontSize),valueFont:Number.parseFloat(getComputedStyle(value).fontSize),overlap:labelRect.right>valueRect.left+1&&labelRect.bottom>valueRect.top+1&&labelRect.top<valueRect.bottom-1,detailOverlap:labelRect.right>detailRect.left+1&&labelRect.left<detailRect.right-1&&labelRect.bottom>detailRect.top+1&&labelRect.top<detailRect.bottom-1,detailRight:detailRect.right,detailBottom:detailRect.bottom,cardRight:cardRect.right,cardBottom:cardRect.bottom,detailPosition:getComputedStyle(detail).position}})(),
+      kasa:(()=>{const card=document.getElementById("kasaTile")!;const label=card.querySelector<HTMLElement>(".kasa-compact-debt-label")!;const value=card.querySelector<HTMLElement>(".kasa-compact-debt-value")!;const detail=card.querySelector<HTMLElement>(".kasa-detail-link")!;const labelRect=label.getBoundingClientRect();const valueRect=value.getBoundingClientRect();const cardRect=card.getBoundingClientRect();const detailRect=detail.getBoundingClientRect();const siblingHeights=["chemTile","powTile","trustTile"].map(id=>document.getElementById(id)!.getBoundingClientRect().height);return{hasDetailText:/detay/i.test(card.textContent||""),height:cardRect.height,siblingHeights,label:label.textContent?.trim(),value:value.textContent?.trim(),labelFont:Number.parseFloat(getComputedStyle(label).fontSize),valueFont:Number.parseFloat(getComputedStyle(value).fontSize),overlap:labelRect.right>valueRect.left+1&&labelRect.bottom>valueRect.top+1&&labelRect.top<valueRect.bottom-1,detailOverlap:labelRect.right>detailRect.left+1&&labelRect.left<detailRect.right-1&&labelRect.bottom>detailRect.top+1&&labelRect.top<detailRect.bottom-1,detailRight:detailRect.right,detailBottom:detailRect.bottom,cardRight:cardRect.right,cardBottom:cardRect.bottom,detailPosition:getComputedStyle(detail).position}})(),
       visibleToasts:[...document.querySelectorAll<HTMLElement>(".toast")].filter(item=>item.offsetParent).length,
       navBottom:nav.getBoundingClientRect().bottom,
       toast:{top:toast.getBoundingClientRect().top,bottom:toast.getBoundingClientRect().bottom},
@@ -174,6 +180,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   expect(match.kasa.value).toMatch(/€/);
   expect(match.kasa.labelFont).toBeGreaterThanOrEqual(7);
   expect(match.kasa.valueFont).toBeGreaterThanOrEqual(9);
+  expect(match.kasa.siblingHeights.every(height=>Math.abs(height-match.kasa.height)<=1),JSON.stringify(match.kasa)).toBe(true);
   expect(match.kasa.overlap).toBe(false);
   expect(match.kasa.detailOverlap).toBe(false);
   expect(match.kasa.detailRight).toBeLessThanOrEqual(match.kasa.cardRight+1);
@@ -317,8 +324,10 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
       const actionRoot=document.querySelector<HTMLElement>("#hub .hub-action-panel .actionbtns");
       const actionParent=actionRoot?.parentElement;
       const actionButtons=actionRoot?[...actionRoot.querySelectorAll<HTMLElement>("button")].filter(button=>button.offsetParent):[];
+      const metricHeights=["chemTile","powTile","trustTile","kasaTile"].map(id=>document.getElementById(id)!.getBoundingClientRect().height);
       return{
         overflow:document.documentElement.scrollWidth-innerWidth,
+        metricHeights,
         offscreen:controls.filter(({rect,intentionalScroll})=>!intentionalScroll&&(rect.left<0||rect.right>innerWidth+1))
           .map(({id,text,rect})=>({id,text,left:rect.left,right:rect.right})),
         dock:dockRect?{left:dockRect.left,right:dockRect.right,bottom:dockRect.bottom}:null,
@@ -330,6 +339,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
       };
     });
     expect(layout.overflow,`${platform} ${viewport.name}`).toBeLessThanOrEqual(1);
+    expect(Math.max(...layout.metricHeights)-Math.min(...layout.metricHeights),`${platform} ${viewport.name}: ${JSON.stringify(layout.metricHeights)}`).toBeLessThanOrEqual(1);
     expect(layout.offscreen,`${platform} ${viewport.name}: ${JSON.stringify(layout.offscreen)}`).toEqual([]);
     if(layout.dock){
       expect(layout.dock.left).toBeGreaterThanOrEqual(0);

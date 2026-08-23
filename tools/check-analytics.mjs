@@ -23,10 +23,15 @@ const privacy=read("privacy.html");
 const webIndex=read("dist/index.html");
 const androidIndex=read("dist-android/index.html");
 const iosIndex=read("dist-ios/index.html");
+const androidAnalytics=read("android/app/src/main/java/life/copa/app/CopaAnalyticsPlugin.java");
+const androidManifest=read("android/app/src/main/AndroidManifest.xml");
+const androidGradle=read("android/app/build.gradle");
+const androidStrings=read("android/app/src/main/res/values/strings.xml");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
-for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed"]){
+expect(sourceIndex.includes("src/runtime/playReview.js"),"Play review runtime is not loaded");
+for(const event of ["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed","arena_match_completed"]){
   expect(runtime.includes(`"${event}"`),`product event is missing: ${event}`);
   expect(worker.includes(`"${event}"`),`Worker allowlist is missing: ${event}`);
 }
@@ -79,6 +84,10 @@ for(const [name,index] of [["Android",androidIndex],["iOS",iosIndex]]){
 }
 expect(fs.existsSync(path.join(ROOT,"dist-android/src/runtime/productAnalytics.js")),"Android artifact is missing the product analytics runtime");
 expect(fs.existsSync(path.join(ROOT,"dist-ios/src/runtime/productAnalytics.js")),"iOS artifact is missing the product analytics runtime");
+expect(androidGradle.includes("com.facebook.android:facebook-core:18.3.0"),"Android Meta App Events SDK is missing or unpinned");
+expect(androidStrings.includes('<string name="facebook_app_id" translatable="false">1408973857833536</string>'),"Meta app ID does not match the configured Copa Life app");
+expect(androidManifest.includes("com.facebook.sdk.ApplicationId")&&androidManifest.includes('com.facebook.sdk.AutoLogAppEventsEnabled" android:value="false"')&&androidManifest.includes('com.facebook.sdk.AdvertiserIDCollectionEnabled" android:value="false"'),"privacy-safe Meta manifest configuration is incomplete");
+expect(androidAnalytics.includes("metaEnabled = enabled")&&androidAnalytics.includes("metaAnalytics().logEvent(event, parameters)"),"Meta App Events must follow the existing explicit native analytics opt-in");
 
 if(failures.length){for(const failure of failures)console.error(`[analytics] ${failure}`);process.exit(1);}
 console.log("[analytics] privacy-minimised web funnel and explicit opt-in native platform metrics passed");

@@ -245,6 +245,9 @@ test("landing hero keeps responsive tactics and persistent header actions",async
     const boardElement=document.querySelector(".tactical-board") as HTMLElement;
     const board=boardElement.getBoundingClientRect();
     const diagram=document.querySelector(".tactical-diagram") as SVGElement;
+    const stage=document.querySelector(".tactical-stage") as HTMLElement;
+    const diagramRect=diagram.getBoundingClientRect();
+    const stageRect=stage.getBoundingClientRect();
     const route=getComputedStyle(document.querySelector(".tactical-route-primary") as SVGElement);
     const player=getComputedStyle(document.querySelector(".tactical-unit") as SVGElement);
     const guide=(document.getElementById("howtoToggle") as HTMLElement).getBoundingClientRect();
@@ -260,7 +263,11 @@ test("landing hero keeps responsive tactics and persistent header actions",async
       numbers,
       boardHidden:getComputedStyle(boardElement).display==="none",
       boardWidth:board.width,
-      diagramRatio:diagram.getBoundingClientRect().width/diagram.getBoundingClientRect().height,
+      diagramRatio:diagramRect.width/diagramRect.height,
+      diagramFitsStage:diagramRect.left>=stageRect.left-1
+        && diagramRect.right<=stageRect.right+1
+        && diagramRect.top>=stageRect.top-1
+        && diagramRect.bottom<=stageRect.bottom+1,
       routeAnimation:route.animationName,
       playerAnimation:player.animationName,
       guideSettingsGap:settings.left-guide.right,
@@ -283,10 +290,12 @@ test("landing hero keeps responsive tactics and persistent header actions",async
   expect(layout.connectorLineContent==="none"||layout.connectorLineDisplay==="none").toBe(true);
   expect(layout.connectorHeadContent==="none"||layout.connectorHeadDisplay==="none").toBe(true);
   expect(layout.boardHidden).toBe(false);
-  expect(layout.routeAnimation).toContain("tacticalRouteFlow");
+  expect(layout.routeAnimation).toContain("heroRouteReveal");
   expect(layout.playerAnimation).toContain("tacticalNodePulse");
   expect(layout.boardWidth).toBeGreaterThanOrEqual(230);
-  expect(layout.diagramRatio).toBeCloseTo(360/144,1);
+  expect(layout.diagramFitsStage).toBe(true);
+  expect(layout.diagramRatio).toBeGreaterThan(2.5);
+  expect(layout.diagramRatio).toBeLessThan(3.2);
   expect(layout.guideSettingsGap).toBeGreaterThanOrEqual(0);
   expect(layout.guideSettingsGap).toBeLessThanOrEqual(8);
   expect(layout.guideSettingsHeightDelta).toBeLessThanOrEqual(1);

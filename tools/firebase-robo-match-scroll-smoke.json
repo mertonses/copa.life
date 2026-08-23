@@ -1,0 +1,106 @@
+[
+  {
+    "eventType": "WAIT",
+    "delayTime": 4000,
+    "description": "Allow the native shell and web surface to settle"
+  },
+  {
+    "eventType": "VIEW_CLICKED",
+    "visionText": "Cancel",
+    "optional": true,
+    "description": "Dismiss the optional Google Play Games welcome sheet"
+  },
+  {
+    "eventType": "WAIT",
+    "delayTime": 1500,
+    "description": "Allow the mode screen to settle"
+  },
+  {
+    "eventType": "VIEW_CLICKED",
+    "visionText": "START COPA LIFE",
+    "optional": true,
+    "description": "Enter the Copa Life setup flow"
+  },
+  {
+    "eventType": "WAIT",
+    "delayTime": 5000,
+    "description": "Allow setup content to load"
+  },
+  {
+    "eventType": "VIEW_CLICKED",
+    "visionText": "START",
+    "optional": true,
+    "description": "Start the available setup flow when the CTA is visible"
+  },
+  {
+    "eventType": "WAIT",
+    "delayTime": 5000,
+    "description": "Allow the match surface to load"
+  },
+  {
+    "eventType": "TAKE_SCREENSHOT",
+    "screenshotName": "match-before-scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Swipe upward on the active match surface"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Swipe downward on the active match surface"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Repeat upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Repeat downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Third upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Third downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Fourth upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Fourth downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Fifth upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Fifth downward scroll"
+  },
+  {
+    "eventType": "WAIT",
+    "delayTime": 1000,
+    "description": "Allow inertial scrolling to settle"
+  },
+  {
+    "eventType": "TAKE_SCREENSHOT",
+    "screenshotName": "match-after-scroll"
+  },
+  {
+    "eventType": "TERMINATE_CRAWL"
+  }
+]

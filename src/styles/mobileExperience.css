@@ -673,12 +673,12 @@
   #hub #shopLbl button.shop-reroll-btn{width:auto!important;min-width:64px!important;height:44px!important;min-height:44px!important;padding:6px 8px!important;border-radius:8px!important;flex:0 0 auto!important;font-size:8px!important}
   #hub #shopLbl button.shop-reroll-btn::after{display:none!important}
   #hub #shopLbl button.shop-reroll-btn svg{width:14px!important;height:14px!important}
-  #hub .hub-bench-stack .injbar{grid-template-columns:22px minmax(0,1fr)!important;align-items:start!important;padding:10px!important;gap:8px!important}
+  #hub .hub-bench-stack .injbar{grid-template-columns:1fr!important;align-items:start!important;padding:7px!important;gap:6px!important}
+  #hub .hub-bench-stack .injbar .inj-summary{grid-template-columns:18px minmax(0,1fr)!important;padding:4px!important}
   #hub .hub-bench-stack .injbar .inj-info{min-width:0!important}
-  #hub .hub-bench-stack .injbar .inj-btns{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;width:100%!important}
-  #hub .hub-bench-stack .injbar .inj-btns button{min-width:0!important;min-height:44px!important;padding:7px 8px!important;white-space:normal!important;font-size:8px!important;line-height:1.2!important}
-  #hub .hub-bench-stack .injbar .inj-reward-btn{grid-column:1/-1!important;background:color-mix(in srgb,var(--color-primary) 14%,var(--surface-elevated))!important;border-color:var(--color-primary)!important;color:var(--color-primary)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--color-primary) 28%,transparent)!important}
-  #hub .hub-bench-stack .injbar .inj-reward-btn::before{content:"▶";font-size:9px;margin-right:5px}.inj-reward-badge{display:inline-flex;margin-right:5px;padding:2px 4px;border-radius:999px;background:var(--color-primary);color:var(--text-on-primary);font:900 7px/1 var(--mono)}
+  #hub .hub-bench-stack .injbar .inj-btns{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;width:100%!important}
+  #hub .hub-bench-stack .injbar .inj-btns button{min-width:0!important;min-height:44px!important;padding:5px 6px!important;white-space:normal!important;font-size:8px!important;line-height:1.15!important}
+  #hub .hub-bench-stack .injbar .inj-btns button.inj-reward-btn{background:linear-gradient(135deg,color-mix(in srgb,var(--risk-fortune) 17%,var(--surface-elevated)),color-mix(in srgb,var(--risk-fortune) 7%,var(--surface-elevated)))!important;border-color:var(--risk-fortune)!important;color:var(--risk-fortune-highlight)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--risk-fortune) 20%,transparent)!important}
   #hub .hub-lower-grid>*,#hub .hub-fixture-bottom>*,#hub #collection,#hub #freeagents,#hub .feed{content-visibility:auto;contain-intrinsic-size:auto 360px}
   #hub .tg-table{font-size:10px!important}
   #hub .tg-table thead{font-size:9px!important}

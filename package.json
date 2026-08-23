@@ -69,6 +69,7 @@
     "check:card-effects": "node tools/check-card-effect-summary.mjs",
     "check:test-matrix": "node tools/check-changed-test-matrix.mjs",
     "check:positions": "node tools/check-position-fit.mjs",
+    "check:injuries": "node tools/check-injury-system.mjs",
     "players:rebalance": "node tools/rebalance-player-pools.mjs --write",
     "check:playerbalance": "node tools/check-player-balance.mjs",
     "check:draftquality": "node tools/check-draft-quality.mjs",
@@ -94,6 +95,8 @@
     "check:clubnames": "node tools/check-club-name-security.mjs",
     "check:ghosts": "node tools/check-ghost-clubs.mjs",
     "check:analytics": "npm run build:pages && npm run build:android && npm run build:ios && node tools/check-analytics.mjs",
+    "check:play-review": "node tools/check-play-review.mjs",
+    "check:growth-package": "node tools/check-growth-package.mjs",
     "analytics:report": "node services/ghost-club-api/scripts/analytics-report.mjs",
     "analytics:monitor": "node services/ghost-club-api/scripts/analytics-monitor.mjs",
     "check:rights": "node tools/check-publishing-rights.mjs",
@@ -125,7 +128,7 @@
     "test:simulations": "npm run check:arena:selfplay && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:preparation && npm run check:strategic-depth && npm run check:cardbalance && npm run check:economy",
     "test:fast": "npm run test:contracts && npm run test:arena && npm run test:worker",
     "test:nightly": "npm test",
-    "test": "npm run check:encoding && npm run check:locales && npm run check:guide && npm run test:arena && npm run check:arena:selfplay && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:surfaces && npm run check:cards && npm run check:card-effects && npm run check:test-matrix && npm run check:positions && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:side-field && npm run check:cash-display && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:preparation && npm run check:strategic-depth && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:relationships && npm run check:clubfiles && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:rewarded-ads && npm run check:ad-gateway && npm run check:play-games-pc && npm run check:android:store && npm run check:android:release:source && npm run check:ios:readiness"
+    "test": "npm run check:encoding && npm run check:locales && npm run check:guide && npm run test:arena && npm run check:arena:selfplay && npm run check:responsive && npm run check:faq && npm run check:story-icons && npm run check:palette && npm run check:surfaces && npm run check:cards && npm run check:card-effects && npm run check:test-matrix && npm run check:positions && npm run check:injuries && npm run check:playerbalance && npm run check:draftquality && npm run check:profiles && npm run check:lastmatch && npm run check:scout && npm run check:japan && npm run audit:japan-data && npm run check:persistence && npm run check:mobile-readiness && npm run check:tournament && npm run check:side-field && npm run check:cash-display && npm run check:tournament:balance && npm run check:tournament:balance:matrix && npm run check:finalsim && npm run check:finalsim:stats && npm run check:finalsim:ab && npm run check:normalmatch && npm run check:preparation && npm run check:strategic-depth && npm run check:cardbalance && npm run check:freeagents && npm run check:economy && npm run check:chairmen && npm run check:trust && npm run check:meta && npm run check:relationships && npm run check:clubfiles && npm run check:lineupsync && npm run check:clubnames && npm run check:ghosts && npm run check:analytics && npm run check:rights && npm run check:performance && npm run check:deploy && npm run check:legal && npm run check:rewarded-ads && npm run check:ad-gateway && npm run check:play-games-pc && npm run check:android:store && npm run check:android:release:source && npm run check:ios:readiness"
   },
   "devDependencies": {
     "@capacitor/android": "8.5.0",
@@ -142,7 +145,6 @@
     "@capacitor/preferences": "8.0.1",
     "@capacitor/push-notifications": "8.1.2",
     "@capacitor/splash-screen": "8.0.2",
-    "@capacitor/status-bar": "8.0.3",
     "@capgo/capacitor-social-login": "^8.3.39",
     "phaser": "4.2.1"
   },

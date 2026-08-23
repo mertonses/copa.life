@@ -47,8 +47,8 @@ async function boot(page:any,packaged=false){
   const nonce=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
   await page.goto(packaged?`/dist-android/index.html?arena-visual-qa=1&v=${nonce}`:`/?arena-visual-qa=1&v=${nonce}`,{waitUntil:"domcontentloaded"});
   if(packaged)await page.evaluate(()=>{const shell=(globalThis as any).CopaMobileShell;if(shell)shell.showLanding(null);});
-  if(packaged)await expect(page.locator("#startBtn")).toHaveCount(1);
-  else await expect(page.locator("#startBtn")).toBeVisible();
+  await expect(page.locator("#startBtn")).toHaveCount(1);
+  if(!packaged)await expect(page.locator("#startBtn")).toBeHidden();
   if(packaged)await expect(page.locator(".mode-gate-app-promo")).toBeHidden();
   await expect(page.locator('[data-mode-choice="arena"]:visible').first()).toBeVisible();
 }
@@ -684,4 +684,49 @@ test("Google sign-in stays inside the Arena account card on narrow phones",async
     return rect.left>=auth.left-1&&rect.right<=auth.right+1;
   });
   expect(guestInside).toBe(true);
+});
+
+test("Android Google sign-in uses default scopes and never exposes plugin diagnostics",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","native Google sign-in contract");
+  await boot(page,true);
+  await page.evaluate(()=>{
+    localStorage.removeItem("copa_arena_google_user_v1");
+    localStorage.removeItem("copa_arena_club_v1");
+    localStorage.removeItem("copa_arena_terms_v1");
+    const currentFetch=globalThis.fetch.bind(globalThis);
+    globalThis.fetch=(input:any,init?:RequestInit)=>{
+      const url=String(typeof input==="string"?input:input&&input.url||"");
+      if(url.includes("/v1/arena/auth/google"))return Promise.resolve(new Response(JSON.stringify({
+        token:"CAR-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        user:{name:"Android QA",email:"android@copa.life"}
+      }),{status:201,headers:{"content-type":"application/json"}}));
+      return currentFetch(input,init);
+    };
+    (globalThis as any).__arenaNativeReject=true;
+    (globalThis as any).Capacitor=(globalThis as any).Capacitor||{Plugins:{}};
+    (globalThis as any).Capacitor.Plugins=(globalThis as any).Capacitor.Plugins||{};
+    (globalThis as any).Capacitor.Plugins.SocialLogin={
+      async initialize(config:any){(globalThis as any).__arenaNativeInitialize=config;},
+      async login(config:any){
+        (globalThis as any).__arenaNativeLogin=config;
+        if((globalThis as any).__arenaNativeReject)throw new Error("You CANNOT use scopes without modifying the main activity. Please follow the docs!");
+        return{result:{idToken:"x".repeat(120)}};
+      }
+    };
+  });
+  await page.locator('[data-mode-choice="arena"]:visible').click();
+  const google=page.locator('[data-arena-action="google"]');
+  await expect(google).toBeVisible();
+  await google.click();
+  const error=page.locator('.arena-google-error[role="alert"]');
+  await expect(error).toContainText(/Google ile giriş tamamlanamadı|Google sign-in could not be completed/);
+  await expect(error).not.toContainText(/CANNOT|scope|activity|docs/i);
+  const nativeCall=await page.evaluate(()=>(globalThis as any).__arenaNativeLogin);
+  expect(nativeCall).toEqual({provider:"google",options:{filterByAuthorizedAccounts:false,autoSelectEnabled:false}});
+  expect(nativeCall.options).not.toHaveProperty("scopes");
+  await page.evaluate(()=>(globalThis as any).__arenaNativeReject=false);
+  await google.click();
+  await expect(page.locator(".arena-google-user")).toContainText("Android QA");
+  await expect(error).toHaveCount(0);
+  await capture(page,"android-google-sign-in-ready.png");
 });

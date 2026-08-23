@@ -43,7 +43,7 @@
       deleteData:"ARENA VERİLERİMİ SİL",deleteConfirm:"Arena kulübün, derecen ve maç geçmişin kalıcı olarak silinecek. Devam edilsin mi?",
       you:"SEN",opponent:"RAKİP",goal:"GOL",cardEvent:"KART",tacticDecision:"TAKTİK KARARI",pass:"PAS",marketCard:"KART",
       selected:"SEÇİLDİ",startingXI:"İLK 11",babacan:"BABACAN BAŞKAN",practice:"ANTRENMAN MAÇI",practiceCopy:"Ödülsüz, derecesiz bir prova maçı. Taktiklerini burada deneyebilirsin.",practiceAgain:"YENİ PROVA",networkGood:"İYİ",networkFair:"ORTA",networkPoor:"ZAYIF",
-      googleTitle:"ARENA HESABIN",googleCopy:"Dereceni ve maç geçmişini tüm cihazlarında koru.",googleContinue:"GOOGLE İLE DEVAM ET",googleReady:"GOOGLE HESABI BAĞLANDI",googleConfig:"Google girişi henüz yapılandırılmadı.",
+      googleTitle:"ARENA HESABIN",googleCopy:"Dereceni ve maç geçmişini tüm cihazlarında koru.",googleContinue:"GOOGLE İLE DEVAM ET",googleReady:"GOOGLE HESABI BAĞLANDI",googleConfig:"Google girişi henüz yapılandırılmadı.",googleFailed:"Google ile giriş tamamlanamadı. Tekrar deneyebilirsin.",googleCancelled:"Google ile giriş iptal edildi.",
       or:"VEYA",guestContinue:"MİSAFİR OLARAK DEVAM ET",guestFast:"KAYIT OLMADAN HEMEN GİR",guestNote:"Misafir ilerlemesi yalnızca bu cihazda korunur.",guestName:"Misafir",
       rematch:"RÖVANŞ İSTE",rematchSent:"RÖVANŞ İSTEĞİ GÖNDERİLDİ",rematchIncoming:"RAKİBİN RÖVANŞ İSTİYOR",rematchStarting:"RÖVANŞ BAŞLIYOR",
       leave:"TERK ET",leaveTitle:"MAÇI TERK ET",leaveCopy:"Onaylarsan maç hemen biter ve 0–3 hükmen mağlup sayılırsın.",leaveCheck:"0–3 hükmen mağlubiyeti kabul ediyorum.",leaveConfirm:"TERK ET VE MAÇI BİTİR",leaveCancel:"VAZGEÇ",
@@ -67,7 +67,7 @@
       deleteData:"DELETE MY ARENA DATA",deleteConfirm:"Your Arena club, rating and match history will be permanently deleted. Continue?",
       you:"YOU",opponent:"OPPONENT",goal:"GOAL",cardEvent:"CARD",tacticDecision:"TACTIC DECISION",pass:"PASS",marketCard:"CARD",
       selected:"SELECTED",startingXI:"STARTING XI",babacan:"BABACAN CHAIRMAN",practice:"PRACTICE MATCH",practiceCopy:"A rewardless, unranked match for trying out your tactics.",practiceAgain:"NEW PRACTICE MATCH",networkGood:"GOOD",networkFair:"FAIR",networkPoor:"POOR",
-      googleTitle:"YOUR ARENA ACCOUNT",googleCopy:"Keep your rating and match history on every device.",googleContinue:"CONTINUE WITH GOOGLE",googleReady:"GOOGLE ACCOUNT CONNECTED",googleConfig:"Google sign-in is not configured yet.",
+      googleTitle:"YOUR ARENA ACCOUNT",googleCopy:"Keep your rating and match history on every device.",googleContinue:"CONTINUE WITH GOOGLE",googleReady:"GOOGLE ACCOUNT CONNECTED",googleConfig:"Google sign-in is not configured yet.",googleFailed:"Google sign-in could not be completed. Please try again.",googleCancelled:"Google sign-in was cancelled.",
       or:"OR",guestContinue:"CONTINUE AS GUEST",guestFast:"ENTER WITHOUT SIGNING UP",guestNote:"Guest progress is kept only on this device.",guestName:"Guest",
       rematch:"REQUEST REMATCH",rematchSent:"REMATCH REQUEST SENT",rematchIncoming:"OPPONENT WANTS A REMATCH",rematchStarting:"REMATCH STARTING",
       leave:"LEAVE",leaveTitle:"LEAVE MATCH",leaveCopy:"Confirming ends the match immediately as a 0–3 forfeit defeat.",leaveCheck:"I accept the 0–3 forfeit defeat.",leaveConfirm:"LEAVE AND END MATCH",leaveCancel:"CANCEL",
@@ -85,6 +85,9 @@
   Object.assign(COPY.es,{systemManaged:"CLUB PREPARADO",candidate:"ASPIRANTE",bronze:"BRONCE",silver:"PLATA",gold:"ORO",diamond:"DIAMANTE",legend:"LEYENDA",selected:"ELEGIDO",startingXI:"ONCE INICIAL",babacan:"PRESIDENTE BABACAN",practice:"PARTIDO DE PRÁCTICA",practiceCopy:"Un partido sin premios ni clasificación para probar tus tácticas.",practiceAgain:"NUEVO PARTIDO DE PRÁCTICA",networkGood:"BUENA",networkFair:"MEDIA",networkPoor:"DÉBIL",googleTitle:"TU CUENTA ARENA",googleCopy:"Conserva tu puntuación y tu historial en todos tus dispositivos.",googleContinue:"CONTINUAR CON GOOGLE",googleReady:"CUENTA DE GOOGLE VINCULADA",googleConfig:"El acceso con Google aún no está configurado.",or:"O",guestContinue:"CONTINUAR COMO INVITADO",guestFast:"ENTRAR SIN REGISTRARSE",guestNote:"El progreso de invitado solo se guarda en este dispositivo.",guestName:"Invitado"});
   Object.assign(COPY.de,{systemManaged:"BEREITER CLUB",candidate:"ANWÄRTER",bronze:"BRONZE",silver:"SILBER",gold:"GOLD",diamond:"DIAMANT",legend:"LEGENDE",selected:"GEWÄHLT",startingXI:"STARTELF",babacan:"PRÄSIDENT BABACAN",practice:"TRAININGSSPIEL",practiceCopy:"Ein Spiel ohne Belohnung und Wertung, um deine Taktik zu testen.",practiceAgain:"NEUES TRAININGSSPIEL",networkGood:"GUT",networkFair:"MITTEL",networkPoor:"SCHWACH",googleTitle:"DEIN ARENA-KONTO",googleCopy:"Sichere Wertung und Verlauf auf allen Geräten.",googleContinue:"MIT GOOGLE FORTFAHREN",googleReady:"GOOGLE-KONTO VERKNÜPFT",googleConfig:"Google-Anmeldung ist noch nicht eingerichtet.",or:"ODER",guestContinue:"ALS GAST FORTFAHREN",guestFast:"OHNE REGISTRIERUNG STARTEN",guestNote:"Gastfortschritt bleibt nur auf diesem Gerät.",guestName:"Gast"});
   Object.assign(COPY.it,{systemManaged:"CLUB PRONTO",candidate:"ASPIRANTE",bronze:"BRONZO",silver:"ARGENTO",gold:"ORO",diamond:"DIAMANTE",legend:"LEGGENDA",selected:"SCELTO",startingXI:"UNDICI TITOLARE",babacan:"PRESIDENTE BABACAN",practice:"PARTITA DI PROVA",practiceCopy:"Una partita senza premi né classifica per provare le tue tattiche.",practiceAgain:"NUOVA PARTITA DI PROVA",networkGood:"BUONA",networkFair:"MEDIA",networkPoor:"DEBOLE",googleTitle:"IL TUO ACCOUNT ARENA",googleCopy:"Conserva punteggio e cronologia su tutti i dispositivi.",googleContinue:"CONTINUA CON GOOGLE",googleReady:"ACCOUNT GOOGLE COLLEGATO",googleConfig:"L'accesso Google non è ancora configurato.",or:"OPPURE",guestContinue:"CONTINUA COME OSPITE",guestFast:"ENTRA SENZA REGISTRARTI",guestNote:"I progressi ospite restano solo su questo dispositivo.",guestName:"Ospite"});
+  Object.assign(COPY.es,{googleFailed:"No se pudo completar el acceso con Google. Inténtalo de nuevo.",googleCancelled:"Se canceló el acceso con Google."});
+  Object.assign(COPY.de,{googleFailed:"Die Google-Anmeldung konnte nicht abgeschlossen werden. Versuche es erneut.",googleCancelled:"Die Google-Anmeldung wurde abgebrochen."});
+  Object.assign(COPY.it,{googleFailed:"Non è stato possibile completare l'accesso con Google. Riprova.",googleCancelled:"L'accesso con Google è stato annullato."});
   const state={screen:"closed",profile:null,history:[],leaderboard:[],socket:null,room:null,googleUser:null,googleLoading:false,setupDraft:null,setupSubmitting:false,planDraft:null,planSubmitting:false,emoteMenu:false,emoteReadyAt:0,emoteCooldownTimer:null,emoteHideTimer:null,forfeitConfirm:false,liveEventCues:new Set(),queueStarted:0,timer:null,heartbeat:null,deadlineTimer:null,retryTimer:null,retries:0,reconnectAt:0,connection:"idle",latency:null,pingAt:0,lastNetworkBand:"",lastNetworkTelemetry:0,lastError:"",lastResultSound:"",lastPenaltySound:"",lastAudioCue:"",audioCueCount:0,audioClockTimer:null,audioClockBeat:0,audioClockActive:false,searchAudio:null,searchFadeTimer:null,lastArenaAdMatchId:"",systemOpponentTracked:"",customRoom:null,customInput:"",customBusy:false,customPoll:null,customPollInFlight:false,customPollGeneration:0,tournament:null,tournamentInput:"",tournamentBusy:false,tournamentPoll:null,tournamentPollInFlight:false,tournamentPollGeneration:0,roomConnectionKey:"",roomConnectGeneration:0,cosmeticCatalog:REWARDS};
   const text=key=>(COPY[root.LANG]||COPY.en)[key]||key;
   const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -102,6 +105,10 @@
   const clubName=()=>get(CLUB_KEY,"").trim().slice(0,29);
   const actionId=()=>`AA-${uuid().slice(0,24)}`;
   const local=(tr,en)=>root.LANG==="tr"?tr:en;
+  const googleErrorMessage=error=>{
+    const code=String(error&&error.message||error||"").toLowerCase();
+    return code.includes("cancel")||code.includes("abort")?text("googleCancelled"):text("googleFailed");
+  };
   const soundMuted=()=>!!root._muted||!!root.muted||(typeof root.CopaSfxMuted==="function"&&!!root.CopaSfxMuted());
   function sfx(kind){
     if(soundMuted())return;
@@ -213,8 +220,8 @@
     try{
       const response=await fetch(api()+"/v1/arena/auth/google",{method:"POST",headers:{"content-type":"application/json","x-copa-client":client(),"x-copa-arena-token":token()},body:JSON.stringify({credential})});
       const data=await response.json().catch(()=>({error:"invalid_response"}));if(!response.ok)throw new Error(data.error||"google_sign_in_failed");
-      set(TOKEN_KEY,data.token);set(GOOGLE_USER_KEY,JSON.stringify(data.user||{}));state.googleUser=data.user||{};state.googleLoading=false;render();
-    }catch(error){state.googleLoading=false;state.lastError=error.message;render();}
+      set(TOKEN_KEY,data.token);set(GOOGLE_USER_KEY,JSON.stringify(data.user||{}));state.googleUser=data.user||{};state.googleLoading=false;state.lastError="";render();
+    }catch(error){state.googleLoading=false;state.lastError=googleErrorMessage(error);render();}
   }
   async function nativeGoogleSignIn(){
     const clientId=googleClientId();if(!clientId||clientId.startsWith("__")){state.lastError=text("googleConfig");render();return;}
@@ -224,10 +231,10 @@
       if(!plugin)throw new Error("native_google_unavailable");
       const iosClientId=googleIosClientId();
       await plugin.initialize({google:{webClientId:clientId,iOSClientId:iosClientId&&!iosClientId.startsWith("__")?iosClientId:undefined,iOSServerClientId:clientId,mode:"online"}});
-      const login=await plugin.login({provider:"google",options:{scopes:["email","profile"]}});
+      const login=await plugin.login({provider:"google",options:{filterByAuthorizedAccounts:false,autoSelectEnabled:false}});
       const credential=login&&login.result&&login.result.idToken;if(!credential)throw new Error("google_credential_missing");
       await finishGoogleSignIn(credential);
-    }catch(error){state.googleLoading=false;state.lastError=error.message||"google_sign_in_failed";render();}
+    }catch(error){state.googleLoading=false;state.lastError=googleErrorMessage(error);render();}
   }
   function continueAsGuest(){
     const guest={name:text("guestName"),guest:true};
@@ -286,7 +293,7 @@
   }
   function terms(){
     const user=state.googleUser;
-    return chrome(`<article class="arena-consent"><div class="arena-crest">${icon("arena")}</div><span class="arena-kicker">${esc(text("ranked"))}</span><h1>${esc(text("consentTitle"))}</h1><p>${esc(text("consent"))}</p><section class="arena-google-auth ${user?"is-ready":""}"><span>${esc(text("googleTitle"))}</span><p>${esc(text("googleCopy"))}</p>${user?`<div class="arena-google-user"><i>${user.guest?"◇":"G"}</i><span><b>${esc(user.name||text("googleReady"))}</b><small>${esc(user.guest?text("guestNote"):user.email||text("googleReady"))}</small></span><em>✓</em></div>`:nativePlatform()?`<button type="button" class="arena-google-button" data-arena-action="google">${state.googleLoading?"…":`<i>G</i>${esc(text("googleContinue"))}`}</button>`:`<div class="arena-google-slot" data-google-slot></div>`}${user?"":`<div class="arena-auth-divider"><span>${esc(text("or"))}</span></div><button type="button" class="arena-guest-button" data-arena-action="guest"><i>◇</i><span><b>${esc(text("guestContinue"))}</b><small>${esc(text("guestFast"))}</small></span><em>→</em></button><small class="arena-guest-note">${esc(text("guestNote"))}</small>`}${state.lastError?`<small class="arena-google-error">${esc(state.lastError)}</small>`:""}</section>${user?`<label><span>${esc(text("club"))}</span><input data-arena-club maxlength="29" value="${esc(clubName())}" autocomplete="off"></label><div class="arena-trust-row"><span>${icon("shield")}<b>${esc(text("authentic"))}</b><small>${esc(text("noBots"))}</small></span><span>${icon("rank")}<b>${esc(text("fair"))}</b><small>${esc(text("fairCopy"))}</small></span></div><button class="arena-primary" data-arena-action="accept">${esc(text("accept"))}</button>`:""}</article>`);
+    return chrome(`<article class="arena-consent"><div class="arena-crest">${icon("arena")}</div><span class="arena-kicker">${esc(text("ranked"))}</span><h1>${esc(text("consentTitle"))}</h1><p>${esc(text("consent"))}</p><section class="arena-google-auth ${user?"is-ready":""}"><span>${esc(text("googleTitle"))}</span><p>${esc(text("googleCopy"))}</p>${user?`<div class="arena-google-user"><i>${user.guest?"◇":"G"}</i><span><b>${esc(user.name||text("googleReady"))}</b><small>${esc(user.guest?text("guestNote"):user.email||text("googleReady"))}</small></span><em>✓</em></div>`:nativePlatform()?`<button type="button" class="arena-google-button" data-arena-action="google">${state.googleLoading?"…":`<i>G</i>${esc(text("googleContinue"))}`}</button>`:`<div class="arena-google-slot" data-google-slot></div>`}${user?"":`<div class="arena-auth-divider"><span>${esc(text("or"))}</span></div><button type="button" class="arena-guest-button" data-arena-action="guest"><i>◇</i><span><b>${esc(text("guestContinue"))}</b><small>${esc(text("guestFast"))}</small></span><em>→</em></button><small class="arena-guest-note">${esc(text("guestNote"))}</small>`}${state.lastError?`<small class="arena-google-error" role="alert">${esc(state.lastError)}</small>`:""}</section>${user?`<label><span>${esc(text("club"))}</span><input data-arena-club maxlength="29" value="${esc(clubName())}" autocomplete="off"></label><div class="arena-trust-row"><span>${icon("shield")}<b>${esc(text("authentic"))}</b><small>${esc(text("noBots"))}</small></span><span>${icon("rank")}<b>${esc(text("fair"))}</b><small>${esc(text("fairCopy"))}</small></span></div><button class="arena-primary" data-arena-action="accept">${esc(text("accept"))}</button>`:""}</article>`);
   }
   function rewardTrack(profile){
     const progress=Number(profile.tokenProgress)||0,owned=new Set(profile.cosmetics||[]);
@@ -833,7 +840,7 @@
       connectQueue(data.ticket);
     }catch(error){stopSearchMusic(false);state.lastError=error.message;setScreen("error");sfx("error");}
   }
-  function stopCustomPolling(){clearInterval(state.customPoll);state.customPoll=null;state.customPollGeneration++;state.customPollInFlight=false;}
+  function stopCustomPolling(){clearInterval(state.customPoll);state.customPoll=null;state.customPollGeneration++;}
   function enterCustomMatch(data){
     if(!data||!data.directMatch)return false;
     stopCustomPolling();remove(CUSTOM_ROOM_KEY);
@@ -853,9 +860,9 @@
       state.lastError=error.message;
       if(["room_expired","room_not_found","not_participant"].includes(error.message)){stopCustomPolling();remove(CUSTOM_ROOM_KEY);state.customRoom=null;}
       if(state.screen==="custom")render();
-    }finally{if(generation===state.customPollGeneration)state.customPollInFlight=false;}
+    }finally{state.customPollInFlight=false;}
   }
-  function startCustomPolling(){stopCustomPolling();const generation=state.customPollGeneration;pollCustomRoom(generation);state.customPoll=setInterval(()=>pollCustomRoom(generation),1500);}
+  function startCustomPolling(){if(state.customPoll)return;stopCustomPolling();const generation=state.customPollGeneration;pollCustomRoom(generation);state.customPoll=setInterval(()=>pollCustomRoom(generation),1500);}
   async function createCustomRoom(){
     if(state.customBusy)return;state.customBusy=true;state.lastError="";render();
     try{const data=await request("/v1/arena/custom-rooms",{method:"POST",body:JSON.stringify({clubName:clubName()})});state.customRoom=data.room;set(CUSTOM_ROOM_KEY,JSON.stringify(data.room));startCustomPolling();}
@@ -879,7 +886,7 @@
       state.lastError=error.message;if(state.customRoom){set(CUSTOM_ROOM_KEY,JSON.stringify(state.customRoom));startCustomPolling();}if(state.screen==="custom")render();
     }
   }
-  function stopTournamentPolling(){clearInterval(state.tournamentPoll);state.tournamentPoll=null;state.tournamentPollGeneration++;state.tournamentPollInFlight=false;}
+  function stopTournamentPolling(){clearInterval(state.tournamentPoll);state.tournamentPoll=null;state.tournamentPollGeneration++;}
   function enterTournamentMatch(data){
     if(!data||!data.directMatch)return false;
     stopTournamentPolling();
@@ -903,9 +910,9 @@
       state.lastError=error.message;
       if(["room_expired","room_not_found","not_participant"].includes(error.message)){stopTournamentPolling();remove(TOURNAMENT_KEY);state.tournament=null;}
       if(state.screen==="tournament")render();
-    }finally{if(generation===state.tournamentPollGeneration)state.tournamentPollInFlight=false;}
+    }finally{state.tournamentPollInFlight=false;}
   }
-  function startTournamentPolling(){stopTournamentPolling();const generation=state.tournamentPollGeneration;pollTournament(generation);state.tournamentPoll=setInterval(()=>pollTournament(generation),1500);}
+  function startTournamentPolling(){if(state.tournamentPoll)return;stopTournamentPolling();const generation=state.tournamentPollGeneration;pollTournament(generation);state.tournamentPoll=setInterval(()=>pollTournament(generation),1500);}
   async function createTournament(size){
     if(state.tournamentBusy)return;state.tournamentBusy=true;state.lastError="";render();
     try{const data=await request("/v1/arena/tournaments",{method:"POST",body:JSON.stringify({clubName:clubName(),size:Number(size)})});state.tournament=data.tournament;set(TOURNAMENT_KEY,JSON.stringify({code:data.tournament.code}));startTournamentPolling();}
@@ -972,7 +979,9 @@
           state.forfeitConfirm=false;
           const settled=data.state.result&&data.state.result.profiles&&data.state.result.profiles[data.state.selfIndex];
           if(settled)state.profile=settled;
-          remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":data.state.result.outcomes[data.state.selfIndex]);
+          const arenaOutcome=data.state.result.voided?"":data.state.result.outcomes[data.state.selfIndex];
+          remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":arenaOutcome);
+          if(root.CopaAnalytics)root.CopaAnalytics.track("arena_match_completed",{outcome:arenaOutcome});
           const matchId=data.state.matchId||saved.matchId;
           if(data.state.mode==="ranked"&&matchId&&state.lastArenaAdMatchId!==matchId){
             state.lastArenaAdMatchId=matchId;

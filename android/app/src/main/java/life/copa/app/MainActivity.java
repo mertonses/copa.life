@@ -7,6 +7,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
+import androidx.activity.EdgeToEdge;
+import androidx.core.view.WindowCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -21,7 +23,13 @@ public class MainActivity extends BridgeActivity {
 
         registerPlugin(CopaAdsPlugin.class);
         registerPlugin(CopaPlayGamesPlugin.class);
+        registerPlugin(CopaAnalyticsPlugin.class);
+        registerPlugin(CopaReviewPlugin.class);
         super.onCreate(savedInstanceState);
+
+        EdgeToEdge.enable(this);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
 
         WebView webView = getBridge() != null ? getBridge().getWebView() : null;
         if (webView != null) {

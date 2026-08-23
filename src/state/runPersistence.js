@@ -30,7 +30,7 @@
     state.chairmanEventSeen=object(state.chairmanEventSeen)?state.chairmanEventSeen:{};
     state.pendingChairmanEvent=object(state.pendingChairmanEvent)?state.pendingChairmanEvent:null;
     state.sansSpotlightIdx=Number.isInteger(Number(state.sansSpotlightIdx))?Number(state.sansSpotlightIdx):-1;
-    state.rewardedInjuryHealsEarned=finite(state.rewardedInjuryHealsEarned)?Math.max(0,Math.min(1,Number(state.rewardedInjuryHealsEarned))):0;
+    state.rewardedInjuryHealsEarned=finite(state.rewardedInjuryHealsEarned)?Math.max(0,Math.min(2,Number(state.rewardedInjuryHealsEarned))):0;
     state.rewardedMarketRerollsEarned=finite(state.rewardedMarketRerollsEarned)?Math.max(0,Math.min(1,Number(state.rewardedMarketRerollsEarned))):0;
     state.rewardedFreeAgentRerollsEarned=finite(state.rewardedFreeAgentRerollsEarned)?Math.max(0,Math.min(1,Number(state.rewardedFreeAgentRerollsEarned))):0;
     if(state.phase==="draft"){
