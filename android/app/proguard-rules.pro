@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Capacitor plugins are discovered through annotations and reflection.
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keepclassmembers class * {
+    @com.getcapacitor.PluginMethod <methods>;
+}
+
+# Keep useful source context for Play Console stack traces while still allowing R8 optimization.
+-keepattributes SourceFile,LineNumberTable,*Annotation*

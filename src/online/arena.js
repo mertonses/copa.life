@@ -972,7 +972,9 @@
           state.forfeitConfirm=false;
           const settled=data.state.result&&data.state.result.profiles&&data.state.result.profiles[data.state.selfIndex];
           if(settled)state.profile=settled;
-          remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":data.state.result.outcomes[data.state.selfIndex]);
+          const arenaOutcome=data.state.result.voided?"":data.state.result.outcomes[data.state.selfIndex];
+          remove(ROOM_KEY);telemetry("arena_match_completed",data.state.result.voided?"void":arenaOutcome);
+          if(root.CopaAnalytics)root.CopaAnalytics.track("arena_match_completed",{outcome:arenaOutcome});
           const matchId=data.state.matchId||saved.matchId;
           if(data.state.mode==="ranked"&&matchId&&state.lastArenaAdMatchId!==matchId){
             state.lastArenaAdMatchId=matchId;

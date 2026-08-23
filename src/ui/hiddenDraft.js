@@ -28,11 +28,15 @@ function scoutNote(signal){
   return LT("Scout notu: veriler dengeli, sürpriz payı var.","Scout note: balanced data with room for a surprise.","Nota del scout: datos equilibrados, con margen para sorpresas.","Scout-Notiz: ausgeglichene Daten mit Überraschungspotenzial.","Nota scout: dati equilibrati, con margine per una sorpresa.");
 }
 
-function requestChoose(index){
+function requestChoose(index,expectedPlayer){
   if(global.choose.locked||global.currentSlot<0||!Number.isInteger(index)||!global.currentOpts[index])return;
   const player=global.currentOpts[index];
-  if(!player.hidden){global.choose(index);return;}
-  global.choose(index,"manual");
+  if(expectedPlayer&&player!==expectedPlayer){
+    if(global.CopaDiagnostics)global.CopaDiagnostics.capture("stale_draft_selection",String(expectedPlayer.playerId||expectedPlayer.name||index),"");
+    return false;
+  }
+  if(!player.hidden){return global.choose(index,undefined,player);}
+  return global.choose(index,"manual",player);
 }
 
 function autoScore(option){

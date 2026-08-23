@@ -46,7 +46,7 @@ if (!wrapper.includes("distributionSha256Sum=61ba77b3ff7167e60962763eb4bae79db71
 const manifest = read("android/app/src/main/AndroidManifest.xml");
 if (!manifest.includes('android:allowBackup="false"')) fail("Android backup must remain disabled");
 if (!manifest.includes('android:usesCleartextTraffic="false"')) fail("cleartext Android traffic must remain disabled");
-if (!manifest.includes('android:screenOrientation="portrait"')) fail("Android orientation contract changed");
+if (manifest.includes('android:screenOrientation=')) fail("Android activity must remain orientation-adaptive");
 if (!manifest.includes('android:resizeableActivity="true"')) fail("Google Play Games on PC resizable activity support is missing");
 const permissions = [...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map((match) => match[1]);
 const expectedPermissions = new Set(["android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS", "com.google.android.gms.permission.AD_ID"]);

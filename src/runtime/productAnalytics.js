@@ -29,7 +29,8 @@
     "sidefield_selection_viewed",
     "sidefield_pick_placed",
     "sidefield_settled",
-    "card_effect_summary_viewed"
+    "card_effect_summary_viewed",
+    "arena_match_completed"
   ]);
   const COUNTRIES=new Set(["TR","IT","ENG","ES","DE","JP"]);
   const OUTCOMES=new Set(["","win","draw","loss","sacked"]);
@@ -66,6 +67,11 @@
   const endpoint=()=>metaContent(API_META).replace(/\/$/,"");
   const privacySignal=()=>navigator.globalPrivacyControl===true||navigator.doNotTrack==="1"||global.doNotTrack==="1";
   const platform=()=>String(global.COPA_PLATFORM||metaContent("meta[name='copa-platform']")||"web").toLowerCase();
+  const nativePlugin=name=>{
+    if(!global.Capacitor)return null;
+    const plugins=global.Capacitor.Plugins||{};
+    return plugins[name]||(typeof global.Capacitor.registerPlugin==="function"?global.Capacitor.registerPlugin(name):null);
+  };
   const nativeOptIn=()=>{try{return !!(global.CopaPlatform&&global.CopaPlatform.storage&&global.CopaPlatform.storage.getItem(NATIVE_OPT_IN_KEY)==="1");}catch(_){return false;}};
   const enabled=()=>{
     const current=platform();
@@ -148,6 +154,7 @@
   }
 
   function track(eventName,properties){
+    try{global.CopaPlayReview?.onEvent(eventName,properties||{});}catch(_){}
     if(!enabled())return false;
     const payload=payloadFor(eventName,properties);
     if(!payload)return false;
@@ -163,6 +170,10 @@
       keepalive:true,
       referrerPolicy:"no-referrer"
     }).catch(()=>{});
+    if(platform()==="android"){
+      const Native=nativePlugin("CopaAnalyticsNative");
+      if(Native&&typeof Native.logEvent==="function")void Native.logEvent({event:eventName,parameters:payload}).catch(()=>{});
+    }
     return true;
   }
 
@@ -175,6 +186,8 @@
   function setNativeEnabled(value){
     if(!global.CopaPlatform||!global.CopaPlatform.isNative)return false;
     global.CopaPlatform.storage.setItem(NATIVE_OPT_IN_KEY,value?"1":"0");
+    const Native=nativePlugin("CopaAnalyticsNative");
+    if(Native&&typeof Native.setEnabled==="function")void Native.setEnabled({enabled:!!value}).catch(()=>{});
     installSetting();
     if(value)startSession();
     return nativeOptIn();
@@ -195,6 +208,10 @@
   }
 
   global.CopaAnalytics=Object.freeze({track,enabled,payloadFor,nativeOptIn,setNativeEnabled,installSetting});
+  if(platform()==="android"){
+    const Native=nativePlugin("CopaAnalyticsNative");
+    if(Native&&typeof Native.setEnabled==="function")void Native.setEnabled({enabled:nativeOptIn()}).catch(()=>{});
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startSession,{once:true});
   else queueMicrotask(startSession);
 })(window);

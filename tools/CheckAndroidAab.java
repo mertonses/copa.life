@@ -18,7 +18,9 @@ import java.util.zip.ZipFile;
 
 public final class CheckAndroidAab {
     private static final String PUBLIC = "base/assets/public/";
+    private static final String R8_MAPPING = "BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map";
     private static final long MAX_ENTRY_BYTES = 32L * 1024 * 1024;
+    private static final long MAX_R8_MAPPING_BYTES = 64L * 1024 * 1024;
     private static final long MAX_TOTAL_BYTES = 160L * 1024 * 1024;
     private static final Set<String> TEXT_EXTENSIONS = Set.of(
         ".html", ".js", ".css", ".json", ".webmanifest", ".svg", ".txt"
@@ -114,7 +116,8 @@ public final class CheckAndroidAab {
                 String name = entry.getName().replace('\\', '/');
                 names.add(name);
                 if (name.startsWith("/") || name.contains("../")) failures.add("unsafe archive path: " + name);
-                if (entry.getSize() > MAX_ENTRY_BYTES) failures.add("entry exceeds safety limit: " + name);
+                long entryLimit = name.equals(R8_MAPPING) ? MAX_R8_MAPPING_BYTES : MAX_ENTRY_BYTES;
+                if (entry.getSize() > entryLimit) failures.add("entry exceeds safety limit: " + name);
                 if (entry.getSize() > 0) totalBytes += entry.getSize();
                 if (totalBytes > MAX_TOTAL_BYTES) failures.add("AAB uncompressed size exceeds safety limit");
                 if (entry.isDirectory() || !name.startsWith(PUBLIC)) continue;
@@ -139,6 +142,7 @@ public final class CheckAndroidAab {
         for (String required : REQUIRED) {
             if (!names.contains(required)) failures.add("required packaged file is missing: " + required);
         }
+        if (!names.contains(R8_MAPPING)) failures.add("R8 mapping metadata is missing");
         if (packagedBuild == null) failures.add("packaged platform-build.json could not be read");
         else {
             if (!packagedBuild.equals(expectedBuild)) failures.add("packaged build manifest differs from dist-android");
