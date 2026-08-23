@@ -13,6 +13,68 @@ const chooseOne=async(page:any)=>{
 };
 
 test.describe("critical mobile run integrity",()=>{
+  test("every tapped draft player keeps the same identity and name on the hub pitch",async({page})=>{
+    await startDraft(page);
+    const selected:Array<{slot:number,playerId:string,name:string}>=[];
+    for(let count=0;count<11;count++){
+      await page.evaluate(()=>{(globalThis as any).roll();});
+      await expect(page.locator("#optstage")).toBeVisible();
+      await page.waitForFunction(()=>document.querySelectorAll("#opts .opt").length===3);
+      const choice=await page.evaluate(()=>{
+        const game=globalThis as any,index=game.currentOpts.findIndex((player:any)=>{
+          const reserve=Math.max(0,(game.remaining-1)*.6);
+          return !player.hidden&&game.canAffordChairmanSpend(player.price||0,"transfer",{...player,reserve});
+        });
+        const fallback=game.currentOpts.findIndex((player:any)=>{
+          const reserve=Math.max(0,(game.remaining-1)*.6);
+          return game.canAffordChairmanSpend(player.price||0,"transfer",{...player,reserve});
+        });
+        const resolved=index>=0?index:fallback,player=game.currentOpts[resolved];
+        return{index:resolved,slot:game.currentSlot,playerId:player.playerId,name:player.name};
+      });
+      expect(choice.index).toBeGreaterThanOrEqual(0);
+      expect(choice.playerId).toBeTruthy();
+      const before=11-count;
+      await page.locator("#opts .opt").nth(choice.index).click();
+      await page.waitForFunction(expected=>(globalThis as any).remaining===expected,before-1);
+      selected.push({slot:choice.slot,playerId:choice.playerId,name:choice.name});
+    }
+    await expect(page.locator("#postClubName")).toBeVisible();
+    await page.locator("#postClubName").fill("Identity Test");
+    await page.evaluate(()=>{const game=globalThis as any;game.pcGo();game.fastTournamentDraw();game.finishTournamentDraw();});
+    await expect(page.locator("#hub")).toBeVisible();
+
+    const compare=await page.evaluate(()=>{
+      const game=globalThis as any;
+      return game.picksBySlot.map((player:any,index:number)=>{
+        const node=document.getElementById("h"+index) as HTMLElement|null;
+        return{slot:index,stateId:player.playerId,stateName:player.name,domId:node?.dataset.playerId,domName:node?.dataset.playerName,label:node?.querySelector(".rname")?.textContent||""};
+      });
+    });
+    const expected=[...selected].sort((a,b)=>a.slot-b.slot);
+    expect(compare.map((item:any)=>({slot:item.slot,playerId:item.stateId,name:item.stateName}))).toEqual(expected);
+    for(const item of compare){expect(item.domId).toBe(item.stateId);expect(item.domName).toBe(item.stateName);expect(item.label).toBeTruthy();}
+
+    await page.reload({waitUntil:"domcontentloaded"});
+    await expect(page.locator("#hub")).toBeVisible();
+    const restored=await page.evaluate(()=>Array.from(document.querySelectorAll<HTMLElement>("#hubPitch .roundel.full")).map(node=>[node.dataset.playerId,node.dataset.playerName]));
+    expect(restored).toEqual(expected.map(item=>[item.playerId,item.name]));
+  });
+
+  test("a stale delayed draft tap can never select a replacement candidate",async({page})=>{
+    await startDraft(page);
+    await page.evaluate(()=>{(globalThis as any).roll();});
+    await expect(page.locator("#optstage")).toBeVisible();
+    const result=await page.evaluate(async()=>{
+      const game=globalThis as any,index=0,stale=game.currentOpts[index],slot=game.currentSlot;
+      await game.CopaLazy.ensureHiddenDraft();
+      game.currentOpts=game.draftOptions(game.slots[slot][0]);
+      const accepted=game.requestChoose(index,stale);
+      return{accepted,filled:game.picksBySlot.filter(Boolean).length,remaining:game.remaining};
+    });
+    expect(result).toEqual({accepted:false,filled:0,remaining:11});
+  });
+
   test("double selection fills exactly one slot",async({page})=>{
     await startDraft(page);await chooseOne(page);
     const state=await page.evaluate(()=>{const w=globalThis as any;return{filled:w.picksBySlot.filter(Boolean).length,remaining:w.remaining,phase:w.CopaRunState.phase};});
