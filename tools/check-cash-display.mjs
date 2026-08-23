@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),"utf8");
-const economy=read("src/balance/config.js"),display=read("src/ui/cashDisplay.js"),styles=read("src/styles/cashDisplay.css"),sfx=read("src/audio/sfx.js"),hub=read("src/ui/hub.js"),lazy=read("src/runtime/lazyAssets.js"),index=read("index.html"),worker=read("sw.js");
+const economy=read("src/balance/config.js"),display=read("src/ui/cashDisplay.js"),styles=read("src/styles/cashDisplay.css"),mobileStyles=read("src/styles/mobileGameSystems.css"),sfx=read("src/audio/sfx.js"),hub=read("src/ui/hub.js"),lazy=read("src/runtime/lazyAssets.js"),index=read("index.html"),worker=read("sw.js");
 
 assert.match(economy,/cashHalf\(entry\.after-entry\.before\)/,"cash deltas must preserve half-million precision");
 assert.match(economy,/copa:cash-transaction/,"committed cash changes must publish one central event");
@@ -20,7 +20,8 @@ assert.match(styles,/@keyframes cashRollDown/,"cash losses must have mechanical 
 assert.match(styles,/prefers-reduced-motion:reduce/,"cash motion must respect the OS accessibility preference");
 assert.match(index,/kasa-card kasa-compact clickable/,"the match hub must use the compact premium vault surface");
 assert.match(styles,/#hub \.hub-stat-row\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important\}/,"hub cash must share an equal metric column");
-assert.match(styles,/#hub \.hub-stat-row>\.kasa-compact[\s\S]*height:58px!important/,"desktop hub cash must match the compact metric height");
+assert.match(mobileStyles,/\.hub-stat-row>:is\(#chemTile,#powTile,#trustTile,#kasaTile\)[\s\S]*height:88px!important/,"native mobile hub metrics must share one fixed height");
+assert.match(mobileStyles,/html:not\(\.copa-mobile-game\) #hub \.hub-stat-row>:is\(#chemTile,#powTile,#trustTile,#kasaTile\)[\s\S]*height:68px!important/,"mobile web hub metrics must share one fixed height");
 assert.match(styles,/\.kasa-compact-foot/,"compact cash must keep its debt-limit context visible");
 assert.match(hub,/CopaCashDisplay\.render\(vEl,bv,\{target:"kasaTile",legacy:lc\}\)/,"hub refreshes must preserve the shared premium cash renderer");
 assert.match(lazy,/ensureCashDisplay/,"the premium vault must remain outside the critical startup bundle");

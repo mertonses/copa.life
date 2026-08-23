@@ -121,9 +121,17 @@ function chairmanReactToSpend(cost,context,payload){
  }
 }
 function opponentEdge(power,oppPower){const gap=(power||0)-(oppPower||0);return gap>=24?5:gap>=18?4:gap>=12?3:gap>=8?2:0;}
-function injuryRiskFor(power){const s=picksBySlot.filter(Boolean);let risk=0.09;risk+=s.filter(p=>p.age>=32).length*0.022;if(style==="gegen")risk+=0.035;if(lastTalkResult&&lastTalkResult.key==="gaz"&&lastTalkResult.delta>0)risk+=0.025;if(power>=90)risk+=0.035;if(power>=95)risk+=0.035;if(hasRunCard("temiz_sayfa"))risk*=0.70;return Math.min(0.40,Math.max(0.02,risk));}
+function injuryRiskFor(power){let risk=0.09;if(style==="gegen")risk+=0.035;if(lastTalkResult&&lastTalkResult.key==="gaz"&&lastTalkResult.delta>0)risk+=0.025;if(power>=90)risk+=0.035;if(power>=95)risk+=0.035;if(hasRunCard("temiz_sayfa"))risk*=0.70;return Math.min(0.40,Math.max(0.02,risk));}
 var _r=function(){return typeof rand==="function"?rand():Math.random();};
 function _randInjLevel(){const r=_r();return r<0.50?1:r<0.80?2:3;}
+function injuryRecoveryMatches(level){return Number(level)===1?1:2;}
+function injuryPlayRisk(player){const level=Math.max(1,Math.min(3,Number(player&&player.injuryLevel)||2));return level===1?0.15:level===2?0.35:0.55;}
+function injuryTreatmentCost(player){const level=Math.max(1,Math.min(3,Number(player&&player.injuryLevel)||2)),base=level===1?3:level===2?5:7,age=Number(player&&player.age)||0;return base+(age>=34?1:0);}
+function normalizePlayerInjury(player){if(!player)return player;if(!player.injured){player.injuryLevel=0;player.injuryMatchesRemaining=0;player.injuryDecisionRound=0;player.injuryPlayedRound=0;return player;}player.injuryLevel=Math.max(1,Math.min(3,Number(player.injuryLevel)||2));player.injuryMatchesRemaining=Math.max(1,Number(player.injuryMatchesRemaining)||injuryRecoveryMatches(player.injuryLevel));player.injuryDecisionRound=Math.max(0,Number(player.injuryDecisionRound)||0);player.injuryPlayedRound=Math.max(0,Number(player.injuryPlayedRound)||0);return player;}
+function assignPlayerInjury(player,level){if(!player)return player;player.injured=true;player.injuryLevel=Math.max(1,Math.min(3,Number(level)||_randInjLevel()));player.injuryMatchesRemaining=injuryRecoveryMatches(player.injuryLevel);player.injuryDecisionRound=0;player.injuryPlayedRound=0;return player;}
+function clearPlayerInjury(player){if(!player)return player;player.injured=false;player.injuryLevel=0;player.injuryMatchesRemaining=0;player.injuryDecisionRound=0;player.injuryPlayedRound=0;return player;}
+function injuryVictimWeight(player){const age=Math.max(16,Number(player&&player.age)||27);return 1+Math.max(0,age-31)*0.16;}
+function weightedInjuryIndex(indices){let total=0;const weighted=indices.map(index=>{const weight=injuryVictimWeight(picksBySlot[index]);total+=weight;return{index,weight};});let roll=_r()*total;for(const item of weighted){roll-=item.weight;if(roll<=0)return item.index;}return weighted.length?weighted[weighted.length-1].index:-1;}
 function injuredSlotIndices(){const out=[];picksBySlot.forEach((p,i)=>{if(p&&p.injured)out.push(i);});return out;}
 function syncInjuredIdx(preferred){
  const current=Number.isInteger(preferred)&&picksBySlot[preferred]&&picksBySlot[preferred].injured?preferred:
@@ -139,11 +147,11 @@ function applyRandomInjury(chance){
  if(_r()>=injuryChanceWithMedicalProtection(chance))return null;
  const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});
  if(!idxs.length)return null;
- const slotIdx=rnd(idxs),p=picksBySlot[slotIdx];
- p.injured=true;p.injuryLevel=_randInjLevel();
+ const slotIdx=weightedInjuryIndex(idxs),p=picksBySlot[slotIdx];
+ assignPlayerInjury(p,_randInjLevel());
  syncInjuredIdx(slotIdx);
  if(econStats)econStats.injuries=(econStats.injuries||0)+1;
  return p;
 }
 /* Birden fazla sakatlık (kurban_belli gibi) — injuredIdx kısıtlamasını aşar */
-function applyMultiInjury(count){const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});const injured=[];for(let i=0;i<count&&idxs.length;i++){const pick=Math.floor(rand()*idxs.length);const slotIdx=idxs.splice(pick,1)[0];const p=picksBySlot[slotIdx];p.injured=true;p.injuryLevel=_randInjLevel();if(econStats)econStats.injuries=(econStats.injuries||0)+1;injured.push(p);}syncInjuredIdx(injured.length?picksBySlot.indexOf(injured[0]):-1);return injured;}
+function applyMultiInjury(count){const idxs=[];picksBySlot.forEach((p,i)=>{if(p&&!p.injured)idxs.push(i);});const injured=[];for(let i=0;i<count&&idxs.length;i++){const slotIdx=weightedInjuryIndex(idxs),pick=idxs.indexOf(slotIdx);if(pick>=0)idxs.splice(pick,1);const p=picksBySlot[slotIdx];assignPlayerInjury(p,_randInjLevel());if(econStats)econStats.injuries=(econStats.injuries||0)+1;injured.push(p);}syncInjuredIdx(injured.length?picksBySlot.indexOf(injured[0]):-1);return injured;}

@@ -22,10 +22,10 @@
 <meta property="og:site_name" content="Copa Life">
 <meta property="og:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta property="og:description" content="Kadronu kur, başkanınla hedef belirle, antrenman ve taktik kararlarıyla kupaya yürü. Her koşuda yeni bir futbol hikâyesi.">
-<meta property="og:image" content="https://copa.life/assets/social-v2.jpg">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image" content="https://copa.life/assets/social-copa-arena.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1731">
+<meta property="og:image:height" content="909">
 <meta property="og:image:alt" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:locale:alternate" content="en_US">
@@ -34,7 +34,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Copa Life – Roguelite Futbol Menajerlik Oyunu">
 <meta name="twitter:description" content="Kadronu kur, başkanınla hedef belirle, antrenman ve taktik kararlarıyla kupaya yürü. Her koşuda yeni bir futbol hikâyesi.">
-<meta name="twitter:image" content="https://copa.life/assets/social-v2.jpg">
+<meta name="twitter:image" content="https://copa.life/assets/social-copa-arena.png">
 <meta name="twitter:image:alt" content="Copa Life futbol oyunu">
 
 <!-- Favicon & PWA -->
@@ -81,7 +81,7 @@ if("serviceWorker"in navigator){
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "inLanguage": ["tr", "en", "es", "de", "it"],
-  "image": "https://copa.life/assets/social-v2.jpg"
+  "image": "https://copa.life/assets/social-copa-arena.png"
 }
 </script>
 
@@ -286,12 +286,12 @@ html.copa-native-boot body>#modeGate{display:none!important}
             <div class="v7-setup-group copa-country-group">
               <div class="v7-sec-lbl" id="countryhdr">Ülkeni Seç</div>
               <div class="countrypick" id="countryPick">
-                <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye"><img src="assets/flags/TR.svg" alt="">Türkiye</button>
-                <button data-country="IT" onclick="pickCountry('IT')" title="İtalya"><img src="assets/flags/IT.svg" alt="">İtalya</button>
-                <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere"><img src="assets/flags/ENGLAND.svg" alt="">İngiltere</button>
-                <button data-country="ES" onclick="pickCountry('ES')" title="İspanya"><img src="assets/flags/ES.svg" alt="">İspanya</button>
-                <button data-country="DE" onclick="pickCountry('DE')" title="Almanya"><img src="assets/flags/DE.svg" alt="">Almanya</button>
-                <button data-country="JP" onclick="pickCountry('JP')" title="Japonya"><img src="assets/flags/JP.svg" alt="">Japonya</button>
+                <button class="on" data-country="TR" onclick="pickCountry('TR')" title="Türkiye" aria-pressed="true"><img src="assets/flags/TR.svg" alt="">Türkiye</button>
+                <button data-country="IT" onclick="pickCountry('IT')" title="İtalya" aria-pressed="false"><img src="assets/flags/IT.svg" alt="">İtalya</button>
+                <button data-country="ENG" onclick="pickCountry('ENG')" title="İngiltere" aria-pressed="false"><img src="assets/flags/ENGLAND.svg" alt="">İngiltere</button>
+                <button data-country="ES" onclick="pickCountry('ES')" title="İspanya" aria-pressed="false"><img src="assets/flags/ES.svg" alt="">İspanya</button>
+                <button data-country="DE" onclick="pickCountry('DE')" title="Almanya" aria-pressed="false"><img src="assets/flags/DE.svg" alt="">Almanya</button>
+                <button data-country="JP" onclick="pickCountry('JP')" title="Japonya" aria-pressed="false"><img src="assets/flags/JP.svg" alt="">Japonya</button>
               </div>
             </div>
           </div>
@@ -314,7 +314,7 @@ html.copa-native-boot body>#modeGate{display:none!important}
                   <div class="copa-chair-stage-kicker js-chair-stage-type">EKONOMİ</div>
                   <h2 class="copa-chair-stage-title js-chair-stage-title">PATRON<br>BAŞKAN</h2>
                   <p class="copa-chair-stage-role js-chair-stage-role">BÜYÜK PATRON</p>
-                  <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="lazy" fetchpriority="low" decoding="async"></div>
+                  <div class="copa-chair-stage-portrait"><img class="js-chair-stage-image" src="assets/chairs_profile_hd/babacan.webp" alt="Patron Başkan" loading="eager" fetchpriority="high" decoding="async"></div>
                   <div class="copa-chair-stage-actions" aria-label="Başkan navigasyonu"><button class="copa-chair-nav js-chair-prev" type="button" aria-label="Önceki başkan" title="Önceki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button><button class="copa-chair-nav js-chair-next" type="button" aria-label="Sonraki başkan" title="Sonraki başkan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div>
                 </div>
               </section>
@@ -728,7 +728,7 @@ function countryGameData(k){
   return[POOL_TR,OPP_POOL,OPP_BASES];
 }
 const _cups={tr:{TR:"Türkiye Ulusal Kupası",ENG:"İngiltere Kupası",ES:"İspanya Kupası",IT:"İtalya Kupası",DE:"Almanya Kupası",JP:"Japonya Kupası"},en:{TR:"Türkiye National Cup",ENG:"England Cup",ES:"Spain Cup",IT:"Italy Cup",DE:"Germany Cup",JP:"Japan Cup"},es:{TR:"Copa Nacional de Turquía",ENG:"Copa de Inglaterra",ES:"Copa de España",IT:"Copa de Italia",DE:"Copa de Alemania",JP:"Copa de Japón"},de:{TR:"Nationalpokal Türkei",ENG:"England-Pokal",ES:"Spanien-Pokal",IT:"Italien-Pokal",DE:"Deutschland-Pokal",JP:"Japan-Pokal"},it:{TR:"Coppa Nazionale di Turchia",ENG:"Coppa d'Inghilterra",ES:"Coppa di Spagna",IT:"Coppa d'Italia",DE:"Coppa di Germania",JP:"Coppa del Giappone"}};
-function pickCountry(k){const btn=document.querySelector(`#countryPick button[data-country="${k}"]`);if(!btn||!COUNTRY_CODES.includes(k))return;if(btn.dataset.locked==="1"){try{sfxStamp();}catch(e){}return;}try{sfxFlag(k);}catch(e){}selectedCountry=k;try{localStorage.setItem("copa_country",k);}catch(e){}if(window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function")window.CopaLazy.ensureCountryPlayers(k).then(()=>{if(selectedCountry===k)_updateIntroSummary();}).catch(()=>{});if(window.CopaAnalytics)window.CopaAnalytics.track("country_selected",{country:k});document.querySelectorAll("#countryPick button").forEach(b=>b.classList.toggle("on",(b.dataset.country||"")===k));_updateIntroSummary();
+function pickCountry(k){const btn=document.querySelector(`#countryPick button[data-country="${k}"]`);if(!btn||!COUNTRY_CODES.includes(k))return;if(btn.dataset.locked==="1"){try{sfxStamp();}catch(e){}return;}try{sfxFlag(k);}catch(e){}selectedCountry=k;try{localStorage.setItem("copa_country",k);}catch(e){}if(window.CopaLazy&&typeof window.CopaLazy.ensureCountryPlayers==="function")window.CopaLazy.ensureCountryPlayers(k).then(()=>{if(selectedCountry===k)_updateIntroSummary();}).catch(()=>{});if(window.CopaAnalytics)window.CopaAnalytics.track("country_selected",{country:k});document.querySelectorAll("#countryPick button").forEach(b=>{const active=(b.dataset.country||"")===k;b.classList.toggle("on",active);b.setAttribute("aria-pressed",String(active));});_updateIntroSummary();
   const cupLocale=_cups[LANG]||_cups.en,sub=$("coverSub");if(sub)sub.textContent=cupLocale[k]||cupLocale.TR;
   const _pools={TR:[POOL_TR,OPP_POOL,1358,40],ENG:[POOL_EN,OPP_POOL_EN],ES:[POOL_ES,OPP_POOL_ES],IT:[POOL_IT,OPP_POOL_IT],DE:[POOL_DE,OPP_POOL_DE],JP:[POOL_JP,OPP_POOL_JP]};
   const _pd=_pools[k]||_pools.TR,_knownPlayers={TR:1360,ENG:2983,ES:1061,IT:2656,DE:1206,JP:561},_knownClubs={TR:38,ENG:44,ES:42,IT:40,DE:36,JP:20};const _pc=_pd[0]&&_pd[0].length?_pd[0].length:_knownPlayers[k]||0;const _tc=_pd[1]&&_pd[1].length?_pd[1].length:_knownClubs[k]||0;
@@ -906,7 +906,7 @@ function pickChair(id){if(!chairIsUnlocked(id))return;selectedChairId=id;if(wind
 function confirmChair(id){if(!chairIsUnlocked(id)){showToast(LT("Bu başkan henüz kullanıma açık değil.","This chairman is not available yet.","Este presidente aún no está disponible.","Dieser Präsident ist noch nicht verfügbar.","Questo presidente non è ancora disponibile."),{type:"info",duration:1800,id:"chairman-locked"});return;}selectedChairId=id;if(window.CopaAnalytics)window.CopaAnalytics.track("chairman_selected",analyticsBalanceProps({chairman:id}));buildChairButtons();closeModal();const chairName=(L().chair&&L().chair[id]&&L().chair[id].n)||id;showToast(LT(`${chairName} seçildi.`,`${chairName} selected.`,`${chairName} seleccionado.`,`${chairName} ausgewählt.`,`${chairName} selezionato.`),{type:"info",duration:1800,id:"chairman-selected"});}
 const _CHAIR_FX={
   babacan:{pros:{tr:["Borç limitin −€28M olur.","Başkan danışmalarında takımını destekleyen sonuçlar daha sık çıkar.","Takımını destekleyen danışma kararı final gücünü azaltmaz."],en:["Your debt limit is −€28M.","Supportive consultation results appear more often.","A supportive consultation result does not reduce final power."]},cons:{tr:["Kart fiyatlarına +€1M eklenir."],en:["Card prices increase by +€1M."]}},
-  leydi:{pros:{tr:["Draftta yerli oyuncuların seçilme ihtimali artar.","Takım kimyan +3 veya üzerindeyse ilgili maçta gücün ve başkan güvenin +1 artar."],en:["Local players are more likely to appear in the draft.","At +3 chemistry or higher, that match gives +1 power and +1 chairman trust."]},cons:{tr:["Kimyan 0'ın altındaysa ilgili maçta gücün ve başkan güvenin −1 azalır.","Borç limitin −€21M olur."],en:["Below 0 chemistry, that match gives −1 power and −1 chairman trust.","Your debt limit is −€21M."]}},
+  leydi:{pros:{tr:["Her draft adayının yerli havuzundan gelme ihtimali %20 artar.","Takım kimyan +3 veya üzerindeyse ilgili maçta gücün ve başkan güvenin +1 artar."],en:["Each draft candidate has a 20% higher chance of coming from the local player pool.","At +3 chemistry or higher, that match gives +1 power and +1 chairman trust."]},cons:{tr:["Kimyan 0'ın altındaysa ilgili maçta gücün ve başkan güvenin −1 azalır.","Borç limitin −€21M olur."],en:["Below 0 chemistry, that match gives −1 power and −1 chairman trust.","Your debt limit is −€21M."]}},
   pinti:{pros:{tr:["Transfer fiyatlarına %10 indirim uygulanır.","Tur sonunda kasan 0 veya üzerindeyse birikimine €2M eklenir.","Finalden önce birikimini final gücüne veya kasana çevirebilirsin."],en:["Transfers receive a 10% discount.","If your cash is 0 or higher at the end of a round, €2M is added to savings.","Before the final, you can convert savings into final power or cash."]},cons:{tr:["Premium kart satın alırken ek ücret ödersin.","€14M ve üzeri transferlerde veya riskli kart alımında başkan güvenin işlem başına −1 azalır.","Borç limitin −€14M olur."],en:["Premium cards cost an extra fee.","Transfers costing €14M or more and risky card purchases reduce chairman trust by −1 per transaction.","Your debt limit is −€14M."]}},
   sansasyoncu:{pros:{tr:["Gücü 85–89 olan transfer ilgili maçta +2 güç, 90 ve üzeri transfer +3 güç kazandırır. Bu bonus ilgili turda yalnızca bir kez verilir.","1. ve 4. maçtan önce bir oyuncu seçersin. Seçtiğin oyuncu o maç +2 ila +4 güç kazanır."],en:["A signing rated 85–89 gives +2 power in that match. A signing rated 90 or higher gives +3 power. This bonus is awarded only once per round.","Before matches 1 and 4, choose one player to gain +2 to +4 power in that match."]},cons:{tr:["Kart fiyatlarına +€2M eklenir.","Seçtiğin Spotlight oyuncusu sakatlanırsa bir sonraki pazar kart fiyatlarına +€3M eklenir.","Borç limitin −€22M olur."],en:["Card prices increase by +€2M.","If your selected Spotlight player is injured, card prices increase by +€3M in the next market.","Your debt limit is −€22M."]}},
   torpilci:{pros:{tr:["Kart fiyatlarına −€1M indirim uygulanır.","Kabul ettiğin yeğeninin gücü her tur en fazla +3 artar.","Yeğeni kabul ettiğinde kasana €3M eklenir."],en:["Card prices receive a −€1M discount.","Your accepted nephew gains up to +3 power each round.","Accepting the nephew adds €3M to your cash."]},cons:{tr:["Her tur bir kez zorunlu yeğen kararı gelir.","Yeğeni reddedersen borç limitin €3M daralır.","Yeğeni kabul edersen final gücünden 1 puan eksilir.","Borç limitin −€16M olur."],en:["One mandatory nephew decision appears each round.","Rejecting the nephew tightens your debt limit by €3M.","Accepting the nephew removes 1 point from final power.","Your debt limit is −€16M."]}},
@@ -1313,7 +1313,7 @@ function buildBench(){
 }
 function _benchSlotEff(p,pos){if(!p)return 0;const at=Object.assign({},p,{pos});return effOf(at);}
 function benchOptionsFor(pos){
- const g=groupOf(pos),unused=bench.map((p,i)=>({p,i,fit:positionPenaltyFor(p,pos)<=4,emergencyKeeper:false})).filter(x=>x.p&&!x.p.used);
+ const g=groupOf(pos),unused=bench.map((p,i)=>({p,i,fit:positionPenaltyFor(p,pos)<=4,emergencyKeeper:false})).filter(x=>x.p&&!x.p.used&&!x.p.injured&&!x.p.suspended);
  if(g==="GK"){
   const keepers=unused.filter(x=>groupOf(x.p.pos)==="GK");
   if(keepers.length)return keepers.sort((a,b)=>_benchSlotEff(b.p,pos)-_benchSlotEff(a.p,pos));
@@ -1411,26 +1411,40 @@ function _showKaosResult(res){
 }
 
 function maybeInjure(){if(round>1){const base=hasCard("temiz_sayfa")?0.049:0.07,p=applyRandomInjury(base);if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("idmanda sakatland\u0131","was injured in training")),"lose");const idx=picksBySlot.indexOf(p);if(idx>=0)renderRoundel("h"+idx,p);}}}
+function _activeInjuryDecisionIdx(){return picksBySlot.findIndex(p=>p&&p.injured&&Number(p.injuryDecisionRound)!==Number(round));}
 function renderInjbar(){
   const ib=$("injbar");
   if(typeof syncInjuredIdx==="function")syncInjuredIdx();
-  if(injuredIdx<0){ib.classList.add("hidden");ib.innerHTML="";return;}
-  const p=picksBySlot[injuredIdx],fit=effOf(p)+injPen(p),hurt=effOf(p),available=bench.filter(b=>!b.used).length;
+  const decisionIdx=_activeInjuryDecisionIdx();
+  if(decisionIdx<0){ib.classList.add("hidden");ib.innerHTML="";return;}
+  const p=picksBySlot[decisionIdx];if(typeof normalizePlayerInjury==="function")normalizePlayerInjury(p);
+  const fit=effOf(p)+injPen(p),hurt=effOf(p),available=bench.filter(b=>!b.used&&!b.injured&&!b.suspended).length;
   const injuryCount=typeof injuredSlotIndices==="function"?injuredSlotIndices().length:1;
   const _injLvl=p.injuryLevel||2,_injSev=_injLvl===1?LT("Hafif","Mild","Leve","Leicht","Lieve"):_injLvl===2?LT("Orta","Moderate","Moderada","Mittel","Media"):LT("Ağır","Severe","Grave","Schwer","Grave");
   const _playLabel=LT("Sakat oyna","Play injured","Jugar lesionado","Verletzt spielen","Gioca infortunato");
-  const playInjBtn=round>=5?`<button class="inj-play-btn" onclick="playInjured()" aria-label="${_playLabel}" title="${_playLabel}">${LT("OYNA","PLAY","JUGAR","SPIELEN","GIOCA")}</button>`:"";
+  const playRisk=Math.round(injuryPlayRisk(p)*100),healCost=injuryTreatmentCost(p),remaining=Math.max(1,Number(p.injuryMatchesRemaining)||injuryRecoveryMatches(_injLvl));
+  const playInjBtn=`<button class="inj-play-btn" onclick="playInjured(${decisionIdx})" aria-label="${_playLabel}" title="${_playLabel}"><b><span class="inj-action-icon" aria-hidden="true">!</span>${LT("RİSK AL","TAKE RISK","ASUMIR RIESGO","RISIKO","RISCHIA")}</b><small>${LT(`Güç ${hurt} · %${playRisk} kalıcı −1`,`Power ${hurt} · ${playRisk}% permanent −1`,`Fuerza ${hurt} · ${playRisk}% −1 permanente`,`Stärke ${hurt} · ${playRisk}% dauerhaft −1`,`Forza ${hurt} · ${playRisk}% −1 permanente`)}</small></button>`;
   const rewardAvailable=canOfferRewardedInjuryHeal();
-  const rewardLabel=injuryRewardInFlight?LT("Reklam hazırlanıyor…","Loading ad…","Cargando anuncio…","Anzeige wird geladen…","Caricamento annuncio…"):`<span class="inj-reward-badge">${LT("ÜCRETSİZ","FREE","GRATIS","GRATIS","GRATIS")}</span>${LT("Reklam izle · tedavi","Watch ad · treatment","Ver anuncio · cura","Werbung · Behandlung","Guarda annuncio · cura")}`;
-  const rewardButton=rewardAvailable||injuryRewardInFlight?`<button class="inj-reward-btn" onclick="requestRewardedInjuryHeal()" ${injuryRewardInFlight?"disabled aria-busy=\"true\"":""}>${rewardLabel}</button>`:"";
+  const rewardLeft=Math.max(0,MAX_REWARDED_INJURY_HEALS-rewardedInjuryHealsEarned);
+  const rewardTitle=LT("REKLAM","AD","ANUNCIO","WERBUNG","ANNUNCIO");
+  const rewardBadge=rewardLeft>0?LT("ÜCRETSİZ","FREE","GRATIS","GRATIS","GRATIS"):LT("SINIR","LIMIT","LÍMITE","LIMIT","LIMITE");
+  const rewardMeta=injuryRewardInFlight
+    ?LT("Hazırlanıyor…","Loading…","Cargando…","Wird geladen…","Caricamento…")
+    :rewardLeft<=0
+      ?LT("2 hak kullanıldı","2 uses spent","2 usos agotados","2 Nutzungen verbraucht","2 utilizzi esauriti")
+      :rewardAvailable
+        ?LT(`Ücretsiz · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Free · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Gratis · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Gratis · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Gratis · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`)
+        :LT(`Hazır değil · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Not ready · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`No disponible · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Nicht bereit · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`,`Non pronto · ${rewardLeft}/${MAX_REWARDED_INJURY_HEALS}`);
+  const rewardButton=`<button class="inj-reward-btn${rewardAvailable?" is-ready":""}" onclick="requestRewardedInjuryHeal(${decisionIdx})" ${rewardAvailable&&!injuryRewardInFlight?"":`disabled aria-disabled="true"${injuryRewardInFlight?' aria-busy="true"':""}`}><span class="inj-reward-badge">${rewardBadge}</span><b><span class="inj-reward-mark" aria-hidden="true">▶</span>${rewardTitle}</b><small>${rewardMeta}</small></button>`;
   ib.classList.remove("hidden");
-  const canHeal=canAffordCost(6);
-  ib.innerHTML=`<span class="inj-ico" aria-hidden="true">!</span><span class="inj-info"><span class="inj-main"><b>${shortName(p)} ${LT("sakatlandı","injured","lesionado","verletzt","infortunato")}</b><span class="inj-severity">${_injSev}</span></span><span class="inj-detail">${LT("Güç","Power","Fuerza","Stärke","Forza")} ${fit} → ${hurt} · ${available} ${LT("yedek","bench","suplentes","Ersatz","riserve")}${injuryCount>1?" · "+injuryCount+" "+LT("sakat","injured","lesionados","Verletzte","infortunati"):""}</span></span><div class="inj-btns"><button class="inj-bench-btn" onclick="openBackup(${injuredIdx})">${LT("Yedek seç","Choose bench","Elegir suplente","Ersatz wählen","Scegli riserva")}</button><button class="inj-heal-btn" onclick="healInjury()" ${canHeal?"":"disabled"}>${LT("Tedavi €6M","Heal €6M","Curar €6M","Heilen €6M","Cura €6M")}</button>${rewardButton}${playInjBtn}</div>`;
+  const canHeal=canAffordCost(healCost),best=benchOptionsFor(slots[decisionIdx][0])[0],bestEff=best?_benchSlotEff(best.p,slots[decisionIdx][0]):null,bestDelta=bestEff==null?null:bestEff-hurt;
+  const benchMeta=best?LT(`${bestEff} güç · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} power · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} fuerza · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} Stärke · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} forza · ${bestDelta>=0?"+":""}${bestDelta}`):LT("Yedek yok","No bench","Sin suplente","Kein Ersatz","Nessuna riserva");
+  ib.innerHTML=`<div class="inj-summary"><span class="inj-ico" aria-hidden="true">!</span><span class="inj-info"><span class="inj-main"><b>${shortName(p)} ${LT("sakatlandı","injured","lesionado","verletzt","infortunato")}</b><span class="inj-severity">${_injSev}</span>${injuryCount>1?`<span class="inj-count">${injuredSlotIndices().indexOf(decisionIdx)+1}/${injuryCount}</span>`:""}</span><span class="inj-detail">${LT("Güç","Power","Fuerza","Stärke","Forza")} <strong class="inj-power-change"><span>${fit}</span><span class="inj-power-arrow" aria-hidden="true">→</span><em>${hurt}</em></strong><span class="inj-detail-sep">·</span>${LT(`${remaining} maç dinlenir`,`Rest ${remaining} match${remaining===1?"":"es"}`,`${remaining} partido${remaining===1?"":"s"} de descanso`,`${remaining} Spiel${remaining===1?"":"e"} Pause`,`${remaining} partit${remaining===1?"a":"e"} di riposo`)}</span></span></div><div class="inj-btns"><button class="inj-bench-btn" onclick="openBackup(${decisionIdx})" ${best?"":"disabled"}><b><span class="inj-action-icon" aria-hidden="true">↔</span>${LT("YEDEK","BENCH","BANQUILLO","BANK","PANCHINA")}</b><small>${benchMeta}</small></button><button class="inj-heal-btn" onclick="healInjury(${decisionIdx})" ${canHeal?"":"disabled"}><b><span class="inj-action-icon" aria-hidden="true">+</span>${LT(`TEDAVİ · €${healCost}M`,`HEAL · €${healCost}M`,`CURAR · €${healCost}M`,`HEILEN · €${healCost}M`,`CURA · €${healCost}M`)}</b><small>${p.age>=34?LT("34+ ücret dahil","34+ fee included","Incluye tasa 34+","34+ Gebühr inkl.","Supplemento 34+ incluso"):LT("Tam iyileşme","Full recovery","Recuperación total","Vollständig fit","Recupero totale")}</small></button>${rewardButton}${playInjBtn}</div>`;
 }
-function playInjured(){const ib=$("injbar");if(ib)ib.classList.add("hidden");const p=injuredIdx>=0?picksBySlot[injuredIdx]:null;if(p)pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("sakat sahaya \u00e7\u0131k\u0131yor \u2014 g\u00fc\u00e7 d\u00fc\u015f\u00fck, sakatl\u0131k uzayabilir","starts injured \u2014 reduced power, worsening risk")),"lose");}
-function healInjury(){if(typeof syncInjuredIdx==="function")syncInjuredIdx();if(injuredIdx<0||!canAffordCost(6))return;const p=picksBySlot[injuredIdx];spend(6,"spent");p.injured=false;pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("tedavi edildi (-\u20ac6M)","healed (-\u20ac6M)")),"buy");injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();setBudget();renderInjbar();renderHub();}
+function playInjured(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;p.injuryDecisionRound=round;p.injuryPlayedRound=round;const risk=Math.round(injuryPlayRisk(p)*100);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`sakat oynayacak · güç düşük · %${risk} kalıcı −1 riski`,`will play injured · reduced power · ${risk}% permanent −1 risk`,`jugará lesionado · fuerza reducida · ${risk}% riesgo de −1 permanente`,`spielt verletzt · weniger Stärke · ${risk}% Risiko auf dauerhaft −1`,`giocherà infortunato · forza ridotta · ${risk}% rischio di −1 permanente`),"lose");renderInjbar();}
+function healInjury(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;const cost=injuryTreatmentCost(p);if(!canAffordCost(cost))return;spend(cost,"spent");clearPlayerInjury(p);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`tedavi edildi (-€${cost}M)`,`healed (-€${cost}M)`,`curado (-€${cost}M)`,`geheilt (-€${cost}M)`,`curato (-€${cost}M)`),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();setBudget();renderInjbar();renderHub();}
 function canOfferRewardedInjuryHeal(){return !!(window.CopaAds&&CopaAds.canReward("showRewardedInjury")&&rewardedInjuryHealsEarned<MAX_REWARDED_INJURY_HEALS);}
-async function requestRewardedInjuryHeal(){if(injuryRewardInFlight||!canOfferRewardedInjuryHeal())return;if(typeof syncInjuredIdx==="function")syncInjuredIdx();if(injuredIdx<0)return;const target=picksBySlot[injuredIdx];if(!target)return;injuryRewardInFlight=true;renderInjbar();let result={earned:false,reason:"ad_error"};try{result=await window.CopaAds.showRewardedInjury(chairmanEventRunId);}catch(_){ }injuryRewardInFlight=false;if(result&&result.earned){rewardedInjuryHealsEarned=Math.min(MAX_REWARDED_INJURY_HEALS,Math.max(rewardedInjuryHealsEarned+1,Number(result.earnedCount)||0));target.injured=false;target.injuryLevel=0;pushFeed("\u{1fa79} <b>"+shortName(target)+"</b> "+LT("reklam ödülüyle ücretsiz tedavi edildi","was treated free with an ad reward","recibió tratamiento gratis con un anuncio","wurde per Werbeprämie gratis behandelt","è stato curato gratis con una ricompensa pubblicitaria"),"buy");injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();_saveState();showToast(LT("Sakatlık iyileştirildi.","Injury healed.","Lesión curada.","Verletzung geheilt.","Infortunio guarito."),{type:"info"});renderHub();return;}showToast(result&&["not_ready","not_available"].includes(result.reason)?LT("Reklam henüz hazır değil. Biraz sonra tekrar dene.","The ad is not ready. Try again shortly.","El anuncio aún no está listo. Inténtalo pronto.","Die Anzeige ist noch nicht bereit. Versuche es gleich erneut.","L'annuncio non è pronto. Riprova tra poco."):LT("Reklam tamamlanmadı. Tedavi uygulanmadı.","The ad was not completed. Treatment was not applied.","El anuncio no se completó. No se aplicó la cura.","Die Anzeige wurde nicht abgeschlossen. Keine Behandlung.","L'annuncio non è stato completato. Cura non applicata."));renderInjbar();}
+async function requestRewardedInjuryHeal(idx){if(injuryRewardInFlight||!canOfferRewardedInjuryHeal())return;const target=picksBySlot[idx];if(!target||!target.injured)return;injuryRewardInFlight=true;renderInjbar();let result={earned:false,reason:"ad_error"};try{result=await window.CopaAds.showRewardedInjury(chairmanEventRunId);}catch(_){ }injuryRewardInFlight=false;if(result&&result.earned){rewardedInjuryHealsEarned=Math.min(MAX_REWARDED_INJURY_HEALS,Math.max(rewardedInjuryHealsEarned+1,Number(result.earnedCount)||0));clearPlayerInjury(target);pushFeed("\u{1fa79} <b>"+shortName(target)+"</b> "+LT("reklam ödülüyle ücretsiz tedavi edildi","was treated free with an ad reward","recibió tratamiento gratis con un anuncio","wurde per Werbeprämie gratis behandelt","è stato curato gratis con una ricompensa pubblicitaria"),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();_saveState();showToast(LT("Sakatlık iyileştirildi.","Injury healed.","Lesión curada.","Verletzung geheilt.","Infortunio guarito."),{type:"info"});renderHub();return;}showToast(result&&["not_ready","not_available"].includes(result.reason)?LT("Reklam henüz hazır değil. Biraz sonra tekrar dene.","The ad is not ready. Try again shortly.","El anuncio aún no está listo. Inténtalo pronto.","Die Anzeige ist noch nicht bereit. Versuche es gleich erneut.","L'annuncio non è pronto. Riprova tra poco."):LT("Reklam tamamlanmadı. Tedavi uygulanmadı.","The ad was not completed. Treatment was not applied.","El anuncio no se completó. No se aplicó la cura.","Die Anzeige wurde nicht abgeschlossen. Keine Behandlung.","L'annuncio non è stato completato. Cura non applicata."));renderInjbar();}
 function _backupImpactClass(delta){return delta>=8?"great":delta>=3?"good":delta>=0?"ok":"bad";}
 function selectBackup(idx,i){window._backupSelect={idx,i};document.querySelectorAll(".backup-card").forEach((el,n)=>{const on=n===i;el.classList.toggle("is-selected",on);el.setAttribute("aria-pressed",on?"true":"false");});const item=window._bk&&window._bk[i],btn=$("backupApplyBtn");if(btn&&item){btn.disabled=false;btn.textContent=CopaText("SEÇİLİ YEDEĞİ AL","CONFIRM REPLACEMENT");}}
 function applySelectedBackup(){const s=window._backupSelect;if(!s)return;doBackup(s.idx,s.i);}
@@ -1451,7 +1465,7 @@ function openBackup(idx){const x=L(),pos=slots[idx][0],main=picksBySlot[idx],hur
   showModal(`<div class="backup-modal scoutmodal"><button type="button" class="backup-close" aria-label="${tr?"Kapat":"Close"}" onclick="cancelBackup()"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg></button><div class="backup-head"><div class="backup-titleblock"><h4>${title}</h4><p>${sub}</p></div><div class="backup-injury"><div class="backup-injury-copy"><span class="backup-summary-label">${tr?"Sakat oyuncu":"Injured player"}</span><strong>${main?shortName(main):""}</strong></div><div class="backup-injury-power"><span><small>${tr?"Normal":"Fit"}</small><b>${fitEff}</b></span><i aria-hidden="true">→</i><span><small>${tr?"Şimdi":"Now"}</small><b>${hurtEff}</b></span></div></div></div><div class="backup-body"><div class="backup-grid">${cards}</div></div><div class="bact backup-actions">${cancel}${cta}</div></div>`,{label:title});
   if(window.PlayerProfiles)document.querySelectorAll(".backup-card[data-profile-player-index]").forEach(card=>{const item=opts[+card.dataset.profilePlayerIndex];if(item&&item.p)PlayerProfiles.bind(card,item.p,{delayCoarseAction:true});});}
 function openSuspendedBackup(idx){openBackup(idx);const label=document.querySelector("#modal .backup-summary-label");if(label)label.textContent=CopaText("Cezalı oyuncu","Suspended player");}
-function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,permission=window.CopaRelationships&&CopaRelationships.canEnter(o);if(permission&&permission.allowed===false){showToast(permission.message,{type:"warning",duration:4200});return;}const old=picksBySlot[idx];if(old){old.injured=false;old.suspended=false;old.backupBoost=0;}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(CopaText("acil kaleci olarak kaleye geçti","moved into goal as emergency keeper")),"pres");injuredIdx=-1;if(suspendedSlotIdx===idx)suspendedSlotIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
+function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,permission=window.CopaRelationships&&CopaRelationships.canEnter(o);if(permission&&permission.allowed===false){showToast(permission.message,{type:"warning",duration:4200});return;}const old=picksBySlot[idx];if(old){old.backupBoost=0;if(old.suspended)old.suspended=false;if(old.injured){normalizePlayerInjury(old);old.injuryDecisionRound=round;pushFeed("\u{1fa79} <b>"+shortName(old)+"</b> "+LT(`yedeğe alındı · ${old.injuryMatchesRemaining} maç dinlenecek`,`moved to the bench · rests ${old.injuryMatchesRemaining} match${old.injuryMatchesRemaining===1?"":"es"}`,`pasa al banquillo · descansa ${old.injuryMatchesRemaining} partido${old.injuryMatchesRemaining===1?"":"s"}`,`auf der Bank · ${old.injuryMatchesRemaining} Spiel${old.injuryMatchesRemaining===1?"":"e"} Pause`,`in panchina · riposa ${old.injuryMatchesRemaining} partit${old.injuryMatchesRemaining===1?"a":"e"}`),"pres");}}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(CopaText("acil kaleci olarak kaleye geçti","moved into goal as emergency keeper")),"pres");if(suspendedSlotIdx===idx)suspendedSlotIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
 
 
 /* ===== president ===== */
@@ -2193,7 +2207,7 @@ function finishMatchPresentation(){
   if(window.CopaMatchAudioDirector)window.CopaMatchAudioDirector.stop();
   _restoreNormalMatchSim();closeModal();_selectedMatchPresentation="";_showPendingMatchResult();
 }
-function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;if(window.CopaRunState&&window.CopaRunState.phase!=="hub")return;if(pendingChairmanEvent&&pendingChairmanEvent.status==="pending"){showPendingChairmanEvent();return;}if(eventSeen[round]==="pending"){showDraftEvent(round);return;}if(!hasCompleteStartingXI()){showModal(`<div class="scoutmodal"><h4>${CopaText("Kadro tamamlanmadı","Squad incomplete")}</h4><p>${CopaText("Maça çıkmak için ilk 11'in tamamlanması gerekiyor.","Complete the starting XI before playing a match.")}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${CopaText("KAPAT","CLOSE")}</button></div></div>`);return;}if(!hasSelectedCaptain()){pickCaptain();return;}if(_showSuspendedBlock())return;clearTimeout(autoTimer);if(typeof showMatchPromiseModal==="function"&&showMatchPromiseModal())return;if(round>=7&&chairman.id==="pinti"&&pintiSavings>=4&&!window._pintiSavingsUsed){window._pintiSavingsUsed=true;_showPintiSavingsModal(squadPower(round));return;}const sp=squadPower(round);const requested=presentationMode==="watch"||presentationMode==="quick"?presentationMode:(presentationMode===true?_selectedMatchPresentation:""),mode=requested;if(!mode){showMatchModePicker(sp);return;}_selectedMatchPresentation=mode;if(round>=7){if(!window._finalTacticDone){window._finalTacticDone=true;_showFinalTacticModal(sp);return;}window._finalTacticDone=false;showFinalCard(sp);return;}
+function playMatch(presentationMode){if(runEnded||pendingMatchResolution)return;if(window.CopaRunState&&window.CopaRunState.phase!=="hub")return;if(pendingChairmanEvent&&pendingChairmanEvent.status==="pending"){showPendingChairmanEvent();return;}if(eventSeen[round]==="pending"){showDraftEvent(round);return;}if(!hasCompleteStartingXI()){showModal(`<div class="scoutmodal"><h4>${CopaText("Kadro tamamlanmadı","Squad incomplete")}</h4><p>${CopaText("Maça çıkmak için ilk 11'in tamamlanması gerekiyor.","Complete the starting XI before playing a match.")}</p><div class="bact"><button class="btn btn-primary" onclick="closeModal()">${CopaText("KAPAT","CLOSE")}</button></div></div>`);return;}const unresolvedInjury=_activeInjuryDecisionIdx();if(unresolvedInjury>=0){renderInjbar();const bar=$("injbar");if(bar&&typeof bar.scrollIntoView==="function")bar.scrollIntoView({behavior:"smooth",block:"center"});showToast(LT("Önce sakat oyuncu için bir karar ver.","Choose what to do with the injured player first.","Primero decide qué hacer con el jugador lesionado.","Entscheide zuerst über den verletzten Spieler.","Decidi prima cosa fare con il giocatore infortunato."),{type:"warning",duration:3600});return;}if(!hasSelectedCaptain()){pickCaptain();return;}if(_showSuspendedBlock())return;clearTimeout(autoTimer);if(typeof showMatchPromiseModal==="function"&&showMatchPromiseModal())return;if(round>=7&&chairman.id==="pinti"&&pintiSavings>=4&&!window._pintiSavingsUsed){window._pintiSavingsUsed=true;_showPintiSavingsModal(squadPower(round));return;}const sp=squadPower(round);const requested=presentationMode==="watch"||presentationMode==="quick"?presentationMode:(presentationMode===true?_selectedMatchPresentation:""),mode=requested;if(!mode){showMatchModePicker(sp);return;}_selectedMatchPresentation=mode;if(round>=7){if(!window._finalTacticDone){window._finalTacticDone=true;_showFinalTacticModal(sp);return;}window._finalTacticDone=false;showFinalCard(sp);return;}
   if(!window.CopaFinalSimCore||!window.CopaNormalMatch){
     if(window._normalMatchCoreLoading)return;
     window._normalMatchCoreLoading=true;
@@ -2276,12 +2290,19 @@ function resolvePostMatchStateBeforeReward(){
   if(_journalCommitted(_postMatchTx)){window._postMatchResolvedRound=round;return;}
   _journalBegin(_postMatchTx,"post_match",{round});
   window._postMatchResolvedRound=round;
-  const injuredBefore=(typeof injuredSlotIndices==="function"?injuredSlotIndices():[]).map(i=>picksBySlot[i]).filter(Boolean);
+  const startersBefore=picksBySlot.filter(Boolean),allPlayersBefore=[...startersBefore,...(bench||[])].filter((p,i,list)=>p&&list.indexOf(p)===i),injuredBefore=allPlayersBefore.filter(p=>p.injured);
   const spotlightPlayer=sansSpotlightIdx>=0?picksBySlot[sansSpotlightIdx]:null;
   injuredBefore.forEach(p=>{
-    if(p&&p.injured&&picksBySlot.includes(p)&&rand()<0.35){
-      p.dev=(p.dev||0)-1;
-      pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("sakat oynadı, sakatlık uzadı (-1)","played injured, recovery worsened (-1)")),"lose");
+    normalizePlayerInjury(p);
+    if(startersBefore.includes(p)){
+      if(Number(p.injuryPlayedRound)===Number(round)&&rand()<injuryPlayRisk(p)){
+        p.dev=(p.dev||0)-1;
+        pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT("sakat oynadı · kalıcı güç −1","played injured · permanent power −1","jugó lesionado · fuerza permanente −1","spielte verletzt · dauerhaft −1 Stärke","ha giocato infortunato · forza permanente −1"),"lose");
+      }
+      p.injuryDecisionRound=0;
+    }else{
+      p.injuryMatchesRemaining=Math.max(0,Number(p.injuryMatchesRemaining)-1);
+      if(p.injuryMatchesRemaining<=0){clearPlayerInjury(p);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT("dinlenerek iyileşti","recovered while resting","se recuperó descansando","hat sich durch Pause erholt","ha recuperato riposando"),"buy");}
     }
   });
   if(typeof expireTemporaryCards==="function")expireTemporaryCards();
@@ -2563,7 +2584,7 @@ function finishRoundReward(kind,extraText,careSlotIdx){
   else if(kind==="care"){
     const idx=Number.isInteger(careSlotIdx)?careSlotIdx:injuredIdx,p=picksBySlot[idx];
     if(p&&p.injured){
-      p.injured=false;
+      clearPlayerInjury(p);
       rewardText=(CopaText("Sağlık Ekibi: ","Medical Team: "))+shortName(p)+(CopaText(" iyileşti · sonraki maç risk %50 azaldı"," healed · next-match risk halved"));
       injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();
     }else rewardText=CopaText("Sağlık Ekibi: sonraki maç sakatlık riski %50 azaldı","Medical Team: next-match injury risk halved");
@@ -3660,10 +3681,10 @@ function _tryRestoreState(){
     if(!Array.isArray(restoreSlots)||!Array.isArray(st.picks)||st.picks.length!==restoreSlots.length||(restorePhase!=="draft"&&!st.picks.every(Boolean))){_clearState();return false;}
     document.body.classList.add("run-active");
     selectedCountry=COUNTRY_CODES.includes(st.country)?st.country:(COUNTRY_CODES.includes(selectedCountry)?selectedCountry:"TR");
-    document.querySelectorAll("#countryPick button").forEach(button=>button.classList.toggle("on",button.dataset.country===selectedCountry));
+    document.querySelectorAll("#countryPick button").forEach(button=>{const active=button.dataset.country===selectedCountry;button.classList.toggle("on",active);button.setAttribute("aria-pressed",String(active));});
     try{localStorage.setItem("copa_country",selectedCountry);}catch(e){}
     POOL=countryGameData(selectedCountry)[0];
-    picksBySlot=st.picks.map(ensurePlayerIdentity);budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
+    picksBySlot=st.picks.map(ensurePlayerIdentity);picksBySlot.forEach(p=>p&&normalizePlayerInjury(p));budget=st.budget;legacyCash=st.legacyCash||0;round=st.round;tournamentFormat=st.tournamentFormat||"legacy_knockout_v1";tournament=st.tournament||null;sideFieldState=window.CopaSideField?CopaSideField.restore(st.sideField):(window.CopaSideFieldEngine?CopaSideFieldEngine.normalizeState(st.sideField):null);runTransactionJournal=window.CopaRunJournal?CopaRunJournal.normalizeState(st.transactionJournal):null;
     window.CopaCashDisplay?.sync(budget);
     cards=st.cards;cardInv=st.cardInv;cardVariant=st.cardVariant||{};
     chairman=CHAIRMEN.find(c=>c.id===st.chairId)||CHAIRMEN[0];
@@ -3671,7 +3692,7 @@ function _tryRestoreState(){
     seedNum=Number(st.seedNum)||0;seedStr=st.seedStr||("TR-2026-"+String(seedNum).padStart(4,"0"));window._runUsesCheatSeed=!!st.cheatRun;window._ghostOpponentUsed=!!st.ghostOpponentUsed;window._ghostOpponentId=String(st.ghostOpponentId||"");window._ghostCheckedRounds=Array.isArray(st.ghostCheckedRounds)?st.ghostCheckedRounds.filter(value=>Number.isInteger(value)&&value>=1&&value<=7):[];window._ghostSeenIds=Array.isArray(st.ghostSeenIds)?st.ghostSeenIds.filter(value=>/^G-[A-Z0-9]{8,32}$/.test(String(value))).slice(-16):[];
     runRng=mulberry32((Math.imul(seedNum,2654435761)>>>0)||1);runRngCalls=Math.max(0,Number(st.rngCalls)||0);for(let i=0;i<runRngCalls;i++)runRng();
     slots=restoreSlots;filled=slots.map((_,i)=>!!picksBySlot[i]);remaining=filled.filter(value=>!value).length;
-    bench=(Array.isArray(st.bench)?st.bench:[]).map(ensurePlayerIdentity);benchUsed=st.benchUsed||0;captainIdx=Number.isInteger(st.captainIdx)&&!!picksBySlot[st.captainIdx]?st.captainIdx:-1;presCharges=st.presCharges??1;
+    bench=(Array.isArray(st.bench)?st.bench:[]).map(ensurePlayerIdentity);bench.forEach(p=>normalizePlayerInjury(p));benchUsed=st.benchUsed||0;captainIdx=Number.isInteger(st.captainIdx)&&!!picksBySlot[st.captainIdx]?st.captainIdx:-1;presCharges=st.presCharges??1;
     kit=st.kit||{bg:"#AE3D28",fg:"#FFFFFF",sec:"#F24A28"};_kp=st.kp||0;_ks=st.ks||6;
     feed=st.feed||[];finalPenalty=st.finalPenalty||0;riskPowerMod=st.riskPowerMod||0;
     econStats=st.econStats||{earned:0,injuries:0,president:0,finalDebt:0,spent:0,worstDebt:0,bestCard:"",bestCardValue:0,worstPresident:"",transactions:[]};if(!Array.isArray(econStats.transactions))econStats.transactions=[];
@@ -4206,7 +4227,7 @@ function _showFinalTacticModal(sp){
 }
 function _finalTacticRest(playerName){
   const p=picksBySlot.find(q=>q&&q.name===playerName);
-  if(p){p.injured=false;p.ov=Math.max(55,p.ov-5);pushFeed(" "+(CopaText("Sakat oyuncu dinlendi (Güç -5 ama sağlıklı)","Injured player rested (Power -5 but fit)")),"form");}
+  if(p){clearPlayerInjury(p);p.ov=Math.max(55,p.ov-5);pushFeed(" "+(CopaText("Sakat oyuncu dinlendi (Güç -5 ama sağlıklı)","Injured player rested (Power -5 but fit)")),"form");}
 }
 function _finalTacticBench(benchIdx){
   if(!bench||benchIdx<0||benchIdx>=bench.length)return;

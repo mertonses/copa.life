@@ -88,10 +88,18 @@
     }, true);
   };
 
-  const decorateNumbers = value => String(value || "").replace(/([+−-]?€?\d+(?:[.,]\d+)?%?)/g, token => {
-    const tone = token.startsWith("+") ? "chair-value-positive" : token.startsWith("-") || token.startsWith("−") ? "chair-value-risk" : "chair-value-neutral";
-    return `<span class="${tone}">${token}</span>`;
-  });
+  const surfaceNumberTones = {
+    pinti: { advantage: ["positive"], trigger: ["neutral", "positive"], redline: [] }
+  };
+  const decorateNumbers = (value, tones = []) => {
+    let index = 0;
+    return String(value || "").replace(/(?:[+−-]?€\d+(?:[.,]\d+)?M|%\d+(?:[.,]\d+)?|[+−-]?\d+(?:[.,]\d+)?(?:M|%|\+)?)/g, token => {
+      const requestedTone = tones[index++];
+      const inferredTone = token.startsWith("+") ? "positive" : token.startsWith("-") || token.startsWith("−") ? "risk" : "neutral";
+      const tone = requestedTone || inferredTone;
+      return `<span class="chair-value-${tone}">${token}</span>`;
+    });
+  };
 
   function syncChairSelectionSurface(id = previewChairId || selectedChairId || chairIds()[0]) {
     const surface = document.getElementById("chairSelectionSurface"), cd = L().chair && L().chair[id];
@@ -115,22 +123,24 @@
     surface.classList.toggle("is-chair-locked", locked);
     const warning = surface.querySelector(".js-chair-lock-warning");
     if (warning && !locked) warning.hidden = true;
+    window.dispatchEvent(new CustomEvent("copa:chair-preview-changed", { detail: { id, locked } }));
     const debt = typeof baseChairmanSackLimit === "function" ? Math.abs(baseChairmanSackLimit(id)) : 30;
-    const title = String(cd.n || id).replace(/\s+Başkan$/i, "<br>Başkan");
+    const title = String(cd.n || id).replace(/\s+([^\s]+)$/u, "<br>$1");
     setSurfaceText(".js-chair-stage-index", `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`);
     setSurfaceText(".js-chair-detail-index", `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`);
     setSurfaceText(".js-chair-stage-type", type); setSurfaceText(".js-chair-detail-type", type);
     setSurfaceText(".js-chair-stage-title", title, true); setSurfaceText(".js-chair-detail-title", cd.n || id);
     setSurfaceText(".js-chair-stage-role", cd.role || ""); setSurfaceText(".js-chair-detail-role", cd.role || "");
     setSurfaceText(".js-chair-detail-desc", decorateNumbers(cd.desc || ""), true); setSurfaceText(".js-chair-cash", `€${typeof BUDGET === "number" ? BUDGET : 30}M`); setSurfaceText(".js-chair-debt", `−€${debt}M`);
-    setSurfaceText(".js-chair-advantage", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][0], lang)), true); setSurfaceText(".js-chair-trigger", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][1], lang)), true); setSurfaceText(".js-chair-redline", decorateNumbers(textFor(fx.cons && fx.cons[lang] && fx.cons[lang][0], lang)), true);
+    const numberTones = surfaceNumberTones[id] || {};
+    setSurfaceText(".js-chair-advantage", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][0], lang), numberTones.advantage), true); setSurfaceText(".js-chair-trigger", decorateNumbers(textFor(fx.pros && fx.pros[lang] && fx.pros[lang][1], lang), numberTones.trigger), true); setSurfaceText(".js-chair-redline", decorateNumbers(textFor(fx.cons && fx.cons[lang] && fx.cons[lang][0], lang), numberTones.redline), true);
     setSurfaceText(".copa-chair-stage-head span", copy.profile); setSurfaceText(".copa-chair-rail-head>span", copy.cards); setSurfaceText(".copa-chair-rail-head small", copy.hint);
     const prevButton = surface.querySelector(".js-chair-prev"), nextButton = surface.querySelector(".js-chair-next");
     if (prevButton) { prevButton.setAttribute("aria-label", copy.prev); prevButton.title = copy.prev; }
     if (nextButton) { nextButton.setAttribute("aria-label", copy.next); nextButton.title = copy.next; }
     const labels = surface.querySelectorAll(".copa-chair-metrics small"); if (labels[0]) labels[0].textContent = copy.start; if (labels[1]) labels[1].textContent = copy.debt;
     const contractLabels = surface.querySelectorAll(".copa-chair-contracts small"); [copy.advantage, copy.trigger, copy.redline].forEach((label, i) => { if (contractLabels[i]) contractLabels[i].textContent = label; });
-    const image = surface.querySelector(".js-chair-stage-image"); if (image) { image.src = chairProfileSrc(id); image.alt = cd.n || id; image.decoding = "async"; image.setAttribute("fetchpriority", "high"); }
+    const image = surface.querySelector(".js-chair-stage-image"); if (image) { const source = chairProfileSrc(id); if (image.getAttribute("src") !== source) image.src = source; image.alt = cd.n || id; image.loading = "eager"; image.decoding = "async"; image.setAttribute("fetchpriority", "high"); }
     const prev = ids[(index - 1 + total) % total], next = ids[(index + 1) % total], selectedMark = surface.querySelector(".js-chair-selected-mark");
     if (selectedMark) {
       const isSelected = !locked && id === selectedChairId;
@@ -163,7 +173,7 @@
     const surface = document.getElementById("chairSelectionSurface");
     return Boolean(surface && surface.classList.contains("is-chair-locked"));
   }
-  function warnLockedChair() {
+  function warnLockedChair(action = "start") {
     const surface = document.getElementById("chairSelectionSurface");
     if (!surface || !displayedChairIsLocked()) return false;
     let warning = surface.querySelector(".js-chair-lock-warning");
@@ -173,7 +183,9 @@
       warning.setAttribute("role", "alert");
       surface.querySelector(".copa-chair-stage-frame")?.appendChild(warning);
     }
-    warning.textContent = LANG === "tr" ? "KİLİTLİ · Başlamak için açık bir başkana geç." : "LOCKED · Choose an available chairman to start.";
+    warning.textContent = LANG === "tr"
+      ? `KİLİTLİ · ${action === "next" ? "Devam etmek" : "Başlamak"} için açık bir başkana geç.`
+      : `LOCKED · Choose an available chairman to ${action === "next" ? "continue" : "start"}.`;
     warning.hidden = false;
     surface.classList.remove("is-locked-warning");
     void surface.offsetWidth;

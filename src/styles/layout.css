@@ -259,7 +259,7 @@ html[data-theme="dark"] .patreonicon-sm{filter:brightness(0) invert(1)}
 }
 .cp-bot-row .cp-sel-btn{
   width:100%;
-  min-height:40px;
+  min-height:38px;
   padding:10px 16px;
   font-size:12px;
   justify-self:center;
@@ -923,7 +923,7 @@ body.reduced-motion .vsscout-ring,body.reduced-motion .vsscout-scan{animation:no
   grid-template-columns:18px minmax(0,1fr) auto;
   align-items:center;
   gap:7px;
-  min-height:38px;
+  min-height:40px;
   overflow:hidden;
 }
 .settings-advanced-btn>svg{
@@ -1840,6 +1840,11 @@ svg[stroke]{stroke-width:1.75}
 
 /* Approach 1: compact desktop country rail + single action row. */
 @media (min-width:721px) and (pointer:fine){
+  #introLand .v7-hero-head{
+    grid-template-columns:minmax(0,1fr) minmax(320px,380px);
+    justify-content:space-between;
+    gap:24px;
+  }
   #introSetup .v7-setup-twocol + .v7-setup-group{padding-top:12px}
   #introSetup .v7-sec-lbl{margin-bottom:7px}
   #introSetup .countrypick button{
@@ -6699,23 +6704,40 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
 #hub .hub-bench-stack .injbar{
   order:1!important;
   display:grid!important;
-  grid-template-columns:18px minmax(0,1fr) auto;
+  grid-template-columns:minmax(180px,.72fr) minmax(480px,1.28fr);
   align-items:center!important;
-  gap:7px!important;
-  min-height:44px;
+  gap:8px!important;
+  min-height:50px;
   box-sizing:border-box;
   margin:0!important;
-  padding:6px 7px!important;
+  padding:6px!important;
   border:1px solid rgba(66,1,2,.24)!important;
-  border-left:3px solid #DA3D2E!important;
-  border-radius:8px!important;
-  background:var(--surface-elevated)!important;
+  border-left:2px solid #DA3D2E!important;
+  border-radius:6px!important;
+  background:color-mix(in srgb,#DA3D2E 4%,var(--surface-elevated))!important;
   box-shadow:none!important;
 }
 #hub .hub-bench-stack .injbar.hidden{display:none!important}
+#hub .hub-bench-stack .injbar .inj-summary{
+  min-width:0;
+  display:grid;
+  grid-template-columns:18px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  padding:4px 6px 4px 4px;
+  border-radius:5px;
+  background:linear-gradient(90deg,rgba(218,61,46,.075) 0%,rgba(218,61,46,.025) 68%,transparent 100%);
+}
 #hub .hub-bench-stack .injbar .inj-ico{
+  display:grid;
+  place-items:center;
+  width:16px;
+  height:16px;
   margin:0!important;
+  border:1px solid color-mix(in srgb,#DA3D2E 55%,transparent);
+  border-radius:50%;
   color:#DA3D2E!important;
+  font:900 9px/1 var(--mono);
 }
 #hub .hub-bench-stack .injbar .inj-info{
   min-width:0;
@@ -6723,6 +6745,7 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   flex-direction:column;
   gap:2px;
   line-height:1.1;
+  background:transparent!important;
 }
 #hub .hub-bench-stack .injbar .inj-main{
   min-width:0;
@@ -6745,6 +6768,11 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   color:#DA3D2E;
   font:800 7px/1 var(--mono);
 }
+#hub .hub-bench-stack .injbar .inj-count{
+  flex:0 0 auto;
+  color:var(--color-slate);
+  font:800 7px/1 var(--mono);
+}
 #hub .hub-bench-stack .injbar .inj-detail{
   margin:0!important;
   overflow:hidden;
@@ -6754,30 +6782,59 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
   opacity:.82!important;
   font:700 8px/1.1 var(--mono);
 }
+#hub .hub-bench-stack .injbar .inj-detail strong{color:var(--color-ink);font-weight:850}
+#hub .hub-bench-stack .injbar .inj-detail em{color:#DA3D2E;font-style:normal}
+#hub .hub-bench-stack .injbar .inj-power-change{display:inline-flex;align-items:center;gap:3px;vertical-align:middle;line-height:1}
+#hub .hub-bench-stack .injbar .inj-power-arrow{display:inline-grid;place-items:center;height:10px;line-height:10px;transform:translateY(-.25px);color:var(--color-slate);font-size:8px}
+#hub .hub-bench-stack .injbar .inj-detail-sep{display:inline-block;margin:0 4px;color:var(--color-slate)}
 #hub .hub-bench-stack .injbar .inj-btns{
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(108px,1fr));
   justify-content:flex-end!important;
   gap:4px!important;
-  flex-wrap:nowrap!important;
+  width:100%;
 }
 #hub .hub-bench-stack .injbar .inj-btns button{
-  min-height:30px;
+  min-width:0;
+  min-height:42px;
   margin:0!important;
-  padding:4px 7px!important;
+  padding:4px 6px!important;
   border:1px solid var(--border-default)!important;
   border-radius:6px!important;
   background:var(--surface-elevated)!important;
   color:var(--color-ink)!important;
   font:800 8px/1 var(--mono);
-  white-space:nowrap;
+  white-space:normal;
   box-shadow:none!important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .16s ease,background-color .16s ease,color .16s ease,box-shadow .16s ease;
 }
+#hub .hub-bench-stack .injbar .inj-btns button b{display:flex;align-items:center;justify-content:center;font:850 8px/1.05 var(--mono)}
+#hub .hub-bench-stack .injbar .inj-btns button small{display:block;color:var(--color-slate);font:700 7px/1.15 var(--mono)}
+#hub .hub-bench-stack .injbar .inj-btns button:disabled{opacity:.52;cursor:not-allowed}
+#hub .hub-bench-stack .injbar .inj-btns button:not(:disabled):hover{border-color:color-mix(in srgb,currentColor 54%,var(--border-default))!important;background:color-mix(in srgb,currentColor 6%,var(--surface-elevated))!important}
+#hub .hub-bench-stack .injbar .inj-action-icon{display:inline-grid;place-items:center;width:13px;height:13px;margin-right:4px;border:1px solid currentColor;border-radius:50%;font:900 8px/1 var(--mono);opacity:.82}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-bench-btn{color:var(--color-ink)!important}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-heal-btn{border-color:color-mix(in srgb,var(--status-success) 42%,var(--border-default))!important;color:var(--status-positive-text)!important;background:color-mix(in srgb,var(--status-success) 5%,var(--surface-elevated))!important}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-play-btn{border-color:color-mix(in srgb,var(--status-error) 38%,var(--border-default))!important;color:var(--status-negative-text)!important;background:color-mix(in srgb,var(--status-error) 4%,var(--surface-elevated))!important}
 #hub #shopLbl .shop-label-wrap{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
 #hub #shopLbl .shop-label-title{display:inline-flex;align-items:center;gap:5px;min-width:0}
 #hub #shopLbl .shop-reroll-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:58px;min-height:36px;padding:5px 8px;border:1px solid var(--border-subtle);border-radius:7px;background:var(--surface-elevated);color:var(--color-slate);font:800 8px/1 var(--mono);cursor:pointer}
 #hub #shopLbl .shop-reroll-btn.is-rewarded{border-color:color-mix(in srgb,var(--color-primary) 60%,var(--border-subtle));color:var(--color-primary)}
 #hub #shopLbl .shop-reroll-btn:disabled{cursor:default;opacity:.55}
-#hub .hub-bench-stack .injbar .inj-reward-btn{border-color:color-mix(in srgb,var(--color-primary) 60%,var(--border-default))!important;color:var(--color-primary)!important}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-reward-btn{border-color:color-mix(in srgb,var(--risk-fortune) 72%,var(--border-default))!important;color:var(--risk-fortune-highlight)!important;background:linear-gradient(135deg,color-mix(in srgb,var(--risk-fortune) 16%,var(--surface-elevated)),color-mix(in srgb,var(--risk-fortune) 7%,var(--surface-elevated)))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--risk-fortune) 16%,transparent)!important}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-reward-btn.is-ready{border-color:var(--risk-fortune)!important;color:var(--risk-fortune-highlight)!important;animation:injuryRewardArrival .65s ease-out both}
+#hub .hub-bench-stack .injbar .inj-btns button.inj-reward-btn:disabled{opacity:.72!important;filter:saturate(.72)}
+#hub .hub-bench-stack .injbar .inj-reward-mark{margin-right:4px;font-size:7px}
+#hub .hub-bench-stack .injbar .inj-reward-badge{position:absolute;top:3px;right:3px;padding:2px 4px;border-radius:999px;background:var(--risk-fortune);color:var(--status-on-warning);font:900 5.5px/1 var(--mono);letter-spacing:.35px}
+@keyframes injuryRewardArrival{0%{box-shadow:0 0 0 color-mix(in srgb,var(--risk-fortune) 0%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--risk-fortune) 12%,transparent)}45%{box-shadow:0 0 13px color-mix(in srgb,var(--risk-fortune) 23%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--risk-fortune) 30%,transparent)}100%{box-shadow:0 0 0 color-mix(in srgb,var(--risk-fortune) 0%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--risk-fortune) 16%,transparent)}}
+@media(prefers-reduced-motion:reduce){#hub .hub-bench-stack .injbar .inj-reward-btn.is-ready{animation:none}}
 #hub .hub-bench-stack .injbar button:focus-visible{outline:2px solid var(--color-primary)!important;outline-offset:2px}
 @media(max-width:900px){
   #hub .hub-bench-stack{
@@ -6785,6 +6842,8 @@ html[data-theme="dark"] .sdbtn.on{background:var(--color-primary);border-color:v
     max-width:100%!important;
     margin:0!important;
   }
+  #hub .hub-bench-stack .injbar{grid-template-columns:1fr!important}
+  #hub .hub-bench-stack .injbar .inj-btns{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 /* ===== Editorial landing hero + tactical timeline ===== */
@@ -7213,15 +7272,6 @@ body.reduced-motion .tactical-board-clock b,body.reduced-motion .tactical-attack
   }
   #hub .pitch-area #hubBenchSection .bench-power{font-size:9px}
   #hub .pitch-area #hubBenchSection .bench-inj{font-size:5.5px;padding:1px 3px}
-  #hub .pitch-area .hub-bench-stack:has(.injbar:not(.hidden)){
-    height:auto;
-    margin-top:8px;
-  }
-  #hub .pitch-area .hub-bench-stack:has(.injbar:not(.hidden)) #hubBenchSection{
-    position:static;
-    align-self:flex-end;
-    width:232px!important;
-  }
 }
 @media(max-width:980px), (orientation:portrait){
   #hub .pitch-area #hubBenchSection{
@@ -7422,6 +7472,129 @@ html:not(.copa-mobile-game) #chairpick .chair-card .chair-detail-link,
   #introLand .tactical-board{transform:translateY(-4px)}
   #introLand .tactical-stage{padding:0}
 }
+
+/* Premium desktop hero polish: stronger focus without adding more copy. */
+@media (min-width:721px) and (pointer:fine){
+  #introLand .v7-landing-panel{
+    isolation:isolate;
+    border-top-color:color-mix(in srgb,var(--color-slate) 34%,var(--border-subtle));
+    border-bottom-color:color-mix(in srgb,var(--color-slate) 46%,var(--border-subtle));
+    box-shadow:0 14px 36px rgba(10,17,24,.11),inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  #introLand .v7-landing-panel::before,
+  #introLand .v7-landing-panel::after{
+    content:"";
+    position:absolute;
+    z-index:3;
+    left:1px;
+    right:1px;
+    height:1px;
+    pointer-events:none;
+  }
+  #introLand .v7-landing-panel::before{top:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-slate) 24%,transparent) 22% 78%,transparent)}
+  #introLand .v7-landing-panel::after{bottom:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-slate) 38%,transparent) 16% 84%,transparent)}
+  #introLand .v7-hero-copy{position:relative;isolation:isolate}
+  #introLand .v7-hero-copy::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    width:min(520px,62vw);
+    height:210px;
+    left:-86px;
+    top:50%;
+    transform:translateY(-50%);
+    pointer-events:none;
+    background:radial-gradient(ellipse at 34% 50%,color-mix(in srgb,var(--color-primary) 14%,transparent),transparent 67%);
+    opacity:.9;
+  }
+  #introLand .v7-tagline-accent{position:relative;display:inline-block;overflow:hidden;isolation:isolate}
+  #introLand .v7-tagline-accent::after{
+    content:"";
+    position:absolute;
+    z-index:1;
+    inset:-10% auto -10% 0;
+    width:34%;
+    pointer-events:none;
+    background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--color-ink) 34%,transparent),transparent);
+    transform:translateX(-145%) skewX(-12deg);
+    animation:heroAccentSweep 1.05s cubic-bezier(.22,.75,.2,1) .34s 1 both;
+  }
+  #introLand .v7-hero-side{transform:none}
+  #introLand .v7-hero-side{
+    width:100%;
+    justify-self:end;
+  }
+  #introLand .tactical-board{
+    max-width:100%;
+    margin-left:auto;
+    filter:drop-shadow(0 12px 22px color-mix(in srgb,var(--page-bg) 68%,transparent));
+  }
+  #introLand .tactical-board::before{
+    content:"";
+    display:block;
+    position:absolute;
+    z-index:0;
+    inset:8% 2%;
+    pointer-events:none;
+    border-radius:50%;
+    background:radial-gradient(ellipse at center,color-mix(in srgb,var(--surface-elevated) 54%,transparent),color-mix(in srgb,var(--page-bg) 22%,transparent) 52%,transparent 76%);
+    filter:blur(12px);
+  }
+  #introLand .tactical-stage{
+    overflow:hidden;
+    border:0;
+    border-radius:3px;
+    background:transparent;
+    box-shadow:none;
+  }
+  #introLand .tactical-stage::after{
+    content:"";
+    position:absolute;
+    z-index:4;
+    inset:0;
+    pointer-events:none;
+    inset:3% 2%;
+    border-radius:12px;
+    background:radial-gradient(ellipse at center,transparent 56%,color-mix(in srgb,var(--page-bg) 20%,transparent) 100%);
+    box-shadow:none;
+  }
+  #introLand .tactical-diagram{width:100%;height:100%;aspect-ratio:auto;align-self:stretch}
+  #introLand .tactical-route-primary{
+    animation:heroRouteReveal 1.15s cubic-bezier(.2,.72,.2,1) .16s 1 both;
+    stroke:var(--color-primary);
+    stroke-width:1.8;
+    filter:drop-shadow(0 0 2px color-mix(in srgb,var(--color-primary) 42%,transparent));
+  }
+  #introLand .tactical-run{
+    animation:none;
+    opacity:.34;
+    stroke:color-mix(in srgb,var(--color-slate) 48%,transparent);
+    marker-end:none;
+  }
+  #introLand .mechanics{
+    border-top-color:color-mix(in srgb,var(--color-slate) 34%,var(--border-subtle));
+    background:linear-gradient(90deg,color-mix(in srgb,var(--surface-elevated) 34%,transparent),color-mix(in srgb,var(--surface-elevated) 22%,transparent));
+  }
+  #introLand .mstep + .mstep::before{content:none;display:none}
+  #introLand .mstep::after{content:none!important;display:none!important}
+  #introLand .mn{width:27px;height:27px;min-width:27px;flex-basis:27px;font-size:9.5px}
+  #introLand .mt{font-size:10.5px}
+  #introLand .mstep.is-active .mn{box-shadow:0 0 0 2px color-mix(in srgb,var(--color-primary) 10%,transparent),0 0 13px color-mix(in srgb,var(--color-primary) 14%,transparent)}
+}
+@media (min-width:1100px) and (pointer:fine){
+  #introLand .v7-hero-head{
+    grid-template-columns:minmax(500px,1fr) minmax(440px,500px);
+    justify-content:stretch;
+    gap:clamp(40px,3vw,56px);
+  }
+}
+@media (min-width:721px) and (max-width:900px) and (pointer:fine){
+  #introLand .v7-hero-head{grid-template-columns:minmax(0,1fr) minmax(290px,340px);gap:18px}
+}
+@keyframes heroAccentSweep{0%{transform:translateX(-145%) skewX(-12deg);opacity:0}18%{opacity:1}100%{transform:translateX(390%) skewX(-12deg);opacity:0}}
+@keyframes heroRouteReveal{0%{opacity:0;stroke-dashoffset:22}28%{opacity:.35}100%{opacity:1;stroke-dashoffset:0}}
+body.reduced-motion #introLand .v7-tagline-accent::after,
+body.reduced-motion #introLand .tactical-route-primary{animation:none}
 
 /* Contextual colour system for the play-style choices. The accent identifies
    the tactical idea while green/red effect chips keep their semantic meaning. */

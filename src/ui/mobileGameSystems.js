@@ -130,7 +130,7 @@
     if(!view){view=document.createElement("div");view.id="mobileGameLanding";view.className="mobile-game-landing";land.prepend(view);}
     view._savedRun=saved||null;
     const data=saved?savedSummary(saved):null,meta=landingMeta();
-    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><span class="mgl-light mgl-light-l"></span><span class="mgl-light mgl-light-r"></span><span class="mgl-tunnel"></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>COPA LIFE</h1><p>${tr()?"Yedi maç. Tek kupa. Her seçim kulübünün hikâyesini değiştirir.":"Seven matches. One cup. Every choice changes your club's story."}</p></div><ol class="mgl-road" aria-label="${tr()?"Kupa yolu":"Cup journey"}"><li>${tr()?"KADRO":"SQUAD"}</li><li>${tr()?"GRUPLAR":"GROUPS"}</li><li>${tr()?"ELEMELER":"KNOCKOUT"}</li><li>${tr()?"KUPA":"CUP"}</li></ol><div class="mgl-board-wrap"><span>4–3–3 · ${tr()?"DENGELİ YERLEŞİM":"BALANCED SHAPE"}</span>${landingPitch()}</div><section class="mgl-meta" aria-label="${tr()?"Kariyer özeti":"Career summary"}"><div class="mgl-career"><span>${tr()?"KARİYER":"CAREER"}</span><b>${tr()?"SEVİYE":"LEVEL"} ${meta.level}</b><b>${meta.reputation} ${tr()?"İTİBAR":"REP"}</b><b>${meta.licenses} ${tr()?"LİSANS":"LICENCES"}</b></div><div class="mgl-world"><b>6 <small>${tr()?"ÜLKE":"COUNTRIES"}</small></b><b>11 <small>${tr()?"LİG":"LEAGUES"}</small></b><b>9.827 <small>${tr()?"OYUNCU":"PLAYERS"}</small></b><b>220 <small>${tr()?"KULÜP":"CLUBS"}</small></b></div></section><div class="mgl-bottom">${data?`<article class="mgl-save"><span>${tr()?"DEVAM EDEN KARİYER":"ACTIVE CAREER"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/7</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki rakip":"Next opponent"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"KARİYERE DEVAM ET":"CONTINUE CAREER"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"BAŞLA":"START"}</button><button class="arena-entry mgl-arena-entry" data-mobile-arena type="button" onclick="CopaLazy.openArena()" aria-label="Copa Arena"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button></div></div></div>`;
+    view.innerHTML=`<div class="mgl-atmosphere" aria-hidden="true"><span class="mgl-light mgl-light-l"></span><span class="mgl-light mgl-light-r"></span><span class="mgl-tunnel"></span></div><div class="mgl-content"><div class="mgl-brand"><small>${tr()?"KADERİNİ KUR":"BUILD YOUR FATE"}</small><h1>COPA <em>LIFE</em></h1><p>${tr()?"Yedi maç. Tek kupa. Her seçim kulübünün hikâyesini değiştirir.":"Seven matches. One cup. Every choice changes your club's story."}</p></div><ol class="mgl-road" aria-label="${tr()?"Kupa yolu":"Cup journey"}"><li>${tr()?"KADRO":"SQUAD"}</li><li>${tr()?"GRUPLAR":"GROUPS"}</li><li>${tr()?"ELEMELER":"KNOCKOUT"}</li><li>${tr()?"KUPA":"CUP"}</li></ol><div class="mgl-board-wrap"><span>4–3–3 · ${tr()?"DENGELİ YERLEŞİM":"BALANCED SHAPE"}</span>${landingPitch()}</div><section class="mgl-meta" aria-label="${tr()?"Kariyer özeti":"Career summary"}"><div class="mgl-career"><span>${tr()?"KARİYER":"CAREER"}</span><b>${tr()?"SEVİYE":"LEVEL"} ${meta.level}</b><b>${meta.reputation} ${tr()?"İTİBAR":"REP"}</b><b>${meta.licenses} ${tr()?"LİSANS":"LICENCES"}</b></div><div class="mgl-world"><b>6 <small>${tr()?"ÜLKE":"COUNTRIES"}</small></b><b>11 <small>${tr()?"LİG":"LEAGUES"}</small></b><b>9.827 <small>${tr()?"OYUNCU":"PLAYERS"}</small></b><b>220 <small>${tr()?"KULÜP":"CLUBS"}</small></b></div></section><div class="mgl-bottom">${data?`<article class="mgl-save"><span>${tr()?"DEVAM EDEN KARİYER":"ACTIVE CAREER"}</span><h2>${escapeHtml(data.club)}</h2><div><b>${tr()?"MAÇ":"MATCH"} ${data.round}/7</b><b>${tr()?"GÜÇ":"POWER"} ${data.power}</b></div><p>${tr()?"Sıradaki rakip":"Next opponent"} · ${escapeHtml(data.opponent)}</p></article>`:""}<div class="mgl-actions">${data?`<button class="btn btn-go" onclick="CopaMobileShell.continueRun()">${tr()?"KARİYERE DEVAM ET":"CONTINUE CAREER"}</button>`:""}<button class="btn ${data?"btn-ghost":"btn-go"}" onclick="CopaMobileShell.newRun()">${tr()?"BAŞLA":"START"}</button><button class="arena-entry mgl-arena-entry" data-mobile-arena type="button" onclick="CopaLazy.openArena()" aria-label="Copa Arena"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17V8l8-4 8 4v9M2 20h20M7 17v-5h10v5M9 9h6"/></svg><span>COPA ARENA</span><span class="arena-entry-live"><i></i> LIVE</span></button></div></div></div>`;
     view.querySelector("[data-mobile-arena]")?.remove();
     land.classList.remove("hidden");intro.classList.remove("hidden");
     return true;
@@ -212,10 +212,19 @@
     const setup=document.getElementById("introSetup");if(setup)setup.dataset.mobileCurrentStep=String(setupStep);
     document.querySelectorAll("#introSetup [data-mobile-step]").forEach(node=>node.classList.toggle("is-mobile-step-active",Number(node.dataset.mobileStep)===setupStep));
     const nav=document.getElementById("mobileSetupNav"),cta=document.querySelector("#introSetup .v7-cta-stack");
-    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/stepCount*100}%`;if(label)label.textContent=`${setupStep}/${stepCount}`;if(back)back.disabled=setupStep===1;if(next)next.classList.toggle("hidden",setupStep===stepCount);}
+    if(nav){const bar=nav.querySelector("i"),label=nav.querySelector("b"),back=nav.querySelector("[data-step-back]"),next=nav.querySelector("[data-step-next]");if(bar)bar.style.width=`${setupStep/stepCount*100}%`;if(label)label.textContent=`${setupStep}/${stepCount}`;if(back){back.disabled=setupStep===1;back.hidden=setupStep===1;}if(next){next.classList.toggle("hidden",setupStep===stepCount);const chairBlocked=setupStep===1&&Boolean(root.CopaChairSelectionSurface&&root.CopaChairSelectionSurface.displayedChairIsLocked());next.classList.toggle("is-chair-blocked",chairBlocked);next.setAttribute("aria-disabled",String(chairBlocked));}}
     if(cta)cta.classList.toggle("is-mobile-step-active",setupStep===stepCount);
   }
-  function step(delta){setSetupStep(setupStep+(Number(delta)||0));}
+  function step(delta){
+    const direction=Number(delta)||0;
+    if(direction>0&&setupStep===1&&root.CopaChairSelectionSurface&&root.CopaChairSelectionSurface.displayedChairIsLocked()){
+      root.CopaChairSelectionSurface.warnLockedChair("next");
+      setSetupStep(setupStep);
+      return false;
+    }
+    setSetupStep(setupStep+direction);
+    return true;
+  }
   function handleBack(){
     const setup=document.getElementById("introSetup");
     if(setup&&!setup.classList.contains("hidden")&&gameMode()){
@@ -563,6 +572,7 @@
       observer.observe(hub,{attributes:true,attributeFilter:["class"]});
     }
     const setup=document.getElementById("introSetup");if(setup)new MutationObserver(()=>enhanceSetupChoices()).observe(setup,{childList:true,subtree:true});
+    root.addEventListener("copa:chair-preview-changed",()=>setSetupStep(setupStep));
     const draft=document.getElementById("draft");if(draft)new MutationObserver(()=>enhanceDraftControls()).observe(draft,{attributes:true,attributeFilter:["class"]});
   }
   function ensureSettingsExtras(){

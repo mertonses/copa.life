@@ -172,6 +172,34 @@ test("chairman selection confirms from the surface without opening a detail moda
   await page.screenshot({path:path.join(output,`selection-feedback-${testInfo.project.name}.png`),fullPage:false});
 });
 
+test("Diplomat copy is explicit and Miser numbers use contextual colors",async({page})=>{
+  await page.goto("/?chairman-copy-qa=1",{waitUntil:"domcontentloaded"});
+  await page.evaluate(async()=>{
+    const game=globalThis as any;
+    game.setLang("tr");
+    game._applyCheat();
+    game.goSetup();
+    await game.pickCountry("TR");
+  });
+  const surface=page.locator("#chairSelectionSurface");
+  await expect(surface).toBeVisible();
+
+  await surface.locator(".js-chair-next").click();
+  await expect(surface.locator(".js-chair-advantage")).toHaveText("Her draft adayının yerli havuzundan gelme ihtimali %20 artar.");
+
+  await surface.locator(".js-chair-next").click();
+  await expect(surface.locator(".js-chair-stage-title")).toContainText("Pinti");
+  const discount=surface.locator(".js-chair-advantage .chair-value-positive");
+  const saving=surface.locator(".js-chair-trigger .chair-value-positive");
+  const threshold=surface.locator(".js-chair-trigger .chair-value-neutral");
+  await expect(discount).toHaveText("%10");
+  await expect(saving).toHaveText("€2M");
+  await expect(threshold).toHaveText("0");
+  await expect(discount).toHaveCSS("color","rgb(115, 203, 145)");
+  await expect(saving).toHaveCSS("color","rgb(115, 203, 145)");
+  await expect(threshold).toHaveCSS("color","rgb(243, 245, 244)");
+});
+
 test("chairman surface supports keyboard navigation and locked previews",async({page},testInfo)=>{
   await page.goto("/?chairman-cards-visual-qa=1",{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{

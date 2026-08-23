@@ -34,8 +34,8 @@
     const target=list.find(player=>player&&!player.injured&&!player.suspended);
     if(!target)return null;
     injuryConsumed=true;
-    target.injured=true;
-    target.injuryLevel=2;
+    if(typeof root.assignPlayerInjury==="function")root.assignPlayerInjury(target,2);
+    else{target.injured=true;target.injuryLevel=2;target.injuryMatchesRemaining=2;target.injuryDecisionRound=0;target.injuryPlayedRound=0;}
     if(typeof root.econStats==="object"&&root.econStats)root.econStats.injuries=(Number(root.econStats.injuries)||0)+1;
     if(typeof root.syncInjuredIdx==="function")root.syncInjuredIdx();
     return target;

@@ -1,4 +1,5 @@
 html.mode-gate-active,html.mode-gate-active body{overflow:hidden!important}
+html.mode-gate-active body>.wrap{display:none!important}
 .mode-gate{position:fixed;inset:0;z-index:2147483000;display:grid;grid-template-rows:auto 1fr;min-height:100dvh;overflow:auto;color:#f6f1e5;background:#07131d;font-family:Inter,system-ui,sans-serif;isolation:isolate}
 .mode-gate[hidden]{display:none!important}
 .mode-gate::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 75% 34%,rgba(207,157,38,.14),transparent 33%),radial-gradient(circle at 18% 75%,rgba(242,74,40,.08),transparent 28%),linear-gradient(135deg,#0d1c28 0%,#07131d 52%,#091117 100%)}

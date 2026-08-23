@@ -1,0 +1,73 @@
+[
+  {
+    "eventType": "WAIT",
+    "delayTime": 4000,
+    "description": "Allow the native shell and web surface to settle"
+  },
+  {
+    "eventType": "TAKE_SCREENSHOT",
+    "screenshotName": "scroll-start"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Swipe upward through the active mobile surface"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Swipe downward through the active mobile surface"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Repeat upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Repeat downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Third upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Third downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Fourth upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Fourth downward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,78%)->(50%,22%)",
+    "description": "Fifth upward scroll"
+  },
+  {
+    "eventType": "ONE_POINT_GESTURE",
+    "coordinates": "(50%,22%)->(50%,78%)",
+    "description": "Fifth downward scroll"
+  },
+  {
+    "eventType": "WAIT",
+    "delayTime": 1000,
+    "description": "Allow inertial scrolling to settle"
+  },
+  {
+    "eventType": "TAKE_SCREENSHOT",
+    "screenshotName": "scroll-end"
+  },
+  {
+    "eventType": "TERMINATE_CRAWL"
+  }
+]

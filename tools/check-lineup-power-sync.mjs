@@ -47,7 +47,7 @@ assert.equal(sandbox.api.getIndex(),-1);
 
 assert.match(html,/openSuspendedBackup\(\$\{idx\}\)/,
   "the suspension blocker must route the player into a real replacement flow");
-assert.match(html,/old\.injured=false;old\.suspended=false;old\.backupBoost=0/,
+assert.match(html,/old\.backupBoost=0;if\(old\.suspended\)old\.suspended=false/,
   "replacing a suspended starter must clear the stale suspension state");
 
 console.log("Lineup sync OK: swaps rerender power, captain identity stays coherent, and suspended starters have a working replacement path.");

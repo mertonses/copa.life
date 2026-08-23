@@ -21,7 +21,7 @@
 .copa-chair-detail-panel{display:flex;flex-direction:column;min-width:0;padding:22px 24px 18px;background:#14232C}
 .copa-chair-detail-head{align-items:flex-start;color:#aeb8ba}
 .copa-chair-detail-kicker{display:block;margin-bottom:10px;color:#4e9b65;font:800 9px/1 var(--mono);letter-spacing:1.6px}
-.copa-chair-detail-head h2{margin:0;color:#f3f5f4;font:900 clamp(24px,2.8vw,38px)/.95 var(--disp);letter-spacing:-.04em;text-transform:uppercase}
+.copa-chair-detail-head h2{margin:0;color:#f3f5f4;font:900 clamp(24px,2.8vw,38px)/.95 var(--disp);letter-spacing:-.025em;word-spacing:.18em;text-transform:uppercase}
 .copa-chair-detail-role{margin:8px 0 0;color:#aeb8ba;font:700 9px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase}
 .copa-chair-detail-desc{min-height:48px;margin:22px 0 16px;color:#aeb8ba;font:550 11px/1.5 var(--disp)}
 .copa-chair-detail-desc b{color:#f3f5f4;font-weight:800}
@@ -167,6 +167,10 @@
   gap:6px!important;
 }
 #introSetup .copa-formation-panel .formpick .fbtn{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
   min-width:0!important;
   width:100%!important;
   min-height:44px!important;
@@ -176,6 +180,32 @@
   border-radius:0!important;
   background:var(--surface-elevated)!important;
   color:var(--color-ink)!important;
+  text-align:center!important;
+}
+#introSetup .copa-formation-panel .formation-name-row{
+  display:inline-flex!important;
+  width:auto!important;
+  min-width:0;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px;
+  line-height:1!important;
+}
+#introSetup .copa-formation-panel .formation-name-row .formation-card-name{
+  display:block!important;
+  width:auto!important;
+  min-height:0!important;
+  line-height:1!important;
+  text-align:center!important;
+}
+#introSetup .copa-formation-panel .formation-name-row .lockicon{
+  display:block!important;
+  flex:0 0 14px;
+  width:14px!important;
+  height:14px!important;
+  margin:0!important;
+  align-self:center!important;
+  vertical-align:middle!important;
 }
 #introSetup .copa-formation-panel .formpick .fbtn:hover:not(.locked):not(.sel),
 #introSetup .copa-country-panel .countrypick button:hover:not(.on):not(.locked){

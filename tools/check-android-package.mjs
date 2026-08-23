@@ -43,6 +43,14 @@ if(fs.existsSync(nativeRuntime)){const source=fs.readFileSync(nativeRuntime,"utf
 if(!fs.existsSync(nativeAdsRuntime))fail("Android native ad runtime is missing");else{const source=fs.readFileSync(nativeAdsRuntime,"utf8");for(const marker of ["CopaAds","showRunEnd","showArenaEnd","showRewardedReroll","showRewardedInjury","showRewardedMarket","showListPlacement","hideListPlacement","showPrivacyOptions","privacyOptionsChanged","scheduleInitialize","setTimeout(initialize,8000)"])if(!source.includes(marker))fail(`Android native ad runtime is missing ${marker}`);}
 if(!index.includes("Capacitor.Plugins.Browser")||!index.includes("openNativeSupport")||!index.includes('const supportUrl="https://copa.life/support.html"')||!index.includes("plugin.open({url:supportUrl"))fail("Android support link is not routed through the dedicated support page");
 if(index.includes('plugin.open({url:"https://copa.life/"'))fail("Android support link still routes to the public home page");
+const arenaSourcePath=path.join(OUT,"src/online/arena.js");
+if(!fs.existsSync(arenaSourcePath))fail("Android Arena source is missing");
+else{
+  const arenaSource=fs.readFileSync(arenaSourcePath,"utf8");
+  if(/plugin\.login\(\{provider:["']google["'],options:\{scopes:/.test(arenaSource))fail("Android Google sign-in requests custom scopes without a modified Activity");
+  for(const marker of ["filterByAuthorizedAccounts:false","autoSelectEnabled:false","googleErrorMessage",'class="arena-google-error" role="alert"'])if(!arenaSource.includes(marker))fail(`Android Google sign-in contract is missing ${marker}`);
+  if(arenaSource.includes("You CANNOT use scopes"))fail("Android Arena ships a raw SocialLogin developer diagnostic");
+}
 const platformManifestPath=path.join(OUT,"platform-build.json"),versionPath=path.join(ROOT,"release/android-version.json");
 if(!fs.existsSync(platformManifestPath))fail("Android platform build manifest missing");
 else if(!fs.existsSync(versionPath))fail("Android release version file missing");

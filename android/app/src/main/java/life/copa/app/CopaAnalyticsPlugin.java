@@ -7,6 +7,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +16,8 @@ import java.util.Set;
 
 @CapacitorPlugin(name = "CopaAnalyticsNative")
 public class CopaAnalyticsPlugin extends Plugin {
+    private boolean metaEnabled = false;
+    private AppEventsLogger metaLogger;
     private static final Set<String> EVENTS = new HashSet<>(Arrays.asList(
         "session_started", "country_selected", "formation_selected", "chairman_selected",
         "style_selected", "draft_started", "xi_completed", "match_completed",
@@ -35,10 +39,18 @@ public class CopaAnalyticsPlugin extends Plugin {
         return FirebaseAnalytics.getInstance(getContext());
     }
 
+    private AppEventsLogger metaAnalytics() {
+        if (metaLogger == null) metaLogger = AppEventsLogger.newLogger(getContext());
+        return metaLogger;
+    }
+
     @PluginMethod
     public void setEnabled(PluginCall call) {
         boolean enabled = call.getBoolean("enabled", false);
         analytics().setAnalyticsCollectionEnabled(enabled);
+        metaEnabled = enabled;
+        FacebookSdk.setAutoLogAppEventsEnabled(false);
+        FacebookSdk.setAdvertiserIDCollectionEnabled(false);
         call.resolve(new JSObject().put("enabled", enabled));
     }
 
@@ -61,6 +73,7 @@ public class CopaAnalyticsPlugin extends Plugin {
             else if (value != null) parameters.putString(key, clean(value));
         }
         analytics().logEvent(event, parameters);
+        if (metaEnabled) metaAnalytics().logEvent(event, parameters);
         call.resolve();
     }
 

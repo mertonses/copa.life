@@ -406,14 +406,14 @@ function applyRiskCardGain(k){
   const count=v===1?2:1;
   let healed=0;
   if(injuredIdx>=0&&picksBySlot[injuredIdx]){
-   const _ip=picksBySlot[injuredIdx];_ip.injured=false;healed++;
+   const _ip=picksBySlot[injuredIdx];if(typeof clearPlayerInjury==="function")clearPlayerInjury(_ip);else _ip.injured=false;healed++;
    pushFeed("💉 <b>"+shortName(_ip)+"</b> "+(tr?"iyileşti":"healed"),"buy");
    injuredIdx=-1;
   }
   // 2. sakatlık icin (dark): basit kontrol
   if(healed<count){
    const secondInj=picksBySlot.findIndex((p,i)=>p&&p.injured&&i!==injuredIdx);
-   if(secondInj>=0){const _sp=picksBySlot[secondInj];_sp.injured=false;healed++;pushFeed("💉 <b>"+shortName(_sp)+"</b> "+(tr?"iyileşti":"healed"),"buy");}
+   if(secondInj>=0){const _sp=picksBySlot[secondInj];if(typeof clearPlayerInjury==="function")clearPlayerInjury(_sp);else _sp.injured=false;healed++;pushFeed("💉 <b>"+shortName(_sp)+"</b> "+(tr?"iyileşti":"healed"),"buy");}
   }
   if(!healed){const refund=cardPrice(k);if(refund>0)earn(refund,"earned");pushFeed("💉 <b>"+L().cards[k].n+"</b> "+(tr?"sakat oyuncu yok — iade +€"+refund+"M":"no injured player — refund +€"+refund+"M"),"buy");return;}
   if(v===1&&rand()<0.25){applyCardCashPenalty(k,6);pushFeed("💉 "+(tr?"Tedavi masrafı: -€6M":"Treatment cost: -€6M"),"lose");}

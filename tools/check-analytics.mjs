@@ -23,6 +23,10 @@ const privacy=read("privacy.html");
 const webIndex=read("dist/index.html");
 const androidIndex=read("dist-android/index.html");
 const iosIndex=read("dist-ios/index.html");
+const androidAnalytics=read("android/app/src/main/java/life/copa/app/CopaAnalyticsPlugin.java");
+const androidManifest=read("android/app/src/main/AndroidManifest.xml");
+const androidGradle=read("android/app/build.gradle");
+const androidStrings=read("android/app/src/main/res/values/strings.xml");
 
 expect(sourceIndex.includes('meta name="copa-analytics-api"'),"web analytics API meta is missing");
 expect(sourceIndex.includes("src/runtime/productAnalytics.js"),"web product analytics runtime is not loaded");
@@ -80,6 +84,10 @@ for(const [name,index] of [["Android",androidIndex],["iOS",iosIndex]]){
 }
 expect(fs.existsSync(path.join(ROOT,"dist-android/src/runtime/productAnalytics.js")),"Android artifact is missing the product analytics runtime");
 expect(fs.existsSync(path.join(ROOT,"dist-ios/src/runtime/productAnalytics.js")),"iOS artifact is missing the product analytics runtime");
+expect(androidGradle.includes("com.facebook.android:facebook-core:18.3.0"),"Android Meta App Events SDK is missing or unpinned");
+expect(androidStrings.includes('<string name="facebook_app_id" translatable="false">1408973857833536</string>'),"Meta app ID does not match the configured Copa Life app");
+expect(androidManifest.includes("com.facebook.sdk.ApplicationId")&&androidManifest.includes('com.facebook.sdk.AutoLogAppEventsEnabled" android:value="false"')&&androidManifest.includes('com.facebook.sdk.AdvertiserIDCollectionEnabled" android:value="false"'),"privacy-safe Meta manifest configuration is incomplete");
+expect(androidAnalytics.includes("metaEnabled = enabled")&&androidAnalytics.includes("metaAnalytics().logEvent(event, parameters)"),"Meta App Events must follow the existing explicit native analytics opt-in");
 
 if(failures.length){for(const failure of failures)console.error(`[analytics] ${failure}`);process.exit(1);}
 console.log("[analytics] privacy-minimised web funnel and explicit opt-in native platform metrics passed");
