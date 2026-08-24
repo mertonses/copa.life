@@ -182,7 +182,9 @@ test("risky offers use distinct static icons and preserve the intended packages"
   await openHub(page);
   await page.evaluate(()=>(globalThis as any).showDraftEvent());
   await expect(page.getByRole("button",{name:/Vadeli Kudret/})).toBeVisible();
-  await expect(page.getByRole("button",{name:/Kör Talih/})).toContainText("+€12M");
+  const blindFortune=page.getByRole("button",{name:/Kör Talih/});
+  await expect(blindFortune).toContainText("+€10M");
+  await expect(blindFortune).toContainText("%40 ihtimal -€20M");
   await expect(page.getByRole("button",{name:/Dişini Sık/})).toContainText("+5 güç");
   await expect(page.getByRole("button",{name:/Pas Geç/})).toContainText("Etki yok");
 
@@ -248,8 +250,8 @@ test("risky offers use distinct static icons and preserve the intended packages"
 
   expect(result).toEqual({
     press:{power:6,cost:8,fatigue:1},
-    blindSafe:12,
-    blindClawback:-8,
+    blindSafe:10,
+    blindClawback:-10,
     grit:{power:5,pending:1},
     stackedDebtTurns:3,
     passUnchanged:true,
