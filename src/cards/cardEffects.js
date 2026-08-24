@@ -528,7 +528,7 @@ function processRiskCards(){
  }
  /* Gec Gec dark: sakatlık riski */
  if(hasCard("gec_gec")&&variantOf("gec_gec")===1&&rand()<0.25){
-  const inj=applyRandomInjury(1);
+  const inj=applyRandomInjury(1);if(inj&&typeof trackInjurySource==="function")trackInjurySource("card");
   if(inj)pushFeed("🦺 "+(tr?"Barikat riski: ":"Barricade risk: ")+"<b>"+shortName(inj)+"</b>"+(tr?" sakatlandı":" injured"),"lose");
  }
 }
@@ -541,7 +541,7 @@ function expireTemporaryCards(){
   const penAmt=(typeof window._geciciPrimV!=="undefined"&&window._geciciPrimV===1)?2:2;
   tempPrimePenalty=-penAmt;
   cards=cards.filter(k=>k!=="gecici_prim");cardInv.gecici_prim=0;cardVariant.gecici_prim=0;
-  if(rand()<injChance){const inj=applyRandomInjury(1);if(inj)pushFeed("🩺 <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"Geçici Prim sonrası sakatlandı":"injured after Temporary Bonus"),"lose");}
+  if(rand()<injChance){const inj=applyRandomInjury(1);if(inj){if(typeof trackInjurySource==="function")trackInjurySource("card");pushFeed("🩺 <b>"+shortName(inj)+"</b> "+(LANG==="tr"?"Geçici Prim sonrası sakatlandı":"injured after Temporary Bonus"),"lose");}}
   pushFeed("💸 "+(LANG==="tr"?"Geçici Prim bitti: sıradaki maç -"+penAmt+" güç":"Temporary Bonus expired: next match -"+penAmt+" power"),"lose");
   window._geciciPrimV=0;
  }

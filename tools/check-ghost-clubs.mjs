@@ -9,7 +9,7 @@ const checks = [
   ["ghost client", "src/online/ghostClubs.js", ["consentVersion", "leaderboardConsentVersion", "hasConsent", "hasLeaderboardConsent", "sharingEnabled", "leaderboardEnabled", "requestConsent", "requestLeaderboardConsent", "deleteMyData", "deleteLeaderboardData", "recordLeaderboardRun", "renderLeaderboard", "reportGhost", "blockGhost", "blockedIds", "recordCompletedRun", "findOpponent", "flushReportQueue", "clearLocalGhostData"]],
   ["hub bridge", "src/ui/hub.js", ["_lockGhostOpponent", "_applyGhostOpponent", "_ghostHubContextActive", "phase===\"hub\"", "ghostCheckedRounds", "ghostMeta", "ghost-report-btn", "reportGhost"]],
   ["match bridge", "src/sim/finalSim.js", ["_ghostProfile", "ghostTactics"]],
-  ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "GhostClubs.recordCompletedRun"]],
+  ["page bootstrap", "index.html", ["src/online/ghostClubs.js", "copa-ghost-api", "https://api.copa.life", "GhostClubs.recordCompletedRun"]],
   ["privacy policy", "privacy.html", ["45 gün", "90 gün", "Çevrimiçi verilerimi sil", "leaderboard-terms-v1"]],
   ["terms", "terms.html", ["Ghost Club", "Dünya Kulüpler Sıralaması", "bildir"]],
   ["takedown channel", "takedown.html", ["TAKEDOWN", "bildir"]],
@@ -19,6 +19,10 @@ const checks = [
   ["moderation migration", "services/ghost-club-api/migrations/0002_consent_moderation_retention.sql", ["owner_hash", "consent_version", "ghost_reports", "ghost_clients"]],
   ["leaderboard migration", "services/ghost-club-api/migrations/0003_club_leaderboard.sql", ["club_profiles", "career_runs", "season_score"]],
   ["worker tests", "services/ghost-club-api/test/worker.spec.js", ["explicit consent", "scores career runs on the server", "semantically forged squads", "deduplicates spoofed reports", "deletes all rows owned", "physically purges"]],
+  ["TLS gateway", "services/ghost-club-gateway/functions/[[path]].js", ["GHOST_SERVICE.fetch", "context.request"]],
+  ["TLS gateway config", "services/ghost-club-gateway/wrangler.jsonc", ["copa-life-ghost-gateway", "pages_build_output_dir", "GHOST_SERVICE", "copa-life-ghost-clubs"]],
+  ["TLS gateway robots", "services/ghost-club-gateway/public/robots.txt", ["Disallow: /"]],
+  ["push operator workflow", ".github/workflows/push-notification.yml", ["COPA_PUSH_API_URL", "COPA_PUSH_ADMIN_TOKEN", "COPA_PUSH_DRY_RUN"]],
 ];
 
 let failures = 0;

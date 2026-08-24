@@ -1,4 +1,4 @@
-const target=process.argv[2]||"https://copa-life-ghost-clubs.mertonses-copa.workers.dev/v1/health";
+const target=process.argv[2]||"https://api.copa.life/v1/health";
 const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
 try{
   const response=await fetch(target,{headers:{accept:"application/json"},signal:controller.signal});

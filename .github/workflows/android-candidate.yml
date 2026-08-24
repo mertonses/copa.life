@@ -159,6 +159,8 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/bundle/release/candidate-manifest.json
+            android/app/build/outputs/mapping/release/mapping.txt
+            android/app/build/outputs/native-debug-symbols/release/native-debug-symbols.zip
             outputs/native-smoke/launch.png
             outputs/native-smoke/logcat.txt
             outputs/native-smoke/result.txt

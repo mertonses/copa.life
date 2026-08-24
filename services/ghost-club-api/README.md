@@ -41,7 +41,13 @@ GitHub Actions performs tests and dry-run builds on pull requests. `main` deploy
 
 - `GET /v1/health` checks Worker execution and a real D1 query.
 - `ghost-health.yml` probes production every 30 minutes and fails visibly in GitHub Actions.
-- Set the repository/environment variable `GHOST_API_HEALTH_URL` to the canonical production `/v1/health` URL; the script's workers.dev URL is only a fallback.
+- Set the repository/environment variable `GHOST_API_HEALTH_URL` to `https://api.copa.life/v1/health`. This custom domain fronts the Pages service gateway so clients are not dependent on direct `workers.dev` or `pages.dev` reachability.
+
+## Android push delivery
+
+`POST /v1/notifications/send` dispatches a bounded Android FCM HTTP v1 message to active, opted-in device tokens. The route is intentionally hidden behind `PUSH_ADMIN_TOKEN`; Firebase service-account values belong in Worker secrets named `FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, and `FCM_PRIVATE_KEY`.
+
+Operators should use the manual **Send Android push notification** GitHub Action. Its repository variable `COPA_PUSH_API_URL` points to `https://api.copa.life/v1/notifications/send` and its `COPA_PUSH_ADMIN_TOKEN` secret must match the Worker secret. Invalid FCM registration tokens are deactivated automatically.
 - Workers Logs sample 10% and traces sample 1% in production; staging uses higher sampling.
 - Errors are emitted as structured JSON with event, fixed route bucket, and message.
 - `copa_life_worker_health` stores privacy-safe aggregate route, status, request-count and latency metrics; staging uses `copa_life_worker_health_staging`.

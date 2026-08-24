@@ -1,0 +1,61 @@
+name: Send Android push notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Notification title
+        required: true
+        type: string
+      body:
+        description: Notification body
+        required: true
+        type: string
+      deep_link:
+        description: In-app route such as hub/match
+        required: false
+        default: hub/match
+        type: string
+      type:
+        description: Notification category
+        required: true
+        default: system
+        type: choice
+        options: [system, match, injury, transfer, reward, tournament]
+      priority:
+        description: Android delivery priority
+        required: true
+        default: normal
+        type: choice
+        options: [normal, high]
+      locale:
+        description: Optional locale filter such as tr or en
+        required: false
+        type: string
+      dry_run:
+        description: Validate through FCM without delivering
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Send notification
+        env:
+          COPA_PUSH_API_URL: ${{ vars.COPA_PUSH_API_URL }}
+          COPA_PUSH_ADMIN_TOKEN: ${{ secrets.COPA_PUSH_ADMIN_TOKEN }}
+          COPA_PUSH_TITLE: ${{ inputs.title }}
+          COPA_PUSH_BODY: ${{ inputs.body }}
+          COPA_PUSH_DEEP_LINK: ${{ inputs.deep_link }}
+          COPA_PUSH_TYPE: ${{ inputs.type }}
+          COPA_PUSH_PRIORITY: ${{ inputs.priority }}
+          COPA_PUSH_LOCALE: ${{ inputs.locale }}
+          COPA_PUSH_DRY_RUN: ${{ inputs.dry_run }}
+        run: node services/ghost-club-api/scripts/send-push.mjs

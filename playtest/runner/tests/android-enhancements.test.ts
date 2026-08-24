@@ -24,7 +24,11 @@ test("Android presents filtered notifications and a safe pinch-zoom pitch contro
   });
   await expect(page.locator("#hub")).toBeVisible();
   const captainChoice=page.locator("#modal .cap-card").first();
-  if(await captainChoice.isVisible())await captainChoice.click();
+  // The captain picker is asynchronous, but it is a required setup decision.
+  // Waiting for the actual choice prevents the test from racing a modal that
+  // has not mounted yet.
+  await expect(captainChoice).toBeVisible();
+  await captainChoice.click();
   await expect(page.locator("#modal")).toBeHidden();
   await page.evaluate(() => {
     const game = globalThis as any;
@@ -35,6 +39,7 @@ test("Android presents filtered notifications and a safe pinch-zoom pitch contro
   });
   await expect(page.locator("#mobileFeedToggle")).toBeVisible();
   await page.locator("#mobileFeedToggle").click();
+  await expect(page.locator("#modal")).toBeVisible();
   await expect(page.locator(".mobile-feed-filters [data-feed-filter='injury']")).toBeVisible();
   await page.locator(".mobile-feed-filters [data-feed-filter='injury']").click();
   await expect(page.locator(".mobile-feed-history .feeditem:not([hidden])")).toHaveCount(1);
