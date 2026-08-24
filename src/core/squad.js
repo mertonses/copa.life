@@ -78,10 +78,12 @@ function playerAgeValueMultiplier(age){
  if(value<=20)return 1.18;
  if(value<=23)return 1.12;
  if(value<=28)return 1;
- if(value<=30)return .88;
- if(value<=32)return .72;
- if(value<=34)return .55;
- return .40;
+ if(value<=30)return .92;
+ if(value<=32)return .80;
+ if(value<=34)return .68;
+ if(value<=36)return .60;
+ if(value<=38)return .50;
+ return .42;
 }
 function playerPotential(ov,age,hint){
  const current=Math.max(45,Math.min(99,Number(ov)||60)),given=Number(hint);

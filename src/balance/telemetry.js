@@ -3,13 +3,15 @@ var BALANCE_TELEMETRY_KEY="copa_balance_telemetry_v1";
 var balanceTelemetryRun=null;
 var CHAIRMAN_METRIC_KEYS=["consults","positiveEvents","negativeEvents","neutralEvents","penaltyWins","penaltyLosses","spotlightSelections","starTransferBonuses","nephewAccepted","nephewRejected","chaosOffers","chaosRolls","savingsEarned","savingsCash","savingsPower","savingsResidualCash","premiumCardsOffered","premiumCardsPurchased"];
 
-function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},hiddenDraft:{},updatedAt:0};}
+function _btBlank(){return{version:1,runs:0,cards:{},chairmen:{},rewards:{},hiddenDraft:{},riskOffers:{},injury:{sources:{},decisions:{}},runSummary:{countries:{},formations:{}},updatedAt:0};}
 function _btLoad(){
  try{
   const raw=localStorage.getItem(BALANCE_TELEMETRY_KEY);
   const data=raw?JSON.parse(raw):_btBlank();
   if(!data||data.version!==1)return _btBlank();
-  data.cards=data.cards||{};data.chairmen=data.chairmen||{};data.rewards=data.rewards||{};data.hiddenDraft=data.hiddenDraft||{};
+  data.cards=data.cards||{};data.chairmen=data.chairmen||{};data.rewards=data.rewards||{};data.hiddenDraft=data.hiddenDraft||{};data.riskOffers=data.riskOffers||{};
+  data.injury=data.injury||{};data.injury.sources=data.injury.sources||{};data.injury.decisions=data.injury.decisions||{};
+  data.runSummary=data.runSummary||{};data.runSummary.countries=data.runSummary.countries||{};data.runSummary.formations=data.runSummary.formations||{};
   return data;
  }catch(e){return _btBlank();}
 }
@@ -22,12 +24,24 @@ function _btCard(data,key){
  return data.cards[key];
 }
 function _btChair(data,id){
- const empty={runs:0,finalReached:0,champion:0,sacked:0};
+ const empty={runs:0,finalReached:0,champion:0,sacked:0,powerTotal:0,endCashTotal:0,worstDebtTotal:0,injuriesTotal:0};
  CHAIRMAN_METRIC_KEYS.forEach(key=>{empty[key]=0;});
  const cid=String(id||"unknown");
  if(!data.chairmen[cid])data.chairmen[cid]=empty;
  else Object.keys(empty).forEach(key=>{if(typeof data.chairmen[cid][key]!=="number")data.chairmen[cid][key]=empty[key];});
  return data.chairmen[cid];
+}
+function _btRisk(data,id){
+ const key=String(id||"unknown"),empty={shown:0,chosen:0,success:0,failed:0,cashDeltaTotal:0};
+ if(!data.riskOffers[key])data.riskOffers[key]=empty;
+ else Object.keys(empty).forEach(field=>{if(typeof data.riskOffers[key][field]!=="number")data.riskOffers[key][field]=empty[field];});
+ return data.riskOffers[key];
+}
+function _btRunRow(bucket,key){
+ const id=String(key||"unknown"),empty={runs:0,finalReached:0,champion:0,sacked:0,powerTotal:0,endCashTotal:0,worstDebtTotal:0,injuriesTotal:0};
+ if(!bucket[id])bucket[id]=empty;
+ else Object.keys(empty).forEach(field=>{if(typeof bucket[id][field]!=="number")bucket[id][field]=empty[field];});
+ return bucket[id];
 }
 function _btEnsureRun(){
  if(!balanceTelemetryRun)balanceTelemetryRun={chairman:"unknown",cards:{},startedAt:Date.now()};
@@ -86,6 +100,30 @@ function trackRewardChoice(kind,roundNo){
  if(!data.rewards[roundKey])data.rewards[roundKey]={cash:0,loan:0,swap:0,care:0};
  data.rewards[roundKey][key]++;_btSave(data);
 }
+function trackRiskOffersShown(ids,roundNo){
+ const data=_btLoad(),unique=[...new Set((Array.isArray(ids)?ids:[]).map(String).filter(Boolean))];
+ unique.forEach(id=>_btRisk(data,id).shown++);
+ const run=_btEnsureRun();run.riskOfferRounds=run.riskOfferRounds||{};run.riskOfferRounds[String(Math.max(1,Number(roundNo)||1))]=unique;
+ _btSave(data);
+}
+function trackRiskOfferChosen(id,roundNo){
+ const data=_btLoad(),row=_btRisk(data,id);row.chosen++;
+ const run=_btEnsureRun();run.riskChoices=Array.isArray(run.riskChoices)?run.riskChoices:[];run.riskChoices.push({id:String(id||"unknown"),round:Math.max(1,Number(roundNo)||1)});
+ _btSave(data);
+}
+function trackRiskOfferOutcome(id,result){
+ const value=result&&typeof result==="object"?result:{},data=_btLoad(),row=_btRisk(data,id);
+ if(value.failed)row.failed++;else row.success++;
+ row.cashDeltaTotal+=Number(value.cashDelta)||0;_btSave(data);
+}
+function trackInjurySource(source,count=1){
+ const amount=Math.max(0,Math.round(Number(count)||0));if(!amount)return;
+ const data=_btLoad(),key=String(source||"unknown");data.injury.sources[key]=(Number(data.injury.sources[key])||0)+amount;_btSave(data);
+}
+function trackInjuryDecision(decision,count=1){
+ const amount=Math.max(0,Math.round(Number(count)||0));if(!amount)return;
+ const data=_btLoad(),key=String(decision||"unknown");data.injury.decisions[key]=(Number(data.injury.decisions[key])||0)+amount;_btSave(data);
+}
 function trackHiddenDraftMetric(kind,meta){
  meta=meta||{};if(!["offered","selected","revealed","rerolled"].includes(kind))return;
  const data=_btLoad(),row=data.hiddenDraft||(data.hiddenDraft={}),inc=key=>row[key]=(row[key]||0)+1,cap=key=>key[0].toUpperCase()+key.slice(1),suffix=cap(kind);
@@ -112,7 +150,11 @@ function finishBalanceTelemetry(won,meta){
  /* Attribute a run to the chairman selected at kickoff; a late board vote must
     not rewrite the balance history of the run's original ruleset. */
  const cid=String(run.chairman||meta.chairman||"unknown");
- const chair=_btChair(data,cid);chair.runs++;if(finalReached)chair.finalReached++;if(won)chair.champion++;if(meta.endType==="sacked")chair.sacked++;
+ const power=Number(meta.power)||0,endCash=Number(meta.endCash)||0,worstDebt=Math.min(0,Number(meta.worstDebt)||0),injuries=Math.max(0,Number(meta.injuries)||0),sacked=meta.endType==="sacked";
+ const applyOutcome=row=>{row.runs++;if(finalReached)row.finalReached++;if(won)row.champion++;if(sacked)row.sacked++;row.powerTotal+=power;row.endCashTotal+=endCash;row.worstDebtTotal+=worstDebt;row.injuriesTotal+=injuries;};
+ const chair=_btChair(data,cid);applyOutcome(chair);
+ applyOutcome(_btRunRow(data.runSummary.countries,meta.country));
+ applyOutcome(_btRunRow(data.runSummary.formations,meta.formation));
  _btSave(data);balanceTelemetryRun=null;
 }
 function getBalanceTelemetry(){return _btLoad();}

@@ -13,6 +13,7 @@ const files={
   effects:read("src/cards/cardEffects.js"),
   prices:read("src/cards/cardBalance.js"),
   telemetry:read("src/balance/telemetry.js"),
+  difficulty:read("src/balance/difficulty.js"),
 };
 
 const failures=[];
@@ -69,6 +70,10 @@ expect(/const rate=v===1\?0\.65:0\.50/.test(files.effects)&&/const cap=v===1\?10
 expect(/const gain=v===1\?18:10,pay=v===1\?7:4/.test(files.effects),"Installment Transfer behavior is out of sync");
 expect(/const netPow=v===1\?4:3/.test(files.effects)&&/riskPowerMod\+=netPow/.test(files.effects),"Star Crisis behavior is out of sync");
 expect(/if\(k==="buyuk_mac"\)\{\s*const pow=v===1\?10:6/.test(files.effects),"Big Game Player DARK reward is still dominated by COMMON");
+expect(/Kör Talih[^\n]+\+\u20ac10M hemen/.test(files.difficulty),"Kör Talih kazancı +€10M olarak gösterilmiyor");
+expect(/Kör Talih[^\n]+%40 ihtimal -\u20ac20M geri ödeme/.test(files.difficulty),"Kör Talih riski %40 / -€20M olarak gösterilmiyor");
+expect(/earn\(10,"earned"\)[^\n]+rand\(\)<0\.40[^\n]+spend\(20,"spent"\)/.test(files.difficulty),"Kör Talih uygulaması +€10M / %40 -€20M kuralıyla uyuşmuyor");
+expect(!/Kör Talih[^\n]+\+\u20ac12M|Kör Talih[^\n]+%35/.test(files.difficulty),"Kör Talih eski sayısal değerleri hâlâ içeriyor");
 
 const chemContext={
  Math,

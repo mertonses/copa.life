@@ -21,6 +21,17 @@ const supportedFormations=["4-4-2","4-3-3","4-2-3-1","3-5-2","5-3-2","3-4-3","4-
 function newTournament(seed=baseOptions.seed){return engine.createTournament({...baseOptions,seed});}
 
 {
+  const expected={ES:[62,87],ENG:[61,86],DE:[61,86],TR:[60,85],IT:[60,85],JP:[60,85]};
+  assert.deepEqual({...engine.COUNTRY_DIFFICULTY},{ES:1,ENG:0,DE:0,TR:-1,IT:-1,JP:-1},"ülke zorluk düzeltmeleri değişmiş");
+  for(const [countryCode,[minimum,maximum]] of Object.entries(expected)){
+    const state=engine.createTournament({...baseOptions,countryCode});
+    const powers=Object.values(state.teams).filter(team=>team.id!=="player").map(team=>team.power);
+    assert.equal(Math.min(...powers),minimum,`${countryCode} turnuva alt güç sınırı yanlış`);
+    assert.equal(Math.max(...powers),maximum,`${countryCode} turnuva üst güç sınırı yanlış`);
+  }
+}
+
+{
   const matched=penalty.shotResult({shooterPower:90,keeperPower:60,shotDir:"L",keeperDir:"L"},()=>.99);
   const wrongWay=penalty.shotResult({shooterPower:60,keeperPower:98,shotDir:"L",keeperDir:"R"},()=>.99);
   assert.equal(matched.type,"save","matching ball and keeper directions must always be a visible save");

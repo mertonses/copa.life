@@ -37,6 +37,9 @@ sandbox.assignPlayerInjury(veteran,3);
 assert.equal(veteran.injuryMatchesRemaining,2);
 assert.equal(sandbox.injuryTreatmentCost(veteran),8,"34+ bakım ücreti uygulanmalı");
 assert.equal(sandbox.injuryPlayRisk(veteran),0.55);
+assert.ok(Math.abs(sandbox.preMatchInjuryRisk(0.07,1,0.04)-0.11)<1e-12,"takım konuşması +%4 riski tabana doğrudan eklemeli");
+assert.ok(Math.abs(sandbox.preMatchInjuryRisk(0.07,1,0.02)-0.09)<1e-12,"takım konuşması +%2 riski tabana doğrudan eklemeli");
+assert.equal(sandbox.preMatchInjuryRisk(0.30,1.5,0.04),0.40,"maç öncesi sakatlık riski %40 tavanını aşmamalı");
 sandbox.clearPlayerInjury(veteran);
 assert.deepEqual({injured:veteran.injured,level:veteran.injuryLevel,remaining:veteran.injuryMatchesRemaining,decision:veteran.injuryDecisionRound,played:veteran.injuryPlayedRound},{injured:false,level:0,remaining:0,decision:0,played:0});
 
@@ -61,6 +64,8 @@ for(const marker of [
   'rewardTitle=LT("REKLAM"',
   'const rewardButton=`<button class="inj-reward-btn'
 ])assert.ok(html.includes(marker),`index sakatlık sözleşmesi eksik: ${marker}`);
+assert.ok(html.includes('preMatchInjuryRisk(hasCard("temiz_sayfa")?0.049:0.07,prepRisk,talkRisk)'),"takım konuşması sakatlık riski ortak fonksiyona bağlı değil");
+assert.ok(!/lastTalkResult\.key==="gaz"/.test(config),"eski Gaz Ver sakatlık riski ikinci kez uygulanıyor");
 assert.ok(html.includes("!x.p.used&&!x.p.injured&&!x.p.suspended"),"sakat/cezalı oyuncu yedek seçeneği olarak sunulmamalı");
 assert.ok(!/function doBackup[^\n]+old\.injured=false/.test(html),"yedek seçimi sakatlığı ücretsiz temizlememeli");
 assert.ok(cards.includes('clearPlayerInjury(_ip)')&&cards.includes('clearPlayerInjury(_sp)'),"kart tedavisi sakatlık metadatasını temizlemeli");

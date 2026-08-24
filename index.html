@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="copa-ghost-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
-<meta name="copa-push-token-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev/v1/notifications/tokens">
-<meta name="copa-analytics-api" content="https://copa-life-ghost-clubs.mertonses-copa.workers.dev">
+<meta name="copa-ghost-api" content="https://api.copa.life">
+<meta name="copa-push-token-api" content="https://api.copa.life/v1/notifications/tokens">
+<meta name="copa-analytics-api" content="https://api.copa.life">
 <meta name="copa-arena-api" content="https://arena-api.copa.life">
 <meta name="copa-google-client-id" content="910942499457-79rqm001821h0tealgup26jba3jrnkmc.apps.googleusercontent.com">
 <meta name="copa-google-ios-client-id" content="910942499457-puuqtrlff1itdu0cejbg990cf1lt4e4a.apps.googleusercontent.com">
@@ -97,7 +97,6 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/debug.css?v=20260711-stability1">
 <link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260818-settings-compact1">
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
-<link rel="stylesheet" href="src/styles/faq.css?v=20260720-faq1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260821-draw-layout1">
 <link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260821-responsive-polish1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
@@ -468,20 +467,20 @@ try{
 <script src="src/data/kits.js?v=20260711-stability1"></script>
 <script src="src/data/i18n.js?v=20260727-language-refresh2"></script>
 <script src="src/core/clubName.js?v=20260818-club-security2"></script>
-<script src="src/core/squad.js?v=20260818-transfer-update1"></script>
+<script src="src/core/squad.js?v=20260824-balance1"></script>
 <script src="src/game/generate.js?v=20260729-role-gameplay1"></script>
-<script src="src/balance/config.js?v=20260806-premium-cash1"></script>
+<script src="src/balance/config.js?v=20260824-balance1"></script>
 <script src="src/runtime/testFixtures.js?v=20260818-qa-fixtures1"></script>
 <script src="src/state/metaState.js?v=20260711-stability1g"></script>
 <script src="src/state/gameState.js?v=20260714-save4"></script>
 <script src="src/state/saveLoad.js?v=20260711-stability1g"></script>
 <script src="src/game/penaltyCore.js?v=20260722-shared-penalties1"></script>
-<script src="src/tournament/tournamentEngine.js?v=20260721-groups1"></script>
+<script src="src/tournament/tournamentEngine.js?v=20260824-balance1"></script>
 <script src="src/sidefield/sideFieldEngine.js?v=20260806-yan-saha3"></script>
 <script src="src/state/runTransactionJournal.js?v=20260805-atomic-journal1"></script>
 <script src="src/tournament/tournamentUI.js?v=20260728-ui-fixes1"></script>
 <script src="src/tournament/matchResolver.js?v=20260722-knockout-rules1"></script>
-<script src="src/tournament/tournamentRuntime.js?v=20260821-layout-ready1"></script>
+<script src="src/tournament/tournamentRuntime.js?v=20260824-balance1"></script>
 <script src="src/state/runPersistence.js?v=20260805-subsystem-versions1"></script>
 <script src="src/state/transferSave.js?v=20260730-mobile-transfer2"></script>
 <script src="src/state/finalSimPersistence.js?v=20260717-final-checkpoint1"></script>
@@ -493,7 +492,7 @@ try{
 <script src="src/cards/cardDefs.js?v=20260720-explicit-power1"></script>
 <script src="src/cards/cardInventory.js?v=20260711-stability1"></script>
 <script src="src/cards/cardBalance.js?v=20260720-explicit-power1"></script>
-<script src="src/balance/telemetry.js?v=20260720-hidden-draft1"></script>
+<script src="src/balance/telemetry.js?v=20260824-balance1"></script>
 <script src="src/balance/finalCalibration.js?v=20260717-weekly-calibration1"></script>
 <script src="src/runtime/productAnalytics.js?v=20260805-analytics5"></script>
 <script src="src/runtime/playReview.js?v=20260823-review1"></script>
@@ -501,7 +500,7 @@ try{
 <script src="src/runtime/copaPlayGames.js?v=20260818-pgs-bridge2"></script>
 <script>window.COPA_WEB_ADS_CONFIG={client:"__COPA_ADSENSE_CLIENT__",channel:"__COPA_ADSENSE_CHANNEL__",displaySlot:"__COPA_ADSENSE_DISPLAY_SLOT__",frequencyHint:"600s"};</script>
 <script src="src/runtime/adGateway.js?v=20260730-ads1"></script>
-<script src="src/cards/cardEffects.js?v=20260720-lottery-copy1"></script>
+<script src="src/cards/cardEffects.js?v=20260824-balance1"></script>
 <script src="src/cards/cardEffectSummary.js?v=20260805-effect-summary1"></script>
 <script src="src/game/cardSynergy.js?v=20260726-systems1"></script>
 <script src="src/game/chemistry.js?v=20260726-systems1"></script>
@@ -511,7 +510,7 @@ try{
 <script src="src/game/clubFiles.js?v=20260729-browser-picker1"></script>
 <script src="src/balance/power.js?v=20260728-relationships1"></script>
 <script src="src/balance/economy.js?v=20260712f"></script>
-<script src="src/balance/difficulty.js?v=20260722-risk-icons1"></script>
+<script src="src/balance/difficulty.js?v=20260824-balance1"></script>
 <script src="src/balance/rewards.js?v=20260711-stability1"></script>
 <script src="src/audio/sfx.js?v=20260817-cardface2"></script>
 <script src="src/online/ghostClubs.js?v=20260818-training-ranking2"></script>
@@ -1441,10 +1440,10 @@ function renderInjbar(){
   const benchMeta=best?LT(`${bestEff} güç · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} power · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} fuerza · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} Stärke · ${bestDelta>=0?"+":""}${bestDelta}`,`${bestEff} forza · ${bestDelta>=0?"+":""}${bestDelta}`):LT("Yedek yok","No bench","Sin suplente","Kein Ersatz","Nessuna riserva");
   ib.innerHTML=`<div class="inj-summary"><span class="inj-ico" aria-hidden="true">!</span><span class="inj-info"><span class="inj-main"><b>${shortName(p)} ${LT("sakatlandı","injured","lesionado","verletzt","infortunato")}</b><span class="inj-severity">${_injSev}</span>${injuryCount>1?`<span class="inj-count">${injuredSlotIndices().indexOf(decisionIdx)+1}/${injuryCount}</span>`:""}</span><span class="inj-detail">${LT("Güç","Power","Fuerza","Stärke","Forza")} <strong class="inj-power-change"><span>${fit}</span><span class="inj-power-arrow" aria-hidden="true">→</span><em>${hurt}</em></strong><span class="inj-detail-sep">·</span>${LT(`${remaining} maç dinlenir`,`Rest ${remaining} match${remaining===1?"":"es"}`,`${remaining} partido${remaining===1?"":"s"} de descanso`,`${remaining} Spiel${remaining===1?"":"e"} Pause`,`${remaining} partit${remaining===1?"a":"e"} di riposo`)}</span></span></div><div class="inj-btns"><button class="inj-bench-btn" onclick="openBackup(${decisionIdx})" ${best?"":"disabled"}><b><span class="inj-action-icon" aria-hidden="true">↔</span>${LT("YEDEK","BENCH","BANQUILLO","BANK","PANCHINA")}</b><small>${benchMeta}</small></button><button class="inj-heal-btn" onclick="healInjury(${decisionIdx})" ${canHeal?"":"disabled"}><b><span class="inj-action-icon" aria-hidden="true">+</span>${LT(`TEDAVİ · €${healCost}M`,`HEAL · €${healCost}M`,`CURAR · €${healCost}M`,`HEILEN · €${healCost}M`,`CURA · €${healCost}M`)}</b><small>${p.age>=34?LT("34+ ücret dahil","34+ fee included","Incluye tasa 34+","34+ Gebühr inkl.","Supplemento 34+ incluso"):LT("Tam iyileşme","Full recovery","Recuperación total","Vollständig fit","Recupero totale")}</small></button>${rewardButton}${playInjBtn}</div>`;
 }
-function playInjured(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;p.injuryDecisionRound=round;p.injuryPlayedRound=round;const risk=Math.round(injuryPlayRisk(p)*100);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`sakat oynayacak · güç düşük · %${risk} kalıcı −1 riski`,`will play injured · reduced power · ${risk}% permanent −1 risk`,`jugará lesionado · fuerza reducida · ${risk}% riesgo de −1 permanente`,`spielt verletzt · weniger Stärke · ${risk}% Risiko auf dauerhaft −1`,`giocherà infortunato · forza ridotta · ${risk}% rischio di −1 permanente`),"lose");renderInjbar();}
-function healInjury(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;const cost=injuryTreatmentCost(p);if(!canAffordCost(cost))return;spend(cost,"spent");clearPlayerInjury(p);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`tedavi edildi (-€${cost}M)`,`healed (-€${cost}M)`,`curado (-€${cost}M)`,`geheilt (-€${cost}M)`,`curato (-€${cost}M)`),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();setBudget();renderInjbar();renderHub();}
+function playInjured(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;p.injuryDecisionRound=round;p.injuryPlayedRound=round;if(typeof trackInjuryDecision==="function")trackInjuryDecision("play_injured");const risk=Math.round(injuryPlayRisk(p)*100);pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`sakat oynayacak · güç düşük · %${risk} kalıcı −1 riski`,`will play injured · reduced power · ${risk}% permanent −1 risk`,`jugará lesionado · fuerza reducida · ${risk}% riesgo de −1 permanente`,`spielt verletzt · weniger Stärke · ${risk}% Risiko auf dauerhaft −1`,`giocherà infortunato · forza ridotta · ${risk}% rischio di −1 permanente`),"lose");renderInjbar();}
+function healInjury(idx){const p=picksBySlot[idx];if(!p||!p.injured)return;const cost=injuryTreatmentCost(p);if(!canAffordCost(cost))return;spend(cost,"spent");clearPlayerInjury(p);if(typeof trackInjuryDecision==="function")trackInjuryDecision("paid_treatment");pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+LT(`tedavi edildi (-€${cost}M)`,`healed (-€${cost}M)`,`curado (-€${cost}M)`,`geheilt (-€${cost}M)`,`curato (-€${cost}M)`),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();setBudget();renderInjbar();renderHub();}
 function canOfferRewardedInjuryHeal(){return !!(window.CopaAds&&CopaAds.canReward("showRewardedInjury")&&rewardedInjuryHealsEarned<MAX_REWARDED_INJURY_HEALS);}
-async function requestRewardedInjuryHeal(idx){if(injuryRewardInFlight||!canOfferRewardedInjuryHeal())return;const target=picksBySlot[idx];if(!target||!target.injured)return;injuryRewardInFlight=true;renderInjbar();let result={earned:false,reason:"ad_error"};try{result=await window.CopaAds.showRewardedInjury(chairmanEventRunId);}catch(_){ }injuryRewardInFlight=false;if(result&&result.earned){rewardedInjuryHealsEarned=Math.min(MAX_REWARDED_INJURY_HEALS,Math.max(rewardedInjuryHealsEarned+1,Number(result.earnedCount)||0));clearPlayerInjury(target);pushFeed("\u{1fa79} <b>"+shortName(target)+"</b> "+LT("reklam ödülüyle ücretsiz tedavi edildi","was treated free with an ad reward","recibió tratamiento gratis con un anuncio","wurde per Werbeprämie gratis behandelt","è stato curato gratis con una ricompensa pubblicitaria"),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();_saveState();showToast(LT("Sakatlık iyileştirildi.","Injury healed.","Lesión curada.","Verletzung geheilt.","Infortunio guarito."),{type:"info"});renderHub();return;}showToast(result&&["not_ready","not_available"].includes(result.reason)?LT("Reklam henüz hazır değil. Biraz sonra tekrar dene.","The ad is not ready. Try again shortly.","El anuncio aún no está listo. Inténtalo pronto.","Die Anzeige ist noch nicht bereit. Versuche es gleich erneut.","L'annuncio non è pronto. Riprova tra poco."):LT("Reklam tamamlanmadı. Tedavi uygulanmadı.","The ad was not completed. Treatment was not applied.","El anuncio no se completó. No se aplicó la cura.","Die Anzeige wurde nicht abgeschlossen. Keine Behandlung.","L'annuncio non è stato completato. Cura non applicata."));renderInjbar();}
+async function requestRewardedInjuryHeal(idx){if(injuryRewardInFlight||!canOfferRewardedInjuryHeal())return;const target=picksBySlot[idx];if(!target||!target.injured)return;injuryRewardInFlight=true;renderInjbar();let result={earned:false,reason:"ad_error"};try{result=await window.CopaAds.showRewardedInjury(chairmanEventRunId);}catch(_){ }injuryRewardInFlight=false;if(result&&result.earned){rewardedInjuryHealsEarned=Math.min(MAX_REWARDED_INJURY_HEALS,Math.max(rewardedInjuryHealsEarned+1,Number(result.earnedCount)||0));clearPlayerInjury(target);if(typeof trackInjuryDecision==="function")trackInjuryDecision("rewarded_treatment");pushFeed("\u{1fa79} <b>"+shortName(target)+"</b> "+LT("reklam ödülüyle ücretsiz tedavi edildi","was treated free with an ad reward","recibió tratamiento gratis con un anuncio","wurde per Werbeprämie gratis behandelt","è stato curato gratis con una ricompensa pubblicitaria"),"buy");if(typeof syncInjuredIdx==="function")syncInjuredIdx();_saveState();showToast(LT("Sakatlık iyileştirildi.","Injury healed.","Lesión curada.","Verletzung geheilt.","Infortunio guarito."),{type:"info"});renderHub();return;}showToast(result&&["not_ready","not_available"].includes(result.reason)?LT("Reklam henüz hazır değil. Biraz sonra tekrar dene.","The ad is not ready. Try again shortly.","El anuncio aún no está listo. Inténtalo pronto.","Die Anzeige ist noch nicht bereit. Versuche es gleich erneut.","L'annuncio non è pronto. Riprova tra poco."):LT("Reklam tamamlanmadı. Tedavi uygulanmadı.","The ad was not completed. Treatment was not applied.","El anuncio no se completó. No se aplicó la cura.","Die Anzeige wurde nicht abgeschlossen. Keine Behandlung.","L'annuncio non è stato completato. Cura non applicata."));renderInjbar();}
 function _backupImpactClass(delta){return delta>=8?"great":delta>=3?"good":delta>=0?"ok":"bad";}
 function selectBackup(idx,i){window._backupSelect={idx,i};document.querySelectorAll(".backup-card").forEach((el,n)=>{const on=n===i;el.classList.toggle("is-selected",on);el.setAttribute("aria-pressed",on?"true":"false");});const item=window._bk&&window._bk[i],btn=$("backupApplyBtn");if(btn&&item){btn.disabled=false;btn.textContent=CopaText("SEÇİLİ YEDEĞİ AL","CONFIRM REPLACEMENT");}}
 function applySelectedBackup(){const s=window._backupSelect;if(!s)return;doBackup(s.idx,s.i);}
@@ -1465,7 +1464,7 @@ function openBackup(idx){const x=L(),pos=slots[idx][0],main=picksBySlot[idx],hur
   showModal(`<div class="backup-modal scoutmodal"><button type="button" class="backup-close" aria-label="${tr?"Kapat":"Close"}" onclick="cancelBackup()"><svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg></button><div class="backup-head"><div class="backup-titleblock"><h4>${title}</h4><p>${sub}</p></div><div class="backup-injury"><div class="backup-injury-copy"><span class="backup-summary-label">${tr?"Sakat oyuncu":"Injured player"}</span><strong>${main?shortName(main):""}</strong></div><div class="backup-injury-power"><span><small>${tr?"Normal":"Fit"}</small><b>${fitEff}</b></span><i aria-hidden="true">→</i><span><small>${tr?"Şimdi":"Now"}</small><b>${hurtEff}</b></span></div></div></div><div class="backup-body"><div class="backup-grid">${cards}</div></div><div class="bact backup-actions">${cancel}${cta}</div></div>`,{label:title});
   if(window.PlayerProfiles)document.querySelectorAll(".backup-card[data-profile-player-index]").forEach(card=>{const item=opts[+card.dataset.profilePlayerIndex];if(item&&item.p)PlayerProfiles.bind(card,item.p,{delayCoarseAction:true});});}
 function openSuspendedBackup(idx){openBackup(idx);const label=document.querySelector("#modal .backup-summary-label");if(label)label.textContent=CopaText("Cezalı oyuncu","Suspended player");}
-function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,permission=window.CopaRelationships&&CopaRelationships.canEnter(o);if(permission&&permission.allowed===false){showToast(permission.message,{type:"warning",duration:4200});return;}const old=picksBySlot[idx];if(old){old.backupBoost=0;if(old.suspended)old.suspended=false;if(old.injured){normalizePlayerInjury(old);old.injuryDecisionRound=round;pushFeed("\u{1fa79} <b>"+shortName(old)+"</b> "+LT(`yedeğe alındı · ${old.injuryMatchesRemaining} maç dinlenecek`,`moved to the bench · rests ${old.injuryMatchesRemaining} match${old.injuryMatchesRemaining===1?"":"es"}`,`pasa al banquillo · descansa ${old.injuryMatchesRemaining} partido${old.injuryMatchesRemaining===1?"":"s"}`,`auf der Bank · ${old.injuryMatchesRemaining} Spiel${old.injuryMatchesRemaining===1?"":"e"} Pause`,`in panchina · riposa ${old.injuryMatchesRemaining} partit${old.injuryMatchesRemaining===1?"a":"e"}`),"pres");}}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(CopaText("acil kaleci olarak kaleye geçti","moved into goal as emergency keeper")),"pres");if(suspendedSlotIdx===idx)suspendedSlotIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
+function doBackup(idx,i){const item=window._bk&&window._bk[i];if(!item)return;const o=item.p,permission=window.CopaRelationships&&CopaRelationships.canEnter(o);if(permission&&permission.allowed===false){showToast(permission.message,{type:"warning",duration:4200});return;}const old=picksBySlot[idx];if(old){old.backupBoost=0;if(old.suspended)old.suspended=false;if(old.injured){normalizePlayerInjury(old);old.injuryDecisionRound=round;if(typeof trackInjuryDecision==="function")trackInjuryDecision("bench");pushFeed("\u{1fa79} <b>"+shortName(old)+"</b> "+LT(`yedeğe alındı · ${old.injuryMatchesRemaining} maç dinlenecek`,`moved to the bench · rests ${old.injuryMatchesRemaining} match${old.injuryMatchesRemaining===1?"":"es"}`,`pasa al banquillo · descansa ${old.injuryMatchesRemaining} partido${old.injuryMatchesRemaining===1?"":"s"}`,`auf der Bank · ${old.injuryMatchesRemaining} Spiel${old.injuryMatchesRemaining===1?"":"e"} Pause`,`in panchina · riposa ${old.injuryMatchesRemaining} partit${old.injuryMatchesRemaining===1?"a":"e"}`),"pres");}}o.used=true;o.bench=false;o.backupBoost=0;if(old){old.used=false;old.bench=true;bench.push(old);}benchUsed++;fillSlotReplace(idx,o);if(item.emergencyKeeper)pushFeed("KL <b>"+shortName(o)+"</b> "+(CopaText("acil kaleci olarak kaleye geçti","moved into goal as emergency keeper")),"pres");if(suspendedSlotIdx===idx)suspendedSlotIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();sfxSeat();window._backupSelect=null;closeModal();renderInjbar();renderHub();}function fillSlotReplace(idx,p){p.natPos=p.natPos||p.pos;p.pos=slots[idx][0];p.eff=effOf(p);picksBySlot[idx]=p;renderRoundel("h"+idx,p);setBudget();}
 
 
 /* ===== president ===== */
@@ -1815,9 +1814,9 @@ function openPreparation(){if(window.CopaPreparation)CopaPreparation.open(round,
 function maybeInjure(){
  if(window.CopaTestFixtures&&CopaTestFixtures.is("injury"))return;
  if(round<=1)return;
- const prepRisk=window.CopaPreparation?CopaPreparation.injuryMultiplier():1,talkRisk=1+Math.max(0,Number(window._talkMatchProfile&&window._talkMatchProfile.injuryRisk)||0);
- const p=applyRandomInjury((hasCard("temiz_sayfa")?0.049:0.07)*prepRisk*talkRisk);window._talkMatchProfile=null;
- if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("🩹 <b>"+shortName(p)+"</b> "+(CopaText("idmanda sakatlandı","was injured in training")),"lose");const idx=picksBySlot.indexOf(p);if(idx>=0)renderRoundel("h"+idx,p);}
+ const prepRisk=window.CopaPreparation?CopaPreparation.injuryMultiplier():1,talkRisk=Math.max(0,Number(window._talkMatchProfile&&window._talkMatchProfile.injuryRisk)||0);
+ const chance=preMatchInjuryRisk(hasCard("temiz_sayfa")?0.049:0.07,prepRisk,talkRisk),p=applyRandomInjury(chance);window._talkMatchProfile=null;
+ if(p){if(typeof trackInjurySource==="function")trackInjurySource("pre_match");try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("🩹 <b>"+shortName(p)+"</b> "+(CopaText("idmanda sakatlandı","was injured in training")),"lose");const idx=picksBySlot.indexOf(p);if(idx>=0)renderRoundel("h"+idx,p);}
 }
 
 /* ===== fx / modal ===== */
@@ -2308,6 +2307,7 @@ function resolvePostMatchStateBeforeReward(){
   if(typeof expireTemporaryCards==="function")expireTemporaryCards();
   if(kurbanScheduled&&kurbanScheduled.count>0){
     const list=applyMultiInjury(kurbanScheduled.count);
+    if(list.length&&typeof trackInjurySource==="function")trackInjurySource("card",list.length);
     pushFeed(" "+(LANG==="tr"?"Kurban bedeli: "+list.length+" oyuncu sakatlandı":"Sacrifice price: "+list.length+" player(s) injured"),"lose");
     kurbanScheduled={count:0,turns:0};
   }
@@ -2315,13 +2315,13 @@ function resolvePostMatchStateBeforeReward(){
     draftPendingInjury=0;
     if(rand()<0.35){
       const p=applyRandomInjury(1);
-      if(p){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("riskli zorlamadan sonra sakatlandı","was injured after the gamble")),"lose");}
+      if(p){if(typeof trackInjurySource==="function")trackInjurySource("risk_offer");try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(p)+"</b> "+(CopaText("riskli zorlamadan sonra sakatlandı","was injured after the gamble")),"lose");}
     }else pushFeed("\u{1fa79} "+(CopaText("Riskli zorlama sakatlık bırakmadı","The gamble left no injury")),"pres");
   }
   const perf=lastMatchPerf||{power:squadPower(round).power};
   const fixtureInjury=window.CopaTestFixtures&&typeof CopaTestFixtures.consumeInjury==="function"?CopaTestFixtures.consumeInjury(picksBySlot):null;
   const normalInjury=fixtureInjury||((window.CopaTestFixtures&&CopaTestFixtures.is("injury"))?null:applyRandomInjury(injuryRiskFor(perf.power)));
-  if(normalInjury){try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(normalInjury)+"</b> "+(fixtureInjury?CopaText("test fixture: deterministik sakatlık","test fixture: deterministic injury"):CopaText("maçtan sonra sakatlandı","was injured after the match")),"lose");}
+  if(normalInjury){if(!fixtureInjury&&typeof trackInjurySource==="function")trackInjurySource("post_match");try{sfxInjury&&sfxInjury();}catch(e){}pushFeed("\u{1fa79} <b>"+shortName(normalInjury)+"</b> "+(fixtureInjury?CopaText("test fixture: deterministik sakatlık","test fixture: deterministic injury"):CopaText("maçtan sonra sakatlandı","was injured after the match")),"lose");}
   if(spotlightPlayer&&spotlightPlayer.injured){
     sansMediaPressure=Math.max(sansMediaPressure,2);
     pushFeed(" "+(CopaText("Spotlight oyuncusu sakatlandı — sonraki tur pazar pahalı","Spotlight player injured — market inflated next round")),"lose");
@@ -2585,6 +2585,7 @@ function finishRoundReward(kind,extraText,careSlotIdx){
     const idx=Number.isInteger(careSlotIdx)?careSlotIdx:injuredIdx,p=picksBySlot[idx];
     if(p&&p.injured){
       clearPlayerInjury(p);
+      if(typeof trackInjuryDecision==="function")trackInjuryDecision("medical_reward");
       rewardText=(CopaText("Sağlık Ekibi: ","Medical Team: "))+shortName(p)+(CopaText(" iyileşti · sonraki maç risk %50 azaldı"," healed · next-match risk halved"));
       injuredIdx=-1;if(typeof syncInjuredIdx==="function")syncInjuredIdx();
     }else rewardText=CopaText("Sağlık Ekibi: sonraki maç sakatlık riski %50 azaldı","Medical Team: next-match injury risk halved");
@@ -2652,7 +2653,7 @@ function endRun(won,score,endType){const _parsedScore=_parseRunScore(score);if(w
   let completedGhostRunId="";
   try{completedGhostRunId=(JSON.parse(localStorage.getItem("copa_ghost_current_run_v1")||"{}")||{}).id||"";}catch(_){}
   window._completedGhostRunKey=completedGhostRunId||[seedNum,teamName,formName,fixtures.map(f=>f&&f.res||"").join(""),lastResult&&lastResult.endType].join("|");
-  if(typeof finishBalanceTelemetry==="function")finishBalanceTelemetry(!!won,{finalReached:round>=7||!!score,chairman:chairman&&chairman.id,endType:endType||""});
+  if(typeof finishBalanceTelemetry==="function")finishBalanceTelemetry(!!won,{finalReached:round>=7||!!score,chairman:chairman&&chairman.id,country:selectedCountry,formation:formName,power:sp.power,endCash:finalCashTotal,worstDebt:econStats&&econStats.worstDebt,injuries:econStats&&econStats.injuries,endType:endType||""});
   setBudget();
   $("sim").classList.add("hidden");$("hub").classList.add("hidden");$("draft").classList.add("hidden");$("result").classList.remove("hidden","is-expanded");$("copied").textContent="";renderFixtures();renderResult();ensureRunNarrative().then(refreshRunNarrative).catch(()=>{});setTimeout(()=>sfxEndResult(won,endType),500);}
 
@@ -2993,7 +2994,6 @@ function pickCaptain(){
     <div style="font-family:var(--mono);font-size:11px;color:var(--color-slate);margin-bottom:14px">${tr?`Kaptan sahada <b style="color:var(--status-positive-text)">+1 / +2 / +3</b> güç sağlar. Tecrübeli veya genç yetenek kaptanlar daha fazla etki eder; sakatlanırsa <b style="color:var(--status-negative-text)">−3</b> uygulanır.`:`Captain gives <b style="color:var(--status-positive-text)">+1 / +2 / +3</b> power on the pitch. Veteran or wonderkid captains boost more; if injured: <b style="color:var(--status-negative-text)">−3</b>.`}</div>
     <div class="cap-grid" role="listbox" aria-label="${tr?"Kaptan seçimi":"Captain selection"}" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${opts}</div>
   </div>`,{label:tr?"Kaptan Seçimi":"Captain Selection"});
-  if(window.PlayerProfiles)document.querySelectorAll(".cap-card[data-profile-player-index]").forEach(card=>{const p=picksBySlot[+card.dataset.profilePlayerIndex];if(p)PlayerProfiles.bind(card,p,{delayCoarseAction:true});});
 }
 function setCaptain(idx){captainIdx=idx;captainPlayerRef=picksBySlot[idx]||null;const p=captainPlayerRef;if(p){pushFeed(" <b>"+surOf(p)+"</b> "+(CopaText("kaptan seçildi","named captain")),"form");showToast((LANG==="tr"?"⚽ "+surOf(p)+" kaptan seçildi":"⚽ "+surOf(p)+" named captain"),{type:"default"});}renderHub();}
 function presBtnLockedClick(){showToast(CopaText("Çeyrek finalde açılır.","Unlocks in the quarter-final."),{type:"info",duration:2400});}
@@ -4237,7 +4237,7 @@ function _finalTacticBench(benchIdx){
 </script>
 <script>_installHumanCopyGuard();</script>
 <script src="src/ui/metaUnlocks.js?v=20260726-mobile-repair1"></script>
-<script>(()=>{let p;const refresh=()=>{const b=document.getElementById("footerFaqBtn");if(b)b.textContent=window.LANG==="tr"?"SSS":"FAQ"};const load=()=>p||(p=new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="src/ui/faq.js?v=20260819-faq-lazy";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)}));window.openFaq=()=>load().then(()=>window.CopaFaq&&window.CopaFaq.open());window.addEventListener("copa:language-changed",refresh);refresh()})();</script>
+<script>(()=>{let p;const refresh=()=>{const b=document.getElementById("footerFaqBtn");if(b)b.textContent=window.LANG==="tr"?"SSS":"FAQ"};const load=()=>p||(p=Promise.all([new Promise((resolve,reject)=>{const l=document.createElement("link");l.rel="stylesheet";l.href="src/styles/faq.css?v=20260720-faq1";l.onload=resolve;l.onerror=reject;document.head.appendChild(l)}),new Promise((resolve,reject)=>{const s=document.createElement("script");s.src="src/ui/faq.js?v=20260819-faq-lazy";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})]));window.openFaq=()=>load().then(()=>window.CopaFaq&&window.CopaFaq.open());window.addEventListener("copa:language-changed",refresh);refresh()})();</script>
 <div class="global-footer-bar" id="globalFooterBar">
  <div class="footer-links-row">
   <button class="footer-link" id="footerFaqBtn" onclick="openFaq()" type="button" aria-label="Sık Sorulan Sorular">SSS</button>

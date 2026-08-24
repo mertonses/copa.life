@@ -62,12 +62,16 @@
     }
     return result;
   }
-  function powerCurve(bases,count){
+  const COUNTRY_DIFFICULTY=Object.freeze({ES:1,ENG:0,DE:0,TR:-1,IT:-1,JP:-1});
+  function powerCurve(bases,count,countryCode){
     const values=(Array.isArray(bases)?bases:[]).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
-    const low=values[0]||60,rawHigh=values[values.length-1]||94;
-    /* Keep elite clubs dangerous without making a seven-match run collapse into
-       an almost automatic round-of-16 exit for a well-built 80-power squad. */
-    const high=rawHigh>86?86:rawHigh,span=Math.max(22,high-low);
+    const code=String(countryCode||"").toUpperCase(),hasCountry=Object.prototype.hasOwnProperty.call(COUNTRY_DIFFICULTY,code);
+    const offset=hasCountry?COUNTRY_DIFFICULTY[code]:0;
+    /* Country cups share one safe curve, then receive only the explicit -1/0/+1
+       league adjustment. This prevents raw data ranges from silently stacking
+       extra difficulty on top of the documented country rule. */
+    const low=(hasCountry?61:(values[0]||60))+offset,rawHigh=values[values.length-1]||94;
+    const high=(hasCountry?86:(rawHigh>86?86:rawHigh))+offset,span=Math.max(22,high-low);
     const total=Math.max(1,Number(count)||31);
     return Array.from({length:total},(_,index)=>Math.round(low+span*(1-index/Math.max(1,total-1))));
   }
@@ -99,7 +103,7 @@
     const seed=hashSeed(input.seed||1),playerName=String(input.playerName||"COPA XI").trim()||"COPA XI";
     const pool=uniquePool(input.pool,playerName);
     if(pool.length<31)throw new Error("tournament_pool_requires_31_unique_teams");
-    const rng=rngFor(`${seed}|participants`),picked=shuffled(pool,rng).slice(0,31),curve=powerCurve(input.powerBases,31);
+    const rng=rngFor(`${seed}|participants`),picked=shuffled(pool,rng).slice(0,31),curve=powerCurve(input.powerBases,31,input.countryCode);
     const aiTeams=picked.map((team,index)=>normalizeTeam(team,index,curve[index],seed)).sort((a,b)=>b.power-a.power||a.name.localeCompare(b.name));
     const player={id:"player",name:playerName,power:Math.max(35,Math.min(110,Number(input.playerPower)||70)),formation:input.playerFormation||"4-3-3",style:input.playerStyle||"gegen",isPlayer:true,fairPlay:0};
     /* The player's club is the host seed. This preserves the existing early-round
@@ -348,5 +352,5 @@
     return{ok:errors.length===0,errors:[...new Set(errors)]};
   }
 
-  return{FORMAT,GROUP_IDS,GROUP_SCHEDULE,hashSeed,rngFor,sameClubIdentity,createTournament,revealedEntries,revealNext,completeDraw,rankGroup,recomputeTables,getPlayerGroup,getCurrentPlayerMatch,completePlayerMatch,playerSchedule,recordMatch,validate,clone,defaultSimulator};
+  return{FORMAT,GROUP_IDS,GROUP_SCHEDULE,COUNTRY_DIFFICULTY,hashSeed,rngFor,sameClubIdentity,createTournament,revealedEntries,revealNext,completeDraw,rankGroup,recomputeTables,getPlayerGroup,getCurrentPlayerMatch,completePlayerMatch,playerSchedule,recordMatch,validate,clone,defaultSimulator};
 });

@@ -6,6 +6,8 @@ const CONSENT_VERSION="ghost-terms-v1";
 const LEADERBOARD_CONSENT_VERSION="leaderboard-terms-v1";
 const REPORT_REASONS=new Set(["hate","sexual","political","person","trademark","impersonation","other"]);
 const NOTIFICATION_PLATFORMS=new Set(["web","android","ios"]);
+const PUSH_PRIORITIES=new Set(["normal","high"]);
+const MAX_PUSH_RECIPIENTS=50;
 const ANALYTICS_EVENTS=new Set(["session_started","country_selected","formation_selected","chairman_selected","style_selected","draft_started","xi_completed","match_completed","round_completed","reward_selected","card_acquired","run_finished","ghost_encountered","ghost_opt_in","meta_unlocked","profile_open_error","final_sim_completed","group_draw_started","group_draw_completed","group_draw_skipped","tournament_match_resolved","sidefield_opened","sidefield_view_changed","sidefield_selection_viewed","sidefield_pick_placed","sidefield_settled","card_effect_summary_viewed","arena_match_completed"]);
 const ANALYTICS_PLATFORMS=new Set(["web","android","ios"]);
 const ANALYTICS_COUNTRIES=new Set(["","TR","IT","ENG","ES","DE","JP"]);
@@ -246,6 +248,60 @@ function notificationMeta(value){
   const raw=String(value||"").trim(),appVersion=/^[A-Za-z0-9._-]{1,64}$/.test(raw)?raw:"";
   return {appVersion};
 }
+const base64Url=value=>{
+  const bytes=value instanceof Uint8Array?value:new TextEncoder().encode(String(value));
+  let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+};
+function normalizePushMessage(value){
+  if(!object(value))return null;
+  const title=clean(value.title).slice(0,70),body=clean(value.body).slice(0,180);
+  if(!title||!body)return null;
+  const deepLink=String(value.deepLink||"").replace(/^copa:\/\//,"").replace(/^\//,"").trim();
+  if(deepLink&&!/^[a-z][a-z0-9/_-]{0,95}$/i.test(deepLink))return null;
+  const type=String(value.type||"system").trim().toLowerCase();
+  if(!/^[a-z][a-z0-9_-]{0,31}$/.test(type))return null;
+  const priority=PUSH_PRIORITIES.has(String(value.priority||"").toLowerCase())?String(value.priority).toLowerCase():"normal";
+  const locale=String(value.locale||"").trim().toLowerCase();
+  if(locale&&!/^[a-z]{2}(?:-[a-z]{2})?$/.test(locale))return null;
+  return {title,body,deepLink,type,priority,locale,dryRun:value.dryRun===true};
+}
+async function secureEqual(left,right){
+  const encoder=new TextEncoder(),[a,b]=await Promise.all([crypto.subtle.digest("SHA-256",encoder.encode(String(left||""))),crypto.subtle.digest("SHA-256",encoder.encode(String(right||"")))]);
+  const aa=new Uint8Array(a),bb=new Uint8Array(b);let difference=0;for(let index=0;index<aa.length;index++)difference|=aa[index]^bb[index];return difference===0&&String(left||"").length>0;
+}
+function pemBytes(value){
+  const base64=String(value||"").replace(/\\n/g,"\n").replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s+/g,"");
+  if(!base64)throw new Error("fcm_private_key_missing");
+  const binary=atob(base64),bytes=new Uint8Array(binary.length);for(let index=0;index<binary.length;index++)bytes[index]=binary.charCodeAt(index);return bytes;
+}
+async function fcmAccessToken(env,fetcher=fetch){
+  if(!env.FCM_CLIENT_EMAIL||!env.FCM_PRIVATE_KEY)throw new Error("fcm_credentials_missing");
+  const now=Math.floor(Date.now()/1000),header=base64Url(JSON.stringify({alg:"RS256",typ:"JWT"})),claims=base64Url(JSON.stringify({iss:env.FCM_CLIENT_EMAIL,scope:"https://www.googleapis.com/auth/firebase.messaging",aud:"https://oauth2.googleapis.com/token",iat:now,exp:now+3600})),unsigned=`${header}.${claims}`;
+  const key=await crypto.subtle.importKey("pkcs8",pemBytes(env.FCM_PRIVATE_KEY),{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["sign"]),signature=await crypto.subtle.sign("RSASSA-PKCS1-v1_5",key,new TextEncoder().encode(unsigned));
+  const response=await fetcher("https://oauth2.googleapis.com/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:new URLSearchParams({grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer",assertion:`${unsigned}.${base64Url(new Uint8Array(signature))}`})});
+  const result=await response.json().catch(()=>null);if(!response.ok||!result||!result.access_token)throw new Error("fcm_auth_failed");return String(result.access_token);
+}
+async function sendFcmMessage({projectId,accessToken,token,message,fetcher=fetch}){
+  const payload={message:{token,notification:{title:message.title,body:message.body},data:{deepLink:message.deepLink,type:message.type},android:{priority:message.priority.toUpperCase(),notification:{channel_id:message.priority==="high"?"copa-critical":"copa-events"}}}};if(message.dryRun)payload.validate_only=true;
+  const response=await fetcher(`https://fcm.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/messages:send`,{method:"POST",headers:{authorization:`Bearer ${accessToken}`,"content-type":"application/json"},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>null),serialized=JSON.stringify(result||{});
+  return {ok:response.ok,stale:response.status===404||/UNREGISTERED|registration-token-not-registered/i.test(serialized),status:response.status};
+}
+async function handleNotificationSend(request,env){
+  if(!env.PUSH_ADMIN_TOKEN||!await secureEqual(request.headers.get("x-copa-push-admin"),env.PUSH_ADMIN_TOKEN))return json(request,env,{error:"not_found"},404);
+  if(!env.FCM_PROJECT_ID||!env.FCM_CLIENT_EMAIL||!env.FCM_PRIVATE_KEY)return json(request,env,{error:"push_not_configured"},503);
+  let body;try{body=await readJsonLimited(request,8192);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
+  const message=normalizePushMessage(body);if(!message)return json(request,env,{error:"invalid_push_message"},422);
+  const query=message.locale?"SELECT token FROM notification_tokens WHERE active=1 AND platform='android' AND locale=? ORDER BY last_seen_at DESC LIMIT ?":"SELECT token FROM notification_tokens WHERE active=1 AND platform='android' ORDER BY last_seen_at DESC LIMIT ?";
+  const statement=message.locale?env.GHOSTS.prepare(query).bind(message.locale,MAX_PUSH_RECIPIENTS):env.GHOSTS.prepare(query).bind(MAX_PUSH_RECIPIENTS),rows=await statement.all(),tokens=(rows.results||[]).map(row=>String(row.token||"")).filter(validNotificationToken);
+  if(!tokens.length)return json(request,env,{ok:true,attempted:0,delivered:0,failed:0,deactivated:0},200);
+  const accessToken=await fcmAccessToken(env),results=[];
+  for(let offset=0;offset<tokens.length;offset+=10){const batch=tokens.slice(offset,offset+10);results.push(...await Promise.all(batch.map(token=>sendFcmMessage({projectId:env.FCM_PROJECT_ID,accessToken,token,message}).then(result=>({...result,token})).catch(()=>({ok:false,stale:false,status:0,token})))));}
+  const stale=results.filter(result=>result.stale).map(result=>result.token);if(stale.length){const now=new Date().toISOString();await env.GHOSTS.batch(stale.map(token=>env.GHOSTS.prepare("UPDATE notification_tokens SET active=0, updated_at=? WHERE token=?").bind(now,token)));}
+  const delivered=results.filter(result=>result.ok).length;console.log(JSON.stringify({event:"push_dispatch",attempted:results.length,delivered,failed:results.length-delivered,deactivated:stale.length,type:message.type,locale:message.locale||"all"}));
+  return json(request,env,{ok:true,attempted:results.length,delivered,failed:results.length-delivered,deactivated:stale.length},delivered||!results.length?200:502);
+}
 async function handleNotificationToken(request,env,remove=false){
   if(env.GHOST_WRITE_LIMITER){const outcome=await env.GHOST_WRITE_LIMITER.limit({key:requestKey(request)});if(!outcome.success)return json(request,env,{error:"rate_limited"},429);}
   let body;try{body=await readJsonLimited(request,8192);}catch(error){if(error instanceof PayloadTooLargeError)return json(request,env,{error:"payload_too_large"},413);return json(request,env,{error:"invalid_json"},400);}
@@ -462,6 +518,7 @@ function routeBucket(pathname){
   if(pathname==="/v1/health")return "health";
   if(pathname==="/v1/analytics/events")return "analytics_events";
   if(pathname==="/v1/notifications/tokens")return "notification_tokens";
+  if(pathname==="/v1/notifications/send")return "notification_send";
   if(pathname==="/v1/ghosts")return "ghost_write";
   if(pathname==="/v1/ghosts/match")return "ghost_match";
   if(pathname==="/v1/leaderboard/runs")return "leaderboard_write";
@@ -501,6 +558,7 @@ async function routeRequest(request,env,url){
   if(request.method==="POST"&&url.pathname==="/v1/analytics/events")return await handleAnalytics(request,env);
   if(request.method==="POST"&&url.pathname==="/v1/notifications/tokens")return await handleNotificationToken(request,env,false);
   if(request.method==="DELETE"&&url.pathname==="/v1/notifications/tokens")return await handleNotificationToken(request,env,true);
+  if(request.method==="POST"&&url.pathname==="/v1/notifications/send")return await handleNotificationSend(request,env);
   if(request.method==="POST"&&url.pathname==="/v1/ghosts")return await handlePost(request,env);
   if(request.method==="GET"&&url.pathname==="/v1/ghosts/match")return await handleMatch(request,env,url);
   if(request.method==="POST"&&url.pathname==="/v1/leaderboard/runs")return await handleLeaderboardPost(request,env);
@@ -518,4 +576,4 @@ export default {
   async scheduled(controller,env){await purgeExpired(env,new Date(controller.scheduledTime));}
 };
 
-export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,analyticsVisitorFingerprint,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket,validNotificationToken,notificationPlatform,notificationMeta};
+export {MAX_BODY_BYTES,CONSENT_VERSION,LEADERBOARD_CONSENT_VERSION,PayloadTooLargeError,readJsonLimited,requestKey,valid,validHistory,validClubName,moderateClubName,normalizeAnalyticsEvent,analyticsVisitorFingerprint,normalizeCareerRun,detectSchemaVersion,integrityFor,purgeExpired,routeBucket,validNotificationToken,notificationPlatform,notificationMeta,normalizePushMessage,secureEqual,sendFcmMessage};

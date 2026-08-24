@@ -1,0 +1,12 @@
+{
+  "$schema": "../ghost-club-api/node_modules/wrangler/config-schema.json",
+  "name": "copa-life-ghost-gateway",
+  "pages_build_output_dir": "public",
+  "compatibility_date": "2026-08-06",
+  "services": [
+    {
+      "binding": "GHOST_SERVICE",
+      "service": "copa-life-ghost-clubs"
+    }
+  ]
+}

@@ -123,7 +123,7 @@
     }
     const previous=readLastDraw(),base=`${root.seedNum}|${drawEntropy()}`;let candidate=null,identity=null;
     for(let attempt=0;attempt<256;attempt++){
-      candidate=root.CopaTournamentEngine.createTournament({seed:`${base}|${attempt}`,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:tournamentPool,powerBases:data[2]});
+      candidate=root.CopaTournamentEngine.createTournament({seed:`${base}|${attempt}`,playerName:root.teamName,playerPower:power,playerFormation:root.formName,playerStyle:root.style,pool:tournamentPool,powerBases:data[2],countryCode:root.selectedCountry});
       identity=drawIdentity(candidate);
       if(!previous||(identity.group!==previous.group&&identity.signature!==previous.signature))break;
     }

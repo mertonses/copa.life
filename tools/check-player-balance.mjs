@@ -89,9 +89,14 @@ const low=market.valueOf(55,27,55);
 const prime=market.valueOf(80,27,80);
 const prospect=market.valueOf(80,19,90);
 const veteran=market.valueOf(80,34,80);
+const veteranStar35=market.valueOf(90,35,90);
+const veteranStar36=market.valueOf(90,36,90);
+const veteranStar38=market.valueOf(90,38,90);
 expect(Number.isInteger(low)&&low>=1,"Draft ücreti tam sayı ve en az 1 olmalı");
 expect(Number.isInteger(prime)&&Number.isInteger(prospect)&&Number.isInteger(veteran),"Draft ücretleri tam sayı olmalı");
 expect(prospect>prime&&prime>veteran,`Yaş/potansiyel fiyat eğrisi geçersiz: genç ${prospect}, prime ${prime}, veteran ${veteran}`);
+expect(veteranStar35>=11&&veteranStar35<=14,`35 yaşındaki 90 güçlü yıldız hedeflenen €11–14M bandında değil: €${veteranStar35}M`);
+expect(veteranStar35===veteranStar36&&veteranStar36>veteranStar38,`Yaşlı yıldız eğrisi tutarsız: 35=${veteranStar35}, 36=${veteranStar36}, 38=${veteranStar38}`);
 
 console.table(report);
 if(failures.length){

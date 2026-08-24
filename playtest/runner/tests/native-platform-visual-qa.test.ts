@@ -57,6 +57,10 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     {width:360,height:800,name:"phone-small"},
     {width:430,height:932,name:"phone"},
     {width:768,height:1024,name:"tablet"},
+    {width:841,height:701,name:"foldable"},
+    {width:1024,height:640,name:"tablet-landscape"},
+    {width:1280,height:800,name:"large-tablet"},
+    {width:1600,height:900,name:"chromebook"},
   ]){
     await page.setViewportSize({width:viewport.width,height:viewport.height});
     await page.goto(`${packagePath(platform)}?native-setup-${viewport.name}=1`,{waitUntil:"domcontentloaded"});
@@ -97,9 +101,29 @@ test("Android and iOS setup states stay contextual, readable and bounded",async(
     await expect(page.locator('#introSetup [data-mobile-step="1"]').first()).toBeVisible();
     await expect(page.locator("[data-step-back]")).toBeHidden();
     await expect.poll(()=>page.locator("#chairSelectionSurface .js-chair-stage-image").evaluate((image:HTMLImageElement)=>image.naturalWidth)).toBeGreaterThan(0);
+    await expect(page.locator("#mobileActionDock")).toBeHidden();
+    if(platform==="android"&&viewport.width>900){
+      await expect(page.locator('#introSetup [data-mobile-step="2"]').first()).toBeVisible();
+      const wideSetup=await page.evaluate(()=>{
+        const intro=document.getElementById("introSetup")!;
+        const chair=document.getElementById("chairSelectionSurface")!;
+        const roster=document.querySelector<HTMLElement>('#introSetup [data-mobile-step="2"]')!;
+        const start=document.getElementById("startBtn")!;
+        const bounds=(node:HTMLElement)=>{const rect=node.getBoundingClientRect();return{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};};
+        return{overflow:document.documentElement.scrollWidth-innerWidth,intro:bounds(intro),chair:bounds(chair),roster:bounds(roster),start:bounds(start)};
+      });
+      expect(wideSetup.overflow,`${platform} ${viewport.name} wide setup`).toBeLessThanOrEqual(1);
+      for(const box of [wideSetup.intro,wideSetup.chair,wideSetup.roster,wideSetup.start]){
+        expect(box.left).toBeGreaterThanOrEqual(0);
+        expect(box.right).toBeLessThanOrEqual(viewport.width+1);
+      }
+      const overlap=wideSetup.chair.left<wideSetup.roster.right-1&&wideSetup.chair.right>wideSetup.roster.left+1&&wideSetup.chair.top<wideSetup.roster.bottom-1&&wideSetup.chair.bottom>wideSetup.roster.top+1;
+      expect(overlap,`${platform} ${viewport.name} setup surfaces overlap`).toBe(false);
+      await capture(page,platform,`${viewport.name}-setup-wide`);
+      continue;
+    }
     const leakedStep2=await page.locator('#introSetup [data-mobile-step="2"]').evaluateAll(nodes=>nodes.filter((node:any)=>node.offsetParent).map((node:any)=>({tag:node.tagName,id:node.id,cls:node.className,display:getComputedStyle(node).display})));
     expect(leakedStep2,`${platform} ${viewport.name} leaked step 2`).toEqual([]);
-    await expect(page.locator("#mobileActionDock")).toBeHidden();
     const chairmanFirst=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth-innerWidth,
       surface:document.querySelector<HTMLElement>("#chairSelectionSurface")!.getBoundingClientRect(),

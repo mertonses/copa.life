@@ -1,6 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, analyticsVisitorFingerprint, detectSchemaVersion, purgeExpired, routeBucket, validHistory, validNotificationToken, notificationPlatform } from "../src/index.js";
+import { MAX_BODY_BYTES, requestKey, moderateClubName, normalizeAnalyticsEvent, analyticsVisitorFingerprint, detectSchemaVersion, purgeExpired, routeBucket, validHistory, validNotificationToken, notificationPlatform, normalizePushMessage, secureEqual, sendFcmMessage } from "../src/index.js";
 
 const origin="https://copa.life";
 const formation442=["GK","LB","CB","CB","RB","LM","CM","CM","RM","ST","ST"];
@@ -74,6 +74,19 @@ describe("Ghost Club Worker",()=>{
     const removed=await exports.default.fetch(new Request("https://ghost.test/v1/notifications/tokens",{method:"DELETE",headers,body:JSON.stringify({token})}));
     expect(removed.status).toBe(200);expect(await removed.json()).toMatchObject({ok:true,unregistered:true});
     expect(await env.GHOSTS.prepare("SELECT active FROM notification_tokens WHERE token=?").bind(token).first()).toMatchObject({active:0});
+  });
+
+  it("validates and sends bounded FCM v1 messages without exposing admin routes",async()=>{
+    expect(normalizePushMessage({title:"Maç hazır",body:"Kadro seni bekliyor.",deepLink:"hub/match",type:"match",priority:"high",locale:"tr"})).toMatchObject({deepLink:"hub/match",priority:"high",locale:"tr"});
+    expect(normalizePushMessage({title:"",body:"Eksik"})).toBeNull();
+    expect(normalizePushMessage({title:"Test",body:"Test",deepLink:"https://evil.example"})).toBeNull();
+    expect(await secureEqual("secret","secret")).toBe(true);expect(await secureEqual("secret","wrong")).toBe(false);
+    let sent=null;
+    const result=await sendFcmMessage({projectId:"copa-life",accessToken:"short-lived",token:"device-token-0123456789",message:normalizePushMessage({title:"Maç hazır",body:"Kadro seni bekliyor.",deepLink:"hub/match",type:"match",priority:"high",dryRun:true}),fetcher:async(url,options)=>{sent={url,options};return new Response(JSON.stringify({name:"projects/copa-life/messages/1"}),{status:200,headers:{"content-type":"application/json"}});}});
+    expect(result).toEqual({ok:true,stale:false,status:200});expect(sent.url).toBe("https://fcm.googleapis.com/v1/projects/copa-life/messages:send");expect(sent.options.headers.authorization).toBe("Bearer short-lived");
+    const payload=JSON.parse(sent.options.body);expect(payload.validate_only).toBe(true);expect(payload.message.android.priority).toBe("HIGH");expect(payload.message.android.notification.channel_id).toBe("copa-critical");expect(payload.message.data).toEqual({deepLink:"hub/match",type:"match"});
+    const hidden=await exports.default.fetch(new Request("https://ghost.test/v1/notifications/send",{method:"POST",headers:{"content-type":"application/json","x-copa-push-admin":"wrong"},body:JSON.stringify({title:"A",body:"B"})}));
+    expect(hidden.status).toBe(404);expect(routeBucket("/v1/notifications/send")).toBe("notification_send");
   });
 
   it("reports the highest fully installed schema instead of hard-coding health",()=>{

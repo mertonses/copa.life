@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'services/ghost-club-api/**'
+      - 'services/ghost-club-gateway/**'
       - '.github/workflows/ghost-api.yml'
   push:
     branches: [main]
     paths:
       - 'services/ghost-club-api/**'
+      - 'services/ghost-club-gateway/**'
       - '.github/workflows/ghost-api.yml'
   workflow_dispatch:
     inputs:
@@ -46,6 +48,9 @@ jobs:
       - name: Verify compatibility with shipped web and Android clients
         working-directory: ${{ github.workspace }}
         run: node tools/check-ghost-clubs.mjs
+      - name: Compile the TLS gateway
+        working-directory: services/ghost-club-gateway
+        run: ../ghost-club-api/node_modules/.bin/wrangler pages functions build functions --outdir .wrangler-dry-run --project-directory .
 
   deploy-production:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target == 'production')
@@ -64,6 +69,9 @@ jobs:
       - run: npm ci
       - run: npx wrangler d1 migrations apply GHOSTS --remote --config wrangler.jsonc
       - run: npx wrangler deploy --config wrangler.jsonc
+      - name: Deploy the TLS gateway
+        working-directory: services/ghost-club-gateway
+        run: ../ghost-club-api/node_modules/.bin/wrangler pages deploy public --project-name copa-life-ghost-gateway --branch main
       - name: Production health smoke test
         run: node scripts/check-health.mjs "${{ vars.GHOST_API_HEALTH_URL }}"
 

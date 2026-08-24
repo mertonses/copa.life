@@ -60,6 +60,8 @@ const appGradle = read("android/app/build.gradle");
 for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID", "COPA_ADMOB_NATIVE_ID"]) {
   if (!appGradle.includes(marker)) fail(`Android ad dependency/configuration is missing ${marker}`);
 }
+if (!/debugSymbolLevel\s+['"]SYMBOL_TABLE['"]/.test(appGradle)) fail("release native symbol table generation is missing");
+if (!appGradle.includes("androidx.test.uiautomator:uiautomator")) fail("physical-device system overlay handling dependency is missing");
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");
 for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCode", "reload()", "registerPlugin(CopaAdsPlugin.class)"] ) {
   if (!mainActivity.includes(marker)) fail(`native update cache guard is missing ${marker}`);
@@ -122,6 +124,12 @@ const nativeSmoke = read("tools/android-native-smoke.sh");
 if (!nativeSmoke.includes("connectedDebugAndroidTest") || !nativeSmoke.includes('PACKAGE="life.copa.app"') || !nativeSmoke.includes('ACTIVITY="$PACKAGE/.MainActivity"')) fail("native smoke must run instrumentation and launch the real app id");
 const instrumentationTest = read("android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java");
 if (!instrumentationTest.includes('assertEquals("life.copa.app"')) fail("instrumentation test package assertion drift");
+const scrollInstrumentation = read("android/app/src/androidTest/java/life/copa/app/ScrollInteractionTest.java");
+for (const marker of ["draftAndHubRemainBidirectionallyScrollable", "durableStorageAndScrollSurviveActivityRecreation", "assertRouteScrollsWhenNeeded", "dismissPlayGamesPromptIfPresent"]) {
+  if (!scrollInstrumentation.includes(marker)) fail(`physical Android quality test is missing ${marker}`);
+}
+if (/min-height['"],['"](?:2200|2400)px/.test(scrollInstrumentation)) fail("physical scroll test still relies on artificial page height");
+if (!exists("tools/run-android-test-lab.ps1") || packageJson.scripts?.["android:testlab"] == null) fail("repeatable Firebase Test Lab command is missing");
 if (!read("tools/shared-build-info.mjs").includes("cleanGitCommit")) fail("local clean release builds do not record their Git source commit");
 
 const legalWorkflow = read(".github/workflows/legal-pages.yml");
