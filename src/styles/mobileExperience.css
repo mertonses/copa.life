@@ -6,6 +6,20 @@
   --mobile-dock-height:0px;
 }
 
+/* Native tablets can exceed the phone breakpoint while still using coarse
+   touch input. Keep page scrolling available over players at every native
+   viewport size; an active drag temporarily takes ownership of the gesture. */
+html[data-copa-platform="android"] #hubPitch .roundel,
+html[data-copa-platform="ios"] #hubPitch .roundel,
+html[data-copa-platform="android"] #hubBenchSection .bench-row,
+html[data-copa-platform="ios"] #hubBenchSection .bench-row{
+  touch-action:pan-y;
+}
+html.hub-player-dragging[data-copa-platform="android"] :is(#hubPitch .roundel,#hubBenchSection .bench-row),
+html.hub-player-dragging[data-copa-platform="ios"] :is(#hubPitch .roundel,#hubBenchSection .bench-row){
+  touch-action:none;
+}
+
 .mobile-action-dock,
 .mobile-sim-tabs,
 .mobile-network-banner,

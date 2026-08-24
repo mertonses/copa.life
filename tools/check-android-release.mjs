@@ -63,8 +63,12 @@ for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "
 if (!/debugSymbolLevel\s+['"]SYMBOL_TABLE['"]/.test(appGradle)) fail("release native symbol table generation is missing");
 if (!appGradle.includes("androidx.test.uiautomator:uiautomator")) fail("physical-device system overlay handling dependency is missing");
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");
-for (const marker of ["VERSION_CODE_KEY", "clearCache(true)", "getLongVersionCode", "reload()", "registerPlugin(CopaAdsPlugin.class)"] ) {
-  if (!mainActivity.includes(marker)) fail(`native update cache guard is missing ${marker}`);
+if (!mainActivity.includes("registerPlugin(CopaAdsPlugin.class)")) fail("native ad plugin registration is missing");
+if (!/EdgeToEdge\.enable\(this\);[\s\S]*super\.onCreate\(savedInstanceState\);/.test(mainActivity)) {
+  fail("edge-to-edge must be configured before BridgeActivity inflates the WebView");
+}
+for (const forbidden of ["clearCache(true)", ".reload()", "copa_native_release"]) {
+  if (mainActivity.includes(forbidden)) fail(`unstable upgrade-time WebView restart remains: ${forbidden}`);
 }
 const adsPlugin = read("android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
 for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showListPlacement", "NativeAdView", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {

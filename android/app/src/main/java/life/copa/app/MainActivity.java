@@ -1,9 +1,5 @@
 package life.copa.app;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -12,22 +8,17 @@ import androidx.core.view.WindowCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
-    private static final String RELEASE_PREFS = "copa_native_release";
-    private static final String VERSION_CODE_KEY = "version_code";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        long currentVersion = readVersionCode();
-        SharedPreferences preferences = getSharedPreferences(RELEASE_PREFS, Context.MODE_PRIVATE);
-        long previousVersion = preferences.getLong(VERSION_CODE_KEY, -1L);
-
+        // Apply system-bar behavior before BridgeActivity inflates the WebView.
+        // This keeps first-frame insets stable across Samsung One UI and stock Android.
+        EdgeToEdge.enable(this);
         registerPlugin(CopaAdsPlugin.class);
         registerPlugin(CopaPlayGamesPlugin.class);
         registerPlugin(CopaAnalyticsPlugin.class);
         registerPlugin(CopaReviewPlugin.class);
         super.onCreate(savedInstanceState);
 
-        EdgeToEdge.enable(this);
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
 
@@ -42,19 +33,8 @@ public class MainActivity extends BridgeActivity {
             webView.setNestedScrollingEnabled(true);
         }
 
-        if (currentVersion >= 0L && previousVersion >= 0L && previousVersion != currentVersion && getBridge() != null) {
-            getBridge().getWebView().clearCache(true);
-            getBridge().getWebView().reload();
-        }
-        if (currentVersion >= 0L) preferences.edit().putLong(VERSION_CODE_KEY, currentVersion).apply();
-    }
-
-    private long readVersionCode() {
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
-            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? info.getLongVersionCode() : info.versionCode;
-        } catch (Exception ignored) {
-            return -1L;
-        }
+        // Capacitor serves versioned files from the installed APK. Do not clear
+        // and reload the WebView during an app upgrade: that creates a second
+        // startup while native plugins and the splash screen are initializing.
     }
 }
