@@ -28,3 +28,8 @@
 
 # Keep useful source context for Play Console stack traces while still allowing R8 optimization.
 -keepattributes SourceFile,LineNumberTable,*Annotation*
+
+# WorkManager initializes from a ContentProvider before MainActivity. Preserve
+# Room's generated database implementation for its reflective lookup under R8.
+-keep class androidx.work.impl.WorkDatabase_Impl { public <init>(); }
+-keep class * extends androidx.room.RoomDatabase { *; }
