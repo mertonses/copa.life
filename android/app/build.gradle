@@ -104,7 +104,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.2.1'
+    implementation 'com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.4.0'
     // ads-mobile-sdk currently pulls WorkManager 2.7.0 transitively. Pin the
     // maintained runtime so AndroidX Startup does not initialize the obsolete
     // Room/WorkDatabase stack before MainActivity on newer OEM builds.
