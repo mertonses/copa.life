@@ -60,6 +60,13 @@ const appGradle = read("android/app/build.gradle");
 for (const marker of ["ads-mobile-sdk:1.2.1", "user-messaging-platform:4.0.0", "COPA_ADMOB_APP_ID", "COPA_ADMOB_INTERSTITIAL_ID", "COPA_ADMOB_REWARDED_ID", "COPA_ADMOB_NATIVE_ID"]) {
   if (!appGradle.includes(marker)) fail(`Android ad dependency/configuration is missing ${marker}`);
 }
+if (!appGradle.includes("androidx.work:work-runtime:2.11.2")) {
+  fail("stable WorkManager startup dependency pin is missing");
+}
+const proguardRules = read("android/app/proguard-rules.pro");
+if (!proguardRules.includes("androidx.work.impl.WorkDatabase_Impl")) {
+  fail("release R8 rules do not preserve WorkManager's generated Room database");
+}
 if (!/debugSymbolLevel\s+['"]SYMBOL_TABLE['"]/.test(appGradle)) fail("release native symbol table generation is missing");
 if (!appGradle.includes("androidx.test.uiautomator:uiautomator")) fail("physical-device system overlay handling dependency is missing");
 const mainActivity = read("android/app/src/main/java/life/copa/app/MainActivity.java");

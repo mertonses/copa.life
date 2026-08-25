@@ -108,6 +108,7 @@ public final class CheckAndroidAab {
         int publicFiles = 0;
         String packagedBuild = null;
         String packagedIndex = null;
+        boolean workDatabaseImplementationPresent = false;
 
         try (ZipFile zip = new ZipFile(aab.toFile())) {
             Enumeration<? extends ZipEntry> entries = zip.entries();
@@ -120,6 +121,14 @@ public final class CheckAndroidAab {
                 if (entry.getSize() > entryLimit) failures.add("entry exceeds safety limit: " + name);
                 if (entry.getSize() > 0) totalBytes += entry.getSize();
                 if (totalBytes > MAX_TOTAL_BYTES) failures.add("AAB uncompressed size exceeds safety limit");
+                if (name.startsWith("base/dex/classes") && name.endsWith(".dex")) {
+                    try (InputStream stream = zip.getInputStream(entry)) {
+                        String dexStrings = new String(stream.readAllBytes(), StandardCharsets.ISO_8859_1);
+                        if (dexStrings.contains("androidx/work/impl/WorkDatabase_Impl")) {
+                            workDatabaseImplementationPresent = true;
+                        }
+                    }
+                }
                 if (entry.isDirectory() || !name.startsWith(PUBLIC)) continue;
                 publicFiles++;
                 if (name.startsWith(PUBLIC + "assets/flags/") && !APPROVED_FLAGS.contains(name.substring((PUBLIC + "assets/flags/").length()))) failures.add("unapproved packaged flag: " + name);
@@ -143,6 +152,9 @@ public final class CheckAndroidAab {
             if (!names.contains(required)) failures.add("required packaged file is missing: " + required);
         }
         if (!names.contains(R8_MAPPING)) failures.add("R8 mapping metadata is missing");
+        if (!workDatabaseImplementationPresent) {
+            failures.add("WorkManager generated Room database is missing from release DEX");
+        }
         if (packagedBuild == null) failures.add("packaged platform-build.json could not be read");
         else {
             if (!packagedBuild.equals(expectedBuild)) failures.add("packaged build manifest differs from dist-android");
