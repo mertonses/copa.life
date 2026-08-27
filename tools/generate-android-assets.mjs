@@ -32,9 +32,10 @@ try {
     const page = await browser.newPage({ viewport: { width: asset.width, height: asset.height }, deviceScaleFactor: 1 });
     const backgroundOnly = asset.name.includes("background");
     const foreground = asset.name.includes("foreground");
+    const round = asset.name.includes("_round");
     const logoSize = foreground ? 72 : 100;
     await page.setContent(
-      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${backgroundOnly ? "#101D28" : "transparent"};display:grid;place-items:center}img{display:${backgroundOnly ? "none" : "block"};width:${logoSize}%;height:${logoSize}%;object-fit:contain}</style><img src="${dataUrl}" alt="">`,
+      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${backgroundOnly ? "#101D28" : "transparent"};display:grid;place-items:center}img{display:${backgroundOnly ? "none" : "block"};width:${logoSize}%;height:${logoSize}%;object-fit:contain;${round ? "border-radius:50%;" : ""}}</style><img src="${dataUrl}" alt="">`,
       { waitUntil: "load" },
     );
     await page.screenshot({ path: asset.file, omitBackground: !backgroundOnly });
