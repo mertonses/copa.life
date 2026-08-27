@@ -34,5 +34,10 @@
       App.minimizeApp().catch(()=>App.exitApp().catch(()=>{}));
     });
   root.addEventListener("pagehide",checkpoint,{passive:true});
-  SplashScreen.hide().catch(()=>{});
+  // Keep the native launch surface visible until the HTML shell has finished
+  // booting. Hiding it immediately can expose the unstyled document for one
+  // frame, which is especially visible on Samsung WebView and large tablets.
+  const hideSplash=()=>SplashScreen.hide().catch(()=>{});
+  if(root.CopaBootReady&&typeof root.CopaBootReady.finally==="function")root.CopaBootReady.finally(hideSplash);
+  else root.addEventListener("copa:boot-ready",hideSplash,{once:true});
 })(window);
