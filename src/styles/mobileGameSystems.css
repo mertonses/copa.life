@@ -455,6 +455,12 @@ html.copa-mobile-game .mobile-legal-links .sdbtn{min-width:0!important;padding-i
   html.copa-mobile-game #draft{height:auto!important;min-height:calc(100dvh - 80px)!important;max-height:none!important;overflow:visible!important;padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}
   html.copa-mobile-game #draft .draft-cols,html.copa-mobile-game #draft .draft-right{overflow:visible!important;max-height:none!important}
   html.copa-mobile-game #draft #pitch{min-height:760px}
+  /* Draft players are interactive, but a vertical swipe over the pitch must
+     still reach the document scroll container on Android and iOS. */
+  html[data-copa-platform="android"] #draft #pitch,
+  html[data-copa-platform="ios"] #draft #pitch,
+  html[data-copa-platform="android"] #draft #pitch :is(button,[role="button"]),
+  html[data-copa-platform="ios"] #draft #pitch :is(button,[role="button"]){touch-action:pan-y}
 
   html.copa-mobile-game .native-hub-nav{position:sticky;top:0;z-index:20;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px;background:color-mix(in srgb,var(--surface-bg) 92%,transparent);backdrop-filter:blur(16px);border:1px solid var(--border-subtle);border-radius:14px}
   html.copa-mobile-game .native-hub-nav button{display:flex!important;align-items:center;justify-content:center;gap:7px;min-height:50px;border:0;border-radius:10px;background:transparent;color:var(--color-slate);font:800 9px/1 var(--mono);letter-spacing:.08em}
