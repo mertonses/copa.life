@@ -34,10 +34,18 @@
       App.minimizeApp().catch(()=>App.exitApp().catch(()=>{}));
     });
   root.addEventListener("pagehide",checkpoint,{passive:true});
-  // Keep the native launch surface visible until the HTML shell has finished
-  // booting. Hiding it immediately can expose the unstyled document for one
-  // frame, which is especially visible on Samsung WebView and large tablets.
-  const hideSplash=()=>SplashScreen.hide().catch(()=>{});
+  // The HTML shell is allowed to finish booting, but a broken/slow optional
+  // plugin must never keep the Android launch surface on top of the WebView.
+  // Android 12 can otherwise retain a stale starting-window composition on
+  // Samsung and wide tablets, which appears as repeated/stretching logos.
+  let hidden=false;
+  const hideSplash=()=>{
+    if(hidden)return;
+    hidden=true;
+    SplashScreen.hide().catch(()=>{});
+  };
   if(root.CopaBootReady&&typeof root.CopaBootReady.finally==="function")root.CopaBootReady.finally(hideSplash);
   else root.addEventListener("copa:boot-ready",hideSplash,{once:true});
+  root.setTimeout(hideSplash,2200);
+  root.addEventListener("load",()=>root.setTimeout(hideSplash,120),{once:true});
 })(window);

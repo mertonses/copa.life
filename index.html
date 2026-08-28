@@ -4185,7 +4185,8 @@ function _bootCopaApplication(){
   try{applyTheme("dark",false);const _savedMusic=localStorage.getItem("copa_music");_musicEnabled=_savedMusic==="1";if(_savedMusic===null)localStorage.setItem("copa_music","0");_updateMusicButton();_startDefaultMusic();if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}
   document.documentElement.classList.remove("copa-native-boot");
 }
-window.CopaBootReady=Promise.all([Promise.resolve(window.CopaPlatform&&window.CopaPlatform.ready).catch(()=>null),window.CopaMobileShellReady||Promise.resolve()]).then(_bootCopaApplication);
+const _copaBootDependencies=Promise.all([Promise.resolve(window.CopaPlatform&&window.CopaPlatform.ready).catch(()=>null),window.CopaMobileShellReady||Promise.resolve()]);
+window.CopaBootReady=Promise.race([_copaBootDependencies,new Promise(resolve=>setTimeout(resolve,1800))]).then(_bootCopaApplication);
 (function(){try{if(localStorage.getItem("copa_reduced_motion")==="1"){document.body.classList.add("reduced-motion");const b=$("animBtn");if(b)b.classList.add("on");}}catch(e){}})();
 (function(){const ms=$("mechStats");if(!ms)return;const pc=typeof POOL_TR!=="undefined"?POOL_TR.length:(typeof POOL!=="undefined"?POOL.length:0);const tc=typeof OPP_POOL!=="undefined"?OPP_POOL.length:0;const cc=typeof CARDDEFS!=="undefined"?Object.keys(CARDDEFS).length:(typeof allCardKeys==="function"?allCardKeys().length:33);ms.innerHTML=`<span><b>${pc}</b> oyuncu</span><span>·</span><span><b>${tc}</b> takım</span><span>·</span><span><b>${cc}</b> kart</span><span>·</span><span><b>6</b> tur</span><span>·</span><span><b>6</b> başkan</span>`;})();
 (function(){Promise.resolve(window.CopaBootReady).finally(()=>{document.documentElement.classList.remove("copa-native-boot");const l=$("loader");if(l){l.classList.add("done");setTimeout(()=>l.remove(),350);}
