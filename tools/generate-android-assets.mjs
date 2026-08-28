@@ -57,7 +57,7 @@ try {
     const page = await browser.newPage({ viewport: { width: asset.width, height: asset.height }, deviceScaleFactor: 1 });
     const logo = Math.round(Math.min(asset.width, asset.height) * 0.34);
     await page.setContent(
-      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${asset.dark ? "#101D28" : "#F3F5F4"};display:grid;place-items:center}img{display:block;width:${logo}px;height:${logo}px}</style><img src="${dataUrl}" alt="">`,
+      `<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101D28;display:grid;place-items:center}img{display:block;width:${logo}px;height:${logo}px}</style><img src="${dataUrl}" alt="">`,
       { waitUntil: "load" },
     );
     await page.screenshot({ path: asset.file, omitBackground: false });

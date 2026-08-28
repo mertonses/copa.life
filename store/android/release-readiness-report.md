@@ -1,17 +1,17 @@
 # Android mağaza ve yayın hazırlık raporu
 
-Son güncelleme: **23 Ağustos 2026**
+Son güncelleme: **28 Ağustos 2026**
 Bu dosya `tools/write-android-release-manifest.mjs` tarafından AAB manifestiyle birlikte otomatik üretilir.
 
 ## Güncel aday
 
 - Paket: `life.copa.app`
-- Sürüm: `1.6.17` (`versionCode` 50)
+- Sürüm: `1.6.27` (`versionCode` 60)
 - Kaynak commit: `dirty/uncommitted`
-- Build sürümü: `56ecf5362d40`
+- Build sürümü: `11d214c78b92`
 - AAB: `android/app/build/outputs/bundle/release/app-release-signed.aab`
-- Boyut: `30240235` bayt
-- SHA-256: `352CD1776CE3CF395D973DEE3F81801FCAB831FB6037192A291819E2A1BD6A46`
+- Boyut: `32941141` bayt
+- SHA-256: `6DC1663A5FE824BE3A23EB53E734377441A6C14CC682F420FFBC8EFE955189B5`
 - Upload certificate: `64:4C:43:AC:75:D7:93:87:87:7B:3B:FC:E7:6C:51:CE:98:85:C1:EA:D3:39:38:F7:D8:9D:1F:6B:A5:2C:21:56`
 - AdMob modu: `production`
 - Play yüklemeye uygun: **HAYIR**

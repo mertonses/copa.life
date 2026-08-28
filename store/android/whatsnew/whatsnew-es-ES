@@ -1,1 +1,1 @@
-Corregimos el cierre inesperado al iniciar en Samsung y otros dispositivos Android. Eliminamos la capa de logotipos que cubría el contenido en móviles y tabletas.
+Corregimos el cierre inesperado al iniciar en Samsung y otros dispositivos Android. Reforzamos la compatibilidad del sistema y las pruebas de desplazamiento. Eliminamos la capa de logotipos que cubría el contenido en móviles y tabletas.

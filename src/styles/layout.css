@@ -7659,3 +7659,131 @@ html[data-theme="dark"] .style-choice-modern[data-style] .sst>span:first-child{c
   #toastContainer{top:calc(max(10px,env(safe-area-inset-top)) + 56px)!important;right:10px!important;bottom:auto!important;left:10px!important;align-items:flex-end}
   #toastContainer .toast{max-width:min(300px,calc(100vw - 20px))}
 }
+
+/* Final responsive guardrails for the hub.  The desktop column overrides above
+   intentionally preserve the dense game layout, but they can leave the
+   chairman action tile too tall and squeeze market cards until their copy
+   overlaps.  Keep the same visual language while giving each region a stable
+   amount of space at every supported viewport. */
+@media (min-width:901px){
+  #hub .hubcols{
+    grid-template-columns:minmax(0,1fr) minmax(330px,360px)!important;
+    gap:18px!important;
+  }
+  #hub .hcol-r{max-width:360px!important}
+
+  #hub .hub-action-panel .actionbar{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(48px,auto)!important;
+    height:auto!important;
+    min-height:0!important;
+    gap:8px!important;
+    align-items:stretch!important;
+  }
+  #hub .hub-action-panel .playbtn,
+  #hub .hub-action-panel .talkbtn,
+  #hub .hub-action-panel .btn-pres,
+  #hub .hub-action-panel #playBtn,
+  #hub .hub-action-panel #talkBtn,
+  #hub .hub-action-panel #presBtn{
+    min-height:48px!important;
+    height:48px!important;
+    box-sizing:border-box!important;
+  }
+  #hub .hub-action-panel .presbtngp{
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  #hub .hub-action-panel .btn-pres{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:7px!important;
+    padding:8px 10px!important;
+    overflow:hidden!important;
+  }
+
+  #hub .hub-stat-row>.mtile,
+  #hub .hub-stat-row>#kasaTile{
+    min-height:72px!important;
+    height:72px!important;
+    box-sizing:border-box!important;
+  }
+  #hub .hub-stat-row .kasa-main-val{
+    font-size:20px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  #hub #shopcards>.market-card{
+    aspect-ratio:auto!important;
+    height:280px!important;
+    min-height:280px!important;
+  }
+  #hub #shopcards>.market-card .market-card-impact{
+    top:52%!important;
+  }
+  #hub #shopcards>.market-card .market-card-title{
+    top:65%!important;
+    line-height:1.05!important;
+    max-height:31px!important;
+    overflow:hidden!important;
+  }
+  #hub #shopcards>.market-card .market-card-desc{
+    top:76%!important;
+    max-height:24px!important;
+    overflow:hidden!important;
+    display:-webkit-box!important;
+    -webkit-box-orient:vertical!important;
+    -webkit-line-clamp:2!important;
+    line-height:1.15!important;
+  }
+  #hub #shopcards>.market-card .market-card-bottom{
+    bottom:13px!important;
+  }
+
+  #hub .hubBenchSection{
+    top:14px!important;
+    right:14px!important;
+    width:clamp(220px,30%,280px)!important;
+  }
+}
+
+@media (min-width:901px) and (max-width:1180px){
+  #hub .hubcols{
+    grid-template-columns:minmax(0,1fr) minmax(300px,320px)!important;
+    gap:14px!important;
+  }
+  #hub .hcol-r{max-width:320px!important}
+}
+
+@media (max-width:900px){
+  #hub #shopcards>.market-card{
+    aspect-ratio:auto!important;
+    height:250px!important;
+    min-height:250px!important;
+  }
+  #hub #shopcards>.market-card .market-card-impact{top:50%!important}
+  #hub #shopcards>.market-card .market-card-title{
+    top:63%!important;
+    line-height:1.05!important;
+    max-height:30px!important;
+    overflow:hidden!important;
+  }
+  #hub #shopcards>.market-card .market-card-desc{
+    top:75%!important;
+    max-height:24px!important;
+    overflow:hidden!important;
+    display:-webkit-box!important;
+    -webkit-box-orient:vertical!important;
+    -webkit-line-clamp:2!important;
+    line-height:1.15!important;
+  }
+  #hub #shopcards>.market-card .market-card-bottom{bottom:12px!important}
+}
