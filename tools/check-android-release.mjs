@@ -78,8 +78,11 @@ for (const forbidden of ["clearCache(true)", ".reload()", "copa_native_release"]
   if (mainActivity.includes(forbidden)) fail(`unstable upgrade-time WebView restart remains: ${forbidden}`);
 }
 const adsPlugin = read("android/app/src/main/java/life/copa/app/CopaAdsPlugin.java");
-for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showListPlacement", "NativeAdView", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
+for (const marker of ["requestConsentInfoUpdate", "loadAndShowConsentFormIfRequired", "canRequestAds()", "showRunEnd", "showRewardedReroll", "showRewardedInjury", "showRewardedMarket", "showListPlacement", "\"disabled\"", "showPrivacyOptions", "AgeRestrictedTreatment.TEEN", "MAX_AD_CONTENT_RATING_T", "RUN_END_AD_COOLDOWN_MS", "duplicate_run", "cooldown"]) {
   if (!adsPlugin.includes(marker)) fail(`native ad consent/runtime guard is missing ${marker}`);
+}
+for (const forbidden of ["NativeAdView", "activity.addContentView", "attachNativeListView", "createNativeListView"]) {
+  if (adsPlugin.includes(forbidden)) fail(`Android overlay ad implementation must stay removed: ${forbidden}`);
 }
 
 const filePaths = read("android/app/src/main/res/xml/file_paths.xml");

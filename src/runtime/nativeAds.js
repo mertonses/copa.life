@@ -54,7 +54,7 @@
     const key=String(runKey||"").trim();if(!key)return Promise.resolve({earned:false,reason:"missing_run_key"});
     return Ads.showRewardedMarket({runKey:key}).catch(()=>({earned:false,reason:"native_error"}));
   }
-  function showListPlacement(rect){return Ads.showListPlacement(rect||{}).catch(()=>({shown:false,reason:"native_error"}));}
+  function showListPlacement(){return Promise.resolve({shown:false,reason:"disabled"});}
   function hideListPlacement(){return Ads.hideListPlacement().catch(()=>({hidden:false,reason:"native_error"}));}
   root.CopaNativeAds=Object.freeze({showRunEnd,showArenaEnd,showRewardedReroll,showRewardedInjury,showRewardedMarket,showListPlacement,hideListPlacement,showPrivacyOptions:()=>Ads.showPrivacyOptions(),getStatus:()=>Ads.getStatus()});
   scheduleInitialize();

@@ -43,7 +43,11 @@
   function mountListSlot(element,placement){
     if(!element)return false;
     const native=nativeApi();
-    if(native&&typeof native.showListPlacement==="function"){element.dataset.adPlacement=String(placement||"career_list");let stopped=false;const stop=()=>{if(stopped)return;stopped=true;observer.disconnect();mutation.disconnect();root.removeEventListener("resize",sync);native.hideListPlacement&&native.hideListPlacement();};const sync=()=>{if(!element.isConnected||element.offsetParent===null){stop();return;}const rect=element.getBoundingClientRect();native.showListPlacement({placement:String(placement||"career_list"),x:rect.left,y:rect.top,width:rect.width,height:rect.height}).catch(()=>{});};const observer=new IntersectionObserver(entries=>{if(entries[0]&&entries[0].isIntersecting)sync();else native.hideListPlacement&&native.hideListPlacement();},{threshold:.35});const mutation=new MutationObserver(()=>{if(!element.isConnected)stop();});observer.observe(element);mutation.observe(document.body,{childList:true,subtree:true});root.addEventListener("resize",sync,{passive:true});element._copaAdObserver=observer;element._copaAdStop=stop;return true;}
+    // Native list ads are deliberately disabled. They live outside the WebView,
+    // so stale placements can cover the app after navigation and CSS-pixel
+    // coordinates can be scaled again on high-density phones and tablets.
+    // Rewarded and interstitial ads remain available through their own flows.
+    if(native){native.hideListPlacement&&native.hideListPlacement().catch(()=>{});return false;}
     if(!webEnabled()||!displaySlot)return false;ensureWebSdk();element.dataset.adPlacement=String(placement||"career_list");element.innerHTML=`<span>${root.LANG==="tr"?"REKLAM":"ADVERTISEMENT"}</span><ins class="adsbygoogle" style="display:block" data-ad-client="${client}" data-ad-slot="${displaySlot}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;try{(root.adsbygoogle=root.adsbygoogle||[]).push({});element.classList.add("is-mounted");return true;}catch(_){return false;}
   }
   root.CopaAds=Object.freeze({showRunEnd,showArenaEnd,showRewardedReroll,showRewardedInjury,showRewardedMarket,canReward,mountListSlot,configured:()=>!!nativeApi()||webEnabled()});

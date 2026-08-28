@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import android.app.Instrumentation;
 import android.os.SystemClock;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.lifecycle.Lifecycle;
@@ -121,6 +123,31 @@ public class ScrollInteractionTest {
         if (cancel != null) {
             cancel.click();
             device.waitForIdle(2_000L);
+        }
+    }
+
+    private int countViewsNamed(View view, String className) {
+        int count = view.getClass().getName().equals(className) ? 1 : 0;
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int index = 0; index < group.getChildCount(); index++) {
+                count += countViewsNamed(group.getChildAt(index), className);
+            }
+        }
+        return count;
+    }
+
+    @Test
+    public void nativeListAdsCannotOverlayTheGame() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> webView = activity.getBridge().getWebView());
+            waitFor("window.CopaNativeAds && window.CopaAds");
+            evaluate("window.__nativeListResult='pending';CopaNativeAds.showListPlacement({x:0,y:0,width:500,height:120}).then(r=>window.__nativeListResult=r.reason)");
+            waitFor("window.__nativeListResult === 'disabled'");
+            scenario.onActivity(activity -> assertTrue(
+                "A native ad view was attached above the WebView",
+                countViewsNamed(activity.getWindow().getDecorView(), "com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView") == 0
+            ));
         }
     }
 
