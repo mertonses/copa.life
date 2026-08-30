@@ -90,7 +90,7 @@ if("serviceWorker"in navigator){
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
-<link rel="stylesheet" href="src/styles/layout.css?v=20260821-responsive-polish1">
+<link rel="stylesheet" href="src/styles/layout.css?v=20260830-safe-area1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
 <link rel="stylesheet" href="src/styles/cards.css?v=20260817-karaborsa1">
 <link rel="stylesheet" href="src/styles/match.css?v=20260821-result-compact1">
@@ -98,9 +98,9 @@ if("serviceWorker"in navigator){
 <link rel="stylesheet" href="src/styles/mobileExperience.css?v=20260818-settings-compact1">
 <link rel="stylesheet" href="src/styles/palette.css?v=20260804-interface-future1">
 <link rel="stylesheet" href="src/styles/tournament.css?v=20260821-draw-layout1">
-<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260821-responsive-polish1">
+<link rel="stylesheet" href="src/styles/mobileGameSystems.css?v=20260830-safe-area1">
 <link rel="stylesheet" href="src/styles/androidSurfaces.css?v=20260727-android-surfaces1">
-<link rel="stylesheet" href="src/styles/modeGate.css?v=20260803-mode-gate7">
+<link rel="stylesheet" href="src/styles/modeGate.css?v=20260830-safe-area1">
 <style>
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg,#1F2B34);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
 #loader.done{opacity:0;pointer-events:none}
@@ -1213,9 +1213,9 @@ function _ovCol(ov){return ov>=70?"#4E9B65":ov>=55?"#68757C":"#101D28";}
 function _updateSquadSils(){const el=$("squadSils");if(!el||!slots)return;el.innerHTML=slots.map((_,i)=>{const done=filled&&filled[i];const f=done?"#4E9B65":"rgba(16,29,40,.2)";const s=done?"rgba(104,117,124,.7)":"rgba(16,29,40,.35)";return`<svg viewBox="0 0 12 18" width="13" height="19" fill="${f}" stroke="${s}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="3.2"/><path d="M1.5 17.5Q2 11.5 6 11.5Q10 11.5 10.5 17.5"/></svg>`;}).join("");}
 function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos]||p.pos);const eff=effOf(p);const isCap=typeof _currentCaptainPlayer==="function"&&_currentCaptainPlayer()===p;const boosted=!!((p.train||0)>0||(p.backupBoost||0)>0||(p.dev||0)>0||(p.tempBoost||0)>0);
   p=ensurePlayerIdentity(p);r.className="roundel full pop"+(p.injured?" inj":"")+(p.suspended?" susp":"")+(isCap?" cap":"")+(boosted?" boosted":"");r.style.background="var(--color-ink)";r.style.color="var(--color-background)";r.style.borderColor=p.suspended?"#420102":(kit.sec||"rgba(255,255,255,.3)");const _fullTitle=p.name+" · "+ab+" "+eff+(isCap?(CopaText(" · KAPTAN"," · CAPTAIN")):"")+(p.injured?(CopaText(" · SAKAT"," · INJURED")):"")+(p.suspended?(CopaText(" · CEZALI"," · SUSPENDED")):"")+(boosted?(CopaText(" · ETKİLİ"," · BOOSTED")):"");r.title=_fullTitle;r.dataset.playerId=p.playerId;r.dataset.playerName=p.name||"";r.setAttribute("aria-label",_fullTitle);r.setAttribute("role","button");r.tabIndex=0;r.setAttribute("aria-selected","false");
-  const surname=surOf(p),sameSurname=(picksBySlot||[]).filter(player=>player&&surOf(player)===surname).length>1,sur=sameSurname?shortName(p):surname;
+  const surname=surOf(p),sameSurname=(picksBySlot||[]).filter(player=>player&&surOf(player)===surname).length>1,sur=sameSurname?shortName(p):surname,displaySur=sur.length>10&&sur.includes("-")?sur.replace(/^(.).*-(.+)$/,"$1. $2"):sur;
   /* font scale: uzun soyadlar için küçük font */
-  const _fs=sur.length>9?"7.5px":sur.length>7?"8.5px":"9.5px";
+  const _fs=displaySur.length>10?"5px":displaySur.length>8?"5.7px":displaySur.length>7?"6.4px":"7.4px";
   /* status icons: state is not communicated by color alone */
   const _injIcon=p.injured
     ?`<span class="injmark"><svg viewBox="0 0 10 10" width="7" height="7" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="8.5"/><line x1="1.5" y1="5" x2="8.5" y2="5"/></svg></span>`
@@ -1223,7 +1223,7 @@ function renderRoundel(id,p){const r=$(id);if(!r)return;const ab=(L().abbr[p.pos
   const _capIcon=isCap?`<span class="capbadge"><svg viewBox="0 0 12 9" width="9" height="7" fill="currentColor"><path d="M1 8L11 8L10 3.5L7 6.5L6 1.5L3 6.5L2 3.5Z"/></svg></span>`:"";
   const _boostIcon=boosted?`<span class="boostbadge"><svg viewBox="0 0 10 10" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 1L2.5 5.5h2.4L4.2 9l3.3-4.7H5.1Z"/></svg></span>`:"";
   const _ovBg=ovCol(eff);const _ovFg=ovOnCol(eff);
-  r.innerHTML=`<span class="rov" style="background:${_ovBg};color:${_ovFg}">${eff}</span>${_injIcon}${_capIcon}${_boostIcon}<span class="rpos">${ab}</span><span class="rname" style="font-size:${_fs}">${sur}</span>`;
+  r.innerHTML=`<span class="rov" style="background:${_ovBg};color:${_ovFg}">${eff}</span>${_injIcon}${_capIcon}${_boostIcon}<span class="rpos">${ab}</span><span class="rname" style="--rname-size:${_fs}">${displaySur}</span>`;
   /* click → seçili state */
   r.onclick=()=>{const _was=r.classList.contains("selected");document.querySelectorAll(".roundel.selected").forEach(e=>{e.classList.remove("selected");e.setAttribute("aria-selected","false");});if(!_was){r.classList.add("selected");r.setAttribute("aria-selected","true");}const _pitch=r.closest(".pitch");if(_pitch)_drawConnectors(_pitch);};
   r.onkeydown=null;if(window.PlayerProfiles)PlayerProfiles.bind(r,p);}

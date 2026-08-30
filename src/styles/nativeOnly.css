@@ -243,10 +243,14 @@ html:is(
     [data-copa-platform="android"],
     [data-copa-platform="ios"]
   ).copa-mobile-game #nativeHubNav .native-hub-tab-label{
-    max-width:100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    flex:0 0 auto!important;
+    width:auto!important;
+    max-width:none!important;
+    overflow:visible!important;
+    font-size:6.6px!important;
+    letter-spacing:0!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
   }
 
   html:is(

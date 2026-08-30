@@ -255,13 +255,12 @@
 
   function scrollRouteIntoView(route){
     const hub=document.getElementById("hub");if(!hub)return;
-    const target=route==="market"?document.getElementById("shopcards"):route==="training"?document.getElementById("mobileTrainingRoute"):route==="sidefield"?document.getElementById("sideFieldRoute"):route==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar");
+    const target=route==="market"?hub.querySelector(".hcol-r"):route==="training"?document.getElementById("mobileTrainingRoute"):route==="sidefield"?document.getElementById("sideFieldRoute"):route==="career"?document.getElementById("mobileCareerRoute"):hub.querySelector(".vsbar");
     if(!target)return;
     const behavior=routeScrollBehavior();
-    if(behavior==="auto"){
-      const top=Math.max(0,Math.round(root.scrollY+target.getBoundingClientRect().top-8));
-      root.scrollTo({top,behavior:"auto"});
-    }else target.scrollIntoView({block:"start",behavior});
+    const nav=document.getElementById("nativeHubNav"),navHeight=nav?Math.ceil(nav.getBoundingClientRect().height):0;
+    const top=Math.max(0,Math.round(root.scrollY+target.getBoundingClientRect().top-navHeight-12));
+    root.scrollTo({top,behavior});
   }
 
   function activateRoute(route){

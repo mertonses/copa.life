@@ -120,7 +120,7 @@ html[data-copa-platform="android"] .mode-card-live i{animation:none!important;tr
 .mode-gate::before{background:radial-gradient(circle at 82% 28%,rgba(221,181,59,.09),transparent 30%),radial-gradient(circle at 12% 78%,rgba(242,90,56,.07),transparent 26%),linear-gradient(135deg,#0d1b25 0%,#07131d 54%,#080f14 100%)}
 .mode-gate::after{opacity:.1;background-image:radial-gradient(rgba(236,225,194,.16) .55px,transparent .7px),linear-gradient(116deg,transparent 0 48%,rgba(255,255,255,.025) 48.2% 48.35%,transparent 48.6%);background-size:7px 7px,520px 100%;mix-blend-mode:screen}
 .mode-gate-atmosphere i{background:linear-gradient(transparent,rgba(221,181,59,.09),transparent)}
-.mode-gate-brand{height:74px;background:rgba(6,14,20,.52);border-bottom-color:rgba(221,181,59,.12);backdrop-filter:blur(12px)}
+.mode-gate-brand{height:auto;min-height:calc(74px + var(--copa-safe-top));padding-top:calc(16px + var(--copa-safe-top));padding-right:max(28px,var(--copa-safe-right));padding-left:max(28px,var(--copa-safe-left));background:rgba(6,14,20,.52);border-bottom-color:rgba(221,181,59,.12);backdrop-filter:blur(12px)}
 .mode-gate-wordmark{letter-spacing:-1.5px}.mode-gate-brand p{color:#a5b0b4;font-size:8px;letter-spacing:1.8px}
 .mode-gate-main{width:min(1280px,calc(100% - 64px));padding:30px 0 max(30px,env(safe-area-inset-bottom))}
 .mode-gate-heading{margin-bottom:24px}.mode-gate-heading>span{color:#e0b83f;letter-spacing:2.8px}.mode-gate-heading h1{margin:9px 0 9px;letter-spacing:-1.15px}.mode-gate-heading p{color:#b5c0c4;line-height:1.5}
@@ -155,7 +155,6 @@ html[data-copa-platform="android"] .mode-card-live i{animation:none!important;tr
   .mode-gate-mobile-app-cta{min-height:42px;padding:0 13px;border-color:rgba(221,181,59,.58);color:#f4f0e6;background:rgba(12,24,31,.96);box-shadow:0 10px 24px rgba(0,0,0,.3);font-size:9px;letter-spacing:.45px}.mode-gate-mobile-app-cta img{width:20px;height:20px}.mode-gate-mobile-app-cta>span:last-child{font-size:15px;color:#e0b83f}
 }
 
-/* Mode insignia: open, rounded marks instead of generic boxed controls. */
 .mode-card-emblem{border:0;background:transparent;box-shadow:none;backdrop-filter:none;overflow:visible;isolation:isolate}
 .mode-card-emblem::before{content:"";position:absolute;inset:-5px;z-index:-1;border:1px solid color-mix(in srgb,var(--mode-accent) 58%,transparent);border-radius:48% 52% 45% 55%;transform:rotate(-7deg);opacity:.72}
 .mode-card-emblem::after{content:"";position:absolute;right:-3px;bottom:2px;width:5px;height:5px;border-radius:50%;background:var(--mode-accent);box-shadow:0 0 12px color-mix(in srgb,var(--mode-accent) 48%,transparent);opacity:.78}
@@ -168,7 +167,6 @@ html[data-copa-platform="android"] .mode-card-live i{animation:none!important;tr
 @media(min-width:1600px){.mode-card-emblem svg{width:44px;height:44px}}
 @media(max-width:760px){.mode-card-emblem::before{inset:-4px}.mode-card-emblem svg{width:37px;height:37px}}
 
-/* Cards sit in the same atmosphere as the page instead of reading as hard-edged panels. */
 .mode-card{border-color:transparent;border-radius:20px 16px 22px 18px;background:linear-gradient(145deg,rgba(17,34,43,.82),rgba(7,17,24,.76));box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -34px 58px rgba(0,0,0,.2),0 18px 44px rgba(0,0,0,.16),0 0 42px color-mix(in srgb,var(--mode-accent) 5%,transparent)}
 .mode-card::before{border-radius:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 color-mix(in srgb,var(--mode-accent) 16%,transparent),inset 0 -30px 48px rgba(0,0,0,.16)}
 .mode-card::after{left:22%;right:12%;bottom:0;width:auto;height:2px;border:0;border-radius:999px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--mode-accent) 74%,white 4%) 28%,color-mix(in srgb,var(--mode-accent) 45%,transparent) 76%,transparent);opacity:.78;transform:none}
@@ -182,3 +180,5 @@ html[data-copa-platform="android"] .mode-card-live i{animation:none!important;tr
 .mode-card-arena .mode-card-backdrop{background-image:radial-gradient(ellipse at 78% 34%,rgba(240,196,77,.15),transparent 27%),radial-gradient(ellipse at 82% 78%,rgba(214,162,31,.07),transparent 42%),repeating-linear-gradient(108deg,transparent 0 58px,rgba(214,162,31,.02) 59px,transparent 60px),linear-gradient(145deg,#14242d 0%,#0b1921 57%,#070d12 100%)}
 @media(max-width:760px){.mode-card{border-radius:16px 13px 18px 15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -24px 40px rgba(0,0,0,.2),0 12px 30px rgba(0,0,0,.14),0 0 30px color-mix(in srgb,var(--mode-accent) 5%,transparent)}.mode-card::after{left:18%;right:10%}.mode-card:hover,.mode-card:focus-visible,.mode-card.is-selected{box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 -24px 40px rgba(0,0,0,.2),0 16px 34px rgba(0,0,0,.2),0 0 30px color-mix(in srgb,var(--mode-accent) 7%,transparent)}}
 @media(prefers-reduced-motion:reduce){.mode-gate::after,.mode-card-backdrop,.mode-gate-app-promo{animation:none}.mode-card{transition:none}}
+
+@media(max-width:760px){.mode-gate-brand{height:auto;min-height:calc(64px + var(--copa-safe-top));padding-top:calc(11px + var(--copa-safe-top));padding-right:max(16px,var(--copa-safe-right));padding-left:max(16px,var(--copa-safe-left))}}

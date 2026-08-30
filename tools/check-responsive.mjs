@@ -140,8 +140,9 @@ const checks = [
   {
     name: "injury notice stays compact directly above the bench",
     pass: /<div class="hub-bench-stack" id="hubBenchStack">\s*<div class="injbar hidden" id="injbar"[\s\S]*<div id="hubBenchSection"><\/div>/s.test(html)
-      && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:minmax\(180px,\.72fr\) minmax\(480px,1\.28fr\);[\s\S]*min-height:50px;[\s\S]*box-shadow:none!important/s.test(layout)
-      && /#hub \.hub-bench-stack \.injbar \.inj-btns\{[\s\S]*grid-template-columns:repeat\(4,minmax\(108px,1fr\)\)/s.test(layout),
+      && /#hub \.hub-bench-stack \.injbar\{[\s\S]*grid-template-columns:minmax\(210px,\.72fr\) minmax\(0,1\.28fr\);[\s\S]*max-width:100%;[\s\S]*min-width:0;[\s\S]*min-height:50px;[\s\S]*overflow:hidden;[\s\S]*box-shadow:none!important/s.test(layout)
+      && /#hub \.hub-bench-stack \.injbar \.inj-btns\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)[\s\S]*max-width:100%;[\s\S]*min-width:0;[\s\S]*overflow:hidden/s.test(layout)
+      && /@container injury-stack \(max-width:520px\)\{[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/s.test(layout),
   },
   {
     name: "wide bench is a bounded draggable pitch overlay with a narrow-screen fallback",
