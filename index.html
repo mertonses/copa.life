@@ -85,10 +85,12 @@ if("serviceWorker"in navigator){
 }
 </script>
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Fonts are bundled locally for deterministic web/native rendering. -->
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/barlow-condensed-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/barlow-condensed-700-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="src/styles/localFonts.css?v=20260831-local-fonts1">
 <link rel="stylesheet" href="src/styles/base.css?v=20260713-theme1">
 <link rel="stylesheet" href="src/styles/layout.css?v=20260830-safe-area1">
 <link rel="stylesheet" href="src/styles/playerProfiles.css?v=20260720-radar-labels1">
