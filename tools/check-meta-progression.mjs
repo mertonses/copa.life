@@ -22,6 +22,10 @@ sandbox.window=sandbox;sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:"metaProgression.js"});
 const meta=sandbox.CopaMeta;
+const legacyOnlyCareer=meta.renderPanelHTML("career");
+assert.match(legacyOnlyCareer,/8 completed runs/,"legacy aggregate run count must remain visible");
+assert.match(legacyOnlyCareer,/Detailed records will appear here after your next completed run\./,"legacy aggregate runs must not be described as a first run");
+assert.doesNotMatch(legacyOnlyCareer,/Your first completed run will appear here\./,"legacy aggregate runs must not show a contradictory empty state");
 
 for(let index=0;index<23;index++){if(index===22)assert.equal(meta.selectDirective("clean_cup"),true);meta.recordRun({
   seed:index+1,metaRun:index+1,team:`Archive ${index}`,country:index%2?"TR":"JP",

@@ -47,6 +47,7 @@ try {
 
     Invoke-Checked "npm" @("ci")
     Invoke-Checked "npm" @("ci", "--prefix", "services/ghost-club-api")
+    Invoke-Checked "npm" @("ci", "--prefix", "services/copa-arena-api")
     Invoke-Checked "npm" @("ci", "--prefix", "playtest/runner")
 
     Invoke-Checked "npm" @("run", "android:version:check")

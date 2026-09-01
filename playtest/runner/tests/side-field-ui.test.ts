@@ -32,3 +32,15 @@ test("Yan Saha freezes non-player markets, persists picks and settles once",asyn
   await page.locator(".ys-tabs button").filter({hasText:/SONUÇLAR|RESULTS/}).click();
   await expect(page.locator(".ys-results-list article")).toHaveCount(15);
 });
+
+test("Yan Saha empty round stays compact",async({page})=>{
+  await reachHub(page);
+  await page.locator('#nativeHubNav [data-native-target="sidefield"]').click();
+  await page.evaluate(()=>{const game=globalThis as any;game.tournament=null;game.CopaSideField.render();});
+  await expect(page.locator(".ys-shell.has-empty-state")).toBeVisible();
+  const empty=await page.evaluate(()=>{const shell=document.querySelector<HTMLElement>(".ys-shell.has-empty-state")!,route=document.getElementById("sideFieldRoute")!,emptyState=shell.querySelector<HTMLElement>(".ys-empty")!;return{shellHeight:shell.getBoundingClientRect().height,routeHeight:route.getBoundingClientRect().height,emptyPadding:getComputedStyle(emptyState).paddingTop,overflow:document.documentElement.scrollWidth-innerWidth};});
+  expect(empty.overflow).toBeLessThanOrEqual(1);
+  expect(empty.shellHeight).toBeLessThan(620);
+  expect(empty.routeHeight).toBeLessThan(700);
+  expect(parseFloat(empty.emptyPadding)).toBeLessThanOrEqual(24);
+});

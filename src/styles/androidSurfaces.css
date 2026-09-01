@@ -125,6 +125,25 @@ html[data-copa-platform="android"] :is(.hub-game-tabs,.native-hub-nav) button.ac
   background-color:#303C44!important;
 }
 
+/* Android WebView can report a desktop-sized CSS viewport while still using
+   phone text metrics. Keep route names intrinsic at every reported width so
+   flex shrinking never turns MARKET/TRAINING/CAREER into ellipses. */
+html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-nav button{
+  gap:5px!important;
+  padding-inline:4px!important;
+}
+html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-nav .native-hub-tab-label{
+  flex:0 0 auto!important;
+  width:auto!important;
+  max-width:none!important;
+  overflow:visible!important;
+  font-size:7px!important;
+  letter-spacing:0!important;
+  text-align:center;
+  text-overflow:clip!important;
+  white-space:nowrap!important;
+}
+
 @media(max-width:480px){
   html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-nav button{
     flex-direction:column!important;
@@ -138,12 +157,7 @@ html[data-copa-platform="android"] :is(.hub-game-tabs,.native-hub-nav) button.ac
     height:20px!important;
   }
   html[data-copa-platform="android"].copa-mobile-game #hub .native-hub-tab-label{
-    width:100%;
-    overflow:visible;
-    font-size:7.5px!important;
-    letter-spacing:.025em!important;
-    text-align:center;
-    text-overflow:clip;
+    font-size:6.6px!important;
   }
 }
 

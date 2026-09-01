@@ -32,6 +32,7 @@ const IGNORED_DIRS = new Set([
   "android/app/build",
   "android/app/src/main/assets/public/src/vendor",
   "android/build",
+  "android/capacitor-cordova-android-plugins/build",
   "dist",
   "dist-android",
   "dist-ios",

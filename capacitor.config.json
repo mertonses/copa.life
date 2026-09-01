@@ -27,8 +27,8 @@
       "logLevel": 1
     },
     "SystemBars": {
-      "insetsHandling": "css",
-      "style": "LIGHT",
+      "insetsHandling": "disable",
+      "style": "DARK",
       "hidden": false
     },
     "SplashScreen": {

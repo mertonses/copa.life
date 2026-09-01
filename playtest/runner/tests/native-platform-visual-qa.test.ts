@@ -48,6 +48,49 @@ async function openHub(page:any,platform:string){
   if(await coachmark.isVisible())await coachmark.locator(".copa-coachmark-ok").click();
 }
 
+test("Android native safe area keeps every visible header control below the system bar",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","Android safe-area matrix");
+  await clean(page);
+  for(const viewport of [
+    {width:360,height:800,name:"phone-portrait"},
+    {width:760,height:390,name:"phone-landscape"},
+    {width:768,height:1024,name:"tablet-portrait"},
+    {width:1024,height:640,name:"tablet-landscape"},
+  ]){
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.goto(`/dist-android/index.html?mode-gate-qa=1&safe-area-${viewport.name}=1`,{waitUntil:"domcontentloaded"});
+    await page.evaluate(()=>{
+      document.documentElement.style.setProperty("--safe-area-inset-top","28px");
+      document.documentElement.style.setProperty("--safe-area-inset-right","6px");
+      document.documentElement.style.setProperty("--safe-area-inset-bottom","18px");
+      document.documentElement.style.setProperty("--safe-area-inset-left","6px");
+      document.documentElement.dataset.copaSafeArea="native-test";
+    });
+    await expect(page.locator(".mode-gate")).toBeVisible();
+    const audit=await page.evaluate(()=>{
+      const safeTop=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"));
+      const visible=(node:HTMLElement)=>!!node.offsetParent;
+      const protectedNodes=[...document.querySelectorAll<HTMLElement>(".mode-gate-brand>* , .mode-settings-button, #settingsBtn, #howtoToggle, #lifeModeBack")]
+        .filter(visible)
+        .map(node=>{const rect=node.getBoundingClientRect();return{selector:node.id||node.className,top:rect.top,left:rect.left,right:rect.right,bottom:rect.bottom};});
+      const brand=document.querySelector<HTMLElement>(".mode-gate-brand")!.getBoundingClientRect();
+      return{
+        safeTop,
+        overflow:document.documentElement.scrollWidth-innerWidth,
+        protectedNodes,
+        brand:{top:brand.top,bottom:brand.bottom,height:brand.height},
+      };
+    });
+    expect(audit.safeTop).toBe(28);
+    expect(audit.overflow,`${viewport.name}: ${JSON.stringify(audit)}`).toBeLessThanOrEqual(1);
+    expect(audit.protectedNodes.length).toBeGreaterThan(0);
+    expect(audit.protectedNodes.every(node=>node.top>=audit.safeTop),`${viewport.name}: ${JSON.stringify(audit)}`).toBe(true);
+    expect(audit.protectedNodes.every(node=>node.left>=0&&node.right<=viewport.width+1),`${viewport.name}: ${JSON.stringify(audit)}`).toBe(true);
+    expect(audit.brand.height).toBeGreaterThanOrEqual(64+audit.safeTop);
+    await capture(page,"android",`safe-area-${viewport.name}`);
+  }
+});
+
 test("Android and iOS setup states stay contextual, readable and bounded",async({page},testInfo)=>{
   test.skip(!["mobile-chromium","webkit-mobile"].includes(testInfo.project.name),"native package visual matrix");
   const platform=platformFor(testInfo.project.name);
@@ -183,6 +226,9 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     return{
       overflow:document.documentElement.scrollWidth-innerWidth,
       navCount:nav.querySelectorAll("button").length,
+      navLabels:[...nav.querySelectorAll<HTMLElement>(".native-hub-tab-label")].map(label=>({text:label.textContent?.trim(),clipped:label.scrollWidth>label.clientWidth+1})),
+      trustLabel:document.getElementById("trustHdr")?.textContent?.trim(),
+      pitchNames:[...document.querySelectorAll<HTMLElement>("#hubPitch .roundel.full .rname")].map(label=>({text:label.textContent?.trim(),clipped:label.scrollWidth>label.clientWidth+1,fontSize:getComputedStyle(label).fontSize})),
       talkStyle:(()=>{const talk=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #talkBtn")!;const play=nav.ownerDocument.querySelector<HTMLElement>("#mobileActionDock #playBtn")!;const talkRect=talk.getBoundingClientRect();const playRect=play.getBoundingClientRect();const content=[...play.children].map(node=>(node as HTMLElement).getBoundingClientRect());const contentLeft=Math.min(...content.map(rect=>rect.left));const contentRight=Math.max(...content.map(rect=>rect.right));return{background:getComputedStyle(talk).backgroundColor,color:getComputedStyle(talk).color,centerDelta:Math.abs((contentLeft+contentRight)/2-(playRect.left+playRect.right)/2),verticalCenterDelta:Math.abs((talkRect.top+talkRect.bottom)/2-(playRect.top+playRect.bottom)/2)}})(),
       kasa:(()=>{const card=document.getElementById("kasaTile")!;const label=card.querySelector<HTMLElement>(".kasa-compact-debt-label")!;const value=card.querySelector<HTMLElement>(".kasa-compact-debt-value")!;const detail=card.querySelector<HTMLElement>(".kasa-detail-link")!;const labelRect=label.getBoundingClientRect();const valueRect=value.getBoundingClientRect();const cardRect=card.getBoundingClientRect();const detailRect=detail.getBoundingClientRect();const siblingHeights=["chemTile","powTile","trustTile"].map(id=>document.getElementById(id)!.getBoundingClientRect().height);return{hasDetailText:/detay/i.test(card.textContent||""),height:cardRect.height,siblingHeights,label:label.textContent?.trim(),value:value.textContent?.trim(),labelFont:Number.parseFloat(getComputedStyle(label).fontSize),valueFont:Number.parseFloat(getComputedStyle(value).fontSize),overlap:labelRect.right>valueRect.left+1&&labelRect.bottom>valueRect.top+1&&labelRect.top<valueRect.bottom-1,detailOverlap:labelRect.right>detailRect.left+1&&labelRect.left<detailRect.right-1&&labelRect.bottom>detailRect.top+1&&labelRect.top<detailRect.bottom-1,detailRight:detailRect.right,detailBottom:detailRect.bottom,cardRight:cardRect.right,cardBottom:cardRect.bottom,detailPosition:getComputedStyle(detail).position}})(),
       visibleToasts:[...document.querySelectorAll<HTMLElement>(".toast")].filter(item=>item.offsetParent).length,
@@ -195,6 +241,10 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
   });
   expect(match.overflow).toBeLessThanOrEqual(1);
   expect(match.navCount).toBe(5);
+  expect(match.navLabels.map(label=>label.text)).toEqual(["MAÇ","PAZAR","ANTRENMAN","RİSK","KARİYER"]);
+  expect(match.navLabels.filter(label=>label.clipped)).toEqual([]);
+  expect(match.trustLabel).toBe("BAŞKAN GÜVENİ");
+  expect(match.pitchNames.filter(label=>label.clipped),JSON.stringify(match.pitchNames)).toEqual([]);
   expect(match.talkStyle.background).toBe("rgb(31, 107, 69)");
   expect(match.talkStyle.color).toBe("rgb(243, 245, 244)");
   expect(match.talkStyle.centerDelta).toBeLessThanOrEqual(2);
@@ -219,6 +269,9 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
 
   await page.locator('#nativeHubNav [data-native-target="market"]').click();
   await expect(page.locator("#shopcards>.cardtile")).toHaveCount(3);
+  await page.waitForTimeout(100);
+  const marketTop=await page.evaluate(()=>({nav:document.getElementById("nativeHubNav")!.getBoundingClientRect().bottom,content:document.querySelector<HTMLElement>("#marketDecisionHeader")!.getBoundingClientRect().top}));
+  expect(marketTop.content,JSON.stringify(marketTop)).toBeGreaterThanOrEqual(marketTop.nav+8);
   const marketGrid=await page.locator("#shopcards").evaluate((root:HTMLElement)=>({
     columns:getComputedStyle(root).gridTemplateColumns.split(" ").length,
     rows:[...root.children].map(child=>(child as HTMLElement).getBoundingClientRect().top),
@@ -261,19 +314,23 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
 
   await page.locator('#nativeHubNav [data-native-target="training"]').click();
   await expect(page.locator("#mobileTrainingRoute")).toBeVisible();
+  await page.waitForTimeout(100);
   const training=await page.evaluate(()=>{
     const route=document.getElementById("mobileTrainingRoute")!;
+    const nav=document.getElementById("nativeHubNav")!;
     const drills=[...route.querySelectorAll<HTMLElement>(".prep-drill")];
     const cta=route.querySelector<HTMLElement>(".bact .btn")!;
     const rect=cta.getBoundingClientRect();
     return{
       overflow:document.documentElement.scrollWidth-innerWidth,
+      topGap:route.getBoundingClientRect().top-nav.getBoundingClientRect().bottom,
       visible:drills.filter(drill=>drill.offsetParent).length,
       total:drills.length,
       cta:{left:rect.left,right:rect.right,height:rect.height},
     };
   });
   expect(training.overflow).toBeLessThanOrEqual(1);
+  expect(training.topGap,JSON.stringify(training)).toBeGreaterThanOrEqual(8);
   expect(training.visible).toBe(training.total);
   expect(training.total).toBeGreaterThanOrEqual(7);
   expect(training.cta.left).toBeGreaterThanOrEqual(0);
@@ -283,14 +340,17 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
 
   await page.locator('#nativeHubNav [data-native-target="career"]').click();
   await expect(page.locator("#mobileCareerRoute")).toBeVisible();
+  await page.waitForTimeout(100);
   const career=await page.evaluate(()=>{
     const route=document.getElementById("mobileCareerRoute")!;
+    const nav=document.getElementById("nativeHubNav")!;
     const header=route.querySelector<HTMLElement>(".meta-progress-head")!;
     const actions=route.querySelector<HTMLElement>(".meta-head-actions")!;
     const tabs=route.querySelector<HTMLElement>(".meta-tabs")!;
     const routeRect=route.getBoundingClientRect(),headerRect=header.getBoundingClientRect(),actionRect=actions.getBoundingClientRect(),tabsRect=tabs.getBoundingClientRect();
     return{
       overflow:document.documentElement.scrollWidth-innerWidth,
+      topGap:route.getBoundingClientRect().top-nav.getBoundingClientRect().bottom,
       hidden:[...document.querySelectorAll<HTMLElement>(".meta-tabs button")]
         .filter(tab=>{const rect=tab.getBoundingClientRect();return rect.left<0||rect.right>innerWidth;})
         .map(tab=>tab.textContent),
@@ -307,6 +367,7 @@ test("Android and iOS hub routes keep navigation, feedback and actions unobstruc
     };
   });
   expect(career.overflow).toBeLessThanOrEqual(1);
+  expect(career.topGap,JSON.stringify(career)).toBeGreaterThanOrEqual(8);
   expect(career.hidden).toEqual([]);
   expect(career.routeHeight).toBeGreaterThan(0);
   expect(career.snapshotBottom).toBeLessThanOrEqual(career.routeBottom+1);

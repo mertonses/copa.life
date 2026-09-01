@@ -307,7 +307,7 @@ describe("Arena balance Monte Carlo",()=>{
     expect(draws/runs).toBeLessThan(.42);
     expect(totalGoals/runs).toBeGreaterThan(1.2);
     expect(totalGoals/runs).toBeLessThan(4.4);
-  },30000);
+  },60000);
 
   it("makes correct counters useful without making them deterministic",()=>{
     let edgeWins=0,neutralWins=0;

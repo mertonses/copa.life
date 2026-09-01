@@ -97,7 +97,17 @@ const capacitor = JSON.parse(read("capacitor.config.json"));
 if (capacitor.appId !== "life.copa.app") fail("Capacitor application id drift");
 if (Object.hasOwn(capacitor.server || {}, "url")) fail("remote runtime URL is forbidden in the native app");
 if (capacitor.android?.allowMixedContent !== false) fail("mixed content must remain disabled");
-if (capacitor.plugins?.SystemBars?.insetsHandling !== "css") fail("SystemBars CSS inset handling must remain explicit");
+if (capacitor.plugins?.SystemBars?.insetsHandling !== "disable") {
+  fail("Capacitor SystemBars inset injection must stay disabled; MainActivity owns the native safe-area bridge");
+}
+for (const marker of [
+  "configureSafeAreaInsets()",
+  "getInsetsIgnoringVisibility",
+  "--safe-area-inset-top",
+  "root.dataset.copaSafeArea='native'",
+]) {
+  if (!mainActivity.includes(marker)) fail(`native safe-area bridge is missing ${marker}`);
+}
 const safeAreaPatch = read("tools/patch-capacitor-safe-area.mjs");
 if (!safeAreaPatch.includes("const root = document.documentElement;") || !safeAreaPatch.includes("if (root)")) {
   fail("Capacitor safe-area DOM guard is missing");

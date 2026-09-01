@@ -1,7 +1,11 @@
 import {test,expect} from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
 
-async function openHub(page:any){
-  await page.goto("/?injury-system=1",{waitUntil:"domcontentloaded"});
+const responsiveVisualDir=path.resolve(__dirname,"../../../artifacts/screenshots/injury-responsive-qa");
+
+async function openHub(page:any,entry="/?injury-system=1"){
+  await page.goto(entry,{waitUntil:"domcontentloaded"});
   await page.evaluate(async()=>{const game=globalThis as any;await game.quickStart();await game.quickAll();});
   await expect(page.locator("#postClubName")).toBeVisible();
   await page.locator("#postClubName").fill("Injury QA");
@@ -121,4 +125,73 @@ test("injury actions remain bounded on phone and desktop",async({page},testInfo)
   expect(bounds.buttons.every(button=>button.w>0&&button.h>=40)).toBe(true);
   expect(Math.max(...bounds.powerCenters)-Math.min(...bounds.powerCenters)).toBeLessThanOrEqual(1);
   await page.screenshot({path:testInfo.outputPath("injury-panel.png"),fullPage:true});
+});
+
+test("injury panel stays internally aligned across Android phone, tablet and landscape widths",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="mobile-chromium","Android responsive matrix");
+  test.setTimeout(90_000);
+  await page.setViewportSize({width:430,height:932});
+  await openHub(page,"/?injury-system=1&responsive-matrix=1");
+  await page.locator('link[href*="webOnly.css"]').evaluate((link:HTMLLinkElement)=>link.remove());
+  await page.addStyleTag({url:"/src/styles/nativeOnly.css"});
+  await page.evaluate(()=>{
+    const game=globalThis as any;
+    game.COPA_IS_NATIVE=true;
+    game.COPA_PLATFORM="android";
+    document.documentElement.dataset.copaPlatform="android";
+    game.assignPlayerInjury(game.picksBySlot[0],3);
+    game.renderHub();
+  });
+  await expect(page.locator("html")).toHaveAttribute("data-copa-platform","android");
+  fs.mkdirSync(responsiveVisualDir,{recursive:true});
+  const viewports=[
+    {name:"phone-320",width:320,height:720},
+    {name:"phone-360",width:360,height:800},
+    {name:"phone-393",width:393,height:873},
+    {name:"phone-412",width:412,height:915},
+    {name:"tablet-600",width:600,height:960},
+    {name:"tablet-768",width:768,height:1024},
+    {name:"tablet-900",width:900,height:1200},
+    {name:"transition-901",width:901,height:1200},
+    {name:"transition-978",width:978,height:1200},
+    {name:"tablet-landscape-1024",width:1024,height:768},
+    {name:"tablet-landscape-1280",width:1280,height:800},
+  ];
+  for(const viewport of viewports){
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.waitForTimeout(80);
+    await page.evaluate(()=>{
+      const game=globalThis as any;
+      if(typeof game.closeModal==="function")game.closeModal();
+      document.documentElement.classList.remove("native-bench-open");
+    });
+    await page.mouse.move(1,1);
+    const bar=page.locator("#injbar");
+    await expect(bar,viewport.name).toBeVisible();
+    await bar.scrollIntoViewIfNeeded();
+    const layout=await bar.evaluate((element:HTMLElement)=>{
+      const rect=(node:Element)=>{const value=node.getBoundingClientRect();return{left:value.left,right:value.right,top:value.top,bottom:value.bottom,width:value.width,height:value.height};};
+      const barRect=rect(element),summary=rect(element.querySelector(".inj-summary")!),actions=rect(element.querySelector(".inj-btns")!);
+      const buttons=[...element.querySelectorAll("button")].map(rect);
+      return{
+        bar:barRect,
+        summary,
+        actions,
+        buttons,
+        barOverflow:element.scrollWidth-element.clientWidth,
+        pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+      };
+    });
+    const within=(child:any,parent:any)=>child.left>=parent.left-1&&child.right<=parent.right+1&&child.top>=parent.top-1&&child.bottom<=parent.bottom+1;
+    expect(layout.barOverflow,`${viewport.name}: panel overflow`).toBeLessThanOrEqual(1);
+    expect(layout.pageOverflow,`${viewport.name}: page overflow`).toBeLessThanOrEqual(1);
+    expect(within(layout.summary,layout.bar),`${viewport.name}: summary inside panel`).toBe(true);
+    expect(within(layout.actions,layout.bar),`${viewport.name}: actions inside panel`).toBe(true);
+    expect(layout.buttons,`${viewport.name}: four actions`).toHaveLength(4);
+    expect(layout.buttons.every(button=>within(button,layout.actions)),`${viewport.name}: buttons inside action grid`).toBe(true);
+    expect(layout.buttons.every(button=>button.width>0&&button.height>=40),`${viewport.name}: usable actions`).toBe(true);
+    if(viewport.width<=1180)expect(layout.actions.top,`${viewport.name}: actions below summary`).toBeGreaterThanOrEqual(layout.summary.bottom-1);
+    else expect(layout.actions.left,`${viewport.name}: actions beside summary`).toBeGreaterThanOrEqual(layout.summary.right-1);
+    await bar.screenshot({path:path.join(responsiveVisualDir,`${viewport.name}.png`)});
+  }
 });

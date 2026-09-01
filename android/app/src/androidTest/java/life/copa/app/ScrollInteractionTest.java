@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
+import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -135,6 +136,51 @@ public class ScrollInteractionTest {
             }
         }
         return count;
+    }
+
+    @Test
+    public void nativeActionBarNeverConsumesTheGameViewport() {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> {
+                ActionBar supportActionBar = activity.getSupportActionBar();
+                assertTrue(
+                    "AppCompat action bar is visible above the game",
+                    supportActionBar == null || !supportActionBar.isShowing()
+                );
+
+                android.app.ActionBar platformActionBar = activity.getActionBar();
+                assertTrue(
+                    "Platform action bar is visible above the game",
+                    platformActionBar == null || !platformActionBar.isShowing()
+                );
+
+                int containerId = activity.getResources().getIdentifier("action_bar_container", "id", "android");
+                View container = containerId == 0 ? null : activity.findViewById(containerId);
+                assertTrue(
+                    "Native action-bar container still occupies layout space",
+                    container == null || container.getVisibility() != View.VISIBLE || container.getHeight() == 0
+                );
+            });
+        }
+    }
+
+    @Test
+    public void nativeStatusBarInsetProtectsTheGameHeader() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> webView = activity.getBridge().getWebView());
+            waitFor("document.documentElement.dataset.copaSafeArea === 'native'");
+            evaluate("localStorage.clear();sessionStorage.clear();document.body.classList.remove('run-active');" +
+                "document.querySelectorAll('#modal,#finalSim,.final-sim-screen').forEach(node=>node.classList.add('hidden'));" +
+                "CopaModeGate.show()");
+            waitFor("!document.getElementById('modeGate').hidden");
+            int safeTop = number("parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top'))");
+            assertTrue("native status-bar inset was not injected", safeTop > 0);
+            int brandContentTop = number("document.querySelector('.mode-gate-brand').firstElementChild.getBoundingClientRect().top");
+            assertTrue(
+                "mode-gate header overlaps the native status bar: safe=" + safeTop + " content=" + brandContentTop,
+                brandContentTop >= safeTop
+            );
+        }
     }
 
     @Test
