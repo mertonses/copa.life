@@ -1,1 +1,1 @@
-The startup crash was fixed on Samsung and other Android devices. The status bar no longer overlaps headers or settings. Scrolling checks were strengthened and the broken logo overlay was removed.
+Web and Android now use the same bundled font files. Turkish glyphs remain consistent offline. Release checks continue to guard startup, status bar and scrolling stability.

@@ -1,1 +1,1 @@
-Der Startabsturz auf Samsung- und anderen Android-Geräten wurde behoben. Die Statusleiste überlappt keine Titel oder Einstellungen mehr. Scroll-Tests wurden verstärkt und die fehlerhafte Logo-Einblendung entfernt.
+Web und Android verwenden jetzt dieselben eingebetteten Schriftdateien. Türkische Zeichen bleiben auch offline einheitlich. Start-, Statusleisten- und Scrollprüfungen wurden weiter abgesichert.

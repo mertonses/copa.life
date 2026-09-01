@@ -1,1 +1,1 @@
-Risolto l'arresto all'avvio sui dispositivi Samsung e Android. La barra di stato non copre più titoli o impostazioni. Rafforzate le verifiche di scorrimento e rimossa la sovrapposizione difettosa dei loghi.
+Web e Android ora usano gli stessi font inclusi nell'app. I caratteri turchi restano uniformi anche offline. Rafforzati i controlli di avvio, barra di stato e scorrimento.

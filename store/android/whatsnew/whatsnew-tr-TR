@@ -1,1 +1,1 @@
-Samsung ve diğer Android cihazlarda açılış çökmesi giderildi. Durum çubuğu artık başlık ve ayar düğmeleriyle çakışmıyor. Kaydırma doğrulamaları güçlendirildi ve içeriği kapatan bozuk logo katmanı kaldırıldı.
+Web ve Android yazı tipleri aynı yerel font paketinde birleştirildi. Türkçe karakterler çevrimdışı kullanımda da tutarlı görünür. Açılış, durum çubuğu ve kaydırma kararlılığı korunarak yayın kontrolleri güçlendirildi.
