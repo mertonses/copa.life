@@ -144,11 +144,11 @@
     "@capacitor/browser": "8.0.4",
     "@capacitor/core": "8.5.0",
     "@capacitor/haptics": "8.0.2",
-    "@capacitor/local-notifications": "^8.3.0",
+    "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/preferences": "8.0.1",
     "@capacitor/push-notifications": "8.1.2",
     "@capacitor/splash-screen": "8.0.2",
-    "@capgo/capacitor-social-login": "^8.3.39",
+    "@capgo/capacitor-social-login": "^8.4.5",
     "phaser": "4.2.1"
   },
   "overrides": {
